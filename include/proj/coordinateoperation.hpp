@@ -116,10 +116,6 @@ class CoordinateOperation : public common::ObjectUsage,
      */
     PROJ_DLL virtual CoordinateOperationNNPtr inverse() const = 0;
 
-    std::string exportToWKT(io::WKTFormatterNNPtr formatter) const override = 0;
-    std::string exportToPROJString(
-        io::PROJStringFormatterNNPtr formatter) const override = 0;
-
   protected:
     CoordinateOperation();
     CoordinateOperation(const CoordinateOperation &other);
@@ -473,7 +469,7 @@ using SingleOperationNNPtr = util::nn<SingleOperationPtr>;
  *
  * \remark Implements SingleOperation from \ref ISO_19111_2018
  */
-class SingleOperation : public CoordinateOperation {
+class SingleOperation : virtual public CoordinateOperation {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~SingleOperation() override;
@@ -1324,6 +1320,24 @@ class Transformation : public SingleOperation {
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
         const crs::CRSNNPtr &targetCRSIn, const common::Angle &offset);
 
+    PROJ_DLL static TransformationNNPtr createGeographic2DOffsets(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
+        const common::Angle &offsetLon,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr createGeographic3DOffsets(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
+        const common::Angle &offsetLon, const common::Length &offsetHeight,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr createGeographic2DWithHeightOffsets(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
+        const common::Angle &offsetLon, const common::Length &offsetHeight,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
     PROJ_DLL std::string getNTv2Filename() const;
     PROJ_DLL std::string getHeightToGeographic3DFilename() const;
 
@@ -1413,10 +1427,9 @@ class ConcatenatedOperation : public CoordinateOperation {
            const std::vector<metadata::PositionalAccuracyNNPtr>
                &accuracies); // throw InvalidOperation
 
-    PROJ_DLL static ConcatenatedOperationNNPtr
-    createComputeAccuracy(const util::PropertyMap &properties,
-                          const std::vector<CoordinateOperationNNPtr>
-                              &operationsIn); // throw InvalidOperation
+    PROJ_DLL static CoordinateOperationNNPtr createComputeMetadata(
+        const std::vector<CoordinateOperationNNPtr> &operationsIn,
+        bool checkExtent); // throw InvalidOperation
 
   protected:
     explicit ConcatenatedOperation(
@@ -1457,6 +1470,41 @@ class CoordinateOperationContext {
     PROJ_DLL metadata::ExtentPtr getAreaOfInterest() const;
 
     PROJ_DLL double getDesiredAccuracy() const;
+
+    /** Specify how source and target CRS extent should be used to restrict
+     * candidate operations (only taken into account if no explicit area of
+     * interest is specified. */
+    enum class SourceTargetCRSExtentUse {
+        /** Ignore CRS extent */
+        NONE,
+        /** Test coordinate operation extent against both CRS extent. */
+        BOTH,
+        /** Test coordinate operation extent against the intersection of both
+           CRS extent. */
+        INTERSECTION,
+        /** Test coordinate operation against the smallest of both CRS extent.
+           */
+        SMALLEST,
+    };
+
+    PROJ_DLL void setSourceAndTargetCRSExtentUse(SourceTargetCRSExtentUse use);
+
+    PROJ_DLL SourceTargetCRSExtentUse getSourceAndTargetCRSExtentUse() const;
+
+    /** Spatial criterion to restrict candiate operations. */
+    enum class SpatialCriterion {
+        /** The area of validity of transforms should strictly contain the
+         * are of interest. */
+        STRICT_CONTAINMENT,
+
+        /** The area of validity of transforms should at least intersect the
+         * area of interest. */
+        PARTIAL_INTERSECTION
+    };
+
+    PROJ_DLL void setSpatialCriterion(SpatialCriterion criterion);
+
+    PROJ_DLL SpatialCriterion getSpatialCriterion() const;
 
     PROJ_DLL static CoordinateOperationContextNNPtr
     create(io::AuthorityFactoryPtr authorityFactory, metadata::ExtentPtr extent,

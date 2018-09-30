@@ -166,6 +166,11 @@ const std::string common::ObjectUsage::OBJECT_DOMAIN_KEY("objectDomain");
 
 // ---------------------------------------------------------------------------
 
+/** \brief World extent. */
+const ExtentNNPtr Extent::WORLD(Extent::createFromBBOX(-180, -90, 180, 90));
+
+// ---------------------------------------------------------------------------
+
 #define DEFINE_WKT_CONSTANT(x) const std::string WKTConstants::x(#x)
 
 //! @cond Doxygen_Suppress

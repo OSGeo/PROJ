@@ -68,6 +68,8 @@ TEST(metadata, extent) {
     EXPECT_TRUE(world->contains(france));
     EXPECT_TRUE(!france->contains(
         world)); // We are only speaking about geography here ;-)
+    EXPECT_TRUE(world->intersects(france));
+    EXPECT_TRUE(france->intersects(world));
 
     auto france_inter_france = france->intersection(france);
     ASSERT_TRUE(france_inter_france != nullptr);
@@ -80,6 +82,13 @@ TEST(metadata, extent) {
     auto world_inter_france = world->intersection(france);
     ASSERT_TRUE(world_inter_france != nullptr);
     EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_inter_france), france));
+
+    auto france_shifted =
+        Extent::createFromBBOX(-5 + 5, 40 + 5, 12 + 5, 51 + 5);
+    EXPECT_TRUE(france->intersects(france_shifted));
+    EXPECT_TRUE(france_shifted->intersects(france));
+    EXPECT_TRUE(!france->contains(france_shifted));
+    EXPECT_TRUE(!france_shifted->contains(france));
 
     auto europe = Extent::createFromBBOX(-30, 25, 30, 70);
     EXPECT_TRUE(europe->contains(france));
@@ -96,9 +105,13 @@ TEST(metadata, extent) {
     auto nz = Extent::createFromBBOX(155.0, -60.0, -170.0, -25.0);
     EXPECT_TRUE(nz->contains(nz));
     EXPECT_TRUE(world->contains(nz));
+    EXPECT_TRUE(nz->intersects(world));
+    EXPECT_TRUE(world->intersects(nz));
     EXPECT_TRUE(!nz->contains(world));
     EXPECT_TRUE(!nz->contains(france));
     EXPECT_TRUE(!france->contains(nz));
+    EXPECT_TRUE(!nz->intersects(france));
+    EXPECT_TRUE(!france->intersects(nz));
 
     auto nz_inter_world = nz->intersection(world);
     ASSERT_TRUE(nz_inter_world != nullptr);
@@ -111,9 +124,24 @@ TEST(metadata, extent) {
     EXPECT_TRUE(nz->intersection(france) == nullptr);
     EXPECT_TRUE(france->intersection(nz) == nullptr);
 
+    auto bbox_antimeridian_north =
+        Extent::createFromBBOX(155.0, 10.0, -170.0, 30.0);
+    EXPECT_TRUE(!nz->contains(bbox_antimeridian_north));
+    EXPECT_TRUE(!bbox_antimeridian_north->contains(nz));
+    EXPECT_TRUE(!nz->intersects(bbox_antimeridian_north));
+    EXPECT_TRUE(!bbox_antimeridian_north->intersects(nz));
+    EXPECT_TRUE(!nz->intersection(bbox_antimeridian_north));
+    EXPECT_TRUE(!bbox_antimeridian_north->intersection(nz));
+
     auto nz_smaller = Extent::createFromBBOX(160, -55.0, -175.0, -30.0);
     EXPECT_TRUE(nz->contains(nz_smaller));
     EXPECT_TRUE(!nz_smaller->contains(nz));
+
+    auto nz_smaller_shifted = Extent::createFromBBOX(165, -60.0, -170.0, -25.0);
+    EXPECT_TRUE(!nz_smaller->contains(nz_smaller_shifted));
+    EXPECT_TRUE(!nz_smaller_shifted->contains(nz_smaller));
+    EXPECT_TRUE(nz_smaller->intersects(nz_smaller_shifted));
+    EXPECT_TRUE(nz_smaller_shifted->intersects(nz_smaller));
 
     auto nz_inter_nz_smaller = nz->intersection(nz_smaller);
     ASSERT_TRUE(nz_inter_nz_smaller != nullptr);

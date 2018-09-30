@@ -92,16 +92,12 @@ using InverseCoordinateOperationNNPtr = util::nn<InverseCoordinateOperationPtr>;
  * This is used when there is no straightforward way of building another
  * subclass of CoordinateOperation that models the inverse operation.
  */
-class InverseCoordinateOperation : public CoordinateOperation {
+class InverseCoordinateOperation : virtual public CoordinateOperation {
   public:
     InverseCoordinateOperation(CoordinateOperationNNPtr forwardOperation,
                                bool wktSupportsInversion);
 
     ~InverseCoordinateOperation() override;
-
-    // Unimplemented
-    std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
 
     std::string
     exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
@@ -113,13 +109,76 @@ class InverseCoordinateOperation : public CoordinateOperation {
 
     CoordinateOperationNNPtr inverse() const override;
 
-    static InverseCoordinateOperationNNPtr
-    create(CoordinateOperationNNPtr forwardOperation,
-           bool wktSupportsInversion);
-
-  private:
+  protected:
     CoordinateOperationNNPtr forwardOperation_;
     bool wktSupportsInversion_;
+
+    void setPropertiesFromForward();
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Inverse of a conversion. */
+class InverseConversion : public Conversion, public InverseCoordinateOperation {
+  public:
+    InverseConversion(ConversionNNPtr forward);
+
+    ~InverseConversion() override;
+
+    std::string exportToWKT(io::WKTFormatterNNPtr formatter) const override {
+        return Conversion::exportToWKT(formatter);
+    }
+
+    std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override {
+        return InverseCoordinateOperation::exportToPROJString(formatter);
+    }
+
+    bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override {
+        return InverseCoordinateOperation::isEquivalentTo(other, criterion);
+    }
+
+    CoordinateOperationNNPtr inverse() const override {
+        return InverseCoordinateOperation::inverse();
+    }
+
+    ConversionNNPtr inverseAsConversion() const;
+
+    static CoordinateOperationNNPtr create(ConversionNNPtr forward);
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Inverse of a transformation. */
+class InverseTransformation : public Transformation,
+                              public InverseCoordinateOperation {
+  public:
+    InverseTransformation(TransformationNNPtr forward);
+
+    ~InverseTransformation() override;
+
+    std::string exportToWKT(io::WKTFormatterNNPtr formatter) const override;
+
+    std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override {
+        return InverseCoordinateOperation::exportToPROJString(formatter);
+    }
+
+    bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override {
+        return InverseCoordinateOperation::isEquivalentTo(other, criterion);
+    }
+
+    CoordinateOperationNNPtr inverse() const override {
+        return InverseCoordinateOperation::inverse();
+    }
+
+    static CoordinateOperationNNPtr create(TransformationNNPtr forward);
 };
 
 // ---------------------------------------------------------------------------

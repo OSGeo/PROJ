@@ -62,6 +62,24 @@ namespace operation {
 
 //! @cond Doxygen_Suppress
 
+class InvalidOperationEmptyIntersection : public InvalidOperation {
+  public:
+    explicit InvalidOperationEmptyIntersection(const std::string &message);
+    InvalidOperationEmptyIntersection(
+        const InvalidOperationEmptyIntersection &other);
+    ~InvalidOperationEmptyIntersection() override;
+};
+
+InvalidOperationEmptyIntersection::InvalidOperationEmptyIntersection(
+    const std::string &message)
+    : InvalidOperation(message) {}
+
+InvalidOperationEmptyIntersection::InvalidOperationEmptyIntersection(
+    const InvalidOperationEmptyIntersection &) = default;
+
+InvalidOperationEmptyIntersection::~InvalidOperationEmptyIntersection() =
+    default;
+
 // ---------------------------------------------------------------------------
 
 using PairOfString = std::pair<std::string, std::string>;
@@ -206,7 +224,7 @@ static double getAccuracy(const std::vector<CoordinateOperationNNPtr> &ops);
 // Returns the accuracy of an operation, or -1 if unknown
 static double getAccuracy(CoordinateOperationNNPtr op) {
 
-    if (dynamic_cast<const Conversion *>(op.get())) {
+    if (util::nn_dynamic_pointer_cast<Conversion>(op)) {
         // A conversion is perfectly accurate.
         return 0.0;
     }
@@ -232,7 +250,7 @@ static double getAccuracy(CoordinateOperationNNPtr op) {
 
 // Returns the accuracy of a set of concantenated operations, or -1 if unknown
 static double getAccuracy(const std::vector<CoordinateOperationNNPtr> &ops) {
-    double accuracy = 0.0;
+    double accuracy = -1.0;
     for (const auto &subop : ops) {
         const double subops_accuracy = getAccuracy(subop);
         if (subops_accuracy < 0.0) {
@@ -248,35 +266,70 @@ static double getAccuracy(const std::vector<CoordinateOperationNNPtr> &ops) {
 
 // ---------------------------------------------------------------------------
 
-static metadata::ExtentPtr getExtent(CoordinateOperationNNPtr op) {
+static metadata::ExtentPtr
+getExtent(const std::vector<CoordinateOperationNNPtr> &ops,
+          bool conversionExtentIsWorld, bool &emptyIntersection);
+
+static metadata::ExtentPtr getExtent(CoordinateOperationNNPtr op,
+                                     bool conversionExtentIsWorld,
+                                     bool &emptyIntersection) {
+    auto conv = util::nn_dynamic_pointer_cast<Conversion>(op);
+    if (conv) {
+        emptyIntersection = false;
+        return metadata::Extent::WORLD;
+    }
     auto domains = op->domains();
     if (!domains.empty()) {
+        emptyIntersection = false;
         return domains[0]->domainOfValidity();
     }
     auto concatenated =
         util::nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     if (!concatenated) {
+        emptyIntersection = false;
         return nullptr;
     }
-    auto ops = concatenated->operations();
+    return getExtent(concatenated->operations(), conversionExtentIsWorld,
+                     emptyIntersection);
+}
+
+// ---------------------------------------------------------------------------
+
+static metadata::ExtentPtr getExtent(crs::CRSNNPtr crs) {
+    auto domains = crs->domains();
+    if (!domains.empty()) {
+        return domains[0]->domainOfValidity();
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+static metadata::ExtentPtr
+getExtent(const std::vector<CoordinateOperationNNPtr> &ops,
+          bool conversionExtentIsWorld, bool &emptyIntersection) {
     metadata::ExtentPtr res = nullptr;
     for (const auto &subop : ops) {
-        const auto &subExtent = getExtent(subop);
+
+        const auto &subExtent =
+            getExtent(subop, conversionExtentIsWorld, emptyIntersection);
         if (!subExtent) {
-            if (dynamic_cast<const Conversion *>(subop.get())) {
-                continue;
+            if (emptyIntersection) {
+                return nullptr;
             }
-            return nullptr;
+            continue;
         }
         if (res == nullptr) {
             res = subExtent;
         } else {
             res = res->intersection(NN_CHECK_ASSERT(subExtent));
             if (!res) {
+                emptyIntersection = true;
                 return nullptr;
             }
         }
     }
+    emptyIntersection = false;
     return res;
 }
 
@@ -571,16 +624,8 @@ OperationMethod::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? io::WKTConstants::METHOD
                                 : io::WKTConstants::PROJECTION,
-                         !identifiers().empty() && !formatter->isInverted());
+                         !identifiers().empty());
     std::string l_name(*(name()->description()));
-    if (formatter->isInverted()) {
-        if (isWKT2) {
-            l_name = "Inverse of " + l_name;
-        } else {
-            throw io::FormattingException(
-                "Inverse of projection method not supported in WKT1");
-        }
-    }
     if (!isWKT2) {
         const MethodMapping *mapping = getMapping(this);
         if (mapping == nullptr) {
@@ -594,7 +639,7 @@ OperationMethod::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         }
     }
     formatter->addQuotedString(l_name);
-    if (formatter->outputId() && !formatter->isInverted()) {
+    if (formatter->outputId()) {
         formatID(formatter);
     }
     formatter->endNode();
@@ -924,7 +969,12 @@ SingleOperation::SingleOperation(const OperationMethodNNPtr &methodIn)
 // ---------------------------------------------------------------------------
 
 SingleOperation::SingleOperation(const SingleOperation &other)
-    : CoordinateOperation(other), d(internal::make_unique<Private>(*other.d)) {}
+    :
+#if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
+      CoordinateOperation(other),
+#endif
+      d(internal::make_unique<Private>(*other.d)) {
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1312,7 +1362,8 @@ Conversion::Conversion(const OperationMethodNNPtr &methodIn,
 // ---------------------------------------------------------------------------
 
 Conversion::Conversion(const Conversion &other)
-    : SingleOperation(other), d(internal::make_unique<Private>(*other.d)) {}
+    : CoordinateOperation(other), SingleOperation(other),
+      d(internal::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1508,18 +1559,18 @@ Conversion::create(const util::PropertyMap &properties,
  */
 ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
                                       int zone, bool north) {
-
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(common::Angle(UTM_LATITUDE_OF_NATURAL_ORIGIN)),
-        ParameterValue::create(common::Angle(zone * 6.0 - 183.0)),
-        ParameterValue::create(common::Scale(UTM_SCALE_FACTOR)),
-        ParameterValue::create(common::Length(UTM_FALSE_EASTING)),
-        ParameterValue::create(common::Length(
-            north ? UTM_NORTH_FALSE_NORTHING : UTM_SOUTH_FALSE_NORTHING)),
-    };
-
-    return create(getUTMConversionProperty(properties, zone, north),
-                  EPSG_CODE_METHOD_TRANSVERSE_MERCATOR, values);
+    return create(
+        getUTMConversionProperty(properties, zone, north),
+        EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
+        {
+            ParameterValue::create(
+                common::Angle(UTM_LATITUDE_OF_NATURAL_ORIGIN)),
+            ParameterValue::create(common::Angle(zone * 6.0 - 183.0)),
+            ParameterValue::create(common::Scale(UTM_SCALE_FACTOR)),
+            ParameterValue::create(common::Length(UTM_FALSE_EASTING)),
+            ParameterValue::create(common::Length(
+                north ? UTM_NORTH_FALSE_NORTHING : UTM_SOUTH_FALSE_NORTHING)),
+        });
 }
 
 // ---------------------------------------------------------------------------
@@ -1543,15 +1594,14 @@ ConversionNNPtr Conversion::createTransverseMercator(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Scale &scale,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR, values);
+    return create(properties, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(scale),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1577,17 +1627,14 @@ ConversionNNPtr Conversion::createGaussSchreiberTransverseMercator(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Scale &scale,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties,
-                  PROJ_WKT2_NAME_METHOD_GAUSS_SCHREIBER_TRANSVERSE_MERCATOR,
-                  values);
+    return create(
+        properties, PROJ_WKT2_NAME_METHOD_GAUSS_SCHREIBER_TRANSVERSE_MERCATOR,
+        {
+            ParameterValue::create(centerLat),
+            ParameterValue::create(centerLong), ParameterValue::create(scale),
+            ParameterValue::create(falseEasting),
+            ParameterValue::create(falseNorthing),
+        });
 }
 
 // ---------------------------------------------------------------------------
@@ -1612,17 +1659,14 @@ ConversionNNPtr Conversion::createTransverseMercatorSouthOriented(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Scale &scale,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties,
-                  EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
-                  values);
+    return create(
+        properties, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
+        {
+            ParameterValue::create(centerLat),
+            ParameterValue::create(centerLong), ParameterValue::create(scale),
+            ParameterValue::create(falseEasting),
+            ParameterValue::create(falseNorthing),
+        });
 }
 
 // ---------------------------------------------------------------------------
@@ -1650,17 +1694,15 @@ Conversion::createTwoPointEquidistant(const util::PropertyMap &properties,
                                       const common::Angle &longitudeSeconPoint,
                                       const common::Length &falseEasting,
                                       const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeFirstPoint),
-        ParameterValue::create(longitudeFirstPoint),
-        ParameterValue::create(latitudeSecondPoint),
-        ParameterValue::create(longitudeSeconPoint),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties, PROJ_WKT2_NAME_METHOD_TWO_POINT_EQUIDISTANT,
-                  values);
+                  {
+                      ParameterValue::create(latitudeFirstPoint),
+                      ParameterValue::create(longitudeFirstPoint),
+                      ParameterValue::create(latitudeSecondPoint),
+                      ParameterValue::create(longitudeSeconPoint),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1685,13 +1727,13 @@ ConversionNNPtr Conversion::createTunisiaMappingGrid(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_TUNISIA_MAPPING_GRID, values);
+    return create(properties, EPSG_CODE_METHOD_TUNISIA_MAPPING_GRID,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1723,16 +1765,15 @@ Conversion::createAlbersEqualArea(const util::PropertyMap &properties,
                                   const common::Angle &latitudeSecondParallel,
                                   const common::Length &eastingFalseOrigin,
                                   const common::Length &northingFalseOrigin) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeFalseOrigin),
-        ParameterValue::create(longitudeFalseOrigin),
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(latitudeSecondParallel),
-        ParameterValue::create(eastingFalseOrigin),
-        ParameterValue::create(northingFalseOrigin),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_ALBERS_EQUAL_AREA, values);
+    return create(properties, EPSG_CODE_METHOD_ALBERS_EQUAL_AREA,
+                  {
+                      ParameterValue::create(latitudeFalseOrigin),
+                      ParameterValue::create(longitudeFalseOrigin),
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(latitudeSecondParallel),
+                      ParameterValue::create(eastingFalseOrigin),
+                      ParameterValue::create(northingFalseOrigin),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1756,16 +1797,14 @@ ConversionNNPtr Conversion::createLambertConicConformal_1SP(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Scale &scale,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties, EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
-                  values);
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(scale),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1797,17 +1836,15 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP(
     const common::Angle &latitudeSecondParallel,
     const common::Length &eastingFalseOrigin,
     const common::Length &northingFalseOrigin) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeFalseOrigin),
-        ParameterValue::create(longitudeFalseOrigin),
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(latitudeSecondParallel),
-        ParameterValue::create(eastingFalseOrigin),
-        ParameterValue::create(northingFalseOrigin),
-    };
-
     return create(properties, EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP,
-                  values);
+                  {
+                      ParameterValue::create(latitudeFalseOrigin),
+                      ParameterValue::create(longitudeFalseOrigin),
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(latitudeSecondParallel),
+                      ParameterValue::create(eastingFalseOrigin),
+                      ParameterValue::create(northingFalseOrigin),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1843,17 +1880,17 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP_Belgium(
     const common::Angle &latitudeSecondParallel,
     const common::Length &eastingFalseOrigin,
     const common::Length &northingFalseOrigin) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeFalseOrigin),
-        ParameterValue::create(longitudeFalseOrigin),
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(latitudeSecondParallel),
-        ParameterValue::create(eastingFalseOrigin),
-        ParameterValue::create(northingFalseOrigin),
-    };
 
     return create(properties,
-                  EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM, values);
+                  EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM,
+                  {
+                      ParameterValue::create(latitudeFalseOrigin),
+                      ParameterValue::create(longitudeFalseOrigin),
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(latitudeSecondParallel),
+                      ParameterValue::create(eastingFalseOrigin),
+                      ParameterValue::create(northingFalseOrigin),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1877,15 +1914,13 @@ ConversionNNPtr Conversion::createAzimuthalEquidistant(
     const util::PropertyMap &properties, const common::Angle &latitudeNatOrigin,
     const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeNatOrigin),
-        ParameterValue::create(longitudeNatOrigin),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties, EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT,
-                  values);
+                  {
+                      ParameterValue::create(latitudeNatOrigin),
+                      ParameterValue::create(longitudeNatOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1909,14 +1944,13 @@ ConversionNNPtr Conversion::createGuamProjection(
     const util::PropertyMap &properties, const common::Angle &latitudeNatOrigin,
     const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeNatOrigin),
-        ParameterValue::create(longitudeNatOrigin),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_GUAM_PROJECTION, values);
+    return create(properties, EPSG_CODE_METHOD_GUAM_PROJECTION,
+                  {
+                      ParameterValue::create(latitudeNatOrigin),
+                      ParameterValue::create(longitudeNatOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1941,14 +1975,13 @@ ConversionNNPtr Conversion::createBonne(const util::PropertyMap &properties,
                                         const common::Angle &longitudeNatOrigin,
                                         const common::Length &falseEasting,
                                         const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeNatOrigin),
-        ParameterValue::create(longitudeNatOrigin),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_BONNE, values);
+    return create(properties, EPSG_CODE_METHOD_BONNE,
+                  {
+                      ParameterValue::create(latitudeNatOrigin),
+                      ParameterValue::create(longitudeNatOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1976,16 +2009,14 @@ ConversionNNPtr Conversion::createLambertCylindricalEqualAreaSpherical(
     const common::Angle &latitudeFirstParallel,
     const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(longitudeNatOrigin),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties,
                   EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
-                  values);
+                  {
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(longitudeNatOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2010,15 +2041,13 @@ ConversionNNPtr Conversion::createLambertCylindricalEqualArea(
     const common::Angle &latitudeFirstParallel,
     const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(longitudeNatOrigin),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties, EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA,
-                  values);
+                  {
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(longitudeNatOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2041,13 +2070,13 @@ ConversionNNPtr Conversion::createCassiniSoldner(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_CASSINI_SOLDNER, values);
+    return create(properties, EPSG_CODE_METHOD_CASSINI_SOLDNER,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2076,16 +2105,15 @@ ConversionNNPtr Conversion::createEquidistantConic(
     const common::Angle &centerLong, const common::Angle &latitudeFirstParallel,
     const common::Angle &latitudeSecondParallel,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(latitudeSecondParallel),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(latitudeSecondParallel),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2106,13 +2134,12 @@ ConversionNNPtr Conversion::createEckertI(const util::PropertyMap &properties,
                                           const common::Angle &centerLong,
                                           const common::Length &falseEasting,
                                           const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_I, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_I,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2132,13 +2159,12 @@ ConversionNNPtr Conversion::createEckertI(const util::PropertyMap &properties,
 ConversionNNPtr Conversion::createEckertII(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_II, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_II,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2158,13 +2184,12 @@ ConversionNNPtr Conversion::createEckertII(
 ConversionNNPtr Conversion::createEckertIII(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_III, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_III,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2184,13 +2209,12 @@ ConversionNNPtr Conversion::createEckertIII(
 ConversionNNPtr Conversion::createEckertIV(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_IV, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_IV,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2211,13 +2235,12 @@ ConversionNNPtr Conversion::createEckertV(const util::PropertyMap &properties,
                                           const common::Angle &centerLong,
                                           const common::Length &falseEasting,
                                           const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_V, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_V,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2237,13 +2260,12 @@ ConversionNNPtr Conversion::createEckertV(const util::PropertyMap &properties,
 ConversionNNPtr Conversion::createEckertVI(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_VI, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_VI,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2275,15 +2297,14 @@ ConversionNNPtr Conversion::createEquidistantCylindricalSpherical(
     const common::Angle &latitudeFirstParallel,
     const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(longitudeNatOrigin),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties,
-                  EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL, values);
+                  EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL,
+                  {
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(longitudeNatOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2304,13 +2325,12 @@ ConversionNNPtr Conversion::createGall(const util::PropertyMap &properties,
                                        const common::Angle &centerLong,
                                        const common::Length &falseEasting,
                                        const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_GALL, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_GALL,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2330,13 +2350,12 @@ ConversionNNPtr Conversion::createGall(const util::PropertyMap &properties,
 ConversionNNPtr Conversion::createGoodeHomolosine(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2360,14 +2379,13 @@ ConversionNNPtr Conversion::createGoodeHomolosine(
 ConversionNNPtr Conversion::createInterruptedGoodeHomolosine(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties,
-                  PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE, values);
+                  PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2390,15 +2408,13 @@ ConversionNNPtr Conversion::createGeostationarySatelliteSweepX(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &height, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong), ParameterValue::create(height),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties,
-                  PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X,
-                  values);
+    return create(
+        properties, PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X,
+        {
+            ParameterValue::create(centerLong), ParameterValue::create(height),
+            ParameterValue::create(falseEasting),
+            ParameterValue::create(falseNorthing),
+        });
 }
 
 // ---------------------------------------------------------------------------
@@ -2421,15 +2437,13 @@ ConversionNNPtr Conversion::createGeostationarySatelliteSweepY(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &height, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong), ParameterValue::create(height),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties,
-                  PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y,
-                  values);
+    return create(
+        properties, PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y,
+        {
+            ParameterValue::create(centerLong), ParameterValue::create(height),
+            ParameterValue::create(falseEasting),
+            ParameterValue::create(falseNorthing),
+        });
 }
 
 // ---------------------------------------------------------------------------
@@ -2451,13 +2465,13 @@ ConversionNNPtr Conversion::createGnomonic(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_GNOMONIC, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_GNOMONIC,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2501,18 +2515,16 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorVariantA(
     const common::Angle &angleFromRectifiedToSkrewGrid,
     const common::Scale &scale, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeProjectionCentre),
-        ParameterValue::create(longitudeProjectionCentre),
-        ParameterValue::create(azimuthInitialLine),
-        ParameterValue::create(angleFromRectifiedToSkrewGrid),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties,
-                  EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A, values);
+    return create(
+        properties, EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A,
+        {
+            ParameterValue::create(latitudeProjectionCentre),
+            ParameterValue::create(longitudeProjectionCentre),
+            ParameterValue::create(azimuthInitialLine),
+            ParameterValue::create(angleFromRectifiedToSkrewGrid),
+            ParameterValue::create(scale), ParameterValue::create(falseEasting),
+            ParameterValue::create(falseNorthing),
+        });
 }
 
 // ---------------------------------------------------------------------------
@@ -2554,18 +2566,17 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorVariantB(
     const common::Angle &angleFromRectifiedToSkrewGrid,
     const common::Scale &scale, const common::Length &eastingProjectionCentre,
     const common::Length &northingProjectionCentre) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeProjectionCentre),
-        ParameterValue::create(longitudeProjectionCentre),
-        ParameterValue::create(azimuthInitialLine),
-        ParameterValue::create(angleFromRectifiedToSkrewGrid),
-        ParameterValue::create(scale),
-        ParameterValue::create(eastingProjectionCentre),
-        ParameterValue::create(northingProjectionCentre),
-    };
-
     return create(properties,
-                  EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B, values);
+                  EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B,
+                  {
+                      ParameterValue::create(latitudeProjectionCentre),
+                      ParameterValue::create(longitudeProjectionCentre),
+                      ParameterValue::create(azimuthInitialLine),
+                      ParameterValue::create(angleFromRectifiedToSkrewGrid),
+                      ParameterValue::create(scale),
+                      ParameterValue::create(eastingProjectionCentre),
+                      ParameterValue::create(northingProjectionCentre),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2595,21 +2606,19 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
     const common::Angle &latitudePoint2, const common::Angle &longitudePoint2,
     const common::Scale &scale, const common::Length &eastingProjectionCentre,
     const common::Length &northingProjectionCentre) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeProjectionCentre),
-        ParameterValue::create(latitudePoint1),
-        ParameterValue::create(longitudePoint1),
-        ParameterValue::create(latitudePoint2),
-        ParameterValue::create(longitudePoint2),
-        ParameterValue::create(scale),
-        ParameterValue::create(eastingProjectionCentre),
-        ParameterValue::create(northingProjectionCentre),
-    };
-
     return create(
         properties,
         PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN,
-        values);
+        {
+            ParameterValue::create(latitudeProjectionCentre),
+            ParameterValue::create(latitudePoint1),
+            ParameterValue::create(longitudePoint1),
+            ParameterValue::create(latitudePoint2),
+            ParameterValue::create(longitudePoint2),
+            ParameterValue::create(scale),
+            ParameterValue::create(eastingProjectionCentre),
+            ParameterValue::create(northingProjectionCentre),
+        });
 }
 
 // ---------------------------------------------------------------------------
@@ -2638,16 +2647,14 @@ ConversionNNPtr Conversion::createInternationalMapWorldPolyconic(
     const common::Angle &latitudeFirstParallel,
     const common::Angle &latitudeSecondParallel,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(latitudeSecondParallel),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties, PROJ_WKT2_NAME_INTERNATIONAL_MAP_WORLD_POLYCONIC,
-                  values);
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(latitudeSecondParallel),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2692,17 +2699,16 @@ ConversionNNPtr Conversion::createKrovakNorthOriented(
     const common::Angle &latitudePseudoStandardParallel,
     const common::Scale &scaleFactorPseudoStandardParallel,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeProjectionCentre),
-        ParameterValue::create(longitudeOfOrigin),
-        ParameterValue::create(colatitudeConeAxis),
-        ParameterValue::create(latitudePseudoStandardParallel),
-        ParameterValue::create(scaleFactorPseudoStandardParallel),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED, values);
+    return create(properties, EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED,
+                  {
+                      ParameterValue::create(latitudeProjectionCentre),
+                      ParameterValue::create(longitudeOfOrigin),
+                      ParameterValue::create(colatitudeConeAxis),
+                      ParameterValue::create(latitudePseudoStandardParallel),
+                      ParameterValue::create(scaleFactorPseudoStandardParallel),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2749,17 +2755,16 @@ Conversion::createKrovak(const util::PropertyMap &properties,
                          const common::Scale &scaleFactorPseudoStandardParallel,
                          const common::Length &falseEasting,
                          const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeProjectionCentre),
-        ParameterValue::create(longitudeOfOrigin),
-        ParameterValue::create(colatitudeConeAxis),
-        ParameterValue::create(latitudePseudoStandardParallel),
-        ParameterValue::create(scaleFactorPseudoStandardParallel),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_KROVAK, values);
+    return create(properties, EPSG_CODE_METHOD_KROVAK,
+                  {
+                      ParameterValue::create(latitudeProjectionCentre),
+                      ParameterValue::create(longitudeOfOrigin),
+                      ParameterValue::create(colatitudeConeAxis),
+                      ParameterValue::create(latitudePseudoStandardParallel),
+                      ParameterValue::create(scaleFactorPseudoStandardParallel),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2782,15 +2787,13 @@ ConversionNNPtr Conversion::createLambertAzimuthalEqualArea(
     const util::PropertyMap &properties, const common::Angle &latitudeNatOrigin,
     const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeNatOrigin),
-        ParameterValue::create(longitudeNatOrigin),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties, EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
-                  values);
+                  {
+                      ParameterValue::create(latitudeNatOrigin),
+                      ParameterValue::create(longitudeNatOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2811,13 +2814,13 @@ ConversionNNPtr Conversion::createMillerCylindrical(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2845,15 +2848,14 @@ ConversionNNPtr Conversion::createMercatorVariantA(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Scale &scale,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_MERCATOR_VARIANT_A, values);
+    return create(properties, EPSG_CODE_METHOD_MERCATOR_VARIANT_A,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(scale),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2880,14 +2882,13 @@ ConversionNNPtr Conversion::createMercatorVariantB(
     const util::PropertyMap &properties,
     const common::Angle &latitudeFirstParallel, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_MERCATOR_VARIANT_B, values);
+    return create(properties, EPSG_CODE_METHOD_MERCATOR_VARIANT_B,
+                  {
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2914,15 +2915,14 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties,
                   EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR,
-                  values);
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2942,13 +2942,12 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
 ConversionNNPtr Conversion::createMollweide(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_MOLLWEIDE, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_MOLLWEIDE,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2971,13 +2970,13 @@ ConversionNNPtr Conversion::createNewZealandMappingGrid(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_NZMG, values);
+    return create(properties, EPSG_CODE_METHOD_NZMG,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3002,15 +3001,14 @@ ConversionNNPtr Conversion::createObliqueStereographic(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Scale &scale,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_OBLIQUE_STEREOGRAPHIC, values);
+    return create(properties, EPSG_CODE_METHOD_OBLIQUE_STEREOGRAPHIC,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(scale),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3035,13 +3033,13 @@ ConversionNNPtr Conversion::createOrthographic(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_ORTHOGRAPHIC, values);
+    return create(properties, EPSG_CODE_METHOD_ORTHOGRAPHIC,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3064,13 +3062,13 @@ ConversionNNPtr Conversion::createAmericanPolyconic(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, EPSG_CODE_METHOD_AMERICAN_POLYCONIC, values);
+    return create(properties, EPSG_CODE_METHOD_AMERICAN_POLYCONIC,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3097,16 +3095,14 @@ ConversionNNPtr Conversion::createPolarStereographicVariantA(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Scale &scale,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties, EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A,
-                  values);
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(scale),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3134,15 +3130,13 @@ ConversionNNPtr Conversion::createPolarStereographicVariantB(
     const common::Angle &latitudeStandardParallel,
     const common::Angle &longitudeOfOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeStandardParallel),
-        ParameterValue::create(longitudeOfOrigin),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties, EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B,
-                  values);
+                  {
+                      ParameterValue::create(latitudeStandardParallel),
+                      ParameterValue::create(longitudeOfOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3162,13 +3156,12 @@ ConversionNNPtr Conversion::createPolarStereographicVariantB(
 ConversionNNPtr Conversion::createRobinson(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_ROBINSON, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_ROBINSON,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3188,13 +3181,12 @@ ConversionNNPtr Conversion::createRobinson(
 ConversionNNPtr Conversion::createSinusoidal(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_SINUSOIDAL, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_SINUSOIDAL,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3221,15 +3213,14 @@ ConversionNNPtr Conversion::createStereographic(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Scale &scale,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(scale),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC,
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(scale),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3249,13 +3240,12 @@ ConversionNNPtr Conversion::createStereographic(
 ConversionNNPtr Conversion::createVanDerGrinten(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3276,13 +3266,12 @@ ConversionNNPtr Conversion::createWagnerI(const util::PropertyMap &properties,
                                           const common::Angle &centerLong,
                                           const common::Length &falseEasting,
                                           const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_I, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_I,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3302,13 +3291,12 @@ ConversionNNPtr Conversion::createWagnerI(const util::PropertyMap &properties,
 ConversionNNPtr Conversion::createWagnerII(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_II, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_II,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3330,14 +3318,13 @@ ConversionNNPtr Conversion::createWagnerIII(
     const util::PropertyMap &properties, const common::Angle &latitudeTrueScale,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(latitudeTrueScale),
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_III, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_III,
+                  {
+                      ParameterValue::create(latitudeTrueScale),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3357,13 +3344,12 @@ ConversionNNPtr Conversion::createWagnerIII(
 ConversionNNPtr Conversion::createWagnerIV(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_IV, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_IV,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3384,13 +3370,12 @@ ConversionNNPtr Conversion::createWagnerV(const util::PropertyMap &properties,
                                           const common::Angle &centerLong,
                                           const common::Length &falseEasting,
                                           const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_V, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_V,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3410,13 +3395,12 @@ ConversionNNPtr Conversion::createWagnerV(const util::PropertyMap &properties,
 ConversionNNPtr Conversion::createWagnerVI(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_VI, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_VI,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3436,13 +3420,12 @@ ConversionNNPtr Conversion::createWagnerVI(
 ConversionNNPtr Conversion::createWagnerVII(
     const util::PropertyMap &properties, const common::Angle &centerLong,
     const common::Length &falseEasting, const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
-    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_VII, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_VII,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3465,15 +3448,14 @@ ConversionNNPtr Conversion::createQuadrilateralizedSphericalCube(
     const util::PropertyMap &properties, const common::Angle &centerLat,
     const common::Angle &centerLong, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
-        ParameterValue::create(falseEasting),
-        ParameterValue::create(falseNorthing),
-    };
-
     return create(properties,
                   PROJ_WKT2_NAME_METHOD_QUADRILATERALIZED_SPHERICAL_CUBE,
-                  values);
+                  {
+                      ParameterValue::create(centerLat),
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3495,23 +3477,91 @@ ConversionNNPtr Conversion::createSphericalCrossTrackHeight(
     const util::PropertyMap &properties, const common::Angle &pegPointLat,
     const common::Angle &pegPointLong, const common::Angle &pegPointHeading,
     const common::Length &pegPointHeight) {
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(pegPointLat),
-        ParameterValue::create(pegPointLong),
-        ParameterValue::create(pegPointHeading),
-        ParameterValue::create(pegPointHeight),
-    };
-
     return create(properties,
-                  PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT, values);
+                  PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT,
+                  {
+                      ParameterValue::create(pegPointLat),
+                      ParameterValue::create(pegPointLong),
+                      ParameterValue::create(pegPointHeading),
+                      ParameterValue::create(pegPointHeight),
+                  });
 }
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+static util::PropertyMap
+createPropertiesForInverse(const OperationMethodNNPtr &method) {
+    util::PropertyMap map;
+
+    std::string forwardName = *method->name()->description();
+    std::string name;
+    if (!forwardName.empty()) {
+        name = "Inverse of " + forwardName;
+    }
+
+    if (!name.empty()) {
+        map.set(common::IdentifiedObject::NAME_KEY, name);
+    }
+
+    // If original operation is AUTH:CODE, then assign INVERSE(AUTH):CODE
+    // as identifier.
+    {
+        auto ar = util::ArrayOfBaseObject::create();
+        for (const auto &idSrc : method->identifiers()) {
+            auto srcAuthName = *(idSrc->codeSpace());
+            auto srcCode = idSrc->code();
+            auto idsProp =
+                util::PropertyMap().set(metadata::Identifier::CODESPACE_KEY,
+                                        "INVERSE(" + srcAuthName + ")");
+            ar->add(metadata::Identifier::create(srcCode, idsProp));
+        }
+        if (!ar->empty()) {
+            map.set(common::IdentifiedObject::IDENTIFIERS_KEY, ar);
+        }
+    }
+
+    return map;
+}
+
+// ---------------------------------------------------------------------------
+
+InverseConversion::InverseConversion(ConversionNNPtr forward)
+    : Conversion(
+          OperationMethod::create(createPropertiesForInverse(forward->method()),
+                                  forward->method()->parameters()),
+          forward->parameterValues()),
+      InverseCoordinateOperation(forward, true) {
+    setPropertiesFromForward();
+}
+
+// ---------------------------------------------------------------------------
+
+InverseConversion::~InverseConversion() = default;
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr InverseConversion::inverseAsConversion() const {
+    return NN_CHECK_ASSERT(
+        util::nn_dynamic_pointer_cast<Conversion>(forwardOperation_));
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr InverseConversion::create(ConversionNNPtr forward) {
+    auto conv = util::nn_make_shared<InverseConversion>(forward);
+    conv->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(conv));
+    return conv;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr Conversion::inverse() const {
-    return util::nn_make_shared<InverseCoordinateOperation>(
-        util::nn_static_pointer_cast<CoordinateOperation>(shared_from_this()),
-        true);
+    return InverseConversion::create(NN_CHECK_ASSERT(
+        util::nn_dynamic_pointer_cast<Conversion>(shared_from_this())));
 }
 
 // ---------------------------------------------------------------------------
@@ -3522,14 +3572,8 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         formatter->startNode(formatter->useDerivingConversion()
                                  ? io::WKTConstants::DERIVINGCONVERSION
                                  : io::WKTConstants::CONVERSION,
-                             !identifiers().empty() &&
-                                 !formatter->isInverted());
-        if (formatter->isInverted()) {
-            formatter->addQuotedString("Inverse of " +
-                                       *(name()->description()));
-        } else {
-            formatter->addQuotedString(*(name()->description()));
-        }
+                             !identifiers().empty());
+        formatter->addQuotedString(*(name()->description()));
     } else {
         formatter->enter();
         formatter->pushOutputUnit(false);
@@ -3613,7 +3657,7 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     }
 
     if (isWKT2) {
-        if (formatter->outputId() && !formatter->isInverted()) {
+        if (formatter->outputId()) {
             formatID(formatter);
         }
         formatter->endNode();
@@ -4047,6 +4091,8 @@ std::string Conversion::exportToPROJString(
                     targetGeogCRS->addDatumInfoToPROJString(formatter);
                 } else {
                     targetGeogCRS->ellipsoid()->exportToPROJString(formatter);
+                    targetGeogCRS->primeMeridian()->exportToPROJString(
+                        formatter);
                 }
             }
         }
@@ -4198,7 +4244,13 @@ InvalidOperation::~InvalidOperation() = default;
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct Transformation::Private {};
+struct Transformation::Private {
+
+    CoordinateOperationPtr forwardOperation_{};
+
+    CoordinateOperationNNPtr registerInv(util::BaseObjectNNPtr thisIn,
+                                         TransformationNNPtr invTransform);
+};
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -4482,81 +4534,80 @@ static TransformationNNPtr createSevenParamsTransform(
     double rotationXArcSecond, double rotationYArcSecond,
     double rotationZArcSecond, double scaleDifferencePPM,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
-    std::vector<OperationParameterNNPtr> parameters{
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_X_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_X_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Y_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Z_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_SCALE_DIFFERENCE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)),
-    };
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(common::Length(translationXMetre)),
-        ParameterValue::create(common::Length(translationYMetre)),
-        ParameterValue::create(common::Length(translationZMetre)),
-        ParameterValue::create(common::Angle(
-            rotationXArcSecond, common::UnitOfMeasure::ARC_SECOND)),
-        ParameterValue::create(common::Angle(
-            rotationYArcSecond, common::UnitOfMeasure::ARC_SECOND)),
-        ParameterValue::create(common::Angle(
-            rotationZArcSecond, common::UnitOfMeasure::ARC_SECOND)),
-        ParameterValue::create(common::Scale(
-            scaleDifferencePPM, common::UnitOfMeasure::PARTS_PER_MILLION)),
-    };
-
-    return Transformation::create(properties, sourceCRSIn, targetCRSIn, nullptr,
-                                  methodProperties, parameters, values,
-                                  accuracies);
+    return Transformation::create(
+        properties, sourceCRSIn, targetCRSIn, nullptr, methodProperties,
+        {
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_X_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_X_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Y_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Z_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_SCALE_DIFFERENCE)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)),
+        },
+        {
+            ParameterValue::create(common::Length(translationXMetre)),
+            ParameterValue::create(common::Length(translationYMetre)),
+            ParameterValue::create(common::Length(translationZMetre)),
+            ParameterValue::create(common::Angle(
+                rotationXArcSecond, common::UnitOfMeasure::ARC_SECOND)),
+            ParameterValue::create(common::Angle(
+                rotationYArcSecond, common::UnitOfMeasure::ARC_SECOND)),
+            ParameterValue::create(common::Angle(
+                rotationZArcSecond, common::UnitOfMeasure::ARC_SECOND)),
+            ParameterValue::create(common::Scale(
+                scaleDifferencePPM, common::UnitOfMeasure::PARTS_PER_MILLION)),
+        },
+        accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -4608,38 +4659,6 @@ TransformationNNPtr Transformation::createGeocentricTranslations(
     const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
     double translationYMetre, double translationZMetre,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
-    std::vector<OperationParameterNNPtr> parameters{
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
-    };
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(common::Length(translationXMetre)),
-        ParameterValue::create(common::Length(translationYMetre)),
-        ParameterValue::create(common::Length(translationZMetre)),
-    };
-
     bool isGeocentric;
     bool isGeog2D;
     bool isGeog3D;
@@ -4664,7 +4683,38 @@ TransformationNNPtr Transformation::createGeocentricTranslations(
                     : isGeog2D
                           ? EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D
                           : EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D),
-        parameters, values, accuracies);
+        {
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
+        },
+        {
+            ParameterValue::create(common::Length(translationXMetre)),
+            ParameterValue::create(common::Length(translationYMetre)),
+            ParameterValue::create(common::Length(translationZMetre)),
+        },
+        accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -4800,164 +4850,162 @@ static TransformationNNPtr createFifteenParamsTransform(
     double rateRotationX, double rateRotationY, double rateRotationZ,
     double rateScaleDifference, double referenceEpochYear,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
-    std::vector<OperationParameterNNPtr> parameters{
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_X_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_X_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Y_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Z_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_SCALE_DIFFERENCE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)),
+    return Transformation::create(
+        properties, sourceCRSIn, targetCRSIn, nullptr, methodProperties,
+        {
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_X_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_X_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Y_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Z_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_SCALE_DIFFERENCE)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)),
 
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE)),
 
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_REFERENCE_EPOCH)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_REFERENCE_EPOCH)),
-    };
-
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(common::Length(translationXMetre)),
-        ParameterValue::create(common::Length(translationYMetre)),
-        ParameterValue::create(common::Length(translationZMetre)),
-        ParameterValue::create(common::Angle(
-            rotationXArcSecond, common::UnitOfMeasure::ARC_SECOND)),
-        ParameterValue::create(common::Angle(
-            rotationYArcSecond, common::UnitOfMeasure::ARC_SECOND)),
-        ParameterValue::create(common::Angle(
-            rotationZArcSecond, common::UnitOfMeasure::ARC_SECOND)),
-        ParameterValue::create(common::Scale(
-            scaleDifferencePPM, common::UnitOfMeasure::PARTS_PER_MILLION)),
-        ParameterValue::create(common::Measure(
-            rateTranslationX, common::UnitOfMeasure::METRE_PER_YEAR)),
-        ParameterValue::create(common::Measure(
-            rateTranslationY, common::UnitOfMeasure::METRE_PER_YEAR)),
-        ParameterValue::create(common::Measure(
-            rateTranslationZ, common::UnitOfMeasure::METRE_PER_YEAR)),
-        ParameterValue::create(common::Measure(
-            rateRotationX, common::UnitOfMeasure::ARC_SECOND_PER_YEAR)),
-        ParameterValue::create(common::Measure(
-            rateRotationY, common::UnitOfMeasure::ARC_SECOND_PER_YEAR)),
-        ParameterValue::create(common::Measure(
-            rateRotationZ, common::UnitOfMeasure::ARC_SECOND_PER_YEAR)),
-        ParameterValue::create(common::Measure(
-            rateScaleDifference, common::UnitOfMeasure::PPM_PER_YEAR)),
-        ParameterValue::create(
-            common::Measure(referenceEpochYear, common::UnitOfMeasure::YEAR)),
-    };
-
-    return Transformation::create(properties, sourceCRSIn, targetCRSIn, nullptr,
-                                  methodProperties, parameters, values,
-                                  accuracies);
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_REFERENCE_EPOCH)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_REFERENCE_EPOCH)),
+        },
+        {
+            ParameterValue::create(common::Length(translationXMetre)),
+            ParameterValue::create(common::Length(translationYMetre)),
+            ParameterValue::create(common::Length(translationZMetre)),
+            ParameterValue::create(common::Angle(
+                rotationXArcSecond, common::UnitOfMeasure::ARC_SECOND)),
+            ParameterValue::create(common::Angle(
+                rotationYArcSecond, common::UnitOfMeasure::ARC_SECOND)),
+            ParameterValue::create(common::Angle(
+                rotationZArcSecond, common::UnitOfMeasure::ARC_SECOND)),
+            ParameterValue::create(common::Scale(
+                scaleDifferencePPM, common::UnitOfMeasure::PARTS_PER_MILLION)),
+            ParameterValue::create(common::Measure(
+                rateTranslationX, common::UnitOfMeasure::METRE_PER_YEAR)),
+            ParameterValue::create(common::Measure(
+                rateTranslationY, common::UnitOfMeasure::METRE_PER_YEAR)),
+            ParameterValue::create(common::Measure(
+                rateTranslationZ, common::UnitOfMeasure::METRE_PER_YEAR)),
+            ParameterValue::create(common::Measure(
+                rateRotationX, common::UnitOfMeasure::ARC_SECOND_PER_YEAR)),
+            ParameterValue::create(common::Measure(
+                rateRotationY, common::UnitOfMeasure::ARC_SECOND_PER_YEAR)),
+            ParameterValue::create(common::Measure(
+                rateRotationZ, common::UnitOfMeasure::ARC_SECOND_PER_YEAR)),
+            ParameterValue::create(common::Measure(
+                rateScaleDifference, common::UnitOfMeasure::PPM_PER_YEAR)),
+            ParameterValue::create(common::Measure(
+                referenceEpochYear, common::UnitOfMeasure::YEAR)),
+        },
+        accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -5164,59 +5212,6 @@ TransformationNNPtr Transformation::createMolodensky(
     double translationYMetre, double translationZMetre,
     double semiMajorAxisDifferenceMetre, double flattingDifference,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
-    std::vector<OperationParameterNNPtr> parameters{
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
-
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)),
-    };
-
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(common::Length(translationXMetre)),
-        ParameterValue::create(common::Length(translationYMetre)),
-        ParameterValue::create(common::Length(translationZMetre)),
-        ParameterValue::create(common::Length(semiMajorAxisDifferenceMetre)),
-        ParameterValue::create(
-            common::Measure(flattingDifference, common::UnitOfMeasure::NONE)),
-    };
-
     return Transformation::create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
         util::PropertyMap()
@@ -5225,7 +5220,59 @@ TransformationNNPtr Transformation::createMolodensky(
             .set(metadata::Identifier::CODESPACE_KEY,
                  metadata::Identifier::EPSG)
             .set(metadata::Identifier::CODE_KEY, EPSG_CODE_METHOD_MOLODENSKY),
-        parameters, values, accuracies);
+        {
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
+
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)),
+        },
+        {
+            ParameterValue::create(common::Length(translationXMetre)),
+            ParameterValue::create(common::Length(translationYMetre)),
+            ParameterValue::create(common::Length(translationZMetre)),
+            ParameterValue::create(
+                common::Length(semiMajorAxisDifferenceMetre)),
+            ParameterValue::create(common::Measure(
+                flattingDifference, common::UnitOfMeasure::NONE)),
+        },
+        accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -5258,59 +5305,6 @@ TransformationNNPtr Transformation::createAbridgedMolodensky(
     double translationYMetre, double translationZMetre,
     double semiMajorAxisDifferenceMetre, double flattingDifference,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
-    std::vector<OperationParameterNNPtr> parameters{
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
-
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)),
-        OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)),
-    };
-
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(common::Length(translationXMetre)),
-        ParameterValue::create(common::Length(translationYMetre)),
-        ParameterValue::create(common::Length(translationZMetre)),
-        ParameterValue::create(common::Length(semiMajorAxisDifferenceMetre)),
-        ParameterValue::create(
-            common::Measure(flattingDifference, common::UnitOfMeasure::NONE)),
-    };
-
     return Transformation::create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
         util::PropertyMap()
@@ -5320,7 +5314,59 @@ TransformationNNPtr Transformation::createAbridgedMolodensky(
                  metadata::Identifier::EPSG)
             .set(metadata::Identifier::CODE_KEY,
                  EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY),
-        parameters, values, accuracies);
+        {
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
+
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)),
+            OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)),
+        },
+        {
+            ParameterValue::create(common::Length(translationXMetre)),
+            ParameterValue::create(common::Length(translationYMetre)),
+            ParameterValue::create(common::Length(translationZMetre)),
+            ParameterValue::create(
+                common::Length(semiMajorAxisDifferenceMetre)),
+            ParameterValue::create(common::Measure(
+                flattingDifference, common::UnitOfMeasure::NONE)),
+        },
+        accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -5360,7 +5406,7 @@ TransformationNNPtr Transformation::createTOWGS84(
                     *(transformSourceCRS->name()->description()) + " to WGS84"),
             NN_CHECK_ASSERT(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
             TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
-            std::vector<metadata::PositionalAccuracyNNPtr>());
+            {});
     }
 
     return createPositionVector(
@@ -5371,7 +5417,7 @@ TransformationNNPtr Transformation::createTOWGS84(
         NN_CHECK_ASSERT(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
         TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
         TOWGS84Parameters[3], TOWGS84Parameters[4], TOWGS84Parameters[5],
-        TOWGS84Parameters[6], std::vector<metadata::PositionalAccuracyNNPtr>());
+        TOWGS84Parameters[6], {});
 }
 
 // ---------------------------------------------------------------------------
@@ -5398,7 +5444,7 @@ TransformationNNPtr Transformation::createNTv2(
             .set(metadata::Identifier::CODESPACE_KEY,
                  metadata::Identifier::EPSG)
             .set(metadata::Identifier::CODE_KEY, EPSG_CODE_METHOD_NTV2),
-        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+        {OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_NAME_PARAMETER_NTV2_FILENAME)
@@ -5406,9 +5452,7 @@ TransformationNNPtr Transformation::createNTv2(
                      metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
                      EPSG_CODE_PARAMETER_NTV2_FILENAME))},
-        std::vector<ParameterValueNNPtr>{
-            ParameterValue::createFilename(filename)},
-        accuracies);
+        {ParameterValue::createFilename(filename)}, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -5433,7 +5477,7 @@ TransformationNNPtr Transformation::createGravityRelatedHeightToGeographic3D(
         properties, sourceCRSIn, targetCRSIn, nullptr,
         util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                 PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D),
-        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+        {OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME)
@@ -5441,9 +5485,7 @@ TransformationNNPtr Transformation::createGravityRelatedHeightToGeographic3D(
                      metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
                      EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME))},
-        std::vector<ParameterValueNNPtr>{
-            ParameterValue::createFilename(filename)},
-        accuracies);
+        {ParameterValue::createFilename(filename)}, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -5470,7 +5512,7 @@ TransformationNNPtr Transformation::createVERTCON(
             .set(metadata::Identifier::CODESPACE_KEY,
                  metadata::Identifier::EPSG)
             .set(metadata::Identifier::CODE_KEY, EPSG_CODE_METHOD_VERTCON),
-        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+        {OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE)
@@ -5478,9 +5520,7 @@ TransformationNNPtr Transformation::createVERTCON(
                      metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
                      EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE))},
-        std::vector<ParameterValueNNPtr>{
-            ParameterValue::createFilename(filename)},
-        accuracies);
+        {ParameterValue::createFilename(filename)}, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -5501,25 +5541,213 @@ TransformationNNPtr Transformation::createLongitudeRotation(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
     const crs::CRSNNPtr &targetCRSIn, const common::Angle &offset) {
 
+    return create(properties, sourceCRSIn, targetCRSIn, nullptr,
+                  util::PropertyMap()
+                      .set(common::IdentifiedObject::NAME_KEY,
+                           EPSG_NAME_METHOD_LONGITUDE_ROTATION)
+                      .set(metadata::Identifier::CODESPACE_KEY,
+                           metadata::Identifier::EPSG)
+                      .set(metadata::Identifier::CODE_KEY,
+                           EPSG_CODE_METHOD_LONGITUDE_ROTATION),
+                  {OperationParameter::create(
+                      util::PropertyMap()
+                          .set(common::IdentifiedObject::NAME_KEY,
+                               EPSG_NAME_PARAMETER_LONGITUDE_OFFSET)
+                          .set(metadata::Identifier::CODESPACE_KEY,
+                               metadata::Identifier::EPSG)
+                          .set(metadata::Identifier::CODE_KEY,
+                               EPSG_CODE_PARAMETER_LONGITUDE_OFFSET))},
+                  {ParameterValue::create(offset)},
+                  {metadata::PositionalAccuracy::create("0")});
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a transformation with method Geographic 2D offsets
+ *
+ * This method is defined as [EPSG:9619]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9619)
+ * *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param offsetLat Latitude offset to add.
+ * @param offsetLon Longitude offset to add.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
+TransformationNNPtr Transformation::createGeographic2DOffsets(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
+    const common::Angle &offsetLon,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     return create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
         util::PropertyMap()
             .set(common::IdentifiedObject::NAME_KEY,
-                 EPSG_NAME_METHOD_LONGITUDE_ROTATION)
+                 EPSG_NAME_METHOD_GEOGRAPHIC2D_OFFSETS)
             .set(metadata::Identifier::CODESPACE_KEY,
                  metadata::Identifier::EPSG)
             .set(metadata::Identifier::CODE_KEY,
-                 EPSG_CODE_METHOD_LONGITUDE_ROTATION),
-        std::vector<OperationParameterNNPtr>{OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_NAME_PARAMETER_LONGITUDE_OFFSET)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY,
-                     EPSG_CODE_PARAMETER_LONGITUDE_OFFSET))},
-        std::vector<ParameterValueNNPtr>{ParameterValue::create(offset)},
-        std::vector<metadata::PositionalAccuracyNNPtr>());
+                 EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS),
+        {OperationParameter::create(
+             util::PropertyMap()
+                 .set(common::IdentifiedObject::NAME_KEY,
+                      EPSG_NAME_PARAMETER_LATITUDE_OFFSET)
+                 .set(metadata::Identifier::CODESPACE_KEY,
+                      metadata::Identifier::EPSG)
+                 .set(metadata::Identifier::CODE_KEY,
+                      EPSG_CODE_PARAMETER_LATITUDE_OFFSET)),
+         OperationParameter::create(
+             util::PropertyMap()
+                 .set(common::IdentifiedObject::NAME_KEY,
+                      EPSG_NAME_PARAMETER_LONGITUDE_OFFSET)
+                 .set(metadata::Identifier::CODESPACE_KEY,
+                      metadata::Identifier::EPSG)
+                 .set(metadata::Identifier::CODE_KEY,
+                      EPSG_CODE_PARAMETER_LONGITUDE_OFFSET))},
+        {ParameterValue::create(offsetLat), ParameterValue::create(offsetLon)},
+        accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a transformation with method Geographic 3D offsets
+ *
+ * This method is defined as [EPSG:9660]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9660)
+ * *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param offsetLat Latitude offset to add.
+ * @param offsetLon Longitude offset to add.
+ * @param offsetHeight Height offset to add.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
+TransformationNNPtr Transformation::createGeographic3DOffsets(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
+    const common::Angle &offsetLon, const common::Length &offsetHeight,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    return create(properties, sourceCRSIn, targetCRSIn, nullptr,
+                  util::PropertyMap()
+                      .set(common::IdentifiedObject::NAME_KEY,
+                           EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSETS)
+                      .set(metadata::Identifier::CODESPACE_KEY,
+                           metadata::Identifier::EPSG)
+                      .set(metadata::Identifier::CODE_KEY,
+                           EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS),
+                  {OperationParameter::create(
+                       util::PropertyMap()
+                           .set(common::IdentifiedObject::NAME_KEY,
+                                EPSG_NAME_PARAMETER_LATITUDE_OFFSET)
+                           .set(metadata::Identifier::CODESPACE_KEY,
+                                metadata::Identifier::EPSG)
+                           .set(metadata::Identifier::CODE_KEY,
+                                EPSG_CODE_PARAMETER_LATITUDE_OFFSET)),
+                   OperationParameter::create(
+                       util::PropertyMap()
+                           .set(common::IdentifiedObject::NAME_KEY,
+                                EPSG_NAME_PARAMETER_LONGITUDE_OFFSET)
+                           .set(metadata::Identifier::CODESPACE_KEY,
+                                metadata::Identifier::EPSG)
+                           .set(metadata::Identifier::CODE_KEY,
+                                EPSG_CODE_PARAMETER_LONGITUDE_OFFSET)),
+                   OperationParameter::create(
+                       util::PropertyMap()
+                           .set(common::IdentifiedObject::NAME_KEY,
+                                EPSG_NAME_PARAMETER_VERTICAL_OFFSET)
+                           .set(metadata::Identifier::CODESPACE_KEY,
+                                metadata::Identifier::EPSG)
+                           .set(metadata::Identifier::CODE_KEY,
+                                EPSG_CODE_PARAMETER_VERTICAL_OFFSET))},
+                  {ParameterValue::create(offsetLat),
+                   ParameterValue::create(offsetLon),
+                   ParameterValue::create(offsetHeight)},
+                  accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a transformation with method Geographic 2D with height
+ * offsets
+ *
+ * This method is defined as [EPSG:9618]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9618)
+ * *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param offsetLat Latitude offset to add.
+ * @param offsetLon Longitude offset to add.
+ * @param offsetHeight Geoid undulation to add.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
+TransformationNNPtr Transformation::createGeographic2DWithHeightOffsets(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const common::Angle &offsetLat,
+    const common::Angle &offsetLon, const common::Length &offsetHeight,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    return create(properties, sourceCRSIn, targetCRSIn, nullptr,
+                  util::PropertyMap()
+                      .set(common::IdentifiedObject::NAME_KEY,
+                           EPSG_NAME_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS)
+                      .set(metadata::Identifier::CODESPACE_KEY,
+                           metadata::Identifier::EPSG)
+                      .set(metadata::Identifier::CODE_KEY,
+                           EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS),
+                  {OperationParameter::create(
+                       util::PropertyMap()
+                           .set(common::IdentifiedObject::NAME_KEY,
+                                EPSG_NAME_PARAMETER_LATITUDE_OFFSET)
+                           .set(metadata::Identifier::CODESPACE_KEY,
+                                metadata::Identifier::EPSG)
+                           .set(metadata::Identifier::CODE_KEY,
+                                EPSG_CODE_PARAMETER_LATITUDE_OFFSET)),
+                   OperationParameter::create(
+                       util::PropertyMap()
+                           .set(common::IdentifiedObject::NAME_KEY,
+                                EPSG_NAME_PARAMETER_LONGITUDE_OFFSET)
+                           .set(metadata::Identifier::CODESPACE_KEY,
+                                metadata::Identifier::EPSG)
+                           .set(metadata::Identifier::CODE_KEY,
+                                EPSG_CODE_PARAMETER_LONGITUDE_OFFSET)),
+                   OperationParameter::create(
+                       util::PropertyMap()
+                           .set(common::IdentifiedObject::NAME_KEY,
+                                EPSG_NAME_PARAMETER_GEOID_UNDULATION)
+                           .set(metadata::Identifier::CODESPACE_KEY,
+                                metadata::Identifier::EPSG)
+                           .set(metadata::Identifier::CODE_KEY,
+                                EPSG_CODE_PARAMETER_GEOID_UNDULATION))},
+                  {ParameterValue::create(offsetLat),
+                   ParameterValue::create(offsetLon),
+                   ParameterValue::create(offsetHeight)},
+                  accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+static TransformationNNPtr
+createGeographicGeocentric(const util::PropertyMap &properties,
+                           const crs::CRSNNPtr &sourceCRSIn,
+                           const crs::CRSNNPtr &targetCRSIn) {
+    return Transformation::create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY,
+                 EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC)
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
+            .set(metadata::Identifier::CODE_KEY,
+                 EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC),
+        {}, {}, {metadata::PositionalAccuracy::create("0")});
 }
 
 // ---------------------------------------------------------------------------
@@ -5558,7 +5786,7 @@ createPropertiesForInverse(const CoordinateOperation *op,
     std::string forwardName = *op->name()->description();
     std::string name;
     if (!forwardName.empty()) {
-        if (sourceCRS && targetCRS &&
+        if (!sourceCRS || !targetCRS ||
             forwardName !=
                 opType + " from " + *(sourceCRS->name()->description()) +
                     " to " + *(targetCRS->name()->description())) {
@@ -5783,8 +6011,24 @@ createApproximateInverseIfPossible(const Transformation *op) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+CoordinateOperationNNPtr
+Transformation::Private::registerInv(util::BaseObjectNNPtr thisIn,
+                                     TransformationNNPtr invTransform) {
+    invTransform->d->forwardOperation_ =
+        util::nn_dynamic_pointer_cast<CoordinateOperation>(thisIn);
+    return invTransform;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr Transformation::inverse() const {
     auto method_name = *(method()->name()->description());
+
+    if (d->forwardOperation_) {
+        return NN_CHECK_ASSERT(d->forwardOperation_);
+    }
 
     // For geocentric translation, the inverse is exactly the negation of
     // the parameters.
@@ -5803,9 +6047,11 @@ CoordinateOperationNNPtr Transformation::inverse() const {
         double z = parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
                                          EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
                        .getSIValue();
-        return createGeocentricTranslations(
-            createPropertiesForInverse(this), targetCRS(), sourceCRS(),
-            negate(x), negate(y), negate(z), coordinateOperationAccuracies());
+        return d->registerInv(shared_from_this(),
+                              createGeocentricTranslations(
+                                  createPropertiesForInverse(this), targetCRS(),
+                                  sourceCRS(), negate(x), negate(y), negate(z),
+                                  coordinateOperationAccuracies()));
     }
 
     if (ci_find(method_name, "Molodensky") != std::string::npos ||
@@ -5831,15 +6077,19 @@ CoordinateOperationNNPtr Transformation::inverse() const {
 
         if (ci_find(method_name, "Abridged") != std::string::npos ||
             method()->isEPSG(EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY)) {
-            return createAbridgedMolodensky(
-                createPropertiesForInverse(this), targetCRS(), sourceCRS(),
-                negate(x), negate(y), negate(z), negate(da), negate(df),
-                coordinateOperationAccuracies());
+            return d->registerInv(
+                shared_from_this(),
+                createAbridgedMolodensky(
+                    createPropertiesForInverse(this), targetCRS(), sourceCRS(),
+                    negate(x), negate(y), negate(z), negate(da), negate(df),
+                    coordinateOperationAccuracies()));
         } else {
-            return createMolodensky(
-                createPropertiesForInverse(this), targetCRS(), sourceCRS(),
-                negate(x), negate(y), negate(z), negate(da), negate(df),
-                coordinateOperationAccuracies());
+            return d->registerInv(
+                shared_from_this(),
+                createMolodensky(createPropertiesForInverse(this), targetCRS(),
+                                 sourceCRS(), negate(x), negate(y), negate(z),
+                                 negate(da), negate(df),
+                                 coordinateOperationAccuracies()));
         }
     }
 
@@ -5849,29 +6099,152 @@ CoordinateOperationNNPtr Transformation::inverse() const {
             parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
                                   EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
         const common::Angle newOffset(negate(offset.value()), offset.unit());
-        return createLongitudeRotation(createPropertiesForInverse(this),
-                                       targetCRS(), sourceCRS(), newOffset);
+        return d->registerInv(
+            shared_from_this(),
+            createLongitudeRotation(createPropertiesForInverse(this),
+                                    targetCRS(), sourceCRS(), newOffset));
     }
 
-    auto l_inverse = InverseCoordinateOperation::create(
-        util::nn_static_pointer_cast<CoordinateOperation>(shared_from_this()),
-        true);
-    return util::nn_static_pointer_cast<CoordinateOperation>(l_inverse);
+    if (ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC2D_OFFSETS) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS)) {
+        auto offsetLat =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LATITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LATITUDE_OFFSET);
+        const common::Angle newOffsetLat(negate(offsetLat.value()),
+                                         offsetLat.unit());
+
+        auto offsetLong =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
+        const common::Angle newOffsetLong(negate(offsetLong.value()),
+                                          offsetLong.unit());
+
+        return d->registerInv(shared_from_this(),
+                              createGeographic2DOffsets(
+                                  createPropertiesForInverse(this), targetCRS(),
+                                  sourceCRS(), newOffsetLat, newOffsetLong,
+                                  coordinateOperationAccuracies()));
+    }
+
+    if (ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSETS) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS)) {
+        auto offsetLat =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LATITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LATITUDE_OFFSET);
+        const common::Angle newOffsetLat(negate(offsetLat.value()),
+                                         offsetLat.unit());
+
+        auto offsetLong =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
+        const common::Angle newOffsetLong(negate(offsetLong.value()),
+                                          offsetLong.unit());
+
+        auto offsetHeight =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_VERTICAL_OFFSET,
+                                  EPSG_CODE_PARAMETER_VERTICAL_OFFSET);
+        const common::Length newOffsetHeight(negate(offsetHeight.value()),
+                                             offsetHeight.unit());
+
+        return d->registerInv(
+            shared_from_this(),
+            createGeographic3DOffsets(createPropertiesForInverse(this),
+                                      targetCRS(), sourceCRS(), newOffsetLat,
+                                      newOffsetLong, newOffsetHeight,
+                                      coordinateOperationAccuracies()));
+    }
+
+    if (ci_equal(method_name,
+                 EPSG_NAME_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS)) {
+        auto offsetLat =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LATITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LATITUDE_OFFSET);
+        const common::Angle newOffsetLat(negate(offsetLat.value()),
+                                         offsetLat.unit());
+
+        auto offsetLong =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
+        const common::Angle newOffsetLong(negate(offsetLong.value()),
+                                          offsetLong.unit());
+
+        auto offsetHeight =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_GEOID_UNDULATION,
+                                  EPSG_CODE_PARAMETER_GEOID_UNDULATION);
+        const common::Length newOffsetHeight(negate(offsetHeight.value()),
+                                             offsetHeight.unit());
+
+        return d->registerInv(shared_from_this(),
+                              createGeographic2DWithHeightOffsets(
+                                  createPropertiesForInverse(this), targetCRS(),
+                                  sourceCRS(), newOffsetLat, newOffsetLong,
+                                  newOffsetHeight,
+                                  coordinateOperationAccuracies()));
+    }
+
+    if (ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC)) {
+
+        return d->registerInv(
+            shared_from_this(),
+            createGeographicGeocentric(createPropertiesForInverse(this),
+                                       targetCRS(), sourceCRS()));
+    }
+
+    return InverseTransformation::create(NN_CHECK_ASSERT(
+        util::nn_dynamic_pointer_cast<Transformation>(shared_from_this())));
 }
 
 // ---------------------------------------------------------------------------
 
-std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+//! @cond Doxygen_Suppress
 
-    if (formatter->isInverted()) {
-        auto approxInverse = createApproximateInverseIfPossible(this);
-        if (approxInverse) {
-            formatter->stopInversion();
-            auto ret = approxInverse->exportToWKT(formatter);
-            formatter->startInversion();
-            return ret;
-        }
+// ---------------------------------------------------------------------------
+
+InverseTransformation::InverseTransformation(TransformationNNPtr forward)
+    : Transformation(
+          forward->targetCRS(), forward->sourceCRS(),
+          forward->interpolationCRS(),
+          OperationMethod::create(createPropertiesForInverse(forward->method()),
+                                  forward->method()->parameters()),
+          forward->parameterValues(), forward->coordinateOperationAccuracies()),
+      InverseCoordinateOperation(forward, true) {
+    setPropertiesFromForward();
+}
+
+// ---------------------------------------------------------------------------
+
+InverseTransformation::~InverseTransformation() = default;
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr
+InverseTransformation::create(TransformationNNPtr forward) {
+    auto conv = util::nn_make_shared<InverseTransformation>(forward);
+    conv->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(conv));
+    return conv;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+InverseTransformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+
+    auto approxInverse = createApproximateInverseIfPossible(
+        util::nn_dynamic_pointer_cast<Transformation>(forwardOperation_).get());
+    if (approxInverse) {
+        return approxInverse->exportToWKT(formatter);
     }
+
+    return Transformation::exportToWKT(formatter);
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
@@ -5881,34 +6254,21 @@ std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
     if (formatter->abridgedTransformation()) {
         formatter->startNode(io::WKTConstants::ABRIDGEDTRANSFORMATION,
-                             !identifiers().empty() &&
-                                 !formatter->isInverted());
+                             !identifiers().empty());
     } else {
         formatter->startNode(io::WKTConstants::COORDINATEOPERATION,
-                             !identifiers().empty() &&
-                                 !formatter->isInverted());
+                             !identifiers().empty());
     }
-    if (formatter->isInverted()) {
-        formatter->addQuotedString("Inverse of " + *(name()->description()));
-    } else {
-        formatter->addQuotedString(*(name()->description()));
-    }
+
+    formatter->addQuotedString(*(name()->description()));
 
     if (!formatter->abridgedTransformation()) {
         formatter->startNode(io::WKTConstants::SOURCECRS, false);
-        if (formatter->isInverted()) {
-            targetCRS()->exportToWKT(formatter);
-        } else {
-            sourceCRS()->exportToWKT(formatter);
-        }
+        sourceCRS()->exportToWKT(formatter);
         formatter->endNode();
 
         formatter->startNode(io::WKTConstants::TARGETCRS, false);
-        if (formatter->isInverted()) {
-            sourceCRS()->exportToWKT(formatter);
-        } else {
-            targetCRS()->exportToWKT(formatter);
-        }
+        targetCRS()->exportToWKT(formatter);
         formatter->endNode();
     }
 
@@ -5934,9 +6294,7 @@ std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         }
     }
 
-    if (!formatter->isInverted()) {
-        ObjectUsage::_exportToWKT(formatter);
-    }
+    ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
 
     return formatter->toString();
@@ -6259,6 +6617,165 @@ std::string Transformation::exportToPROJString(
         return scope.toString();
     }
 
+    if (ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC2D_OFFSETS) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS)) {
+        double offsetLat =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LATITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LATITUDE_OFFSET)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value();
+        double offsetLong =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value();
+
+        auto sourceCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+        if (!sourceCRSGeog) {
+            throw io::FormattingException(
+                "Can apply Geographic 2D offsets only to GeographicCRS");
+        }
+
+        auto targetCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(
+                "Can apply Geographic 2D offsets only to GeographicCRS");
+        }
+
+        io::PROJStringFormatter::Scope scope(formatter);
+
+        formatter->startInversion();
+        sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        formatter->stopInversion();
+
+        if (offsetLat != 0.0 || offsetLong != 0.0) {
+            formatter->addStep("geogoffset");
+            formatter->addParam("dlat", offsetLat);
+            formatter->addParam("dlon", offsetLong);
+        }
+
+        targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
+        return scope.toString();
+    }
+
+    if (ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSETS) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS)) {
+        double offsetLat =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LATITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LATITUDE_OFFSET)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value();
+        double offsetLong =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value();
+        double offsetHeight =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_VERTICAL_OFFSET,
+                                  EPSG_CODE_PARAMETER_VERTICAL_OFFSET)
+                .getSIValue();
+
+        auto sourceCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+        if (!sourceCRSGeog) {
+            throw io::FormattingException(
+                "Can apply Geographic 3D offsets only to GeographicCRS");
+        }
+
+        auto targetCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(
+                "Can apply Geographic 3D offsets only to GeographicCRS");
+        }
+
+        io::PROJStringFormatter::Scope scope(formatter);
+
+        formatter->startInversion();
+        sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        formatter->stopInversion();
+
+        if (offsetLat != 0.0 || offsetLong != 0.0 || offsetHeight != 0.0) {
+            formatter->addStep("geogoffset");
+            formatter->addParam("dlat", offsetLat);
+            formatter->addParam("dlon", offsetLong);
+            formatter->addParam("dh", offsetHeight);
+        }
+
+        targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
+        return scope.toString();
+    }
+
+    if (ci_equal(method_name,
+                 EPSG_NAME_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS)) {
+        double offsetLat =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LATITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LATITUDE_OFFSET)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value();
+        double offsetLong =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value();
+        double offsetHeight =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_GEOID_UNDULATION,
+                                  EPSG_CODE_PARAMETER_GEOID_UNDULATION)
+                .getSIValue();
+
+        auto sourceCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+        if (!sourceCRSGeog) {
+            auto sourceCRSCompound =
+                util::nn_dynamic_pointer_cast<crs::CompoundCRS>(sourceCRS());
+            if (sourceCRSCompound) {
+                sourceCRSGeog = sourceCRSCompound->extractGeographicCRS();
+            }
+            if (!sourceCRSGeog) {
+                throw io::FormattingException("Can apply Geographic 2D with "
+                                              "height offsets only to "
+                                              "GeographicCRS / CompoundCRS");
+            }
+        }
+
+        auto targetCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS());
+        if (!targetCRSGeog) {
+            auto targetCRSCompound =
+                util::nn_dynamic_pointer_cast<crs::CompoundCRS>(targetCRS());
+            if (targetCRSCompound) {
+                targetCRSGeog = targetCRSCompound->extractGeographicCRS();
+            }
+            if (!targetCRSGeog) {
+                throw io::FormattingException("Can apply Geographic 2D with "
+                                              "height offsets only to "
+                                              "GeographicCRS / CompoundCRS");
+            }
+        }
+
+        io::PROJStringFormatter::Scope scope(formatter);
+
+        formatter->startInversion();
+        sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        formatter->stopInversion();
+
+        if (offsetLat != 0.0 || offsetLong != 0.0 || offsetHeight != 0.0) {
+            formatter->addStep("geogoffset");
+            formatter->addParam("dlat", offsetLat);
+            formatter->addParam("dlon", offsetLong);
+            formatter->addParam("dh", offsetHeight);
+        }
+
+        targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
+        return scope.toString();
+    }
+
     auto NTv2Filename = getNTv2Filename();
     if (!NTv2Filename.empty()) {
         io::PROJStringFormatter::Scope scope(formatter);
@@ -6316,23 +6833,81 @@ std::string Transformation::exportToPROJString(
 
         if (!sourceCRSGeog->ellipsoid()->isEquivalentTo(
                 targetCRSGeog->ellipsoid())) {
+            // This is arguable if we should check this...
             throw io::FormattingException(
                 "Can apply Longitude rotation only to SRS with same ellipsoid");
         }
 
-        if (!sourceCRSGeog->coordinateSystem()->isEquivalentTo(
-                targetCRSGeog->coordinateSystem())) {
-            throw io::FormattingException("Can apply Longitude rotation only "
-                                          "to SRS with same coordinate system");
+        io::PROJStringFormatter::Scope scope(formatter);
+
+        formatter->startInversion();
+        sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        formatter->stopInversion();
+
+        bool done = false;
+        if (offsetDeg != 0.0) {
+            // Optimization: as we are doing nominally a +step=inv,
+            // if the negation of the offset value is a well-known name,
+            // then use forward case with this name.
+            auto projPMName = datum::PrimeMeridian::getPROJStringWellKnownName(
+                common::Angle(-offsetDeg));
+            if (!projPMName.empty()) {
+                done = true;
+                formatter->addStep("longlat");
+                sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
+                formatter->addParam("pm", projPMName);
+            }
+        }
+        if (!done) {
+            // To actually add the offset, we must use the reverse longlat
+            // operation.
+            formatter->startInversion();
+            formatter->addStep("longlat");
+            sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
+            datum::PrimeMeridian::create(util::PropertyMap(),
+                                         common::Angle(offsetDeg))
+                ->exportToPROJString(formatter);
+            formatter->stopInversion();
         }
 
-        io::PROJStringFormatter::Scope scope(formatter);
-        formatter->startInversion();
-        formatter->addStep("longlat");
-        sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
-        formatter->addParam("pm", offsetDeg);
-        formatter->stopInversion();
+        targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
         return scope.toString();
+    }
+
+    if (ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC)) {
+
+        auto sourceCRSGeod =
+            util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(sourceCRS());
+        auto sourceCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+        auto targetCRSGeod =
+            util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(targetCRS());
+        auto targetCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS());
+        bool isSrcGeocentric =
+            sourceCRSGeod != nullptr && sourceCRSGeod->isGeocentric();
+        bool isSrcGeographic = sourceCRSGeog != nullptr;
+        bool isTargetGeocentric =
+            targetCRSGeod != nullptr && targetCRSGeod->isGeocentric();
+        bool isTargetGeographic = targetCRSGeog != nullptr;
+        if ((isSrcGeocentric && isTargetGeographic) ||
+            (isSrcGeographic && isTargetGeocentric)) {
+            io::PROJStringFormatter::Scope scope(formatter);
+
+            formatter->startInversion();
+            sourceCRSGeod->exportToPROJString(formatter);
+            formatter->stopInversion();
+
+            targetCRSGeod->exportToPROJString(formatter);
+
+            return scope.toString();
+        } else {
+            throw io::FormattingException("Invalid nature of source and/or "
+                                          "targetCRS for Geographic/Geocentric "
+                                          "conversion");
+        }
     }
 
     throw io::FormattingException("Unimplemented");
@@ -6349,6 +6924,7 @@ PointMotionOperation::~PointMotionOperation() = default;
 //! @cond Doxygen_Suppress
 struct ConcatenatedOperation::Private {
     std::vector<CoordinateOperationNNPtr> operations_{};
+    bool computedName_ = false;
 
     explicit Private(const std::vector<CoordinateOperationNNPtr> &operationsIn)
         : operations_(operationsIn) {}
@@ -6424,22 +7000,87 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ConcatenatedOperation
+static std::string computeConcatenatedName(
+    const std::vector<CoordinateOperationNNPtr> &flattenOps) {
+    std::string name;
+    for (const auto &subOp : flattenOps) {
+        if (!name.empty()) {
+            name += " + ";
+        }
+        if (subOp->name()->description()->empty()) {
+            name += "unnamed";
+        } else {
+            name += *(subOp->name()->description());
+        }
+    }
+    return name;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a ConcatenatedOperation, or return a single coordinate
+ * operation.
  *
- * This computes its accuracy from the maximum of its member operations.
+ * This computes its accuracy from the sum of its member operations, its extent
  *
- * @param properties See \ref general_properties. At minimum the name should be
- * defined.
  * @param operationsIn Vector of the CoordinateOperation steps.
+ * @param checkExtent Whether we should check the non-emptyness of the
+ * intersection
+ * of the extents of the operations
  * @throws InvalidOperation
  */
-ConcatenatedOperationNNPtr ConcatenatedOperation::createComputeAccuracy(
-    const util::PropertyMap &properties,
-    const std::vector<CoordinateOperationNNPtr>
-        &operationsIn) // throw InvalidOperation
+CoordinateOperationNNPtr ConcatenatedOperation::createComputeMetadata(
+    const std::vector<CoordinateOperationNNPtr> &operationsIn,
+    bool checkExtent) // throw InvalidOperation
 {
+    util::PropertyMap properties;
+
+    if (operationsIn.size() == 1) {
+        return operationsIn[0];
+    }
+
+    std::vector<CoordinateOperationNNPtr> flattenOps;
+    for (const auto &subOp : operationsIn) {
+        auto subOpSourceCRS = subOp->sourceCRS();
+        auto subOpTargetCRS = subOp->targetCRS();
+        if (subOpSourceCRS && subOpTargetCRS &&
+            subOpSourceCRS->isEquivalentTo(NN_CHECK_ASSERT(subOpTargetCRS))) {
+            continue;
+        }
+        auto subOpConcat =
+            util::nn_dynamic_pointer_cast<ConcatenatedOperation>(subOp);
+        if (subOpConcat) {
+            auto subOps = subOpConcat->operations();
+            for (const auto &subSubOp : subOps) {
+                flattenOps.emplace_back(subSubOp);
+            }
+        } else {
+            flattenOps.emplace_back(subOp);
+        }
+    }
+    if (flattenOps.size() == 1) {
+        return flattenOps[0];
+    }
+
+    properties.set(common::IdentifiedObject::NAME_KEY,
+                   computeConcatenatedName(flattenOps));
+
+    bool emptyIntersection = false;
+    auto extent = getExtent(flattenOps, false, emptyIntersection);
+    if (checkExtent && emptyIntersection) {
+        std::string msg(
+            "empty intersection of area of validity of concantenated "
+            "operations");
+        throw InvalidOperationEmptyIntersection(msg);
+    }
+    if (extent) {
+        properties.set(
+            common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+            util::nn_static_pointer_cast<BaseObject>(NN_CHECK_ASSERT(extent)));
+    }
+
     std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
-    const double accuracy = getAccuracy(operationsIn);
+    const double accuracy = getAccuracy(flattenOps);
     if (accuracy >= 0.0) {
         std::ostringstream buffer;
         buffer.imbue(std::locale::classic());
@@ -6447,7 +7088,10 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::createComputeAccuracy(
         accuracies.emplace_back(
             metadata::PositionalAccuracy::create(buffer.str()));
     }
-    return create(properties, operationsIn, accuracies);
+
+    auto op = create(properties, flattenOps, accuracies);
+    op->d->computedName_ = true;
+    return op;
 }
 
 // ---------------------------------------------------------------------------
@@ -6460,8 +7104,17 @@ CoordinateOperationNNPtr ConcatenatedOperation::inverse() const {
         inversedOperations.emplace_back(operation->inverse());
     }
     std::reverse(inversedOperations.begin(), inversedOperations.end());
-    return create(createPropertiesForInverse(this), inversedOperations,
-                  coordinateOperationAccuracies());
+
+    auto properties = createPropertiesForInverse(this);
+    if (d->computedName_) {
+        properties.set(common::IdentifiedObject::NAME_KEY,
+                       computeConcatenatedName(inversedOperations));
+    }
+
+    auto op =
+        create(properties, inversedOperations, coordinateOperationAccuracies());
+    op->d->computedName_ = d->computedName_;
+    return op;
 }
 
 // ---------------------------------------------------------------------------
@@ -6539,6 +7192,10 @@ struct CoordinateOperationContext::Private {
     io::AuthorityFactoryPtr authorityFactory_{};
     metadata::ExtentPtr extent_{};
     double accuracy_ = 0.0;
+    SourceTargetCRSExtentUse sourceAndTargetCRSExtentUse_ =
+        CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST;
+    SpatialCriterion spatialCriterion_ =
+        CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT;
 };
 //! @endcond
 
@@ -6573,6 +7230,61 @@ metadata::ExtentPtr CoordinateOperationContext::getAreaOfInterest() const {
 /** \brief Return the desired accuracy (in metre), or 0 */
 double CoordinateOperationContext::getDesiredAccuracy() const {
     return d->accuracy_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set how source and target CRS extent should be used
+ * when considering if a transformation can be used (only takes effect if
+ * no area of interest is explicitly defined).
+ *
+ * The default is
+ * CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST.
+ */
+void CoordinateOperationContext::setSourceAndTargetCRSExtentUse(
+    SourceTargetCRSExtentUse use) {
+    d->sourceAndTargetCRSExtentUse_ = use;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return how source and target CRS extent should be used
+ * when considering if a transformation can be used (only takes effect if
+ * no area of interest is explicitly defined).
+ *
+ * The default is
+ * CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST.
+ */
+CoordinateOperationContext::SourceTargetCRSExtentUse
+CoordinateOperationContext::getSourceAndTargetCRSExtentUse() const {
+    return d->sourceAndTargetCRSExtentUse_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set the spatial criterion to use when comparing the area of validity
+ * of coordinate operations with the area of interest / area of validity of
+ * source and target CRS.
+ *
+ * The default is STRICT_CONTAINMENT.
+ */
+void CoordinateOperationContext::setSpatialCriterion(
+    SpatialCriterion criterion) {
+    d->spatialCriterion_ = criterion;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the spatial criterion to use when comparing the area of
+ * validity
+ * of coordinate operations with the area of interest / area of validity of
+ * source and target CRS.
+ *
+ * The default is STRICT_CONTAINMENT.
+ */
+CoordinateOperationContext::SpatialCriterion
+CoordinateOperationContext::getSpatialCriterion() const {
+    return d->spatialCriterion_;
 }
 
 // ---------------------------------------------------------------------------
@@ -6658,10 +7370,42 @@ CoordinateOperationPtr CoordinateOperationFactory::createOperation(
  */
 static std::vector<CoordinateOperationNNPtr>
 filterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceList,
-              CoordinateOperationContextNNPtr context) {
+              CoordinateOperationContextNNPtr context,
+              const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) {
     std::vector<CoordinateOperationNNPtr> res;
     const double desiredAccuracy = context->getDesiredAccuracy();
-    const auto &areaOfInterest = context->getAreaOfInterest();
+    auto areaOfInterest = context->getAreaOfInterest();
+    const auto sourceAndTargetCRSExtentUse =
+        context->getSourceAndTargetCRSExtentUse();
+    auto sourceCRSExtent = getExtent(sourceCRS);
+    auto targetCRSExtent = getExtent(targetCRS);
+    if (!areaOfInterest) {
+        if (sourceAndTargetCRSExtentUse ==
+            CoordinateOperationContext::SourceTargetCRSExtentUse::
+                INTERSECTION) {
+            if (sourceCRSExtent && targetCRSExtent) {
+                areaOfInterest = sourceCRSExtent->intersection(
+                    NN_CHECK_ASSERT(targetCRSExtent));
+            }
+        } else if (sourceAndTargetCRSExtentUse ==
+                   CoordinateOperationContext::SourceTargetCRSExtentUse::
+                       SMALLEST) {
+            if (sourceCRSExtent && targetCRSExtent) {
+                if (getPseudoArea(sourceCRSExtent) <
+                    getPseudoArea(targetCRSExtent)) {
+                    areaOfInterest = sourceCRSExtent;
+                } else {
+                    areaOfInterest = targetCRSExtent;
+                }
+            } else if (sourceCRSExtent) {
+                areaOfInterest = sourceCRSExtent;
+            } else {
+                areaOfInterest = targetCRSExtent;
+            }
+        }
+    }
+    const auto spatialCriterion = context->getSpatialCriterion();
+    bool hasOpThatContainsAreaOfInterset = false;
     for (const auto &op : sourceList) {
         if (desiredAccuracy != 0) {
             const double accuracy = getAccuracy(op);
@@ -6670,40 +7414,149 @@ filterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceList,
             }
         }
         if (areaOfInterest) {
-            auto extent = getExtent(op);
-            if (!extent || !extent->contains(NN_CHECK_ASSERT(areaOfInterest))) {
+            bool emptyIntersection = false;
+            auto extent = getExtent(op, true, emptyIntersection);
+            if (!extent)
                 continue;
+            bool extentContains =
+                extent->contains(NN_CHECK_ASSERT(areaOfInterest));
+            if (extentContains) {
+                hasOpThatContainsAreaOfInterset = true;
+            }
+            if (spatialCriterion == CoordinateOperationContext::
+                                        SpatialCriterion::STRICT_CONTAINMENT &&
+                !extentContains) {
+                continue;
+            }
+            if (spatialCriterion ==
+                    CoordinateOperationContext::SpatialCriterion::
+                        PARTIAL_INTERSECTION &&
+                !extent->intersects(NN_CHECK_ASSERT(areaOfInterest))) {
+                continue;
+            }
+        } else if (sourceAndTargetCRSExtentUse ==
+                   CoordinateOperationContext::SourceTargetCRSExtentUse::BOTH) {
+            bool emptyIntersection = false;
+            auto extent = getExtent(op, true, emptyIntersection);
+            if (!extent)
+                continue;
+            bool extentContainsSource =
+                !sourceCRSExtent ||
+                extent->contains(NN_CHECK_ASSERT(sourceCRSExtent));
+            bool extentContainsTarget =
+                !targetCRSExtent ||
+                extent->contains(NN_CHECK_ASSERT(targetCRSExtent));
+            if (extentContainsSource && extentContainsTarget) {
+                hasOpThatContainsAreaOfInterset = true;
+            }
+            if (spatialCriterion == CoordinateOperationContext::
+                                        SpatialCriterion::STRICT_CONTAINMENT) {
+                if (!extentContainsSource || !extentContainsTarget) {
+                    continue;
+                }
+            } else if (spatialCriterion ==
+                       CoordinateOperationContext::SpatialCriterion::
+                           PARTIAL_INTERSECTION) {
+                bool extentIntersectsSource =
+                    !sourceCRSExtent ||
+                    extent->intersects(NN_CHECK_ASSERT(sourceCRSExtent));
+                bool extentIntersectsTarget =
+                    targetCRSExtent &&
+                    extent->intersects(NN_CHECK_ASSERT(targetCRSExtent));
+                if (!extentIntersectsSource || !extentIntersectsTarget) {
+                    continue;
+                }
             }
         }
         res.emplace_back(op);
     }
 
-    struct {
-        bool operator()(CoordinateOperationNNPtr a,
-                        CoordinateOperationNNPtr b) const {
-            const double areaA = getPseudoArea(getExtent(a));
-            const double areaB = getPseudoArea(getExtent(b));
-            if (areaA > 0) {
-                if (areaA > areaB) {
-                    return 1;
-                }
-                if (areaA < areaB) {
-                    return 0;
-                }
-            } else if (areaB > 0) {
-                return 0;
-            }
+    struct AreaAccuracy {
+        double area_{};
+        double accuracy_{};
+        AreaAccuracy() = default;
+        AreaAccuracy(double area, double accuracy)
+            : area_(area), accuracy_(accuracy) {}
+    };
 
-            const double accuracyA = getAccuracy(a);
-            const double accuracyB = getAccuracy(b);
-            if (accuracyA >= 0 && (accuracyA < accuracyB || accuracyB < 0)) {
-                return 1;
+    std::map<CoordinateOperation *, AreaAccuracy> map;
+    for (const auto &op : res) {
+        bool dummy = false;
+        auto extentOp = getExtent(op, true, dummy);
+        double area = 0.0;
+        if (extentOp) {
+            if (areaOfInterest) {
+                area = getPseudoArea(
+                    extentOp->intersection(NN_CHECK_ASSERT(areaOfInterest)));
+            } else if (sourceCRSExtent && targetCRSExtent) {
+                auto x =
+                    extentOp->intersection(NN_CHECK_ASSERT(sourceCRSExtent));
+                auto y =
+                    extentOp->intersection(NN_CHECK_ASSERT(targetCRSExtent));
+                area = getPseudoArea(x) + getPseudoArea(y) -
+                       ((x && y)
+                            ? getPseudoArea(x->intersection(NN_CHECK_ASSERT(y)))
+                            : 0.0);
+            } else if (sourceCRSExtent) {
+                area = getPseudoArea(
+                    extentOp->intersection(NN_CHECK_ASSERT(sourceCRSExtent)));
+            } else if (targetCRSExtent) {
+                area = getPseudoArea(
+                    extentOp->intersection(NN_CHECK_ASSERT(targetCRSExtent)));
+            } else {
+                area = getPseudoArea(extentOp);
             }
+        }
+        map.insert(std::pair<CoordinateOperation *, AreaAccuracy>(
+            op.get(), AreaAccuracy(area, getAccuracy(op))));
+    }
+
+    auto sortLambda = [&map](CoordinateOperationNNPtr a,
+                             CoordinateOperationNNPtr b) {
+        auto iterA = map.find(a.get());
+        assert(iterA != map.end());
+        auto iterB = map.find(b.get());
+        assert(iterB != map.end());
+        const double areaA = iterA->second.area_;
+        const double areaB = iterB->second.area_;
+        const double accuracyA = iterA->second.accuracy_;
+        const double accuracyB = iterB->second.accuracy_;
+
+        if (accuracyA < 0 && accuracyB >= 0) {
             return 0;
         }
-    } sortFunc;
+        if (accuracyB < 0 && accuracyA >= 0) {
+            return 1;
+        }
 
-    std::sort(res.begin(), res.end(), sortFunc);
+        if (areaA > 0) {
+            if (areaA > areaB) {
+                return 1;
+            }
+            if (areaA < areaB) {
+                return 0;
+            }
+        } else if (areaB > 0) {
+            return 0;
+        }
+
+        if (accuracyA >= 0 && accuracyA < accuracyB) {
+            return 1;
+        }
+        return 0;
+    };
+
+    std::sort(res.begin(), res.end(), sortLambda);
+
+    if (hasOpThatContainsAreaOfInterset && res.size() > 1 &&
+        (*(res.back()->name()->description())).find("Null geographic offset") !=
+            std::string::npos) {
+        std::vector<CoordinateOperationNNPtr> resTemp;
+        for (size_t i = 0; i < res.size() - 1; i++) {
+            resTemp.emplace_back(res[i]);
+        }
+        res = std::move(resTemp);
+    }
 
     return res;
 }
@@ -6741,7 +7594,7 @@ findOpsInRegistry(const crs::CRSNNPtr &sourceCRS,
                         authFactory->createFromCoordinateReferenceSystemCodes(
                             srcAuthName, srcCode, targetAuthName, targetCode);
                     if (!res.empty()) {
-                        return filterAndSort(res, context);
+                        return res;
                     }
                 }
             }
@@ -6756,69 +7609,221 @@ findOpsInRegistry(const crs::CRSNNPtr &sourceCRS,
 #define NN_CO_CAST util::nn_static_pointer_cast<CoordinateOperation>
 //! @endcond
 
+static CoordinateOperationNNPtr
+createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
+                           const crs::CRSNNPtr &targetCRS) {
+    if (util::nn_dynamic_pointer_cast<crs::SingleCRS>(sourceCRS)
+                ->coordinateSystem()
+                ->axisList()
+                .size() == 3 ||
+        util::nn_dynamic_pointer_cast<crs::SingleCRS>(targetCRS)
+                ->coordinateSystem()
+                ->axisList()
+                .size() == 3) {
+        return NN_CO_CAST(Transformation::createGeographic3DOffsets(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     "Null geographic offset transformation from " +
+                         *(sourceCRS->name()->description()) + " to " +
+                         *(targetCRS->name()->description()))
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                     metadata::Extent::WORLD),
+            sourceCRS, targetCRS, common::Angle(0), common::Angle(0),
+            common::Length(0), {}));
+    } else {
+        return NN_CO_CAST(Transformation::createGeographic2DOffsets(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     "Null geographic offset transformation from " +
+                         *(sourceCRS->name()->description()) + " to " +
+                         *(targetCRS->name()->description()))
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                     metadata::Extent::WORLD),
+            sourceCRS, targetCRS, common::Angle(0), common::Angle(0), {}));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Find a list of CoordinateOperation from sourceCRS to targetCRS.
  *
- * The operations are sorted with the most relevant ones first (those with
- * unknown accuracy are sorted last)
+ * The operations are sorted with the most relevant ones first: by descending
+ * area (intersection of the transformation area with the area of interest,
+ * or intersection of the transformation with the area of use of the CRS), and
+ * by increasing accuracy. Operations with unknown accuracy are sorted last,
+ * whatever their area.
  *
  * @param sourceCRS source CRS.
  * @param targetCRS source CRS.
  * @param context Search context.
  * @return a list
  */
-std::vector<CoordinateOperationNNPtr>
-CoordinateOperationFactory::createOperations(
-    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    CoordinateOperationContextNNPtr context) const {
+static std::vector<CoordinateOperationNNPtr>
+createOperations(const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+                 CoordinateOperationContextNNPtr context) {
 
     std::vector<CoordinateOperationNNPtr> res;
+    const bool allowEmptyIntersection = true;
 
     // First look-up if the registry provide us with operations.
     auto authFactory = context->getAuthorityFactory();
-    if (authFactory) {
+    auto derivedSrc = util::nn_dynamic_pointer_cast<crs::DerivedCRS>(sourceCRS);
+    auto derivedDst = util::nn_dynamic_pointer_cast<crs::DerivedCRS>(targetCRS);
+    if (authFactory && (derivedSrc == nullptr ||
+                        !derivedSrc->baseCRS()->isEquivalentTo(targetCRS)) &&
+        (derivedDst == nullptr ||
+         !derivedDst->baseCRS()->isEquivalentTo(sourceCRS))) {
         res = findOpsInRegistry(sourceCRS, targetCRS, context);
-        if (!res.empty()) {
-            return res;
+        if (res.empty()) {
+            res = findOpsInRegistry(targetCRS, sourceCRS, context);
+            if (!res.empty()) {
+                res = applyInverse(res);
+            }
         }
-        res = findOpsInRegistry(targetCRS, sourceCRS, context);
-        if (!res.empty()) {
-            return applyInverse(res);
+
+        // If we get at least a result with perfect accuracy, do not bother
+        // generating synthetic transforms.
+        for (const auto &op : res) {
+            if (getAccuracy(op) == 0.0) {
+                return res;
+            }
         }
     }
 
     // Special case if both CRS are geodetic
     auto geodSrc = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(sourceCRS);
     auto geodDst = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(targetCRS);
-    if (geodSrc && geodDst) {
+    if (geodSrc && geodDst && !derivedSrc && !derivedDst) {
 
         auto geogSrc =
             util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS);
         auto geogDst =
             util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS);
 
-        // If both are geographic and only differ by their prime meridian,
-        // apply a longitude rotation transformation.
-        if (geogSrc && geogDst &&
-            geogSrc->ellipsoid()->isEquivalentTo(geogDst->ellipsoid()) &&
-            geogSrc->coordinateSystem()->isEquivalentTo(
-                geogDst->coordinateSystem())) {
-            double src_pm = geogSrc->primeMeridian()->longitude().getSIValue();
-            double dst_pm = geogDst->primeMeridian()->longitude().getSIValue();
-            if (src_pm != dst_pm) {
-                res.emplace_back(
+        if (geogSrc && geogDst) {
+            std::vector<CoordinateOperationNNPtr> steps;
+            auto src_pm = geogSrc->primeMeridian()->longitude();
+            auto dst_pm = geogDst->primeMeridian()->longitude();
+
+            auto offset =
+                (src_pm.unit() == dst_pm.unit())
+                    ? common::Angle(src_pm.value() - dst_pm.value(),
+                                    src_pm.unit())
+                    : common::Angle(
+                          src_pm.convertToUnit(common::UnitOfMeasure::DEGREE)
+                                  .value() -
+                              dst_pm
+                                  .convertToUnit(common::UnitOfMeasure::DEGREE)
+                                  .value(),
+                          common::UnitOfMeasure::DEGREE);
+
+            // If both are geographic and only differ by their prime meridian,
+            // apply a longitude rotation transformation.
+            if (geogSrc->ellipsoid()->isEquivalentTo(geogDst->ellipsoid()) &&
+                src_pm.getSIValue() != dst_pm.getSIValue()) {
+
+                steps.emplace_back(
                     NN_CO_CAST(Transformation::createLongitudeRotation(
-                        util::PropertyMap().set(
-                            common::IdentifiedObject::NAME_KEY,
-                            "Transformation from " +
-                                *(sourceCRS->name()->description()) + " to " +
-                                *(targetCRS->name()->description())),
-                        sourceCRS, targetCRS,
-                        common::Angle(src_pm - dst_pm,
-                                      common::UnitOfMeasure::RADIAN))));
-                return filterAndSort(res, context);
+                        util::PropertyMap()
+                            .set(common::IdentifiedObject::NAME_KEY,
+                                 "Transformation from " +
+                                     *(sourceCRS->name()->description()) +
+                                     " to " +
+                                     *(targetCRS->name()->description()))
+                            .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                                 metadata::Extent::WORLD),
+                        sourceCRS, targetCRS, offset)));
+                // If only the target has a non-zero prime meridian, chain a
+                // null geographic offset and then the longitude rotation
+            } else if (src_pm.getSIValue() == 0 && dst_pm.getSIValue() != 0) {
+                auto datum = datum::GeodeticReferenceFrame::create(
+                    util::PropertyMap(), geogDst->ellipsoid(),
+                    util::optional<std::string>(), geogSrc->primeMeridian());
+                auto interm_crs = util::nn_static_pointer_cast<crs::CRS>(
+                    crs::GeographicCRS::create(
+                        util::PropertyMap()
+                            .set(common::IdentifiedObject::NAME_KEY,
+                                 *(targetCRS->name()->description()) +
+                                     " altered to use prime meridian of " +
+                                     *(sourceCRS->name()->description()))
+                            .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                                 metadata::Extent::WORLD),
+                        datum, geogDst->coordinateSystem()));
+
+                steps.emplace_back(
+                    createNullGeographicOffset(sourceCRS, interm_crs));
+
+                steps.emplace_back(
+                    NN_CO_CAST(Transformation::createLongitudeRotation(
+                        util::PropertyMap()
+                            .set(common::IdentifiedObject::NAME_KEY,
+                                 "Transformation from " +
+                                     *(sourceCRS->name()->description()) +
+                                     " to " +
+                                     *(interm_crs->name()->description()))
+                            .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                                 metadata::Extent::WORLD),
+                        interm_crs, targetCRS, offset)));
+
+            } else {
+                auto interm_crs = sourceCRS.as_nullable();
+                // If the prime meridians are different, chain a longitude
+                // rotation and the null geographic offset.
+                if (src_pm.getSIValue() != dst_pm.getSIValue()) {
+                    auto datum = datum::GeodeticReferenceFrame::create(
+                        util::PropertyMap(), geogSrc->ellipsoid(),
+                        util::optional<std::string>(),
+                        geogDst->primeMeridian());
+                    interm_crs =
+                        crs::GeographicCRS::create(
+                            util::PropertyMap().set(
+                                common::IdentifiedObject::NAME_KEY,
+                                *(sourceCRS->name()->description()) +
+                                    " altered to use prime meridian of " +
+                                    *(targetCRS->name()->description())),
+                            datum, geogSrc->coordinateSystem())
+                            .as_nullable();
+                    steps.emplace_back(
+                        NN_CO_CAST(Transformation::createLongitudeRotation(
+                            util::PropertyMap()
+                                .set(common::IdentifiedObject::NAME_KEY,
+                                     "Transformation from " +
+                                         *(sourceCRS->name()->description()) +
+                                         " to " +
+                                         *(interm_crs->name()->description()))
+                                .set(
+                                    common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                                    metadata::Extent::WORLD),
+                            sourceCRS, NN_CHECK_ASSERT(interm_crs), offset)));
+                }
+
+                steps.emplace_back(createNullGeographicOffset(
+                    NN_CHECK_ASSERT(interm_crs), targetCRS));
             }
+
+            res.emplace_back(
+                NN_CO_CAST(ConcatenatedOperation::createComputeMetadata(
+                    steps, !allowEmptyIntersection)));
+            return res;
         }
 
+        bool isSrcGeocentric = geodSrc->isGeocentric();
+        bool isSrcGeographic = geogSrc != nullptr;
+        bool isTargetGeocentric = geodDst->isGeocentric();
+        bool isTargetGeographic = geogDst != nullptr;
+        if ((isSrcGeocentric && isTargetGeographic) ||
+            (isSrcGeographic && isTargetGeocentric)) {
+            res.emplace_back(NN_CO_CAST(createGeographicGeocentric(
+                util::PropertyMap().set(
+                    common::IdentifiedObject::NAME_KEY,
+                    "Transformation from " +
+                        *(sourceCRS->name()->description()) + " to " +
+                        *(targetCRS->name()->description())),
+                sourceCRS, targetCRS)));
+            return res;
+        }
+
+        // Tranformation between two geocentric systems
         auto formatter = io::PROJStringFormatter::create();
         io::PROJStringFormatter::Scope scope(formatter);
         formatter->startInversion();
@@ -6827,33 +7832,35 @@ CoordinateOperationFactory::createOperations(
         geodDst->exportToPROJString(formatter);
         res.emplace_back(NN_CO_CAST(SingleOperation::createPROJBased(
             util::PropertyMap(), scope.toString(), sourceCRS, targetCRS)));
-        return filterAndSort(res, context);
+        return res;
     }
 
     // If the source is a derived CRS, then chain the inverse of its
     // deriving conversion, with transforms from its baseCRS to the targetCRS
-    auto derivedSrc = util::nn_dynamic_pointer_cast<crs::DerivedCRS>(sourceCRS);
     if (derivedSrc) {
+        auto opFirst = NN_CO_CAST(derivedSrc->derivingConversion()->inverse());
+        // Small optimization if the targetCRS is the baseCRS of the source
+        // derivedCRS.
+        if (derivedSrc->baseCRS()->isEquivalentTo(targetCRS)) {
+            res.emplace_back(opFirst);
+            return res;
+        }
         auto opsSecond =
             createOperations(derivedSrc->baseCRS(), targetCRS, context);
-        auto opFirst = NN_CO_CAST(derivedSrc->derivingConversion()->inverse());
         for (const auto &opSecond : opsSecond) {
-            res.emplace_back(
-                NN_CO_CAST(ConcatenatedOperation::createComputeAccuracy(
-                    util::PropertyMap(), {opFirst, NN_CO_CAST(opSecond)})));
+            try {
+                res.emplace_back(
+                    NN_CO_CAST(ConcatenatedOperation::createComputeMetadata(
+                        {opFirst, NN_CO_CAST(opSecond)},
+                        !allowEmptyIntersection)));
+            } catch (const InvalidOperationEmptyIntersection &) {
+            }
         }
-        return filterAndSort(res, context);
+        return res;
     }
 
     // reverse of previous case
-    auto derivedDst = util::nn_dynamic_pointer_cast<crs::DerivedCRS>(targetCRS);
     if (derivedDst) {
-        // Small optimization if the sourceCRS is the baseCRS of the target
-        // derivedCRS.
-        if (sourceCRS->isEquivalentTo(derivedDst->baseCRS())) {
-            res.emplace_back(NN_CO_CAST(derivedDst->derivingConversion()));
-            return filterAndSort(res, context);
-        }
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
@@ -6875,13 +7882,18 @@ CoordinateOperationFactory::createOperations(
                 context);
             if (!opsFirst.empty()) {
                 for (const auto &opFirst : opsFirst) {
-                    res.emplace_back(
-                        NN_CO_CAST(ConcatenatedOperation::createComputeAccuracy(
-                            util::PropertyMap(),
-                            {NN_CO_CAST(opFirst),
-                             NN_CO_CAST(boundSrc->transformation())})));
+                    try {
+                        res.emplace_back(NN_CO_CAST(
+                            ConcatenatedOperation::createComputeMetadata(
+                                {NN_CO_CAST(opFirst),
+                                 NN_CO_CAST(boundSrc->transformation())},
+                                !allowEmptyIntersection)));
+                    } catch (const InvalidOperationEmptyIntersection &) {
+                    }
                 }
-                return filterAndSort(res, context);
+                if (!res.empty()) {
+                    return res;
+                }
             }
         }
 
@@ -6890,7 +7902,7 @@ CoordinateOperationFactory::createOperations(
             util::nn_dynamic_pointer_cast<crs::VerticalCRS>(
                 boundSrc->baseCRS())) {
             res.emplace_back(NN_CO_CAST(boundSrc->transformation()));
-            return filterAndSort(res, context);
+            return res;
         }
 
         return createOperations(boundSrc->baseCRS(), targetCRS, context);
@@ -6953,16 +7965,21 @@ CoordinateOperationFactory::createOperations(
                     NN_CO_CAST(boundDst->transformation()->inverse());
                 for (const auto &opFirst : opsFirst) {
                     for (const auto &opLast : opsLast) {
-                        res.emplace_back(NN_CO_CAST(
-                            ConcatenatedOperation::createComputeAccuracy(
-                                util::PropertyMap(),
-                                {
-                                    NN_CO_CAST(opFirst), opSecond, opThird,
-                                    NN_CO_CAST(opLast),
-                                })));
+                        try {
+                            res.emplace_back(NN_CO_CAST(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {
+                                        NN_CO_CAST(opFirst), opSecond, opThird,
+                                        NN_CO_CAST(opLast),
+                                    },
+                                    !allowEmptyIntersection)));
+                        } catch (const InvalidOperationEmptyIntersection &) {
+                        }
                     }
                 }
-                return filterAndSort(res, context);
+                if (!res.empty()) {
+                    return res;
+                }
             }
         }
 
@@ -7005,7 +8022,7 @@ CoordinateOperationFactory::createOperations(
                                     ->coordinateOperationAccuracies())));
                     }
                 }
-                return filterAndSort(res, context);
+                return res;
             } else {
                 return horizTransforms;
             }
@@ -7078,7 +8095,7 @@ CoordinateOperationFactory::createOperations(
                             NN_CO_CAST(SingleOperation::createPROJBased(
                                 util::PropertyMap(), scope.toString(),
                                 sourceCRS, targetCRS)));
-                        return filterAndSort(res, context);
+                        return res;
                     }
                 } else {
                     return createOperations(componentsSrc[0], componentsDst[0],
@@ -7088,7 +8105,27 @@ CoordinateOperationFactory::createOperations(
         }
     }
 
-    return filterAndSort(res, context);
+    return res;
+}
+// ---------------------------------------------------------------------------
+
+/** \brief Find a list of CoordinateOperation from sourceCRS to targetCRS.
+ *
+ * The operations are sorted with the most relevant ones first (those with
+ * unknown accuracy are sorted last)
+ *
+ * @param sourceCRS source CRS.
+ * @param targetCRS source CRS.
+ * @param context Search context.
+ * @return a list
+ */
+std::vector<CoordinateOperationNNPtr>
+CoordinateOperationFactory::createOperations(
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    CoordinateOperationContextNNPtr context) const {
+    return filterAndSort(
+        NS_PROJ::operation::createOperations(sourceCRS, targetCRS, context),
+        context, sourceCRS, targetCRS);
 }
 
 // ---------------------------------------------------------------------------
@@ -7111,45 +8148,24 @@ InverseCoordinateOperation::~InverseCoordinateOperation() = default;
 InverseCoordinateOperation::InverseCoordinateOperation(
     CoordinateOperationNNPtr forwardOperation, bool wktSupportsInversion)
     : forwardOperation_(forwardOperation),
-      wktSupportsInversion_(wktSupportsInversion) {
-    setProperties(createPropertiesForInverse(forwardOperation.get()));
-    setAccuracies(forwardOperation->coordinateOperationAccuracies());
-    if (forwardOperation->sourceCRS() && forwardOperation->targetCRS()) {
-        setCRSs(NN_CHECK_ASSERT(forwardOperation->targetCRS()),
-                NN_CHECK_ASSERT(forwardOperation->sourceCRS()),
-                forwardOperation->interpolationCRS());
-    }
-}
+      wktSupportsInversion_(wktSupportsInversion) {}
 
 // ---------------------------------------------------------------------------
 
-InverseCoordinateOperationNNPtr
-InverseCoordinateOperation::create(CoordinateOperationNNPtr forwardOperation,
-                                   bool wktSupportsInversion) {
-    auto op = util::nn_make_shared<InverseCoordinateOperation>(
-        forwardOperation, wktSupportsInversion);
-    op->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(op));
-    return op;
+void InverseCoordinateOperation::setPropertiesFromForward() {
+    setProperties(createPropertiesForInverse(forwardOperation_.get()));
+    setAccuracies(forwardOperation_->coordinateOperationAccuracies());
+    if (forwardOperation_->sourceCRS() && forwardOperation_->targetCRS()) {
+        setCRSs(NN_CHECK_ASSERT(forwardOperation_->targetCRS()),
+                NN_CHECK_ASSERT(forwardOperation_->sourceCRS()),
+                forwardOperation_->interpolationCRS());
+    }
 }
 
 // ---------------------------------------------------------------------------
 
 CoordinateOperationNNPtr InverseCoordinateOperation::inverse() const {
     return forwardOperation_;
-}
-
-// ---------------------------------------------------------------------------
-
-std::string
-InverseCoordinateOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
-    if (wktSupportsInversion_) {
-        formatter->startInversion();
-        forwardOperation_->exportToWKT(formatter);
-        formatter->stopInversion();
-        return formatter->toString();
-    }
-    throw io::FormattingException(
-        "InverseCoordinateOperation::exportToWKT(): unsupported");
 }
 
 // ---------------------------------------------------------------------------

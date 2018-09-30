@@ -25,7 +25,15 @@
         - time-specific Helmert (codes 1065 and 1066)
         - sourceEpochCoordinate and targetEpochCoordinate in CoordinateOperation are unused/unset
 
-    
+    - deal with alternate grid names
+    - implement export to PROJ of     "Geographic3D to GravityRelatedHeight (EGM2008)" ( projinfo -s EPSG:4979 -t EPSG:3855 )
+    - implement export to PROJ of  METHOD["NADCON"  ID["EPSG",1241]
+    - src/projinfo -k operation EPSG:7811
+            input string: error while querying database: cannot build transformation 7811: Inconsistent chaining of CRS in operations
+            see  https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:coordinateOperation:EPSG::7811
+    - use an intermediate CRS when going from A of B
+        ogrinfo data/proj.db -sql "select v1.code as code1, v1.name as name1, v1.accuracy as accuracy1, v2.code as code2, v2.name as name2, v2.accuracy as accuracy2 from coordinate_operation_view v1 join coordinate_operation_view v2 on v1.target_crs_code = v2.source_crs_code where v1.source_crs_code = 4275 and v2.target_crs_code = 4179 AND v1.deprecated = 0 AND v2.deprecated = 0 order by (CASE WHEN accuracy1 is NULL THEN 1 ELSE 0 END) + (CASE WHEN accuracy2 is NULL THEN 1 ELSE 0 END), accuracy1 + accuracy2"
+
 - Integrate Doxygen doc in PROJ doc
 - More tests
 - Address TODO and FIXME

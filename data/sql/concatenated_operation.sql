@@ -188,6 +188,8 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','8639','NGO 1948 (Oslo) to WG
 INSERT INTO "concatenated_operation" VALUES('EPSG','8640','Nord Sahara 1959 (Paris) to WGS 84 (1)','EPSG','4819','EPSG','4326','EPSG','1026',NULL,'EPSG','1882','EPSG','1253',NULL,NULL,1);
 INSERT INTO "concatenated_operation" VALUES('EPSG','8641','Segara (Jakarta) to WGS 84 (1)','EPSG','4820','EPSG','4326','EPSG','1360',NULL,'EPSG','1883','EPSG','1897',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','8642','S-JTSK (Ferro) to WGS 84 (1)','EPSG','4818','EPSG','4326','EPSG','1079',NULL,'EPSG','1884','EPSG','1623',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','8643','Greek to WGS 84 (1)','EPSG','4120','EPSG','4326','EPSG','3254',NULL,'EPSG','1891','EPSG','1272',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','8644','Greek (Athens) to WGS 84 (1)','EPSG','4815','EPSG','4326','EPSG','3254',NULL,'EPSG','1761','EPSG','1891','EPSG','1272',0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','8645','MGI (Ferro) to WGS 84 (2)','EPSG','4805','EPSG','4326','EPSG','1037',NULL,'EPSG','1757','EPSG','1618',NULL,NULL,1);
 INSERT INTO "concatenated_operation" VALUES('EPSG','8646','Manoca 1962 to WGS 84 (1)','EPSG','4193','EPSG','4326','EPSG','2555',NULL,'EPSG','1902','EPSG','1240',NULL,NULL,1);
 INSERT INTO "concatenated_operation" VALUES('EPSG','8647','NAD27 to WGS 84 (78)','EPSG','4267','EPSG','4326','EPSG','2831',NULL,'EPSG','1313','EPSG','1950','EPSG','1946',0);

@@ -167,9 +167,8 @@ using MeasureNNPtr = util::nn<MeasurePtr>;
 /** \brief Numeric value, without a physical unit of measure. */
 class Scale : public Measure {
   public:
-    PROJ_DLL explicit Scale(
-        double valueIn = 0.0,
-        const UnitOfMeasure &unitIn = UnitOfMeasure::SCALE_UNITY);
+    PROJ_DLL explicit Scale(double valueIn = 0.0);
+    PROJ_DLL explicit Scale(double valueIn, const UnitOfMeasure &unitIn);
 
     //! @cond Doxygen_Suppress
     PROJ_DLL Scale(const Scale &other);
@@ -186,8 +185,8 @@ class Scale : public Measure {
 /** \brief Numeric value, with a angular unit of measure. */
 class Angle : public Measure {
   public:
-    PROJ_DLL Angle(double valueIn = 0.0,
-                   const UnitOfMeasure &unitIn = UnitOfMeasure::DEGREE);
+    PROJ_DLL Angle(double valueIn = 0.0);
+    PROJ_DLL Angle(double valueIn, const UnitOfMeasure &unitIn);
 
     //! @cond Doxygen_Suppress
     PROJ_DLL Angle(const Angle &other);
@@ -206,8 +205,8 @@ class Angle : public Measure {
 /** \brief Numeric value, with a linear unit of measure. */
 class Length : public Measure {
   public:
-    PROJ_DLL Length(double valueIn = 0.0,
-                    const UnitOfMeasure &unitIn = UnitOfMeasure::METRE);
+    PROJ_DLL Length(double valueIn = 0.0);
+    PROJ_DLL Length(double valueIn, const UnitOfMeasure &unitIn);
 
     //! @cond Doxygen_Suppress
     PROJ_DLL Length(const Length &other);
@@ -373,6 +372,12 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
 };
 
 // ---------------------------------------------------------------------------
+
+class ObjectUsage;
+/** Shared pointer of ObjectUsage. */
+using ObjectUsagePtr = std::shared_ptr<ObjectUsage>;
+/** Non-null shared pointer of ObjectUsage. */
+using ObjectUsageNNPtr = util::nn<ObjectUsagePtr>;
 
 /** \brief Usage of a CRS-related object.
  *

@@ -165,6 +165,9 @@ CREATE TABLE conversion(
     code TEXT NOT NULL,
     name TEXT NOT NULL,
 
+    area_of_use_auth_name TEXT NOT NULL,
+    area_of_use_code TEXT NOT NULL,
+
     method_auth_name TEXT NOT NULL,
     method_code TEXT NOT NULL,
     method_name NOT NULL,
@@ -219,6 +222,7 @@ CREATE TABLE conversion(
     param7_uom_code TEXT,
 
     CONSTRAINT pk_conversion PRIMARY KEY (auth_name, code),
+    CONSTRAINT fk_conversion_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
     CONSTRAINT fk_conversion_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_conversion_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_conversion_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code),

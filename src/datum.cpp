@@ -302,27 +302,39 @@ std::string PrimeMeridian::exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+std::string
+PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
+    const double valRad = angle.getSIValue();
+    std::string projPMName;
+    projCtx ctxt = pj_ctx_alloc();
+    for (int i = 0; pj_prime_meridians[i].id != nullptr; ++i) {
+        double valRefRad =
+            dmstor_ctx(ctxt, pj_prime_meridians[i].defn, nullptr);
+        if (::fabs(valRad - valRefRad) < 1e-10) {
+            projPMName = pj_prime_meridians[i].id;
+            break;
+        }
+    }
+    pj_ctx_free(ctxt);
+    return projPMName;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 std::string PrimeMeridian::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
     if (longitude().getSIValue() != 0) {
-        const double valDeg =
-            longitude().convertToUnit(common::UnitOfMeasure::DEGREE).value();
-        const double valRad = longitude().getSIValue();
-        std::string projPMName;
-        projCtx ctxt = pj_ctx_alloc();
-        for (int i = 0; pj_prime_meridians[i].id != nullptr; ++i) {
-            double valRefRad =
-                dmstor_ctx(ctxt, pj_prime_meridians[i].defn, nullptr);
-            if (::fabs(valRad - valRefRad) < 1e-10) {
-                projPMName = pj_prime_meridians[i].id;
-                break;
-            }
-        }
-        pj_ctx_free(ctxt);
+        std::string projPMName(getPROJStringWellKnownName(longitude()));
         if (!projPMName.empty()) {
             formatter->addParam("pm", projPMName);
         } else {
+            const double valDeg =
+                longitude()
+                    .convertToUnit(common::UnitOfMeasure::DEGREE)
+                    .value();
             formatter->addParam("pm", valDeg);
         }
     }

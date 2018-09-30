@@ -106,11 +106,12 @@ bool starts_with(const std::string &str, const std::string &prefix);
 
 bool ends_with(const std::string &str, const std::string &suffix);
 
-std::string tolower(const std::string &osStr);
+PROJ_DLL std::string tolower(const std::string &osStr);
 
 std::string toupper(const std::string &osStr);
 
-std::vector<std::string> split(const std::string &osStr, char separator);
+PROJ_DLL std::vector<std::string> split(const std::string &osStr,
+                                        char separator);
 
 inline bool ci_equal(const std::string &a, const std::string &b) {
     return tolower(a) == tolower(b);
@@ -118,7 +119,8 @@ inline bool ci_equal(const std::string &a, const std::string &b) {
 
 std::string stripQuotes(const std::string &osStr);
 
-double c_locale_stod(const std::string &s); // throw(std::invalid_argument)
+PROJ_DLL double
+c_locale_stod(const std::string &s); // throw(std::invalid_argument)
 
 } // namespace internal
 

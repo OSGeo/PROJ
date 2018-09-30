@@ -611,6 +611,7 @@ const std::string &WKTFormatter::getHDatumExtension() const {
     return d->hDatumExtension_;
 }
 
+#ifdef unused
 // ---------------------------------------------------------------------------
 
 void WKTFormatter::startInversion() {
@@ -627,6 +628,7 @@ void WKTFormatter::stopInversion() {
 // ---------------------------------------------------------------------------
 
 bool WKTFormatter::isInverted() const { return d->inversionStack_.back(); }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -3596,6 +3598,7 @@ struct PROJStringParser::Private {
 
     bool hasParamValue(const Step &step, const std::string &key);
     std::string getParamValue(const Step &step, const std::string &key);
+    PrimeMeridianNNPtr buildPrimeMeridian(const Step &step);
     GeodeticReferenceFrameNNPtr buildDatum(const Step &step);
     GeographicCRSNNPtr buildGeographicCRS(int iStep, int iUnitConvert,
                                           int iAxisSwap);
@@ -3855,19 +3858,11 @@ static bool isProjectedStep(const std::string &name) {
 
 // ---------------------------------------------------------------------------
 
-GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
+PrimeMeridianNNPtr PROJStringParser::Private::buildPrimeMeridian(
     const PROJStringParser::Private::Step &step) {
 
-    auto ellpsStr = getParamValue(step, "ellps");
-    auto datumStr = getParamValue(step, "datum");
-    auto aStr = getParamValue(step, "a");
-    auto bStr = getParamValue(step, "b");
-    auto rfStr = getParamValue(step, "rf");
-    auto RStr = getParamValue(step, "R");
-    auto pmStr = getParamValue(step, "pm");
-    GeodeticReferenceFramePtr datum = nullptr;
-
     PrimeMeridianNNPtr pm = PrimeMeridian::GREENWICH;
+    auto pmStr = getParamValue(step, "pm");
     if (!pmStr.empty()) {
         try {
             double pmValue = c_locale_stod(pmStr);
@@ -3900,6 +3895,23 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
             }
         }
     }
+    return pm;
+}
+
+// ---------------------------------------------------------------------------
+
+GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
+    const PROJStringParser::Private::Step &step) {
+
+    auto ellpsStr = getParamValue(step, "ellps");
+    auto datumStr = getParamValue(step, "datum");
+    auto aStr = getParamValue(step, "a");
+    auto bStr = getParamValue(step, "b");
+    auto rfStr = getParamValue(step, "rf");
+    auto RStr = getParamValue(step, "R");
+    GeodeticReferenceFramePtr datum = nullptr;
+
+    PrimeMeridianNNPtr pm(buildPrimeMeridian(step));
 
     if (!datumStr.empty()) {
         if (datumStr == "WGS84") {
@@ -4390,6 +4402,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     assert(isProjectedStep(step.name));
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
+
+    if (!buildPrimeMeridian(step)->isEquivalentTo(geogCRS->primeMeridian())) {
+        throw ParsingException("inconsistant pm values between projectedCRS "
+                               "and its base geographicalCRS");
+    }
 
     if (step.name == "tmerc" && getParamValue(step, "axis") == "wsu") {
         constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED =

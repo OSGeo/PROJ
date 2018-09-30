@@ -113,6 +113,10 @@ class GeographicExtent : public util::BaseObject, public util::IComparable {
     PROJ_DLL virtual bool
     contains(const GeographicExtentNNPtr &other) const = 0;
 
+    /** \brief Returns whether this extent intersects the other one. */
+    PROJ_DLL virtual bool
+    intersects(const GeographicExtentNNPtr &other) const = 0;
+
     /** \brief Returns the intersection of this extent with another one. */
     PROJ_DLL virtual GeographicExtentPtr
     intersection(const GeographicExtentNNPtr &other) const = 0;
@@ -162,6 +166,8 @@ class GeographicBoundingBox : public GeographicExtent {
 
     PROJ_DLL bool contains(const GeographicExtentNNPtr &other) const override;
 
+    PROJ_DLL bool intersects(const GeographicExtentNNPtr &other) const override;
+
     PROJ_DLL GeographicExtentPtr
     intersection(const GeographicExtentNNPtr &other) const override;
 
@@ -206,6 +212,8 @@ class TemporalExtent : public util::BaseObject, public util::IComparable {
 
     PROJ_DLL bool contains(const TemporalExtentNNPtr &other) const;
 
+    PROJ_DLL bool intersects(const TemporalExtentNNPtr &other) const;
+
   protected:
     TemporalExtent(const std::string &start, const std::string &stop);
     INLINED_MAKE_SHARED
@@ -248,6 +256,8 @@ class VerticalExtent : public util::BaseObject, public util::IComparable {
                        util::IComparable::Criterion::STRICT) const override;
 
     PROJ_DLL bool contains(const VerticalExtentNNPtr &other) const;
+
+    PROJ_DLL bool intersects(const VerticalExtentNNPtr &other) const;
 
   protected:
     VerticalExtent(double minimumValue, double maximumValue,
@@ -303,7 +313,11 @@ class Extent : public util::BaseObject, public util::IComparable {
 
     PROJ_DLL bool contains(const ExtentNNPtr &other) const;
 
+    PROJ_DLL bool intersects(const ExtentNNPtr &other) const;
+
     PROJ_DLL ExtentPtr intersection(const ExtentNNPtr &other) const;
+
+    PROJ_DLL static const ExtentNNPtr WORLD;
 
   protected:
     Extent();

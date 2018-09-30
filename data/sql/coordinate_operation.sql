@@ -4114,6 +4114,109 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','1266','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1268','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1269','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1270','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1335','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1336','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1337','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1338','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1339','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1340','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1341','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1342','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1343','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1344','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1345','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1346','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1347','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1348','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1349','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1350','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1351','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1352','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1353','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1354','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1355','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1356','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1357','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1358','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1359','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1360','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1361','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1362','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1363','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1364','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1365','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1366','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1367','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1368','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1369','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1370','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1371','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1372','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1373','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1374','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1375','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1376','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1377','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1378','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1379','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1380','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1381','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1382','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1383','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1384','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1385','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1386','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1387','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1388','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1389','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1390','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1391','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1392','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1393','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1394','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1395','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1396','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1397','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1398','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1399','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1400','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1401','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1402','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1403','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1404','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1405','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1406','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1407','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1408','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1409','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1410','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1411','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1412','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1413','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1414','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1415','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1416','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1417','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1418','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1419','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1420','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1421','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1422','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1423','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1424','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1425','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1426','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1427','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1428','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1429','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1430','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1431','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1432','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1433','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1434','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1435','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1436','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1447','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1466','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1467','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1468','other_transformation');
@@ -4129,16 +4232,121 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','1762','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1763','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1764','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1765','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1827','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1881','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1882','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1883','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1884','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','1891','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1991','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','3895','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','3913','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5133','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5134','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5238','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5241','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15596','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15597','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15598','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15599','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15600','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15601','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15602','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15603','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15604','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15605','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15606','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15607','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15608','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15609','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15610','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15611','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15612','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15613','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15614','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15615','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15616','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15617','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15618','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15619','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15620','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15621','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15622','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15623','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15624','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15625','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15626','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15627','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15628','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15629','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15630','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15631','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15632','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15633','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15634','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15635','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15636','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15637','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15638','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15639','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15640','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15641','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15642','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15643','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15644','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15645','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15646','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15647','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15648','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15649','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15650','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15651','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15652','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15653','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15654','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15655','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15656','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15657','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15658','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15659','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15660','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15661','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15662','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15663','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15664','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15665','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15666','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15667','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15668','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15669','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15670','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15671','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15672','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15673','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15674','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15675','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15676','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15677','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15678','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15679','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15680','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15681','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15682','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15683','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15684','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15685','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15686','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15687','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15688','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15689','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15690','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15691','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15692','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15693','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15694','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15695','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15696','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15697','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','3896','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','3966','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','4435','concatenated_operation');
@@ -4327,6 +4535,8 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8639','concatenated_operation'
 INSERT INTO "coordinate_operation" VALUES('EPSG','8640','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8641','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8642','concatenated_operation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','8643','concatenated_operation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','8644','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8645','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8646','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8647','concatenated_operation');
@@ -4385,109 +4595,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (1079, u'transformation', u'Luxembourg 1930 to WGS 84 (2)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4181, 4326, 1146, 0.5, 0)
 --- Non imported: (1095, u'transformation', u'PSAD56 to WGS 84 (13)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4248, 4326, 3327, 15.0, 0)
 --- Non imported: (1096, u'transformation', u'La Canoa to WGS 84 (13)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4247, 4326, 3327, 15.0, 0)
---- Non imported: (1335, u'transformation', u'Tokyo to WGS 84 (6)', 9618, u'Geographic2D with Height Offsets', 4301, 4326, 2425, 2.0, 1)
---- Non imported: (1336, u'transformation', u'Tokyo + JSLD to WGS 84 (7)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2426, 1.0, 1)
---- Non imported: (1337, u'transformation', u'Tokyo + JSLD to WGS 84 (8)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2427, 1.0, 1)
---- Non imported: (1338, u'transformation', u'Tokyo + JSLD to WGS 84 (9)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2428, 1.0, 1)
---- Non imported: (1339, u'transformation', u'Tokyo + JSLD to WGS 84 (10)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2429, 1.0, 1)
---- Non imported: (1340, u'transformation', u'Tokyo + JSLD to WGS 84 (11)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2430, 1.0, 1)
---- Non imported: (1341, u'transformation', u'Tokyo + JSLD to WGS 84 (12)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2431, 1.0, 1)
---- Non imported: (1342, u'transformation', u'Tokyo + JSLD to WGS 84 (13)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2432, 1.0, 1)
---- Non imported: (1343, u'transformation', u'Tokyo + JSLD to WGS 84 (14)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2433, 1.0, 1)
---- Non imported: (1344, u'transformation', u'Tokyo + JSLD to WGS 84 (15)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2434, 1.0, 1)
---- Non imported: (1345, u'transformation', u'Tokyo + JSLD to WGS 84 (16)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2435, 1.0, 1)
---- Non imported: (1346, u'transformation', u'Tokyo + JSLD to WGS 84 (17)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2436, 1.0, 1)
---- Non imported: (1347, u'transformation', u'Tokyo + JSLD to WGS 84 (18)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2437, 1.0, 1)
---- Non imported: (1348, u'transformation', u'Tokyo + JSLD to WGS 84 (19)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2438, 1.0, 1)
---- Non imported: (1349, u'transformation', u'Tokyo + JSLD to WGS 84 (20)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2439, 1.0, 1)
---- Non imported: (1350, u'transformation', u'Tokyo + JSLD to WGS 84 (21)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2440, 1.0, 1)
---- Non imported: (1351, u'transformation', u'Tokyo + JSLD to WGS 84 (22)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2441, 1.0, 1)
---- Non imported: (1352, u'transformation', u'Tokyo + JSLD to WGS 84 (23)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2442, 1.0, 1)
---- Non imported: (1353, u'transformation', u'Tokyo + JSLD to WGS 84 (24)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2443, 1.0, 1)
---- Non imported: (1354, u'transformation', u'Tokyo + JSLD to WGS 84 (25)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2444, 1.0, 1)
---- Non imported: (1355, u'transformation', u'Tokyo + JSLD to WGS 84 (26)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2445, 1.0, 1)
---- Non imported: (1356, u'transformation', u'Tokyo + JSLD to WGS 84 (27)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2446, 1.0, 1)
---- Non imported: (1357, u'transformation', u'Tokyo + JSLD to WGS 84 (28)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2447, 1.0, 1)
---- Non imported: (1358, u'transformation', u'Tokyo + JSLD to WGS 84 (29)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2448, 1.0, 1)
---- Non imported: (1359, u'transformation', u'Tokyo + JSLD to WGS 84 (30)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2449, 1.0, 1)
---- Non imported: (1360, u'transformation', u'Tokyo + JSLD to WGS 84 (31)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2450, 1.0, 1)
---- Non imported: (1361, u'transformation', u'Tokyo + JSLD to WGS 84 (32)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2451, 1.0, 1)
---- Non imported: (1362, u'transformation', u'Tokyo + JSLD to WGS 84 (33)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2452, 1.0, 1)
---- Non imported: (1363, u'transformation', u'Tokyo + JSLD to WGS 84 (34)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2453, 1.0, 1)
---- Non imported: (1364, u'transformation', u'Tokyo + JSLD to WGS 84 (35)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2454, 1.0, 1)
---- Non imported: (1365, u'transformation', u'Tokyo + JSLD to WGS 84 (36)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2455, 1.0, 1)
---- Non imported: (1366, u'transformation', u'Tokyo + JSLD to WGS 84 (37)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2456, 1.0, 1)
---- Non imported: (1367, u'transformation', u'Tokyo + JSLD to WGS 84 (38)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2457, 1.0, 1)
---- Non imported: (1368, u'transformation', u'Tokyo + JSLD to WGS 84 (39)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2458, 1.0, 1)
---- Non imported: (1369, u'transformation', u'Tokyo + JSLD to WGS 84 (40)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2459, 1.0, 1)
---- Non imported: (1370, u'transformation', u'Tokyo + JSLD to WGS 84 (41)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2460, 1.0, 1)
---- Non imported: (1371, u'transformation', u'Tokyo + JSLD to WGS 84 (42)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2461, 1.0, 1)
---- Non imported: (1372, u'transformation', u'Tokyo + JSLD to WGS 84 (43)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2462, 1.0, 1)
---- Non imported: (1373, u'transformation', u'Tokyo + JSLD to WGS 84 (44)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2463, 1.0, 1)
---- Non imported: (1374, u'transformation', u'Tokyo + JSLD to WGS 84 (45)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2464, 1.0, 1)
---- Non imported: (1375, u'transformation', u'Tokyo + JSLD to WGS 84 (46)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2465, 1.0, 1)
---- Non imported: (1376, u'transformation', u'Tokyo + JSLD to WGS 84 (47)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2466, 1.0, 1)
---- Non imported: (1377, u'transformation', u'Tokyo + JSLD to WGS 84 (48)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2467, 1.0, 1)
---- Non imported: (1378, u'transformation', u'Tokyo + JSLD to WGS 84 (49)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2468, 1.0, 1)
---- Non imported: (1379, u'transformation', u'Tokyo + JSLD to WGS 84 (50)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2469, 1.0, 1)
---- Non imported: (1380, u'transformation', u'Tokyo + JSLD to WGS 84 (51)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2470, 1.0, 1)
---- Non imported: (1381, u'transformation', u'Tokyo + JSLD to WGS 84 (52)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2471, 1.0, 1)
---- Non imported: (1382, u'transformation', u'Tokyo + JSLD to WGS 84 (53)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2472, 1.0, 1)
---- Non imported: (1383, u'transformation', u'Tokyo + JSLD to WGS 84 (54)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2473, 1.0, 1)
---- Non imported: (1384, u'transformation', u'Tokyo + JSLD to WGS 84 (55)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2474, 1.0, 1)
---- Non imported: (1385, u'transformation', u'Tokyo + JSLD to WGS 84 (56)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2475, 1.0, 1)
---- Non imported: (1386, u'transformation', u'Tokyo + JSLD to WGS 84 (57)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2476, 1.0, 1)
---- Non imported: (1387, u'transformation', u'Tokyo + JSLD to WGS 84 (58)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2477, 1.0, 1)
---- Non imported: (1388, u'transformation', u'Tokyo + JSLD to WGS 84 (59)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2478, 1.0, 1)
---- Non imported: (1389, u'transformation', u'Tokyo + JSLD to WGS 84 (60)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2479, 1.0, 1)
---- Non imported: (1390, u'transformation', u'Tokyo + JSLD to WGS 84 (61)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2480, 1.0, 1)
---- Non imported: (1391, u'transformation', u'Tokyo + JSLD to WGS 84 (62)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2481, 1.0, 1)
---- Non imported: (1392, u'transformation', u'Tokyo + JSLD to WGS 84 (63)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2482, 1.0, 1)
---- Non imported: (1393, u'transformation', u'Tokyo + JSLD to WGS 84 (64)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2483, 1.0, 1)
---- Non imported: (1394, u'transformation', u'Tokyo + JSLD to WGS 84 (65)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2484, 1.0, 1)
---- Non imported: (1395, u'transformation', u'Tokyo + JSLD to WGS 84 (66)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2485, 1.0, 1)
---- Non imported: (1396, u'transformation', u'Tokyo + JSLD to WGS 84 (67)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2486, 1.0, 1)
---- Non imported: (1397, u'transformation', u'Tokyo + JSLD to WGS 84 (68)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2487, 1.0, 1)
---- Non imported: (1398, u'transformation', u'Tokyo + JSLD to WGS 84 (69)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2488, 1.0, 1)
---- Non imported: (1399, u'transformation', u'Tokyo + JSLD to WGS 84 (70)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2489, 1.0, 1)
---- Non imported: (1400, u'transformation', u'Tokyo + JSLD to WGS 84 (71)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2490, 1.0, 1)
---- Non imported: (1401, u'transformation', u'Tokyo + JSLD to WGS 84 (72)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2491, 1.0, 1)
---- Non imported: (1402, u'transformation', u'Tokyo + JSLD to WGS 84 (73)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2492, 1.0, 1)
---- Non imported: (1403, u'transformation', u'Tokyo + JSLD to WGS 84 (74)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2493, 1.0, 1)
---- Non imported: (1404, u'transformation', u'Tokyo + JSLD to WGS 84 (75)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2494, 1.0, 1)
---- Non imported: (1405, u'transformation', u'Tokyo + JSLD to WGS 84 (76)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2495, 1.0, 1)
---- Non imported: (1406, u'transformation', u'Tokyo + JSLD to WGS 84 (77)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2496, 1.0, 1)
---- Non imported: (1407, u'transformation', u'Tokyo + JSLD to WGS 84 (78)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2497, 1.0, 1)
---- Non imported: (1408, u'transformation', u'Tokyo + JSLD to WGS 84 (79)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2498, 1.0, 1)
---- Non imported: (1409, u'transformation', u'Tokyo + JSLD to WGS 84 (80)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2499, 1.0, 1)
---- Non imported: (1410, u'transformation', u'Tokyo + JSLD to WGS 84 (81)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2500, 1.0, 1)
---- Non imported: (1411, u'transformation', u'Tokyo + JSLD to WGS 84 (82)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2501, 1.0, 1)
---- Non imported: (1412, u'transformation', u'Tokyo + JSLD to WGS 84 (83)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2502, 1.0, 1)
---- Non imported: (1413, u'transformation', u'Tokyo + JSLD to WGS 84 (84)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2503, 1.0, 1)
---- Non imported: (1414, u'transformation', u'Tokyo + JSLD to WGS 84 (85)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2504, 1.0, 1)
---- Non imported: (1415, u'transformation', u'Tokyo + JSLD to WGS 84 (86)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2505, 1.0, 1)
---- Non imported: (1416, u'transformation', u'Tokyo + JSLD to WGS 84 (87)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2506, 1.0, 1)
---- Non imported: (1417, u'transformation', u'Tokyo + JSLD to WGS 84 (88)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2507, 1.0, 1)
---- Non imported: (1418, u'transformation', u'Tokyo + JSLD to WGS 84 (89)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2508, 1.0, 1)
---- Non imported: (1419, u'transformation', u'Tokyo + JSLD to WGS 84 (90)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2509, 1.0, 1)
---- Non imported: (1420, u'transformation', u'Tokyo + JSLD to WGS 84 (91)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2510, 1.0, 1)
---- Non imported: (1421, u'transformation', u'Tokyo + JSLD to WGS 84 (92)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2511, 1.0, 1)
---- Non imported: (1422, u'transformation', u'Tokyo + JSLD to WGS 84 (93)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2512, 1.0, 1)
---- Non imported: (1423, u'transformation', u'Tokyo + JSLD to WGS 84 (94)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2513, 1.0, 1)
---- Non imported: (1424, u'transformation', u'Tokyo + JSLD to WGS 84 (95)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2514, 1.0, 1)
---- Non imported: (1425, u'transformation', u'Tokyo + JSLD to WGS 84 (96)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2515, 1.0, 1)
---- Non imported: (1426, u'transformation', u'Tokyo + JSLD to WGS 84 (97)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2516, 1.0, 1)
---- Non imported: (1427, u'transformation', u'Tokyo + JSLD to WGS 84 (98)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2517, 1.0, 1)
---- Non imported: (1428, u'transformation', u'Tokyo + JSLD to WGS 84 (99)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2518, 1.0, 1)
---- Non imported: (1429, u'transformation', u'Tokyo + JSLD to WGS 84 (100)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2519, 1.0, 1)
---- Non imported: (1430, u'transformation', u'Tokyo + JSLD to WGS 84 (101)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2520, 1.0, 1)
---- Non imported: (1431, u'transformation', u'Tokyo + JSLD to WGS 84 (102)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2521, 1.0, 1)
---- Non imported: (1432, u'transformation', u'Tokyo + JSLD to WGS 84 (103)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2522, 1.0, 1)
---- Non imported: (1433, u'transformation', u'Tokyo + JSLD to WGS 84 (104)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2523, 1.0, 1)
---- Non imported: (1434, u'transformation', u'Tokyo + JSLD to WGS 84 (105)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2524, 1.0, 1)
---- Non imported: (1435, u'transformation', u'Tokyo + JSLD to WGS 84 (106)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2525, 1.0, 1)
---- Non imported: (1436, u'transformation', u'Tokyo + JSLD to WGS 84 (107)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2526, 1.0, 1)
---- Non imported: (1447, u'transformation', u'Anguilla 1957 to WGS 84 (1)', 9619, u'Geographic2D offsets', 4600, 4326, 3214, 10.0, 0)
 --- Non imported: (1450, u'transformation', u'ED50 to WGS 84 (20)', 9620, u'Norway Offshore Interpolation', 4230, 4326, 2333, 0.5, 0)
 --- Non imported: (1452, u'transformation', u'D48 / GK to D96 / TM (1)', 9621, u'Similarity transformation', 3787, 3794, 2578, 0.2, 1)
 --- Non imported: (1453, u'transformation', u'D48 / GK to D96 / TM (2)', 9621, u'Similarity transformation', 3787, 3794, 2579, 0.2, 1)
@@ -4509,8 +4616,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (1771, u'transformation', u'La Canoa to REGVEN (1)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4247, 4189, 3327, 15.0, 0)
 --- Non imported: (1772, u'transformation', u'La Canoa to WGS84 (1)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4247, 4326, 1251, None, 1)
 --- Non imported: (1795, u'transformation', u'MGI to WGS 84 (7)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4312, 4326, 3536, 999.0, 1)
---- Non imported: (1827, u'transformation', u'Tokyo + JSLD to WGS 84 (6)', 9618, u'Geographic2D with Height Offsets', 7414, 4326, 2425, 1.0, 1)
---- Non imported: (1891, u'transformation', u'Greek to GGRS87 (1)', 9619, u'Geographic2D offsets', 4120, 4121, 3254, 5.0, 0)
 --- Non imported: (1947, u'transformation', u'ATS77 to NAD27 (1)', 9634, u'Maritime Provinces polynomial interpolation', 4122, 4267, 1447, 1.0, 0)
 --- Non imported: (1948, u'transformation', u'ATS77 to NAD27 (2)', 9634, u'Maritime Provinces polynomial interpolation', 4122, 4267, 2313, 1.0, 0)
 --- Non imported: (1949, u'transformation', u'ATS77 to NAD27 (3)', 9634, u'Maritime Provinces polynomial interpolation', 4122, 4267, 1533, 1.0, 0)
@@ -4632,7 +4737,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (5215, u'transformation', u'Genoa height to EVRF2007 height (1)', 1046, u'Vertical Offset and Slope', 5214, 5621, 2372, 0.1, 0)
 --- Non imported: (5216, u'transformation', u'Genoa height to EVRF2000 height (2)', 1046, u'Vertical Offset and Slope', 5214, 5730, 2340, 0.1, 0)
 --- Non imported: (5217, u'transformation', u'Genoa height to EVRF2007 height (2)', 1046, u'Vertical Offset and Slope', 5214, 5621, 2340, 0.1, 0)
---- Non imported: (5241, u'transformation', u'S-JTSK to S-JTSK/05 (1)', 9619, u'Geographic2D offsets', 4156, 5228, 1079, 0.0, 0)
 --- Non imported: (5400, u'transformation', u'Baltic height to Caspian depth (1)', 9616, u'Vertical Offset', 5705, 5706, 1291, 0.0, 1)
 --- Non imported: (5401, u'transformation', u'Belfast to Malin Head', 9616, u'Vertical Offset', 5732, 5731, 1305, 0.01, 1)
 --- Non imported: (5402, u'transformation', u'Baltic height to AIOC95 depth (1)', 9616, u'Vertical Offset', 5705, 5734, 2592, 0.0, 1)
@@ -4776,8 +4880,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (8561, u'transformation', u'Old Hawaiian to NAD83 (2)', 1074, u'NADCON5 (2D)', 4135, 4269, 1334, 0.2, 0)
 --- Non imported: (8567, u'concatenated operation', u'OSGB36 / National Grid to WGS 84 (1)', None, None, 27700, 4326, 1264, None, 1)
 --- Non imported: (8570, u'concatenated operation', u'ED50 to ETRS89 (2)', None, None, 4230, 4258, 2330, None, 1)
---- Non imported: (8643, u'concatenated operation', u'Greek to WGS 84 (1)', None, None, 4120, 4326, 3254, None, 0)
---- Non imported: (8644, u'concatenated operation', u'Greek (Athens) to WGS 84 (1)', None, None, 4815, 4326, 3254, None, 0)
 --- Non imported: (8653, u'concatenated operation', u'ED50 to WGS 84 (14)', None, None, 4230, 4326, 2330, None, 0)
 --- Non imported: (8654, u'concatenated operation', u'ED50 to ETRS89 (2)', None, None, 4230, 4258, 2330, None, 0)
 --- Non imported: (8658, u'concatenated operation', u'Pulkovo 1942 to WGS 84 (16)', None, None, 4284, 4326, 1198, None, 1)
@@ -4809,108 +4911,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (10096, u'transformation', u'Mauritania 1999 / UTM zone 29N to WGS 84 / UTM zone 29N (1)', 9624, u'Affine parametric transformation', 3104, 32629, 2970, 40.0, 1)
 --- Non imported: (10097, u'transformation', u'Mauritania 1999 / UTM zone 30N to WGS 84 / UTM zone 30N (1)', 9624, u'Affine parametric transformation', 3105, 32630, 2969, 40.0, 1)
 --- Non imported: (15487, u'transformation', u'TWD67 / TM2 zone 121 to TWD97 / TM2 zone 121 (1)', 9656, u'Cartesian Grid Offsets', 3828, 3826, 3982, 7.0, 0)
---- Non imported: (15596, u'transformation', u'Tokyo + JSLD height to WGS 84 (7)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2426, 1.0, 0)
---- Non imported: (15597, u'transformation', u'Tokyo + JSLD height to WGS 84 (8)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2427, 1.0, 0)
---- Non imported: (15598, u'transformation', u'Tokyo + JSLD height to WGS 84 (9)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2428, 1.0, 0)
---- Non imported: (15599, u'transformation', u'Tokyo + JSLD height to WGS 84 (10)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2429, 1.0, 0)
---- Non imported: (15600, u'transformation', u'Tokyo + JSLD height to WGS 84 (11)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2430, 1.0, 0)
---- Non imported: (15601, u'transformation', u'Tokyo + JSLD height to WGS 84 (12)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2431, 1.0, 0)
---- Non imported: (15602, u'transformation', u'Tokyo + JSLD height to WGS 84 (13)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2432, 1.0, 0)
---- Non imported: (15603, u'transformation', u'Tokyo + JSLD height to WGS 84 (14)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2433, 1.0, 0)
---- Non imported: (15604, u'transformation', u'Tokyo + JSLD height to WGS 84 (15)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2434, 1.0, 0)
---- Non imported: (15605, u'transformation', u'Tokyo + JSLD height to WGS 84 (16)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2435, 1.0, 0)
---- Non imported: (15606, u'transformation', u'Tokyo + JSLD height to WGS 84 (17)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2436, 1.0, 0)
---- Non imported: (15607, u'transformation', u'Tokyo + JSLD height to WGS 84 (18)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2437, 1.0, 0)
---- Non imported: (15608, u'transformation', u'Tokyo + JSLD height to WGS 84 (19)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2438, 1.0, 0)
---- Non imported: (15609, u'transformation', u'Tokyo + JSLD height to WGS 84 (20)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2439, 1.0, 0)
---- Non imported: (15610, u'transformation', u'Tokyo + JSLD height to WGS 84 (21)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2440, 1.0, 0)
---- Non imported: (15611, u'transformation', u'Tokyo + JSLD height to WGS 84 (22)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2441, 1.0, 0)
---- Non imported: (15612, u'transformation', u'Tokyo + JSLD height to WGS 84 (23)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2442, 1.0, 0)
---- Non imported: (15613, u'transformation', u'Tokyo + JSLD height to WGS 84 (24)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2443, 1.0, 0)
---- Non imported: (15614, u'transformation', u'Tokyo + JSLD height to WGS 84 (25)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2444, 1.0, 0)
---- Non imported: (15615, u'transformation', u'Tokyo + JSLD height to WGS 84 (26)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2445, 1.0, 0)
---- Non imported: (15616, u'transformation', u'Tokyo + JSLD height to WGS 84 (27)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2446, 1.0, 0)
---- Non imported: (15617, u'transformation', u'Tokyo + JSLD height to WGS 84 (28)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2447, 1.0, 0)
---- Non imported: (15618, u'transformation', u'Tokyo + JSLD height to WGS 84 (29)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2448, 1.0, 0)
---- Non imported: (15619, u'transformation', u'Tokyo + JSLD height to WGS 84 (30)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2449, 1.0, 0)
---- Non imported: (15620, u'transformation', u'Tokyo + JSLD height to WGS 84 (31)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2450, 1.0, 0)
---- Non imported: (15621, u'transformation', u'Tokyo + JSLD height to WGS 84 (32)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2451, 1.0, 0)
---- Non imported: (15622, u'transformation', u'Tokyo + JSLD height to WGS 84 (33)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2452, 1.0, 0)
---- Non imported: (15623, u'transformation', u'Tokyo + JSLD height to WGS 84 (34)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2453, 1.0, 0)
---- Non imported: (15624, u'transformation', u'Tokyo + JSLD height to WGS 84 (35)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2454, 1.0, 0)
---- Non imported: (15625, u'transformation', u'Tokyo + JSLD height to WGS 84 (36)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2455, 1.0, 0)
---- Non imported: (15626, u'transformation', u'Tokyo + JSLD height to WGS 84 (37)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2456, 1.0, 0)
---- Non imported: (15627, u'transformation', u'Tokyo + JSLD height to WGS 84 (38)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2457, 1.0, 0)
---- Non imported: (15628, u'transformation', u'Tokyo + JSLD height to WGS 84 (39)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2458, 1.0, 0)
---- Non imported: (15629, u'transformation', u'Tokyo + JSLD height to WGS 84 (40)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2459, 1.0, 0)
---- Non imported: (15630, u'transformation', u'Tokyo + JSLD height to WGS 84 (41)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2460, 1.0, 0)
---- Non imported: (15631, u'transformation', u'Tokyo + JSLD height to WGS 84 (42)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2461, 1.0, 0)
---- Non imported: (15632, u'transformation', u'Tokyo + JSLD height to WGS 84 (43)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2462, 1.0, 0)
---- Non imported: (15633, u'transformation', u'Tokyo + JSLD height to WGS 84 (44)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2463, 1.0, 0)
---- Non imported: (15634, u'transformation', u'Tokyo + JSLD height to WGS 84 (45)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2464, 1.0, 0)
---- Non imported: (15635, u'transformation', u'Tokyo + JSLD height to WGS 84 (46)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2465, 1.0, 0)
---- Non imported: (15636, u'transformation', u'Tokyo + JSLD height to WGS 84 (47)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2466, 1.0, 0)
---- Non imported: (15637, u'transformation', u'Tokyo + JSLD height to WGS 84 (48)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2467, 1.0, 0)
---- Non imported: (15638, u'transformation', u'Tokyo + JSLD height to WGS 84 (49)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2468, 1.0, 0)
---- Non imported: (15639, u'transformation', u'Tokyo + JSLD height to WGS 84 (50)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2469, 1.0, 0)
---- Non imported: (15640, u'transformation', u'Tokyo + JSLD height to WGS 84 (51)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2470, 1.0, 0)
---- Non imported: (15641, u'transformation', u'Tokyo + JSLD height to WGS 84 (52)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2471, 1.0, 0)
---- Non imported: (15642, u'transformation', u'Tokyo + JSLD height to WGS 84 (53)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2472, 1.0, 0)
---- Non imported: (15643, u'transformation', u'Tokyo + JSLD height to WGS 84 (54)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2473, 1.0, 0)
---- Non imported: (15644, u'transformation', u'Tokyo + JSLD height to WGS 84 (55)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2474, 1.0, 0)
---- Non imported: (15645, u'transformation', u'Tokyo + JSLD height to WGS 84 (56)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2475, 1.0, 0)
---- Non imported: (15646, u'transformation', u'Tokyo + JSLD height to WGS 84 (57)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2476, 1.0, 0)
---- Non imported: (15647, u'transformation', u'Tokyo + JSLD height to WGS 84 (58)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2477, 1.0, 0)
---- Non imported: (15648, u'transformation', u'Tokyo + JSLD height to WGS 84 (59)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2478, 1.0, 0)
---- Non imported: (15649, u'transformation', u'Tokyo + JSLD height to WGS 84 (60)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2479, 1.0, 0)
---- Non imported: (15650, u'transformation', u'Tokyo + JSLD height to WGS 84 (61)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2480, 1.0, 0)
---- Non imported: (15651, u'transformation', u'Tokyo + JSLD height to WGS 84 (62)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2481, 1.0, 0)
---- Non imported: (15652, u'transformation', u'Tokyo + JSLD height to WGS 84 (63)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2482, 1.0, 0)
---- Non imported: (15653, u'transformation', u'Tokyo + JSLD height to WGS 84 (64)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2483, 1.0, 0)
---- Non imported: (15654, u'transformation', u'Tokyo + JSLD height to WGS 84 (65)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2484, 1.0, 0)
---- Non imported: (15655, u'transformation', u'Tokyo + JSLD height to WGS 84 (66)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2485, 1.0, 0)
---- Non imported: (15656, u'transformation', u'Tokyo + JSLD height to WGS 84 (67)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2486, 1.0, 0)
---- Non imported: (15657, u'transformation', u'Tokyo + JSLD height to WGS 84 (68)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2487, 1.0, 0)
---- Non imported: (15658, u'transformation', u'Tokyo + JSLD height to WGS 84 (69)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2488, 1.0, 0)
---- Non imported: (15659, u'transformation', u'Tokyo + JSLD height to WGS 84 (70)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2489, 1.0, 0)
---- Non imported: (15660, u'transformation', u'Tokyo + JSLD height to WGS 84 (71)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2490, 1.0, 0)
---- Non imported: (15661, u'transformation', u'Tokyo + JSLD height to WGS 84 (72)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2491, 1.0, 0)
---- Non imported: (15662, u'transformation', u'Tokyo + JSLD height to WGS 84 (73)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2492, 1.0, 0)
---- Non imported: (15663, u'transformation', u'Tokyo + JSLD height to WGS 84 (74)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2493, 1.0, 0)
---- Non imported: (15664, u'transformation', u'Tokyo + JSLD height to WGS 84 (75)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2494, 1.0, 0)
---- Non imported: (15665, u'transformation', u'Tokyo + JSLD height to WGS 84 (76)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2495, 1.0, 0)
---- Non imported: (15666, u'transformation', u'Tokyo + JSLD height to WGS 84 (77)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2496, 1.0, 0)
---- Non imported: (15667, u'transformation', u'Tokyo + JSLD height to WGS 84 (78)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2497, 1.0, 0)
---- Non imported: (15668, u'transformation', u'Tokyo + JSLD height to WGS 84 (79)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2498, 1.0, 0)
---- Non imported: (15669, u'transformation', u'Tokyo + JSLD height to WGS 84 (80)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2499, 1.0, 0)
---- Non imported: (15670, u'transformation', u'Tokyo + JSLD height to WGS 84 (81)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2500, 1.0, 0)
---- Non imported: (15671, u'transformation', u'Tokyo + JSLD height to WGS 84 (82)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2501, 1.0, 0)
---- Non imported: (15672, u'transformation', u'Tokyo + JSLD height to WGS 84 (83)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2502, 1.0, 0)
---- Non imported: (15673, u'transformation', u'Tokyo + JSLD height to WGS 84 (84)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2503, 1.0, 0)
---- Non imported: (15674, u'transformation', u'Tokyo + JSLD height to WGS 84 (85)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2504, 1.0, 0)
---- Non imported: (15675, u'transformation', u'Tokyo + JSLD height to WGS 84 (86)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2505, 1.0, 0)
---- Non imported: (15676, u'transformation', u'Tokyo + JSLD height to WGS 84 (87)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2506, 1.0, 0)
---- Non imported: (15677, u'transformation', u'Tokyo + JSLD height to WGS 84 (88)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2507, 1.0, 0)
---- Non imported: (15678, u'transformation', u'Tokyo + JSLD height to WGS 84 (89)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2508, 1.0, 0)
---- Non imported: (15679, u'transformation', u'Tokyo + JSLD height to WGS 84 (90)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2509, 1.0, 0)
---- Non imported: (15680, u'transformation', u'Tokyo + JSLD height to WGS 84 (91)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2510, 1.0, 0)
---- Non imported: (15681, u'transformation', u'Tokyo + JSLD height to WGS 84 (92)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2511, 1.0, 0)
---- Non imported: (15682, u'transformation', u'Tokyo + JSLD height to WGS 84 (93)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2512, 1.0, 0)
---- Non imported: (15683, u'transformation', u'Tokyo + JSLD height to WGS 84 (94)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2513, 1.0, 0)
---- Non imported: (15684, u'transformation', u'Tokyo + JSLD height to WGS 84 (95)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2514, 1.0, 0)
---- Non imported: (15685, u'transformation', u'Tokyo + JSLD height to WGS 84 (96)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2515, 1.0, 0)
---- Non imported: (15686, u'transformation', u'Tokyo + JSLD height to WGS 84 (97)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2516, 1.0, 0)
---- Non imported: (15687, u'transformation', u'Tokyo + JSLD height to WGS 84 (98)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2517, 1.0, 0)
---- Non imported: (15688, u'transformation', u'Tokyo + JSLD height to WGS 84 (99)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2518, 1.0, 0)
---- Non imported: (15689, u'transformation', u'Tokyo + JSLD height to WGS 84 (100)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2519, 1.0, 0)
---- Non imported: (15690, u'transformation', u'Tokyo + JSLD height to WGS 84 (101)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2520, 1.0, 0)
---- Non imported: (15691, u'transformation', u'Tokyo + JSLD height to WGS 84 (102)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2521, 1.0, 0)
---- Non imported: (15692, u'transformation', u'Tokyo + JSLD height to WGS 84 (103)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2522, 1.0, 0)
---- Non imported: (15693, u'transformation', u'Tokyo + JSLD height to WGS 84 (104)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2523, 1.0, 0)
---- Non imported: (15694, u'transformation', u'Tokyo + JSLD height to WGS 84 (105)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2524, 1.0, 0)
---- Non imported: (15695, u'transformation', u'Tokyo + JSLD height to WGS 84 (106)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2525, 1.0, 0)
---- Non imported: (15696, u'transformation', u'Tokyo + JSLD height to WGS 84 (107)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2526, 1.0, 0)
---- Non imported: (15697, u'transformation', u'Tokyo + JSLD height to WGS 84 (6)', 9618, u'Geographic2D with Height Offsets', 7414, 4979, 2425, 1.0, 0)
 --- Non imported: (15730, u'transformation', u'Bogota 1975 to MAGNA-SIRGAS (9)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4218, 4686, 3082, 1.0, 0)
 --- Non imported: (15731, u'transformation', u'Bogota 1975 to MAGNA-SIRGAS (10)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4218, 4686, 3083, 1.0, 0)
 --- Non imported: (15732, u'transformation', u'Bogota 1975 to MAGNA-SIRGAS (11)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4218, 4686, 3084, 1.0, 0)

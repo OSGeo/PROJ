@@ -186,6 +186,10 @@ class PrimeMeridian : public common::IdentifiedObject,
     PROJ_DLL static const PrimeMeridianNNPtr GREENWICH;
     PROJ_DLL static const PrimeMeridianNNPtr PARIS;
 
+    //! @cond Doxygen_Suppress
+    static std::string getPROJStringWellKnownName(const common::Angle &angle);
+    //! @endcond
+
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 

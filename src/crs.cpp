@@ -861,13 +861,6 @@ GeographicCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         !formatter->getTOWGS84Parameters().empty() ||
         !formatter->getHDatumExtension().empty()) {
         formatter->addStep("longlat");
-        if (formatter->convention() ==
-                io::PROJStringFormatter::Convention::PROJ_5 &&
-            (primeMeridian()->longitude().getSIValue() != 0.0 ||
-             !formatter->getTOWGS84Parameters().empty() ||
-             !formatter->getHDatumExtension().empty())) {
-            formatter->setCurrentStepInverted(true);
-        }
         addDatumInfoToPROJString(formatter);
     }
 

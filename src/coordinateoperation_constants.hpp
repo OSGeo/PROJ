@@ -450,9 +450,35 @@ constexpr int EPSG_CODE_METHOD_LONGITUDE_ROTATION = 9601;
 static const std::string
     EPSG_NAME_METHOD_LONGITUDE_ROTATION("Longitude rotation");
 
+constexpr int EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS = 9619;
+static const std::string
+    EPSG_NAME_METHOD_GEOGRAPHIC2D_OFFSETS("Geographic2D offsets");
+
+constexpr int EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS = 9618;
+static const std::string EPSG_NAME_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS(
+    "Geographic2D with Height Offsets");
+
+constexpr int EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS = 9660;
+static const std::string
+    EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSETS("Geographic3D offsets");
+
+constexpr int EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC = 9602;
+static const std::string
+    EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC("Geographic/geocentric conversions");
+
+static const std::string EPSG_NAME_PARAMETER_LATITUDE_OFFSET("Latitude offset");
+constexpr int EPSG_CODE_PARAMETER_LATITUDE_OFFSET = 8601;
+
 static const std::string
     EPSG_NAME_PARAMETER_LONGITUDE_OFFSET("Longitude offset");
 constexpr int EPSG_CODE_PARAMETER_LONGITUDE_OFFSET = 8602;
+
+static const std::string EPSG_NAME_PARAMETER_VERTICAL_OFFSET("Vertical Offset");
+constexpr int EPSG_CODE_PARAMETER_VERTICAL_OFFSET = 8603;
+
+static const std::string
+    EPSG_NAME_PARAMETER_GEOID_UNDULATION("Geoid undulation");
+constexpr int EPSG_CODE_PARAMETER_GEOID_UNDULATION = 8604;
 
 // ---------------------------------------------------------------------------
 

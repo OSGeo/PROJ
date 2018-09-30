@@ -460,7 +460,7 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
 TEST(crs, EPSG_4807_as_PROJ_string) {
     auto crs = GeographicCRS::EPSG_4807;
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +inv +proj=longlat +ellps=clrk80ign "
+              "+proj=pipeline +step +proj=longlat +ellps=clrk80ign "
               "+pm=paris +step +proj=unitconvert +xy_in=rad +xy_out=grad +step "
               "+proj=axisswap +order=2,1");
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
@@ -495,12 +495,13 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string) {
         "  ID[\"EPSG\",27561]]");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
-              "+ellps=clrk80ign +pm=paris +step +proj=lcc +lat_1=49.5 "
-              "+lat_0=49.5 +lon_0=0 +k_0=0.999877341 +x_0=600000 +y_0=200000 "
-              "+ellps=clrk80ign");
+    EXPECT_EQ(
+        crs->exportToPROJString(PROJStringFormatter::create()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
+        "+ellps=clrk80ign +pm=paris +step +proj=lcc +lat_1=49.5 "
+        "+lat_0=49.5 +lon_0=0 +k_0=0.999877341 +x_0=600000 +y_0=200000 "
+        "+ellps=clrk80ign +pm=paris");
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_4)),
               "+proj=lcc +lat_1=49.5 +lat_0=49.5 +lon_0=0 +k_0=0.999877341 "

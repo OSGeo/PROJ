@@ -1150,9 +1150,16 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
                             "VALUES('EPSG','16031','conversion');"))
             << last_error();
+
+        ASSERT_TRUE(execute(
+            "INSERT INTO area VALUES('EPSG','1933','World - N hemisphere - "
+            "0°E to 6°E','',0.0,84.0,0.0,6.0,0);"))
+            << last_error();
+
         ASSERT_TRUE(execute(
             "INSERT INTO conversion VALUES('EPSG','16031','UTM zone "
-            "31N','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude "
+            "31N','EPSG','1933','EPSG','9807','Transverse "
+            "Mercator','EPSG','8801','Latitude "
             "of "
             "natural origin',0.0,'EPSG','9102','EPSG','8802','Longitude of "
             "natural "
@@ -1168,6 +1175,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "INSERT INTO area VALUES('EPSG','2060','World - N hemisphere - "
             "0°E to 6°E - by country','',0.0,84.0,0.0,6.0,0);"))
             << last_error();
+
         ASSERT_TRUE(execute("INSERT INTO coordinate_system "
                             "VALUES('EPSG','4400','Cartesian',2);"))
             << last_error();
@@ -1347,6 +1355,8 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
         auto res =
             factory->createFromCoordinateReferenceSystemCodes("4326", "32631");
         ASSERT_EQ(res.size(), 1);
+        EXPECT_TRUE(res[0]->sourceCRS() != nullptr);
+        EXPECT_TRUE(res[0]->targetCRS() != nullptr);
         EXPECT_TRUE(res[0]->isEquivalentTo(factory->createConversion("16031")));
     }
     {

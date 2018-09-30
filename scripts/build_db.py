@@ -132,8 +132,8 @@ def fill_vertical_crs(proj_db_cursor):
 
 
 def fill_conversion(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH'")
-    for (code, name, method_code, method_name) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, area_of_use_code, coord_op_method_code, coord_op_method_name FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH'")
+    for (code, name, area_of_use_code, method_code, method_name) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7
         param_auth_name = [None for i in range(max_n_params)]
@@ -158,7 +158,9 @@ def fill_conversion(proj_db_cursor):
             param_uom_code[order - 1] = uom_code
             expected_order += 1
 
-        arg = (EPSG_AUTHORITY, code, name, EPSG_AUTHORITY, method_code, method_name,
+        arg = (EPSG_AUTHORITY, code, name,
+               EPSG_AUTHORITY, area_of_use_code,
+               EPSG_AUTHORITY, method_code, method_name,
                param_auth_name[0], param_code[0], param_name[0],
                param_value[0], param_uom_auth_name[0], param_uom_code[0],
                param_auth_name[1], param_code[1], param_name[1], param_value[1],
@@ -176,7 +178,7 @@ def fill_conversion(proj_db_cursor):
 
         proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'conversion')", (EPSG_AUTHORITY, code))
         proj_db_cursor.execute('INSERT INTO conversion VALUES (' +
-            '?,?,?, ?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ' +
+            '?,?,?, ?,?, ?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ' +
             '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?)', arg)
 
 
@@ -339,7 +341,11 @@ def fill_grid_transformation(proj_db_cursor):
             '?,?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?, ?,?,?,?, ?,?, ?)', arg)
 
 def fill_other_transformation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601)")
+    # 9601: Longitude rotation
+    # 9618: Geographic2D with Height offsets
+    # 9619: Geographic2D offsets
+    # 9660: Geographic3D offsets
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601, 9618, 9619, 9660)")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7

@@ -246,9 +246,11 @@ class WKTFormatter {
     void setHDatumExtension(const std::string &filename);
     const std::string &getHDatumExtension() const;
 
+#ifdef unused
     void startInversion();
     void stopInversion();
     bool isInverted() const;
+#endif
 
     bool outputAxisOrder() const;
     bool primeMeridianOmittedIfGreenwich() const;

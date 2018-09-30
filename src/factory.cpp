@@ -1171,7 +1171,8 @@ operation::ConversionNNPtr
 AuthorityFactory::createConversion(const std::string &code) const {
     std::ostringstream buffer;
     buffer.imbue(std::locale::classic());
-    buffer << "SELECT name, method_auth_name, method_code, method_name";
+    buffer << "SELECT name, area_of_use_auth_name, area_of_use_code, "
+              "method_auth_name, method_code, method_name";
     constexpr int N_MAX_PARAMS = 7;
     for (int i = 1; i <= N_MAX_PARAMS; ++i) {
         buffer << ", param" << i << "_auth_name";
@@ -1191,11 +1192,14 @@ AuthorityFactory::createConversion(const std::string &code) const {
     }
     try {
         const auto &row = res[0];
-        const auto &name = row[0];
-        const auto &method_auth_name = row[1];
-        const auto &method_code = row[2];
-        const auto &method_name = row[3];
-        constexpr int base_param_idx = 4;
+        size_t idx = 0;
+        const auto &name = row[idx++];
+        const auto &area_of_use_auth_name = row[idx++];
+        const auto &area_of_use_code = row[idx++];
+        const auto &method_auth_name = row[idx++];
+        const auto &method_code = row[idx++];
+        const auto &method_name = row[idx++];
+        const size_t base_param_idx = idx;
         std::vector<operation::OperationParameterNNPtr> parameters;
         std::vector<operation::ParameterValueNNPtr> values;
         for (int i = 0; i < N_MAX_PARAMS; ++i) {
@@ -1222,16 +1226,23 @@ AuthorityFactory::createConversion(const std::string &code) const {
             values.emplace_back(operation::ParameterValue::create(
                 common::Measure(normalized_value, *uom)));
         }
+
+        auto extent = d->createFactory(area_of_use_auth_name)
+                          ->createExtent(area_of_use_code);
+
         auto propConversion =
             util::PropertyMap()
                 .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
                 .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name);
+                .set(common::IdentifiedObject::NAME_KEY, name)
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+
         auto propMethod =
             util::PropertyMap()
                 .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
                 .set(metadata::Identifier::CODE_KEY, method_code)
                 .set(common::IdentifiedObject::NAME_KEY, method_name);
+
         return operation::Conversion::create(propConversion, propMethod,
                                              parameters, values);
     } catch (const std::exception &ex) {
@@ -2148,9 +2159,10 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     }
     auto res = d->context()->getPrivate()->run(sql, params);
     if (!res.empty()) {
-        const auto &auth_name = res[0][0];
-        const auto &code = res[0][1];
-        list.emplace_back(d->createFactory(auth_name)->createConversion(code));
+        auto targetCRS = d->createFactory(targetCRSAuthName)
+                             ->createProjectedCRS(targetCRSCode);
+        auto conv = targetCRS->derivingConversion();
+        list.emplace_back(conv);
         return list;
     }
     sql =

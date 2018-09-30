@@ -266,6 +266,67 @@ bool GeographicBoundingBox::contains(const GeographicExtentNNPtr &other) const {
 
 // ---------------------------------------------------------------------------
 
+bool GeographicBoundingBox::intersects(
+    const GeographicExtentNNPtr &other) const {
+    auto otherExtent =
+        util::nn_dynamic_pointer_cast<GeographicBoundingBox>(other);
+    if (!otherExtent) {
+        return false;
+    }
+
+    if (northBoundLatitude() < otherExtent->southBoundLatitude() ||
+        southBoundLatitude() > otherExtent->northBoundLatitude()) {
+        return false;
+    }
+
+    if (westBoundLongitude() == -180.0 && eastBoundLongitude() == 180.0 &&
+        otherExtent->westBoundLongitude() > otherExtent->eastBoundLongitude()) {
+        return true;
+    }
+
+    if (otherExtent->westBoundLongitude() == -180.0 &&
+        otherExtent->eastBoundLongitude() == 180.0 &&
+        westBoundLongitude() > eastBoundLongitude()) {
+        return true;
+    }
+
+    // Normal bounding box ?
+    if (westBoundLongitude() <= eastBoundLongitude()) {
+        if (otherExtent->westBoundLongitude() <
+            otherExtent->eastBoundLongitude()) {
+            if (std::max(westBoundLongitude(),
+                         otherExtent->westBoundLongitude()) <
+                std::min(eastBoundLongitude(),
+                         otherExtent->eastBoundLongitude())) {
+                return true;
+            }
+            return false;
+        }
+
+        return intersects(GeographicBoundingBox::create(
+                   otherExtent->westBoundLongitude(),
+                   otherExtent->southBoundLatitude(), 180.0,
+                   otherExtent->northBoundLatitude())) ||
+               intersects(GeographicBoundingBox::create(
+                   -180.0, otherExtent->southBoundLatitude(),
+                   otherExtent->eastBoundLongitude(),
+                   otherExtent->northBoundLatitude()));
+
+        // No: crossing antimerian
+    } else {
+        if (otherExtent->westBoundLongitude() <=
+            otherExtent->eastBoundLongitude()) {
+            return otherExtent->intersects(GeographicBoundingBox::create(
+                westBoundLongitude(), southBoundLatitude(),
+                eastBoundLongitude(), northBoundLatitude()));
+        }
+
+        return true;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 GeographicExtentPtr
 GeographicBoundingBox::intersection(const GeographicExtentNNPtr &other) const {
     auto otherExtent =
@@ -448,6 +509,19 @@ bool VerticalExtent::contains(const VerticalExtentNNPtr &other) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns whether this extent intersects the other one.
+ */
+bool VerticalExtent::intersects(const VerticalExtentNNPtr &other) const {
+    return common::Measure(minimumValue(), *unit()).getSIValue() <=
+               common::Measure(other->maximumValue(), *other->unit())
+                   .getSIValue() &&
+           common::Measure(maximumValue(), *unit()).getSIValue() >=
+               common::Measure(other->minimumValue(), *other->unit())
+                   .getSIValue();
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct TemporalExtent::Private {
     std::string start_{};
@@ -511,6 +585,14 @@ bool TemporalExtent::isEquivalentTo(const util::BaseObjectNNPtr &other,
  */
 bool TemporalExtent::contains(const TemporalExtentNNPtr &other) const {
     return start() <= other->start() && stop() >= other->stop();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns whether this extent intersects the other one.
+ */
+bool TemporalExtent::intersects(const TemporalExtentNNPtr &other) const {
+    return start() <= other->stop() && stop() >= other->start();
 }
 
 // ---------------------------------------------------------------------------
@@ -596,6 +678,7 @@ Extent::create(const optional<std::string> &descriptionIn,
                const std::vector<VerticalExtentNNPtr> &verticalElementsIn,
                const std::vector<TemporalExtentNNPtr> &temporalElementsIn) {
     auto extent = Extent::nn_make_shared<Extent>();
+    extent->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(extent));
     extent->d->description_ = descriptionIn;
     extent->d->geographicElements_ = geographicElementsIn;
     extent->d->verticalElements_ = verticalElementsIn;
@@ -685,6 +768,31 @@ bool Extent::contains(const ExtentNNPtr &other) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns whether this extent intersects the other one.
+ *
+ * Behaviour only well specified if each sub-extent category as at most
+ * one element.
+ */
+bool Extent::intersects(const ExtentNNPtr &other) const {
+    bool res = true;
+    if (geographicElements().size() == 1 &&
+        other->geographicElements().size() == 1) {
+        res =
+            geographicElements()[0]->intersects(other->geographicElements()[0]);
+    }
+    if (res && verticalElements().size() == 1 &&
+        other->verticalElements().size() == 1) {
+        res = verticalElements()[0]->intersects(other->verticalElements()[0]);
+    }
+    if (res && temporalElements().size() == 1 &&
+        other->temporalElements().size() == 1) {
+        res = temporalElements()[0]->intersects(other->temporalElements()[0]);
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns the intersection of this extent with another one.
  *
  * Behaviour only well specified if there is one single GeographicExtent
@@ -694,6 +802,14 @@ bool Extent::contains(const ExtentNNPtr &other) const {
 ExtentPtr Extent::intersection(const ExtentNNPtr &other) const {
     if (geographicElements().size() == 1 &&
         other->geographicElements().size() == 1) {
+        if (contains(other)) {
+            return other.as_nullable();
+        }
+        auto self = NN_CHECK_ASSERT(
+            util::nn_dynamic_pointer_cast<Extent>(shared_from_this()));
+        if (other->contains(self)) {
+            return self.as_nullable();
+        }
         auto geogIntersection = geographicElements()[0]->intersection(
             other->geographicElements()[0]);
         if (geogIntersection) {

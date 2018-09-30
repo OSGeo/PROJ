@@ -3778,7 +3778,7 @@ TEST(io, projparse_longlat_pm_numeric) {
 
 TEST(io, projparse_longlat_complex) {
     std::string input =
-        "+proj=pipeline +step +inv +proj=longlat +ellps=clrk80ign "
+        "+proj=pipeline +step +proj=longlat +ellps=clrk80ign "
         "+pm=paris +step +proj=unitconvert +xy_in=rad +xy_out=grad +step "
         "+proj=axisswap +order=2,1";
     auto obj = PROJStringParser().createFromPROJString(input);
@@ -4521,10 +4521,10 @@ TEST(io, projparse_utm_south) {
 TEST(io, projparse_axisswap_unitconvert_longlat_proj) {
     std::string input =
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-        "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
+        "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
         "+ellps=clrk80ign +pm=paris +step +proj=lcc +lat_1=49.5 "
         "+lat_0=49.5 +lon_0=0 +k_0=0.999877341 +x_0=600000 +y_0=200000 "
-        "+ellps=clrk80ign";
+        "+ellps=clrk80ign +pm=paris";
     auto obj = PROJStringParser().createFromPROJString(input);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -4934,7 +4934,7 @@ TEST(io, projparse_helmert_complex_pipeline_2) {
         "+ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 "
         "+ry=-5 +rz=-6 +s=-7 +convention=position_vector +step +inv "
         "+proj=cart +ellps=clrk80ign +step "
-        "+inv +proj=longlat +ellps=clrk80ign +pm=paris +step "
+        "+proj=longlat +ellps=clrk80ign +pm=paris +step "
         "+proj=unitconvert +xy_in=rad +xy_out=grad +step +proj=axisswap "
         "+order=2,1");
     auto obj = PROJStringParser().createFromPROJString(projString);

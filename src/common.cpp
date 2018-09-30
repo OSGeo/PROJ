@@ -349,6 +349,14 @@ bool Measure::isEquivalentTo(const Measure &other,
 /** \brief Instanciate a Scale.
  *
  * @param valueIn value
+ */
+Scale::Scale(double valueIn) : Measure(valueIn, UnitOfMeasure::SCALE_UNITY) {}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a Scale.
+ *
+ * @param valueIn value
  * @param unitIn unit. Constraint: unit.type() == UnitOfMeasure::Type::SCALE
  */
 Scale::Scale(double valueIn, const UnitOfMeasure &unitIn)
@@ -356,7 +364,9 @@ Scale::Scale(double valueIn, const UnitOfMeasure &unitIn)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Scale::Scale(const Scale &) = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -373,6 +383,14 @@ Scale &Scale::operator=(const Scale &) = default;
 /** \brief Instanciate a Angle.
  *
  * @param valueIn value
+ */
+Angle::Angle(double valueIn) : Measure(valueIn, UnitOfMeasure::DEGREE) {}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a Angle.
+ *
+ * @param valueIn value
  * @param unitIn unit. Constraint: unit.type() == UnitOfMeasure::Type::ANGULAR
  */
 Angle::Angle(double valueIn, const UnitOfMeasure &unitIn)
@@ -380,7 +398,9 @@ Angle::Angle(double valueIn, const UnitOfMeasure &unitIn)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Angle::Angle(const Angle &) = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -409,6 +429,14 @@ Angle &Angle::operator=(const Angle &) = default;
 /** \brief Instanciate a Length.
  *
  * @param valueIn value
+ */
+Length::Length(double valueIn) : Measure(valueIn, UnitOfMeasure::METRE) {}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a Length.
+ *
+ * @param valueIn value
  * @param unitIn unit. Constraint: unit.type() == UnitOfMeasure::Type::LINEAR
  */
 Length::Length(double valueIn, const UnitOfMeasure &unitIn)
@@ -416,7 +444,9 @@ Length::Length(double valueIn, const UnitOfMeasure &unitIn)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Length::Length(const Length &) = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
