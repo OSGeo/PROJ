@@ -470,8 +470,16 @@ struct AuthorityFactory::Private {
 
     AuthorityFactoryNNPtr createFactory(const std::string &auth_name);
 
+    common::UnitOfMeasurePtr getUOMFromCache(const std::string &code);
+    void cache(const std::string &code, const common::UnitOfMeasureNNPtr &uom);
+
     crs::CRSPtr getCRSFromCache(const std::string &code);
     void cache(const std::string &code, const crs::CRSNNPtr &crs);
+
+    datum::GeodeticReferenceFramePtr
+    getGeodeticDatumFromCache(const std::string &code);
+    void cache(const std::string &code,
+               const datum::GeodeticReferenceFrameNNPtr &datum);
 
   private:
     DatabaseContextNNPtr context_;
@@ -479,7 +487,10 @@ struct AuthorityFactory::Private {
     std::weak_ptr<AuthorityFactory> thisFactory_{};
     std::weak_ptr<AuthorityFactory> parentFactory_{};
     std::map<std::string, AuthorityFactoryNNPtr> mapFactory_{};
+    lru11::Cache<std::string, common::UnitOfMeasurePtr> cacheUOM_{};
     lru11::Cache<std::string, crs::CRSPtr> cacheCRS_{};
+    lru11::Cache<std::string, datum::GeodeticReferenceFramePtr>
+        cacheGeodeticDaum_{};
 };
 
 // ---------------------------------------------------------------------------
@@ -526,6 +537,38 @@ AuthorityFactory::Private::getCRSFromCache(const std::string &code) {
 void AuthorityFactory::Private::cache(const std::string &code,
                                       const crs::CRSNNPtr &crs) {
     cacheCRS_.insert(code, crs.as_nullable());
+}
+
+// ---------------------------------------------------------------------------
+
+common::UnitOfMeasurePtr
+AuthorityFactory::Private::getUOMFromCache(const std::string &code) {
+    common::UnitOfMeasurePtr uom = nullptr;
+    cacheUOM_.tryGet(code, uom);
+    return uom;
+}
+
+// ---------------------------------------------------------------------------
+
+void AuthorityFactory::Private::cache(const std::string &code,
+                                      const common::UnitOfMeasureNNPtr &uom) {
+    cacheUOM_.insert(code, uom.as_nullable());
+}
+
+// ---------------------------------------------------------------------------
+
+datum::GeodeticReferenceFramePtr
+AuthorityFactory::Private::getGeodeticDatumFromCache(const std::string &code) {
+    datum::GeodeticReferenceFramePtr datum = nullptr;
+    cacheGeodeticDaum_.tryGet(code, datum);
+    return datum;
+}
+
+// ---------------------------------------------------------------------------
+
+void AuthorityFactory::Private::cache(
+    const std::string &code, const datum::GeodeticReferenceFrameNNPtr &datum) {
+    cacheGeodeticDaum_.insert(code, datum.as_nullable());
 }
 
 //! @endcond
@@ -714,6 +757,12 @@ AuthorityFactory::createExtent(const std::string &code) const {
 
 UnitOfMeasureNNPtr
 AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
+    {
+        auto uom = d->getUOMFromCache(code);
+        if (uom) {
+            return NN_CHECK_ASSERT(uom);
+        }
+    }
     auto res = d->context()->getPrivate()->run(
         "SELECT name, conv_factor, type, deprecated FROM unit_of_measure WHERE "
         "auth_name = ? AND code = ?",
@@ -751,8 +800,10 @@ AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
             unitType = UnitOfMeasure::Type::SCALE;
         else if (type_str == "time")
             unitType = UnitOfMeasure::Type::TIME;
-        return util::nn_make_shared<UnitOfMeasure>(name, conv_factor, unitType,
-                                                   getAuthority(), code);
+        auto uom = util::nn_make_shared<UnitOfMeasure>(
+            name, conv_factor, unitType, getAuthority(), code);
+        d->cache(code, uom);
+        return uom;
     } catch (const std::exception &ex) {
         throw FactoryException("cannot build unit of measure " + code + ": " +
                                ex.what());
@@ -907,6 +958,12 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
 
 datum::GeodeticReferenceFrameNNPtr
 AuthorityFactory::createGeodeticDatum(const std::string &code) const {
+    {
+        auto datum = d->getGeodeticDatumFromCache(code);
+        if (datum) {
+            return NN_CHECK_ASSERT(datum);
+        }
+    }
     auto res = d->context()->getPrivate()->run(
         "SELECT name, ellipsoid_auth_name, ellipsoid_code, "
         "prime_meridian_auth_name, prime_meridian_code, area_of_use_auth_name, "
@@ -941,8 +998,10 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
                 .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
                 .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
         auto anchor = util::optional<std::string>();
-        return datum::GeodeticReferenceFrame::create(props, ellipsoid, anchor,
-                                                     pm);
+        auto datum =
+            datum::GeodeticReferenceFrame::create(props, ellipsoid, anchor, pm);
+        d->cache(code, datum);
+        return datum;
     } catch (const std::exception &ex) {
         throw FactoryException("cannot build geodetic reference frame " + code +
                                ": " + ex.what());
