@@ -10,7 +10,9 @@ systems are based on different datums.
 .. toctree::
    :maxdepth: 1
 
+   affine
    deformation
+   geogoffset
    helmert
    molodensky
    hgridshift
