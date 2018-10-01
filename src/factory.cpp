@@ -2026,7 +2026,9 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
 
     if (allowConcatenated && type == "concatenated_operation") {
         res = d->context()->getPrivate()->run(
-            "SELECT name, area_of_use_auth_name, area_of_use_code, accuracy, "
+            "SELECT name, source_crs_auth_name, source_crs_code, "
+            "target_crs_auth_name, target_crs_code, "
+            "area_of_use_auth_name, area_of_use_code, accuracy, "
             "step1_auth_name, step1_code, step2_auth_name, step2_code, "
             "step3_auth_name, step3_code, deprecated FROM "
             "concatenated_operation WHERE auth_name = ? AND code = ?",
@@ -2040,6 +2042,10 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
             const auto &row = res[0];
             size_t idx = 0;
             const auto &name = row[idx++];
+            const auto &source_crs_auth_name = row[idx++];
+            const auto &source_crs_code = row[idx++];
+            const auto &target_crs_auth_name = row[idx++];
+            const auto &target_crs_code = row[idx++];
             const auto &area_of_use_auth_name = row[idx++];
             const auto &area_of_use_code = row[idx++];
             const auto &accuracy = row[idx++];
@@ -2059,10 +2065,129 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
             operations.push_back(
                 d->createFactory(step2_auth_name)
                     ->createCoordinateOperation(step2_code, false));
+
             if (!step3_auth_name.empty()) {
                 operations.push_back(
                     d->createFactory(step3_auth_name)
                         ->createCoordinateOperation(step3_code, false));
+            }
+
+            // In case the operation is a conversion (we hope this is the
+            // forward case!)
+            if (!operations[0]->sourceCRS() || !operations[0]->targetCRS()) {
+                if (!operations[1]->sourceCRS()) {
+                    throw FactoryException(
+                        "chaining of conversion not supported");
+                }
+                operations[0]->setCRSs(
+                    d->createFactory(source_crs_auth_name)
+                        ->createCoordinateReferenceSystem(source_crs_code),
+                    NN_CHECK_ASSERT(operations[1]->sourceCRS()), nullptr);
+            }
+
+            // Some concatenated operations, like 8443, might actually chain
+            // reverse operations rather than forward operations.
+            if (operations[0]->sourceCRS()->identifiers()[0]->code() !=
+                    source_crs_code ||
+                *operations[0]->sourceCRS()->identifiers()[0]->codeSpace() !=
+                    source_crs_auth_name) {
+                operations[0] = operations[0]->inverse();
+            }
+
+            if (operations[0]->sourceCRS()->identifiers()[0]->code() !=
+                    source_crs_code ||
+                *operations[0]->sourceCRS()->identifiers()[0]->codeSpace() !=
+                    source_crs_auth_name) {
+                throw FactoryException(
+                    "Source CRS of first operation in concatenated operation " +
+                    code +
+                    " doest not match source CRS of concatenated operation");
+            }
+
+            // In case the operation is a conversion (we hope this is the
+            // forward case!)
+            if (!operations[1]->sourceCRS() || !operations[1]->targetCRS()) {
+                if (!step3_auth_name.empty()) {
+                    operations[1]->setCRSs(
+                        NN_CHECK_ASSERT(operations[0]->targetCRS()),
+                        d->createFactory(target_crs_auth_name)
+                            ->createCoordinateReferenceSystem(target_crs_code),
+                        nullptr);
+                } else {
+                    if (!operations[2]->sourceCRS()) {
+                        throw FactoryException(
+                            "chaining of conversion not supported");
+                    }
+                    operations[1]->setCRSs(
+                        NN_CHECK_ASSERT(operations[0]->targetCRS()),
+                        NN_CHECK_ASSERT(operations[2]->sourceCRS()), nullptr);
+                }
+            }
+
+            if (step3_auth_name.empty() &&
+                operations.back()->targetCRS()->identifiers()[0]->code() ==
+                    target_crs_code &&
+                *(operations.back()
+                      ->targetCRS()
+                      ->identifiers()[0]
+                      ->codeSpace()) == target_crs_auth_name) {
+                // in case we have only 2 steps, and
+                // step2.targetCRS == concatenate.targetCRS do nothing,
+                // but ConcatenatedOperation::create() will ultimately
+                // check that step1.targetCRS == step2.sourceCRS
+            } else if (operations[1]->sourceCRS()->identifiers()[0]->code() !=
+                           operations[0]
+                               ->targetCRS()
+                               ->identifiers()[0]
+                               ->code() ||
+                       *operations[1]
+                               ->sourceCRS()
+                               ->identifiers()[0]
+                               ->codeSpace() !=
+                           *(operations[0]
+                                 ->targetCRS()
+                                 ->identifiers()[0]
+                                 ->codeSpace())) {
+                operations[1] = operations[1]->inverse();
+            }
+
+            if (!step3_auth_name.empty()) {
+
+                // In case the operation is a conversion (we hope this is the
+                // forward case!)
+                if (!operations[2]->sourceCRS() ||
+                    !operations[2]->targetCRS()) {
+                    operations[2]->setCRSs(
+                        NN_CHECK_ASSERT(operations[1]->targetCRS()),
+                        d->createFactory(target_crs_auth_name)
+                            ->createCoordinateReferenceSystem(target_crs_code),
+                        nullptr);
+                }
+
+                if (operations[2]->sourceCRS()->identifiers()[0]->code() !=
+                        operations[1]->targetCRS()->identifiers()[0]->code() ||
+                    *operations[2]
+                            ->sourceCRS()
+                            ->identifiers()[0]
+                            ->codeSpace() !=
+                        *(operations[1]
+                              ->targetCRS()
+                              ->identifiers()[0]
+                              ->codeSpace())) {
+                    operations[2] = operations[2]->inverse();
+                }
+            }
+
+            if (operations.back()->targetCRS()->identifiers()[0]->code() !=
+                    target_crs_code ||
+                *operations.back()
+                        ->targetCRS()
+                        ->identifiers()[0]
+                        ->codeSpace() != target_crs_auth_name) {
+                throw FactoryException(
+                    "Target CRS of last operation in concatenated operation " +
+                    code +
+                    " doest not match target CRS of concatenated operation");
             }
 
             auto extent = d->createFactory(area_of_use_auth_name)
@@ -2204,13 +2329,15 @@ const std::string &AuthorityFactory::getAuthority() const {
 
 /** \brief Returns the set of authority codes of the given object type.
  *
- * @param type Objec type.
+ * @param type Object type.
+ * @param allowDeprecated whether we should return deprecated objects as well.
  * @return the set of authority codes for spatial reference objects of the given
  * type
  * @throw FactoryException
  */
 std::set<std::string>
-AuthorityFactory::getAuthorityCodes(const ObjectType &type) const {
+AuthorityFactory::getAuthorityCodes(const ObjectType &type,
+                                    bool allowDeprecated) const {
     std::string sql;
     switch (type) {
     case ObjectType::PRIME_MERIDIAN:
@@ -2262,8 +2389,13 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type) const {
         sql = "SELECT code FROM concatenated_operation WHERE ";
         break;
     }
-    auto res = d->context()->getPrivate()->run(sql + "auth_name = ?",
-                                               {getAuthority()});
+
+    sql += "auth_name = ?";
+    if (!allowDeprecated) {
+        sql += " AND deprecated != 1";
+    }
+
+    auto res = d->context()->getPrivate()->run(sql, {getAuthority()});
     std::set<std::string> set;
     for (const auto &row : res) {
         set.insert(row[0]);

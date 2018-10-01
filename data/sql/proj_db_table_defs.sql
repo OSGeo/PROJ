@@ -463,6 +463,8 @@ CREATE TABLE other_transformation(
     CONSTRAINT fk_other_transformation_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code)
 );
 
+-- Note: in EPSG, the steps might be to be chained in reverse order, so we cannot
+-- enforce that source_crs_code == step1.source_crs_code etc
 CREATE TABLE concatenated_operation(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,

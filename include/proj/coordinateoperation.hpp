@@ -121,6 +121,7 @@ class CoordinateOperation : public common::ObjectUsage,
     CoordinateOperation(const CoordinateOperation &other);
 
     friend class crs::DerivedCRS;
+    friend class io::AuthorityFactory;
     void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                                 std::weak_ptr<crs::CRS> targetCRSIn);
     void setCRSs(const crs::CRSNNPtr &sourceCRSIn,

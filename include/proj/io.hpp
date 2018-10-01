@@ -706,7 +706,8 @@ class AuthorityFactory {
     };
 
     PROJ_DLL std::set<std::string>
-    getAuthorityCodes(const ObjectType &type) const;
+    getAuthorityCodes(const ObjectType &type,
+                      bool allowDeprecated = true) const;
 
     PROJ_DLL std::string getDescriptionText(const std::string &code) const;
 

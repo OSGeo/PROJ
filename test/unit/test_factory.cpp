@@ -893,6 +893,87 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(
+    factory,
+    AuthorityFactory_createCoordinateOperation_concatenated_operation_inverse_step1) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("8443");
+    auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
+    ASSERT_TRUE(concatenated != nullptr);
+    auto operations = concatenated->operations();
+    ASSERT_EQ(operations.size(), 2);
+    EXPECT_TRUE(operations[0]->isEquivalentTo(
+        factory->createCoordinateOperation("8364")->inverse()));
+    EXPECT_TRUE(operations[1]->isEquivalentTo(
+        factory->createCoordinateOperation("8367")));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    factory,
+    AuthorityFactory_createCoordinateOperation_concatenated_operation_inverse_step2) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("7811");
+    auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
+    ASSERT_TRUE(concatenated != nullptr);
+    auto operations = concatenated->operations();
+    ASSERT_EQ(operations.size(), 2);
+    EXPECT_TRUE(operations[0]->isEquivalentTo(
+        factory->createCoordinateOperation("1763")));
+    EXPECT_TRUE(operations[1]->isEquivalentTo(
+        factory->createCoordinateOperation("15958")->inverse()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    factory,
+    AuthorityFactory_createCoordinateOperation_concatenated_operation_step1_is_conversion) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("7973");
+    auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
+    ASSERT_TRUE(concatenated != nullptr);
+    auto operations = concatenated->operations();
+    ASSERT_EQ(operations.size(), 2);
+    EXPECT_TRUE(operations[0]->isEquivalentTo(
+        factory->createCoordinateOperation("7972")));
+    EXPECT_TRUE(operations[1]->isEquivalentTo(
+        factory->createCoordinateOperation("7969")));
+}
+
+// ---------------------------------------------------------------------------
+
+static bool in(const std::string &str, const std::vector<std::string> &list) {
+    for (const auto &listItem : list) {
+        if (str == listItem) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_build_all_concatenated) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto setConcatenated = factory->getAuthorityCodes(
+        AuthorityFactory::ObjectType::CONCATENATED_OPERATION);
+    auto setConcatenatedNoDeprecated = factory->getAuthorityCodes(
+        AuthorityFactory::ObjectType::CONCATENATED_OPERATION, false);
+    EXPECT_LT(setConcatenatedNoDeprecated.size(), setConcatenated.size());
+    for (const auto &code : setConcatenated) {
+        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572"})) {
+            EXPECT_THROW(factory->createCoordinateOperation(code),
+                         FactoryException);
+        } else {
+            factory->createCoordinateOperation(code);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createCoordinateOperation_conversion) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto op = factory->createCoordinateOperation("16031");
