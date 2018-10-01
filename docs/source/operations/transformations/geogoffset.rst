@@ -32,6 +32,8 @@ It can also be used to implement the method Vertical offset (code 9616)
 
 The reverse transformation simply consists in subtracting the offsets.
 
+This method is a conveniency wrapper for the more general :ref:`affine`.
+
 Examples
 ###############################################################################
 

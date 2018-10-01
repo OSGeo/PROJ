@@ -7,6 +7,7 @@ static const char PJ_LIST_H_ID[] = "@(#)pj_list.h	4.5	95/08/09	GIE	REL";
 */
 PROJ_HEAD(aea, "Albers Equal Area")
 PROJ_HEAD(aeqd, "Azimuthal Equidistant")
+PROJ_HEAD(affine, "Affine transformation")
 PROJ_HEAD(airy, "Airy")
 PROJ_HEAD(aitoff, "Aitoff")
 PROJ_HEAD(alsk, "Mod. Stererographics of Alaska")

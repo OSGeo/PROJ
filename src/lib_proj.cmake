@@ -40,6 +40,7 @@ SET(SRC_LIBPROJ_PJ
         nad_init.c
         PJ_aea.c
         PJ_aeqd.c
+        PJ_affine.c
         PJ_airy.c
         PJ_aitoff.c
         PJ_august.c
@@ -72,7 +73,6 @@ SET(SRC_LIBPROJ_PJ
         PJ_fouc_s.c
         PJ_gall.c
         PJ_geoc.c
-        PJ_geogoffset.c
         PJ_geos.c
         PJ_gins8.c
         PJ_gnom.c

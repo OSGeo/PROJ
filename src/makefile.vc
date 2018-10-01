@@ -61,7 +61,7 @@ support = \
 pipeline = \
 	proj_4D_api.obj PJ_cart.obj PJ_pipeline.obj PJ_horner.obj PJ_helmert.obj \
 	PJ_vgridshift.obj PJ_hgridshift.obj PJ_unitconvert.obj PJ_molodensky.obj \
-	PJ_deformation.obj PJ_axisswap.obj PJ_geogoffset.obj
+	PJ_deformation.obj PJ_axisswap.obj PJ_affine.obj
 
 geodesic = geodesic.obj
 

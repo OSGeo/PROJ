@@ -89,7 +89,7 @@ libproj_la_SOURCES = \
 	\
 	proj_4D_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
 	PJ_vgridshift.c PJ_hgridshift.c PJ_unitconvert.c PJ_molodensky.c \
-	PJ_deformation.c pj_internal.c PJ_axisswap.c PJ_geogoffset.c
+	PJ_deformation.c pj_internal.c PJ_axisswap.c PJ_affine.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
