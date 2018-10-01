@@ -109,6 +109,7 @@ struct DatabaseContext::Private {
   private:
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
+    std::map<std::string, sqlite3_stmt *> mapSqlToStatement_;
 
     void registerFunctions();
 
@@ -127,6 +128,9 @@ DatabaseContext::Private::Private() = default;
 // ---------------------------------------------------------------------------
 
 DatabaseContext::Private::~Private() {
+    for (auto &pair : mapSqlToStatement_) {
+        sqlite3_finalize(pair.second);
+    }
     if (close_handle_) {
         sqlite3_close(sqlite_handle_);
     }
@@ -340,68 +344,50 @@ SQLResultSet
 DatabaseContext::Private::run(const std::string &sql,
                               const std::vector<SQLValues> &parameters) {
 
-    std::string expandSql;
-    bool inString = false;
-    bool lastWasEscape = false;
-    char endString = 0;
-    size_t iSubstitution = 0;
-    for (const auto ch : sql) {
-        if (inString) {
-            expandSql += ch;
-            if (lastWasEscape) {
-                lastWasEscape = false;
-            } else if (ch == '\\') {
-                lastWasEscape = true;
-            } else if (ch == endString) {
-                inString = false;
-            }
-        } else if (ch == '"' || ch == '\'') {
-            expandSql += ch;
-            inString = true;
-            endString = ch;
-        } else if (ch == '?') {
-            if (iSubstitution == parameters.size()) {
-                throw FactoryException(
-                    "not enough parameters in substitution list");
-            }
-            const auto &param = parameters[iSubstitution];
-            if (param.type() == SQLValues::Type::STRING) {
-                expandSql += "'";
-                expandSql += replaceAll(
-                    replaceAll(param.stringValue(), "\\", "\\\\"), "'", "\\'");
-                expandSql += "'";
-            }
-            iSubstitution++;
-        } else {
-            expandSql += ch;
+    sqlite3_stmt *stmt = nullptr;
+    auto iter = mapSqlToStatement_.find(sql);
+    if (iter != mapSqlToStatement_.end()) {
+        stmt = iter->second;
+        sqlite3_reset(stmt);
+    } else {
+        if (sqlite3_prepare_v2(sqlite_handle_, sql.c_str(),
+                               static_cast<int>(sql.size()), &stmt,
+                               nullptr) != SQLITE_OK) {
+            throw FactoryException("SQLite error on " + sql + ": " +
+                                   sqlite3_errmsg(sqlite_handle_));
         }
-    }
-    if (iSubstitution != parameters.size()) {
-        throw FactoryException("unused parameters in substitution list");
+        mapSqlToStatement_.insert(
+            std::pair<std::string, sqlite3_stmt *>(sql, stmt));
     }
 
-    char **papszResult = nullptr;
-    int rows = 0;
-    int cols = 0;
-    char *sqliteErrMsg = nullptr;
-    int rc = sqlite3_get_table(sqlite_handle_, expandSql.c_str(), &papszResult,
-                               &rows, &cols, &sqliteErrMsg);
-    if (rc != SQLITE_OK) {
-        auto ex = FactoryException("SQLite error on " + expandSql + ": " +
-                                   sqliteErrMsg);
-        sqlite3_free(sqliteErrMsg);
-        throw ex;
+    int nBindField = 1;
+    for (const auto &param : parameters) {
+        assert(param.type() == SQLValues::Type::STRING);
+        auto strValue = param.stringValue();
+        sqlite3_bind_text(stmt, nBindField, strValue.c_str(),
+                          static_cast<int>(strValue.size()), SQLITE_TRANSIENT);
+        nBindField++;
     }
+
     SQLResultSet result;
-    for (int j = 0; j < rows; ++j) {
-        SQLRow row;
-        for (int i = 0; i < cols; ++i) {
-            auto v = papszResult[(j + 1) * cols + i];
-            row.emplace_back(v ? v : std::string());
+    const int column_count = sqlite3_column_count(stmt);
+    while (true) {
+        int ret = sqlite3_step(stmt);
+        if (ret == SQLITE_ROW) {
+            SQLRow row;
+            for (int i = 0; i < column_count; i++) {
+                const char *txt = reinterpret_cast<const char *>(
+                    sqlite3_column_text(stmt, i));
+                row.emplace_back(txt ? txt : std::string());
+            }
+            result.emplace_back(row);
+        } else if (ret == SQLITE_DONE) {
+            break;
+        } else {
+            throw FactoryException("SQLite error on " + sql + ": " +
+                                   sqlite3_errmsg(sqlite_handle_));
         }
-        result.emplace_back(row);
     }
-    sqlite3_free_table(papszResult);
     return result;
 }
 
