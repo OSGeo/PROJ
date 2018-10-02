@@ -364,13 +364,24 @@ bool CoordinateSystemAxis::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
     auto otherCSA = util::nn_dynamic_pointer_cast<CoordinateSystemAxis>(other);
-    if (otherCSA == nullptr ||
-        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+    if (otherCSA == nullptr) {
         return false;
     }
-    // TODO other metadata
-    return abbreviation() == otherCSA->abbreviation() &&
-           direction() == otherCSA->direction() && unit() == otherCSA->unit();
+    // For approximate comparison, only care about axis direction and unit.
+    if (!(direction() == otherCSA->direction() && unit() == otherCSA->unit())) {
+        return false;
+    }
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        if (!IdentifiedObject::_isEquivalentTo(other, criterion)) {
+            return false;
+        }
+        if (abbreviation() != otherCSA->abbreviation()) {
+            return false;
+        }
+        // TODO other metadata
+    }
+
+    return true;
 }
 
 // ---------------------------------------------------------------------------

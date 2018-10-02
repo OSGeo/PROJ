@@ -137,6 +137,64 @@ VerticalCRSPtr CRS::extractVerticalCRS() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns potentially
+ * a BoundCRS, with a transformation to EPSG:4326, wrapping this CRS
+ *
+ * If no such BoundCRS is possible, the object will be returned.
+ *
+ * The purpose of this method is to be able to format a PROJ.4 string with
+ * a +towgs84 parameter or a WKT1:GDAL string with a TOWGS node.
+ *
+ * This method will fetch the GeographicCRS of this CRS and find a
+ * transformation to EPSG:4326 using the domain of the validity of the main CRS.
+ *
+ * @return a CRS.
+ */
+CRSNNPtr CRS::createBoundCRSToWGS84IfPossible() const {
+    auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    auto thisAsCRS = NN_CHECK_ASSERT(
+        std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
+    if (boundCRS) {
+        return thisAsCRS;
+    }
+    auto geogCRS = extractGeographicCRS();
+    if (!geogCRS ||
+        geogCRS->isEquivalentTo(crs::GeographicCRS::EPSG_4326,
+                                util::IComparable::Criterion::EQUIVALENT)) {
+        return thisAsCRS;
+    }
+    auto l_domains = domains();
+    metadata::ExtentPtr extent;
+    if (!l_domains.empty()) {
+        extent = l_domains[0]->domainOfValidity();
+    }
+    try {
+        auto dbContext = io::DatabaseContext::create();
+        auto authFactory =
+            io::AuthorityFactory::create(dbContext, std::string());
+        auto ctxt = operation::CoordinateOperationContext::create(authFactory,
+                                                                  extent, 0.0);
+        auto list =
+            operation::CoordinateOperationFactory::create()->createOperations(
+                NN_CHECK_ASSERT(geogCRS), crs::GeographicCRS::EPSG_4326, ctxt);
+        if (list.empty()) {
+            return thisAsCRS;
+        }
+        auto transf =
+            util::nn_dynamic_pointer_cast<operation::Transformation>(list[0]);
+        if (!transf) {
+            return thisAsCRS;
+        }
+        transf->getTOWGS84Parameters();
+        return util::nn_static_pointer_cast<CRS>(BoundCRS::create(
+            thisAsCRS, crs::GeographicCRS::EPSG_4326, NN_CHECK_ASSERT(transf)));
+    } catch (const std::exception &) {
+        return thisAsCRS;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct SingleCRS::Private {
     datum::DatumPtr datum{};

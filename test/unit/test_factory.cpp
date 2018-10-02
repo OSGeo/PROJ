@@ -1631,4 +1631,14 @@ TEST_F(FactoryWithTmpDatabase,
               "TRANSFORMATION_1M_SMALL_EXTENT");
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_EPSG_4326_approximate_equivalent_to_builtin) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(
+        factory->createCoordinateReferenceSystem("4326"));
+    EXPECT_TRUE(crs->isEquivalentTo(GeographicCRS::EPSG_4326,
+                                    IComparable::Criterion::EQUIVALENT));
+}
+
 } // namespace

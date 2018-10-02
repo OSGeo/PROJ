@@ -4439,6 +4439,30 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
         }
     }
 
+#if 0
+    if (ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC2D_OFFSETS) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS) ||
+        ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSETS) ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS)) {
+        auto offsetLat =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LATITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LATITUDE_OFFSET);
+        auto offsetLong =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
+
+        auto offsetHeight =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_VERTICAL_OFFSET,
+                                  EPSG_CODE_PARAMETER_VERTICAL_OFFSET);
+
+        if (offsetLat.getSIValue() == 0.0 && offsetLong.getSIValue() == 0.0 &&
+            offsetHeight.getSIValue() == 0.0) {
+            std::vector<double> params(7, 0.0);
+            return params;
+        }
+    }
+#endif
+
     throw io::FormattingException(
         "Transformation cannot be formatted as WKT1 TOWGS84 parameters");
 }

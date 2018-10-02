@@ -2412,3 +2412,54 @@ TEST(crs, DerivedVerticalCRS_WKT1) {
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    {
+        auto crs_4326 = factory->createCoordinateReferenceSystem("4326");
+        EXPECT_EQ(crs_4326->createBoundCRSToWGS84IfPossible(), crs_4326);
+    }
+    {
+        auto crs_32631 = factory->createCoordinateReferenceSystem("32631");
+        EXPECT_EQ(crs_32631->createBoundCRSToWGS84IfPossible(), crs_32631);
+    }
+    {
+        // Pulkovo 42 East Germany
+        auto crs_5670 = factory->createCoordinateReferenceSystem("5670");
+        EXPECT_EQ(crs_5670->createBoundCRSToWGS84IfPossible(), crs_5670);
+    }
+    {
+        // Pulkovo 42 Romania
+        auto crs_3844 = factory->createCoordinateReferenceSystem("3844");
+        auto bound = crs_3844->createBoundCRSToWGS84IfPossible();
+        EXPECT_NE(bound, crs_3844);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(), bound);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_4)),
+                  "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
+                  "+y_0=500000 +ellps=krass "
+                  "+towgs84=2.329,-147.042,-92.08,-0.309,0.325,0.497,5.69");
+    }
+    {
+        // Pulkovo 42 Poland
+        auto crs_2171 = factory->createCoordinateReferenceSystem("2171");
+        auto bound = crs_2171->createBoundCRSToWGS84IfPossible();
+        EXPECT_NE(bound, crs_2171);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(), bound);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_4)),
+                  "+proj=sterea +lat_0=50.625 +lon_0=21.0833333333333 "
+                  "+k=0.9998 +x_0=4637000 +y_0=5647000 +ellps=krass "
+                  "+towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84");
+    }
+    {
+        auto crs = createVerticalCRS();
+        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(), crs);
+    }
+}

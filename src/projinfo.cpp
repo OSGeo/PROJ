@@ -180,7 +180,20 @@ static void outputObject(BaseObjectPtr obj, const OutputOptions &outputOpt) {
                 if (!outputOpt.quiet) {
                     std::cout << "PROJ.4 string: " << std::endl;
                 }
-                std::cout << projStringExportable->exportToPROJString(
+
+                auto crs = std::dynamic_pointer_cast<CRS>(obj);
+                std::shared_ptr<IPROJStringExportable> objToExport;
+                if (crs) {
+                    objToExport =
+                        std::dynamic_pointer_cast<IPROJStringExportable>(
+                            crs->createBoundCRSToWGS84IfPossible()
+                                .as_nullable());
+                }
+                if (!objToExport) {
+                    objToExport = projStringExportable;
+                }
+
+                std::cout << objToExport->exportToPROJString(
                                  PROJStringFormatter::create(
                                      PROJStringFormatter::Convention::PROJ_4))
                           << std::endl;
@@ -239,7 +252,18 @@ static void outputObject(BaseObjectPtr obj, const OutputOptions &outputOpt) {
                 if (!outputOpt.quiet) {
                     std::cout << "WKT1_GDAL: " << std::endl;
                 }
-                std::cout << wktExportable->exportToWKT(WKTFormatter::create(
+
+                auto crs = std::dynamic_pointer_cast<CRS>(obj);
+                std::shared_ptr<IWKTExportable> objToExport;
+                if (crs) {
+                    objToExport = std::dynamic_pointer_cast<IWKTExportable>(
+                        crs->createBoundCRSToWGS84IfPossible().as_nullable());
+                }
+                if (!objToExport) {
+                    objToExport = wktExportable;
+                }
+
+                std::cout << objToExport->exportToWKT(WKTFormatter::create(
                                  WKTFormatter::Convention::WKT1_GDAL))
                           << std::endl;
                 std::cout << std::endl;

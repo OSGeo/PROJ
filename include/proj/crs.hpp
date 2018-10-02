@@ -87,6 +87,7 @@ class CRS : public common::ObjectUsage,
 
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
     PROJ_DLL VerticalCRSPtr extractVerticalCRS() const;
+    PROJ_DLL CRSNNPtr createBoundCRSToWGS84IfPossible() const;
 
   protected:
     CRS();
