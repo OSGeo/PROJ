@@ -71,6 +71,7 @@ int main(int argc, char **argv) {
     const char *SUB_NAME = "";
     const char *CREATED  = "";
     const char *UPDATED  = "";
+    memset(&ct, 0, sizeof(ct));
 
 /* ==================================================================== */
 /*      Process arguments.                                              */
