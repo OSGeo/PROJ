@@ -582,6 +582,10 @@ const std::string
 
 // ---------------------------------------------------------------------------
 
+/** \brief EPSG:4267 / "NAD27" 2D GeographicCRS */
+const GeographicCRSNNPtr
+    GeographicCRS::EPSG_4267(GeographicCRS::createEPSG_4267());
+
 /** \brief EPSG:4269 / "NAD83" 2D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4269(GeographicCRS::createEPSG_4269());

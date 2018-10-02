@@ -470,6 +470,54 @@ TEST(crs, EPSG_4807_as_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4267) {
+    auto crs = GeographicCRS::EPSG_4267;
+    EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()),
+              "GEODCRS[\"NAD27\",\n"
+              "    DATUM[\"North American Datum 1927\",\n"
+              "        ELLIPSOID[\"Clarke 1866\",6378206.4,294.978698213898,\n"
+              "            LENGTHUNIT[\"metre\",1]]],\n"
+              "    PRIMEM[\"Greenwich\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+              "    CS[ellipsoidal,2],\n"
+              "        AXIS[\"latitude\",north,\n"
+              "            ORDER[1],\n"
+              "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+              "        AXIS[\"longitude\",east,\n"
+              "            ORDER[2],\n"
+              "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+              "    ID[\"EPSG\",4267]]");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=longlat +datum=NAD27");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_4269) {
+    auto crs = GeographicCRS::EPSG_4269;
+    EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()),
+              "GEODCRS[\"NAD83\",\n"
+              "    DATUM[\"North American Datum 1983\",\n"
+              "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+              "            LENGTHUNIT[\"metre\",1]]],\n"
+              "    PRIMEM[\"Greenwich\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+              "    CS[ellipsoidal,2],\n"
+              "        AXIS[\"latitude\",north,\n"
+              "            ORDER[1],\n"
+              "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+              "        AXIS[\"longitude\",east,\n"
+              "            ORDER[2],\n"
+              "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+              "    ID[\"EPSG\",4269]]");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=longlat +datum=NAD83");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string) {
     auto obj = WKTParser().createFromWKT(
         "PROJCRS[\"NTF (Paris) / Lambert Nord France\",\n"
@@ -580,7 +628,7 @@ TEST(crs, EPSG_2222_projected_unit_foot_as_PROJ_string) {
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_4)),
               "+proj=tmerc +lat_0=31 +lon_0=-110.166666667025 +k_0=0.9999 "
-              "+x_0=213360 +y_0=0 +ellps=GRS80 +units=ft");
+              "+x_0=213360 +y_0=0 +datum=NAD83 +units=ft");
 }
 
 // ---------------------------------------------------------------------------

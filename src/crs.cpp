@@ -643,14 +643,28 @@ void GeodeticCRS::addDatumInfoToPROJString(
     const // throw(io::FormattingException)
 {
     const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
+    bool datumWritten = false;
     auto nadgrids = formatter->getHDatumExtension();
     if (formatter->convention() ==
             io::PROJStringFormatter::Convention::PROJ_4 &&
-        datum() &&
-        datum()->isEquivalentTo(datum::GeodeticReferenceFrame::EPSG_6326) &&
-        TOWGS84Params.empty() && nadgrids.empty()) {
-        formatter->addParam("datum", "WGS84");
-    } else {
+        datum() && TOWGS84Params.empty() && nadgrids.empty()) {
+        if (datum()->isEquivalentTo(datum::GeodeticReferenceFrame::EPSG_6326,
+                                    util::IComparable::Criterion::EQUIVALENT)) {
+            datumWritten = true;
+            formatter->addParam("datum", "WGS84");
+        } else if (datum()->isEquivalentTo(
+                       datum::GeodeticReferenceFrame::EPSG_6267,
+                       util::IComparable::Criterion::EQUIVALENT)) {
+            datumWritten = true;
+            formatter->addParam("datum", "NAD27");
+        } else if (datum()->isEquivalentTo(
+                       datum::GeodeticReferenceFrame::EPSG_6269,
+                       util::IComparable::Criterion::EQUIVALENT)) {
+            datumWritten = true;
+            formatter->addParam("datum", "NAD83");
+        }
+    }
+    if (!datumWritten) {
         ellipsoid()->exportToPROJString(formatter);
         primeMeridian()->exportToPROJString(formatter);
     }
@@ -773,6 +787,19 @@ bool GeographicCRS::is2DPartOf3D(const GeographicCRSNNPtr &other) const {
            datum()->isEquivalentTo(NN_CHECK_ASSERT(other->datum())) &&
            axis[0]->isEquivalentTo(otherAxis[0]) &&
            axis[1]->isEquivalentTo(otherAxis[1]);
+}
+
+// ---------------------------------------------------------------------------
+
+GeographicCRSNNPtr GeographicCRS::createEPSG_4267() {
+    util::PropertyMap propertiesCRS;
+    propertiesCRS
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
+        .set(metadata::Identifier::CODE_KEY, 4267)
+        .set(common::IdentifiedObject::NAME_KEY, "NAD27");
+    return create(propertiesCRS, datum::GeodeticReferenceFrame::EPSG_6267,
+                  cs::EllipsoidalCS::createLatitudeLongitude(
+                      common::UnitOfMeasure::DEGREE));
 }
 
 // ---------------------------------------------------------------------------

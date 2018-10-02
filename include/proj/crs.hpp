@@ -273,6 +273,7 @@ class GeographicCRS : public GeodeticCRS {
 
     PROJ_DLL bool is2DPartOf3D(const GeographicCRSNNPtr &other) const;
 
+    PROJ_DLL static const GeographicCRSNNPtr EPSG_4267; // NAD27
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4269; // NAD83
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4326; // WGS 84 2D
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4807; // NTF Paris
@@ -291,6 +292,7 @@ class GeographicCRS : public GeodeticCRS {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    static GeographicCRSNNPtr createEPSG_4267();
     static GeographicCRSNNPtr createEPSG_4269();
     static GeographicCRSNNPtr createEPSG_4326();
     static GeographicCRSNNPtr createEPSG_4807();
