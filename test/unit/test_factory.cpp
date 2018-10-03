@@ -1641,4 +1641,18 @@ TEST(factory, AuthorityFactory_EPSG_4326_approximate_equivalent_to_builtin) {
                                     IComparable::Criterion::EQUIVALENT));
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase, getAuthorities) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(execute(
+        "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic 2D');"))
+        << last_error();
+
+    auto res = DatabaseContext::create(m_ctxt)->getAuthorities();
+    EXPECT_EQ(res.size(), 2);
+}
+
 } // namespace

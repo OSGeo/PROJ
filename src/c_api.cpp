@@ -28,6 +28,7 @@
 
 #include <cassert>
 #include <cstdarg>
+#include <cstring>
 #include <map>
 
 #include "proj/common.hpp"
@@ -723,4 +724,164 @@ PJ_OBJ *proj_obj_get_target_crs(PJ_OBJ *obj) {
     proj_log_error(obj->ctx, __FUNCTION__,
                    "Object is not a BoundCRS or a CoordinateOperation");
     return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+static PROJ_STRING_LIST set_to_string_list(const std::set<std::string> &set) {
+    auto ret = new char *[set.size() + 1];
+    size_t i = 0;
+    for (const auto &str : set) {
+        ret[i] = new char[str.size() + 1];
+        std::memcpy(ret[i], str.c_str(), str.size() + 1);
+        i++;
+    }
+    ret[i] = nullptr;
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the list of authorities used in the database.
+ *
+ * The returned list is NULL terminated and must be freed with
+ * proj_free_string_list().
+ *
+ * @param ctx PROJ context, or NULL for default context
+ *
+ * @return a NULL terminated list of NUL-terminated strings that must be
+ * freed with proj_free_string_list(), or NULL in case of error.
+ */
+PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
+    try {
+        if (ctx->cpp_context == nullptr) {
+            ctx->cpp_context = new projCppContext(DatabaseContext::create());
+        }
+        return set_to_string_list(
+            ctx->cpp_context->databaseContext->getAuthorities());
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the set of authority codes of the given object type.
+ *
+ * The returned list is NULL terminated and must be freed with
+ * proj_free_string_list().
+ *
+ * @param ctx PROJ context, or NULL for default context.
+ * @param auth_name Authority name (must not be NULL)
+ * @param type Object type.
+ * @param allow_deprecated whether we should return deprecated objects as well.
+ *
+ * @return a NULL terminated list of NUL-terminated strings that must be
+ * freed with proj_free_string_list(), or NULL in case of error.
+ */
+PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
+                                              const char *auth_name,
+                                              PJ_OBJ_TYPE type,
+                                              int allow_deprecated) {
+    assert(auth_name);
+    try {
+        if (ctx->cpp_context == nullptr) {
+            ctx->cpp_context = new projCppContext(DatabaseContext::create());
+        }
+        auto factory = AuthorityFactory::create(
+            ctx->cpp_context->databaseContext, auth_name);
+
+        AuthorityFactory::ObjectType typeInternal =
+            AuthorityFactory::ObjectType::CRS;
+        switch (type) {
+        case PJ_OBJ_TYPE_ELLIPSOID:
+            typeInternal = AuthorityFactory::ObjectType::ELLIPSOID;
+            break;
+
+        case PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME:
+        case PJ_OBJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME:
+            typeInternal =
+                AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME;
+            break;
+
+        case PJ_OBJ_TYPE_VERTICAL_REFERENCE_FRAME:
+        case PJ_OBJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME:
+            typeInternal =
+                AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME;
+            break;
+
+        case PJ_OBJ_TYPE_DATUM_ENSEMBLE:
+            typeInternal = AuthorityFactory::ObjectType::DATUM;
+            break;
+
+        case PJ_OBJ_TYPE_GEODETIC_CRS:
+            typeInternal = AuthorityFactory::ObjectType::GEODETIC_CRS;
+            break;
+
+        case PJ_OBJ_TYPE_GEOGRAPHIC_CRS:
+            typeInternal = AuthorityFactory::ObjectType::GEOGRAPHIC_CRS;
+            break;
+
+        case PJ_OBJ_TYPE_VERTICAL_CRS:
+            typeInternal = AuthorityFactory::ObjectType::VERTICAL_CRS;
+            break;
+
+        case PJ_OBJ_TYPE_PROJECTED_CRS:
+            typeInternal = AuthorityFactory::ObjectType::PROJECTED_CRS;
+            break;
+
+        case PJ_OBJ_TYPE_COMPOUND_CRS:
+            typeInternal = AuthorityFactory::ObjectType::COMPOUND_CRS;
+            break;
+
+        case PJ_OBJ_TYPE_TEMPORAL_CRS:
+            return nullptr;
+
+        case PJ_OBJ_TYPE_BOUND_CRS:
+            return nullptr;
+
+        case PJ_OBJ_TYPE_OTHER_CRS:
+            typeInternal = AuthorityFactory::ObjectType::CRS;
+            break;
+
+        case PJ_OBJ_TYPE_CONVERSION:
+            typeInternal = AuthorityFactory::ObjectType::CONVERSION;
+            break;
+
+        case PJ_OBJ_TYPE_TRANSFORMATION:
+            typeInternal = AuthorityFactory::ObjectType::TRANSFORMATION;
+            break;
+
+        case PJ_OBJ_TYPE_CONCATENATED_OPERATION:
+            typeInternal = AuthorityFactory::ObjectType::CONCATENATED_OPERATION;
+            break;
+
+        case PJ_OBJ_TYPE_OTHER_COORDINATE_OPERATION:
+            typeInternal = AuthorityFactory::ObjectType::COORDINATE_OPERATION;
+            break;
+
+        case PJ_OBJ_TYPE_UNKNOWN:
+            return nullptr;
+        }
+
+        return set_to_string_list(
+            factory->getAuthorityCodes(typeInternal, allow_deprecated != 0));
+
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Free a list of NULL terminated strings. */
+void proj_free_string_list(PROJ_STRING_LIST list) {
+    if (list) {
+        for (size_t i = 0; list[i] != nullptr; i++) {
+            delete[] list[i];
+        }
+        delete[] list;
+    }
 }

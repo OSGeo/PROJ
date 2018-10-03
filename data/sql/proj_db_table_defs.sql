@@ -554,3 +554,25 @@ CREATE VIEW object_view AS
     UNION ALL
     SELECT table_name, auth_name, code, name FROM coordinate_operation_view
 ;
+
+CREATE VIEW authority_list AS
+    SELECT DISTINCT auth_name FROM unit_of_measure
+    UNION
+    SELECT DISTINCT auth_name FROM ellipsoid
+    UNION
+    SELECT DISTINCT auth_name FROM area
+    UNION
+    SELECT DISTINCT auth_name FROM prime_meridian
+    UNION
+    SELECT DISTINCT auth_name FROM geodetic_datum
+    UNION
+    SELECT DISTINCT auth_name FROM vertical_datum
+    UNION
+    SELECT DISTINCT auth_name FROM axis
+    UNION
+    SELECT DISTINCT auth_name FROM crs
+    UNION
+    SELECT DISTINCT auth_name FROM conversion
+    UNION
+    SELECT DISTINCT auth_name FROM coordinate_operation_view
+;

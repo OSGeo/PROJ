@@ -436,6 +436,19 @@ DatabaseContextNNPtr DatabaseContext::create(const std::string &databasePath) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the list of authorities used in the database.
+ */
+std::set<std::string> DatabaseContext::getAuthorities() const {
+    auto res = d->run("SELECT auth_name FROM authority_list");
+    std::set<std::string> list;
+    for (const auto &row : res) {
+        list.insert(row[0]);
+    }
+    return list;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 DatabaseContextNNPtr DatabaseContext::create(void *sqlite_handle) {

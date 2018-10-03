@@ -574,6 +574,8 @@ class DatabaseContext {
     PROJ_DLL static DatabaseContextNNPtr
     create(const std::string &databasePath);
 
+    PROJ_DLL std::set<std::string> getAuthorities() const;
+
     //! @cond Doxygen_Suppress
     PROJ_DLL void *getSqliteHandle() const;
     PROJ_DLL static DatabaseContextNNPtr create(void *sqlite_handle);

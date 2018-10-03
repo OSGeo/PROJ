@@ -603,4 +603,55 @@ TEST_F(CApi, proj_obj_get_source_target_crs_invalid_object) {
     ASSERT_EQ(targetCRS, nullptr);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_authorities_from_database) {
+    auto list = proj_get_authorities_from_database(m_ctxt);
+    ASSERT_NE(list, nullptr);
+    EXPECT_EQ(list[0], std::string("EPSG"));
+    EXPECT_EQ(list[1], nullptr);
+    proj_free_string_list(list);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_codes_from_database) {
+
+    auto listTypes =
+        std::vector<PJ_OBJ_TYPE>{PJ_OBJ_TYPE_ELLIPSOID,
+
+                                 PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME,
+                                 PJ_OBJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME,
+                                 PJ_OBJ_TYPE_VERTICAL_REFERENCE_FRAME,
+                                 PJ_OBJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME,
+                                 PJ_OBJ_TYPE_DATUM_ENSEMBLE,
+
+                                 PJ_OBJ_TYPE_GEODETIC_CRS,
+                                 PJ_OBJ_TYPE_GEOGRAPHIC_CRS,
+                                 PJ_OBJ_TYPE_VERTICAL_CRS,
+                                 PJ_OBJ_TYPE_PROJECTED_CRS,
+                                 PJ_OBJ_TYPE_COMPOUND_CRS,
+                                 PJ_OBJ_TYPE_TEMPORAL_CRS,
+                                 PJ_OBJ_TYPE_BOUND_CRS,
+                                 PJ_OBJ_TYPE_OTHER_CRS,
+
+                                 PJ_OBJ_TYPE_CONVERSION,
+                                 PJ_OBJ_TYPE_TRANSFORMATION,
+                                 PJ_OBJ_TYPE_CONCATENATED_OPERATION,
+                                 PJ_OBJ_TYPE_OTHER_COORDINATE_OPERATION,
+
+                                 PJ_OBJ_TYPE_UNKNOWN};
+    for (const auto &type : listTypes) {
+        auto list = proj_get_codes_from_database(m_ctxt, "EPSG", type, true);
+        if (type == PJ_OBJ_TYPE_TEMPORAL_CRS || type == PJ_OBJ_TYPE_BOUND_CRS ||
+            type == PJ_OBJ_TYPE_UNKNOWN) {
+            EXPECT_EQ(list, nullptr) << type;
+        } else {
+            ASSERT_NE(list, nullptr) << type;
+            ASSERT_NE(list[0], nullptr) << type;
+        }
+        proj_free_string_list(list);
+    }
+}
+
 } // namespace
