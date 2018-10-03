@@ -115,7 +115,10 @@ using ::dropbox::oxygen::i_promise_i_checked_for_null;
 using ::dropbox::oxygen::nn;
 using ::dropbox::oxygen::nn_dynamic_pointer_cast;
 using ::dropbox::oxygen::nn_make_shared;
+
+// For return statements, to convert from derived type to base type
 using ::dropbox::oxygen::nn_static_pointer_cast;
+
 template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 //! @endcond
 

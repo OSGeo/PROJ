@@ -85,8 +85,8 @@ static void usage() {
 
 // ---------------------------------------------------------------------------
 
-static BaseObjectPtr buildObject(const std::string &user_string, bool kindIsCRS,
-                                 const std::string &context) {
+static BaseObjectNNPtr buildObject(const std::string &user_string,
+                                   bool kindIsCRS, const std::string &context) {
     bool isWKT = false;
     try {
         WKTNode::createFrom(user_string);
@@ -124,13 +124,11 @@ static BaseObjectPtr buildObject(const std::string &user_string, bool kindIsCRS,
                 auto factory = AuthorityFactory::create(
                     DatabaseContext::create(), authority);
                 if (kindIsCRS) {
-                    obj = nn_static_pointer_cast<BaseObject>(
-                              factory->createCoordinateReferenceSystem(code))
+                    obj = factory->createCoordinateReferenceSystem(code)
                               .as_nullable();
                 } else {
-                    obj = nn_static_pointer_cast<BaseObject>(
-                              factory->createCoordinateOperation(code))
-                              .as_nullable();
+                    obj =
+                        factory->createCoordinateOperation(code).as_nullable();
                 }
             } catch (const std::exception &e) {
                 std::cerr << context
@@ -146,14 +144,14 @@ static BaseObjectPtr buildObject(const std::string &user_string, bool kindIsCRS,
         std::exit(1);
     }
 
-    return obj;
+    return NN_CHECK_ASSERT(obj);
 }
 
 // ---------------------------------------------------------------------------
 
-static void outputObject(BaseObjectPtr obj, const OutputOptions &outputOpt) {
+static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
     auto projStringExportable =
-        std::dynamic_pointer_cast<IPROJStringExportable>(obj);
+        nn_dynamic_pointer_cast<IPROJStringExportable>(obj);
     bool alreadyOutputed = false;
     if (projStringExportable) {
         if (outputOpt.PROJ5) {
@@ -181,13 +179,12 @@ static void outputObject(BaseObjectPtr obj, const OutputOptions &outputOpt) {
                     std::cout << "PROJ.4 string: " << std::endl;
                 }
 
-                auto crs = std::dynamic_pointer_cast<CRS>(obj);
+                auto crs = nn_dynamic_pointer_cast<CRS>(obj);
                 std::shared_ptr<IPROJStringExportable> objToExport;
                 if (crs) {
                     objToExport =
-                        std::dynamic_pointer_cast<IPROJStringExportable>(
-                            crs->createBoundCRSToWGS84IfPossible()
-                                .as_nullable());
+                        nn_dynamic_pointer_cast<IPROJStringExportable>(
+                            crs->createBoundCRSToWGS84IfPossible());
                 }
                 if (!objToExport) {
                     objToExport = projStringExportable;
@@ -205,7 +202,7 @@ static void outputObject(BaseObjectPtr obj, const OutputOptions &outputOpt) {
         }
     }
 
-    auto wktExportable = std::dynamic_pointer_cast<IWKTExportable>(obj);
+    auto wktExportable = nn_dynamic_pointer_cast<IWKTExportable>(obj);
     if (wktExportable) {
         if (outputOpt.WKT2_2015) {
             try {
@@ -243,8 +240,7 @@ static void outputObject(BaseObjectPtr obj, const OutputOptions &outputOpt) {
             }
         }
 
-        if (outputOpt.WKT1_GDAL &&
-            !std::dynamic_pointer_cast<Conversion>(obj)) {
+        if (outputOpt.WKT1_GDAL && !nn_dynamic_pointer_cast<Conversion>(obj)) {
             try {
                 if (alreadyOutputed) {
                     std::cout << std::endl;
@@ -253,11 +249,11 @@ static void outputObject(BaseObjectPtr obj, const OutputOptions &outputOpt) {
                     std::cout << "WKT1_GDAL: " << std::endl;
                 }
 
-                auto crs = std::dynamic_pointer_cast<CRS>(obj);
+                auto crs = nn_dynamic_pointer_cast<CRS>(obj);
                 std::shared_ptr<IWKTExportable> objToExport;
                 if (crs) {
-                    objToExport = std::dynamic_pointer_cast<IWKTExportable>(
-                        crs->createBoundCRSToWGS84IfPossible().as_nullable());
+                    objToExport = nn_dynamic_pointer_cast<IWKTExportable>(
+                        crs->createBoundCRSToWGS84IfPossible());
                 }
                 if (!objToExport) {
                     objToExport = wktExportable;
@@ -284,14 +280,14 @@ static void outputOperations(
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
     const OutputOptions &outputOpt, bool summary) {
     auto sourceObj = buildObject(sourceCRSStr, true, "source CRS");
-    auto sourceCRS = std::dynamic_pointer_cast<CRS>(sourceObj);
+    auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
 
     auto targetObj = buildObject(targetCRSStr, true, "target CRS");
-    auto targetCRS = std::dynamic_pointer_cast<CRS>(targetObj);
+    auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
         std::exit(1);
@@ -312,7 +308,7 @@ static void outputOperations(
         std::exit(1);
     }
     if (outputOpt.quiet && !list.empty()) {
-        outputObject(nn_static_pointer_cast<BaseObject>(list[0]), outputOpt);
+        outputObject(list[0], outputOpt);
         return;
     }
     if (summary) {
@@ -373,7 +369,7 @@ static void outputOperations(
                 std::cout << "Operation n°" << (i + 1) << ":" << std::endl
                           << std::endl;
             }
-            outputObject(nn_static_pointer_cast<BaseObject>(op), outputOpt);
+            outputObject(op, outputOpt);
         }
     }
 }

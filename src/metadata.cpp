@@ -678,7 +678,7 @@ Extent::create(const optional<std::string> &descriptionIn,
                const std::vector<VerticalExtentNNPtr> &verticalElementsIn,
                const std::vector<TemporalExtentNNPtr> &temporalElementsIn) {
     auto extent = Extent::nn_make_shared<Extent>();
-    extent->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(extent));
+    extent->assignSelf(extent);
     extent->d->description_ = descriptionIn;
     extent->d->geographicElements_ = geographicElementsIn;
     extent->d->verticalElements_ = verticalElementsIn;

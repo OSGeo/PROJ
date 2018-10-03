@@ -497,7 +497,7 @@ GeodeticCRS::create(const util::PropertyMap &properties,
                     const cs::SphericalCSNNPtr &cs) {
     auto crs(
         GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, datumEnsemble, cs));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     return crs;
 }
@@ -541,7 +541,7 @@ GeodeticCRS::create(const util::PropertyMap &properties,
                     const cs::CartesianCSNNPtr &cs) {
     auto crs(
         GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, datumEnsemble, cs));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     return crs;
 }
@@ -769,7 +769,7 @@ GeographicCRS::create(const util::PropertyMap &properties,
                       const cs::EllipsoidalCSNNPtr &cs) {
     GeographicCRSNNPtr crs(
         GeographicCRS::nn_make_shared<GeographicCRS>(datum, datumEnsemble, cs));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     return crs;
 }
@@ -1131,7 +1131,7 @@ VerticalCRS::create(const util::PropertyMap &properties,
                     const cs::VerticalCSNNPtr &csIn) {
     auto crs(VerticalCRS::nn_make_shared<VerticalCRS>(datumIn, datumEnsembleIn,
                                                       csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     return crs;
 }
@@ -1449,7 +1449,7 @@ ProjectedCRS::create(const util::PropertyMap &properties,
                      const cs::CartesianCSNNPtr &csIn) {
     auto crs = ProjectedCRS::nn_make_shared<ProjectedCRS>(
         baseCRSIn, derivingConversionIn, csIn);
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
     return crs;
@@ -1586,8 +1586,7 @@ std::vector<CRSNNPtr> CompoundCRS::componentReferenceSystems() const {
 CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
                                      const std::vector<CRSNNPtr> &components) {
     auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
-    compoundCRS->assignSelf(
-        util::nn_static_pointer_cast<util::BaseObject>(compoundCRS));
+    compoundCRS->assignSelf(compoundCRS);
     compoundCRS->setProperties(properties);
     if (properties.find(common::IdentifiedObject::NAME_KEY) ==
         properties.end()) {
@@ -1742,7 +1741,7 @@ BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
                  const operation::TransformationNNPtr &transformationIn) {
     auto crs = BoundCRS::nn_make_shared<BoundCRS>(baseCRSIn, hubCRSIn,
                                                   transformationIn);
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     if (baseCRSIn->name()->description().has_value()) {
         crs->setProperties(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
@@ -1766,7 +1765,7 @@ BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
     auto crs = BoundCRS::nn_make_shared<BoundCRS>(
         baseCRSIn, GeographicCRS::EPSG_4326,
         operation::Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     if (baseCRSIn->name()->description().has_value()) {
         crs->setProperties(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
@@ -1799,7 +1798,7 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
                                     transformationName),
             baseCRSIn, GeographicCRS::EPSG_4326, filename,
             std::vector<metadata::PositionalAccuracyNNPtr>()));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     if (baseCRSIn->name()->description().has_value()) {
         crs->setProperties(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
@@ -2002,7 +2001,7 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
     const cs::CartesianCSNNPtr &csIn) {
     auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(
         baseCRSIn, derivingConversionIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
     return crs;
@@ -2027,7 +2026,7 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
     const cs::SphericalCSNNPtr &csIn) {
     auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(
         baseCRSIn, derivingConversionIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
     return crs;
@@ -2148,7 +2147,7 @@ DerivedGeographicCRSNNPtr DerivedGeographicCRS::create(
     const cs::EllipsoidalCSNNPtr &csIn) {
     auto crs(DerivedGeographicCRS::nn_make_shared<DerivedGeographicCRS>(
         baseCRSIn, derivingConversionIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
     return crs;
@@ -2264,7 +2263,7 @@ DerivedProjectedCRSNNPtr DerivedProjectedCRS::create(
     const cs::CoordinateSystemNNPtr &csIn) {
     auto crs(DerivedProjectedCRS::nn_make_shared<DerivedProjectedCRS>(
         baseCRSIn, derivingConversionIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
     return crs;
@@ -2402,7 +2401,7 @@ TemporalCRSNNPtr TemporalCRS::create(const util::PropertyMap &properties,
                                      const datum::TemporalDatumNNPtr &datumIn,
                                      const cs::TemporalCSNNPtr &csIn) {
     auto crs(TemporalCRS::nn_make_shared<TemporalCRS>(datumIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     return crs;
 }
@@ -2478,7 +2477,7 @@ EngineeringCRS::create(const util::PropertyMap &properties,
                        const datum::EngineeringDatumNNPtr &datumIn,
                        const cs::CoordinateSystemNNPtr &csIn) {
     auto crs(EngineeringCRS::nn_make_shared<EngineeringCRS>(datumIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     return crs;
 }
@@ -2567,7 +2566,7 @@ ParametricCRS::create(const util::PropertyMap &properties,
                       const datum::ParametricDatumNNPtr &datumIn,
                       const cs::ParametricCSNNPtr &csIn) {
     auto crs(ParametricCRS::nn_make_shared<ParametricCRS>(datumIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     return crs;
 }
@@ -2654,7 +2653,7 @@ DerivedVerticalCRSNNPtr DerivedVerticalCRS::create(
     const cs::VerticalCSNNPtr &csIn) {
     auto crs(DerivedVerticalCRS::nn_make_shared<DerivedVerticalCRS>(
         baseCRSIn, derivingConversionIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
     return crs;

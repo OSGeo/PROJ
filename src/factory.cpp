@@ -1248,14 +1248,14 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             ellipsoidalCS) {
             auto crsRet = crs::GeographicCRS::create(
                 props, datum, NN_CHECK_ASSERT(ellipsoidalCS));
-            d->cache(code, util::nn_static_pointer_cast<crs::CRS>(crsRet));
+            d->cache(code, crsRet);
             return crsRet;
         }
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (type == "geocentric" && geocentricCS) {
             auto crsRet = crs::GeodeticCRS::create(
                 props, datum, NN_CHECK_ASSERT(geocentricCS));
-            d->cache(code, util::nn_static_pointer_cast<crs::CRS>(crsRet));
+            d->cache(code, crsRet);
             return crsRet;
         }
         throw FactoryException("unsupported (type, CS type) for geodeticCRS: " +
