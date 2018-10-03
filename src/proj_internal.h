@@ -85,6 +85,9 @@ void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
 void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
 void proj_context_inherit (PJ *parent, PJ *child);
 
+struct projCppContext;
+void proj_context_delete_cpp_context(struct projCppContext* cppContext);
+
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 

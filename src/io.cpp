@@ -3010,6 +3010,11 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
             buildCoordinateOperation(node));
     }
 
+    if (ci_equal(name, WKTConstants::CONVERSION)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            buildConversion(node, UnitOfMeasure::METRE, UnitOfMeasure::DEGREE));
+    }
+
     if (ci_equal(name, WKTConstants::CONCATENATEDOPERATION)) {
         return util::nn_static_pointer_cast<BaseObject>(
             buildConcatenatedOperation(node));

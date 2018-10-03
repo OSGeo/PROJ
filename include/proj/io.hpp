@@ -166,6 +166,7 @@ class WKTFormatter {
          * </ul>
          */
         WKT2_SIMPLIFIED,
+        WKT2_2015_SIMPLIFIED = WKT2_SIMPLIFIED,
 
         /** Full WKT2 string, conforming to ISO 19162:2018 / OGC 18-010, with
          * all possible nodes and new keyword names.
@@ -698,7 +699,7 @@ class AuthorityFactory {
         /** Object of type operation::Conversion (and derived classes) */
         CONVERSION,
         /** Object of type operation::Transformation (and derived classes)
-           */
+         */
         TRANSFORMATION,
         /** Object of type operation::ConcatenatedOperation (and derived
            classes) */

@@ -129,6 +129,24 @@
 extern "C" {
 #endif
 
+/**
+ * \file proj.h
+ *
+ * C API new generation
+ */
+
+/*! @cond Doxygen_Suppress */
+
+#ifndef PROJ_DLL
+#ifdef PROJ_MSVC_DLL_EXPORT
+#define PROJ_DLL __declspec(dllexport)
+#elif defined(PROJ_MSVC_DLL_IMPORT)
+#define PROJ_DLL __declspec(dllimport)
+#else
+#define PROJ_DLL
+#endif
+#endif
+
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 6
 #define PROJ_VERSION_MINOR 0
@@ -409,6 +427,126 @@ PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD
 
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);
+
+/*! @endcond */
+
+/* ------------------------------------------------------------------------- */
+/* Binding in C of C++ API */
+/* ------------------------------------------------------------------------- */
+
+/*! @cond Doxygen_Suppress */
+typedef struct PJ_OBJ PJ_OBJ;
+/*! @endcond */
+
+PJ_OBJ PROJ_DLL *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char* wkt);
+
+PJ_OBJ PROJ_DLL *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
+                                                  const char* proj_string);
+
+/** \brief Object category. */
+typedef enum
+{
+    PJ_OBJ_CATEGORY_ELLIPSOID,
+    PJ_OBJ_CATEGORY_DATUM,
+    PJ_OBJ_CATEGORY_CRS,
+    PJ_OBJ_CATEGORY_COORDINATE_OPERATION
+} PJ_OBJ_CATEGORY;
+
+PJ_OBJ PROJ_DLL *proj_obj_create_from_database(PJ_CONTEXT *ctx,
+                                               const char* auth_name,
+                                               const char* code,
+                                               PJ_OBJ_CATEGORY category);
+
+void PROJ_DLL proj_obj_unref(PJ_OBJ* obj);
+
+/** \brief Object type. */
+typedef enum
+{
+    PJ_OBJ_TYPE_ELLIPSOID,
+
+    PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME,
+    PJ_OBJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME,
+    PJ_OBJ_TYPE_VERTICAL_REFERENCE_FRAME,
+    PJ_OBJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME,
+    PJ_OBJ_TYPE_DATUM_ENSEMBLE,
+
+    PJ_OBJ_TYPE_GEODETIC_CRS,
+    PJ_OBJ_TYPE_GEOGRAPHIC_CRS,
+    PJ_OBJ_TYPE_VERTICAL_CRS,
+    PJ_OBJ_TYPE_PROJECTED_CRS,
+    PJ_OBJ_TYPE_COMPOUND_CRS,
+    PJ_OBJ_TYPE_TEMPORAL_CRS,
+    PJ_OBJ_TYPE_BOUND_CRS,
+    PJ_OBJ_TYPE_OTHER_CRS,
+
+    PJ_OBJ_TYPE_CONVERSION,
+    PJ_OBJ_TYPE_TRANSFORMATION,
+    PJ_OBJ_TYPE_CONCATENATED_OPERATION,
+    PJ_OBJ_TYPE_OTHER_COORDINATE_OPERATION,
+
+    PJ_OBJ_TYPE_UNKNOWN
+} PJ_OBJ_TYPE;
+
+PJ_OBJ_TYPE PROJ_DLL proj_obj_get_type(PJ_OBJ* obj);
+
+int PROJ_DLL proj_obj_is_crs(PJ_OBJ* obj);
+
+const char PROJ_DLL* proj_obj_get_name(PJ_OBJ* obj);
+
+const char PROJ_DLL* proj_obj_get_id_auth_name(PJ_OBJ* obj, int index);
+
+const char PROJ_DLL* proj_obj_get_id_code(PJ_OBJ* obj, int index);
+
+/** \brief WKT version. */
+typedef enum
+{
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018 */
+    PJ_WKT2_2018,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018_SIMPLIFIED */
+    PJ_WKT2_2018_SIMPLIFIED,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2 */
+    PJ_WKT2_2015,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_SIMPLIFIED */
+    PJ_WKT2_2015_SIMPLIFIED,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_GDAL */
+    PJ_WKT1_GDAL
+} PJ_WKT_TYPE;
+
+const char PROJ_DLL* proj_obj_as_wkt(PJ_OBJ* obj, PJ_WKT_TYPE type);
+
+/** \brief PROJ string version. */
+typedef enum
+{
+    /** cf osgeo::proj::io::PROJStringFormatter::Convention::PROJ_5 */
+    PJ_PROJ_5,
+    /** cf osgeo::proj::io::PROJStringFormatter::Convention::PROJ_4 */
+    PJ_PROJ_4,
+} PJ_PROJ_STRING_TYPE;
+
+const char PROJ_DLL* proj_obj_as_proj_string(PJ_OBJ* obj,
+                                             PJ_PROJ_STRING_TYPE type);
+
+PJ_OBJ PROJ_DLL *proj_obj_get_source_crs(PJ_OBJ* obj);
+
+PJ_OBJ PROJ_DLL *proj_obj_get_target_crs(PJ_OBJ* obj);
+
+/* ------------------------------------------------------------------------- */
+
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_geographic_crs(PJ_OBJ* crs);
+
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_ellipsoid(PJ_OBJ* crs);
+
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_horizontal_datum(PJ_OBJ* crs);
+
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_sub_crs(PJ_OBJ* crs, int index);
+
+PJ_OBJ PROJ_DLL *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ* crs);
+
+int PROJ_DLL proj_obj_ellipsoid_get_parameters(PJ_OBJ* ellipsoid,
+                                            double* pSemiMajorMetre,
+                                            double* pSemiMinorMetre,
+                                            int*    pIsSemiMinorComputed,
+                                            double* pInverseFlattening);
 
 #ifdef __cplusplus
 }

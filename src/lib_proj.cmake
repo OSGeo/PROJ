@@ -242,6 +242,7 @@ set(SRC_LIBPROJ_CPP
         util.cpp
         internal.cpp
         factory.cpp
+        c_api.cpp
 )
 
 set(HEADERS_LIBPROJ

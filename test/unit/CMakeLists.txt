@@ -95,7 +95,8 @@ add_executable(proj_test_cpp_api
   test_io.cpp
   test_operation.cpp
   test_datum.cpp
-  test_factory.cpp)
+  test_factory.cpp
+  test_c_api.cpp)
 target_link_libraries(proj_test_cpp_api
   gtest
   ${PROJ_LIBRARIES}

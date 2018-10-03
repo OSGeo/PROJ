@@ -1484,7 +1484,7 @@ class CoordinateOperationContext {
            CRS extent. */
         INTERSECTION,
         /** Test coordinate operation against the smallest of both CRS extent.
-           */
+         */
         SMALLEST,
     };
 

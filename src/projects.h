@@ -579,6 +579,8 @@ enum deprecated_constants_for_now_dropped_analytical_factors {
 
 struct projFileAPI_t;
 
+struct projCppContext;
+
 /* proj thread context */
 struct projCtx_t {
     int     last_errno;
@@ -586,6 +588,7 @@ struct projCtx_t {
     void    (*logger)(void *, int, const char *);
     void    *app_data;
     struct projFileAPI_t *fileapi;
+    struct projCppContext* cpp_context; /* internal context for C++ code */
 };
 
 /* classic public API */
