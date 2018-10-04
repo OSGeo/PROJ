@@ -466,11 +466,11 @@ TEST_F(CApi, proj_crs) {
     ObjectKeeper keeper(crs);
     EXPECT_TRUE(proj_obj_is_crs(crs));
 
-    auto geogCRS = proj_obj_crs_get_geographic_crs(crs);
-    ASSERT_NE(geogCRS, nullptr);
-    ObjectKeeper keeper_geogCRS(geogCRS);
-    EXPECT_TRUE(proj_obj_is_crs(geogCRS));
-    auto geogCRS_name = proj_obj_get_name(geogCRS);
+    auto geodCRS = proj_obj_crs_get_geodetic_crs(crs);
+    ASSERT_NE(geodCRS, nullptr);
+    ObjectKeeper keeper_geogCRS(geodCRS);
+    EXPECT_TRUE(proj_obj_is_crs(geodCRS));
+    auto geogCRS_name = proj_obj_get_name(geodCRS);
     ASSERT_TRUE(geogCRS_name != nullptr);
     EXPECT_EQ(geogCRS_name, std::string("WGS 84"));
 
@@ -481,20 +481,26 @@ TEST_F(CApi, proj_crs) {
     ASSERT_TRUE(datum_name != nullptr);
     EXPECT_EQ(datum_name, std::string("World Geodetic System 1984"));
 
-    auto ellipsoid = proj_obj_crs_get_ellipsoid(crs);
+    auto ellipsoid = proj_obj_get_ellipsoid(crs);
     ASSERT_NE(ellipsoid, nullptr);
     ObjectKeeper keeper_ellipsoid(ellipsoid);
     auto ellipsoid_name = proj_obj_get_name(ellipsoid);
     ASSERT_TRUE(ellipsoid_name != nullptr);
     EXPECT_EQ(ellipsoid_name, std::string("WGS 84"));
 
-    EXPECT_EQ(proj_obj_crs_get_ellipsoid(ellipsoid), nullptr);
+    auto ellipsoid_from_datum = proj_obj_get_ellipsoid(datum);
+    ASSERT_NE(ellipsoid_from_datum, nullptr);
+    ObjectKeeper keeper_ellipsoid_from_datum(ellipsoid_from_datum);
+
+    EXPECT_EQ(proj_obj_get_ellipsoid(ellipsoid), nullptr);
     EXPECT_FALSE(proj_obj_is_crs(ellipsoid));
 
     double a;
     double b;
     int b_is_computed;
     double rf;
+    EXPECT_TRUE(proj_obj_ellipsoid_get_parameters(ellipsoid, nullptr, nullptr,
+                                                  nullptr, nullptr));
     EXPECT_TRUE(proj_obj_ellipsoid_get_parameters(ellipsoid, &a, &b,
                                                   &b_is_computed, &rf));
     EXPECT_FALSE(
@@ -506,6 +512,46 @@ TEST_F(CApi, proj_crs) {
     auto id = proj_obj_get_id_code(ellipsoid, 0);
     ASSERT_TRUE(id != nullptr);
     EXPECT_EQ(id, std::string("7030"));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_get_prime_meridian) {
+    auto crs = proj_obj_create_from_wkt(
+        m_ctxt, createProjectedCRS()
+                    ->exportToWKT(WKTFormatter::create(
+                        WKTFormatter::Convention::WKT1_GDAL))
+                    .c_str());
+    ASSERT_NE(crs, nullptr);
+    ObjectKeeper keeper(crs);
+
+    auto pm = proj_obj_get_prime_meridian(crs);
+    ASSERT_NE(pm, nullptr);
+    ObjectKeeper keeper_pm(pm);
+    auto pm_name = proj_obj_get_name(pm);
+    ASSERT_TRUE(pm_name != nullptr);
+    EXPECT_EQ(pm_name, std::string("Greenwich"));
+
+    EXPECT_EQ(proj_obj_get_prime_meridian(pm), nullptr);
+
+    EXPECT_TRUE(
+        proj_obj_prime_meridian_get_parameters(pm, nullptr, nullptr, nullptr));
+    double longitude = -1;
+    double longitude_unit = 0;
+    const char *longitude_unit_name = nullptr;
+    EXPECT_TRUE(proj_obj_prime_meridian_get_parameters(
+        pm, &longitude, &longitude_unit, &longitude_unit_name));
+    EXPECT_EQ(longitude, 0);
+    EXPECT_NEAR(longitude_unit, UnitOfMeasure::DEGREE.conversionToSI(), 1e-10);
+    ASSERT_TRUE(longitude_unit_name != nullptr);
+    EXPECT_EQ(longitude_unit_name, std::string("degree"));
+
+    auto datum = proj_obj_crs_get_horizontal_datum(crs);
+    ASSERT_NE(datum, nullptr);
+    ObjectKeeper keeper_datum(datum);
+    auto pm_from_datum = proj_obj_get_prime_meridian(datum);
+    ASSERT_NE(pm_from_datum, nullptr);
+    ObjectKeeper keeper_pm_from_datum(pm_from_datum);
 }
 
 // ---------------------------------------------------------------------------
@@ -652,6 +698,89 @@ TEST_F(CApi, proj_get_codes_from_database) {
         }
         proj_free_string_list(list);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, conversion) {
+    auto crs = proj_obj_create_from_wkt(
+        m_ctxt,
+        createProjectedCRS()->exportToWKT(WKTFormatter::create()).c_str());
+    ASSERT_NE(crs, nullptr);
+    ObjectKeeper keeper(crs);
+
+    {
+        auto conv =
+            proj_obj_crs_get_coordoperation(crs, nullptr, nullptr, nullptr);
+        ASSERT_NE(conv, nullptr);
+        ObjectKeeper keeper_conv(conv);
+
+        ASSERT_EQ(
+            proj_obj_crs_get_coordoperation(conv, nullptr, nullptr, nullptr),
+            nullptr);
+    }
+
+    const char *methodName = nullptr;
+    const char *methodAuthorityName = nullptr;
+    const char *methodCode = nullptr;
+    auto conv = proj_obj_crs_get_coordoperation(
+        crs, &methodName, &methodAuthorityName, &methodCode);
+    ASSERT_NE(conv, nullptr);
+    ObjectKeeper keeper_conv(conv);
+
+    ASSERT_NE(methodName, nullptr);
+    ASSERT_NE(methodAuthorityName, nullptr);
+    ASSERT_NE(methodCode, nullptr);
+    EXPECT_EQ(methodName, std::string("Transverse Mercator"));
+    EXPECT_EQ(methodAuthorityName, std::string("EPSG"));
+    EXPECT_EQ(methodCode, std::string("9807"));
+
+    EXPECT_EQ(proj_coordoperation_get_param_count(conv), 5);
+    EXPECT_EQ(proj_coordoperation_get_param_index(conv, "foo"), -1);
+    EXPECT_EQ(proj_coordoperation_get_param_index(conv, "False easting"), 3);
+
+    EXPECT_FALSE(proj_coordoperation_get_param(conv, -1, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr,
+                                               nullptr, nullptr));
+    EXPECT_FALSE(proj_coordoperation_get_param(conv, 5, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr,
+                                               nullptr, nullptr));
+
+    const char *name = nullptr;
+    const char *nameAuthorityName = nullptr;
+    const char *nameCode = nullptr;
+    double value = 0;
+    const char *valueString = nullptr;
+    double valueUnitConvFactor = 0;
+    const char *valueUnitName = nullptr;
+    EXPECT_TRUE(proj_coordoperation_get_param(
+        conv, 3, &name, &nameAuthorityName, &nameCode, &value, &valueString,
+        &valueUnitConvFactor, &valueUnitName));
+    ASSERT_NE(name, nullptr);
+    ASSERT_NE(nameAuthorityName, nullptr);
+    ASSERT_NE(nameCode, nullptr);
+    EXPECT_EQ(valueString, nullptr);
+    ASSERT_NE(valueUnitName, nullptr);
+    EXPECT_EQ(name, std::string("False easting"));
+    EXPECT_EQ(nameAuthorityName, std::string("EPSG"));
+    EXPECT_EQ(nameCode, std::string("8806"));
+    EXPECT_EQ(value, 500000.0);
+    EXPECT_EQ(valueUnitConvFactor, 1.0);
+    EXPECT_EQ(valueUnitName, std::string("metre"));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, transformation_from_boundCRS) {
+    auto crs = proj_obj_create_from_wkt(
+        m_ctxt, createBoundCRS()->exportToWKT(WKTFormatter::create()).c_str());
+    ASSERT_NE(crs, nullptr);
+    ObjectKeeper keeper(crs);
+
+    auto transf =
+        proj_obj_crs_get_coordoperation(crs, nullptr, nullptr, nullptr);
+    ASSERT_NE(transf, nullptr);
+    ObjectKeeper keeper_transf(transf);
 }
 
 } // namespace

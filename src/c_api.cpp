@@ -36,6 +36,7 @@
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
 #include "proj/io.hpp"
+#include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
 // PROJ include order is sensitive
@@ -49,6 +50,7 @@ using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;
 using namespace NS_PROJ::datum;
 using namespace NS_PROJ::io;
+using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
 
@@ -299,7 +301,7 @@ PJ_OBJ_TYPE proj_obj_get_type(PJ_OBJ *obj) {
  *
  * @param obj Object (must not be NULL)
  */
-int PROJ_DLL proj_obj_is_crs(PJ_OBJ *obj) {
+int proj_obj_is_crs(PJ_OBJ *obj) {
     assert(obj);
     return nn_dynamic_pointer_cast<CRS>(obj->obj) != nullptr;
 }
@@ -486,24 +488,24 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type) {
 
 // ---------------------------------------------------------------------------
 
-static GeographicCRSPtr extractGeographicCRS(PJ_OBJ *crs, const char *fname) {
+static GeodeticCRSPtr extractGeodeticCRS(PJ_OBJ *crs, const char *fname) {
     assert(crs);
     auto l_crs = nn_dynamic_pointer_cast<CRS>(crs->obj);
     if (!l_crs) {
         proj_log_error(crs->ctx, fname, "Object is not a CRS");
         return nullptr;
     }
-    auto geogCRS = l_crs->extractGeographicCRS();
-    if (!geogCRS) {
-        proj_log_error(crs->ctx, fname, "CRS has no geographic CRS");
+    auto geodCRS = l_crs->extractGeodeticCRS();
+    if (!geodCRS) {
+        proj_log_error(crs->ctx, fname, "CRS has no geodetic CRS");
         return nullptr;
     }
-    return geogCRS;
+    return geodCRS;
 }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Extract the geographicCRS from a CRS
+/** \brief Get the geodeticCRS / geographicCRS from a CRS
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
@@ -512,17 +514,17 @@ static GeographicCRSPtr extractGeographicCRS(PJ_OBJ *crs, const char *fname) {
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_crs_get_geographic_crs(PJ_OBJ *crs) {
-    auto geogCRS = extractGeographicCRS(crs, __FUNCTION__);
-    if (!geogCRS) {
+PJ_OBJ *proj_obj_crs_get_geodetic_crs(PJ_OBJ *crs) {
+    auto geodCRS = extractGeodeticCRS(crs, __FUNCTION__);
+    if (!geodCRS) {
         return nullptr;
     }
-    return new PJ_OBJ(crs->ctx, NN_CHECK_ASSERT(geogCRS));
+    return new PJ_OBJ(crs->ctx, NN_CHECK_ASSERT(geodCRS));
 }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Extract a CRS component from a CompoundCRS
+/** \brief Get a CRS component from a CompoundCRS
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
@@ -574,26 +576,36 @@ PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ *crs) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Extract the ellipsoid from a CRS
+/** \brief Get the ellipsoid from a CRS or a GeodeticReferenceFrame.
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
  *
- * @param crs Objet of type CRS (must not be NULL)
+ * @param obj Objet of type CRS or GeodeticReferenceFrame (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_crs_get_ellipsoid(PJ_OBJ *crs) {
-    auto geogCRS = extractGeographicCRS(crs, __FUNCTION__);
-    if (!geogCRS) {
-        return nullptr;
+PJ_OBJ *proj_obj_get_ellipsoid(PJ_OBJ *obj) {
+    if (nn_dynamic_pointer_cast<CRS>(obj->obj)) {
+        auto geodCRS = extractGeodeticCRS(obj, __FUNCTION__);
+        if (!geodCRS) {
+            return nullptr;
+        }
+        return new PJ_OBJ(obj->ctx, geodCRS->ellipsoid());
+    } else {
+        auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj->obj);
+        if (datum) {
+            return new PJ_OBJ(obj->ctx, datum->ellipsoid());
+        }
     }
-    return new PJ_OBJ(crs->ctx, geogCRS->ellipsoid());
+    proj_log_error(obj->ctx, __FUNCTION__,
+                   "Object is not a CRS or GeodeticReferenceFrame");
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Extract the horizontal datum from a CRS
+/** \brief Get the horizontal datum from a CRS
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
@@ -603,13 +615,13 @@ PJ_OBJ *proj_obj_crs_get_ellipsoid(PJ_OBJ *crs) {
  * in case of error.
  */
 PJ_OBJ *proj_obj_crs_get_horizontal_datum(PJ_OBJ *crs) {
-    auto geogCRS = extractGeographicCRS(crs, __FUNCTION__);
-    if (!geogCRS) {
+    auto geodCRS = extractGeodeticCRS(crs, __FUNCTION__);
+    if (!geodCRS) {
         return nullptr;
     }
-    auto datum = geogCRS->datum();
+    auto datum = geodCRS->datum();
     if (!datum) {
-        auto datumEnsemble = geogCRS->datumEnsemble();
+        auto datumEnsemble = geodCRS->datumEnsemble();
         if (datumEnsemble) {
             return new PJ_OBJ(crs->ctx, NN_CHECK_ASSERT(datumEnsemble));
         }
@@ -625,14 +637,14 @@ PJ_OBJ *proj_obj_crs_get_horizontal_datum(PJ_OBJ *crs) {
  *
  * @param ellipsoid Object of type Ellipsoid (must not be NULL)
  * @param pSemiMajorMetre Pointer to a value to store the semi-major axis in
- * metre.
+ * metre. or NULL
  * @param pSemiMinorMetre Pointer to a value to store the semi-minor axis in
- * metre.
+ * metre. or NULL
  * @param pIsSemiMinorComputed Pointer to a boolean value to indicate if the
  * semi-minor value was computed. If FALSE, its value comes from the
- * definition.
+ * definition. or NULL
  * @param pInverseFlattening Pointer to a value to store the inverse
- * flattening.
+ * flattening. or NULL
  * @return TRUE in case of success.
  */
 int proj_obj_ellipsoid_get_parameters(PJ_OBJ *ellipsoid,
@@ -662,6 +674,73 @@ int proj_obj_ellipsoid_get_parameters(PJ_OBJ *ellipsoid,
             l_ellipsoid->computeInverseFlattening().getSIValue();
     }
     return TRUE;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Get the prime meridian of a CRS or a GeodeticReferenceFrame.
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after
+ * use.
+ *
+ * @param obj Objet of type CRS or GeodeticReferenceFrame (must not be NULL)
+ * @return Object that must be unreferenced with proj_obj_unref(), or NULL
+ * in case of error.
+ */
+
+PJ_OBJ *proj_obj_get_prime_meridian(PJ_OBJ *obj) {
+    if (nn_dynamic_pointer_cast<CRS>(obj->obj)) {
+        auto geodCRS = extractGeodeticCRS(obj, __FUNCTION__);
+        if (!geodCRS) {
+            return nullptr;
+        }
+        return new PJ_OBJ(obj->ctx, geodCRS->primeMeridian());
+    } else {
+        auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj->obj);
+        if (datum) {
+            return new PJ_OBJ(obj->ctx, datum->primeMeridian());
+        }
+    }
+    proj_log_error(obj->ctx, __FUNCTION__,
+                   "Object is not a CRS or GeodeticReferenceFrame");
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return prime meridian parameters.
+ *
+ * @param prime_meridian Object of type PrimeMeridian (must not be NULL)
+ * @param pLongitude Pointer to a value to store the longitude of the prime
+ * meridian, in its native unit. or NULL
+ * @param pLongitudeUnitConvFactor Pointer to a value to store the conversion
+ * factor of the prime meridian longitude unit to radian. or NULL
+ * @param pLongitudeUnitName Pointer to a string value to store the unit name.
+ * or NULL
+ * @return TRUE in case of success.
+ */
+int proj_obj_prime_meridian_get_parameters(PJ_OBJ *prime_meridian,
+                                           double *pLongitude,
+                                           double *pLongitudeUnitConvFactor,
+                                           const char **pLongitudeUnitName) {
+    assert(prime_meridian);
+    auto l_pm = nn_dynamic_pointer_cast<PrimeMeridian>(prime_meridian->obj);
+    if (!l_pm) {
+        proj_log_error(prime_meridian->ctx, __FUNCTION__,
+                       "Object is not a PrimeMeridian");
+        return false;
+    }
+    const auto &longitude = l_pm->longitude();
+    if (pLongitude) {
+        *pLongitude = longitude.value();
+    }
+    if (pLongitudeUnitConvFactor) {
+        *pLongitudeUnitConvFactor = longitude.unit().conversionToSI();
+    }
+    if (pLongitudeUnitName) {
+        *pLongitudeUnitName = longitude.unit().name().c_str();
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -884,4 +963,221 @@ void proj_free_string_list(PROJ_STRING_LIST list) {
         }
         delete[] list;
     }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the Conversion of a DerivedCRS (such as a ProjectedCRS),
+ * or the Transformation from the baseCRS to the hubCRS of a BoundCRS
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after
+ * use.
+ *
+ * @param crs Objet of type DerivedCRS or BoundCRSs (must not be NULL)
+ * @param pMethodName Pointer to a string value to store the method
+ * (projection) name. or NULL
+ * @param pMethodAuthorityName Pointer to a string value to store the method
+ * authority name. or NULL
+ * @param pMethodCode Pointer to a string value to store the method
+ * code. or NULL
+ * @return Object of type Conversion that must be unreferenced with
+ * proj_obj_unref(), or NULL in case of error.
+ */
+PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_OBJ *crs, const char **pMethodName,
+                                        const char **pMethodAuthorityName,
+                                        const char **pMethodCode) {
+    assert(crs);
+    SingleOperationPtr co;
+
+    auto derivedCRS = nn_dynamic_pointer_cast<DerivedCRS>(crs->obj);
+    if (derivedCRS) {
+        co = derivedCRS->derivingConversion().as_nullable();
+    } else {
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(crs->obj);
+        if (boundCRS) {
+            co = boundCRS->transformation().as_nullable();
+        } else {
+            proj_log_error(crs->ctx, __FUNCTION__,
+                           "Object is not a DerivedCRS or BoundCRS");
+            return nullptr;
+        }
+    }
+
+    const auto &method = co->method();
+    const auto &method_ids = method->identifiers();
+    if (pMethodName) {
+        *pMethodName = method->name()->description()->c_str();
+    }
+    if (pMethodAuthorityName) {
+        if (!method_ids.empty()) {
+            *pMethodAuthorityName =
+                method->identifiers()[0]->codeSpace()->c_str();
+        } else {
+            *pMethodAuthorityName = nullptr;
+        }
+    }
+    if (pMethodCode) {
+        *pMethodCode = method->identifiers()[0]->code().c_str();
+    }
+    return new PJ_OBJ(crs->ctx, NN_CHECK_ASSERT(co));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the number of parameters of a SingleOperation
+ *
+ * @param coordoperation Objet of type SingleOperation or derived classes
+ * (must not be NULL)
+ */
+
+int proj_coordoperation_get_param_count(PJ_OBJ *coordoperation) {
+    assert(coordoperation);
+    auto co = nn_dynamic_pointer_cast<SingleOperation>(coordoperation->obj);
+    if (!co) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__,
+                       "Object is not a SingleOperation");
+        return 0;
+    }
+    return static_cast<int>(co->parameterValues().size());
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the index of a parameter of a SingleOperation
+ *
+ * @param coordoperation Objet of type SingleOperation or derived classes
+ * (must not be NULL)
+ * @param name Parameter name. Must not be NULL
+ * @return index (>=0), or -1 in case of error.
+ */
+
+int proj_coordoperation_get_param_index(PJ_OBJ *coordoperation,
+                                        const char *name) {
+    assert(coordoperation);
+    assert(name);
+    auto co = nn_dynamic_pointer_cast<SingleOperation>(coordoperation->obj);
+    if (!co) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__,
+                       "Object is not a SingleOperation");
+        return -1;
+    }
+    int index = 0;
+    for (const auto &genParam : co->method()->parameters()) {
+        if (Identifier::isEquivalentName(*genParam->name()->description(),
+                                         name)) {
+            return index;
+        }
+        index++;
+    }
+    return -1;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a parameter of a SingleOperation
+ *
+ * @param coordoperation Objet of type SingleOperation or derived classes
+ * (must not be NULL)
+ * @param index Parameter index.
+ * @param pName Pointer to a string value to store the parameter name. or NULL
+ * @param pNameAuthorityName Pointer to a string value to store the parameter
+ * authority name. or NULL
+ * @param pNameCode Pointer to a string value to store the parameter
+ * code. or NULL
+ * @param pValue Pointer to a double value to store the parameter
+ * value (if numeric). or NULL
+ * @param pValueString Pointer to a string value to store the parameter
+ * value (if of type string). or NULL
+ * @param pValueUnitConvFactor Pointer to a double value to store the parameter
+ * unit conversion factor. or NULL
+ * @param pValueUnitName Pointer to a string value to store the parameter
+ * unit name. or NULL
+ * @return TRUE in case of success.
+ */
+
+int proj_coordoperation_get_param(PJ_OBJ *coordoperation, int index,
+                                  const char **pName,
+                                  const char **pNameAuthorityName,
+                                  const char **pNameCode, double *pValue,
+                                  const char **pValueString,
+                                  double *pValueUnitConvFactor,
+                                  const char **pValueUnitName) {
+    assert(coordoperation);
+    auto co = nn_dynamic_pointer_cast<SingleOperation>(coordoperation->obj);
+    if (!co) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__,
+                       "Object is not a SingleOperation");
+        return false;
+    }
+    const auto &parameters = co->method()->parameters();
+    const auto &values = co->parameterValues();
+    if (index < 0 || static_cast<size_t>(index) >= parameters.size() ||
+        static_cast<size_t>(index) >= values.size()) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__, "Invalid index");
+        return false;
+    }
+
+    const auto &param = parameters[index];
+    const auto &param_ids = param->identifiers();
+    if (pName) {
+        *pName = param->name()->description()->c_str();
+    }
+    if (pNameAuthorityName) {
+        if (!param_ids.empty()) {
+            *pNameAuthorityName = param_ids[0]->codeSpace()->c_str();
+        } else {
+            *pNameAuthorityName = nullptr;
+        }
+    }
+    if (pNameCode) {
+        if (!param_ids.empty()) {
+            *pNameCode = param_ids[0]->code().c_str();
+        } else {
+            *pNameCode = nullptr;
+        }
+    }
+
+    const auto &value = values[index];
+    ParameterValuePtr paramValue = nullptr;
+    auto opParamValue = nn_dynamic_pointer_cast<OperationParameterValue>(value);
+    if (opParamValue) {
+        paramValue = opParamValue->parameterValue().as_nullable();
+    }
+    if (pValue) {
+        *pValue = 0;
+        if (paramValue) {
+            if (paramValue->type() == ParameterValue::Type::MEASURE) {
+                *pValue = paramValue->value().value();
+            }
+        }
+    }
+    if (pValueString) {
+        *pValueString = nullptr;
+        if (paramValue) {
+            if (paramValue->type() == ParameterValue::Type::FILENAME) {
+                *pValueString = paramValue->valueFile().c_str();
+            } else if (paramValue->type() == ParameterValue::Type::STRING) {
+                *pValueString = paramValue->stringValue().c_str();
+            }
+        }
+    }
+    if (pValueUnitConvFactor) {
+        *pValueUnitConvFactor = 0;
+        if (paramValue) {
+            if (paramValue->type() == ParameterValue::Type::MEASURE) {
+                *pValueUnitConvFactor =
+                    paramValue->value().unit().conversionToSI();
+            }
+        }
+    }
+    if (pValueUnitName) {
+        *pValueUnitName = nullptr;
+        if (paramValue) {
+            if (paramValue->type() == ParameterValue::Type::MEASURE) {
+                *pValueUnitName = paramValue->value().unit().name().c_str();
+            }
+        }
+    }
+
+    return true;
 }

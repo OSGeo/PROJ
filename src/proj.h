@@ -544,9 +544,7 @@ PJ_OBJ PROJ_DLL *proj_obj_get_target_crs(PJ_OBJ* obj);
 
 /* ------------------------------------------------------------------------- */
 
-PJ_OBJ PROJ_DLL *proj_obj_crs_get_geographic_crs(PJ_OBJ* crs);
-
-PJ_OBJ PROJ_DLL *proj_obj_crs_get_ellipsoid(PJ_OBJ* crs);
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_geodetic_crs(PJ_OBJ* crs);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_get_horizontal_datum(PJ_OBJ* crs);
 
@@ -554,11 +552,40 @@ PJ_OBJ PROJ_DLL *proj_obj_crs_get_sub_crs(PJ_OBJ* crs, int index);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ* crs);
 
+PJ_OBJ PROJ_DLL *proj_obj_get_ellipsoid(PJ_OBJ* obj);
+
 int PROJ_DLL proj_obj_ellipsoid_get_parameters(PJ_OBJ* ellipsoid,
                                             double* pSemiMajorMetre,
                                             double* pSemiMinorMetre,
                                             int*    pIsSemiMinorComputed,
                                             double* pInverseFlattening);
+
+PJ_OBJ PROJ_DLL *proj_obj_get_prime_meridian(PJ_OBJ* obj);
+
+int PROJ_DLL proj_obj_prime_meridian_get_parameters(PJ_OBJ* prime_meridian,
+                                               double* pLongitude,
+                                               double* pLongitudeUnitConvFactor,
+                                               const char** pLongitudeUnitName);
+
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_coordoperation(PJ_OBJ* crs,
+                                             const char** pMethodName,
+                                             const char** pMethodAuthorityName,
+                                             const char** pMethodCode);
+
+int PROJ_DLL proj_coordoperation_get_param_count(PJ_OBJ* coordoperation);
+
+int PROJ_DLL proj_coordoperation_get_param_index(PJ_OBJ* coordoperation,
+                                                 const char* name);
+
+int PROJ_DLL proj_coordoperation_get_param(PJ_OBJ* coordoperation,
+                                           int index,
+                                           const char** pName,
+                                           const char** pNameAuthorityName,
+                                           const char** pNameCode,
+                                           double* pValue,
+                                           const char **pValueString,
+                                           double* pValueUnitConvFactor,
+                                           const char** pValueUnitName);
 
 #ifdef __cplusplus
 }

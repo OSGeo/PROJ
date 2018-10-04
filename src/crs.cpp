@@ -68,6 +68,43 @@ CRS::~CRS() = default;
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the GeodeticCRS of the CRS.
+ *
+ * Returns the GeodeticCRS contained in a CRS. This works currently with
+ * input parameters of type GeodeticCRS or derived, ProjectedCRS,
+ * CompoundCRS or BoundCRS.
+ *
+ * @return a GeodeticCRSPtr, that might be null.
+ */
+GeodeticCRSPtr CRS::extractGeodeticCRS() const {
+    CRSPtr transformSourceCRS;
+    auto geodCRS = dynamic_cast<const GeodeticCRS *>(this);
+    if (geodCRS) {
+        return std::dynamic_pointer_cast<GeodeticCRS>(
+            shared_from_this().as_nullable());
+    }
+    auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        return projCRS->baseCRS()->extractGeodeticCRS();
+    }
+    auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
+            auto retGeogCRS = subCrs->extractGeodeticCRS();
+            if (retGeogCRS) {
+                return retGeogCRS;
+            }
+        }
+    }
+    auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    if (boundCRS) {
+        return boundCRS->baseCRS()->extractGeodeticCRS();
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the GeographicCRS of the CRS.
  *
  * Returns the GeographicCRS contained in a CRS. This works currently with
@@ -77,30 +114,7 @@ CRS::~CRS() = default;
  * @return a GeographicCRSPtr, that might be null.
  */
 GeographicCRSPtr CRS::extractGeographicCRS() const {
-    CRSPtr transformSourceCRS;
-    auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
-    if (geogCRS) {
-        return std::dynamic_pointer_cast<GeographicCRS>(
-            shared_from_this().as_nullable());
-    }
-    auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
-        return projCRS->baseCRS()->extractGeographicCRS();
-    }
-    auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
-    if (compoundCRS) {
-        for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
-            auto retGeogCRS = subCrs->extractGeographicCRS();
-            if (retGeogCRS) {
-                return retGeogCRS;
-            }
-        }
-    }
-    auto boundCRS = dynamic_cast<const BoundCRS *>(this);
-    if (boundCRS) {
-        return boundCRS->baseCRS()->extractGeographicCRS();
-    }
-    return nullptr;
+    return std::dynamic_pointer_cast<GeographicCRS>(extractGeodeticCRS());
 }
 
 // ---------------------------------------------------------------------------

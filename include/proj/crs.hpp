@@ -85,6 +85,7 @@ class CRS : public common::ObjectUsage,
 
     // Non-standard
 
+    PROJ_DLL GeodeticCRSPtr extractGeodeticCRS() const;
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
     PROJ_DLL VerticalCRSPtr extractVerticalCRS() const;
     PROJ_DLL CRSNNPtr createBoundCRSToWGS84IfPossible() const;
