@@ -980,7 +980,7 @@ void proj_free_string_list(PROJ_STRING_LIST list) {
  * authority name. or NULL
  * @param pMethodCode Pointer to a string value to store the method
  * code. or NULL
- * @return Object of type Conversion that must be unreferenced with
+ * @return Object of type SingleOperation that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_OBJ *crs, const char **pMethodName,

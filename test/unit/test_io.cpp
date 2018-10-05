@@ -3897,7 +3897,7 @@ TEST(io, projparse_longlat_geoidgrids) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_4)),
-              "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx");
+              "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx +vunits=m");
 }
 
 // ---------------------------------------------------------------------------
@@ -3936,6 +3936,26 @@ TEST(io, projparse_longlat_vunits) {
                          "(h)\",up,ORDER[3],LENGTHUNIT[\"foot\",0.3048]") !=
                 std::string::npos)
         << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_vunits) {
+    auto obj = PROJStringParser().createFromPROJString("+vunits=ft");
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+vunits=ft");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_vto_meter) {
+    auto obj = PROJStringParser().createFromPROJString("+vto_meter=2");
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+vto_meter=2");
 }
 
 // ---------------------------------------------------------------------------

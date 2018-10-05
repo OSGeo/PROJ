@@ -30,13 +30,30 @@
     - implement export to PROJ of  METHOD["NADCON"  ID["EPSG",1241]
     - use an intermediate CRS when going from A of B
         ogrinfo data/proj.db -sql "select v1.code as code1, v1.name as name1, v1.accuracy as accuracy1, v2.code as code2, v2.name as name2, v2.accuracy as accuracy2 from coordinate_operation_view v1 join coordinate_operation_view v2 on v1.target_crs_code = v2.source_crs_code where v1.source_crs_code = 4275 and v2.target_crs_code = 4179 AND v1.deprecated = 0 AND v2.deprecated = 0 order by (CASE WHEN accuracy1 is NULL THEN 1 ELSE 0 END) + (CASE WHEN accuracy2 is NULL THEN 1 ELSE 0 END), accuracy1 + accuracy2"
-     - CONVERSION["NGVD29 height (ftUS) to NGVD29 height (m)",
-    METHOD["Change of Vertical Unit",
-        ID["EPSG",1069]],
-    PARAMETER["Unit conversion scalar",0.304800609601219,
-        SCALEUNIT["unity",1],
-        ID["EPSG",1051]],
-    ID["EPSG",7972]]
+
+        
+OGRFeature(epsg_coordoperation):10013
+  coord_op_name (String) = NAD83 to NAVD88 height (1)
+  coord_op_type (String) = transformation
+  source_crs_code (Integer) = 4269
+  target_crs_code (Integer) = 5703
+
+OGRFeature(epsg_coordoperation):1188
+  coord_op_name (String) = NAD83 to WGS 84 (1)
+  coord_op_type (String) = transformation
+  source_crs_code (Integer) = 4269
+  target_crs_code (Integer) = 4326
+
+4326 <--> 4979
+  
+OGRFeature(epsg_coordoperation):3859
+  coord_op_name (String) = WGS 84 to EGM2008 height (2)
+  coord_op_type (String) = transformation
+  source_crs_code (Integer) = 4979
+  target_crs_code (Integer) = 3855
+
+  
+  - map "Lambert Conic Conformal (2SP Michigan)" to PROJ (https://github.com/OSGeo/proj.4/pull/1142)
 
 
 - Integrate Doxygen doc in PROJ doc

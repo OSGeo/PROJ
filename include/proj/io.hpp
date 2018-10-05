@@ -351,6 +351,9 @@ class PROJStringFormatter {
     void setOmitProjLongLatIfPossible(bool omit);
     bool omitProjLongLatIfPossible() const;
 
+    void setOmitZUnitConversion(bool omit);
+    bool omitZUnitConversion() const;
+
     Convention convention() const;
 
     //! @endcond

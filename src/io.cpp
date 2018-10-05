@@ -3104,6 +3104,7 @@ struct PROJStringFormatter::Private {
     };
     std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
     bool omitProjLongLatIfPossible_ = false;
+    bool omitZUnitConversion_ = false;
     int level_ = 0;
 
     std::string result_{};
@@ -3167,7 +3168,7 @@ const std::string &PROJStringFormatter::toString() const {
                 break;
             }
 
-            // unitconvert followed by its inverse is a no-op
+            // unitconvert (xy) followed by its inverse is a no-op
             if (d->steps_[i].name == "unitconvert" &&
                 d->steps_[i - 1].name == "unitconvert" &&
                 !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
@@ -3184,6 +3185,139 @@ const std::string &PROJStringFormatter::toString() const {
                 d->steps_.erase(d->steps_.begin() + i - 1,
                                 d->steps_.begin() + i + 1);
                 changeDone = true;
+                break;
+            }
+
+            // unitconvert (z) followed by its inverse is a no-op
+            if (d->steps_[i].name == "unitconvert" &&
+                d->steps_[i - 1].name == "unitconvert" &&
+                !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
+                d->steps_[i].paramValues.size() == 2 &&
+                d->steps_[i - 1].paramValues.size() == 2 &&
+                starts_with(d->steps_[i].paramValues[0], "z_in=") &&
+                starts_with(d->steps_[i - 1].paramValues[0], "z_in=") &&
+                starts_with(d->steps_[i].paramValues[1], "z_out=") &&
+                starts_with(d->steps_[i - 1].paramValues[1], "z_out=") &&
+                d->steps_[i].paramValues[0].substr(strlen("z_in=")) ==
+                    d->steps_[i - 1].paramValues[1].substr(strlen("z_out=")) &&
+                d->steps_[i].paramValues[1].substr(strlen("z_out=")) ==
+                    d->steps_[i - 1].paramValues[0].substr(strlen("z_in="))) {
+                d->steps_.erase(d->steps_.begin() + i - 1,
+                                d->steps_.begin() + i + 1);
+                changeDone = true;
+                break;
+            }
+
+            // unitconvert (xyz) followed by its inverse is a no-op
+            if (d->steps_[i].name == "unitconvert" &&
+                d->steps_[i - 1].name == "unitconvert" &&
+                !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
+                d->steps_[i].paramValues.size() == 4 &&
+                d->steps_[i - 1].paramValues.size() == 4 &&
+                starts_with(d->steps_[i].paramValues[0], "xy_in=") &&
+                starts_with(d->steps_[i - 1].paramValues[0], "xy_in=") &&
+                starts_with(d->steps_[i].paramValues[1], "z_in=") &&
+                starts_with(d->steps_[i - 1].paramValues[1], "z_in=") &&
+                starts_with(d->steps_[i].paramValues[2], "xy_out=") &&
+                starts_with(d->steps_[i - 1].paramValues[2], "xy_out=") &&
+                starts_with(d->steps_[i].paramValues[3], "z_out=") &&
+                starts_with(d->steps_[i - 1].paramValues[3], "z_out=") &&
+                d->steps_[i].paramValues[0].substr(strlen("xy_in=")) ==
+                    d->steps_[i - 1].paramValues[2].substr(strlen("xy_out=")) &&
+                d->steps_[i].paramValues[1].substr(strlen("z_in=")) ==
+                    d->steps_[i - 1].paramValues[3].substr(strlen("z_out=")) &&
+                d->steps_[i].paramValues[2].substr(strlen("xy_out=")) ==
+                    d->steps_[i - 1].paramValues[0].substr(strlen("xy_in=")) &&
+                d->steps_[i].paramValues[3].substr(strlen("z_out=")) ==
+                    d->steps_[i - 1].paramValues[1].substr(strlen("z_in="))) {
+                d->steps_.erase(d->steps_.begin() + i - 1,
+                                d->steps_.begin() + i + 1);
+                changeDone = true;
+                break;
+            }
+
+            // combine unitconvert (xy) and unitconvert (z)
+            for (int k = 0; k < 2; ++k) {
+                auto first = (k == 0) ? i : i - 1;
+                auto second = (k == 0) ? i - 1 : i;
+                if (d->steps_[first].name == "unitconvert" &&
+                    d->steps_[second].name == "unitconvert" &&
+                    !d->steps_[first].inverted && !d->steps_[second].inverted &&
+                    d->steps_[first].paramValues.size() == 2 &&
+                    d->steps_[second].paramValues.size() == 2 &&
+                    starts_with(d->steps_[second].paramValues[0], "xy_in=") &&
+                    starts_with(d->steps_[second].paramValues[1], "xy_out=") &&
+                    starts_with(d->steps_[first].paramValues[0], "z_in=") &&
+                    starts_with(d->steps_[first].paramValues[1], "z_out=")) {
+
+                    auto xy_in = d->steps_[second].paramValues[0].substr(
+                        strlen("xy_in="));
+                    auto xy_out = d->steps_[second].paramValues[1].substr(
+                        strlen("xy_out="));
+                    auto z_in =
+                        d->steps_[first].paramValues[0].substr(strlen("z_in="));
+                    auto z_out = d->steps_[first].paramValues[1].substr(
+                        strlen("z_out="));
+                    d->steps_.erase(d->steps_.begin() + i - 1,
+                                    d->steps_.begin() + i);
+                    d->steps_[i - 1].paramValues.clear();
+                    d->steps_[i - 1].paramValues.emplace_back("xy_in=" + xy_in);
+                    d->steps_[i - 1].paramValues.emplace_back("z_in=" + z_in);
+                    d->steps_[i - 1].paramValues.emplace_back("xy_out=" +
+                                                              xy_out);
+                    d->steps_[i - 1].paramValues.emplace_back("z_out=" + z_out);
+                    changeDone = true;
+                    break;
+                }
+            }
+            if (changeDone) {
+                break;
+            }
+
+            // +step +proj=unitconvert +xy_in=X1 +xy_out=X2
+            //  +step +proj=unitconvert +xy_in=X2 +z_in=Z1 +xy_out=X1 +z_out=Z2
+            // ==> step +proj=unitconvert +z_in=Z1 +z_out=Z2
+            for (int k = 0; k < 2; ++k) {
+                auto first = (k == 0) ? i : i - 1;
+                auto second = (k == 0) ? i - 1 : i;
+                if (d->steps_[first].name == "unitconvert" &&
+                    d->steps_[second].name == "unitconvert" &&
+                    !d->steps_[first].inverted && !d->steps_[second].inverted &&
+                    d->steps_[first].paramValues.size() == 4 &&
+                    d->steps_[second].paramValues.size() == 2 &&
+                    starts_with(d->steps_[first].paramValues[0], "xy_in=") &&
+                    starts_with(d->steps_[first].paramValues[1], "z_in=") &&
+                    starts_with(d->steps_[first].paramValues[2], "xy_out=") &&
+                    starts_with(d->steps_[first].paramValues[3], "z_out=") &&
+                    starts_with(d->steps_[second].paramValues[0], "xy_in=") &&
+                    starts_with(d->steps_[second].paramValues[1], "xy_out=") &&
+                    d->steps_[first].paramValues[0].substr(strlen("xy_in=")) ==
+                        d->steps_[second].paramValues[1].substr(
+                            strlen("xy_out=")) &&
+                    d->steps_[first].paramValues[2].substr(strlen("xy_out=")) ==
+                        d->steps_[second].paramValues[0].substr(
+                            strlen("xy_in="))) {
+                    auto z_in =
+                        d->steps_[first].paramValues[1].substr(strlen("z_in="));
+                    auto z_out = d->steps_[first].paramValues[3].substr(
+                        strlen("z_out="));
+                    if (z_in != z_out) {
+                        d->steps_.erase(d->steps_.begin() + i - 1,
+                                        d->steps_.begin() + i);
+                        d->steps_[i - 1].paramValues.clear();
+                        d->steps_[i - 1].paramValues.emplace_back("z_in=" +
+                                                                  z_in);
+                        d->steps_[i - 1].paramValues.emplace_back("z_out=" +
+                                                                  z_out);
+                    } else {
+                        d->steps_.erase(d->steps_.begin() + i - 1,
+                                        d->steps_.begin() + i + 1);
+                    }
+                    changeDone = true;
+                    break;
+                }
+            }
+            if (changeDone) {
                 break;
             }
 
@@ -3294,6 +3428,35 @@ const std::string &PROJStringFormatter::toString() const {
                                   step.paramValues[0].substr(strlen("xy_in=")));
                 continue;
             }
+
+            if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
+                starts_with(step.paramValues[0], "z_in=") &&
+                starts_with(step.paramValues[1], "z_out=")) {
+                d->appendToResult("+proj=" + step.name);
+                d->appendToResult("+z_in=" +
+                                  step.paramValues[1].substr(strlen("z_out=")));
+                d->appendToResult("+z_out=" +
+                                  step.paramValues[0].substr(strlen("z_in=")));
+                continue;
+            }
+
+            if (step.name == "unitconvert" && step.paramValues.size() == 4 &&
+                starts_with(step.paramValues[0], "xy_in=") &&
+                starts_with(step.paramValues[1], "z_in=") &&
+                starts_with(step.paramValues[2], "xy_out=") &&
+                starts_with(step.paramValues[3], "z_out=")) {
+                d->appendToResult("+proj=" + step.name);
+                d->appendToResult(
+                    "+xy_in=" + step.paramValues[2].substr(strlen("xy_out=")));
+                d->appendToResult("+z_in=" +
+                                  step.paramValues[3].substr(strlen("z_out=")));
+                d->appendToResult("+xy_out=" +
+                                  step.paramValues[0].substr(strlen("xy_in=")));
+                d->appendToResult("+z_out=" +
+                                  step.paramValues[1].substr(strlen("z_in=")));
+                continue;
+            }
+
             // axisswap order=2,1 is its own inverse
             if (!(step.name == "axisswap" && step.paramValues.size() == 1 &&
                   step.paramValues[0] == "order=2,1")) {
@@ -3576,6 +3739,7 @@ const std::string &PROJStringFormatter::getHDatumExtension() const {
 // ---------------------------------------------------------------------------
 
 void PROJStringFormatter::setOmitProjLongLatIfPossible(bool omit) {
+    assert(d->omitProjLongLatIfPossible_ ^ omit);
     d->omitProjLongLatIfPossible_ = omit;
 }
 
@@ -3583,6 +3747,19 @@ void PROJStringFormatter::setOmitProjLongLatIfPossible(bool omit) {
 
 bool PROJStringFormatter::omitProjLongLatIfPossible() const {
     return d->omitProjLongLatIfPossible_;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setOmitZUnitConversion(bool omit) {
+    assert(d->omitZUnitConversion_ ^ omit);
+    d->omitZUnitConversion_ = omit;
+}
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::omitZUnitConversion() const {
+    return d->omitZUnitConversion_;
 }
 
 //! @endcond
@@ -3606,7 +3783,7 @@ struct PROJStringParser::Private {
     PrimeMeridianNNPtr buildPrimeMeridian(const Step &step);
     GeodeticReferenceFrameNNPtr buildDatum(const Step &step);
     GeographicCRSNNPtr buildGeographicCRS(int iStep, int iUnitConvert,
-                                          int iAxisSwap);
+                                          int iAxisSwap, bool ignoreVUnits);
     GeodeticCRSNNPtr buildGeocentricCRS(int iStep, int iUnitConvert);
     CRSNNPtr buildProjectedCRS(int iStep, GeographicCRSNNPtr geogCRS,
                                int iUnitConvert, int iAxisSwap);
@@ -3626,7 +3803,7 @@ struct PROJStringParser::Private {
     processAxisSwap(const Step &step, const UnitOfMeasure &unit, int iAxisSwap);
 
     EllipsoidalCSNNPtr buildEllipsoidalCS(int iStep, int iUnitConvert,
-                                          int iAxisSwap);
+                                          int iAxisSwap, bool ignoreVUnits);
 };
 
 // ---------------------------------------------------------------------------
@@ -4200,9 +4377,8 @@ PROJStringParser::Private::processAxisSwap(const Step &step,
 
 // ---------------------------------------------------------------------------
 
-EllipsoidalCSNNPtr
-PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
-                                              int iAxisSwap) {
+EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
+    int iStep, int iUnitConvert, int iAxisSwap, bool ignoreVUnits) {
     const auto &step = steps_[iStep];
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
@@ -4237,7 +4413,7 @@ PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
         AxisAbbreviation::h, AxisDirection::UP,
         buildUnit(step, "vunits", "vto_meter"));
 
-    auto cs = (getParamValue(step, "geoidgrids").empty() &&
+    auto cs = (!ignoreVUnits && getParamValue(step, "geoidgrids").empty() &&
                (!getParamValue(step, "vunits").empty() ||
                 !getParamValue(step, "vto_meter").empty()))
                   ? EllipsoidalCS::create(PropertyMap(), axis[0], axis[1], up)
@@ -4248,16 +4424,15 @@ PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
 
 // ---------------------------------------------------------------------------
 
-GeographicCRSNNPtr
-PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
-                                              int iAxisSwap) {
+GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
+    int iStep, int iUnitConvert, int iAxisSwap, bool ignoreVUnits) {
     const auto &step = steps_[iStep];
 
     auto datum = buildDatum(step);
 
     return GeographicCRS::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), datum,
-        buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap));
+        buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignoreVUnits));
 }
 
 // ---------------------------------------------------------------------------
@@ -4656,7 +4831,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             return DerivedGeographicCRS::create(
                 PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
                 geogCRS, NN_CHECK_ASSERT(conv),
-                buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap));
+                buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false));
         }
     }
 
@@ -4729,14 +4904,14 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     auto sourceCRS =
         iFirstGeogStep >= 0
             ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                 iFirstAxisSwap)
+                                 iFirstAxisSwap, true)
             : GeodeticCRS::create(
                   PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
                   datum, cs);
     auto targetCRS =
         iSecondGeogStep >= 0
             ? buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
-                                 iSecondAxisSwap)
+                                 iSecondAxisSwap, true)
             : GeodeticCRS::create(
                   PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
                   datum, cs);
@@ -4886,8 +5061,8 @@ PROJStringParser::Private::buildMolodenskyTransformation(
     auto datum = buildDatum(step);
     auto sourceCRS = iFirstGeogStep >= 0
                          ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                              iFirstAxisSwap)
-                         : buildGeographicCRS(iStep, -1, -1);
+                                              iFirstAxisSwap, true)
+                         : buildGeographicCRS(iStep, -1, -1, true);
 
     double dx = 0;
     double dy = 0;
@@ -4952,7 +5127,7 @@ PROJStringParser::Private::buildMolodenskyTransformation(
     auto targetCRS =
         iSecondGeogStep >= 0
             ? buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
-                                 iSecondAxisSwap)
+                                 iSecondAxisSwap, true)
             : GeographicCRS::create(
                   PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
                   target_datum,
@@ -4998,6 +5173,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     bool prevWasStep = false;
     bool inProj = false;
     bool inPipeline = false;
+    std::string vunits;
+    std::string vto_meter;
     while (iss >> word) {
         if (word[0] == '+') {
             word = word.substr(1);
@@ -5051,12 +5228,37 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 d->steps_.back().paramValues.push_back(pair);
             }
             prevWasStep = false;
+        } else if (starts_with(word, "vunits=")) {
+            vunits = word.substr(std::string("vunits=").size());
+        } else if (starts_with(word, "vto_meter=")) {
+            vto_meter = word.substr(std::string("vto_meter=").size());
         } else {
             throw ParsingException("Unexpected token: " + word);
         }
     }
 
     if (d->steps_.empty()) {
+
+        if (!vunits.empty() || !vto_meter.empty()) {
+            Private::Step fakeStep;
+            if (!vunits.empty()) {
+                fakeStep.paramValues.emplace_back(
+                    std::pair<std::string, std::string>("vunits", vunits));
+            }
+            if (!vto_meter.empty()) {
+                fakeStep.paramValues.emplace_back(
+                    std::pair<std::string, std::string>("vto_meter",
+                                                        vto_meter));
+            }
+            auto vdatum = VerticalReferenceFrame::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"));
+            auto vcrs = VerticalCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                vdatum, VerticalCS::createGravityRelatedHeight(
+                            d->buildUnit(fakeStep, "vunits", "vto_meter")));
+            return vcrs;
+        }
+
         throw ParsingException("Missing proj= argument");
     }
 
@@ -5148,9 +5350,10 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             iHelmert < 0 && iFirstCart < 0 && iMolodensky < 0 &&
             (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
             (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
+            const bool ignoreVUnits = false;
             return d->buildBoundOrCompoundCRSIfNeeded(
                 0, d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                         iFirstAxisSwap));
+                                         iFirstAxisSwap, ignoreVUnits));
         }
         if (iProjStep >= 0 && !d->steps_[iProjStep].inverted &&
             (iFirstGeogStep < 0 || iFirstGeogStep + 1 == iProjStep) &&
@@ -5158,6 +5361,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             iHelmert < 0) {
             if (iFirstGeogStep < 0)
                 iFirstGeogStep = iProjStep;
+            const bool ignoreVUnits = true;
             return d->buildBoundOrCompoundCRSIfNeeded(
                 iProjStep,
                 d->buildProjectedCRS(
@@ -5166,7 +5370,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         iFirstGeogStep,
                         iFirstUnitConvert < iFirstGeogStep ? iFirstUnitConvert
                                                            : -1,
-                        iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap : -1),
+                        iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap : -1,
+                        ignoreVUnits),
                     iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
                                                        : iFirstUnitConvert,
                     iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap

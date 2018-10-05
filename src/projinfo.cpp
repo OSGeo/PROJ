@@ -104,7 +104,10 @@ static BaseObjectNNPtr buildObject(const std::string &user_string,
                       << std::endl;
             std::exit(1);
         }
-    } else if (user_string.find("+proj=") != std::string::npos) {
+    } else if (user_string.find("+proj=") != std::string::npos ||
+               user_string.find("+vunits=") != std::string::npos ||
+               user_string.find("+vto_meter=") != std::string::npos ||
+               user_string.find("+geoidgrids=") != std::string::npos) {
         try {
             obj = PROJStringParser()
                       .createFromPROJString(user_string)
@@ -293,13 +296,14 @@ static void outputOperations(
         std::exit(1);
     }
 
-    auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
-    auto ctxt = CoordinateOperationContext::create(authFactory, bboxFilter, 0);
-    ctxt->setSpatialCriterion(spatialCriterion);
-    ctxt->setSourceAndTargetCRSExtentUse(crsExtentUse);
     std::vector<CoordinateOperationNNPtr> list;
     try {
+        auto authFactory =
+            AuthorityFactory::create(DatabaseContext::create(), std::string());
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, bboxFilter, 0);
+        ctxt->setSpatialCriterion(spatialCriterion);
+        ctxt->setSourceAndTargetCRSExtentUse(crsExtentUse);
         list = CoordinateOperationFactory::create()->createOperations(
             NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS), ctxt);
     } catch (const std::exception &e) {

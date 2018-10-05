@@ -1370,12 +1370,12 @@ TEST(crs, compoundCRS_as_PROJ_string) {
     auto crs = createCompoundCRS();
     auto expected = "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
                     "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
-                    "+zone=31 +ellps=WGS84";
+                    "+zone=31 +ellps=WGS84 +vunits=m";
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()), expected);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_4)),
-              "+proj=utm +zone=31 +datum=WGS84");
+              "+proj=utm +zone=31 +datum=WGS84 +vunits=m");
 }
 
 // ---------------------------------------------------------------------------
@@ -1814,7 +1814,7 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_PROJ_string) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_4)),
-              "+geoidgrids=egm08_25.gtx");
+              "+geoidgrids=egm08_25.gtx +vunits=m");
 }
 
 // ---------------------------------------------------------------------------
@@ -2509,5 +2509,43 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         auto crs = createVerticalCRS();
         EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(), crs);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, crs_stripVerticalComponent) {
+
+    {
+        auto crs = GeographicCRS::EPSG_4979->stripVerticalComponent();
+        auto geogCRS = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+        ASSERT_TRUE(geogCRS != nullptr);
+        EXPECT_EQ(geogCRS->coordinateSystem()->axisList().size(), 2);
+    }
+
+    {
+        auto crs = GeographicCRS::EPSG_4326->stripVerticalComponent();
+        EXPECT_TRUE(crs->isEquivalentTo(GeographicCRS::EPSG_4326));
+    }
+
+    {
+        std::vector<CoordinateSystemAxisNNPtr> axis{
+            CoordinateSystemAxis::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "Easting"), "E",
+                AxisDirection::EAST, UnitOfMeasure::METRE),
+            CoordinateSystemAxis::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "Northing"), "N",
+                AxisDirection::NORTH, UnitOfMeasure::METRE),
+            CoordinateSystemAxis::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "Height"), "z",
+                AxisDirection::UP, UnitOfMeasure::METRE)};
+        auto cs(CartesianCS::create(PropertyMap(), axis[0], axis[1], axis[2]));
+        auto projected3DCrs = ProjectedCRS::create(
+            PropertyMap(), GeographicCRS::EPSG_4326,
+            Conversion::createUTM(PropertyMap(), 31, true), cs);
+        auto projCRS = nn_dynamic_pointer_cast<ProjectedCRS>(
+            projected3DCrs->stripVerticalComponent());
+        ASSERT_TRUE(projCRS != nullptr);
+        EXPECT_EQ(projCRS->coordinateSystem()->axisList().size(), 2);
     }
 }

@@ -209,6 +209,44 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns a CRS whose coordinate system does not contain a vertical
+ * component
+ *
+ * @return a CRS.
+ */
+CRSNNPtr CRS::stripVerticalComponent() const {
+    auto self = NN_CHECK_ASSERT(
+        std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
+
+    auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        const auto &axisList = geogCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 3) {
+            auto cs = cs::EllipsoidalCS::create(util::PropertyMap(),
+                                                axisList[0], axisList[1]);
+            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        *(name()->description())),
+                geogCRS->datum(), geogCRS->datumEnsemble(), cs));
+        }
+    }
+    auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        const auto &axisList = projCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 3) {
+            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                              axisList[1]);
+            return util::nn_static_pointer_cast<CRS>(ProjectedCRS::create(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        *(name()->description())),
+                projCRS->baseCRS(), projCRS->derivingConversion(), cs));
+        }
+    }
+    return self;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct SingleCRS::Private {
     datum::DatumPtr datum{};
@@ -914,11 +952,23 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
             auto projUnit = axisList[0]->unit().exportToPROJString();
             formatter->addStep("unitconvert");
             formatter->addParam("xy_in", "rad");
+            if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
+                formatter->addParam("z_in", "m");
+            }
             if (projUnit.empty()) {
                 formatter->addParam("xy_out",
                                     axisList[0]->unit().conversionToSI());
             } else {
                 formatter->addParam("xy_out", projUnit);
+            }
+            if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
+                auto projVUnit = axisList[2]->unit().exportToPROJString();
+                if (projVUnit.empty()) {
+                    formatter->addParam("z_out",
+                                        axisList[2]->unit().conversionToSI());
+                } else {
+                    formatter->addParam("z_out", projVUnit);
+                }
             }
         }
 
@@ -1092,8 +1142,7 @@ VerticalCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     }
 
     auto &axisList = coordinateSystem()->axisList();
-    if (!axisList.empty() &&
-        axisList[0]->unit() != common::UnitOfMeasure::METRE) {
+    if (!axisList.empty()) {
         auto projUnit = axisList[0]->unit().exportToPROJString();
         if (projUnit.empty()) {
             formatter->addParam("vto_meter",

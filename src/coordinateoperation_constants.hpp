@@ -446,6 +446,16 @@ constexpr int EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE = 8732;
 
 // ---------------------------------------------------------------------------
 
+constexpr int EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT = 1069;
+static const std::string
+    EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT("Change of Vertical Unit");
+
+static const std::string
+    EPSG_NAME_PARAMETER_UNIT_CONVERSION_SCALAR("Unit conversion scalar");
+constexpr int EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR = 1051;
+
+// ---------------------------------------------------------------------------
+
 constexpr int EPSG_CODE_METHOD_LONGITUDE_ROTATION = 9601;
 static const std::string
     EPSG_NAME_METHOD_LONGITUDE_ROTATION("Longitude rotation");

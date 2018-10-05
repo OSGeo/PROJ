@@ -122,6 +122,7 @@ class CoordinateOperation : public common::ObjectUsage,
 
     friend class crs::DerivedCRS;
     friend class io::AuthorityFactory;
+    friend class CoordinateOperationFactory;
     void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                                 std::weak_ptr<crs::CRS> targetCRSIn);
     void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
@@ -1151,6 +1152,10 @@ class Conversion : public SingleOperation {
         const util::PropertyMap &properties, const common::Angle &pegPointLat,
         const common::Angle &pegPointLong, const common::Angle &pegPointHeading,
         const common::Length &pegPointHeight);
+
+    PROJ_DLL static ConversionNNPtr
+    createChangeVerticalUnit(const util::PropertyMap &properties,
+                             const common::Scale &factor);
 
   protected:
     Conversion(const OperationMethodNNPtr &methodIn,

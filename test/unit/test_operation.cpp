@@ -501,8 +501,17 @@ TEST(operation,
         std::vector<PositionalAccuracyNNPtr>());
 
     EXPECT_EQ(transf2->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +inv +proj=unitconvert +xy_in=m +z_in=m "
-              "+xy_out=km +z_out=km +step +proj=helmert +x=1 +y=2 +z=3");
+              "+proj=pipeline +step +proj=unitconvert +xy_in=km +z_in=km "
+              "+xy_out=m +z_out=m +step +proj=helmert +x=1 +y=2 +z=3");
+
+    auto transf3 = Transformation::createGeocentricTranslations(
+        PropertyMap(), createGeocentricKM(), createGeocentricKM(), 1.0, 2.0,
+        3.0, std::vector<PositionalAccuracyNNPtr>());
+
+    EXPECT_EQ(transf3->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=km +z_in=km "
+              "+xy_out=m +z_out=m +step +proj=helmert +x=1 +y=2 +z=3 +step "
+              "+proj=unitconvert +xy_in=m +z_in=m +xy_out=km +z_out=km");
 }
 
 // ---------------------------------------------------------------------------
@@ -3729,6 +3738,54 @@ TEST(operation, geogCRS_to_geogCRS_geographic_offset_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_3D) {
+
+    auto geogcrs_m_obj =
+        PROJStringParser().createFromPROJString("+proj=longlat +vunits=m");
+    auto geogcrs_m = nn_dynamic_pointer_cast<CRS>(geogcrs_m_obj);
+    ASSERT_TRUE(geogcrs_m != nullptr);
+
+    auto geogcrs_ft_obj =
+        PROJStringParser().createFromPROJString("+proj=longlat +vunits=ft");
+    auto geogcrs_ft = nn_dynamic_pointer_cast<CRS>(geogcrs_ft_obj);
+    ASSERT_TRUE(geogcrs_ft != nullptr);
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(geogcrs_m), NN_CHECK_ASSERT(geogcrs_ft));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=unitconvert +z_in=m +z_out=ft");
+    }
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(geogcrs_ft), NN_CHECK_ASSERT(geogcrs_m));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=unitconvert +z_in=ft +z_out=m");
+    }
+
+    auto geogcrs_m_with_pm_obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +pm=paris +vunits=m");
+    auto geogcrs_m_with_pm =
+        nn_dynamic_pointer_cast<CRS>(geogcrs_m_with_pm_obj);
+    ASSERT_TRUE(geogcrs_m_with_pm != nullptr);
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(geogcrs_m_with_pm), NN_CHECK_ASSERT(geogcrs_ft));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=pipeline +step +proj=unitconvert +xy_in=deg +z_in=m "
+                  "+xy_out=rad +z_out=m +step +inv +proj=longlat +ellps=WGS84 "
+                  "+pm=paris +step +proj=unitconvert +xy_in=rad +z_in=m "
+                  "+xy_out=deg +z_out=ft");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geocentricCRS_to_geogCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -4312,6 +4369,32 @@ TEST(operation, compoundCRS_with_boundVerticalCRS_to_geogCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_with_boundGeogCRS_to_geogCRS) {
+
+    auto geogCRS = GeographicCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::create(
+                           PropertyMap(), Ellipsoid::WGS84,
+                           optional<std::string>(), PrimeMeridian::GREENWICH),
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+    auto horizBoundCRS = BoundCRS::createFromTOWGS84(
+        geogCRS, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto compound = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{horizBoundCRS, createVerticalCRS()});
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        compound, GeographicCRS::EPSG_4979);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
+              "+rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
+              "+ellps=WGS84 +step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
 
     auto horizBoundCRS = BoundCRS::createFromTOWGS84(
@@ -4324,16 +4407,15 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
     ASSERT_TRUE(op != nullptr);
     // Not completely sure the order of horizontal and vertical operations
     // makes sense
-    EXPECT_EQ(
-        op->exportToPROJString(PROJStringFormatter::create()),
-        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-        "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
-        "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
-        "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
-        "+convention=position_vector +step "
-        "+inv +proj=cart +ellps=WGS84 +step +proj=vgridshift "
-        "+grids=egm08_25.gtx +step +proj=unitconvert +xy_in=rad "
-        "+xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
+              "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=cart "
+              "+ellps=clrk80ign +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
+              "+rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
+              "+ellps=WGS84 +step +proj=vgridshift +grids=egm08_25.gtx +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step "
+              "+proj=axisswap +order=2,1");
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4979, compound);
@@ -4361,13 +4443,12 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
     // makes sense
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
-              "+pm=paris "
-              "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
-              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +convention=position_vector +step "
-              "+inv +proj=cart +ellps=WGS84 "
+              "+pm=paris +step +proj=cart +ellps=clrk80ign +step +proj=helmert "
+              "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector +step +inv +proj=cart +ellps=WGS84 "
               "+step +proj=vgridshift +grids=egm08_25.gtx +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
-              "+order=2,1");
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step "
+              "+proj=axisswap +order=2,1");
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4979, compound);
@@ -4431,4 +4512,88 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
         compound2, compound1);
     ASSERT_TRUE(opInverse != nullptr);
     EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(NN_CHECK_ASSERT(op)));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, vertCRS_to_vertCRS) {
+
+    auto vertcrs_m_obj = PROJStringParser().createFromPROJString("+vunits=m");
+    auto vertcrs_m = nn_dynamic_pointer_cast<VerticalCRS>(vertcrs_m_obj);
+    ASSERT_TRUE(vertcrs_m != nullptr);
+
+    auto vertcrs_ft_obj = PROJStringParser().createFromPROJString("+vunits=ft");
+    auto vertcrs_ft = nn_dynamic_pointer_cast<VerticalCRS>(vertcrs_ft_obj);
+    ASSERT_TRUE(vertcrs_ft != nullptr);
+
+    auto vertcrs_us_ft_obj =
+        PROJStringParser().createFromPROJString("+vunits=us-ft");
+    auto vertcrs_us_ft =
+        nn_dynamic_pointer_cast<VerticalCRS>(vertcrs_us_ft_obj);
+    ASSERT_TRUE(vertcrs_us_ft != nullptr);
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(vertcrs_m), NN_CHECK_ASSERT(vertcrs_ft));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=unitconvert +z_in=m +z_out=ft");
+    }
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(vertcrs_m), NN_CHECK_ASSERT(vertcrs_ft));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(
+            op->inverse()->exportToPROJString(PROJStringFormatter::create()),
+            "+proj=unitconvert +z_in=ft +z_out=m");
+    }
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(vertcrs_ft), NN_CHECK_ASSERT(vertcrs_m));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=unitconvert +z_in=ft +z_out=m");
+    }
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(vertcrs_ft), NN_CHECK_ASSERT(vertcrs_us_ft));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=affine +s33=0.999998");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_to_geogCRS_3D) {
+
+    auto compoundcrs_ft_obj =
+        PROJStringParser().createFromPROJString("+proj=merc +vunits=ft");
+    auto compoundcrs_ft = nn_dynamic_pointer_cast<CRS>(compoundcrs_ft_obj);
+    ASSERT_TRUE(compoundcrs_ft != nullptr);
+
+    auto geogcrs_m_obj =
+        PROJStringParser().createFromPROJString("+proj=longlat +vunits=m");
+    auto geogcrs_m = nn_dynamic_pointer_cast<CRS>(geogcrs_m_obj);
+    ASSERT_TRUE(geogcrs_m != nullptr);
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(compoundcrs_ft), NN_CHECK_ASSERT(geogcrs_m));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=pipeline +step +inv +proj=merc +lon_0=0 +k=1 +x_0=0 "
+                  "+y_0=0 +ellps=WGS84 +step +proj=unitconvert +xy_in=rad "
+                  "+z_in=ft +xy_out=deg +z_out=m");
+    }
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(geogcrs_m), NN_CHECK_ASSERT(compoundcrs_ft));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=pipeline +step +proj=unitconvert +xy_in=deg +z_in=m "
+                  "+xy_out=rad +z_out=ft +step +proj=merc +lon_0=0 +k=1 +x_0=0 "
+                  "+y_0=0 +ellps=WGS84");
+    }
 }
