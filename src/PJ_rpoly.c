@@ -13,7 +13,7 @@ struct pj_opaque {
 };
 
 PROJ_HEAD(rpoly, "Rectangular Polyconic")
-    "\n\tConic, Sph., no inv.\n\tlat_ts=";
+    "\n\tConic, Sph, no inv\n\tlat_ts=";
 
 #define EPS 1e-9
 

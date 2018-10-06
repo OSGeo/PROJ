@@ -11,7 +11,7 @@ Port to PROJ.4 by Bojan Savric, 4 April 2016
 
 #include "projects.h"
 
-PROJ_HEAD(natearth2, "Natural Earth 2") "\n\tPCyl., Sph.";
+PROJ_HEAD(natearth2, "Natural Earth 2") "\n\tPCyl, Sph";
 
 #define A0 0.84719
 #define A1 -0.13063

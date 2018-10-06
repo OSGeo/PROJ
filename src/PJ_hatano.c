@@ -5,7 +5,7 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(hatano, "Hatano Asymmetrical Equal Area") "\n\tPCyl, Sph.";
+PROJ_HEAD(hatano, "Hatano Asymmetrical Equal Area") "\n\tPCyl, Sph";
 
 #define NITER   20
 #define EPS 1e-7

@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(wag7, "Wagner VII") "\n\tMisc Sph, no inv.";
+PROJ_HEAD(wag7, "Wagner VII") "\n\tMisc Sph, no inv";
 
 
 

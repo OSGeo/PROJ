@@ -5,7 +5,7 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(tcc, "Transverse Central Cylindrical") "\n\tCyl, Sph, no inv.";
+PROJ_HEAD(tcc, "Transverse Central Cylindrical") "\n\tCyl, Sph, no inv";
 
 #define EPS10 1.e-10
 

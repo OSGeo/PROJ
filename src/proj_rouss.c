@@ -39,7 +39,7 @@ struct pj_opaque {
     double D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11;
     void *en;
 };
-PROJ_HEAD(rouss, "Roussilhe Stereographic") "\n\tAzi., Ellps.";
+PROJ_HEAD(rouss, "Roussilhe Stereographic") "\n\tAzi, Ell";
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */

@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(august, "August Epicycloidal") "\n\tMisc Sph, no inv.";
+PROJ_HEAD(august, "August Epicycloidal") "\n\tMisc Sph, no inv";
 #define M 1.333333333333333
 
 

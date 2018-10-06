@@ -4,7 +4,7 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(robin, "Robinson") "\n\tPCyl., Sph.";
+PROJ_HEAD(robin, "Robinson") "\n\tPCyl, Sph";
 
 #define V(C,z) (C.c0 + z * (C.c1 + z * (C.c2 + z * C.c3)))
 #define DV(C,z) (C.c1 + z * (C.c2 + C.c2 + z * 3. * C.c3))

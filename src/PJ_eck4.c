@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(eck4, "Eckert IV") "\n\tPCyl, Sph.";
+PROJ_HEAD(eck4, "Eckert IV") "\n\tPCyl, Sph";
 
 #define C_x .42223820031577120149
 #define C_y 1.32650042817700232218
