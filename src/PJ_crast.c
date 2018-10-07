@@ -3,7 +3,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(crast, "Craster Parabolic (Putnins P4)") "\n\tPCyl., Sph.";
+PROJ_HEAD(crast, "Craster Parabolic (Putnins P4)") "\n\tPCyl, Sph";
 
 #define XM  0.97720502380583984317
 #define RXM 1.02332670794648848847

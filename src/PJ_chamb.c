@@ -19,7 +19,7 @@ struct pj_opaque {
     double beta_0, beta_1, beta_2;
 };
 
-PROJ_HEAD(chamb, "Chamberlin Trimetric") "\n\tMisc Sph, no inv."
+PROJ_HEAD(chamb, "Chamberlin Trimetric") "\n\tMisc Sph, no inv"
 "\n\tlat_1= lon_1= lat_2= lon_2= lat_3= lon_3=";
 
 #include <stdio.h>

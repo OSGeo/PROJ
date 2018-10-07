@@ -9,8 +9,8 @@ struct pj_opaque {
     double C_x, C_y;
 };
 
-PROJ_HEAD(putp4p, "Putnins P4'") "\n\tPCyl., Sph.";
-PROJ_HEAD(weren, "Werenskiold I") "\n\tPCyl., Sph.";
+PROJ_HEAD(putp4p, "Putnins P4'") "\n\tPCyl, Sph";
+PROJ_HEAD(weren, "Werenskiold I") "\n\tPCyl, Sph";
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

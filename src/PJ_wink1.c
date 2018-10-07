@@ -5,7 +5,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(wink1, "Winkel I") "\n\tPCyl., Sph.\n\tlat_ts=";
+PROJ_HEAD(wink1, "Winkel I") "\n\tPCyl, Sph\n\tlat_ts=";
 
 struct pj_opaque {
 	double	cosphi1;

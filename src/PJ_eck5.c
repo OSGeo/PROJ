@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(eck5, "Eckert V") "\n\tPCyl, Sph.";
+PROJ_HEAD(eck5, "Eckert V") "\n\tPCyl, Sph";
 
 #define XF  0.44101277172455148219
 #define RXF 2.26750802723822639137

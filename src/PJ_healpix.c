@@ -37,8 +37,8 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(healpix, "HEALPix") "\n\tSph., Ellps.";
-PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph., Ellps.\n\tnorth_square= south_square=";
+PROJ_HEAD(healpix, "HEALPix") "\n\tSph&Ell";
+PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph&Ell\n\tnorth_square= south_square=";
 
 /* Matrix for counterclockwise rotation by pi/2: */
 # define R1 {{ 0,-1},{ 1, 0}}

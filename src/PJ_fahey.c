@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(fahey, "Fahey") "\n\tPcyl, Sph.";
+PROJ_HEAD(fahey, "Fahey") "\n\tPcyl, Sph";
 
 #define TOL 1e-6
 

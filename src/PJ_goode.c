@@ -6,7 +6,7 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(goode, "Goode Homolosine") "\n\tPCyl, Sph.";
+PROJ_HEAD(goode, "Goode Homolosine") "\n\tPCyl, Sph";
 
 #define Y_COR   0.05280
 #define PHI_LIM 0.71093078197902358062

@@ -5,7 +5,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(wag3, "Wagner III") "\n\tPCyl., Sph.\n\tlat_ts=";
+PROJ_HEAD(wag3, "Wagner III") "\n\tPCyl, Sph\n\tlat_ts=";
 
 #define TWOTHIRD 0.6666666666666666666667
 

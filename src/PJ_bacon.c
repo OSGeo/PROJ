@@ -12,9 +12,9 @@ struct pj_opaque {
 	int ortl;
 };
 
-PROJ_HEAD(apian, "Apian Globular I") "\n\tMisc Sph, no inv.";
-PROJ_HEAD(ortel, "Ortelius Oval") "\n\tMisc Sph, no inv.";
-PROJ_HEAD(bacon, "Bacon Globular") "\n\tMisc Sph, no inv.";
+PROJ_HEAD(apian, "Apian Globular I") "\n\tMisc Sph, no inv";
+PROJ_HEAD(ortel, "Ortelius Oval") "\n\tMisc Sph, no inv";
+PROJ_HEAD(bacon, "Bacon Globular") "\n\tMisc Sph, no inv";
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

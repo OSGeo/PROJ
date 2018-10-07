@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(putp2, "Putnins P2") "\n\tPCyl., Sph.";
+PROJ_HEAD(putp2, "Putnins P2") "\n\tPCyl, Sph";
 
 #define C_x	1.89490
 #define C_y	1.71848

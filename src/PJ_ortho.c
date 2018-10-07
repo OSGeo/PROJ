@@ -5,7 +5,7 @@
 #include "proj_math.h"
 #include "projects.h"
 
-PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph.";
+PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph";
 
 enum Mode {
     N_POLE = 0,

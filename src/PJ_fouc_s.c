@@ -6,7 +6,7 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(fouc_s, "Foucaut Sinusoidal") "\n\tPCyl., Sph.";
+PROJ_HEAD(fouc_s, "Foucaut Sinusoidal") "\n\tPCyl, Sph";
 
 #define MAX_ITER    10
 #define LOOP_TOL    1e-7

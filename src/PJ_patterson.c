@@ -44,7 +44,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(patterson, "Patterson Cylindrical") "\n\tCyl.";
+PROJ_HEAD(patterson, "Patterson Cylindrical") "\n\tCyl";
 
 #define K1 1.0148
 #define K2 0.23185

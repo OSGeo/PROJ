@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv.";
+PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv";
 
 #define TOL 1e-10
 

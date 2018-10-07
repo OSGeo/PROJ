@@ -6,7 +6,7 @@
 #include "projects.h"
 #include "proj_math.h"
 
-PROJ_HEAD(bipc, "Bipolar conic of western hemisphere") "\n\tConic Sph.";
+PROJ_HEAD(bipc, "Bipolar conic of western hemisphere") "\n\tConic Sph";
 
 # define EPS    1e-10
 # define EPS10  1e-10

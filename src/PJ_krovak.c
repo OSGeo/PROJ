@@ -82,7 +82,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
+PROJ_HEAD(krovak, "Krovak") "\n\tPCyl, Ell";
 
 #define EPS 1e-15
 #define UQ  1.04216856380474   /* DU(2, 59, 42, 42.69689) */

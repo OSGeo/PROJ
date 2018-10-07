@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(larr, "Larrivee") "\n\tMisc Sph, no inv.";
+PROJ_HEAD(larr, "Larrivee") "\n\tMisc Sph, no inv";
 
 #define SIXTH .16666666666666666
 

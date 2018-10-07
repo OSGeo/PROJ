@@ -6,10 +6,10 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(gn_sinu, "General Sinusoidal Series") "\n\tPCyl, Sph.\n\tm= n=";
+PROJ_HEAD(gn_sinu, "General Sinusoidal Series") "\n\tPCyl, Sph\n\tm= n=";
 PROJ_HEAD(sinu, "Sinusoidal (Sanson-Flamsteed)") "\n\tPCyl, Sph&Ell";
-PROJ_HEAD(eck6, "Eckert VI") "\n\tPCyl, Sph.";
-PROJ_HEAD(mbtfps, "McBryde-Thomas Flat-Polar Sinusoidal") "\n\tPCyl, Sph.";
+PROJ_HEAD(eck6, "Eckert VI") "\n\tPCyl, Sph";
+PROJ_HEAD(mbtfps, "McBryde-Thomas Flat-Polar Sinusoidal") "\n\tPCyl, Sph";
 
 #define EPS10    1e-10
 #define MAX_ITER 8

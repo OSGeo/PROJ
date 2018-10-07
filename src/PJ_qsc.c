@@ -62,7 +62,7 @@ struct pj_opaque {
         double one_minus_f;
         double one_minus_f_squared;
 };
-PROJ_HEAD(qsc, "Quadrilateralized Spherical Cube") "\n\tAzi, Sph.";
+PROJ_HEAD(qsc, "Quadrilateralized Spherical Cube") "\n\tAzi, Sph";
 
 #define EPS10 1.e-10
 

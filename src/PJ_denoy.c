@@ -3,7 +3,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(denoy, "Denoyer Semi-Elliptical") "\n\tPCyl., no inv., Sph.";
+PROJ_HEAD(denoy, "Denoyer Semi-Elliptical") "\n\tPCyl, no inv, Sph";
 
 #define C0  0.95
 #define C1 -0.08333333333333333333
