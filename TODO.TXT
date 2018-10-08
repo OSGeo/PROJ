@@ -49,9 +49,6 @@ OGRFeature(epsg_coordoperation):3859
   source_crs_code (Integer) = 4979
   target_crs_code (Integer) = 3855
 
-  
-  - map "Lambert Conic Conformal (2SP Michigan)" to PROJ (https://github.com/OSGeo/proj.4/pull/1142)
-
 
 - Integrate Doxygen doc in PROJ doc
 - More tests

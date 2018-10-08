@@ -1583,6 +1583,47 @@ TEST(operation, lcc2sp_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, lcc2sp_michigan_export) {
+    auto conv = Conversion::createLambertConicConformal_2SP_Michigan(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
+        Length(6), Scale(7));
+    EXPECT_EQ(
+        conv->exportToPROJString(PROJStringFormatter::create()),
+        "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6 +k_0=7");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Lambert Conic Conformal (2SP Michigan)\",\n"
+              "    METHOD[\"Lambert Conic Conformal (2SP Michigan)\",\n"
+              "        ID[\"EPSG\",1051]],\n"
+              "    PARAMETER[\"Latitude of false origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8821]],\n"
+              "    PARAMETER[\"Longitude of false origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8822]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8824]],\n"
+              "    PARAMETER[\"Easting of false origin\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8826]],\n"
+              "    PARAMETER[\"Northing of false origin\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8827]],\n"
+              "    PARAMETER[\"Ellipsoid scaling factor\",7,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",1038]]]");
+
+    EXPECT_THROW(conv->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, lcc2sp_belgium_export) {
     auto conv = Conversion::createLambertConicConformal_2SP_Belgium(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),

@@ -4630,10 +4630,16 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         auto lat_0 = getParamValue(step, "lat_0");
         auto lat_1 = getParamValue(step, "lat_1");
         auto lat_2 = getParamValue(step, "lat_2");
+        auto k_0 = getParamValue(step, "k_0");
         if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
             getAngularValue(lat_0) == getAngularValue(lat_1)) {
             constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP = 9801;
             mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+        } else if (!k_0.empty()) {
+            constexpr int
+                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN = 1051;
+            mapping = getMapping(
+                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN);
         } else {
             constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP = 9802;
             mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);

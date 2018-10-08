@@ -837,6 +837,16 @@ class Conversion : public SingleOperation {
                                     const common::Length &eastingFalseOrigin,
                                     const common::Length &eastingNorthOrigin);
 
+    PROJ_DLL static ConversionNNPtr createLambertConicConformal_2SP_Michigan(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeFalseOrigin,
+        const common::Angle &longitudeFalseOrigin,
+        const common::Angle &latitudeFirstParallel,
+        const common::Angle &latitudeSecondParallel,
+        const common::Length &eastingFalseOrigin,
+        const common::Length &eastingNorthOrigin,
+        const common::Scale &ellipsoidScalingFactor);
+
     PROJ_DLL static ConversionNNPtr createLambertConicConformal_2SP_Belgium(
         const util::PropertyMap &properties,
         const common::Angle &latitudeFalseOrigin,

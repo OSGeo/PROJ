@@ -77,6 +77,10 @@ static const std::string EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM(
     "Lambert Conic Conformal (2SP Belgium)");
 constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM = 9803;
 
+static const std::string EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN(
+    "Lambert Conic Conformal (2SP Michigan)");
+constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN = 1051;
+
 static const std::string EPSG_NAME_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT(
     "Modified Azimuthal Equidistant");
 constexpr int EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT = 9832;
@@ -313,6 +317,10 @@ constexpr int EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL = 8832;
 static const std::string
     EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN("Longitude of origin");
 constexpr int EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN = 8833;
+
+static const std::string
+    EPSG_NAME_PARAMETER_ELLIPSOID_SCALE_FACTOR("Ellipsoid scaling factor");
+constexpr int EPSG_CODE_PARAMETER_ELLIPSOID_SCALE_FACTOR = 1038;
 
 static const std::string WKT1_LATITUDE_OF_ORIGIN("latitude_of_origin");
 static const std::string WKT1_CENTRAL_MERIDIAN("central_meridian");
@@ -677,6 +685,23 @@ static const MethodMapping methodMappings[] = {
          paramLatitudeFalseOrigin, paramLongitudeFalseOrigin,
          paramLatitude1stStdParallel, paramLatitude2ndStdParallel,
          paramFalseEastingOrigin, paramFalseNorthingOrigin,
+     }},
+
+    {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN,
+     EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN,
+     "", // no mapping to WKT1_GDAL
+     "lcc",
+     {
+         paramLatitudeFalseOrigin,
+         paramLongitudeFalseOrigin,
+         paramLatitude1stStdParallel,
+         paramLatitude2ndStdParallel,
+         paramFalseEastingOrigin,
+         paramFalseNorthingOrigin,
+
+         {EPSG_NAME_PARAMETER_ELLIPSOID_SCALE_FACTOR,
+          EPSG_CODE_PARAMETER_ELLIPSOID_SCALE_FACTOR, "",
+          common::UnitOfMeasure::Type::SCALE, "k_0"},
      }},
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM,

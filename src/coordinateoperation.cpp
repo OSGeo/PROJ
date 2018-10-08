@@ -1878,6 +1878,48 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP(
 // ---------------------------------------------------------------------------
 
 /** \brief Instanciate a conversion based on the [Lambert Conic Conformal (2SP
+ *Michigan)]
+ *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *
+ * This method is defined as [EPSG:1051]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1051)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeFalseOrigin See \ref latitude_false_origin
+ * @param longitudeFalseOrigin See \ref longitude_false_origin
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel
+ * @param latitudeSecondParallel See \ref latitude_second_std_parallel
+ * @param eastingFalseOrigin See \ref easting_false_origin
+ * @param northingFalseOrigin See \ref northing_false_origin
+ * @param ellipsoidScalingFactor Ellipsoid scaling factor.
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createLambertConicConformal_2SP_Michigan(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeFalseOrigin,
+    const common::Angle &longitudeFalseOrigin,
+    const common::Angle &latitudeFirstParallel,
+    const common::Angle &latitudeSecondParallel,
+    const common::Length &eastingFalseOrigin,
+    const common::Length &northingFalseOrigin,
+    const common::Scale &ellipsoidScalingFactor) {
+    return create(properties,
+                  EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN,
+                  {
+                      ParameterValue::create(latitudeFalseOrigin),
+                      ParameterValue::create(longitudeFalseOrigin),
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(latitudeSecondParallel),
+                      ParameterValue::create(eastingFalseOrigin),
+                      ParameterValue::create(northingFalseOrigin),
+                      ParameterValue::create(ellipsoidScalingFactor),
+                  });
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Lambert Conic Conformal (2SP
  *Belgium)]
  *(https://proj4.org/operations/projections/lcc.html) projection method.
  *

@@ -4229,6 +4229,23 @@ TEST(io, projparse_lcc_as_lcc2sp) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_lcc_as_lcc2sp_michigan) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=lcc +lat_0=45 +lat_1=46 +k_0=1.02");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("Lambert Conic Conformal (2SP Michigan)") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_aeqd_guam) {
     auto obj = PROJStringParser().createFromPROJString("+proj=aeqd +guam");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
