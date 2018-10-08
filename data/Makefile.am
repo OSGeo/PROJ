@@ -25,6 +25,7 @@ SQL_ORDERED_LIST = sql/proj_db_table_defs.sql \
 		sql/compound_crs.sql \
 		sql/helmert_transformation.sql \
 		sql/grid_transformation.sql \
+		sql/grid_transformation_custom.sql \
 		sql/other_transformation.sql \
 		sql/concatenated_operation.sql \
 		sql/grid_alternatives.sql \

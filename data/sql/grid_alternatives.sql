@@ -10,6 +10,9 @@ INSERT INTO grid_packages VALUES ('proj-datumgrid',
 INSERT INTO grid_packages VALUES ('proj-datumgrid-north-america',
                                   'https://download.osgeo.org/proj/proj-datumgrid-north-america-1.1.zip');
 
+INSERT INTO grid_packages VALUES ('proj-datumgrid-europe',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-europe-1.1.zip');
+
  -- not released yet at the time of writing
 INSERT INTO grid_packages VALUES ('proj-datumgrid-world',
                                   'https://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip');
@@ -308,3 +311,70 @@ INSERT INTO grid_alternatives(original_grid_name,
                               1,
                               'proj-datumgrid-world',
                               NULL);
+
+-- Greenland height models
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              directory)
+                      VALUES ('gr2000g.gri',
+                              'gvr2000.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              directory)
+                      VALUES ('ggeoid16.gri',
+                              'gvr2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL);
+
+-- Denmark height models
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              directory)
+                      VALUES ('dvr90.gtx',
+                              'dvr90.gtx', -- no change. Just document the package
+                              'GTX',
+                              'vgridshift',
+                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'proj-datumgrid-europe',
+                              NULL);
+
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              directory)
+                      VALUES ('dnn.gtx',
+                              'dnn.gtx', -- no change. Just document the package
+                              'GTX',
+                              'vgridshift',
+                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'proj-datumgrid-europe',
+                              NULL);
+
+

@@ -160,6 +160,13 @@ CREATE TABLE coordinate_operation(
     CONSTRAINT pk_coordinate_operation PRIMARY KEY (auth_name, code)
 );
 
+CREATE TRIGGER coordinate_operation_insert_trigger
+BEFORE INSERT ON coordinate_operation
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on coordinate_operation violates constraint: type must be one of ''conversion'', ''grid_transformation'', ''helmert_transformation'', ''other_transformation'', ''concatenated_operation''')
+        WHERE NEW.type NOT IN ('conversion', 'grid_transformation', 'helmert_transformation', 'other_transformation', 'concatenated_operation');
+END;
+
 CREATE TABLE conversion(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
