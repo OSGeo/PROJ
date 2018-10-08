@@ -49,9 +49,6 @@ After downloading and unpacking the PROJ source, also download and unpack the
 set of datum shift files.  See :ref:`download` for instructions how to fetch
 and install these files
 
-On Windows the extra nadshift target must be used.  For instance
-``nmake /f makefile.vc nadshift`` in the ``proj/src`` directory.
-
 A default build and install on Unix will normally build knowledge of the
 directory where the grid shift files are installed into the PROJ library
 (usually ``/usr/local/share/proj``).  On Windows the library is normally built
