@@ -2507,6 +2507,33 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                   "+towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84");
     }
     {
+        // NTF (Paris)
+        auto crs_4807 = factory->createCoordinateReferenceSystem("4807");
+        auto bound = crs_4807->createBoundCRSToWGS84IfPossible();
+        EXPECT_NE(bound, crs_4807);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(), bound);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_4)),
+                  "+proj=longlat +ellps=clrk80ign +pm=paris "
+                  "+towgs84=-168,-60,320,0,0,0,0");
+    }
+    {
+        // NTF (Paris) / Lambert zone II + NGF-IGN69 height
+        auto crs_7421 = factory->createCoordinateReferenceSystem("7421");
+        auto bound = crs_7421->createBoundCRSToWGS84IfPossible();
+        EXPECT_NE(bound, crs_7421);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(), bound);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_4)),
+                  "+proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 "
+                  "+x_0=600000 +y_0=2200000 +ellps=clrk80ign +pm=paris "
+                  "+towgs84=-168,-60,320,0,0,0,0 +vunits=m");
+    }
+    {
         auto crs = createVerticalCRS();
         EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(), crs);
     }

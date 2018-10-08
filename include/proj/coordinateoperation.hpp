@@ -116,6 +116,25 @@ class CoordinateOperation : public common::ObjectUsage,
      */
     PROJ_DLL virtual CoordinateOperationNNPtr inverse() const = 0;
 
+    /** \brief Grid description */
+    struct GridDescription {
+        std::string shortName;   /**< Grid short filename */
+        std::string fullName;    /**< Grid full path name (if found) */
+        std::string packageName; /**< Package name (or empty) */
+        std::string packageURL;  /**< Package URL (or empty) */
+        bool available;          /**< Whether GRID is available. */
+
+        //! @cond Doxygen_Suppress
+        bool operator<(const GridDescription &other) const {
+            return shortName < other.shortName;
+        }
+        //! @endcond
+    };
+
+    /** \brief Return grids needed by an operation. */
+    PROJ_DLL virtual std::set<GridDescription>
+    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const = 0;
+
   protected:
     CoordinateOperation();
     CoordinateOperation(const CoordinateOperation &other);
@@ -496,6 +515,9 @@ class SingleOperation : virtual public CoordinateOperation {
     isEquivalentTo(const util::BaseObjectNNPtr &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL std::set<GridDescription>
+    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const override;
 
   protected:
     explicit SingleOperation(const OperationMethodNNPtr &methodIn);
@@ -1344,8 +1366,14 @@ class Transformation : public SingleOperation {
         const common::Angle &offsetLon, const common::Length &offsetHeight,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
-    PROJ_DLL std::string getNTv2Filename() const;
-    PROJ_DLL std::string getHeightToGeographic3DFilename() const;
+    PROJ_DLL TransformationNNPtr substitutePROJAlternativeGridNames(
+        io::DatabaseContextNNPtr databaseContext) const;
+
+    //! @cond Doxygen_Suppress
+    std::string getNTv2Filename() const;
+    std::string getHeightToGeographic3DFilename() const;
+    bool isLongitudeRotation() const;
+    //! @endcond
 
   protected:
     Transformation(
@@ -1355,6 +1383,8 @@ class Transformation : public SingleOperation {
         const std::vector<GeneralParameterValueNNPtr> &values,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
     INLINED_MAKE_SHARED
+
+    TransformationNNPtr inverseAsTransformation() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1437,6 +1467,9 @@ class ConcatenatedOperation : public CoordinateOperation {
         const std::vector<CoordinateOperationNNPtr> &operationsIn,
         bool checkExtent); // throw InvalidOperation
 
+    PROJ_DLL std::set<GridDescription>
+    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const override;
+
   protected:
     explicit ConcatenatedOperation(
         const std::vector<CoordinateOperationNNPtr> &operationsIn);
@@ -1475,7 +1508,11 @@ class CoordinateOperationContext {
 
     PROJ_DLL metadata::ExtentPtr getAreaOfInterest() const;
 
+    PROJ_DLL void setAreaOfInterest(metadata::ExtentPtr extent);
+
     PROJ_DLL double getDesiredAccuracy() const;
+
+    PROJ_DLL void setDesiredAccuracy(double accuracy);
 
     /** Specify how source and target CRS extent should be used to restrict
      * candidate operations (only taken into account if no explicit area of
@@ -1511,6 +1548,28 @@ class CoordinateOperationContext {
     PROJ_DLL void setSpatialCriterion(SpatialCriterion criterion);
 
     PROJ_DLL SpatialCriterion getSpatialCriterion() const;
+
+    PROJ_DLL void setUsePROJAlternativeGridNames(bool usePROJNames);
+
+    PROJ_DLL bool getUsePROJAlternativeGridNames() const;
+
+    /** Describe how grid availability is used. */
+    enum class GridAvailabilityUse {
+        /** Grid availability is only used for sorting results. Operations
+         * where some grids are missing will be sorted last. */
+        USE_FOR_SORTING,
+
+        /** Completely discard an operation if a required grid is missing. */
+        DISCARD_OPERATION_IF_MISSING_GRID,
+
+        /** Ignore grid availability at all. Results will be presented as if
+         * all grids were available. */
+        IGNORE_GRID_AVAILABILITY,
+    };
+
+    PROJ_DLL void setGridAvailabilityUse(GridAvailabilityUse use);
+
+    PROJ_DLL GridAvailabilityUse getGridAvailabilityUse() const;
 
     PROJ_DLL static CoordinateOperationContextNNPtr
     create(io::AuthorityFactoryPtr authorityFactory, metadata::ExtentPtr extent,

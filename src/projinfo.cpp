@@ -71,7 +71,10 @@ static void usage() {
         << "                [--spatial-test contains|intersects]" << std::endl
         << "                [--crs-extent-use none|both|intersection|smallest]"
         << std::endl
-        << "                {object_definition} | (-s {src_def} -t {src_def})"
+        << "                [--grid-check none|discard_missing|sort]"
+        << std::endl
+        << "                [--boundcrs-to-WGS84]" << std::endl
+        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
@@ -86,7 +89,8 @@ static void usage() {
 // ---------------------------------------------------------------------------
 
 static BaseObjectNNPtr buildObject(const std::string &user_string,
-                                   bool kindIsCRS, const std::string &context) {
+                                   bool kindIsCRS, const std::string &context,
+                                   bool buildBoundCRSToWGS84) {
     bool isWKT = false;
     try {
         WKTNode::createFrom(user_string);
@@ -130,8 +134,8 @@ static BaseObjectNNPtr buildObject(const std::string &user_string,
                     obj = factory->createCoordinateReferenceSystem(code)
                               .as_nullable();
                 } else {
-                    obj =
-                        factory->createCoordinateOperation(code).as_nullable();
+                    obj = factory->createCoordinateOperation(code, true)
+                              .as_nullable();
                 }
             } catch (const std::exception &e) {
                 std::cerr << context
@@ -145,6 +149,13 @@ static BaseObjectNNPtr buildObject(const std::string &user_string,
     if (!obj) {
         std::cerr << context << ": unrecognized format." << std::endl;
         std::exit(1);
+    }
+
+    if (buildBoundCRSToWGS84) {
+        auto crs = std::dynamic_pointer_cast<CRS>(obj);
+        if (crs) {
+            obj = crs->createBoundCRSToWGS84IfPossible().as_nullable();
+        }
     }
 
     return NN_CHECK_ASSERT(obj);
@@ -164,7 +175,8 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
                 }
                 std::cout << projStringExportable->exportToPROJString(
                                  PROJStringFormatter::create(
-                                     PROJStringFormatter::Convention::PROJ_5))
+                                     PROJStringFormatter::Convention::PROJ_5,
+                                     DatabaseContext::create()))
                           << std::endl;
                 alreadyOutputed = true;
             } catch (const std::exception &e) {
@@ -195,7 +207,8 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
 
                 std::cout << objToExport->exportToPROJString(
                                  PROJStringFormatter::create(
-                                     PROJStringFormatter::Convention::PROJ_4))
+                                     PROJStringFormatter::Convention::PROJ_4,
+                                     DatabaseContext::create()))
                           << std::endl;
                 alreadyOutputed = true;
             } catch (const std::exception &e) {
@@ -281,15 +294,16 @@ static void outputOperations(
     const ExtentPtr &bboxFilter,
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
+    CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
     const OutputOptions &outputOpt, bool summary) {
-    auto sourceObj = buildObject(sourceCRSStr, true, "source CRS");
+    auto sourceObj = buildObject(sourceCRSStr, true, "source CRS", false);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
 
-    auto targetObj = buildObject(targetCRSStr, true, "target CRS");
+    auto targetObj = buildObject(targetCRSStr, true, "target CRS", false);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -304,6 +318,7 @@ static void outputOperations(
             CoordinateOperationContext::create(authFactory, bboxFilter, 0);
         ctxt->setSpatialCriterion(spatialCriterion);
         ctxt->setSourceAndTargetCRSExtentUse(crsExtentUse);
+        ctxt->setGridAvailabilityUse(gridAvailabilityUse);
         list = CoordinateOperationFactory::create()->createOperations(
             NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS), ctxt);
     } catch (const std::exception &e) {
@@ -399,6 +414,9 @@ int main(int argc, char **argv) {
         CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT;
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse =
         CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST;
+    bool buildBoundCRSToWGS84 = false;
+    CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse =
+        CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -510,6 +528,8 @@ int main(int argc, char **argv) {
             outputOpt.quiet = true;
         } else if (arg == "--summary") {
             summary = true;
+        } else if (arg == "--boundcrs-to-wgs84") {
+            buildBoundCRSToWGS84 = true;
         } else if (arg == "--spatial-test" && i + 1 < argc) {
             i++;
             std::string value(argv[i]);
@@ -541,6 +561,23 @@ int main(int argc, char **argv) {
                     SourceTargetCRSExtentUse::SMALLEST;
             } else {
                 std::cerr << "Unrecognized value for option --crs-extent-use: "
+                          << value << std::endl;
+                usage();
+            }
+        } else if (arg == "--grid-check" && i + 1 < argc) {
+            i++;
+            std::string value(argv[i]);
+            if (ci_equal(value, "none")) {
+                gridAvailabilityUse = CoordinateOperationContext::
+                    GridAvailabilityUse::IGNORE_GRID_AVAILABILITY;
+            } else if (ci_equal(value, "discard_missing")) {
+                gridAvailabilityUse = CoordinateOperationContext::
+                    GridAvailabilityUse::DISCARD_OPERATION_IF_MISSING_GRID;
+            } else if (ci_equal(value, "sort")) {
+                gridAvailabilityUse = CoordinateOperationContext::
+                    GridAvailabilityUse::USE_FOR_SORTING;
+            } else {
+                std::cerr << "Unrecognized value for option --grid-check: "
                           << value << std::endl;
                 usage();
             }
@@ -590,11 +627,13 @@ int main(int argc, char **argv) {
     }
 
     if (!user_string.empty()) {
-        auto obj(buildObject(user_string, kindIsCRS, "input string"));
+        auto obj(buildObject(user_string, kindIsCRS, "input string",
+                             buildBoundCRSToWGS84));
         outputObject(obj, outputOpt);
     } else {
         outputOperations(sourceCRSStr, targetCRSStr, bboxFilter,
-                         spatialCriterion, crsExtentUse, outputOpt, summary);
+                         spatialCriterion, crsExtentUse, gridAvailabilityUse,
+                         outputOpt, summary);
     }
 
     return 0;

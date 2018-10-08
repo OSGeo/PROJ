@@ -188,6 +188,8 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible() const {
             io::AuthorityFactory::create(dbContext, std::string());
         auto ctxt = operation::CoordinateOperationContext::create(authFactory,
                                                                   extent, 0.0);
+        // ctxt->setSpatialCriterion(
+        //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
         auto list =
             operation::CoordinateOperationFactory::create()->createOperations(
                 NN_CHECK_ASSERT(geogCRS), crs::GeographicCRS::EPSG_4326, ctxt);
@@ -197,6 +199,30 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible() const {
         auto transf =
             util::nn_dynamic_pointer_cast<operation::Transformation>(list[0]);
         if (!transf) {
+            auto concatenated =
+                util::nn_dynamic_pointer_cast<operation::ConcatenatedOperation>(
+                    list[0]);
+            if (concatenated) {
+                // Case for EPSG:4807 / "NTF (Paris)" that is made of a
+                // longitude rotation followed by a Helmert
+                // The prime meridian shift will be accounted elsewhere
+                const auto &subops = concatenated->operations();
+                if (subops.size() == 2) {
+                    auto firstop = util::nn_dynamic_pointer_cast<
+                        operation::Transformation>(subops[0]);
+                    if (firstop && firstop->isLongitudeRotation()) {
+                        transf = util::nn_dynamic_pointer_cast<
+                            operation::Transformation>(subops[1]);
+                        if (transf) {
+                            transf->getTOWGS84Parameters();
+                            return util::nn_static_pointer_cast<CRS>(
+                                BoundCRS::create(thisAsCRS,
+                                                 crs::GeographicCRS::EPSG_4326,
+                                                 NN_CHECK_ASSERT(transf)));
+                        }
+                    }
+                }
+            }
             return thisAsCRS;
         }
         transf->getTOWGS84Parameters();

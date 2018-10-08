@@ -178,7 +178,7 @@ class InverseTransformation : public Transformation,
         return InverseCoordinateOperation::inverse();
     }
 
-    static CoordinateOperationNNPtr create(TransformationNNPtr forward);
+    static TransformationNNPtr create(TransformationNNPtr forward);
 };
 
 // ---------------------------------------------------------------------------
@@ -207,6 +207,9 @@ class PROJBasedOperation : public SingleOperation {
     create(const util::PropertyMap &properties, const std::string &PROJString,
            const crs::CRSPtr sourceCRS, const crs::CRSPtr targetCRS,
            const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    std::set<GridDescription>
+    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const override;
 
   protected:
     PROJBasedOperation(const OperationMethodNNPtr &methodIn,

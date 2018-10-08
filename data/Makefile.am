@@ -27,6 +27,8 @@ SQL_ORDERED_LIST = sql/proj_db_table_defs.sql \
 		sql/grid_transformation.sql \
 		sql/other_transformation.sql \
 		sql/concatenated_operation.sql \
+		sql/grid_alternatives.sql \
+		sql/customizations.sql \
 		sql/commit.sql
 
 EXTRA_DIST = GL27 nad.lst proj_def.dat nad27 nad83 \

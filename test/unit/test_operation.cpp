@@ -3652,6 +3652,146 @@ TEST(operation, geogCRS_to_geogCRS_context_incompatible_area) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setUsePROJAlternativeGridNames(false);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4275"), // NTF
+            authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
+            ctxt);
+        ASSERT_EQ(list.size(), 2);
+        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5,
+                      authFactory->databaseContext())),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step "
+                  "+proj=hgridshift +grids=ntf_r93.gsb +step +proj=unitconvert "
+                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+
+        EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+                  "+ellps=clrk80ign +step +proj=helmert +x=-168 +y=-60 +z=320 "
+                  "+step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert "
+                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+    }
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4275"), // NTF
+            authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
+            ctxt);
+        ASSERT_EQ(list.size(), 2);
+        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step "
+                  "+proj=hgridshift +grids=ntf_r93.gsb +step +proj=unitconvert "
+                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+    }
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
+            authFactory->createCoordinateReferenceSystem("4275"), // NTF
+            ctxt);
+        ASSERT_EQ(list.size(), 2);
+        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
+                  "+proj=hgridshift +grids=ntf_r93.gsb +step +proj=unitconvert "
+                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_ntv1_ntv2_ctable2) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4267"), // NAD27
+        authFactory->createCoordinateReferenceSystem("4269"), // NAD83
+        ctxt);
+    ASSERT_EQ(list.size(), 6);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
+              "+grids=ntv1_can.dat +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
+              "+grids=ntv2_0.gsb +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(list[2]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
+              "+grids=conus +step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, vertCRS_to_geogCRS_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setUsePROJAlternativeGridNames(false);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem(
+                "3855"), // EGM2008 height
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
+            ctxt);
+        ASSERT_EQ(list.size(), 2);
+        EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5,
+                      authFactory->databaseContext())),
+                  "+proj=vgridshift +grids=egm08_25.gtx");
+    }
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem(
+                "3855"), // EGM2008 height
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
+            ctxt);
+        ASSERT_EQ(list.size(), 2);
+        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=vgridshift +grids=egm08_25.gtx");
+    }
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
+            authFactory->createCoordinateReferenceSystem(
+                "3855"), // EGM2008 height
+            ctxt);
+        ASSERT_EQ(list.size(), 2);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create()),
+            "+proj=pipeline +step +inv +proj=vgridshift +grids=egm08_25.gtx");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_noop) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -3715,6 +3855,31 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation_context) {
               "+proj=longlat +ellps=clrk80ign +pm=2.33720833333333 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4807"), // NTF(Paris)
+        authFactory->createCoordinateReferenceSystem("4171"), // RGF93
+        ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(*(list[0]->name()->description()), "NTF (Paris) to RGF93 (2)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
+              "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=hgridshift "
+              "+grids=ntf_r93.gsb +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(list[0]) !=
+                nullptr);
+    auto grids = list[0]->gridsNeeded(DatabaseContext::create());
+    EXPECT_EQ(grids.size(), 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -4223,9 +4388,27 @@ static BoundCRSNNPtr createBoundVerticalCRS() {
 // ---------------------------------------------------------------------------
 
 TEST(operation, transformation_height_to_PROJ_string) {
-    EXPECT_EQ(createBoundVerticalCRS()->transformation()->exportToPROJString(
-                  PROJStringFormatter::create()),
+    auto transf = createBoundVerticalCRS()->transformation();
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
               "+proj=vgridshift +grids=egm08_25.gtx");
+
+    auto grids = transf->gridsNeeded(DatabaseContext::create());
+    ASSERT_EQ(grids.size(), 1);
+    EXPECT_EQ(grids.begin()->shortName, "egm08_25.gtx");
+    EXPECT_EQ(grids.begin()->packageName, "proj-datumgrid-world");
+    EXPECT_TRUE(grids.begin()->packageURL.find(
+                    "https://download.osgeo.org/proj/proj-datumgrid-world-") ==
+                0)
+        << grids.begin()->packageURL;
+    if (grids.begin()->available) {
+        EXPECT_TRUE(!grids.begin()->fullName.empty())
+            << grids.begin()->fullName;
+        EXPECT_TRUE(grids.begin()->fullName.find(grids.begin()->shortName) !=
+                    std::string::npos)
+            << grids.begin()->fullName;
+    } else {
+        EXPECT_TRUE(grids.begin()->fullName.empty()) << grids.begin()->fullName;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -4235,7 +4418,10 @@ TEST(operation, transformation_ntv2_to_PROJ_string) {
         PropertyMap(), GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
         "foo.gsb", std::vector<PositionalAccuracyNNPtr>());
     EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=hgridshift +grids=foo.gsb");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step "
+              "+proj=hgridshift +grids=foo.gsb +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -4416,6 +4602,9 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
               "+ellps=WGS84 +step +proj=vgridshift +grids=egm08_25.gtx +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step "
               "+proj=axisswap +order=2,1");
+
+    auto grids = op->gridsNeeded(DatabaseContext::create());
+    EXPECT_EQ(grids.size(), 1);
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4979, compound);

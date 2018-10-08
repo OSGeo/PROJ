@@ -379,6 +379,35 @@ CREATE TABLE grid_transformation(
     CONSTRAINT fk_grid_transformation_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
 
+CREATE TABLE grid_packages(
+    package_name TEXT NOT NULL NULL PRIMARY KEY,    -- package name that contains the file
+    url TEXT                                        -- optional URL where to download the PROJ grid
+);
+
+-- Table that contain alternative names for original grid names coming from the authority
+CREATE TABLE grid_alternatives(
+    original_grid_name TEXT NOT NULL PRIMARY KEY,   -- original grid name (e.g. Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree.gz). For LOS/LAS format, the .las files
+    proj_grid_name TEXT NOT NULL,                   -- PROJ grid name (e.g egm08_25.gtx)
+    proj_grid_format TEXT NOT NULL,                 -- one of 'CTable2', 'NTv1', 'NTv2', 'GTX'
+    proj_method TEXT NOT NULL,                      -- hgridshift or vgridshift
+    inverse_direction BOOLEAN NOT NULL,             -- whether the PROJ grid direction is reversed w.r.t to the authority one (TRUE in that case)
+    package_name TEXT NOT NULL,                     -- package name that contains the file
+    directory TEXT,                                 -- optional directory where the file might be located
+
+    CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name)
+);
+
+CREATE TRIGGER grid_alternatives_insert_trigger
+BEFORE INSERT ON grid_alternatives
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_grid_format must be one of ''CTable2'', ''NTv1'', ''NTv2'', ''GTX''')
+        WHERE NEW.proj_grid_format NOT IN ('CTable2', 'NTv1', 'NTv2', 'GTX');
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_method must be one of ''hgridshift'', ''vgridshift''')
+        WHERE NEW.proj_method NOT IN ('hgridshift', 'vgridshift');
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: original_grid_name must be referenced in grid_transformation.grid_name')
+        WHERE NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
+END;
+
 CREATE TABLE other_transformation(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,

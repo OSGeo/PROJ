@@ -120,6 +120,12 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  */
 namespace io {
 
+class DatabaseContext;
+/** Shared pointer of DatabaseContext. */
+using DatabaseContextPtr = std::shared_ptr<DatabaseContext>;
+/** Non-null shared pointer of DatabaseContext. */
+using DatabaseContextNNPtr = util::nn<DatabaseContextPtr>;
+
 // ---------------------------------------------------------------------------
 
 class WKTFormatter;
@@ -130,7 +136,7 @@ using WKTFormatterNNPtr = util::nn<WKTFormatterPtr>;
 
 /** \brief Formatter to WKT strings.
  *
- * This class is thread-safe, but one instance can only be used by a single
+ * An instance of this class can only be used by a single
  * thread at a time.
  */
 class WKTFormatter {
@@ -287,7 +293,7 @@ using PROJStringFormatterNNPtr = util::nn<PROJStringFormatterPtr>;
 
 /** \brief Formatter to PROJ strings.
  *
- * This class is thread-safe, but one instance can only be used by a single
+ * An instance of this class can only be used by a single
  * thread at a time.
  */
 class PROJStringFormatter {
@@ -302,7 +308,8 @@ class PROJStringFormatter {
     };
 
     PROJ_DLL static PROJStringFormatterNNPtr
-    create(Convention conventionIn = Convention::PROJ_5);
+    create(Convention conventionIn = Convention::PROJ_5,
+           DatabaseContextPtr dbContext = nullptr);
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PROJStringFormatter();
     //! @endcond
@@ -339,6 +346,8 @@ class PROJStringFormatter {
     PROJ_DLL void addParam(const std::string &paramName,
                            const std::vector<double> &vals);
 
+    std::set<std::string> getUsedGridNames() const;
+
     void setTOWGS84Parameters(const std::vector<double> &params);
     const std::vector<double> &getTOWGS84Parameters() const;
 
@@ -354,13 +363,16 @@ class PROJStringFormatter {
     void setOmitZUnitConversion(bool omit);
     bool omitZUnitConversion() const;
 
+    DatabaseContextPtr databaseContext() const;
+
     Convention convention() const;
 
     //! @endcond
 
   protected:
     //! @cond Doxygen_Suppress
-    explicit PROJStringFormatter(Convention conventionIn);
+    explicit PROJStringFormatter(Convention conventionIn,
+                                 DatabaseContextPtr dbContext);
     PROJStringFormatter(const PROJStringFormatter &other) = delete;
 
     INLINED_MAKE_SHARED
@@ -556,12 +568,6 @@ class PROJStringParser {
 
 // ---------------------------------------------------------------------------
 
-class DatabaseContext;
-/** Shared pointer of DatabaseContext. */
-using DatabaseContextPtr = std::shared_ptr<DatabaseContext>;
-/** Non-null shared pointer of DatabaseContext. */
-using DatabaseContextNNPtr = util::nn<DatabaseContextPtr>;
-
 /** \brief Database context.
  *
  * A database context should be used only by one thread at a time.
@@ -581,7 +587,18 @@ class DatabaseContext {
 
     //! @cond Doxygen_Suppress
     PROJ_DLL void *getSqliteHandle() const;
+
     PROJ_DLL static DatabaseContextNNPtr create(void *sqlite_handle);
+
+    static DatabaseContextNNPtr createWithPJContext(void *pjCtxt);
+
+    bool lookForGridAlternative(const std::string &officialName,
+                                std::string &projFilename,
+                                std::string &projFormat, bool &inverse);
+
+    void lookForGridInfo(const std::string &gridName, std::string &fullFilename,
+                         std::string &packageName, std::string &packageURL,
+                         bool &gridAvailable);
     //! @endcond
 
   protected:
@@ -663,7 +680,8 @@ class AuthorityFactory {
     createCoordinateReferenceSystem(const std::string &code) const;
 
     PROJ_DLL operation::CoordinateOperationNNPtr
-    createCoordinateOperation(const std::string &code) const;
+    createCoordinateOperation(const std::string &code,
+                              bool usePROJAlternativeGridNames) const;
 
     PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
     createFromCoordinateReferenceSystemCodes(
@@ -721,11 +739,13 @@ class AuthorityFactory {
     PROJ_DLL static AuthorityFactoryNNPtr
     create(DatabaseContextNNPtr context, const std::string &authorityName);
 
+    PROJ_DLL DatabaseContextNNPtr databaseContext() const;
+
     PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
     createFromCoordinateReferenceSystemCodes(
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
-        const std::string &targetCRSAuthName,
-        const std::string &targetCRSCode) const;
+        const std::string &targetCRSAuthName, const std::string &targetCRSCode,
+        bool usePROJAlternativeGridNames, bool discardIfMissingGrid) const;
 
   protected:
     AuthorityFactory(DatabaseContextNNPtr context,
@@ -738,8 +758,8 @@ class AuthorityFactory {
                                             bool geographicOnly) const;
 
     operation::CoordinateOperationNNPtr
-    createCoordinateOperation(const std::string &code,
-                              bool allowConcatenated) const;
+    createCoordinateOperation(const std::string &code, bool allowConcatenated,
+                              bool usePROJAlternativeGridNames) const;
 
     INLINED_MAKE_SHARED
 

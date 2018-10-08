@@ -384,7 +384,8 @@ WKTFormatter &WKTFormatter::simulCurNodeHasId() {
 // ---------------------------------------------------------------------------
 
 void WKTFormatter::Private::startNewChild() {
-    if (!stackHasChild_.empty() && stackHasChild_.back()) {
+    assert(!stackHasChild_.empty());
+    if (stackHasChild_.back()) {
         result_ += ",";
     }
     stackHasChild_.back() = true;
@@ -3106,6 +3107,7 @@ struct PROJStringFormatter::Private {
     bool omitProjLongLatIfPossible_ = false;
     bool omitZUnitConversion_ = false;
     int level_ = 0;
+    DatabaseContextPtr dbContext_{};
 
     std::string result_{};
 
@@ -3116,9 +3118,11 @@ struct PROJStringFormatter::Private {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-PROJStringFormatter::PROJStringFormatter(Convention conventionIn)
+PROJStringFormatter::PROJStringFormatter(Convention conventionIn,
+                                         DatabaseContextPtr dbContext)
     : d(internal::make_unique<Private>()) {
     d->convention_ = conventionIn;
+    d->dbContext_ = dbContext;
 }
 //! @endcond
 
@@ -3137,11 +3141,15 @@ PROJStringFormatter::~PROJStringFormatter() = default;
  * Its default behaviour can be adjusted with the different setters.
  *
  * @param conventionIn PROJ string flavor. Defaults to Convention::PROJ_5
+ * @param dbContext Database context (can help to find alternative grid names).
+ * May be nullptr
  * @return new formatter.
  */
-PROJStringFormatterNNPtr PROJStringFormatter::create(Convention conventionIn) {
+PROJStringFormatterNNPtr
+PROJStringFormatter::create(Convention conventionIn,
+                            DatabaseContextPtr dbContext) {
     return PROJStringFormatter::nn_make_shared<PROJStringFormatter>(
-        conventionIn);
+        conventionIn, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -3714,6 +3722,20 @@ const std::vector<double> &PROJStringFormatter::getTOWGS84Parameters() const {
 
 // ---------------------------------------------------------------------------
 
+std::set<std::string> PROJStringFormatter::getUsedGridNames() const {
+    std::set<std::string> res;
+    for (const auto &step : d->steps_) {
+        for (const auto &param : step.paramValues) {
+            if (starts_with(param, "grids=")) {
+                res.insert(param.substr(strlen("grids=")));
+            }
+        }
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 void PROJStringFormatter::setVDatumExtension(const std::string &filename) {
     d->vDatumExtension_ = filename;
 }
@@ -3760,6 +3782,12 @@ void PROJStringFormatter::setOmitZUnitConversion(bool omit) {
 
 bool PROJStringFormatter::omitZUnitConversion() const {
     return d->omitZUnitConversion_;
+}
+
+// ---------------------------------------------------------------------------
+
+DatabaseContextPtr PROJStringFormatter::databaseContext() const {
+    return d->dbContext_;
 }
 
 //! @endcond

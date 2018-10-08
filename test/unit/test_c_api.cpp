@@ -113,6 +113,19 @@ class CApi : public ::testing::Test {
         explicit ObjectKeeper(PJ_OBJ *obj) : m_obj(obj) {}
         ~ObjectKeeper() { proj_obj_unref(m_obj); }
     };
+
+    struct ContextKeeper {
+        PJ_OPERATION_FACTORY_CONTEXT *m_op_ctxt = nullptr;
+        explicit ContextKeeper(PJ_OPERATION_FACTORY_CONTEXT *op_ctxt)
+            : m_op_ctxt(op_ctxt) {}
+        ~ContextKeeper() { proj_operation_factory_context_unref(m_op_ctxt); }
+    };
+
+    struct OperationResultKeeper {
+        PJ_OPERATION_RESULT *m_res = nullptr;
+        explicit OperationResultKeeper(PJ_OPERATION_RESULT *res) : m_res(res) {}
+        ~OperationResultKeeper() { proj_operation_result_unref(m_res); }
+    };
 };
 
 // ---------------------------------------------------------------------------
@@ -236,7 +249,7 @@ TEST_F(CApi, proj_obj_as_proj_string_incompatible_WKT1) {
 
 TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
     auto crs = proj_obj_create_from_database(m_ctxt, "EPSG", "3844",
-                                             PJ_OBJ_CATEGORY_CRS);
+                                             PJ_OBJ_CATEGORY_CRS, false);
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
@@ -411,12 +424,12 @@ TEST_F(CApi, proj_obj_get_type) {
 TEST_F(CApi, proj_obj_create_from_database) {
     {
         auto crs = proj_obj_create_from_database(m_ctxt, "EPSG", "-1",
-                                                 PJ_OBJ_CATEGORY_CRS);
+                                                 PJ_OBJ_CATEGORY_CRS, false);
         ASSERT_EQ(crs, nullptr);
     }
     {
         auto crs = proj_obj_create_from_database(m_ctxt, "EPSG", "4326",
-                                                 PJ_OBJ_CATEGORY_CRS);
+                                                 PJ_OBJ_CATEGORY_CRS, false);
         ASSERT_NE(crs, nullptr);
         ObjectKeeper keeper(crs);
         EXPECT_TRUE(proj_obj_is_crs(crs));
@@ -424,7 +437,7 @@ TEST_F(CApi, proj_obj_create_from_database) {
     }
     {
         auto crs = proj_obj_create_from_database(m_ctxt, "EPSG", "6871",
-                                                 PJ_OBJ_CATEGORY_CRS);
+                                                 PJ_OBJ_CATEGORY_CRS, false);
         ASSERT_NE(crs, nullptr);
         ObjectKeeper keeper(crs);
         EXPECT_TRUE(proj_obj_is_crs(crs));
@@ -432,14 +445,14 @@ TEST_F(CApi, proj_obj_create_from_database) {
     }
     {
         auto ellipsoid = proj_obj_create_from_database(
-            m_ctxt, "EPSG", "7030", PJ_OBJ_CATEGORY_ELLIPSOID);
+            m_ctxt, "EPSG", "7030", PJ_OBJ_CATEGORY_ELLIPSOID, false);
         ASSERT_NE(ellipsoid, nullptr);
         ObjectKeeper keeper(ellipsoid);
         EXPECT_EQ(proj_obj_get_type(ellipsoid), PJ_OBJ_TYPE_ELLIPSOID);
     }
     {
-        auto datum = proj_obj_create_from_database(m_ctxt, "EPSG", "6326",
-                                                   PJ_OBJ_CATEGORY_DATUM);
+        auto datum = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "6326", PJ_OBJ_CATEGORY_DATUM, false);
         ASSERT_NE(datum, nullptr);
         ObjectKeeper keeper(datum);
         EXPECT_EQ(proj_obj_get_type(datum),
@@ -447,7 +460,8 @@ TEST_F(CApi, proj_obj_create_from_database) {
     }
     {
         auto op = proj_obj_create_from_database(
-            m_ctxt, "EPSG", "16031", PJ_OBJ_CATEGORY_COORDINATE_OPERATION);
+            m_ctxt, "EPSG", "16031", PJ_OBJ_CATEGORY_COORDINATE_OPERATION,
+            false);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper(op);
         EXPECT_EQ(proj_obj_get_type(op), PJ_OBJ_TYPE_CONVERSION);
@@ -624,7 +638,7 @@ TEST_F(CApi, proj_obj_get_source_target_crs_transformation) {
 
 TEST_F(CApi, proj_obj_get_source_target_crs_conversion_without_crs) {
     auto obj = proj_obj_create_from_database(
-        m_ctxt, "EPSG", "16031", PJ_OBJ_CATEGORY_COORDINATE_OPERATION);
+        m_ctxt, "EPSG", "16031", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, false);
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
 
@@ -781,6 +795,83 @@ TEST_F(CApi, transformation_from_boundCRS) {
         proj_obj_crs_get_coordoperation(crs, nullptr, nullptr, nullptr);
     ASSERT_NE(transf, nullptr);
     ObjectKeeper keeper_transf(transf);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_coordoperation_get_grid_used) {
+    auto op = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "1312", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, true);
+    ASSERT_NE(op, nullptr);
+    ObjectKeeper keeper(op);
+
+    EXPECT_EQ(proj_coordoperation_get_grid_used_count(op), 1);
+    const char *shortName = nullptr;
+    const char *fullName = nullptr;
+    const char *packageName = nullptr;
+    const char *packageURL = nullptr;
+    int available = 0;
+    EXPECT_EQ(proj_coordoperation_get_grid_used(op, -1, nullptr, nullptr,
+                                                nullptr, nullptr, nullptr),
+              0);
+    EXPECT_EQ(proj_coordoperation_get_grid_used(op, 1, nullptr, nullptr,
+                                                nullptr, nullptr, nullptr),
+              0);
+    EXPECT_EQ(proj_coordoperation_get_grid_used(op, 0, &shortName, &fullName,
+                                                &packageName, &packageURL,
+                                                &available),
+              1);
+    ASSERT_NE(shortName, nullptr);
+    ASSERT_NE(fullName, nullptr);
+    ASSERT_NE(packageName, nullptr);
+    ASSERT_NE(packageURL, nullptr);
+    EXPECT_EQ(shortName, std::string("ntv1_can.dat"));
+    // EXPECT_EQ(fullName, std::string(""));
+    EXPECT_EQ(packageName, std::string("proj-datumgrid"));
+    EXPECT_TRUE(std::string(packageURL)
+                    .find("https://download.osgeo.org/proj/proj-datumgrid-") ==
+                0)
+        << std::string(packageURL);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_operations) {
+    auto ctxt = proj_create_operation_factory_context(m_ctxt);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+
+    auto source_crs = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "4267", PJ_OBJ_CATEGORY_CRS, false); // NAD27
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+
+    auto target_crs = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "4269", PJ_OBJ_CATEGORY_CRS, false); // NAD83
+    ASSERT_NE(target_crs, nullptr);
+    ObjectKeeper keeper_target_crs(target_crs);
+
+    proj_operation_factory_context_set_spatial_criterion(
+        ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+    proj_operation_factory_context_set_grid_availability_use(
+        ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+    auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+    ASSERT_NE(res, nullptr);
+    OperationResultKeeper keeper_res(res);
+
+    EXPECT_EQ(proj_operation_result_get_count(res), 6);
+
+    EXPECT_EQ(proj_operation_result_get(res, -1), nullptr);
+    EXPECT_EQ(
+        proj_operation_result_get(res, proj_operation_result_get_count(res)),
+        nullptr);
+    auto op = proj_operation_result_get(res, 0);
+    ASSERT_NE(op, nullptr);
+    ObjectKeeper keeper_op(op);
+
+    EXPECT_EQ(proj_obj_get_name(op), std::string("NAD27 to NAD83 (3)"));
 }
 
 } // namespace

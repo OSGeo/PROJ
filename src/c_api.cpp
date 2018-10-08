@@ -76,6 +76,8 @@ struct PJ_OBJ {
     // cached results
     std::map<PJ_WKT_TYPE, std::string> mapWKTString;
     std::map<PJ_PROJ_STRING_TYPE, std::string> mapPROJString;
+    bool gridsNeededAsked = false;
+    std::vector<CoordinateOperation::GridDescription> gridsNeeded;
 
     explicit PJ_OBJ(PJ_CONTEXT *ctxIn, BaseObjectNNPtr objIn)
         : ctx(ctxIn), obj(objIn) {}
@@ -138,19 +140,6 @@ PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Opaque object representing a database context. */
-struct PJ_DATABASE_CONTEXT {
-    //! @cond Doxygen_Suppress
-    PJ_CONTEXT *ctx;
-    DatabaseContextNNPtr obj;
-
-    explicit PJ_DATABASE_CONTEXT(PJ_CONTEXT *ctxIn, DatabaseContextNNPtr objIn)
-        : ctx(ctxIn), obj(objIn) {}
-    //! @endcond
-};
-
-// ---------------------------------------------------------------------------
-
 //! @cond Doxygen_Suppress
 
 /** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
@@ -179,18 +168,23 @@ void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
  * @param auth_name Authority name (must not be NULL)
  * @param code Object code (must not be NULL)
  * @param category Object category
+ * @param usePROJAlternativeGridNames Whether PROJ alternative grid names
+ * should be substituted to the official grid names. Only used on
+ * transformations
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL in
  * case of error.
  */
 PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                                       const char *code,
-                                      PJ_OBJ_CATEGORY category) {
+                                      PJ_OBJ_CATEGORY category,
+                                      int usePROJAlternativeGridNames) {
     assert(auth_name);
     assert(code);
 
     try {
         if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context = new projCppContext(DatabaseContext::create());
+            ctx->cpp_context =
+                new projCppContext(DatabaseContext::createWithPJContext(ctx));
         }
         auto factory = AuthorityFactory::create(
             ctx->cpp_context->databaseContext, auth_name);
@@ -206,7 +200,8 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                               factory->createCoordinateReferenceSystem(code));
 
         case PJ_OBJ_CATEGORY_COORDINATE_OPERATION:
-            return new PJ_OBJ(ctx, factory->createCoordinateOperation(code));
+            return new PJ_OBJ(ctx, factory->createCoordinateOperation(
+                                       code, usePROJAlternativeGridNames != 0));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -476,8 +471,12 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type) {
         break;
     }
     try {
-        auto wkt = exportable->exportToPROJString(
-            PROJStringFormatter::create(convention));
+        if (obj->ctx->cpp_context == nullptr) {
+            obj->ctx->cpp_context = new projCppContext(
+                DatabaseContext::createWithPJContext(obj->ctx));
+        }
+        auto wkt = exportable->exportToPROJString(PROJStringFormatter::create(
+            convention, obj->ctx->cpp_context->databaseContext));
         obj->mapPROJString[type] = wkt;
         return obj->mapPROJString[type].c_str();
     } catch (const std::exception &e) {
@@ -834,7 +833,8 @@ static PROJ_STRING_LIST set_to_string_list(const std::set<std::string> &set) {
 PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
     try {
         if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context = new projCppContext(DatabaseContext::create());
+            ctx->cpp_context =
+                new projCppContext(DatabaseContext::createWithPJContext(ctx));
         }
         return set_to_string_list(
             ctx->cpp_context->databaseContext->getAuthorities());
@@ -866,7 +866,8 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
     assert(auth_name);
     try {
         if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context = new projCppContext(DatabaseContext::create());
+            ctx->cpp_context =
+                new projCppContext(DatabaseContext::createWithPJContext(ctx));
         }
         auto factory = AuthorityFactory::create(
             ctx->cpp_context->databaseContext, auth_name);
@@ -1181,3 +1182,398 @@ int proj_coordoperation_get_param(PJ_OBJ *coordoperation, int index,
 
     return true;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the number of grids used by a CoordinateOperation
+ *
+ * @param coordoperation Objet of type CoordinateOperation or derived classes
+ * (must not be NULL)
+ */
+
+int proj_coordoperation_get_grid_used_count(PJ_OBJ *coordoperation) {
+    assert(coordoperation);
+    auto co = nn_dynamic_pointer_cast<CoordinateOperation>(coordoperation->obj);
+    if (!co) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__,
+                       "Object is not a CoordinateOperation");
+        return 0;
+    }
+    if (!coordoperation->gridsNeededAsked) {
+        coordoperation->gridsNeededAsked = true;
+        const auto gridsNeeded =
+            co->gridsNeeded(coordoperation->ctx->cpp_context->databaseContext);
+        for (const auto &gridDesc : gridsNeeded) {
+            coordoperation->gridsNeeded.emplace_back(gridDesc);
+        }
+    }
+    return static_cast<int>(coordoperation->gridsNeeded.size());
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a parameter of a SingleOperation
+ *
+ * @param coordoperation Objet of type SingleOperation or derived classes
+ * (must not be NULL)
+ * @param index Parameter index.
+ * @param pShortName Pointer to a string value to store the grid short name. or
+ * NULL
+ * @param pFullName Pointer to a string value to store the grid full filename.
+ * or NULL
+ * @param pPackageName Pointer to a string value to store the package name where
+ * the grid might be found. or NULL
+ * @param pPackageURL Pointer to a string value to store the package URL where
+ * the grid might be found. or NULL
+ * @param pAvailable Pointer to a int (boolean) value to store whether the grid
+ * is available at runtime. or NULL
+ * @return TRUE in case of success.
+ */
+
+int proj_coordoperation_get_grid_used(PJ_OBJ *coordoperation, int index,
+                                      const char **pShortName,
+                                      const char **pFullName,
+                                      const char **pPackageName,
+                                      const char **pPackageURL,
+                                      int *pAvailable) {
+    const int count = proj_coordoperation_get_grid_used_count(coordoperation);
+    if (index < 0 || index >= count) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__, "Invalid index");
+        return false;
+    }
+
+    if (pShortName) {
+        *pShortName = coordoperation->gridsNeeded[index].shortName.c_str();
+    }
+
+    if (pFullName) {
+        *pFullName = coordoperation->gridsNeeded[index].fullName.c_str();
+    }
+
+    if (pPackageName) {
+        *pPackageName = coordoperation->gridsNeeded[index].packageName.c_str();
+    }
+
+    if (pPackageURL) {
+        *pPackageURL = coordoperation->gridsNeeded[index].packageURL.c_str();
+    }
+
+    if (pAvailable) {
+        *pAvailable = coordoperation->gridsNeeded[index].available;
+    }
+
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Opaque object representing an operation factory context. */
+struct PJ_OPERATION_FACTORY_CONTEXT {
+    //! @cond Doxygen_Suppress
+    PJ_CONTEXT *ctx;
+    CoordinateOperationContextNNPtr operationContext;
+
+    explicit PJ_OPERATION_FACTORY_CONTEXT(
+        PJ_CONTEXT *ctxIn, CoordinateOperationContextNNPtr operationContextIn)
+        : ctx(ctxIn), operationContext(operationContextIn) {}
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a context for building coordinate operations between
+ * two CRS.
+ *
+ * The returned object must be unreferenced with
+ * proj_operation_factory_context_unref() after use.
+ *
+ * @param ctx Context, or NULL for default context.
+ * @return Object that must be unreferenced with
+ * proj_operation_factory_context_unref(), or NULL in
+ * case of error.
+ */
+PJ_OPERATION_FACTORY_CONTEXT *
+proj_create_operation_factory_context(PJ_CONTEXT *ctx) {
+    try {
+        if (ctx->cpp_context == nullptr) {
+            ctx->cpp_context =
+                new projCppContext(DatabaseContext::createWithPJContext(ctx));
+        }
+        auto factory = CoordinateOperationFactory::create();
+        auto authFactory = AuthorityFactory::create(
+            ctx->cpp_context->databaseContext, std::string());
+        auto operationContext =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        return new PJ_OPERATION_FACTORY_CONTEXT(ctx, operationContext);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Drops a reference on an object.
+ *
+ * This method should be called one and exactly one for each function
+ * returning a PJ_OPERATION_FACTORY_CONTEXT*
+ *
+ * @param ctxt Object, or NULL.
+ */
+void proj_operation_factory_context_unref(PJ_OPERATION_FACTORY_CONTEXT *ctxt) {
+    delete ctxt;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set the desired accuracy of the resulting coordinate transformations.
+ * @param ctxt Operation factory context. must not be NULL
+ * @param accuracy Accuracy in meter (or 0 to disable the filter).
+ */
+void proj_operation_factory_context_set_desired_accuracy(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, double accuracy) {
+    assert(ctxt);
+    ctxt->operationContext->setDesiredAccuracy(accuracy);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set the desired area of interest for the resulting coordinate
+ * transformations.
+ *
+ * For an area of interest crossing the anti-meridian, west_lon will be
+ * greater than east_lon.
+ *
+ * @param ctxt Operation factory context. must not be NULL
+ * @param west_lon West longitude (in degrees).
+ * @param south_lat South latitude (in degrees).
+ * @param east_lon East longitude (in degrees).
+ * @param north_lat North latitude (in degrees).
+ */
+void proj_operation_factory_context_set_area_of_interest(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, double west_lon, double south_lat,
+    double east_lon, double north_lat) {
+    assert(ctxt);
+    ctxt->operationContext->setAreaOfInterest(
+        Extent::createFromBBOX(west_lon, south_lat, east_lon, north_lat));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set how source and target CRS extent should be used
+ * when considering if a transformation can be used (only takes effect if
+ * no area of interest is explicitly defined).
+ *
+ * The default is PJ_CRS_EXTENT_SMALLEST.
+ *
+ * @param ctxt Operation factory context. must not be NULL
+ * @param use How source and target CRS extent should be used.
+ */
+void proj_operation_factory_context_set_crs_extent_use(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, PROJ_CRS_EXTENT_USE use) {
+    assert(ctxt);
+    switch (use) {
+    case PJ_CRS_EXTENT_NONE:
+        ctxt->operationContext->setSourceAndTargetCRSExtentUse(
+            CoordinateOperationContext::SourceTargetCRSExtentUse::NONE);
+        break;
+
+    case PJ_CRS_EXTENT_BOTH:
+        ctxt->operationContext->setSourceAndTargetCRSExtentUse(
+            CoordinateOperationContext::SourceTargetCRSExtentUse::BOTH);
+        break;
+
+    case PJ_CRS_EXTENT_INTERSECTION:
+        ctxt->operationContext->setSourceAndTargetCRSExtentUse(
+            CoordinateOperationContext::SourceTargetCRSExtentUse::INTERSECTION);
+        break;
+
+    case PJ_CRS_EXTENT_SMALLEST:
+        ctxt->operationContext->setSourceAndTargetCRSExtentUse(
+            CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST);
+        break;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set the spatial criterion to use when comparing the area of
+ * validity of coordinate operations with the area of interest / area of
+ * validity of
+ * source and target CRS.
+ *
+ * The default is PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT.
+ *
+ * @param ctxt Operation factory context. must not be NULL
+ * @param criterion patial criterion to use
+ */
+void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, PROJ_SPATIAL_CRITERION criterion) {
+    assert(ctxt);
+    switch (criterion) {
+    case PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT:
+        ctxt->operationContext->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT);
+        break;
+
+    case PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION:
+        ctxt->operationContext->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        break;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set how grid availability is used.
+ *
+ * The default is USE_FOR_SORTING.
+ *
+ * @param ctxt Operation factory context. must not be NULL
+ * @param use how grid availability is used.
+ */
+void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, PROJ_GRID_AVAILABILITY_USE use) {
+    assert(ctxt);
+    switch (use) {
+    case PROJ_GRID_AVAILABILITY_USED_FOR_SORTING:
+        ctxt->operationContext->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING);
+        break;
+
+    case PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID:
+        ctxt->operationContext->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                DISCARD_OPERATION_IF_MISSING_GRID);
+        break;
+
+    case PROJ_GRID_AVAILABILITY_IGNORED:
+        ctxt->operationContext->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
+        break;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether PROJ alternative grid names should be substituted to
+ * the official authority names.
+ *
+ * The default is true.
+ *
+ * @param ctxt Operation factory context. must not be NULL
+ * @param usePROJNames whether PROJ alternative grid names should be used
+ */
+void proj_operation_factory_context_set_use_proj_alternative_grid_names(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, int usePROJNames) {
+    assert(ctxt);
+    ctxt->operationContext->setUsePROJAlternativeGridNames(usePROJNames != 0);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Opaque object representing a set of operation results. */
+struct PJ_OPERATION_RESULT {
+    //! @cond Doxygen_Suppress
+    PJ_CONTEXT *ctx;
+    std::vector<CoordinateOperationNNPtr> ops;
+
+    explicit PJ_OPERATION_RESULT(
+        PJ_CONTEXT *ctxIn, const std::vector<CoordinateOperationNNPtr> &opsIn)
+        : ctx(ctxIn), ops(opsIn) {}
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Find a list of CoordinateOperation from source_crs to target_crs.
+ *
+ * The operations are sorted with the most relevant ones first: by
+ * descending
+ * area (intersection of the transformation area with the area of interest,
+ * or intersection of the transformation with the area of use of the CRS),
+ * and
+ * by increasing accuracy. Operations with unknown accuracy are sorted last,
+ * whatever their area.
+ *
+ * @param source_crs source CRS. Must not be NULL.
+ * @param target_crs source CRS. Must not be NULL.
+ * @param operationContext Search context. Must not be NULL.
+ * @return a result set that must be unreferenced with
+ * proj_operation_result_unref(), or NULL in
+ * case of error.
+ */
+PJ_OPERATION_RESULT *
+proj_obj_create_operations(PJ_OBJ *source_crs, PJ_OBJ *target_crs,
+                           PJ_OPERATION_FACTORY_CONTEXT *operationContext) {
+    assert(source_crs);
+    assert(target_crs);
+    assert(operationContext);
+
+    auto sourceCRS = nn_dynamic_pointer_cast<CRS>(source_crs->obj);
+    if (!sourceCRS) {
+        proj_log_error(operationContext->ctx, __FUNCTION__,
+                       "source_crs is not a CRS");
+        return nullptr;
+    }
+    auto targetCRS = nn_dynamic_pointer_cast<CRS>(target_crs->obj);
+    if (!targetCRS) {
+        proj_log_error(operationContext->ctx, __FUNCTION__,
+                       "target_crs is not a CRS");
+        return nullptr;
+    }
+
+    try {
+        auto factory = CoordinateOperationFactory::create();
+        return new PJ_OPERATION_RESULT(
+            operationContext->ctx,
+            factory->createOperations(NN_CHECK_ASSERT(sourceCRS),
+                                      NN_CHECK_ASSERT(targetCRS),
+                                      operationContext->operationContext));
+    } catch (const std::exception &e) {
+        proj_log_error(operationContext->ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the number of CoordinateOperation in the result set
+ *
+ * @param result Objet of type PJ_OPERATION_RESULT (must not be NULL)
+ */
+int proj_operation_result_get_count(PJ_OPERATION_RESULT *result) {
+    assert(result);
+    return static_cast<int>(result->ops.size());
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a CoordinateOperation in the result set
+ *
+ * @param result Objet of type PJ_OPERATION_RESULT (must not be NULL)
+ * @param index Index
+ * @return a new object that must be unreferenced with proj_obj_unref(),
+ * or nullptr in case of error.
+ */
+
+PJ_OBJ *proj_operation_result_get(PJ_OPERATION_RESULT *result, int index) {
+    assert(result);
+    if (index < 0 || index >= proj_operation_result_get_count(result)) {
+        proj_log_error(result->ctx, __FUNCTION__, "Invalid index");
+        return nullptr;
+    }
+    return new PJ_OBJ(result->ctx, result->ops[index]);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Drops a reference on an object.
+ *
+ * This method should be called one and exactly one for each function
+ * returning a PJ_OPERATION_RESULT*
+ *
+ * @param result Object, or NULL.
+ */
+void proj_operation_result_unref(PJ_OPERATION_RESULT *result) { delete result; }

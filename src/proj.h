@@ -455,7 +455,8 @@ typedef enum
 PJ_OBJ PROJ_DLL *proj_obj_create_from_database(PJ_CONTEXT *ctx,
                                                const char* auth_name,
                                                const char* code,
-                                               PJ_OBJ_CATEGORY category);
+                                               PJ_OBJ_CATEGORY category,
+                                               int usePROJAlternativeGridNames);
 
 void PROJ_DLL proj_obj_unref(PJ_OBJ* obj);
 
@@ -544,6 +545,108 @@ PJ_OBJ PROJ_DLL *proj_obj_get_target_crs(PJ_OBJ* obj);
 
 /* ------------------------------------------------------------------------- */
 
+/*! @cond Doxygen_Suppress */
+typedef struct PJ_OPERATION_FACTORY_CONTEXT PJ_OPERATION_FACTORY_CONTEXT;
+/*! @endcond */
+
+PJ_OPERATION_FACTORY_CONTEXT PROJ_DLL *proj_create_operation_factory_context(
+                                            PJ_CONTEXT *ctx);
+
+void PROJ_DLL proj_operation_factory_context_unref(
+                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt);
+
+void PROJ_DLL proj_operation_factory_context_set_desired_accuracy(
+                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            double accuracy);
+
+void PROJ_DLL proj_operation_factory_context_set_area_of_interest(
+                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            double west_lon,
+                                            double south_lat,
+                                            double east_lon,
+                                            double north_lat);
+
+/** Specify how source and target CRS extent should be used to restrict
+  * candidate operations (only taken into account if no explicit area of
+  * interest is specified. */
+typedef enum
+{
+    /** Ignore CRS extent */
+    PJ_CRS_EXTENT_NONE,
+
+    /** Test coordinate operation extent against both CRS extent. */
+    PJ_CRS_EXTENT_BOTH,
+
+    /** Test coordinate operation extent against the intersection of both
+        CRS extent. */
+    PJ_CRS_EXTENT_INTERSECTION,
+
+    /** Test coordinate operation against the smallest of both CRS extent. */
+    PJ_CRS_EXTENT_SMALLEST
+} PROJ_CRS_EXTENT_USE;
+
+void PROJ_DLL proj_operation_factory_context_set_crs_extent_use(
+                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            PROJ_CRS_EXTENT_USE use);
+
+/** Spatial criterion to restrict candiate operations. */
+typedef enum {
+    /** The area of validity of transforms should strictly contain the
+        * are of interest. */
+    PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT,
+
+    /** The area of validity of transforms should at least intersect the
+        * area of interest. */
+    PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION
+} PROJ_SPATIAL_CRITERION;
+
+void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
+                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            PROJ_SPATIAL_CRITERION criterion);
+
+
+/** Describe how grid availability is used. */
+typedef enum {
+    /** Grid availability is only used for sorting results. Operations
+        * where some grids are missing will be sorted last. */
+    PROJ_GRID_AVAILABILITY_USED_FOR_SORTING,
+
+    /** Completely discard an operation if a required grid is missing. */
+    PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID,
+
+    /** Ignore grid availability at all. Results will be presented as if
+        * all grids were available. */
+    PROJ_GRID_AVAILABILITY_IGNORED,
+} PROJ_GRID_AVAILABILITY_USE;
+
+void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
+                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            PROJ_GRID_AVAILABILITY_USE use);
+
+void PROJ_DLL proj_operation_factory_context_set_use_proj_alternative_grid_names(
+    PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+    int usePROJNames);
+
+/* ------------------------------------------------------------------------- */
+
+/*! @cond Doxygen_Suppress */
+typedef struct PJ_OPERATION_RESULT PJ_OPERATION_RESULT;
+/*! @endcond */
+
+PJ_OPERATION_RESULT PROJ_DLL *proj_obj_create_operations(
+                            PJ_OBJ* source_crs,
+                            PJ_OBJ* target_crs,
+                            PJ_OPERATION_FACTORY_CONTEXT* operationContext);
+
+int PROJ_DLL proj_operation_result_get_count(PJ_OPERATION_RESULT* result);
+
+PJ_OBJ PROJ_DLL *proj_operation_result_get(PJ_OPERATION_RESULT* result,
+                                           int index);
+
+void PROJ_DLL proj_operation_result_unref(PJ_OPERATION_RESULT* result);
+
+/* ------------------------------------------------------------------------- */
+
 PJ_OBJ PROJ_DLL *proj_obj_crs_get_geodetic_crs(PJ_OBJ* crs);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_get_horizontal_datum(PJ_OBJ* crs);
@@ -586,6 +689,16 @@ int PROJ_DLL proj_coordoperation_get_param(PJ_OBJ* coordoperation,
                                            const char **pValueString,
                                            double* pValueUnitConvFactor,
                                            const char** pValueUnitName);
+
+int PROJ_DLL proj_coordoperation_get_grid_used_count(PJ_OBJ* coordoperation);
+
+int PROJ_DLL proj_coordoperation_get_grid_used(PJ_OBJ* coordoperation,
+                                               int index,
+                                               const char** pShortName,
+                                               const char** pFullName,
+                                               const char** pPackageName,
+                                               const char** pPackageURL,
+                                               int* pAvailable);
 
 #ifdef __cplusplus
 }

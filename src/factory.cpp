@@ -52,7 +52,11 @@
 
 #include "lru_cache.hpp"
 
-#include "projects.h" // DIR_CHAR
+// PROJ include order is sensitive
+// clang-format off
+#include "proj.h"
+#include "projects.h"
+// clang-format on
 
 #include <sqlite3.h>
 
@@ -102,6 +106,9 @@ struct DatabaseContext::Private {
 
     sqlite3 *handle() const { return sqlite_handle_; }
 
+    PJ_CONTEXT *pjCtxt() const { return pjCtxt_; }
+    void setPjCtxt(PJ_CONTEXT *ctxt) { pjCtxt_ = ctxt; }
+
     SQLResultSet
     run(const std::string &sql,
         const std::vector<SQLValues> &parameters = std::vector<SQLValues>());
@@ -110,6 +117,7 @@ struct DatabaseContext::Private {
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_;
+    PJ_CONTEXT *pjCtxt_ = nullptr;
 
     void registerFunctions();
 
@@ -463,6 +471,66 @@ void *DatabaseContext::getSqliteHandle() const {
     return getPrivate()->handle();
 }
 
+// ---------------------------------------------------------------------------
+
+DatabaseContextNNPtr DatabaseContext::createWithPJContext(void *pjCtxt) {
+    auto ctxt = create(std::string());
+    ctxt->getPrivate()->setPjCtxt(static_cast<PJ_CONTEXT *>(pjCtxt));
+    return ctxt;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
+                                             std::string &projFilename,
+                                             std::string &projFormat,
+                                             bool &inverse) {
+    auto res = d->run(
+        "SELECT proj_grid_name, proj_grid_format, inverse_direction FROM "
+        "grid_alternatives WHERE original_grid_name = ?",
+        {officialName});
+    if (res.empty()) {
+        return false;
+    }
+    projFilename = res[0][0];
+    projFormat = res[0][1];
+    inverse = res[0][2] == "1";
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::lookForGridInfo(const std::string &gridName,
+                                      std::string &fullFilename,
+                                      std::string &packageName,
+                                      std::string &packageURL,
+                                      bool &gridAvailable) {
+    fullFilename.clear();
+    packageName.clear();
+    packageURL.clear();
+
+    fullFilename.resize(2048);
+    if (d->pjCtxt() == nullptr) {
+        d->setPjCtxt(pj_get_default_ctx());
+    }
+    gridAvailable =
+        pj_find_file(d->pjCtxt(), gridName.c_str(), &fullFilename[0],
+                     fullFilename.size() - 1) != 0;
+    fullFilename.resize(strlen(fullFilename.c_str()));
+
+    auto res =
+        d->run("SELECT grid_packages.package_name, grid_packages.url FROM "
+               "grid_alternatives JOIN grid_packages ON "
+               "grid_alternatives.package_name = grid_packages.package_name "
+               "WHERE proj_grid_name = ?",
+               {gridName});
+    if (res.empty()) {
+        return;
+    }
+    packageName = res[0][0];
+    packageURL = res[0][1];
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -624,6 +692,13 @@ AuthorityFactory::create(DatabaseContextNNPtr context,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the database context. */
+DatabaseContextNNPtr AuthorityFactory::databaseContext() const {
+    return d->context();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns an arbitrary object from a code.
  *
  * The returned object will typically be an instance of Datum,
@@ -713,7 +788,7 @@ AuthorityFactory::createObject(const std::string &code) const {
         table_name == "other_transformation" ||
         table_name == "concatenated_operation") {
         return util::nn_static_pointer_cast<util::BaseObject>(
-            createCoordinateOperation(code));
+            createCoordinateOperation(code, false));
     }
     throw FactoryException("unimplemented factory for " + res[0][0]);
 }
@@ -1604,19 +1679,21 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
 /** \brief Returns a operation::CoordinateOperation from the specified code.
  *
  * @param code Object code allocated by authority.
+ * @param usePROJAlternativeGridNames Whether PROJ alternative grid names
+ * should be substituted to the official grid names.
  * @return object.
  * @throw NoSuchAuthorityCodeException
  * @throw FactoryException
  */
 
-operation::CoordinateOperationNNPtr
-AuthorityFactory::createCoordinateOperation(const std::string &code) const {
-    return createCoordinateOperation(code, true);
+operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
+    const std::string &code, bool usePROJAlternativeGridNames) const {
+    return createCoordinateOperation(code, true, usePROJAlternativeGridNames);
 }
 
-operation::CoordinateOperationNNPtr
-AuthorityFactory::createCoordinateOperation(const std::string &code,
-                                            bool allowConcatenated) const {
+operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
+    const std::string &code, bool allowConcatenated,
+    bool usePROJAlternativeGridNames) const {
     auto res =
         d->context()->getPrivate()->run("SELECT type FROM coordinate_operation "
                                         "WHERE auth_name = ? AND code = ?",
@@ -2079,9 +2156,13 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
                 accuracies.emplace_back(
                     metadata::PositionalAccuracy::create(accuracy));
             }
-            return operation::Transformation::create(
+            auto transf = operation::Transformation::create(
                 props, sourceCRS, targetCRS, interpolationCRS, propsMethod,
                 parameters, values, accuracies);
+            if (usePROJAlternativeGridNames) {
+                return transf->substitutePROJAlternativeGridNames(d->context());
+            }
+            return transf;
 
         } catch (const std::exception &ex) {
             throw FactoryException("cannot build transformation " + code +
@@ -2242,15 +2323,18 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
             std::vector<operation::CoordinateOperationNNPtr> operations;
             operations.push_back(
                 d->createFactory(step1_auth_name)
-                    ->createCoordinateOperation(step1_code, false));
+                    ->createCoordinateOperation(step1_code, false,
+                                                usePROJAlternativeGridNames));
             operations.push_back(
                 d->createFactory(step2_auth_name)
-                    ->createCoordinateOperation(step2_code, false));
+                    ->createCoordinateOperation(step2_code, false,
+                                                usePROJAlternativeGridNames));
 
             if (!step3_auth_name.empty()) {
                 operations.push_back(
                     d->createFactory(step3_auth_name)
-                        ->createCoordinateOperation(step3_code, false));
+                        ->createCoordinateOperation(
+                            step3_code, false, usePROJAlternativeGridNames));
             }
 
             // In case the operation is a conversion (we hope this is the
@@ -2419,7 +2503,8 @@ std::vector<operation::CoordinateOperationNNPtr>
 AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSCode, const std::string &targetCRSCode) const {
     return createFromCoordinateReferenceSystemCodes(
-        getAuthority(), sourceCRSCode, getAuthority(), targetCRSCode);
+        getAuthority(), sourceCRSCode, getAuthority(), targetCRSCode, false,
+        false);
 }
 
 // ---------------------------------------------------------------------------
@@ -2440,6 +2525,10 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  * @param targetCRSAuthName Authority name of targetCRSCode
  * @param targetCRSCode Source CRS code allocated by authority
  * targetCRSAuthName.
+ * @param usePROJAlternativeGridNames Whether PROJ alternative grid names
+ * should be substituted to the official grid names.
+ * @param discardIfMissingGrid Whether coordinate operations that reference
+ * missing grids should be removed from the result set.
  * @return list of coordinate operations
  * @throw NoSuchAuthorityCodeException
  * @throw FactoryException
@@ -2448,8 +2537,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
 std::vector<operation::CoordinateOperationNNPtr>
 AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
-    const std::string &targetCRSAuthName,
-    const std::string &targetCRSCode) const {
+    const std::string &targetCRSAuthName, const std::string &targetCRSCode,
+    bool usePROJAlternativeGridNames, bool discardIfMissingGrid) const {
     std::vector<operation::CoordinateOperationNNPtr> list;
 
     // Look-up first for conversion which is the most precise.
@@ -2491,8 +2580,21 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     for (const auto &row : res) {
         const auto &auth_name = row[0];
         const auto &code = row[1];
-        list.emplace_back(
-            d->createFactory(auth_name)->createCoordinateOperation(code));
+        auto op = d->createFactory(auth_name)->createCoordinateOperation(
+            code, true, usePROJAlternativeGridNames);
+        if (discardIfMissingGrid) {
+            bool gridsMissing = false;
+            for (const auto &gridDesc : op->gridsNeeded(d->context())) {
+                if (!gridDesc.available) {
+                    gridsMissing = true;
+                    break;
+                }
+            }
+            if (gridsMissing) {
+                continue;
+            }
+        }
+        list.emplace_back(op);
     }
     return list;
 }

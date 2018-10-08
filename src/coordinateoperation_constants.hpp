@@ -419,12 +419,15 @@ static const std::string
 
 // ---------------------------------------------------------------------------
 
+constexpr int EPSG_CODE_METHOD_NTV1 = 9614;
+static const std::string EPSG_NAME_METHOD_NTV1("NTv1");
+
 constexpr int EPSG_CODE_METHOD_NTV2 = 9615;
 static const std::string EPSG_NAME_METHOD_NTV2("NTv2");
 
-constexpr int EPSG_CODE_PARAMETER_NTV2_FILENAME = 8656;
-static const std::string
-    EPSG_NAME_PARAMETER_NTV2_FILENAME("Latitude and longitude difference file");
+constexpr int EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE = 8656;
+static const std::string EPSG_NAME_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE(
+    "Latitude and longitude difference file");
 
 static const std::string EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME(
     "Geoid (height correction) model file");
@@ -435,6 +438,8 @@ constexpr int EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME = 8666;
 static const std::string PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D(
     "GravityRelatedHeight to Geographic3D");
 
+static const std::string PROJ_WKT2_NAME_METHOD_CTABLE2("CTABLE2");
+
 // ---------------------------------------------------------------------------
 
 constexpr int EPSG_CODE_METHOD_VERTCON = 9658;
@@ -443,6 +448,19 @@ static const std::string EPSG_NAME_METHOD_VERTCON("VERTCON");
 static const std::string
     EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE("Vertical offset file");
 constexpr int EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE = 8732;
+
+// ---------------------------------------------------------------------------
+
+constexpr int EPSG_CODE_METHOD_NADCON = 9613;
+static const std::string EPSG_NAME_METHOD_NADCON("NADCON");
+
+static const std::string
+    EPSG_NAME_PARAMETER_LATITUDE_DIFFERENCE_FILE("Latitude difference file");
+constexpr int EPSG_CODE_PARAMETER_LATITUDE_DIFFERENCE_FILE = 8657;
+
+static const std::string
+    EPSG_NAME_PARAMETER_LONGITUDE_DIFFERENCE_FILE("Longitude difference file");
+constexpr int EPSG_CODE_PARAMETER_LONGITUDE_DIFFERENCE_FILE = 8658;
 
 // ---------------------------------------------------------------------------
 
