@@ -26,6 +26,7 @@ from the ``conda-forge`` channel::
 
     conda install -c conda-forge proj4
 
+Docker
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 A `Docker`_ image with just PROJ binaries and a full compliment of grid shift
