@@ -671,8 +671,10 @@ TEST_F(CApi, proj_get_authorities_from_database) {
     ASSERT_TRUE(list[0] != nullptr);
     EXPECT_EQ(list[0], std::string("EPSG"));
     ASSERT_TRUE(list[1] != nullptr);
-    EXPECT_EQ(list[1], std::string("PROJ"));
-    EXPECT_EQ(list[2], nullptr);
+    EXPECT_EQ(list[1], std::string("IGNF"));
+    ASSERT_TRUE(list[2] != nullptr);
+    EXPECT_EQ(list[2], std::string("PROJ"));
+    EXPECT_EQ(list[3], nullptr);
     proj_free_string_list(list);
 }
 

@@ -219,6 +219,8 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
         io::PROJStringFormatterNNPtr formatter) const;
     //! @endcond
 
+    PROJ_DLL static const GeodeticCRSNNPtr EPSG_4978; // WGS 84 Geocentric
+
   protected:
     GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
@@ -235,6 +237,7 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    static GeodeticCRSNNPtr createEPSG_4978();
     GeodeticCRS(const GeodeticCRS &other) = delete;
     GeodeticCRS &operator=(const GeodeticCRS &other) = delete;
 };

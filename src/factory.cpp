@@ -1168,6 +1168,31 @@ datum::DatumNNPtr AuthorityFactory::createDatum(const std::string &code) const {
 
 // ---------------------------------------------------------------------------
 
+static cs::MeridianPtr createMeridian(const std::string &val) {
+    try {
+        if (ends_with(val, ""
+                           "\xC2\xB0"
+                           "W")) {
+            return cs::Meridian::create(common::Angle(
+                -c_locale_stod(val.substr(0, val.size() - strlen(""
+                                                                 "\xC2\xB0"
+                                                                 "W")))));
+        }
+        if (ends_with(val, ""
+                           "\xC2\xB0"
+                           "E")) {
+            return cs::Meridian::create(common::Angle(
+                c_locale_stod(val.substr(0, val.size() - strlen(""
+                                                                "\xC2\xB0"
+                                                                "E")))));
+        }
+    } catch (const std::exception &) {
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns a cs::CoordinateSystem from the specified code.
  *
  * @param code Object code allocated by authority.
@@ -1206,20 +1231,33 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name);
         const cs::AxisDirection *direction =
             cs::AxisDirection::valueOf(orientation);
+        cs::MeridianPtr meridian;
         if (direction == nullptr) {
-            if (orientation == "Geocentre > equator/0°E") {
+            if (orientation == "Geocentre > equator/0"
+                               "\xC2\xB0"
+                               "E") {
                 direction = &(cs::AxisDirection::GEOCENTRIC_X);
-            } else if (orientation == "Geocentre > equator/90°E") {
+            } else if (orientation == "Geocentre > equator/90"
+                                      "\xC2\xB0"
+                                      "E") {
                 direction = &(cs::AxisDirection::GEOCENTRIC_Y);
             } else if (orientation == "Geocentre > north pole") {
                 direction = &(cs::AxisDirection::GEOCENTRIC_Z);
+            } else if (starts_with(orientation, "North along ")) {
+                direction = &(cs::AxisDirection::NORTH);
+                meridian =
+                    createMeridian(orientation.substr(strlen("North along ")));
+            } else if (starts_with(orientation, "South along ")) {
+                direction = &(cs::AxisDirection::SOUTH);
+                meridian =
+                    createMeridian(orientation.substr(strlen("South along ")));
             } else {
                 throw FactoryException("unknown axis direction: " +
                                        orientation);
             }
         }
-        axisList.emplace_back(
-            cs::CoordinateSystemAxis::create(props, abbrev, *direction, *uom));
+        axisList.emplace_back(cs::CoordinateSystemAxis::create(
+            props, abbrev, *direction, *uom, meridian));
     }
     auto props = util::PropertyMap()
                      .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
@@ -1493,11 +1531,13 @@ AuthorityFactory::createConversion(const std::string &code) const {
                 .set(common::IdentifiedObject::NAME_KEY, name)
                 .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
 
-        auto propMethod =
-            util::PropertyMap()
+        auto propMethod = util::PropertyMap().set(
+            common::IdentifiedObject::NAME_KEY, method_name);
+        if (!method_auth_name.empty()) {
+            propMethod
                 .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
-                .set(metadata::Identifier::CODE_KEY, method_code)
-                .set(common::IdentifiedObject::NAME_KEY, method_name);
+                .set(metadata::Identifier::CODE_KEY, method_code);
+        }
 
         return operation::Conversion::create(propConversion, propMethod,
                                              parameters, values);

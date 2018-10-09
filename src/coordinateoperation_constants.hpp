@@ -118,9 +118,13 @@ static const std::string PROJ_WKT2_NAME_METHOD_ECKERT_V("Eckert V");
 
 static const std::string PROJ_WKT2_NAME_METHOD_ECKERT_VI("Eckert VI");
 
+static const std::string
+    EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL("Equidistant Cylindrical");
+constexpr int EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL = 1028;
+
 static const std::string EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL(
     "Equidistant Cylindrical (Spherical)");
-constexpr int EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL = 1019;
+constexpr int EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL = 1029;
 
 static const std::string PROJ_WKT2_NAME_METHOD_GALL("Gall");
 
@@ -861,6 +865,21 @@ static const MethodMapping methodMappings[] = {
      "eck6",
      {
          paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL,
+     EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL,
+     "Equirectangular",
+     "eqc",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_ts"},
+
+         paramLongitudeNatOrigin,
+         paramFalseEasting,
+         paramFalseNorthing,
      }},
 
     {EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL,

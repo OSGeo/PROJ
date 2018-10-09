@@ -22,6 +22,7 @@ set(SQL_FILES "${SQL_DIR}/proj_db_table_defs.sql"
                   "${SQL_DIR}/grid_transformation_custom.sql"
                   "${SQL_DIR}/other_transformation.sql"
                   "${SQL_DIR}/concatenated_operation.sql"
+                  "${SQL_DIR}/ignf.sql"
                   "${SQL_DIR}/grid_alternatives.sql"
                   "${SQL_DIR}/customizations.sql"
                   "${SQL_DIR}/commit.sql")

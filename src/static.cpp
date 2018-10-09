@@ -364,7 +364,7 @@ const AxisDirection AxisDirection::NORTH_EAST("northEast");
 /** Axis positive direction is approximately east-north-east. */
 const AxisDirection AxisDirection::EAST_NORTH_EAST("eastNorthEast");
 
-/** Axis positive direction is 90° clockwise from north. */
+/** Axis positive direction is 90deg clockwise from north. */
 const AxisDirection AxisDirection::EAST("east");
 
 /** Axis positive direction is approximately east-south-east. */
@@ -376,7 +376,7 @@ const AxisDirection AxisDirection::SOUTH_EAST("southEast");
 /** Axis positive direction is approximately south-south-east. */
 const AxisDirection AxisDirection::SOUTH_SOUTH_EAST("southSouthEast");
 
-/** Axis positive direction is 180° clockwise from north. */
+/** Axis positive direction is 180deg clockwise from north. */
 const AxisDirection AxisDirection::SOUTH("south");
 
 /** Axis positive direction is approximately south-south-west. */
@@ -388,7 +388,7 @@ const AxisDirection AxisDirection::SOUTH_WEST("southWest");
 /** Axis positive direction is approximately west-south-west. */
 const AxisDirection AxisDirection::WEST_SOUTH_WEST("westSouthWest");
 
-/** Axis positive direction is 270° clockwise from north. */
+/** Axis positive direction is 270deg clockwise from north. */
 const AxisDirection AxisDirection::WEST("west");
 
 /** Axis positive direction is approximately west-north-west. */
@@ -412,7 +412,7 @@ const AxisDirection AxisDirection::DOWN("down");
 const AxisDirection AxisDirection::GEOCENTRIC_X("geocentricX");
 
 /** Axis positive direction is in the equatorial plane from the centre of the
- * modelled Earth towards the intersection of the equator and the meridian 90°
+ * modelled Earth towards the intersection of the equator and the meridian 90deg
  * eastwards from the prime meridian. */
 const AxisDirection AxisDirection::GEOCENTRIC_Y("geocentricY");
 
@@ -579,6 +579,11 @@ const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::EPSG_6326(
 /** \brief The proleptic Gregorian calendar. */
 const std::string
     TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN("proleptic Gregorian");
+
+// ---------------------------------------------------------------------------
+
+/** \brief EPSG:4978 / "WGS 84" Geocentric */
+const GeodeticCRSNNPtr GeodeticCRS::EPSG_4978(GeodeticCRS::createEPSG_4978());
 
 // ---------------------------------------------------------------------------
 

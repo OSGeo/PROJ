@@ -171,17 +171,26 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible() const {
     if (boundCRS) {
         return thisAsCRS;
     }
+
+    auto geodCRS = util::nn_dynamic_pointer_cast<GeodeticCRS>(thisAsCRS);
     auto geogCRS = extractGeographicCRS();
-    if (!geogCRS ||
-        geogCRS->isEquivalentTo(crs::GeographicCRS::EPSG_4326,
-                                util::IComparable::Criterion::EQUIVALENT)) {
+    auto hubCRS = util::nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326);
+    if (geodCRS && !geogCRS) {
+        hubCRS = util::nn_static_pointer_cast<CRS>(GeodeticCRS::EPSG_4978);
+    } else if (!geogCRS ||
+               geogCRS->isEquivalentTo(
+                   GeographicCRS::EPSG_4326,
+                   util::IComparable::Criterion::EQUIVALENT)) {
         return thisAsCRS;
+    } else {
+        geodCRS = geogCRS;
     }
     auto l_domains = domains();
     metadata::ExtentPtr extent;
     if (!l_domains.empty()) {
         extent = l_domains[0]->domainOfValidity();
     }
+
     try {
         auto dbContext = io::DatabaseContext::create();
         auto authFactory =
@@ -192,45 +201,58 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible() const {
         //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
         auto list =
             operation::CoordinateOperationFactory::create()->createOperations(
-                NN_CHECK_ASSERT(geogCRS), crs::GeographicCRS::EPSG_4326, ctxt);
-        if (list.empty()) {
-            return thisAsCRS;
-        }
-        auto transf =
-            util::nn_dynamic_pointer_cast<operation::Transformation>(list[0]);
-        if (!transf) {
-            auto concatenated =
-                util::nn_dynamic_pointer_cast<operation::ConcatenatedOperation>(
-                    list[0]);
-            if (concatenated) {
-                // Case for EPSG:4807 / "NTF (Paris)" that is made of a
-                // longitude rotation followed by a Helmert
-                // The prime meridian shift will be accounted elsewhere
-                const auto &subops = concatenated->operations();
-                if (subops.size() == 2) {
-                    auto firstop = util::nn_dynamic_pointer_cast<
-                        operation::Transformation>(subops[0]);
-                    if (firstop && firstop->isLongitudeRotation()) {
-                        transf = util::nn_dynamic_pointer_cast<
-                            operation::Transformation>(subops[1]);
-                        if (transf) {
-                            transf->getTOWGS84Parameters();
-                            return util::nn_static_pointer_cast<CRS>(
-                                BoundCRS::create(thisAsCRS,
-                                                 crs::GeographicCRS::EPSG_4326,
-                                                 NN_CHECK_ASSERT(transf)));
+                NN_CHECK_ASSERT(geodCRS), hubCRS, ctxt);
+        for (const auto &op : list) {
+            auto transf =
+                util::nn_dynamic_pointer_cast<operation::Transformation>(op);
+            if (transf) {
+                try {
+                    transf->getTOWGS84Parameters();
+                } catch (const std::exception &) {
+                    continue;
+                }
+                return util::nn_static_pointer_cast<CRS>(BoundCRS::create(
+                    thisAsCRS, hubCRS, NN_CHECK_ASSERT(transf)));
+            } else {
+                auto concatenated = util::nn_dynamic_pointer_cast<
+                    operation::ConcatenatedOperation>(op);
+                if (concatenated) {
+                    // Case for EPSG:4807 / "NTF (Paris)" that is made of a
+                    // longitude rotation followed by a Helmert
+                    // The prime meridian shift will be accounted elsewhere
+                    const auto &subops = concatenated->operations();
+                    if (subops.size() == 2) {
+                        auto firstOpIsTransformation =
+                            util::nn_dynamic_pointer_cast<
+                                operation::Transformation>(subops[0]);
+                        auto firstOpIsConversion =
+                            util::nn_dynamic_pointer_cast<
+                                operation::Conversion>(subops[0]);
+                        if ((firstOpIsTransformation &&
+                             firstOpIsTransformation->isLongitudeRotation()) ||
+                            (util::nn_dynamic_pointer_cast<DerivedCRS>(
+                                 thisAsCRS) &&
+                             firstOpIsConversion)) {
+                            transf = util::nn_dynamic_pointer_cast<
+                                operation::Transformation>(subops[1]);
+                            if (transf) {
+                                try {
+                                    transf->getTOWGS84Parameters();
+                                } catch (const std::exception &) {
+                                    continue;
+                                }
+                                return util::nn_static_pointer_cast<CRS>(
+                                    BoundCRS::create(thisAsCRS, hubCRS,
+                                                     NN_CHECK_ASSERT(transf)));
+                            }
                         }
                     }
                 }
             }
-            return thisAsCRS;
         }
-        transf->getTOWGS84Parameters();
-        return util::nn_static_pointer_cast<CRS>(BoundCRS::create(
-            thisAsCRS, crs::GeographicCRS::EPSG_4326, NN_CHECK_ASSERT(transf)));
     } catch (const std::exception &) {
-        return thisAsCRS;
     }
+    return thisAsCRS;
 }
 
 // ---------------------------------------------------------------------------
@@ -708,6 +730,13 @@ GeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         formatter->addStep("cart");
     }
     ellipsoid()->exportToPROJString(formatter);
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_4) {
+        const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
+        if (TOWGS84Params.size() == 7) {
+            formatter->addParam("towgs84", TOWGS84Params);
+        }
+    }
     addGeocentricUnitConversionIntoPROJString(formatter);
 
     return scope.toString();
@@ -763,6 +792,19 @@ bool GeodeticCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
     // TODO test velocityModel
     return otherGeodCRS != nullptr &&
            SingleCRS::_isEquivalentTo(other, criterion);
+}
+
+// ---------------------------------------------------------------------------
+
+GeodeticCRSNNPtr GeodeticCRS::createEPSG_4978() {
+    util::PropertyMap propertiesCRS;
+    propertiesCRS
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
+        .set(metadata::Identifier::CODE_KEY, 4978)
+        .set(common::IdentifiedObject::NAME_KEY, "WGS 84");
+    return create(
+        propertiesCRS, datum::GeodeticReferenceFrame::EPSG_6326,
+        cs::CartesianCS::createGeocentric(common::UnitOfMeasure::METRE));
 }
 
 // ---------------------------------------------------------------------------
@@ -1899,7 +1941,7 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
 // ---------------------------------------------------------------------------
 
 bool BoundCRS::isTOWGS84Compatible() const {
-    return util::nn_dynamic_pointer_cast<GeographicCRS>(hubCRS()) != nullptr &&
+    return util::nn_dynamic_pointer_cast<GeodeticCRS>(hubCRS()) != nullptr &&
            ci_equal(*(hubCRS()->name()->description()), "WGS 84");
 }
 

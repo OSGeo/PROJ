@@ -73,7 +73,7 @@ static void usage() {
         << std::endl
         << "                [--grid-check none|discard_missing|sort]"
         << std::endl
-        << "                [--boundcrs-to-WGS84]" << std::endl
+        << "                [--boundcrs-to-wgs84]" << std::endl
         << "                {object_definition} | (-s {srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
@@ -385,7 +385,9 @@ static void outputOperations(
                 first = false;
                 std::cout << "-------------------------------------"
                           << std::endl;
-                std::cout << "Operation n°" << (i + 1) << ":" << std::endl
+                std::cout << "Operation n"
+                             "\xC2\xB0"
+                          << (i + 1) << ":" << std::endl
                           << std::endl;
             }
             outputObject(op, outputOpt);
@@ -528,7 +530,7 @@ int main(int argc, char **argv) {
             outputOpt.quiet = true;
         } else if (arg == "--summary") {
             summary = true;
-        } else if (arg == "--boundcrs-to-wgs84") {
+        } else if (ci_equal(arg, "--boundcrs-to-wgs84")) {
             buildBoundCRSToWGS84 = true;
         } else if (arg == "--spatial-test" && i + 1 < argc) {
             i++;

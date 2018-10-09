@@ -2537,6 +2537,33 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         auto crs = createVerticalCRS();
         EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(), crs);
     }
+    {
+        auto factoryIGNF =
+            AuthorityFactory::create(DatabaseContext::create(), "IGNF");
+        auto crs = factoryIGNF->createCoordinateReferenceSystem("TERA50STEREO");
+        auto bound = crs->createBoundCRSToWGS84IfPossible();
+        EXPECT_NE(bound, crs);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_4)),
+                  "+proj=stere +lat_0=-90 +lat_ts=-67 +lon_0=140 +x_0=300000 "
+                  "+y_0=-2299363.482 +ellps=intl "
+                  "+towgs84=324.912,153.282,172.026,0,0,0,0");
+    }
+    {
+        auto factoryIGNF =
+            AuthorityFactory::create(DatabaseContext::create(), "IGNF");
+        auto crs = factoryIGNF->createCoordinateReferenceSystem("AMST63");
+        auto bound = crs->createBoundCRSToWGS84IfPossible();
+        EXPECT_NE(bound, crs);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_4)),
+                  "+proj=geocent +ellps=intl "
+                  "+towgs84=109.753,-528.133,-362.244,0,0,0,0");
+    }
 }
 
 // ---------------------------------------------------------------------------

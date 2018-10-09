@@ -941,6 +941,13 @@ class Conversion : public SingleOperation {
                    const common::Length &falseEasting,
                    const common::Length &falseNorthing);
 
+    PROJ_DLL static ConversionNNPtr
+    createEquidistantCylindrical(const util::PropertyMap &properties,
+                                 const common::Angle &latitudeFirstParallel,
+                                 const common::Angle &longitudeNatOrigin,
+                                 const common::Length &falseEasting,
+                                 const common::Length &falseNorthing);
+
     PROJ_DLL static ConversionNNPtr createEquidistantCylindricalSpherical(
         const util::PropertyMap &properties,
         const common::Angle &latitudeFirstParallel,

@@ -5117,6 +5117,48 @@ TEST(io, projparse_molodensky_complex_pipeline) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_longlat_title) {
+    std::string projString("+title=Ile d'Amsterdam 1963 +proj=longlat "
+                           "+towgs84=109.7530,-528.1330,-362.2440 "
+                           "+a=6378388.0000 +rf=297.0000000000000 +units=m "
+                           "+no_defs");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto baseCRS = nn_dynamic_pointer_cast<GeographicCRS>(crs->baseCRS());
+    ASSERT_TRUE(baseCRS != nullptr);
+    EXPECT_EQ(*(baseCRS->name()->description()), "Ile d'Amsterdam 1963");
+    EXPECT_EQ(*(baseCRS->datum()->name()->description()),
+              "Ile d'Amsterdam 1963");
+    EXPECT_EQ(
+        crs->exportToPROJString(PROJStringFormatter::create(
+            PROJStringFormatter::Convention::PROJ_4)),
+        "+proj=longlat +ellps=intl +towgs84=109.753,-528.133,-362.244,0,0,0,0");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_projected_title) {
+    std::string projString(
+        "+title=Amsterdam 1963 +proj=tmerc "
+        "+towgs84=109.7530,-528.1330,-362.2440 +a=6378388.0000 "
+        "+rf=297.0000000000000 +lat_0=0.000000000 +lon_0=75.000000000 "
+        "+k_0=0.99960000 +x_0=500000.000 +y_0=10000000.000 +units=m +no_defs");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto baseCRS = nn_dynamic_pointer_cast<ProjectedCRS>(crs->baseCRS());
+    ASSERT_TRUE(baseCRS != nullptr);
+    EXPECT_EQ(*(baseCRS->name()->description()), "Amsterdam 1963");
+    EXPECT_EQ(*(baseCRS->baseCRS()->name()->description()), "unknown");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=utm +zone=43 +south +ellps=intl "
+              "+towgs84=109.753,-528.133,-362.244,0,0,0,0");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString(""), ParsingException);
 

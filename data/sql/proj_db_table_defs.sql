@@ -116,6 +116,13 @@ CREATE TABLE crs(
     CONSTRAINT pk_geodetic_crs PRIMARY KEY (auth_name, code)
 );
 
+CREATE TRIGGER crs_insert_trigger
+BEFORE INSERT ON crs
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on crs violates constraint: type must be one of ''geographic 2D'', ''geographic 3D'', ''geocentric'', ''vertical'', ''projected'', ''compound''')
+        WHERE NEW.type NOT IN ('geographic 2D', 'geographic 3D', 'geocentric', 'vertical', 'projected', 'compound');
+END;
+
 CREATE TABLE geodetic_crs(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
@@ -175,8 +182,8 @@ CREATE TABLE conversion(
     area_of_use_auth_name TEXT NOT NULL,
     area_of_use_code TEXT NOT NULL,
 
-    method_auth_name TEXT NOT NULL,
-    method_code TEXT NOT NULL,
+    method_auth_name TEXT,
+    method_code TEXT,
     method_name NOT NULL,
 
     param1_auth_name TEXT,
@@ -411,6 +418,10 @@ FOR EACH ROW BEGIN
         WHERE NEW.proj_grid_format NOT IN ('CTable2', 'NTv1', 'NTv2', 'GTX');
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_method must be one of ''hgridshift'', ''vgridshift''')
         WHERE NEW.proj_method NOT IN ('hgridshift', 'vgridshift');
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_method must be ''hgridshift'' when proj_grid_format is ''CTable2'', ''NTv1'', ''NTv2''')
+        WHERE NEW.proj_method != 'hgridshift' AND NEW.proj_grid_format IN ('CTable2', 'NTv1', 'NTv2');
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_method must be ''vridshift'' when proj_grid_format is ''GTX''')
+        WHERE NEW.proj_method != 'vgridshift' AND NEW.proj_grid_format IN ('GTX');
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: original_grid_name must be referenced in grid_transformation.grid_name')
         WHERE NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: NEW.inverse_direction must be 0 when original_grid_name = proj_grid_name')

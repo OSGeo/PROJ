@@ -2340,6 +2340,43 @@ ConversionNNPtr Conversion::createEckertVI(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Equidistant Cylindrical]
+ *(https://proj4.org/operations/projections/eqc.html) projection method.
+ *
+ * This is also known as the Equirectangular method, and in the particular case
+ * where the latitude of first parallel is 0.
+ *
+ * This method is defined as [EPSG:1028]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1028)
+ *
+ * @note This is the equivalent OGRSpatialReference::SetEquirectangular2(
+ * 0.0, latitudeFirstParallel, falseEasting, falseNorthing ) of GDAL &lt;= 2.3,
+ * where the lat_0 / center_latitude parameter is forced to 0.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel.
+ * @param longitudeNatOrigin See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEquidistantCylindrical(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeFirstParallel,
+    const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    return create(properties, EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL,
+                  {
+                      ParameterValue::create(latitudeFirstParallel),
+                      ParameterValue::create(longitudeNatOrigin),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a conversion based on the [Equidistant Cylindrical
  *(Spherical)]
  *(https://proj4.org/operations/projections/eqc.html) projection method.
@@ -2742,8 +2779,8 @@ ConversionNNPtr Conversion::createInternationalMapWorldPolyconic(
  * westing(Krovak) = -easting(Krovak_North).
  *
  * @note The current PROJ implementation of Krovak hard-codes
- * colatitudeConeAxis = 30°17'17.30311"
- * and latitudePseudoStandardParallel = 78°30'N, which are the values used for
+ * colatitudeConeAxis = 30deg17'17.30311"
+ * and latitudePseudoStandardParallel = 78deg30'N, which are the values used for
  * the ProjectedCRS S-JTSK (Ferro) / Krovak East North (EPSG:5221).
  * It also hard-codes the parameters of the Bessel ellipsoid typically used for
  * Krovak.
@@ -2797,8 +2834,8 @@ ConversionNNPtr Conversion::createKrovakNorthOriented(
  * northing(Krovak_North) = -southing(Krovak).
  *
  * @note The current PROJ implementation of Krovak hard-codes
- * colatitudeConeAxis = 30°17'17.30311"
- * and latitudePseudoStandardParallel = 78°30'N, which are the values used for
+ * colatitudeConeAxis = 30deg17'17.30311"
+ * and latitudePseudoStandardParallel = 78deg30'N, which are the values used for
  * the ProjectedCRS S-JTSK (Ferro) / Krovak East North (EPSG:5221).
  * It also hard-codes the parameters of the Bessel ellipsoid typically used for
  * Krovak.

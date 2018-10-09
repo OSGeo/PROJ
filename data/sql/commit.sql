@@ -1,1 +1,2 @@
 COMMIT;
+VACUUM;

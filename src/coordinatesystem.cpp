@@ -170,7 +170,7 @@ const std::string &CoordinateSystemAxis::abbreviation() const {
  * coordinate system axes, only one of each pair of terms can be used. For
  * Earth-fixed CRSs, this direction is often approximate and intended to
  * provide a human interpretable meaning to the axis. When a geodetic reference
- * frame is used, the precise directions of the axes may therefore vary
+ * frame is used, the precise directions of the axes may therefore vary
  * slightly from this approximate direction. Note that an EngineeringCRS often
  * requires specific descriptions of the directions of its coordinate system
  * axes.

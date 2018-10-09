@@ -1805,6 +1805,41 @@ TEST(operation, eckert_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createEquidistantCylindrical) {
+    auto conv = Conversion::createEquidistantCylindrical(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=eqc +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Equidistant Cylindrical\",\n"
+              "    METHOD[\"Equidistant Cylindrical\",\n"
+              "        ID[\"EPSG\",1028]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Equirectangular\"],\n"
+              "PARAMETER[\"standard_parallel_1\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, createEquidistantCylindricalSpherical) {
     auto conv = Conversion::createEquidistantCylindricalSpherical(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
@@ -1815,7 +1850,7 @@ TEST(operation, createEquidistantCylindricalSpherical) {
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
               "CONVERSION[\"Equidistant Cylindrical (Spherical)\",\n"
               "    METHOD[\"Equidistant Cylindrical (Spherical)\",\n"
-              "        ID[\"EPSG\",1019]],\n"
+              "        ID[\"EPSG\",1029]],\n"
               "    PARAMETER[\"Latitude of 1st standard parallel\",1,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8823]],\n"

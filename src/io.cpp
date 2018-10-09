@@ -3809,7 +3809,8 @@ struct PROJStringParser::Private {
     bool hasParamValue(const Step &step, const std::string &key);
     std::string getParamValue(const Step &step, const std::string &key);
     PrimeMeridianNNPtr buildPrimeMeridian(const Step &step);
-    GeodeticReferenceFrameNNPtr buildDatum(const Step &step);
+    GeodeticReferenceFrameNNPtr buildDatum(const Step &step,
+                                           const std::string &title);
     GeographicCRSNNPtr buildGeographicCRS(int iStep, int iUnitConvert,
                                           int iAxisSwap, bool ignoreVUnits);
     GeodeticCRSNNPtr buildGeocentricCRS(int iStep, int iUnitConvert);
@@ -4111,7 +4112,7 @@ PrimeMeridianNNPtr PROJStringParser::Private::buildPrimeMeridian(
 // ---------------------------------------------------------------------------
 
 GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
-    const PROJStringParser::Private::Step &step) {
+    const PROJStringParser::Private::Step &step, const std::string &title) {
 
     auto ellpsStr = getParamValue(step, "ellps");
     auto datumStr = getParamValue(step, "datum");
@@ -4163,14 +4164,18 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
     } else if (!ellpsStr.empty()) {
         if (ellpsStr == "WGS84") {
             datum = GeodeticReferenceFrame::create(
-                        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                          "Unknown based on WGS84 ellipsoid"),
+                        PropertyMap().set(
+                            IdentifiedObject::NAME_KEY,
+                            title.empty() ? "Unknown based on WGS84 ellipsoid"
+                                          : title),
                         Ellipsoid::WGS84, util::optional<std::string>(), pm)
                         .as_nullable();
         } else if (ellpsStr == "GRS80") {
             datum = GeodeticReferenceFrame::create(
-                        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                          "Unknown based on GRS80 ellipsoid"),
+                        PropertyMap().set(
+                            IdentifiedObject::NAME_KEY,
+                            title.empty() ? "Unknown based on GRS80 ellipsoid"
+                                          : title),
                         Ellipsoid::GRS1980, util::optional<std::string>(), pm)
                         .as_nullable();
         } else {
@@ -4202,8 +4207,10 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                     datum = GeodeticReferenceFrame::create(
                                 PropertyMap().set(
                                     IdentifiedObject::NAME_KEY,
-                                    std::string("Unknown based on ") +
-                                        pj_ellps[i].name + " ellipsoid"),
+                                    title.empty()
+                                        ? std::string("Unknown based on ") +
+                                              pj_ellps[i].name + " ellipsoid"
+                                        : title),
                                 NN_CHECK_ASSERT(ellipsoid),
                                 util::optional<std::string>(), pm)
                                 .as_nullable();
@@ -4235,7 +4242,8 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                 Length(a), Length(b))
                 ->identify();
         datum = GeodeticReferenceFrame::create(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                    PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                      title.empty() ? "unknown" : title),
                     ellipsoid, util::optional<std::string>(), pm)
                     .as_nullable();
     }
@@ -4259,7 +4267,8 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                 Length(a), Scale(rf))
                 ->identify();
         datum = GeodeticReferenceFrame::create(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                    PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                      title.empty() ? "unknown" : title),
                     ellipsoid, util::optional<std::string>(), pm)
                     .as_nullable();
     }
@@ -4275,7 +4284,8 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
             Length(R));
         datum = GeodeticReferenceFrame::create(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                    PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                      title.empty() ? "unknown" : title),
                     ellipsoid, util::optional<std::string>(), pm)
                     .as_nullable();
     }
@@ -4456,10 +4466,15 @@ GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
     int iStep, int iUnitConvert, int iAxisSwap, bool ignoreVUnits) {
     const auto &step = steps_[iStep];
 
-    auto datum = buildDatum(step);
+    auto title = isGeodeticStep(step.name) ? getParamValue(step, "title")
+                                           : std::string();
+
+    auto datum = buildDatum(step, title);
 
     return GeographicCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), datum,
+        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                          title.empty() ? "unknown" : title),
+        datum,
         buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignoreVUnits));
 }
 
@@ -4473,7 +4488,9 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
 
-    auto datum = buildDatum(step);
+    auto title = getParamValue(step, "title");
+
+    auto datum = buildDatum(step, title);
 
     UnitOfMeasure unit = UnitOfMeasure::METRE;
     if (iUnitConvert >= 0) {
@@ -4510,9 +4527,10 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
     }
 
     auto cs = CartesianCS::createGeocentric(unit);
-
     return GeodeticCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), datum, cs);
+        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                          title.empty() ? "unknown" : title),
+        datum, cs);
 }
 
 // ---------------------------------------------------------------------------
@@ -4610,6 +4628,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     assert(isProjectedStep(step.name));
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
+
+    auto title = getParamValue(step, "title");
 
     if (!buildPrimeMeridian(step)->isEquivalentTo(geogCRS->primeMeridian())) {
         throw ParsingException("inconsistant pm values between projectedCRS "
@@ -4904,8 +4924,9 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     auto cs = CartesianCS::create(PropertyMap(), axis[0], axis[1]);
 
     CRSNNPtr crs = ProjectedCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), geogCRS,
-        NN_CHECK_ASSERT(conv), cs);
+        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                          title.empty() ? "unknown" : title),
+        geogCRS, NN_CHECK_ASSERT(conv), cs);
 
     if (getParamValue(step, "geoidgrids").empty() &&
         (!getParamValue(step, "vunits").empty() ||
@@ -4933,7 +4954,7 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
     int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
     auto &step = steps_[iStep];
-    auto datum = buildDatum(step);
+    auto datum = buildDatum(step, std::string());
     auto cs = CartesianCS::createGeocentric(UnitOfMeasure::METRE);
     auto sourceCRS =
         iFirstGeogStep >= 0
@@ -5092,7 +5113,7 @@ PROJStringParser::Private::buildMolodenskyTransformation(
     int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
     int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
     auto &step = steps_[iStep];
-    auto datum = buildDatum(step);
+    auto datum = buildDatum(step, std::string());
     auto sourceCRS = iFirstGeogStep >= 0
                          ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
                                               iFirstAxisSwap, true)
@@ -5207,13 +5228,19 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     bool prevWasStep = false;
     bool inProj = false;
     bool inPipeline = false;
+    bool prevWasTitle = false;
     std::string vunits;
     std::string vto_meter;
+    std::string title;
     while (iss >> word) {
         if (word[0] == '+') {
             word = word.substr(1);
+        } else if (prevWasTitle) {
+            title += " " + word;
+            continue;
         }
 
+        prevWasTitle = false;
         if (word == "proj=pipeline") {
             if (inPipeline) {
                 throw ParsingException("nested pipeline not supported");
@@ -5243,6 +5270,11 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             d->steps_.push_back(Private::Step());
             d->steps_.back().name = stepName;
             d->steps_.back().inverted = inverted;
+            if (!title.empty()) {
+                d->steps_.back().paramValues.push_back(
+                    std::make_pair("title", title));
+                title.clear();
+            }
             prevWasStep = false;
             inProj = true;
         } else if (inProj) {
@@ -5266,6 +5298,9 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             vunits = word.substr(std::string("vunits=").size());
         } else if (starts_with(word, "vto_meter=")) {
             vto_meter = word.substr(std::string("vto_meter=").size());
+        } else if (starts_with(word, "title=")) {
+            title = word.substr(std::string("title=").size());
+            prevWasTitle = true;
         } else {
             throw ParsingException("Unexpected token: " + word);
         }

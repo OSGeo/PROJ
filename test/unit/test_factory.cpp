@@ -525,6 +525,58 @@ TEST(factory, AuthorityFactory_createProjectedCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createProjectedCRS_south_pole) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createProjectedCRS("-1"),
+                 NoSuchAuthorityCodeException);
+
+    auto crs = factory->createProjectedCRS("32761");
+    auto csList = crs->coordinateSystem()->axisList();
+    ASSERT_EQ(csList.size(), 2);
+    EXPECT_TRUE(csList[0]->meridian() != nullptr);
+    EXPECT_EQ(csList[0]->direction(), AxisDirection::NORTH);
+    EXPECT_EQ(csList[0]
+                  ->meridian()
+                  ->longitude()
+                  .convertToUnit(UnitOfMeasure::DEGREE)
+                  .value(),
+              0);
+    EXPECT_EQ(csList[1]->direction(), AxisDirection::NORTH);
+    EXPECT_EQ(csList[1]
+                  ->meridian()
+                  ->longitude()
+                  .convertToUnit(UnitOfMeasure::DEGREE)
+                  .value(),
+              90);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createProjectedCRS_north_pole) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+
+    auto crs = factory->createProjectedCRS("32661");
+    auto csList = crs->coordinateSystem()->axisList();
+    ASSERT_EQ(csList.size(), 2);
+    EXPECT_TRUE(csList[0]->meridian() != nullptr);
+    EXPECT_EQ(csList[0]->direction(), AxisDirection::SOUTH);
+    EXPECT_EQ(csList[0]
+                  ->meridian()
+                  ->longitude()
+                  .convertToUnit(UnitOfMeasure::DEGREE)
+                  .value(),
+              180);
+    EXPECT_EQ(csList[1]->direction(), AxisDirection::SOUTH);
+    EXPECT_EQ(csList[1]
+                  ->meridian()
+                  ->longitude()
+                  .convertToUnit(UnitOfMeasure::DEGREE)
+                  .value(),
+              90);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createCompoundCRS) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createCompoundCRS("-1"),
