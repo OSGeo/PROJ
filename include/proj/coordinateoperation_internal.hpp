@@ -147,6 +147,17 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
 
     ConversionNNPtr inverseAsConversion() const;
 
+#ifdef _MSC_VER
+    // To avoid a warning C4250: 'osgeo::proj::operation::InverseConversion':
+    // inherits
+    // 'osgeo::proj::operation::SingleOperation::osgeo::proj::operation::SingleOperation::gridsNeeded'
+    // via dominance
+    std::set<GridDescription>
+    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const override {
+        return SingleOperation::gridsNeeded(databaseContext);
+    }
+#endif
+
     static CoordinateOperationNNPtr create(ConversionNNPtr forward);
 };
 
@@ -177,6 +188,17 @@ class InverseTransformation : public Transformation,
     CoordinateOperationNNPtr inverse() const override {
         return InverseCoordinateOperation::inverse();
     }
+
+#ifdef _MSC_VER
+    // To avoid a warning C4250:
+    // 'osgeo::proj::operation::InverseTransformation': inherits
+    // 'osgeo::proj::operation::SingleOperation::osgeo::proj::operation::SingleOperation::gridsNeeded'
+    // via dominance
+    std::set<GridDescription>
+    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const override {
+        return SingleOperation::gridsNeeded(databaseContext);
+    }
+#endif
 
     static TransformationNNPtr create(TransformationNNPtr forward);
 };
