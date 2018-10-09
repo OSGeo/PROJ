@@ -12,16 +12,13 @@ PROJ_LIB ?= ../../data
 noinst_PROGRAMS = basic_test
 noinst_PROGRAMS += pj_phi2_test
 noinst_PROGRAMS += proj_errno_string_test
-noinst_PROGRAMS += test_cpp_api test_cpp
+noinst_PROGRAMS += test_cpp_api
 
 basic_test_SOURCES = basic_test.cpp main.cpp
 basic_test_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la
 
-test_cpp_api_SOURCES = test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp test_datum.cpp test_factory.cpp test_c_api.cpp main.cpp
+test_cpp_api_SOURCES = test_util.cpp test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp test_datum.cpp test_factory.cpp test_c_api.cpp main.cpp
 test_cpp_api_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la @SQLITE3_LDFLAGS@
-
-test_cpp_SOURCES = test_cpp.cpp
-test_cpp_LDADD = ../../src/libproj.la
 
 basic_test-check: basic_test
 	./basic_test

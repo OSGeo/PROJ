@@ -89,6 +89,7 @@ endif()
 
 add_executable(proj_test_cpp_api
   main.cpp
+  test_util.cpp
   test_common.cpp
   test_crs.cpp
   test_metadata.cpp
