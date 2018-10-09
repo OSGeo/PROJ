@@ -74,13 +74,16 @@ struct PJ_OBJ {
     BaseObjectNNPtr obj;
 
     // cached results
-    std::map<PJ_WKT_TYPE, std::string> mapWKTString;
-    std::map<PJ_PROJ_STRING_TYPE, std::string> mapPROJString;
+    std::map<PJ_WKT_TYPE, std::string> mapWKTString{};
+    std::map<PJ_PROJ_STRING_TYPE, std::string> mapPROJString{};
     bool gridsNeededAsked = false;
-    std::vector<CoordinateOperation::GridDescription> gridsNeeded;
+    std::vector<CoordinateOperation::GridDescription> gridsNeeded{};
 
     explicit PJ_OBJ(PJ_CONTEXT *ctxIn, BaseObjectNNPtr objIn)
         : ctx(ctxIn), obj(objIn) {}
+
+    PJ_OBJ(const PJ_OBJ &) = delete;
+    PJ_OBJ &operator=(const PJ_OBJ &) = delete;
     //! @endcond
 };
 
@@ -1276,6 +1279,10 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
     explicit PJ_OPERATION_FACTORY_CONTEXT(
         PJ_CONTEXT *ctxIn, CoordinateOperationContextNNPtr operationContextIn)
         : ctx(ctxIn), operationContext(operationContextIn) {}
+
+    PJ_OPERATION_FACTORY_CONTEXT(const PJ_OPERATION_FACTORY_CONTEXT &) = delete;
+    PJ_OPERATION_FACTORY_CONTEXT &
+    operator=(const PJ_OPERATION_FACTORY_CONTEXT &) = delete;
     //! @endcond
 };
 
@@ -1482,6 +1489,9 @@ struct PJ_OPERATION_RESULT {
     explicit PJ_OPERATION_RESULT(
         PJ_CONTEXT *ctxIn, const std::vector<CoordinateOperationNNPtr> &opsIn)
         : ctx(ctxIn), ops(opsIn) {}
+
+    PJ_OPERATION_RESULT(const PJ_OPERATION_RESULT &) = delete;
+    PJ_OPERATION_RESULT &operator=(const PJ_OPERATION_RESULT &) = delete;
     //! @endcond
 };
 

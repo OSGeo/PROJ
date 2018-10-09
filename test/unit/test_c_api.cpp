@@ -112,6 +112,9 @@ class CApi : public ::testing::Test {
         PJ_OBJ *m_obj = nullptr;
         explicit ObjectKeeper(PJ_OBJ *obj) : m_obj(obj) {}
         ~ObjectKeeper() { proj_obj_unref(m_obj); }
+
+        ObjectKeeper(const ObjectKeeper &) = delete;
+        ObjectKeeper &operator=(const ObjectKeeper &) = delete;
     };
 
     struct ContextKeeper {
@@ -119,12 +122,19 @@ class CApi : public ::testing::Test {
         explicit ContextKeeper(PJ_OPERATION_FACTORY_CONTEXT *op_ctxt)
             : m_op_ctxt(op_ctxt) {}
         ~ContextKeeper() { proj_operation_factory_context_unref(m_op_ctxt); }
+
+        ContextKeeper(const ContextKeeper &) = delete;
+        ContextKeeper &operator=(const ContextKeeper &) = delete;
     };
 
     struct OperationResultKeeper {
         PJ_OPERATION_RESULT *m_res = nullptr;
         explicit OperationResultKeeper(PJ_OPERATION_RESULT *res) : m_res(res) {}
         ~OperationResultKeeper() { proj_operation_result_unref(m_res); }
+
+        OperationResultKeeper(const OperationResultKeeper &) = delete;
+        OperationResultKeeper &
+        operator=(const OperationResultKeeper &) = delete;
     };
 };
 

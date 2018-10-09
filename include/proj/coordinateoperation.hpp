@@ -118,11 +118,11 @@ class CoordinateOperation : public common::ObjectUsage,
 
     /** \brief Grid description */
     struct GridDescription {
-        std::string shortName;   /**< Grid short filename */
-        std::string fullName;    /**< Grid full path name (if found) */
-        std::string packageName; /**< Package name (or empty) */
-        std::string packageURL;  /**< Package URL (or empty) */
-        bool available;          /**< Whether GRID is available. */
+        std::string shortName{};   /**< Grid short filename */
+        std::string fullName{};    /**< Grid full path name (if found) */
+        std::string packageName{}; /**< Package name (or empty) */
+        std::string packageURL{};  /**< Package URL (or empty) */
+        bool available = false;    /**< Whether GRID is available. */
 
         //! @cond Doxygen_Suppress
         bool operator<(const GridDescription &other) const {

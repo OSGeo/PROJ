@@ -116,17 +116,19 @@ struct DatabaseContext::Private {
   private:
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
-    std::map<std::string, sqlite3_stmt *> mapSqlToStatement_;
+    std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
 
     void registerFunctions();
 
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    std::string thisNamePtr_;
-    sqlite3_vfs vfs_;
-    bool vfsValid_ = false;
+    std::string thisNamePtr_{};
+    sqlite3_vfs* vfs_{};
     bool createCustomVFS();
 #endif
+
+    Private(const Private &) = delete;
+    Private &operator=(const Private &) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -143,8 +145,9 @@ DatabaseContext::Private::~Private() {
         sqlite3_close(sqlite_handle_);
     }
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    if (vfsValid_) {
-        sqlite3_vfs_unregister(&vfs_);
+    if (vfs_) {
+        sqlite3_vfs_unregister(vfs_);
+        delete vfs_;
     }
 #endif
 }
@@ -220,26 +223,26 @@ bool DatabaseContext::Private::createCustomVFS() {
     buffer << this;
     thisNamePtr_ = buffer.str();
 
-    vfs_.iVersion = 1;
-    vfs_.szOsFile = defaultVFS->szOsFile + sizeof(ClosePtr);
-    vfs_.mxPathname = defaultVFS->mxPathname;
-    vfs_.zName = thisNamePtr_.c_str();
-    vfs_.pAppData = defaultVFS;
-    vfs_.xOpen = VFSOpen;
-    vfs_.xDelete = defaultVFS->xDelete;
-    vfs_.xAccess = VFSAccess;
-    vfs_.xFullPathname = defaultVFS->xFullPathname;
-    vfs_.xDlOpen = defaultVFS->xDlOpen;
-    vfs_.xDlError = defaultVFS->xDlError;
-    vfs_.xDlSym = defaultVFS->xDlSym;
-    vfs_.xDlClose = defaultVFS->xDlClose;
-    vfs_.xRandomness = defaultVFS->xRandomness;
-    vfs_.xSleep = defaultVFS->xSleep;
-    vfs_.xCurrentTime = defaultVFS->xCurrentTime;
-    vfs_.xGetLastError = defaultVFS->xGetLastError;
-    vfs_.xCurrentTimeInt64 = defaultVFS->xCurrentTimeInt64;
-    vfsValid_ = sqlite3_vfs_register(&vfs_, false) == SQLITE_OK;
-    return vfsValid_;
+    vfs_ = new sqlite3_vfs();
+    vfs_->iVersion = 1;
+    vfs_->szOsFile = defaultVFS->szOsFile + sizeof(ClosePtr);
+    vfs_->mxPathname = defaultVFS->mxPathname;
+    vfs_->zName = thisNamePtr_.c_str();
+    vfs_->pAppData = defaultVFS;
+    vfs_->xOpen = VFSOpen;
+    vfs_->xDelete = defaultVFS->xDelete;
+    vfs_->xAccess = VFSAccess;
+    vfs_->xFullPathname = defaultVFS->xFullPathname;
+    vfs_->xDlOpen = defaultVFS->xDlOpen;
+    vfs_->xDlError = defaultVFS->xDlError;
+    vfs_->xDlSym = defaultVFS->xDlSym;
+    vfs_->xDlClose = defaultVFS->xDlClose;
+    vfs_->xRandomness = defaultVFS->xRandomness;
+    vfs_->xSleep = defaultVFS->xSleep;
+    vfs_->xCurrentTime = defaultVFS->xCurrentTime;
+    vfs_->xGetLastError = defaultVFS->xGetLastError;
+    vfs_->xCurrentTimeInt64 = defaultVFS->xCurrentTimeInt64;
+    return sqlite3_vfs_register(vfs_, false) == SQLITE_OK;
 }
 
 #endif // ENABLE_CUSTOM_LOCKLESS_VFS
