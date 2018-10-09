@@ -413,6 +413,8 @@ FOR EACH ROW BEGIN
         WHERE NEW.proj_method NOT IN ('hgridshift', 'vgridshift');
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: original_grid_name must be referenced in grid_transformation.grid_name')
         WHERE NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: NEW.inverse_direction must be 0 when original_grid_name = proj_grid_name')
+        WHERE NEW.original_grid_name = NEW.proj_grid_name AND NEW.inverse_direction != 0;
 END;
 
 CREATE TABLE other_transformation(

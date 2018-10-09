@@ -6825,6 +6825,12 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
         databaseContext->lookForGridAlternative(horizontalGridName,
                                                 projFilename, projGridFormat,
                                                 inverseDirection)) {
+
+        if (horizontalGridName == projFilename) {
+            assert(!inverseDirection);
+            return self;
+        }
+
         if (projGridFormat == "NTv1") {
             if (inverseDirection) {
                 return createNTv1(createPropertiesForInverse(
@@ -6889,6 +6895,12 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
         if (databaseContext->lookForGridAlternative(
                 heightFilename, projFilename, projGridFormat,
                 inverseDirection)) {
+
+            if (heightFilename == projFilename) {
+                assert(!inverseDirection);
+                return self;
+            }
+
             if (inverseDirection) {
                 return createGravityRelatedHeightToGeographic3D(
                            createPropertiesForInverse(self.as_nullable().get(),
@@ -6913,6 +6925,12 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
             auto filename = fileParameter->valueFile();
             if (databaseContext->lookForGridAlternative(
                     filename, projFilename, projGridFormat, inverseDirection)) {
+
+                if (filename == projFilename) {
+                    assert(!inverseDirection);
+                    return self;
+                }
+
                 auto parameters = std::vector<
                     OperationParameterNNPtr>{OperationParameter::create(
                     util::PropertyMap()

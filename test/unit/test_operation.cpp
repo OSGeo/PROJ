@@ -3925,6 +3925,25 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_same_grid_name) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4314"), // DHDN
+        authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
+        ctxt);
+    ASSERT_TRUE(!list.empty());
+    EXPECT_EQ(*(list[0]->name()->description()), "DHDN to ETRS89 (8)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
+              "+grids=BETA2007.gsb +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_geographic_offset_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
