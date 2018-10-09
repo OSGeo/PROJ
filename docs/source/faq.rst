@@ -130,7 +130,7 @@ How do I use 3 parameter and 7 parameter datum shifting
 
 Datum shifts can be approximated with 3 and 7 parameter transformations. Their
 use with :program:`cs2cs` is more fully described in the
-:ref:`geodetic tranformation<cs2cs_specific_options>` section.
+:ref:`geodetic transformation<cs2cs_specific_options>` section.
 
 More generically, the :ref:`helmert` can be used with :program:`cct`.
 

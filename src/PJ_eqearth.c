@@ -155,7 +155,7 @@ PJ *PROJECTION(eqearth) {
        if (0 == Q->apa)
           return destructor(P, ENOMEM);
        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
-       Q->rqda = sqrt(0.5*Q->qp); /* Authalic radius devided by major axis */
+       Q->rqda = sqrt(0.5*Q->qp); /* Authalic radius divided by major axis */
     }
 
     return P;
