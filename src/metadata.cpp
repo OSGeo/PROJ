@@ -256,7 +256,14 @@ bool GeographicBoundingBox::contains(const GeographicExtentNNPtr &other) const {
     } else {
         if (otherExtent->westBoundLongitude() <
             otherExtent->eastBoundLongitude()) {
-            return false;
+            if (otherExtent->westBoundLongitude() >= westBoundLongitude()) {
+                return true;
+            } else if (otherExtent->eastBoundLongitude() <=
+                       eastBoundLongitude()) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return westBoundLongitude() <= otherExtent->westBoundLongitude() &&
                    eastBoundLongitude() >= otherExtent->eastBoundLongitude();

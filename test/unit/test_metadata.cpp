@@ -51,6 +51,16 @@ static bool equals(ExtentNNPtr extent1, ExtentNNPtr extent2) {
     return extent1->contains(extent2) && extent2->contains(extent1);
 }
 
+static bool equals(GeographicExtentNNPtr extent1,
+                   GeographicExtentNNPtr extent2) {
+    return extent1->contains(extent2) && extent2->contains(extent1);
+}
+
+static GeographicExtentNNPtr getBBox(ExtentNNPtr extent) {
+    assert(extent->geographicElements().size() == 1);
+    return extent->geographicElements()[0];
+}
+
 TEST(metadata, extent) {
     Extent::create(
         optional<std::string>(), std::vector<GeographicExtentNNPtr>(),
@@ -58,6 +68,10 @@ TEST(metadata, extent) {
 
     auto world = Extent::createFromBBOX(-180, -90, 180, 90);
     EXPECT_TRUE(world->contains(world));
+
+    auto west_hemisphere = Extent::createFromBBOX(-180, -90, 0, 90);
+    EXPECT_TRUE(world->contains(west_hemisphere));
+    EXPECT_TRUE(!west_hemisphere->contains(world));
 
     auto world_inter_world = world->intersection(world);
     ASSERT_TRUE(world_inter_world != nullptr);
@@ -113,13 +127,29 @@ TEST(metadata, extent) {
     EXPECT_TRUE(!nz->intersects(france));
     EXPECT_TRUE(!france->intersects(nz));
 
-    auto nz_inter_world = nz->intersection(world);
-    ASSERT_TRUE(nz_inter_world != nullptr);
-    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_world), nz));
+    {
+        auto nz_inter_world = nz->intersection(world);
+        ASSERT_TRUE(nz_inter_world != nullptr);
+        EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_world), nz));
+    }
 
-    auto world_inter_nz = nz->intersection(world);
-    ASSERT_TRUE(world_inter_nz != nullptr);
-    EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_inter_nz), nz));
+    {
+        auto nz_inter_world = getBBox(nz)->intersection(getBBox(world));
+        ASSERT_TRUE(nz_inter_world != nullptr);
+        EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_world), getBBox(nz)));
+    }
+
+    {
+        auto world_inter_nz = world->intersection(nz);
+        ASSERT_TRUE(world_inter_nz != nullptr);
+        EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_inter_nz), nz));
+    }
+
+    {
+        auto world_inter_nz = getBBox(world)->intersection(getBBox(nz));
+        ASSERT_TRUE(world_inter_nz != nullptr);
+        EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_inter_nz), getBBox(nz)));
+    }
 
     EXPECT_TRUE(nz->intersection(france) == nullptr);
     EXPECT_TRUE(france->intersection(nz) == nullptr);
@@ -133,15 +163,52 @@ TEST(metadata, extent) {
     EXPECT_TRUE(!nz->intersection(bbox_antimeridian_north));
     EXPECT_TRUE(!bbox_antimeridian_north->intersection(nz));
 
+    auto nz_pos_long = Extent::createFromBBOX(155.0, -60.0, 180.0, -25.0);
+    EXPECT_TRUE(nz->contains(nz_pos_long));
+    EXPECT_TRUE(!nz_pos_long->contains(nz));
+    EXPECT_TRUE(nz->intersects(nz_pos_long));
+    EXPECT_TRUE(nz_pos_long->intersects(nz));
+    auto nz_inter_nz_pos_long = nz->intersection(nz_pos_long);
+    ASSERT_TRUE(nz_inter_nz_pos_long != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_nz_pos_long), nz_pos_long));
+    auto nz_pos_long_inter_nz = nz_pos_long->intersection(nz);
+    ASSERT_TRUE(nz_pos_long_inter_nz != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_pos_long_inter_nz), nz_pos_long));
+
+    auto nz_neg_long = Extent::createFromBBOX(-180.0, -60.0, -170.0, -25.0);
+    EXPECT_TRUE(nz->contains(nz_neg_long));
+    EXPECT_TRUE(!nz_neg_long->contains(nz));
+    EXPECT_TRUE(nz->intersects(nz_neg_long));
+    EXPECT_TRUE(nz_neg_long->intersects(nz));
+    auto nz_inter_nz_neg_long = nz->intersection(nz_neg_long);
+    ASSERT_TRUE(nz_inter_nz_neg_long != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_nz_neg_long), nz_neg_long));
+    auto nz_neg_long_inter_nz = nz_neg_long->intersection(nz);
+    ASSERT_TRUE(nz_neg_long_inter_nz != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_neg_long_inter_nz), nz_neg_long));
+
     auto nz_smaller = Extent::createFromBBOX(160, -55.0, -175.0, -30.0);
     EXPECT_TRUE(nz->contains(nz_smaller));
     EXPECT_TRUE(!nz_smaller->contains(nz));
+
+    auto nz_pos_long_shifted_west =
+        Extent::createFromBBOX(150.0, -60.0, 175.0, -25.0);
+    EXPECT_TRUE(!nz->contains(nz_pos_long_shifted_west));
+    EXPECT_TRUE(!nz_pos_long_shifted_west->contains(nz));
+    EXPECT_TRUE(nz->intersects(nz_pos_long_shifted_west));
+    EXPECT_TRUE(nz_pos_long_shifted_west->intersects(nz));
 
     auto nz_smaller_shifted = Extent::createFromBBOX(165, -60.0, -170.0, -25.0);
     EXPECT_TRUE(!nz_smaller->contains(nz_smaller_shifted));
     EXPECT_TRUE(!nz_smaller_shifted->contains(nz_smaller));
     EXPECT_TRUE(nz_smaller->intersects(nz_smaller_shifted));
     EXPECT_TRUE(nz_smaller_shifted->intersects(nz_smaller));
+
+    auto nz_shifted = Extent::createFromBBOX(165.0, -60.0, -160.0, -25.0);
+    auto nz_intersect_nz_shifted = nz->intersection(nz_shifted);
+    ASSERT_TRUE(nz_intersect_nz_shifted != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_intersect_nz_shifted),
+                       Extent::createFromBBOX(165, -60.0, -170.0, -25.0)));
 
     auto nz_inter_nz_smaller = nz->intersection(nz_smaller);
     ASSERT_TRUE(nz_inter_nz_smaller != nullptr);
@@ -194,6 +261,18 @@ TEST(metadata, extent) {
               -170);
     EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_smaller_east_inter_nz),
                        Extent::createFromBBOX(-179, -60, -170, -25)));
+
+    auto east_hemisphere = Extent::createFromBBOX(0, -90, 180, 90);
+    auto east_hemisphere_inter_nz = east_hemisphere->intersection(nz);
+    ASSERT_TRUE(east_hemisphere_inter_nz != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(east_hemisphere_inter_nz),
+                       Extent::createFromBBOX(155.0, -60.0, 180.0, -25.0)));
+
+    auto minus_180_to_156 = Extent::createFromBBOX(-180, -90, 156, 90);
+    auto minus_180_to_156_inter_nz = minus_180_to_156->intersection(nz);
+    ASSERT_TRUE(minus_180_to_156_inter_nz != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(minus_180_to_156_inter_nz),
+                       Extent::createFromBBOX(-180.0, -60.0, -170.0, -25.0)));
 }
 
 // ---------------------------------------------------------------------------

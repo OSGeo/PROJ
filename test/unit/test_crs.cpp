@@ -1833,6 +1833,17 @@ TEST(crs, extractGeographicCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, extractVerticalCRS) {
+    EXPECT_EQ(GeographicCRS::EPSG_4326->extractVerticalCRS(), nullptr);
+    {
+        auto vertcrs = createCompoundCRS()->extractVerticalCRS();
+        ASSERT_TRUE(vertcrs != nullptr);
+        EXPECT_TRUE(vertcrs->isEquivalentTo(createVerticalCRS()));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static DerivedGeographicCRSNNPtr createDerivedGeographicCRS() {
 
     auto derivingConversion = Conversion::create(

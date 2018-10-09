@@ -123,7 +123,7 @@ struct DatabaseContext::Private {
 
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
     std::string thisNamePtr_{};
-    sqlite3_vfs* vfs_{};
+    sqlite3_vfs *vfs_{};
     bool createCustomVFS();
 #endif
 
