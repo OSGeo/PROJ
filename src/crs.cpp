@@ -1412,7 +1412,8 @@ ProjectedCRS::~ProjectedCRS() = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return the base CRS (a GeographicCRS) of the ProjectedCRS.
+/** \brief Return the base CRS (a GeodeticCRS, which is generally a
+ * GeographicCRS) of the ProjectedCRS.
  *
  * @return the base CRS.
  */
@@ -1567,7 +1568,8 @@ ProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
- * @param baseCRSIn The base CRS.
+ * @param baseCRSIn The base CRS, a GeodeticCRS that is generally a
+ * GeographicCRS.
  * @param derivingConversionIn The deriving operation::Conversion (typically
  * using a map
  * projection method)
