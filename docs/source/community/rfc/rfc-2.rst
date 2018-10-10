@@ -788,8 +788,16 @@ Doxygen.
 .. _`Current snapshot of Class list`: http://even.rouault.free.fr/proj_cpp_api/html/annotated.html
 .. _`Spaghetti inheritance diagram`: http://even.rouault.free.fr/proj_cpp_api/html/inherits.html
 
-It is not clear yet how this documentation can be integrated with the
-general PROJ documentation with the reStructuredText format.
+A basic integration of the Doxygen XML output into the general PROJ
+documentation (using reStructuredText format) has been done with the the
+Sphinx extension `Breathe`_, producing:
+
+    * `One section with the C++ API`_
+    * `One section with the C API`_
+
+.. _`Breathe`: https://breathe.readthedocs.io/en/latest/
+.. _`One section with the C++ API`: http://even.rouault.free.fr/proj_cpp_api/rst_generated/html/development/reference/cpp/index.html
+.. _`One section with the C API`: http://even.rouault.free.fr/proj_cpp_api/rst_generated/html/development/reference/functions.html#c-api-for-iso-19111-functionality
 
 Testing
 -------
