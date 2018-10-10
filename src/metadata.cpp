@@ -621,9 +621,8 @@ Extent::Extent() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
-Extent::Extent(const Extent &other) : d(internal::make_unique<Private>()) {
-    *d = *other.d;
-}
+Extent::Extent(const Extent &other)
+    : d(internal::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 

@@ -119,6 +119,7 @@ struct DatabaseContext::Private {
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
 
+    // cppcheck-suppress functionStatic
     void registerFunctions();
 
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
@@ -540,7 +541,8 @@ void DatabaseContext::lookForGridInfo(const std::string &gridName,
 
 //! @cond Doxygen_Suppress
 struct AuthorityFactory::Private {
-    Private(DatabaseContextNNPtr contextIn, const std::string &authorityName)
+    Private(const DatabaseContextNNPtr &contextIn,
+            const std::string &authorityName)
         : context_(contextIn), authority_(authorityName) {}
 
     const std::string &authority() const { return authority_; }
@@ -554,14 +556,20 @@ struct AuthorityFactory::Private {
 
     AuthorityFactoryNNPtr createFactory(const std::string &auth_name);
 
+    // cppcheck-suppress functionStatic
     common::UnitOfMeasurePtr getUOMFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
     void cache(const std::string &code, const common::UnitOfMeasureNNPtr &uom);
 
+    // cppcheck-suppress functionStatic
     crs::CRSPtr getCRSFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
     void cache(const std::string &code, const crs::CRSNNPtr &crs);
 
     datum::GeodeticReferenceFramePtr
-    getGeodeticDatumFromCache(const std::string &code);
+        // cppcheck-suppress functionStatic
+        getGeodeticDatumFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
     void cache(const std::string &code,
                const datum::GeodeticReferenceFrameNNPtr &datum);
 
@@ -665,7 +673,7 @@ AuthorityFactory::~AuthorityFactory() = default;
 
 // ---------------------------------------------------------------------------
 
-AuthorityFactory::AuthorityFactory(DatabaseContextNNPtr context,
+AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
                                    const std::string &authorityName)
     : d(internal::make_unique<Private>(context, authorityName)) {}
 

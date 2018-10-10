@@ -383,7 +383,8 @@ class OperationParameterValue : public GeneralParameterValue {
                        util::IComparable::Criterion::STRICT) const override;
 
     PROJ_DLL static OperationParameterValueNNPtr
-    create(OperationParameterNNPtr parameterIn, ParameterValueNNPtr valueIn);
+    create(const OperationParameterNNPtr &parameterIn,
+           const ParameterValueNNPtr &valueIn);
 
     //! @cond Doxygen_Suppress
     static bool convertFromAbridged(const std::string &paramName, double &val,
@@ -392,8 +393,8 @@ class OperationParameterValue : public GeneralParameterValue {
     //! @endcond
 
   protected:
-    OperationParameterValue(OperationParameterNNPtr parameterIn,
-                            ParameterValueNNPtr valueIn);
+    OperationParameterValue(const OperationParameterNNPtr &parameterIn,
+                            const ParameterValueNNPtr &valueIn);
     OperationParameterValue(const OperationParameterValue &other);
     INLINED_MAKE_SHARED
 
@@ -507,7 +508,7 @@ class SingleOperation : virtual public CoordinateOperation {
 
     PROJ_DLL static SingleOperationNNPtr createPROJBased(
         const util::PropertyMap &properties, const std::string &PROJString,
-        const crs::CRSPtr sourceCRS, const crs::CRSPtr targetCRS,
+        const crs::CRSPtr &sourceCRS, const crs::CRSPtr &targetCRS,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies =
             std::vector<metadata::PositionalAccuracyNNPtr>());
 
@@ -1525,7 +1526,7 @@ class CoordinateOperationContext {
 
     PROJ_DLL metadata::ExtentPtr getAreaOfInterest() const;
 
-    PROJ_DLL void setAreaOfInterest(metadata::ExtentPtr extent);
+    PROJ_DLL void setAreaOfInterest(const metadata::ExtentPtr &extent);
 
     PROJ_DLL double getDesiredAccuracy() const;
 
@@ -1589,8 +1590,8 @@ class CoordinateOperationContext {
     PROJ_DLL GridAvailabilityUse getGridAvailabilityUse() const;
 
     PROJ_DLL static CoordinateOperationContextNNPtr
-    create(io::AuthorityFactoryPtr authorityFactory, metadata::ExtentPtr extent,
-           double accuracy);
+    create(const io::AuthorityFactoryPtr &authorityFactory,
+           const metadata::ExtentPtr &extent, double accuracy);
 
   protected:
     CoordinateOperationContext();

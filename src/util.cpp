@@ -367,9 +367,7 @@ GenericName::GenericName() : d(internal::make_unique<Private>()) {}
 // ---------------------------------------------------------------------------
 
 GenericName::GenericName(const GenericName &other)
-    : d(internal::make_unique<Private>()) {
-    *d = *other.d;
-}
+    : d(internal::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -398,9 +396,7 @@ NameSpace::NameSpace(const GenericNamePtr &nameIn)
 // ---------------------------------------------------------------------------
 
 NameSpace::NameSpace(const NameSpace &other)
-    : d(internal::make_unique<Private>()) {
-    *d = *other.d;
-}
+    : d(internal::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -471,9 +467,7 @@ LocalName::LocalName(const NameSpacePtr &ns, const std::string &name)
 // ---------------------------------------------------------------------------
 
 LocalName::LocalName(const LocalName &other)
-    : GenericName(other), d(internal::make_unique<Private>()) {
-    *d = *other.d;
-}
+    : GenericName(other), d(internal::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 

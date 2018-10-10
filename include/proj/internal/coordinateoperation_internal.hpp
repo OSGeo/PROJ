@@ -46,7 +46,10 @@ namespace operation {
 /* Just std::vector<std::string> but with a friendly initializer in case w
  * have just a single string (which is most of cases) */
 struct VectorOfString : public std::vector<std::string> {
+    // cppcheck-suppress noExplicitConstructor
     VectorOfString(const char *str) : std::vector<std::string>{str} {}
+
+    // cppcheck-suppress noExplicitConstructor
     VectorOfString(std::initializer_list<std::string> l)
         : std::vector<std::string>{l} {}
 };
@@ -94,7 +97,7 @@ using InverseCoordinateOperationNNPtr = util::nn<InverseCoordinateOperationPtr>;
  */
 class InverseCoordinateOperation : virtual public CoordinateOperation {
   public:
-    InverseCoordinateOperation(CoordinateOperationNNPtr forwardOperation,
+    InverseCoordinateOperation(const CoordinateOperationNNPtr &forwardOperation,
                                bool wktSupportsInversion);
 
     ~InverseCoordinateOperation() override;
@@ -121,7 +124,7 @@ class InverseCoordinateOperation : virtual public CoordinateOperation {
 /** \brief Inverse of a conversion. */
 class InverseConversion : public Conversion, public InverseCoordinateOperation {
   public:
-    InverseConversion(ConversionNNPtr forward);
+    explicit InverseConversion(const ConversionNNPtr &forward);
 
     ~InverseConversion() override;
 
@@ -158,7 +161,7 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
     }
 #endif
 
-    static CoordinateOperationNNPtr create(ConversionNNPtr forward);
+    static CoordinateOperationNNPtr create(const ConversionNNPtr &forward);
 };
 
 // ---------------------------------------------------------------------------
@@ -167,7 +170,7 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
 class InverseTransformation : public Transformation,
                               public InverseCoordinateOperation {
   public:
-    InverseTransformation(TransformationNNPtr forward);
+    explicit InverseTransformation(const TransformationNNPtr &forward);
 
     ~InverseTransformation() override;
 
@@ -200,7 +203,7 @@ class InverseTransformation : public Transformation,
     }
 #endif
 
-    static TransformationNNPtr create(TransformationNNPtr forward);
+    static TransformationNNPtr create(const TransformationNNPtr &forward);
 };
 
 // ---------------------------------------------------------------------------
@@ -227,7 +230,7 @@ class PROJBasedOperation : public SingleOperation {
 
     static PROJBasedOperationNNPtr
     create(const util::PropertyMap &properties, const std::string &PROJString,
-           const crs::CRSPtr sourceCRS, const crs::CRSPtr targetCRS,
+           const crs::CRSPtr &sourceCRS, const crs::CRSPtr &targetCRS,
            const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     std::set<GridDescription>

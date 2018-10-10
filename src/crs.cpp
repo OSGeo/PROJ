@@ -38,8 +38,8 @@
 #include "proj/util.hpp"
 
 #include "proj/internal/coordinatesystem_internal.hpp"
-#include "proj/internal/io_internal.hpp"
 #include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
 
 #include <cassert>
 #include <memory>
@@ -1893,7 +1893,7 @@ BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
  */
 BoundCRSNNPtr
 BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
-                            const std::vector<double> TOWGS84Parameters) {
+                            const std::vector<double> &TOWGS84Parameters) {
     auto crs = BoundCRS::nn_make_shared<BoundCRS>(
         baseCRSIn, GeographicCRS::EPSG_4326,
         operation::Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters));

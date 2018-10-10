@@ -299,7 +299,7 @@ class Ellipsoid : public common::IdentifiedObject,
     common::Length *semiMedianAxis_;
 #endif
 
-    Ellipsoid(const common::Length &radius);
+    explicit Ellipsoid(const common::Length &radius);
 
     Ellipsoid(const common::Length &semiMajorAxisIn,
               const common::Scale &invFlattening);
@@ -527,7 +527,7 @@ class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
     RealizationMethod realizationMethod_;
 #endif
 
-    VerticalReferenceFrame(
+    explicit VerticalReferenceFrame(
         const util::optional<RealizationMethod> &realizationMethodIn);
     INLINED_MAKE_SHARED
 

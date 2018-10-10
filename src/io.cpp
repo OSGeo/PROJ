@@ -124,8 +124,10 @@ struct WKTFormatter::Private {
     std::vector<bool> inversionStack_{false};
     std::string result_{};
 
+    // cppcheck-suppress functionStatic
     void addNewLine();
     void addIndentation();
+    // cppcheck-suppress functionStatic
     void startNewChild();
 };
 //! @endcond
@@ -878,13 +880,13 @@ struct WKTParser::Private {
 
     void emitRecoverableAssertion(const std::string &errorMsg);
 
-    BaseObjectNNPtr build(WKTNodeNNPtr node);
+    BaseObjectNNPtr build(const WKTNodeNNPtr &node);
 
     IdentifierPtr buildId(WKTNodeNNPtr node, bool tolerant = true);
 
-    PropertyMap buildProperties(WKTNodeNNPtr node);
+    PropertyMap buildProperties(const WKTNodeNNPtr &node);
 
-    ObjectDomainPtr buildObjectDomain(WKTNodeNNPtr node);
+    ObjectDomainPtr buildObjectDomain(const WKTNodeNNPtr &node);
 
     UnitOfMeasure
     buildUnit(WKTNodeNNPtr node,
@@ -894,15 +896,16 @@ struct WKTParser::Private {
         WKTNodeNNPtr node,
         common::UnitOfMeasure::Type type = UnitOfMeasure::Type::UNKNOWN);
 
-    EllipsoidNNPtr buildEllipsoid(WKTNodeNNPtr node);
+    EllipsoidNNPtr buildEllipsoid(const WKTNodeNNPtr &node);
 
     PrimeMeridianNNPtr
     buildPrimeMeridian(WKTNodeNNPtr node,
                        const UnitOfMeasure &defaultAngularUnit);
-    optional<std::string> getAnchor(WKTNodeNNPtr node);
+    static optional<std::string> getAnchor(const WKTNodeNNPtr &node);
 
-    void parseDynamic(WKTNodePtr dynamicNode, double &frameReferenceEpoch,
-                      util::optional<std::string> &modelName);
+    static void parseDynamic(WKTNodePtr dynamicNode,
+                             double &frameReferenceEpoch,
+                             util::optional<std::string> &modelName);
 
     GeodeticReferenceFrameNNPtr
     buildGeodeticReferenceFrame(WKTNodeNNPtr node,
@@ -913,7 +916,7 @@ struct WKTParser::Private {
                                           PrimeMeridianPtr primeMeridian,
                                           bool expectEllipsoid);
 
-    MeridianNNPtr buildMeridian(WKTNodeNNPtr node);
+    MeridianNNPtr buildMeridian(const WKTNodeNNPtr &node);
     CoordinateSystemAxisNNPtr buildAxis(WKTNodeNNPtr node,
                                         const UnitOfMeasure &unitIn,
                                         bool isGeocentric,
@@ -923,11 +926,11 @@ struct WKTParser::Private {
                                   WKTNodeNNPtr parentNode,
                                   const UnitOfMeasure &defaultAngularUnit);
 
-    GeodeticCRSNNPtr buildGeodeticCRS(WKTNodeNNPtr node);
+    GeodeticCRSNNPtr buildGeodeticCRS(const WKTNodeNNPtr &node);
 
-    CRSNNPtr buildDerivedGeodeticCRS(WKTNodeNNPtr node);
+    CRSNNPtr buildDerivedGeodeticCRS(const WKTNodeNNPtr &node);
 
-    UnitOfMeasure
+    static UnitOfMeasure
     guessUnitForParameter(const std::string &paramName,
                           const UnitOfMeasure &defaultLinearUnit,
                           const UnitOfMeasure &defaultAngularUnit);
@@ -942,46 +945,48 @@ struct WKTParser::Private {
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
 
-    bool hasWebMercPROJ4String(WKTNodeNNPtr projCRSNode,
-                               WKTNodeNNPtr projectionNode);
+    static bool hasWebMercPROJ4String(const WKTNodeNNPtr &projCRSNode,
+                                      const WKTNodeNNPtr &projectionNode);
 
-    ConversionNNPtr buildProjection(WKTNodeNNPtr projCRSNode,
-                                    WKTNodeNNPtr projectionNode,
+    ConversionNNPtr buildProjection(const WKTNodeNNPtr &projCRSNode,
+                                    const WKTNodeNNPtr &projectionNode,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
 
-    ProjectedCRSNNPtr buildProjectedCRS(WKTNodeNNPtr node);
+    ProjectedCRSNNPtr buildProjectedCRS(const WKTNodeNNPtr &node);
 
     VerticalReferenceFrameNNPtr
-    buildVerticalReferenceFrame(WKTNodeNNPtr node, WKTNodePtr dynamicNode);
+    buildVerticalReferenceFrame(const WKTNodeNNPtr &node,
+                                const WKTNodePtr &dynamicNode);
 
-    TemporalDatumNNPtr buildTemporalDatum(WKTNodeNNPtr node);
+    TemporalDatumNNPtr buildTemporalDatum(const WKTNodeNNPtr &node);
 
-    EngineeringDatumNNPtr buildEngineeringDatum(WKTNodeNNPtr node);
+    EngineeringDatumNNPtr buildEngineeringDatum(const WKTNodeNNPtr &node);
 
-    ParametricDatumNNPtr buildParametricDatum(WKTNodeNNPtr node);
+    ParametricDatumNNPtr buildParametricDatum(const WKTNodeNNPtr &node);
 
-    CRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
+    CRSNNPtr buildVerticalCRS(const WKTNodeNNPtr &node);
 
-    DerivedVerticalCRSNNPtr buildDerivedVerticalCRS(WKTNodeNNPtr node);
+    DerivedVerticalCRSNNPtr buildDerivedVerticalCRS(const WKTNodeNNPtr &node);
 
-    CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
+    CompoundCRSNNPtr buildCompoundCRS(const WKTNodeNNPtr &node);
 
-    BoundCRSNNPtr buildBoundCRS(WKTNodeNNPtr node);
+    BoundCRSNNPtr buildBoundCRS(const WKTNodeNNPtr &node);
 
-    TemporalCRSNNPtr buildTemporalCRS(WKTNodeNNPtr node);
+    TemporalCRSNNPtr buildTemporalCRS(const WKTNodeNNPtr &node);
 
-    EngineeringCRSNNPtr buildEngineeringCRS(WKTNodeNNPtr node);
+    EngineeringCRSNNPtr buildEngineeringCRS(const WKTNodeNNPtr &node);
 
-    ParametricCRSNNPtr buildParametricCRS(WKTNodeNNPtr node);
+    ParametricCRSNNPtr buildParametricCRS(const WKTNodeNNPtr &node);
 
-    DerivedProjectedCRSNNPtr buildDerivedProjectedCRS(WKTNodeNNPtr node);
+    DerivedProjectedCRSNNPtr buildDerivedProjectedCRS(const WKTNodeNNPtr &node);
 
-    CRSPtr buildCRS(WKTNodeNNPtr node);
+    CRSPtr buildCRS(const WKTNodeNNPtr &node);
 
-    CoordinateOperationNNPtr buildCoordinateOperation(WKTNodeNNPtr node);
+    CoordinateOperationNNPtr buildCoordinateOperation(const WKTNodeNNPtr &node);
 
-    ConcatenatedOperationNNPtr buildConcatenatedOperation(WKTNodeNNPtr node);
+    ConcatenatedOperationNNPtr
+    buildConcatenatedOperation(const WKTNodeNNPtr &node);
 };
 
 // ---------------------------------------------------------------------------
@@ -1074,7 +1079,7 @@ IdentifierPtr WKTParser::Private::buildId(WKTNodeNNPtr node, bool tolerant) {
 
 // ---------------------------------------------------------------------------
 
-PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
+PropertyMap WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
     PropertyMap properties;
     if (!node->children().empty()) {
         properties.set(IdentifiedObject::NAME_KEY,
@@ -1132,7 +1137,8 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-ObjectDomainPtr WKTParser::Private::buildObjectDomain(WKTNodeNNPtr node) {
+ObjectDomainPtr
+WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
 
     auto scopeNode = node->lookForChild(WKTConstants::SCOPE);
     auto areaNode = node->lookForChild(WKTConstants::AREA);
@@ -1321,7 +1327,7 @@ UnitOfMeasure WKTParser::Private::buildUnitInSubNode(WKTNodeNNPtr node,
 
 // ---------------------------------------------------------------------------
 
-EllipsoidNNPtr WKTParser::Private::buildEllipsoid(WKTNodeNNPtr node) {
+EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
     const auto &children = node->children();
     if (children.size() < 3) {
         throw ParsingException("not enough children in " + node->value() +
@@ -1377,7 +1383,7 @@ PrimeMeridianNNPtr WKTParser::Private::buildPrimeMeridian(
 
 // ---------------------------------------------------------------------------
 
-optional<std::string> WKTParser::Private::getAnchor(WKTNodeNNPtr node) {
+optional<std::string> WKTParser::Private::getAnchor(const WKTNodeNNPtr &node) {
 
     auto anchorNode = node->lookForChild(WKTConstants::ANCHOR);
     optional<std::string> anchor;
@@ -1496,7 +1502,7 @@ DatumEnsembleNNPtr WKTParser::Private::buildDatumEnsemble(
 
 // ---------------------------------------------------------------------------
 
-MeridianNNPtr WKTParser::Private::buildMeridian(WKTNodeNNPtr node) {
+MeridianNNPtr WKTParser::Private::buildMeridian(const WKTNodeNNPtr &node) {
     const auto &children = node->children();
     if (children.size() < 2) {
         throw ParsingException("not enough children in " + node->value() +
@@ -1853,7 +1859,8 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
 
 // ---------------------------------------------------------------------------
 
-GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
+GeodeticCRSNNPtr
+WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     auto datumNode = node->lookForChild(WKTConstants::DATUM);
     if (!datumNode) {
         datumNode = node->lookForChild(WKTConstants::GEODETICDATUM);
@@ -1968,7 +1975,7 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(WKTNodeNNPtr node) {
+CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
 
     auto baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEODCRS);
     if (!baseGeodCRSNode) {
@@ -2153,7 +2160,7 @@ WKTParser::Private::buildConversion(WKTNodeNNPtr node,
 // ---------------------------------------------------------------------------
 
 CoordinateOperationNNPtr
-WKTParser::Private::buildCoordinateOperation(WKTNodeNNPtr node) {
+WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
     auto methodNode = node->lookForChild(WKTConstants::METHOD);
     if (!methodNode) {
         throw ParsingException("Missing METHOD node");
@@ -2213,7 +2220,7 @@ WKTParser::Private::buildCoordinateOperation(WKTNodeNNPtr node) {
 // ---------------------------------------------------------------------------
 
 ConcatenatedOperationNNPtr
-WKTParser::Private::buildConcatenatedOperation(WKTNodeNNPtr node) {
+WKTParser::Private::buildConcatenatedOperation(const WKTNodeNNPtr &node) {
     std::vector<CoordinateOperationNNPtr> operations;
     for (const auto &childNode : node->children()) {
         if (ci_equal(childNode->value(), WKTConstants::STEP)) {
@@ -2240,8 +2247,8 @@ WKTParser::Private::buildConcatenatedOperation(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-bool WKTParser::Private::hasWebMercPROJ4String(WKTNodeNNPtr projCRSNode,
-                                               WKTNodeNNPtr projectionNode) {
+bool WKTParser::Private::hasWebMercPROJ4String(
+    const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode) {
     if (projectionNode->children().empty()) {
         throw ParsingException("not enough children in " +
                                WKTConstants::PROJECTION + " node");
@@ -2287,8 +2294,8 @@ bool WKTParser::Private::hasWebMercPROJ4String(WKTNodeNNPtr projCRSNode,
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr
-WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
-                                    WKTNodeNNPtr projectionNode,
+WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
+                                    const WKTNodeNNPtr &projectionNode,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit) {
     if (projectionNode->children().empty()) {
@@ -2449,7 +2456,8 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
 
 // ---------------------------------------------------------------------------
 
-ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
+ProjectedCRSNNPtr
+WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 
     auto conversionNode = node->lookForChild(WKTConstants::CONVERSION);
     auto projectionNode = node->lookForChild(WKTConstants::PROJECTION);
@@ -2531,8 +2539,8 @@ void WKTParser::Private::parseDynamic(WKTNodePtr dynamicNode,
 // ---------------------------------------------------------------------------
 
 VerticalReferenceFrameNNPtr
-WKTParser::Private::buildVerticalReferenceFrame(WKTNodeNNPtr node,
-                                                WKTNodePtr dynamicNode) {
+WKTParser::Private::buildVerticalReferenceFrame(const WKTNodeNNPtr &node,
+                                                const WKTNodePtr &dynamicNode) {
 
     if (dynamicNode) {
         double frameReferenceEpoch = 0.0;
@@ -2552,7 +2560,8 @@ WKTParser::Private::buildVerticalReferenceFrame(WKTNodeNNPtr node,
 
 // ---------------------------------------------------------------------------
 
-TemporalDatumNNPtr WKTParser::Private::buildTemporalDatum(WKTNodeNNPtr node) {
+TemporalDatumNNPtr
+WKTParser::Private::buildTemporalDatum(const WKTNodeNNPtr &node) {
     auto calendarNode = node->lookForChild(WKTConstants::CALENDAR);
     std::string calendar = TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN;
     if (calendarNode && calendarNode->children().size() == 1) {
@@ -2571,20 +2580,20 @@ TemporalDatumNNPtr WKTParser::Private::buildTemporalDatum(WKTNodeNNPtr node) {
 // ---------------------------------------------------------------------------
 
 EngineeringDatumNNPtr
-WKTParser::Private::buildEngineeringDatum(WKTNodeNNPtr node) {
+WKTParser::Private::buildEngineeringDatum(const WKTNodeNNPtr &node) {
     return EngineeringDatum::create(buildProperties(node), getAnchor(node));
 }
 
 // ---------------------------------------------------------------------------
 
 ParametricDatumNNPtr
-WKTParser::Private::buildParametricDatum(WKTNodeNNPtr node) {
+WKTParser::Private::buildParametricDatum(const WKTNodeNNPtr &node) {
     return ParametricDatum::create(buildProperties(node), getAnchor(node));
 }
 
 // ---------------------------------------------------------------------------
 
-CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
+CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     auto datumNode = node->lookForChild(WKTConstants::VDATUM);
     if (!datumNode) {
         datumNode = node->lookForChild(WKTConstants::VERT_DATUM);
@@ -2656,7 +2665,7 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
 // ---------------------------------------------------------------------------
 
 DerivedVerticalCRSNNPtr
-WKTParser::Private::buildDerivedVerticalCRS(WKTNodeNNPtr node) {
+WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
 
     auto baseVertCRSNode = node->lookForChild(WKTConstants::BASEVERTCRS);
     assert(baseVertCRSNode !=
@@ -2693,7 +2702,8 @@ WKTParser::Private::buildDerivedVerticalCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-CompoundCRSNNPtr WKTParser::Private::buildCompoundCRS(WKTNodeNNPtr node) {
+CompoundCRSNNPtr
+WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
     std::vector<CRSNNPtr> components;
     for (const auto &child : node->children()) {
         auto crs = buildCRS(child);
@@ -2706,7 +2716,7 @@ CompoundCRSNNPtr WKTParser::Private::buildCompoundCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-BoundCRSNNPtr WKTParser::Private::buildBoundCRS(WKTNodeNNPtr node) {
+BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     auto abridgedNode =
         node->lookForChild(WKTConstants::ABRIDGEDTRANSFORMATION);
     if (!abridgedNode) {
@@ -2769,7 +2779,8 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-TemporalCRSNNPtr WKTParser::Private::buildTemporalCRS(WKTNodeNNPtr node) {
+TemporalCRSNNPtr
+WKTParser::Private::buildTemporalCRS(const WKTNodeNNPtr &node) {
     auto datumNode = node->lookForChild(WKTConstants::TDATUM);
     if (!datumNode) {
         datumNode = node->lookForChild(WKTConstants::TIMEDATUM);
@@ -2795,7 +2806,8 @@ TemporalCRSNNPtr WKTParser::Private::buildTemporalCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-EngineeringCRSNNPtr WKTParser::Private::buildEngineeringCRS(WKTNodeNNPtr node) {
+EngineeringCRSNNPtr
+WKTParser::Private::buildEngineeringCRS(const WKTNodeNNPtr &node) {
     auto datumNode = node->lookForChild(WKTConstants::EDATUM);
     if (!datumNode) {
         datumNode = node->lookForChild(WKTConstants::ENGINEERINGDATUM);
@@ -2815,7 +2827,8 @@ EngineeringCRSNNPtr WKTParser::Private::buildEngineeringCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-ParametricCRSNNPtr WKTParser::Private::buildParametricCRS(WKTNodeNNPtr node) {
+ParametricCRSNNPtr
+WKTParser::Private::buildParametricCRS(const WKTNodeNNPtr &node) {
     auto datumNode = node->lookForChild(WKTConstants::PDATUM);
     if (!datumNode) {
         datumNode = node->lookForChild(WKTConstants::PARAMETRICDATUM);
@@ -2842,7 +2855,7 @@ ParametricCRSNNPtr WKTParser::Private::buildParametricCRS(WKTNodeNNPtr node) {
 // ---------------------------------------------------------------------------
 
 DerivedProjectedCRSNNPtr
-WKTParser::Private::buildDerivedProjectedCRS(WKTNodeNNPtr node) {
+WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
     auto baseProjCRSNode = node->lookForChild(WKTConstants::BASEPROJCRS);
     if (!baseProjCRSNode) {
         throw ParsingException("Missing BASEPROJCRS node");
@@ -2883,7 +2896,7 @@ static bool isGeodeticCRS(const std::string &name) {
 
 // ---------------------------------------------------------------------------
 
-CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
+CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     const std::string &name(node->value());
 
     if (isGeodeticCRS(name)) {
@@ -2944,7 +2957,7 @@ CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
+BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
     const std::string &name(node->value());
 
     auto crs = buildCRS(node);
@@ -3112,6 +3125,7 @@ struct PROJStringFormatter::Private {
 
     std::string result_{};
 
+    // cppcheck-suppress functionStatic
     void appendToResult(const std::string &str);
 };
 //! @endcond
@@ -3120,7 +3134,7 @@ struct PROJStringFormatter::Private {
 
 //! @cond Doxygen_Suppress
 PROJStringFormatter::PROJStringFormatter(Convention conventionIn,
-                                         DatabaseContextPtr dbContext)
+                                         const DatabaseContextPtr &dbContext)
     : d(internal::make_unique<Private>()) {
     d->convention_ = conventionIn;
     d->dbContext_ = dbContext;
@@ -3503,7 +3517,7 @@ void PROJStringFormatter::leave() {
 
 // ---------------------------------------------------------------------------
 
-PROJStringFormatter::Scope::Scope(PROJStringFormatterNNPtr formatter)
+PROJStringFormatter::Scope::Scope(const PROJStringFormatterNNPtr &formatter)
     : formatter_(formatter) {
     formatter_->enter();
 }
@@ -3807,8 +3821,12 @@ struct PROJStringParser::Private {
     std::vector<Step> steps_{};
     std::vector<std::pair<std::string, std::string>> globalParamValues_{};
 
+    // cppcheck-suppress functionStatic
     bool hasParamValue(const Step &step, const std::string &key);
+
+    // cppcheck-suppress functionStatic
     std::string getParamValue(const Step &step, const std::string &key);
+
     PrimeMeridianNNPtr buildPrimeMeridian(const Step &step);
     GeodeticReferenceFrameNNPtr buildDatum(const Step &step,
                                            const std::string &title);

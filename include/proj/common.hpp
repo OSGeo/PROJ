@@ -185,7 +185,7 @@ class Scale : public Measure {
 /** \brief Numeric value, with a angular unit of measure. */
 class Angle : public Measure {
   public:
-    PROJ_DLL Angle(double valueIn = 0.0);
+    PROJ_DLL explicit Angle(double valueIn = 0.0);
     PROJ_DLL Angle(double valueIn, const UnitOfMeasure &unitIn);
 
     //! @cond Doxygen_Suppress
@@ -205,7 +205,7 @@ class Angle : public Measure {
 /** \brief Numeric value, with a linear unit of measure. */
 class Length : public Measure {
   public:
-    PROJ_DLL Length(double valueIn = 0.0);
+    PROJ_DLL explicit Length(double valueIn = 0.0);
     PROJ_DLL Length(double valueIn, const UnitOfMeasure &unitIn);
 
     //! @cond Doxygen_Suppress

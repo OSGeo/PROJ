@@ -709,7 +709,8 @@ struct OperationParameterValue::Private {
     OperationParameterNNPtr parameter;
     ParameterValueNNPtr parameterValue;
 
-    Private(OperationParameterNNPtr parameterIn, ParameterValueNNPtr valueIn)
+    Private(const OperationParameterNNPtr &parameterIn,
+            const ParameterValueNNPtr &valueIn)
         : parameter(parameterIn), parameterValue(valueIn) {}
 };
 //! @endcond
@@ -724,7 +725,8 @@ OperationParameterValue::OperationParameterValue(
 // ---------------------------------------------------------------------------
 
 OperationParameterValue::OperationParameterValue(
-    OperationParameterNNPtr parameterIn, ParameterValueNNPtr valueIn)
+    const OperationParameterNNPtr &parameterIn,
+    const ParameterValueNNPtr &valueIn)
     : GeneralParameterValue(),
       d(internal::make_unique<Private>(parameterIn, valueIn)) {}
 
@@ -737,8 +739,8 @@ OperationParameterValue::OperationParameterValue(
  * @return a new OperationParameterValue.
  */
 OperationParameterValueNNPtr
-OperationParameterValue::create(OperationParameterNNPtr parameterIn,
-                                ParameterValueNNPtr valueIn) {
+OperationParameterValue::create(const OperationParameterNNPtr &parameterIn,
+                                const ParameterValueNNPtr &valueIn) {
     OperationParameterValueNNPtr opv(
         OperationParameterValue::nn_make_shared<OperationParameterValue>(
             parameterIn, valueIn));
@@ -773,8 +775,9 @@ const ParameterValueNNPtr &OperationParameterValue::parameterValue() const {
 
 // ---------------------------------------------------------------------------
 
-std::string
-OperationParameterValue::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+std::string OperationParameterValue::exportToWKT(
+    // cppcheck-suppress passedByValue
+    io::WKTFormatterNNPtr formatter) const {
     return _exportToWKT(formatter, nullptr);
 }
 
@@ -1079,7 +1082,7 @@ SingleOperation::parameterValueMeasure(const std::string &paramName,
  */
 SingleOperationNNPtr SingleOperation::createPROJBased(
     const util::PropertyMap &properties, const std::string &PROJString,
-    const crs::CRSPtr sourceCRS, const crs::CRSPtr targetCRS,
+    const crs::CRSPtr &sourceCRS, const crs::CRSPtr &targetCRS,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     return util::nn_static_pointer_cast<SingleOperation>(
         PROJBasedOperation::create(properties, PROJString, sourceCRS, targetCRS,
@@ -3682,7 +3685,7 @@ createPropertiesForInverse(const OperationMethodNNPtr &method) {
 
 // ---------------------------------------------------------------------------
 
-InverseConversion::InverseConversion(ConversionNNPtr forward)
+InverseConversion::InverseConversion(const ConversionNNPtr &forward)
     : Conversion(
           OperationMethod::create(createPropertiesForInverse(forward->method()),
                                   forward->method()->parameters()),
@@ -3704,7 +3707,8 @@ ConversionNNPtr InverseConversion::inverseAsConversion() const {
 
 // ---------------------------------------------------------------------------
 
-CoordinateOperationNNPtr InverseConversion::create(ConversionNNPtr forward) {
+CoordinateOperationNNPtr
+InverseConversion::create(const ConversionNNPtr &forward) {
     auto conv = util::nn_make_shared<InverseConversion>(forward);
     conv->assignSelf(conv);
     return conv;
@@ -6478,7 +6482,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
 
 // ---------------------------------------------------------------------------
 
-InverseTransformation::InverseTransformation(TransformationNNPtr forward)
+InverseTransformation::InverseTransformation(const TransformationNNPtr &forward)
     : Transformation(
           forward->targetCRS(), forward->sourceCRS(),
           forward->interpolationCRS(),
@@ -6495,7 +6499,8 @@ InverseTransformation::~InverseTransformation() = default;
 
 // ---------------------------------------------------------------------------
 
-TransformationNNPtr InverseTransformation::create(TransformationNNPtr forward) {
+TransformationNNPtr
+InverseTransformation::create(const TransformationNNPtr &forward) {
     auto conv = util::nn_make_shared<InverseTransformation>(forward);
     conv->assignSelf(conv);
     return conv;
@@ -7980,7 +7985,8 @@ metadata::ExtentPtr CoordinateOperationContext::getAreaOfInterest() const {
 // ---------------------------------------------------------------------------
 
 /** \brief Set the desired area of interest, or null */
-void CoordinateOperationContext::setAreaOfInterest(metadata::ExtentPtr extent) {
+void CoordinateOperationContext::setAreaOfInterest(
+    const metadata::ExtentPtr &extent) {
     d->extent_ = extent;
 }
 
@@ -8123,10 +8129,9 @@ CoordinateOperationContext::getGridAvailabilityUse() const {
  * 0 to get best accuracy.
  * @return a new context.
  */
-CoordinateOperationContextNNPtr
-CoordinateOperationContext::create(io::AuthorityFactoryPtr authorityFactory,
-                                   metadata::ExtentPtr extent,
-                                   double accuracy) {
+CoordinateOperationContextNNPtr CoordinateOperationContext::create(
+    const io::AuthorityFactoryPtr &authorityFactory,
+    const metadata::ExtentPtr &extent, double accuracy) {
     auto ctxt = CoordinateOperationContext::nn_make_shared<
         CoordinateOperationContext>();
     ctxt->d->authorityFactory_ = authorityFactory;
@@ -9147,7 +9152,7 @@ InverseCoordinateOperation::~InverseCoordinateOperation() = default;
 // ---------------------------------------------------------------------------
 
 InverseCoordinateOperation::InverseCoordinateOperation(
-    CoordinateOperationNNPtr forwardOperation, bool wktSupportsInversion)
+    const CoordinateOperationNNPtr &forwardOperation, bool wktSupportsInversion)
     : forwardOperation_(forwardOperation),
       wktSupportsInversion_(wktSupportsInversion) {}
 
@@ -9214,7 +9219,7 @@ static const std::string PROJSTRING_PARAMETER_NAME("PROJ string");
 
 PROJBasedOperationNNPtr PROJBasedOperation::create(
     const util::PropertyMap &properties, const std::string &PROJString,
-    const crs::CRSPtr sourceCRS, const crs::CRSPtr targetCRS,
+    const crs::CRSPtr &sourceCRS, const crs::CRSPtr &targetCRS,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     auto parameter = OperationParameter::create(util::PropertyMap().set(
         common::IdentifiedObject::NAME_KEY, PROJSTRING_PARAMETER_NAME));

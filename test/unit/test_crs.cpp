@@ -40,8 +40,8 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
-#include "proj/internal/io_internal.hpp"
 #include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
 
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::crs;

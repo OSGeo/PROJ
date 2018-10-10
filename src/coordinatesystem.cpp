@@ -260,6 +260,7 @@ CoordinateSystemAxisNNPtr CoordinateSystemAxis::create(
 // ---------------------------------------------------------------------------
 
 std::string CoordinateSystemAxis::exportToWKT(
+    // cppcheck-suppress passedByValue
     io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
     return exportToWKT(formatter, 0, false);

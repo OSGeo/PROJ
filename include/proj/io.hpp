@@ -320,7 +320,7 @@ class PROJStringFormatter {
 
     class Scope {
       public:
-        explicit Scope(PROJStringFormatterNNPtr formatter);
+        explicit Scope(const PROJStringFormatterNNPtr &formatter);
         ~Scope();
         std::string toString();
 
@@ -372,7 +372,7 @@ class PROJStringFormatter {
   protected:
     //! @cond Doxygen_Suppress
     explicit PROJStringFormatter(Convention conventionIn,
-                                 DatabaseContextPtr dbContext);
+                                 const DatabaseContextPtr &dbContext);
     PROJStringFormatter(const PROJStringFormatter &other) = delete;
 
     INLINED_MAKE_SHARED
@@ -748,7 +748,7 @@ class AuthorityFactory {
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid) const;
 
   protected:
-    AuthorityFactory(DatabaseContextNNPtr context,
+    AuthorityFactory(const DatabaseContextNNPtr &context,
                      const std::string &authorityName);
 
     crs::CRSNNPtr createCoordinateReferenceSystem(const std::string &code,

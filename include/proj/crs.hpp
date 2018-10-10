@@ -536,7 +536,7 @@ class CompoundCRS : public CRS, public io::IPROJStringExportable {
 
   protected:
     // relaxed: standard say SingleCRSNNPtr
-    CompoundCRS(const std::vector<CRSNNPtr> &components);
+    explicit CompoundCRS(const std::vector<CRSNNPtr> &components);
     CompoundCRS(const CompoundCRS &other) = delete;
     CompoundCRS &operator=(const CompoundCRS &other) = delete;
     INLINED_MAKE_SHARED
@@ -606,7 +606,7 @@ class BoundCRS : public CRS, public io::IPROJStringExportable {
 
     PROJ_DLL static BoundCRSNNPtr
     createFromTOWGS84(const CRSNNPtr &baseCRSIn,
-                      const std::vector<double> TOWGS84Parameters);
+                      const std::vector<double> &TOWGS84Parameters);
 
     PROJ_DLL static BoundCRSNNPtr
     createFromNadgrids(const CRSNNPtr &baseCRSIn, const std::string &filename);

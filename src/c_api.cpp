@@ -79,7 +79,7 @@ struct PJ_OBJ {
     bool gridsNeededAsked = false;
     std::vector<CoordinateOperation::GridDescription> gridsNeeded{};
 
-    explicit PJ_OBJ(PJ_CONTEXT *ctxIn, BaseObjectNNPtr objIn)
+    explicit PJ_OBJ(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn)
         : ctx(ctxIn), obj(objIn) {}
 
     PJ_OBJ(const PJ_OBJ &) = delete;
@@ -149,7 +149,7 @@ PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
 struct projCppContext {
     DatabaseContextNNPtr databaseContext;
 
-    explicit projCppContext(DatabaseContextNNPtr databaseContextIn)
+    explicit projCppContext(const DatabaseContextNNPtr &databaseContextIn)
         : databaseContext(databaseContextIn) {}
 };
 
@@ -1277,7 +1277,8 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
     CoordinateOperationContextNNPtr operationContext;
 
     explicit PJ_OPERATION_FACTORY_CONTEXT(
-        PJ_CONTEXT *ctxIn, CoordinateOperationContextNNPtr operationContextIn)
+        PJ_CONTEXT *ctxIn,
+        const CoordinateOperationContextNNPtr &operationContextIn)
         : ctx(ctxIn), operationContext(operationContextIn) {}
 
     PJ_OPERATION_FACTORY_CONTEXT(const PJ_OPERATION_FACTORY_CONTEXT &) = delete;
