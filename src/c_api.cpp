@@ -67,7 +67,7 @@ static void proj_log_error(PJ_CONTEXT *ctx, const char *function,
 // ---------------------------------------------------------------------------
 
 /** \brief Opaque object representing a Ellipsoid, Datum, CRS or Coordinate
- * Operation. */
+ * Operation. Should be used by at most one thread at a time. */
 struct PJ_OBJ {
     //! @cond Doxygen_Suppress
     PJ_CONTEXT *ctx;
@@ -94,6 +94,7 @@ struct PJ_OBJ {
  * This function calls osgeo::proj::io::WKTParser::createFromWKT()
  *
  * The returned object must be unreferenced with proj_obj_unref() after use.
+ * It should be used by at most one thread at a time.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param wkt WKT string (must not be NULL)
@@ -120,6 +121,7 @@ PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt) {
  * This function calls osgeo::proj::io::PROJStringParser::createFromPROJString()
  *
  * The returned object must be unreferenced with proj_obj_unref() after use.
+ * It should be used by at most one thread at a time.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param proj_string PROJ string (must not be NULL)
@@ -166,6 +168,7 @@ void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
 /** \brief Instanciate an object from a database lookup.
  *
  * The returned object must be unreferenced with proj_obj_unref() after use.
+ * It should be used by at most one thread at a time.
  *
  * @param ctx Context, or NULL for default context.
  * @param auth_name Authority name (must not be NULL)
@@ -511,6 +514,7 @@ static GeodeticCRSPtr extractGeodeticCRS(PJ_OBJ *crs, const char *fname) {
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * @param crs Objet of type CRS (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
@@ -530,6 +534,7 @@ PJ_OBJ *proj_obj_crs_get_geodetic_crs(PJ_OBJ *crs) {
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * @param crs Objet of type CRS (must not be NULL)
  * @param index Index of the CRS component (typically 0 = horizontal, 1 =
@@ -558,6 +563,7 @@ PJ_OBJ *proj_obj_crs_get_sub_crs(PJ_OBJ *crs, int index) {
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * This is the same as method
  * osgeo::proj::crs::CRS::createBoundCRSToWGS84IfPossible()
@@ -582,6 +588,7 @@ PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ *crs) {
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * @param obj Objet of type CRS or GeodeticReferenceFrame (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
@@ -611,6 +618,7 @@ PJ_OBJ *proj_obj_get_ellipsoid(PJ_OBJ *obj) {
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * @param crs Objet of type CRS (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
@@ -684,6 +692,7 @@ int proj_obj_ellipsoid_get_parameters(PJ_OBJ *ellipsoid,
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * @param obj Objet of type CRS or GeodeticReferenceFrame (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
@@ -752,6 +761,7 @@ int proj_obj_prime_meridian_get_parameters(PJ_OBJ *prime_meridian,
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * @param obj Objet of type BoundCRS or CoordinateOperation (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
@@ -783,6 +793,7 @@ PJ_OBJ *proj_obj_get_source_crs(PJ_OBJ *obj) {
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * @param obj Objet of type BoundCRS or CoordinateOperation (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
@@ -976,6 +987,7 @@ void proj_free_string_list(PROJ_STRING_LIST list) {
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
+ * It should be used by at most one thread at a time.
  *
  * @param crs Objet of type DerivedCRS or BoundCRSs (must not be NULL)
  * @param pMethodName Pointer to a string value to store the method
@@ -1562,6 +1574,10 @@ int proj_operation_result_get_count(PJ_OPERATION_RESULT *result) {
 // ---------------------------------------------------------------------------
 
 /** \brief Return a CoordinateOperation in the result set
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after
+ * use.
+ * It should be used by at most one thread at a time.
  *
  * @param result Objet of type PJ_OPERATION_RESULT (must not be NULL)
  * @param index Index

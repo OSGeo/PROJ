@@ -179,11 +179,11 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
                                      PROJStringFormatter::Convention::PROJ_5,
                                      DatabaseContext::create()))
                           << std::endl;
-                alreadyOutputed = true;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
                           << std::endl;
             }
+            alreadyOutputed = true;
         }
 
         if (outputOpt.PROJ4) {
@@ -211,11 +211,11 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
                                      PROJStringFormatter::Convention::PROJ_4,
                                      DatabaseContext::create()))
                           << std::endl;
-                alreadyOutputed = true;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
                           << std::endl;
             }
+            alreadyOutputed = true;
         }
     }
 
@@ -232,11 +232,11 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
                 std::cout << wktExportable->exportToWKT(WKTFormatter::create(
                                  WKTFormatter::Convention::WKT2_2015))
                           << std::endl;
-                alreadyOutputed = true;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to WKT2_2015: " << e.what()
                           << std::endl;
             }
+            alreadyOutputed = true;
         }
 
         if (outputOpt.WKT2_2018) {
@@ -250,11 +250,11 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
                 std::cout << wktExportable->exportToWKT(WKTFormatter::create(
                                  WKTFormatter::Convention::WKT2_2018))
                           << std::endl;
-                alreadyOutputed = true;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to WKT2_2018: " << e.what()
                           << std::endl;
             }
+            alreadyOutputed = true;
         }
 
         if (outputOpt.WKT1_GDAL && !nn_dynamic_pointer_cast<Conversion>(obj)) {
