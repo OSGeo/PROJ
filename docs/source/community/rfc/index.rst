@@ -12,3 +12,4 @@ the project.
    :maxdepth: 1
 
    rfc-1
+   rfc-2
