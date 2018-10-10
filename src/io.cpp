@@ -722,6 +722,7 @@ const std::vector<WKTNodeNNPtr> &WKTNode::children() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static size_t skipSpace(const std::string &str, size_t start) {
     size_t i = start;
     while (i < str.size() && ::isspace(str[i])) {
@@ -729,6 +730,7 @@ static size_t skipSpace(const std::string &str, size_t start) {
     }
     return i;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -838,6 +840,7 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static std::string escapeIfQuotedString(const std::string &str) {
     if (str.size() > 2 && str[0] == '"' && str.back() == '"') {
         return "\"" + replaceAll(str.substr(1, str.size() - 2), "\"", "\"\"") +
@@ -846,6 +849,7 @@ static std::string escapeIfQuotedString(const std::string &str) {
         return str;
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

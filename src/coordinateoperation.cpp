@@ -60,11 +60,15 @@ using namespace NS_PROJ::internal;
 NS_PROJ_START
 namespace operation {
 
+//! @cond Doxygen_Suppress
 static const std::string INVERSE_OF = "Inverse of ";
+//! @endcond
 
+//! @cond Doxygen_Suppress
 static util::PropertyMap
 createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
                            bool approximateInversion);
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1483,6 +1487,7 @@ ConversionNNPtr Conversion::create(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static util::PropertyMap
 getUTMConversionProperty(const util::PropertyMap &properties, int zone,
                          bool north) {
@@ -1551,6 +1556,7 @@ createConversion(const util::PropertyMap &properties,
         addDefaultNameIfNeeded(properties, mapping->wkt2_name),
         methodProperties, parameters, values);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -3852,6 +3858,7 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static bool createPROJ4WebMercator(const Conversion *conv,
                                    io::PROJStringFormatterNNPtr formatter) {
     const double centralMeridian =
@@ -3951,6 +3958,7 @@ createPROJExtensionFromCustomProj(const Conversion *conv,
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -4762,6 +4770,7 @@ Transformation::create(const util::PropertyMap &propertiesTransformation,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static TransformationNNPtr createSevenParamsTransform(
     const util::PropertyMap &properties,
     const util::PropertyMap &methodProperties, const crs::CRSNNPtr &sourceCRSIn,
@@ -4875,6 +4884,7 @@ static void getTransformationType(const crs::CRSNNPtr &sourceCRSIn,
         throw InvalidOperation("Inconsistent CRS type");
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -5075,6 +5085,7 @@ TransformationNNPtr Transformation::createCoordinateFrameRotation(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static TransformationNNPtr createFifteenParamsTransform(
     const util::PropertyMap &properties,
     const util::PropertyMap &methodProperties, const crs::CRSNNPtr &sourceCRSIn,
@@ -5243,6 +5254,7 @@ static TransformationNNPtr createFifteenParamsTransform(
         },
         accuracies);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -5692,6 +5704,7 @@ TransformationNNPtr Transformation::createNTv2(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static TransformationNNPtr _createGravityRelatedHeightToGeographic3D(
     const util::PropertyMap &properties, bool inverse,
     const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
@@ -5714,6 +5727,7 @@ static TransformationNNPtr _createGravityRelatedHeightToGeographic3D(
                      EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME))},
         {ParameterValue::createFilename(filename)}, accuracies);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 /** \brief Instanciate a transformation from GravityRelatedHeight to
@@ -5994,6 +6008,7 @@ TransformationNNPtr Transformation::createGeographic2DWithHeightOffsets(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static TransformationNNPtr
 createGeographicGeocentric(const util::PropertyMap &properties,
                            const crs::CRSNNPtr &sourceCRSIn,
@@ -6279,6 +6294,7 @@ createApproximateInverseIfPossible(const Transformation *op) {
 
     return nullptr;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -6582,6 +6598,7 @@ std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static std::string _getNTv2Filename(const Transformation *op,
                                     bool allowInverse) {
 
@@ -6600,6 +6617,7 @@ static std::string _getNTv2Filename(const Transformation *op,
     }
     return std::string();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 //! @cond Doxygen_Suppress
@@ -6611,6 +6629,7 @@ std::string Transformation::getNTv2Filename() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static std::string _getNTv1Filename(const Transformation *op,
                                     bool allowInverse) {
 
@@ -6629,9 +6648,11 @@ static std::string _getNTv1Filename(const Transformation *op,
     }
     return std::string();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static std::string _getCTABLE2Filename(const Transformation *op,
                                        bool allowInverse) {
 
@@ -6649,9 +6670,11 @@ static std::string _getCTABLE2Filename(const Transformation *op,
     }
     return std::string();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static std::string _getHeightToGeographic3DFilename(const Transformation *op,
                                                     bool allowInverse) {
 
@@ -6671,6 +6694,7 @@ static std::string _getHeightToGeographic3DFilename(const Transformation *op,
     }
     return std::string();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -6683,6 +6707,7 @@ std::string Transformation::getHeightToGeographic3DFilename() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static bool
 isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
                                      bool allowInverse) {
@@ -6729,9 +6754,11 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
     }
     return false;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static util::PropertyMap
 createSimilarPropertiesMethod(common::IdentifiedObjectNNPtr obj) {
     util::PropertyMap map;
@@ -6757,9 +6784,11 @@ createSimilarPropertiesMethod(common::IdentifiedObjectNNPtr obj) {
 
     return map;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static util::PropertyMap
 createSimilarPropertiesTransformation(TransformationNNPtr obj) {
     util::PropertyMap map;
@@ -6799,9 +6828,11 @@ createSimilarPropertiesTransformation(TransformationNNPtr obj) {
 
     return map;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static TransformationNNPtr
 createNTv1(const util::PropertyMap &properties,
            const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
@@ -6824,6 +6855,7 @@ createNTv1(const util::PropertyMap &properties,
                      EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE))},
         {ParameterValue::createFilename(filename)}, accuracies);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -7739,6 +7771,7 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static std::string computeConcatenatedName(
     const std::vector<CoordinateOperationNNPtr> &flattenOps) {
     std::string name;
@@ -7754,6 +7787,7 @@ static std::string computeConcatenatedName(
     }
     return name;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -8190,6 +8224,7 @@ CoordinateOperationPtr CoordinateOperationFactory::createOperation(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 /** \brief Filter operations and sort them given context.
  *
  * If a desired accuracy is specified, only keep operations whose accuracy
@@ -8430,9 +8465,11 @@ filterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceList,
 
     return res;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 // Apply the inverse() method on all elements of the input list
 static std::vector<CoordinateOperationNNPtr>
 applyInverse(const std::vector<CoordinateOperationNNPtr> &list) {
@@ -8442,9 +8479,11 @@ applyInverse(const std::vector<CoordinateOperationNNPtr> &list) {
     }
     return res;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 // Look in the authority registry for operations from sourceCRS to targetCRS
 static std::vector<CoordinateOperationNNPtr>
 findOpsInRegistry(const crs::CRSNNPtr &sourceCRS,
@@ -8477,9 +8516,11 @@ findOpsInRegistry(const crs::CRSNNPtr &sourceCRS,
     }
     return std::vector<CoordinateOperationNNPtr>();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static TransformationNNPtr
 createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
                            const crs::CRSNNPtr &targetCRS) {
@@ -8513,6 +8554,7 @@ createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
             sourceCRS, targetCRS, common::Angle(0), common::Angle(0), {});
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

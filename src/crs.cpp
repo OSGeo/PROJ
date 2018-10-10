@@ -1096,6 +1096,9 @@ struct VerticalCRS::Private {
 };
 //! @endcond
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 static const datum::DatumEnsemblePtr &
 checkEnsembleForVerticalCRS(const datum::DatumEnsemblePtr &ensemble) {
     if (ensemble) {
@@ -1110,6 +1113,7 @@ checkEnsembleForVerticalCRS(const datum::DatumEnsemblePtr &ensemble) {
     }
     return ensemble;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

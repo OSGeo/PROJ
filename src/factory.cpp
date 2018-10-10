@@ -1179,6 +1179,7 @@ datum::DatumNNPtr AuthorityFactory::createDatum(const std::string &code) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 static cs::MeridianPtr createMeridian(const std::string &val) {
     try {
         if (ends_with(val, ""
@@ -1201,6 +1202,7 @@ static cs::MeridianPtr createMeridian(const std::string &val) {
     }
     return nullptr;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
