@@ -1885,7 +1885,7 @@ MAN_LINKS              = NO
 # captures the structure of the code including all documentation.
 # The default value is: NO.
 
-GENERATE_XML           = NO
+GENERATE_XML           = YES
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
@@ -2043,7 +2043,9 @@ PREDEFINED             =    DOXYGEN_ENABLED \
                             PROJ_DLL= \
                             NS_PROJ_START="namespace osgeo { namespace proj {" \
                             NS_PROJ_END="} }" \
-                            protected=private
+                            protected=private \
+                            INLINED_MAKE_SHARED= \
+                            PROJ_OPAQUE_PRIVATE_DATA=
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

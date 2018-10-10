@@ -54,6 +54,9 @@ clean:
 .PHONY: html
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	# Undoes the hack done in scripts/doxygen.sh
+	@sed -i "s/io::Convention_/io::Convention/g" $(BUILDDIR)/html/development/reference/cpp.html
+	@sed -i "s/>Convention_/>Convention/g" $(BUILDDIR)/html/development/reference/cpp.html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 

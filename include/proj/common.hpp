@@ -176,7 +176,7 @@ class Scale : public Measure {
     //! @endcond
 
   protected:
-    friend class util::optional<Scale>;
+    FRIEND_OPTIONAL(Scale);
     Scale &operator=(const Scale &);
 };
 
@@ -196,7 +196,7 @@ class Angle : public Measure {
     PROJ_DLL Angle convertToUnit(const UnitOfMeasure &otherUnit) const;
 
   protected:
-    friend class util::optional<Angle>;
+    FRIEND_OPTIONAL(Angle);
     Angle &operator=(const Angle &);
 };
 
@@ -216,7 +216,7 @@ class Length : public Measure {
     PROJ_DLL Length convertToUnit(const UnitOfMeasure &otherUnit) const;
 
   protected:
-    friend class util::optional<Length>;
+    FRIEND_OPTIONAL(Length);
     Length &operator=(const Length &);
 };
 
@@ -239,7 +239,7 @@ class DateTime {
 
   protected:
     DateTime();
-    friend class util::optional<DateTime>;
+    FRIEND_OPTIONAL(DateTime);
 
   private:
     explicit DateTime(const std::string &str);
@@ -310,7 +310,7 @@ class IdentifiedObject : public util::BaseObject {
     //! @endcond
 
   protected:
-    friend class util::optional<IdentifiedObject>;
+    FRIEND_OPTIONAL(IdentifiedObject);
     INLINED_MAKE_SHARED
     IdentifiedObject();
     IdentifiedObject(const IdentifiedObject &other);

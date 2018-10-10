@@ -475,7 +475,7 @@ class RealizationMethod : public util::CodeList {
     PROJ_DLL static const RealizationMethod TIDAL;
 
   private:
-    friend class util::optional<RealizationMethod>;
+    FRIEND_OPTIONAL(RealizationMethod);
     PROJ_DLL explicit RealizationMethod(
         const std::string &nameIn = std::string());
     PROJ_DLL RealizationMethod(const RealizationMethod &other);

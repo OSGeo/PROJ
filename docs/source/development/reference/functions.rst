@@ -584,3 +584,8 @@ Various
     :type `direction`: PJ_DIRECTION
     :returns: :c:type:`int` 1 if angular output is returned, otherwise 0
 
+C API for ISO-19111 functionality
++++++++++++++++++++++++++++++++++
+
+.. doxygenfile:: proj.h
+   :project: cpp_stuff

@@ -167,7 +167,6 @@ WKTFormatterNNPtr WKTFormatter::create(WKTFormatterNNPtr other) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Destructor. */
 //! @cond Doxygen_Suppress
 WKTFormatter::~WKTFormatter() = default;
 //! @endcond

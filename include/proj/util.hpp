@@ -81,7 +81,6 @@ namespace proj {}
   protected:                                                                   \
     Private *getPrivate() { return d.get(); }                                  \
     const Private *getPrivate() const { return d.get(); }                      \
-//! @endcond
 
 // To include in the protected/private section of a class definition,
 // to be able to call make_shared on a protected/private constructor
@@ -96,6 +95,14 @@ namespace proj {}
             util::i_promise_i_checked_for_null,                                \
             std::shared_ptr<T>(new T(std::forward<Args>(args)...)));           \
     }
+
+#ifdef DOXYGEN_ENABLED
+#define FRIEND(mytype)
+#define FRIEND_OPTIONAL(mytype)
+#else
+#define FRIEND(mytype) friend class mytype
+#define FRIEND_OPTIONAL(mytype) friend class util::optional<mytype>
+#endif
 
 //! @endcond
 
@@ -436,8 +443,8 @@ class NameSpace {
     PROJ_DLL const GenericNamePtr &name() const;
 
   protected:
-    friend class NameFactory;
-    friend class LocalName;
+    FRIEND(NameFactory);
+    FRIEND(LocalName);
     explicit NameSpace(const GenericNamePtr &name);
     NameSpace(const NameSpace &other);
     NameSpaceNNPtr getGlobalFromThis() const;
@@ -474,8 +481,8 @@ class LocalName : public GenericName {
     PROJ_DLL GenericNameNNPtr toFullyQualifiedName() const override;
 
   protected:
-    friend class NameFactory;
-    friend class NameSpace;
+    FRIEND(NameFactory);
+    FRIEND(NameSpace);
     explicit LocalName(const std::string &nameIn);
     LocalName(const LocalName &other);
     LocalName(const NameSpacePtr &ns, const std::string &name);

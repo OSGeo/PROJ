@@ -74,7 +74,7 @@ class Citation : public util::BaseObject {
     PROJ_DLL const util::optional<std::string> &title() const;
 
   protected:
-    friend class util::optional<Citation>;
+    FRIEND_OPTIONAL(Citation);
     Citation &operator=(const Citation &other);
 
   private:
@@ -382,11 +382,11 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
   protected:
     explicit Identifier(const std::string &codeIn = std::string());
 
-    friend class util::optional<Identifier>;
+    FRIEND_OPTIONAL(Identifier);
     INLINED_MAKE_SHARED
     Identifier &operator=(const Identifier &other);
 
-    friend class common::IdentifiedObject;
+    FRIEND(common::IdentifiedObject);
 
     // Non-standard
     void setProperties(const util::PropertyMap

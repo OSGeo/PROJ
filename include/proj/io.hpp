@@ -604,7 +604,7 @@ class DatabaseContext {
   protected:
     DatabaseContext();
     INLINED_MAKE_SHARED
-    friend class AuthorityFactory;
+    FRIEND(AuthorityFactory);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

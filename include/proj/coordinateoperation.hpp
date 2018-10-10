@@ -139,9 +139,9 @@ class CoordinateOperation : public common::ObjectUsage,
     CoordinateOperation();
     CoordinateOperation(const CoordinateOperation &other);
 
-    friend class crs::DerivedCRS;
-    friend class io::AuthorityFactory;
-    friend class CoordinateOperationFactory;
+    FRIEND(crs::DerivedCRS);
+    FRIEND(io::AuthorityFactory);
+    FRIEND(CoordinateOperationFactory);
     void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                                 std::weak_ptr<crs::CRS> targetCRSIn);
     void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
@@ -1203,7 +1203,7 @@ class Conversion : public SingleOperation {
     Conversion(const Conversion &other);
     INLINED_MAKE_SHARED
 
-    friend class crs::ProjectedCRS;
+    FRIEND(crs::ProjectedCRS);
     void addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const;
 
   private:

@@ -26,5 +26,18 @@ else
     echo "No Doxygen warnings found";
 fi
 
+for i in ${TOPDIR}/xml/*; do
+
+# Fix Breathe error on Doxygen XML
+# Type must be either just a name or a typedef-like declaration.
+#   If just a name:
+#     Invalid definition: Expected end of definition. [error at 32]
+#       osgeo::proj::common::MeasurePtr = typedef std::shared_ptr<Measure>
+    sed -i "s/ = typedef /=/g" $i;
+done
+
+# There is a confusion for Breathe between PROJStringFormatter::Convention and WKTFormatter:Convention
+sed -i "s/Convention/Convention_/g" ${TOPDIR}/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml
+
 popd > /dev/null || exit
 

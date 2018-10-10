@@ -9,4 +9,5 @@ Reference
 
    datatypes
    functions
+   cpp
    deprecated
