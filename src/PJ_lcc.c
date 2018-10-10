@@ -5,9 +5,9 @@
 #include "proj_math.h"
 
 PROJ_HEAD(lcc, "Lambert Conformal Conic")
-    "\n\tConic, Sph&Ell\n\tlat_1= and lat_2= or lat_0";
+    "\n\tConic, Sph&Ell\n\tlat_1= and lat_2= or lat_0, k_0=";
 
-# define EPS10  1.e-10
+#define EPS10 1.e-10
 
 struct pj_opaque {
     double phi1;
@@ -15,12 +15,11 @@ struct pj_opaque {
     double n;
     double rho0;
     double c;
-    int    ellips;
 };
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+    XY xy = {0., 0.};
     struct pj_opaque *Q = P->opaque;
     double rho;
 
@@ -31,18 +30,19 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         }
         rho = 0.;
     } else {
-        rho = Q->c * (Q->ellips ? pow(pj_tsfn(lp.phi, sin(lp.phi),
-            P->e), Q->n) : pow(tan(M_FORTPI + .5 * lp.phi), -Q->n));
+        rho = Q->c * (P->es != 0. ?
+                      pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), Q->n) :
+                      pow(tan(M_FORTPI + .5 * lp.phi), -Q->n));
     }
     lp.lam *= Q->n;
-    xy.x = P->k0 * (rho * sin( lp.lam) );
-    xy.y = P->k0 * (Q->rho0 - rho * cos(lp.lam) );
+    xy.x = P->k0 * (rho * sin(lp.lam));
+    xy.y = P->k0 * (Q->rho0 - rho * cos(lp.lam));
     return xy;
 }
 
 
 static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+    LP lp = {0., 0.};
     struct pj_opaque *Q = P->opaque;
     double rho;
 
@@ -51,13 +51,13 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
     xy.y = Q->rho0 - xy.y;
     rho = hypot(xy.x, xy.y);
-    if (rho != 0.0) {
+    if (rho != 0.) {
         if (Q->n < 0.) {
             rho = -rho;
             xy.x = -xy.x;
             xy.y = -xy.y;
         }
-        if (Q->ellips) {
+        if (P->es != 0.) {
             lp.phi = pj_phi2(P->ctx, pow(rho / Q->c, 1./Q->n), P->e);
             if (lp.phi == HUGE_VAL) {
                 proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -78,12 +78,11 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 PJ *PROJECTION(lcc) {
     double cosphi, sinphi;
     int secant;
-    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    struct pj_opaque *Q = pj_calloc(1, sizeof (struct pj_opaque));
 
-    if (0==Q)
-        return pj_default_destructor (P, ENOMEM);
+    if (0 == Q)
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
-
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     if (pj_param(P->ctx, P->params, "tlat_2").i)
@@ -99,10 +98,9 @@ PJ *PROJECTION(lcc) {
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);
     secant = fabs(Q->phi1 - Q->phi2) >= EPS10;
-    if( (Q->ellips = (P->es != 0.)) ) {
+    if (P->es != 0.) {
         double ml1, m1;
 
-        P->e = sqrt(P->es);
         m1 = pj_msfn(sinphi, cosphi, P->es);
         ml1 = pj_tsfn(Q->phi1, sinphi, P->e);
         if (secant) { /* secant cone */
@@ -128,4 +126,3 @@ PJ *PROJECTION(lcc) {
 
     return P;
 }
-
