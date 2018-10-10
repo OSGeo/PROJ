@@ -401,17 +401,20 @@ static double get_unit_conversion_factor(const char* name,
 /***********************************************************************/
     int i;
     const char* s;
+    const PJ_UNITS *units;
+
+    units = proj_list_units();
 
     /* Try first with linear units */
-    for (i = 0; (s = pj_units[i].id) ; ++i) {
+    for (i = 0; (s = units[i].id) ; ++i) {
         if ( strcmp(s, name) == 0 ) {
             if( p_normalized_name ) {
-                *p_normalized_name = pj_units[i].name;
+                *p_normalized_name = units[i].name;
             }
             if( p_is_linear ) {
                 *p_is_linear = 1;
             }
-            return pj_units[i].factor;
+            return units[i].factor;
         }
     }
 

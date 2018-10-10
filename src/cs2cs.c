@@ -211,7 +211,7 @@ int main(int argc, char **argv)
                     /* list projections */
                     const struct PJ_LIST *lp;
                     int do_long = arg[1] == 'P', c;
-                    char *str;
+                    const char *str;
 
                     for (lp = proj_list_operations() ; lp->id ; ++lp) {
                         (void)printf("%s : ", lp->id);

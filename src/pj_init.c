@@ -484,17 +484,20 @@ pj_init(int argc, char **argv) {
 
 static PJ_CONSTRUCTOR locate_constructor (const char *name) {
     int i;
-    char *s;
-    for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
+    const char *s;
+    const PJ_OPERATIONS *operations;
+    operations = proj_list_operations();
+    for (i = 0; (s = operations[i].id) && strcmp(name, s) ; ++i) ;
     if (0==s)
         return 0;
-    return (PJ_CONSTRUCTOR) pj_list[i].proj;
+    return (PJ_CONSTRUCTOR) operations[i].proj;
 }
 
 
 PJ *
 pj_init_ctx(projCtx ctx, int argc, char **argv) {
-    char *s, *name;
+    const char *s;
+    char *name;
     PJ_CONSTRUCTOR proj;
     paralist *curr, *init, *start;
     int i;
@@ -502,6 +505,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PJ *PIN = 0;
     int n_pipelines = 0;
     int n_inits = 0;
+    const PJ_UNITS *units;
+    const PJ_PRIME_MERIDIANS *prime_meridians;
 
     if (0==ctx)
         ctx = pj_get_default_ctx ();
@@ -701,12 +706,13 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         return pj_default_destructor (PIN, PJD_ERR_K_LESS_THAN_ZERO);
 
     /* Set units */
+    units = proj_list_units();
     s = 0;
     if ((name = pj_param(ctx, start, "sunits").s) != NULL) {
-        for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
+        for (i = 0; (s = units[i].id) && strcmp(name, s) ; ++i) ;
         if (!s)
             return pj_default_destructor (PIN, PJD_ERR_UNKNOWN_UNIT_ID);
-        s = pj_units[i].to_meter;
+        s = units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "sto_meter").s)) {
         double factor;
@@ -718,7 +724,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             s += 2;
         }
 
-        factor = pj_strtod(s, &s);
+        factor = pj_strtod(s, 0);
         if ((factor <= 0.0) || (1/factor==0))
             return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
 
@@ -731,13 +737,13 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* Set vertical units */
     s = 0;
     if ((name = pj_param(ctx, start, "svunits").s) != NULL) {
-        for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
+        for (i = 0; (s = units[i].id) && strcmp(name, s) ; ++i) ;
         if (!s)
             return pj_default_destructor (PIN, PJD_ERR_UNKNOWN_UNIT_ID);
-        s = pj_units[i].to_meter;
+        s = units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "svto_meter").s)) {
-        PIN->vto_meter = pj_strtod(s, &s);
+        PIN->vto_meter = pj_strtod(s, 0);
         if (*s == '/') /* ratio number */
             PIN->vto_meter /= pj_strtod(++s, 0);
         if (PIN->vto_meter <= 0.0)
@@ -749,16 +755,17 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     }
 
     /* Prime meridian */
+    prime_meridians = proj_list_prime_meridians();
     s = 0;
     if ((name = pj_param(ctx, start, "spm").s) != NULL) {
         const char *value = NULL;
         char *next_str = NULL;
 
-        for (i = 0; pj_prime_meridians[i].id != NULL; ++i )
+        for (i = 0; prime_meridians[i].id != NULL; ++i )
         {
-            if( strcmp(name,pj_prime_meridians[i].id) == 0 )
+            if( strcmp(name,prime_meridians[i].id) == 0 )
             {
-                value = pj_prime_meridians[i].defn;
+                value = prime_meridians[i].defn;
                 break;
             }
         }
