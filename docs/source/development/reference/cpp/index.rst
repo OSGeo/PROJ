@@ -1,13 +1,17 @@
-.. _reference:
+.. _cpp:
 
 ================================================================================
-Reference
+C++ API
 ================================================================================
 
 .. toctree::
    :maxdepth: 1
 
-   datatypes
-   functions
-   cpp/index.rst
-   deprecated
+   common
+   util
+   metadata
+   cs
+   datum
+   crs
+   operation
+   io
