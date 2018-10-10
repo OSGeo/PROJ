@@ -35,11 +35,13 @@
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
-#include "proj/internal.hpp"
 #include "proj/io.hpp"
-#include "proj/io_internal.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
+
+#include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
+#include "proj/internal/lru_cache.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -49,8 +51,6 @@
 #include <memory>
 #include <sstream> // std::ostringstream
 #include <string>
-
-#include "lru_cache.hpp"
 
 // PROJ include order is sensitive
 // clang-format off
@@ -1752,7 +1752,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 
     if (type == "helmert_transformation") {
 
-#include "helmert_constants.hpp"
+#include "proj/internal/helmert_constants.hpp"
 
         res = d->context()->getPrivate()->run(
             "SELECT name, method_auth_name, method_code, method_name, "

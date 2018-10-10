@@ -33,7 +33,7 @@
 #ifndef COORDINATEOPERATION_CONSTANTS_HH_INCLUDED
 #define COORDINATEOPERATION_CONSTANTS_HH_INCLUDED
 
-#include "proj/coordinateoperation_internal.hpp"
+#include "coordinateoperation_internal.hpp"
 #include <string>
 
 // ---------------------------------------------------------------------------

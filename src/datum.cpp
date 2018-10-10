@@ -32,11 +32,12 @@
 
 #include "proj/datum.hpp"
 #include "proj/common.hpp"
-#include "proj/internal.hpp"
 #include "proj/io.hpp"
-#include "proj/io_internal.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
+
+#include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
 
 // PROJ include order is sensitive
 // clang-format off

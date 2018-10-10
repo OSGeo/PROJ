@@ -34,11 +34,12 @@
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
-#include "proj/coordinatesystem_internal.hpp"
-#include "proj/internal.hpp"
 #include "proj/io.hpp"
-#include "proj/io_internal.hpp"
 #include "proj/util.hpp"
+
+#include "proj/internal/coordinatesystem_internal.hpp"
+#include "proj/internal/io_internal.hpp"
+#include "proj/internal/internal.hpp"
 
 #include <cassert>
 #include <memory>

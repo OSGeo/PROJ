@@ -36,10 +36,11 @@
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
-#include "proj/internal.hpp"
 #include "proj/io.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
+
+#include "proj/internal/internal.hpp"
 
 #include <string>
 #include <vector>

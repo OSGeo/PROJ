@@ -31,8 +31,9 @@
 #endif
 
 #include "proj/util.hpp"
-#include "proj/internal.hpp"
 #include "proj/io.hpp"
+
+#include "proj/internal/internal.hpp"
 
 #include <map>
 #include <memory>

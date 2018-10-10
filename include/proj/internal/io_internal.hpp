@@ -35,7 +35,7 @@
 
 #include <string>
 
-#include "util.hpp"
+#include "proj/util.hpp"
 
 //! @cond Doxygen_Suppress
 

@@ -33,7 +33,7 @@
 #ifndef COORDINATESYSTEM_INTERNAL_HH_INCLUDED
 #define COORDINATESYSTEM_INTERNAL_HH_INCLUDED
 
-#include "util.hpp"
+#include "proj/util.hpp"
 
 #include <map>
 #include <set>

@@ -37,10 +37,11 @@
 
 #include <proj/coordinateoperation.hpp>
 #include <proj/crs.hpp>
-#include <proj/internal.hpp> // for split
 #include <proj/io.hpp>
 #include <proj/metadata.hpp>
 #include <proj/util.hpp>
+
+#include "proj/internal/internal.hpp" // for split
 
 using namespace NS_PROJ::crs;
 using namespace NS_PROJ::io;
