@@ -1398,6 +1398,141 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             << last_error();
     }
 
+    void createSourceTargetPivotCRS() {
+        for (const auto &val :
+             std::vector<std::string>{"SOURCE", "TARGET", "PIVOT"}) {
+            ASSERT_TRUE(execute("INSERT INTO crs VALUES('NS_" + val + "','" +
+                                val + "','geographic 2D');"))
+                << last_error();
+            ASSERT_TRUE(
+                execute("INSERT INTO geodetic_crs "
+                        "VALUES('NS_" +
+                        val + "','" + val + "','" + val +
+                        "','geographic "
+                        "2D','EPSG','6422','EPSG','6326','EPSG','1262',0);"))
+                << last_error();
+        }
+    }
+
+    void createGridTransformationForPivotTesting(const std::string &src,
+                                                 const std::string &dst) {
+        ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
+                            "VALUES('OTHER','" +
+                            src + "_" + dst + "','grid_transformation');"))
+            << last_error();
+        ASSERT_TRUE(
+            execute("INSERT INTO grid_transformation "
+                    "VALUES('OTHER','" +
+                    src + "_" + dst + "','name','EPSG','9615'"
+                                      ",'NTv2','NS_" +
+                    src + "','" + src + "','NS_" + dst + "','" + dst +
+                    "','EPSG'"
+                    ",'1262',1.0,'EPSG','"
+                    "8656','Latitude and longitude difference "
+                    "file','foo.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            << last_error();
+    }
+
+    void checkSourceToOther() {
+        {
+            auto factoryOTHER = AuthorityFactory::create(
+                DatabaseContext::create(m_ctxt), "OTHER");
+            auto res = factoryOTHER->createFromCRSCodesWithIntermediates(
+                "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false, {});
+            EXPECT_EQ(res.size(), 1);
+            EXPECT_TRUE(res.empty() ||
+                        nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
+
+            res = factoryOTHER->createFromCRSCodesWithIntermediates(
+                "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
+                {std::make_pair(std::string("NS_PIVOT"),
+                                std::string("PIVOT"))});
+            EXPECT_EQ(res.size(), 1);
+            EXPECT_TRUE(res.empty() ||
+                        nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
+
+            res = factoryOTHER->createFromCRSCodesWithIntermediates(
+                "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
+                {std::make_pair(std::string("NS_PIVOT"),
+                                std::string("NOT_EXISTING"))});
+            EXPECT_EQ(res.size(), 0);
+
+            res = factoryOTHER->createFromCRSCodesWithIntermediates(
+                "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
+                {std::make_pair(std::string("BAD_NS"), std::string("PIVOT"))});
+            EXPECT_EQ(res.size(), 0);
+
+            res = factoryOTHER->createFromCRSCodesWithIntermediates(
+                "NS_TARGET", "TARGET", "NS_SOURCE", "SOURCE", false, false, {});
+            EXPECT_EQ(res.size(), 1);
+            EXPECT_TRUE(res.empty() ||
+                        nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
+        }
+        {
+            auto factory = AuthorityFactory::create(
+                DatabaseContext::create(m_ctxt), std::string());
+            auto res = factory->createFromCRSCodesWithIntermediates(
+                "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false, {});
+            EXPECT_EQ(res.size(), 1);
+            EXPECT_TRUE(res.empty() ||
+                        nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
+
+            auto srcCRS = AuthorityFactory::create(
+                              DatabaseContext::create(m_ctxt), "NS_SOURCE")
+                              ->createCoordinateReferenceSystem("SOURCE");
+            auto targetCRS = AuthorityFactory::create(
+                                 DatabaseContext::create(m_ctxt), "NS_TARGET")
+                                 ->createCoordinateReferenceSystem("TARGET");
+
+            {
+                auto ctxt =
+                    CoordinateOperationContext::create(factory, nullptr, 0);
+                res = CoordinateOperationFactory::create()->createOperations(
+                    srcCRS, targetCRS, ctxt);
+                EXPECT_EQ(res.size(), 1);
+                EXPECT_TRUE(
+                    res.empty() ||
+                    nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
+            }
+
+            {
+                auto ctxt =
+                    CoordinateOperationContext::create(factory, nullptr, 0);
+                ctxt->setIntermediateCRS({std::make_pair(
+                    std::string("NS_PIVOT"), std::string("PIVOT"))});
+                res = CoordinateOperationFactory::create()->createOperations(
+                    srcCRS, targetCRS, ctxt);
+                EXPECT_EQ(res.size(), 1);
+                EXPECT_TRUE(
+                    res.empty() ||
+                    nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
+            }
+
+            {
+                auto ctxt =
+                    CoordinateOperationContext::create(factory, nullptr, 0);
+                ctxt->setAllowUseIntermediateCRS(false);
+                res = CoordinateOperationFactory::create()->createOperations(
+                    srcCRS, targetCRS, ctxt);
+                EXPECT_EQ(res.size(), 1);
+                EXPECT_TRUE(res.empty() ||
+                            nn_dynamic_pointer_cast<Transformation>(res[0]));
+            }
+
+            {
+                auto ctxt =
+                    CoordinateOperationContext::create(factory, nullptr, 0);
+                ctxt->setIntermediateCRS({std::make_pair(
+                    std::string("NS_PIVOT"), std::string("NOT_EXISTING"))});
+                res = CoordinateOperationFactory::create()->createOperations(
+                    srcCRS, targetCRS, ctxt);
+                EXPECT_EQ(res.size(), 1);
+                EXPECT_TRUE(res.empty() ||
+                            nn_dynamic_pointer_cast<Transformation>(res[0]));
+            }
+        }
+    }
+
     bool get_table(const char *sql, sqlite3 *db = nullptr) {
         sqlite3_free_table(m_papszResult);
         m_papszResult = nullptr;
@@ -1407,8 +1542,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                                  &m_nRows, &m_nCols, nullptr) == SQLITE_OK;
     }
 
-    bool execute(const char *sql) {
-        return sqlite3_exec(m_ctxt, sql, nullptr, nullptr, nullptr) ==
+    bool execute(const std::string &sql) {
+        return sqlite3_exec(m_ctxt, sql.c_str(), nullptr, nullptr, nullptr) ==
                SQLITE_OK;
     }
 
@@ -1681,6 +1816,66 @@ TEST_F(FactoryWithTmpDatabase,
     EXPECT_EQ(*(res[1]->name()->description()), "TRANSFORMATION_10M");
     EXPECT_EQ(*(res[2]->name()->description()),
               "TRANSFORMATION_1M_SMALL_EXTENT");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(
+    FactoryWithTmpDatabase,
+    AuthorityFactory_createFromCRSCodesWithIntermediates_case_source_pivot_target_pivot) {
+    createStructure();
+    populateWithFakeEPSG();
+    createSourceTargetPivotCRS();
+
+    createGridTransformationForPivotTesting("SOURCE", "PIVOT");
+    createGridTransformationForPivotTesting("TARGET", "PIVOT");
+
+    checkSourceToOther();
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(
+    FactoryWithTmpDatabase,
+    AuthorityFactory_createFromCRSCodesWithIntermediates_case_source_pivot_pivot_target) {
+    createStructure();
+    populateWithFakeEPSG();
+    createSourceTargetPivotCRS();
+
+    createGridTransformationForPivotTesting("SOURCE", "PIVOT");
+    createGridTransformationForPivotTesting("PIVOT", "TARGET");
+
+    checkSourceToOther();
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(
+    FactoryWithTmpDatabase,
+    AuthorityFactory_createFromCRSCodesWithIntermediates_case_pivot_source_pivot_target) {
+    createStructure();
+    populateWithFakeEPSG();
+    createSourceTargetPivotCRS();
+
+    createGridTransformationForPivotTesting("PIVOT", "SOURCE");
+    createGridTransformationForPivotTesting("PIVOT", "TARGET");
+
+    checkSourceToOther();
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(
+    FactoryWithTmpDatabase,
+    AuthorityFactory_createFromCRSCodesWithIntermediates_case_pivot_source_target_pivot) {
+    createStructure();
+    populateWithFakeEPSG();
+    createSourceTargetPivotCRS();
+
+    createGridTransformationForPivotTesting("PIVOT", "SOURCE");
+    createGridTransformationForPivotTesting("TARGET", "PIVOT");
+
+    checkSourceToOther();
 }
 
 // ---------------------------------------------------------------------------

@@ -573,6 +573,9 @@ struct AuthorityFactory::Private {
     void cache(const std::string &code,
                const datum::GeodeticReferenceFrameNNPtr &datum);
 
+    bool rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op,
+                                  bool discardIfMissingGrid);
+
   private:
     DatabaseContextNNPtr context_;
     std::string authority_;
@@ -661,6 +664,20 @@ AuthorityFactory::Private::getGeodeticDatumFromCache(const std::string &code) {
 void AuthorityFactory::Private::cache(
     const std::string &code, const datum::GeodeticReferenceFrameNNPtr &datum) {
     cacheGeodeticDaum_.insert(code, datum.as_nullable());
+}
+
+// ---------------------------------------------------------------------------
+
+bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
+    const operation::CoordinateOperationNNPtr &op, bool discardIfMissingGrid) {
+    if (discardIfMissingGrid) {
+        for (const auto &gridDesc : op->gridsNeeded(context())) {
+            if (!gridDesc.available) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //! @endcond
@@ -1182,21 +1199,15 @@ datum::DatumNNPtr AuthorityFactory::createDatum(const std::string &code) const {
 //! @cond Doxygen_Suppress
 static cs::MeridianPtr createMeridian(const std::string &val) {
     try {
-        if (ends_with(val, ""
-                           "\xC2\xB0"
-                           "W")) {
+        const std::string degW(std::string("\xC2\xB0") + "W");
+        if (ends_with(val, degW)) {
             return cs::Meridian::create(common::Angle(
-                -c_locale_stod(val.substr(0, val.size() - strlen(""
-                                                                 "\xC2\xB0"
-                                                                 "W")))));
+                -c_locale_stod(val.substr(0, val.size() - degW.size()))));
         }
-        if (ends_with(val, ""
-                           "\xC2\xB0"
-                           "E")) {
+        const std::string degE(std::string("\xC2\xB0") + "E");
+        if (ends_with(val, degE)) {
             return cs::Meridian::create(common::Angle(
-                c_locale_stod(val.substr(0, val.size() - strlen(""
-                                                                "\xC2\xB0"
-                                                                "E")))));
+                c_locale_stod(val.substr(0, val.size() - degE.size()))));
         }
     } catch (const std::exception &) {
     }
@@ -2565,7 +2576,11 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
 /** \brief Returns a list operation::CoordinateOperation between two CRS.
  *
  * The list is ordered with preferred operations first. No attempt is made
- * at infering operations that are not explicitly in the database.
+ * at infering operations that are not explicitly in the database (see
+ * createFromCRSCodesWithIntermediates() for that), and only
+ * source -> target operations are searched (ie if target -> source is present,
+ * you need to call this method with the arguments reversed, and apply the
+ * reverse transformations).
  *
  * Deprecated operations are rejected.
  *
@@ -2635,20 +2650,232 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         const auto &code = row[1];
         auto op = d->createFactory(auth_name)->createCoordinateOperation(
             code, true, usePROJAlternativeGridNames);
-        if (discardIfMissingGrid) {
-            bool gridsMissing = false;
-            for (const auto &gridDesc : op->gridsNeeded(d->context())) {
-                if (!gridDesc.available) {
-                    gridsMissing = true;
-                    break;
-                }
-            }
-            if (gridsMissing) {
-                continue;
-            }
+        if (!d->rejectOpDueToMissingGrid(op, discardIfMissingGrid)) {
+            list.emplace_back(op);
         }
-        list.emplace_back(op);
     }
+    return list;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+static std::string
+buildIntermediateWhere(const std::vector<std::pair<std::string, std::string>>
+                           &intermediateCRSAuthCodes,
+                       const std::string &first_field,
+                       const std::string &second_field) {
+    if (intermediateCRSAuthCodes.empty()) {
+        return std::string();
+    }
+    std::string sql(" AND (");
+    for (size_t i = 0; i < intermediateCRSAuthCodes.size(); ++i) {
+        if (i > 0) {
+            sql += " OR";
+        }
+        sql += "(v1." + first_field + "_crs_auth_name = ? AND ";
+        sql += "v1." + first_field + "_crs_code = ? AND ";
+        sql += "v2." + second_field + "_crs_auth_name = ? AND ";
+        sql += "v2." + second_field + "_crs_code = ?) ";
+    }
+    sql += ")";
+    return sql;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a list operation::CoordinateOperation between two CRS,
+ * using intermediate codes.
+ *
+ * The list is ordered with preferred operations first.
+ *
+ * Deprecated operations are rejected.
+ *
+ * The method will take care of considering all potential combinations (ie
+ * contrary to createFromCoordinateReferenceSystemCodes(), you do not need to
+ * call it with sourceCRS and targetCRS switched)
+ *
+ * If getAuthority() returns empty, then coordinate operations from all
+ * authorities are considered.
+ *
+ * @param sourceCRSAuthName Authority name of sourceCRSCode
+ * @param sourceCRSCode Source CRS code allocated by authority
+ * sourceCRSAuthName.
+ * @param targetCRSAuthName Authority name of targetCRSCode
+ * @param targetCRSCode Source CRS code allocated by authority
+ * targetCRSAuthName.
+ * @param usePROJAlternativeGridNames Whether PROJ alternative grid names
+ * should be substituted to the official grid names.
+ * @param discardIfMissingGrid Whether coordinate operations that reference
+ * missing grids should be removed from the result set.
+ * @param intermediateCRSAuthCodes List of (auth_name, code) of CRS that can be
+ * used as potential intermediate CRS. If the list is empty, the database will
+ * be used to find common CRS in operations involving both the source and
+ * target CRS.
+ * @return list of coordinate operations
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+std::vector<operation::CoordinateOperationNNPtr>
+AuthorityFactory::createFromCRSCodesWithIntermediates(
+    const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
+    const std::string &targetCRSAuthName, const std::string &targetCRSCode,
+    bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+    const std::vector<std::pair<std::string, std::string>>
+        &intermediateCRSAuthCodes) const {
+
+    const std::string sqlProlog(
+        "SELECT v1.auth_name as auth_name1, v1.code as code1, "
+        "v1.accuracy as accuracy1, "
+        "v2.auth_name as auth_name2, v2.code as code2, "
+        "v2.accuracy as accuracy2 "
+        "FROM coordinate_operation_view v1 "
+        "JOIN coordinate_operation_view v2 ");
+    const std::string orderBy(
+        "ORDER BY (CASE WHEN accuracy1 is NULL THEN 1 ELSE 0 END) + "
+        "(CASE WHEN accuracy2 is NULL THEN 1 ELSE 0 END), "
+        "accuracy1 + accuracy2");
+
+    std::vector<operation::CoordinateOperationNNPtr> listTmp;
+
+    // Case (source->intermediate) and (intermediate->target)
+    std::string sql(
+        sqlProlog +
+        "ON v1.target_crs_auth_name = v2.source_crs_auth_name "
+        "AND v1.target_crs_code = v2.source_crs_code "
+        "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
+        "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ");
+    auto params = std::vector<SQLValues>{sourceCRSAuthName, sourceCRSCode,
+                                         targetCRSAuthName, targetCRSCode};
+
+    std::string additionalWhere("AND v1.deprecated = 0 AND v2.deprecated = 0 ");
+    if (!getAuthority().empty()) {
+        additionalWhere += "AND v1.auth_name = ? AND v2.auth_name = ? ";
+        params.emplace_back(getAuthority());
+        params.emplace_back(getAuthority());
+    }
+    std::string intermediateWhere =
+        buildIntermediateWhere(intermediateCRSAuthCodes, "target", "source");
+    for (const auto &pair : intermediateCRSAuthCodes) {
+        params.emplace_back(pair.first);
+        params.emplace_back(pair.second);
+        params.emplace_back(pair.first);
+        params.emplace_back(pair.second);
+    }
+    auto res = d->context()->getPrivate()->run(
+        sql + additionalWhere + intermediateWhere + orderBy, params);
+
+    for (const auto &row : res) {
+        const auto &auth_name1 = row[0];
+        const auto &code1 = row[1];
+        // const auto &accuracy1 = row[2];
+        const auto &auth_name2 = row[3];
+        const auto &code2 = row[4];
+        // const auto &accuracy2 = row[5];
+        auto op1 = d->createFactory(auth_name1)
+                       ->createCoordinateOperation(code1, true,
+                                                   usePROJAlternativeGridNames);
+        auto op2 = d->createFactory(auth_name2)
+                       ->createCoordinateOperation(code2, true,
+                                                   usePROJAlternativeGridNames);
+        listTmp.emplace_back(
+            operation::ConcatenatedOperation::createComputeMetadata({op1, op2},
+                                                                    false));
+    }
+
+    // Case (source->intermediate) and (target->intermediate)
+    sql = sqlProlog +
+          "ON v1.target_crs_auth_name = v2.target_crs_auth_name "
+          "AND v1.target_crs_code = v2.target_crs_code "
+          "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
+          "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
+    intermediateWhere =
+        buildIntermediateWhere(intermediateCRSAuthCodes, "target", "target");
+    res = d->context()->getPrivate()->run(
+        sql + additionalWhere + intermediateWhere + orderBy, params);
+    for (const auto &row : res) {
+        const auto &auth_name1 = row[0];
+        const auto &code1 = row[1];
+        // const auto &accuracy1 = row[2];
+        const auto &auth_name2 = row[3];
+        const auto &code2 = row[4];
+        // const auto &accuracy2 = row[5];
+        auto op1 = d->createFactory(auth_name1)
+                       ->createCoordinateOperation(code1, true,
+                                                   usePROJAlternativeGridNames);
+        auto op2 = d->createFactory(auth_name2)
+                       ->createCoordinateOperation(code2, true,
+                                                   usePROJAlternativeGridNames);
+        listTmp.emplace_back(
+            operation::ConcatenatedOperation::createComputeMetadata(
+                {op1, op2->inverse()}, false));
+    }
+
+    // Case (intermediate->source) and (intermediate->target)
+    sql = sqlProlog +
+          "ON v1.source_crs_auth_name = v2.source_crs_auth_name "
+          "AND v1.source_crs_code = v2.source_crs_code "
+          "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
+          "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ";
+    intermediateWhere =
+        buildIntermediateWhere(intermediateCRSAuthCodes, "source", "source");
+    res = d->context()->getPrivate()->run(
+        sql + additionalWhere + intermediateWhere + orderBy, params);
+    for (const auto &row : res) {
+        const auto &auth_name1 = row[0];
+        const auto &code1 = row[1];
+        // const auto &accuracy1 = row[2];
+        const auto &auth_name2 = row[3];
+        const auto &code2 = row[4];
+        // const auto &accuracy2 = row[5];
+        auto op1 = d->createFactory(auth_name1)
+                       ->createCoordinateOperation(code1, true,
+                                                   usePROJAlternativeGridNames);
+        auto op2 = d->createFactory(auth_name2)
+                       ->createCoordinateOperation(code2, true,
+                                                   usePROJAlternativeGridNames);
+        listTmp.emplace_back(
+            operation::ConcatenatedOperation::createComputeMetadata(
+                {op1->inverse(), op2}, false));
+    }
+
+    // Case (intermediate->source) and (target->intermediate)
+    sql = sqlProlog +
+          "ON v1.source_crs_auth_name = v2.target_crs_auth_name "
+          "AND v1.source_crs_code = v2.target_crs_code "
+          "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
+          "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
+    intermediateWhere =
+        buildIntermediateWhere(intermediateCRSAuthCodes, "source", "target");
+    res = d->context()->getPrivate()->run(
+        sql + additionalWhere + intermediateWhere + orderBy, params);
+    for (const auto &row : res) {
+        const auto &auth_name1 = row[0];
+        const auto &code1 = row[1];
+        // const auto &accuracy1 = row[2];
+        const auto &auth_name2 = row[3];
+        const auto &code2 = row[4];
+        // const auto &accuracy2 = row[5];
+        auto op1 = d->createFactory(auth_name1)
+                       ->createCoordinateOperation(code1, true,
+                                                   usePROJAlternativeGridNames);
+        auto op2 = d->createFactory(auth_name2)
+                       ->createCoordinateOperation(code2, true,
+                                                   usePROJAlternativeGridNames);
+        listTmp.emplace_back(
+            operation::ConcatenatedOperation::createComputeMetadata(
+                {op1->inverse(), op2->inverse()}, false));
+    }
+
+    std::vector<operation::CoordinateOperationNNPtr> list;
+    for (const auto &op : listTmp) {
+        if (!d->rejectOpDueToMissingGrid(op, discardIfMissingGrid)) {
+            list.emplace_back(op);
+        }
+    }
+
     return list;
 }
 

@@ -34,6 +34,8 @@
 #include <cstdarg>
 #include <cstring>
 #include <map>
+#include <utility>
+#include <vector>
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
@@ -192,7 +194,7 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                                       const char *code,
                                       PJ_OBJ_CATEGORY category,
                                       int usePROJAlternativeGridNames,
-                                      char **options) {
+                                      const char *const *options) {
     assert(auth_name);
     assert(code);
     (void)options;
@@ -409,7 +411,8 @@ const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
  * @param options should be set to NULL for now
  * @return a string, or NULL in case of error.
  */
-const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type, char **options) {
+const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
+                            const char *const *options) {
     assert(obj);
     (void)options;
     auto iter = obj->mapWKTString.find(type);
@@ -471,7 +474,7 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type, char **options) {
  * @return a string, or NULL in case of error.
  */
 const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
-                                    char **options) {
+                                    const char *const *options) {
     assert(obj);
     auto iter = obj->mapPROJString.find(type);
     if (iter != obj->mapPROJString.end()) {
@@ -1512,6 +1515,56 @@ void proj_operation_factory_context_set_use_proj_alternative_grid_names(
     PJ_OPERATION_FACTORY_CONTEXT *ctxt, int usePROJNames) {
     assert(ctxt);
     ctxt->operationContext->setUsePROJAlternativeGridNames(usePROJNames != 0);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether an intermediate pivot CRS can be used for researching
+ * coordinate operations between a source and target CRS.
+ *
+ * Concretely if in the database there is an operation from A to C
+ * (or C to A), and another one from C to B (or B to C), but no direct
+ * operation between A and B, setting this parameter to true, allow
+ * chaining both operations.
+ *
+ * The current implementation is limited to researching one intermediate
+ * step.
+ *
+ * By default, all potential C candidates will be used.
+ * proj_operation_factory_context_set_allowed_intermediate_crs()
+ * can be used to restrict them.
+ *
+ * The default is true.
+ *
+ * @param ctxt Operation factory context. must not be NULL
+ * @param allow whether intermediate CRS may be used.
+ */
+void proj_operation_factory_context_set_allow_use_intermediate_crs(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, int allow) {
+    assert(ctxt);
+    ctxt->operationContext->setAllowUseIntermediateCRS(allow != 0);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Restrict the potential pivot CRSs that can be used when trying to
+ * build a coordinate operation between two CRS that have no direct operation.
+ *
+ * @param ctxt Operation factory context. must not be NULL
+ * @param list_of_auth_name_codes an array of strings NLL terminated,
+ * with the format { "auth_name1", "code1", "auth_name2", "code2", ... NULL }
+ */
+void proj_operation_factory_context_set_allowed_intermediate_crs(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+    const char *const *list_of_auth_name_codes) {
+    assert(ctxt);
+    std::vector<std::pair<std::string, std::string>> pivots;
+    for (auto iter = list_of_auth_name_codes; iter && iter[0] && iter[1];
+         iter += 2) {
+        pivots.emplace_back(
+            std::make_pair(std::string(iter[0]), std::string(iter[1])));
+    }
+    ctxt->operationContext->setIntermediateCRS(pivots);
 }
 
 // ---------------------------------------------------------------------------

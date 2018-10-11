@@ -32,6 +32,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "util.hpp"
@@ -755,6 +756,14 @@ class AuthorityFactory {
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid) const;
+
+    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    createFromCRSCodesWithIntermediates(
+        const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
+        const std::string &targetCRSAuthName, const std::string &targetCRSCode,
+        bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+        const std::vector<std::pair<std::string, std::string>>
+            &intermediateCRSAuthCodes) const;
 
   protected:
     AuthorityFactory(const DatabaseContextNNPtr &context,

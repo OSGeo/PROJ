@@ -264,7 +264,7 @@ TEST_F(CApi, proj_obj_as_proj_string_etmerc_option) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    char *options[] = {const_cast<char *>("USE_ETMERC=YES"), nullptr};
+    const char *options[] = {"USE_ETMERC=YES", nullptr};
     auto str = proj_obj_as_proj_string(obj, PJ_PROJ_4, options);
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str, std::string("+proj=etmerc +lat_0=0 +lon_0=0 +k_0=1 +x_0=0 "
@@ -905,6 +905,116 @@ TEST_F(CApi, proj_obj_create_operations) {
     ObjectKeeper keeper_op(op);
 
     EXPECT_EQ(proj_obj_get_name(op), std::string("NAD27 to NAD83 (3)"));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_operations_with_pivot) {
+
+    auto source_crs = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "4326", PJ_OBJ_CATEGORY_CRS, false, nullptr); // WGS84
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+
+    auto target_crs = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "6668", PJ_OBJ_CATEGORY_CRS, false, nullptr); // JGD2011
+    ASSERT_NE(target_crs, nullptr);
+    ObjectKeeper keeper_target_crs(target_crs);
+
+    // There is no direct transformations between both
+
+    // Default behaviour: allow any pivot
+    {
+        auto ctxt = proj_create_operation_factory_context(m_ctxt);
+        ASSERT_NE(ctxt, nullptr);
+        ContextKeeper keeper_ctxt(ctxt);
+
+        auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+        ASSERT_NE(res, nullptr);
+        OperationResultKeeper keeper_res(res);
+        EXPECT_EQ(proj_operation_result_get_count(res), 1);
+        auto op = proj_operation_result_get(res, 0);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper_op(op);
+
+        EXPECT_EQ(
+            proj_obj_get_name(op),
+            std::string(
+                "Inverse of JGD2000 to WGS 84 (1) + JGD2000 to JGD2011 (2)"));
+    }
+
+    // Disallow pivots
+    {
+        auto ctxt = proj_create_operation_factory_context(m_ctxt);
+        ASSERT_NE(ctxt, nullptr);
+        ContextKeeper keeper_ctxt(ctxt);
+        proj_operation_factory_context_set_allow_use_intermediate_crs(ctxt,
+                                                                      false);
+
+        auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+        ASSERT_NE(res, nullptr);
+        OperationResultKeeper keeper_res(res);
+        EXPECT_EQ(proj_operation_result_get_count(res), 1);
+        auto op = proj_operation_result_get(res, 0);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper_op(op);
+
+        EXPECT_EQ(proj_obj_get_name(op),
+                  std::string("Null geographic offset transformation from WGS "
+                              "84 to JGD2011"));
+    }
+
+    // Restrict pivot to Tokyo CRS
+    {
+        auto ctxt = proj_create_operation_factory_context(m_ctxt);
+        ASSERT_NE(ctxt, nullptr);
+        ContextKeeper keeper_ctxt(ctxt);
+
+        const char *pivots[] = {"EPSG", "4301", nullptr};
+        proj_operation_factory_context_set_allowed_intermediate_crs(ctxt,
+                                                                    pivots);
+        proj_operation_factory_context_set_spatial_criterion(
+            ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+        auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+        ASSERT_NE(res, nullptr);
+        OperationResultKeeper keeper_res(res);
+        EXPECT_EQ(proj_operation_result_get_count(res), 9);
+        auto op = proj_operation_result_get(res, 0);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper_op(op);
+
+        EXPECT_EQ(
+            proj_obj_get_name(op),
+            std::string(
+                "Inverse of Tokyo to WGS 84 (108) + Tokyo to JGD2011 (2)"));
+    }
+
+    // Restrict pivot to JGD2000
+    {
+        auto ctxt = proj_create_operation_factory_context(m_ctxt);
+        ASSERT_NE(ctxt, nullptr);
+        ContextKeeper keeper_ctxt(ctxt);
+
+        const char *pivots[] = {"EPSG", "4612", nullptr};
+        proj_operation_factory_context_set_allowed_intermediate_crs(ctxt,
+                                                                    pivots);
+        proj_operation_factory_context_set_spatial_criterion(
+            ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+        auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+        ASSERT_NE(res, nullptr);
+        OperationResultKeeper keeper_res(res);
+        EXPECT_EQ(proj_operation_result_get_count(res), 2);
+        auto op = proj_operation_result_get(res, 0);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper_op(op);
+
+        EXPECT_EQ(
+            proj_obj_get_name(op),
+            std::string(
+                "Inverse of JGD2000 to WGS 84 (1) + JGD2000 to JGD2011 (1)"));
+    }
 }
 
 } // namespace

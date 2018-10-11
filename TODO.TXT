@@ -6,7 +6,7 @@
     - derived crs
     - test sphericalCS
     - identification of CRS code from registry from name, etc
-    - proj.db: integrate ESRI catalog, IGNF ?
+    - proj.db: integrate ESRI catalog ?
 
     - transformation with WEST longitude
     GEOGCS["Mars2015",
@@ -25,10 +25,10 @@
         - time-specific Helmert (codes 1065 and 1066)
         - sourceEpochCoordinate and targetEpochCoordinate in CoordinateOperation are unused/unset
 
-    - use an intermediate CRS when going from A of B
-        ogrinfo data/proj.db -sql "select v1.code as code1, v1.name as name1, v1.accuracy as accuracy1, v2.code as code2, v2.name as name2, v2.accuracy as accuracy2 from coordinate_operation_view v1 join coordinate_operation_view v2 on v1.target_crs_code = v2.source_crs_code where v1.source_crs_code = 4275 and v2.target_crs_code = 4179 AND v1.deprecated = 0 AND v2.deprecated = 0 order by (CASE WHEN accuracy1 is NULL THEN 1 ELSE 0 END) + (CASE WHEN accuracy2 is NULL THEN 1 ELSE 0 END), accuracy1 + accuracy2"
+    - add the 51 HARN grids in grid_alternatives
 
-        
+    - multi intermediate coordinate transforms ?? like
+
 OGRFeature(epsg_coordoperation):10013
   coord_op_name (String) = NAD83 to NAVD88 height (1)
   coord_op_type (String) = transformation
@@ -49,9 +49,42 @@ OGRFeature(epsg_coordoperation):3859
   source_crs_code (Integer) = 4979
   target_crs_code (Integer) = 3855
 
-
-- Integrate Doxygen doc in PROJ doc
 - More tests
 - Address TODO and FIXME
 
 - Once integrated with GDAL, test with BAG WKT
+
+
+~~~~~~~~~~~~~~~~~~~
+
+> Another question is what to do with grids
+> with license that does not allow redistribution - should we have
+> entries with URL in grid_transformation table for such grid files as
+> well? (maybe with a flag that it is not direct link to a package, just
+> a web page about that grid)
+
+I guess grid_alternatives could receive additional columns, which would be 
+used if package_name is NULL, perhaps something like:
+
+open_license BOOLEAN
+download_url TEXT
+direct_download BOOLEAN
+
+~~~~~~~~~~~~~~~~~~~
+
+ E.g. to
+> have system proj.db and user proj.db with customizations?
+
+That's another issue. An easy solution would be to copy the system proj.db in 
+a editable location and point PROJ_LIB to it
+
+Having both at the same time is more tricky. For example if you add custom 
+transformations in the user proj.db between official CRS of the system 
+proj.db, you'd have an issue with broken foreign keys, so the user proj.db 
+shouldn't enforce foreign keys.
+and then PROJ could potentially create a in-memory database, that would ATTACH 
+DATABASE the official and custom one, and for every table, create a temporary 
+view that UNION ALL the tables of both dbs. Then that would be transparent for 
+the rest of the code that does database queries.
+
+

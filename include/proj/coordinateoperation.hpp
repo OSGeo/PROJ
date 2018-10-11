@@ -31,6 +31,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "common.hpp"
@@ -1588,6 +1589,17 @@ class CoordinateOperationContext {
     PROJ_DLL void setGridAvailabilityUse(GridAvailabilityUse use);
 
     PROJ_DLL GridAvailabilityUse getGridAvailabilityUse() const;
+
+    PROJ_DLL void setAllowUseIntermediateCRS(bool use);
+
+    PROJ_DLL bool getAllowUseIntermediateCRS() const;
+
+    PROJ_DLL void
+    setIntermediateCRS(const std::vector<std::pair<std::string, std::string>>
+                           &intermediateCRSAuthCodes);
+
+    PROJ_DLL const std::vector<std::pair<std::string, std::string>> &
+    getIntermediateCRS() const;
 
     PROJ_DLL static CoordinateOperationContextNNPtr
     create(const io::AuthorityFactoryPtr &authorityFactory,

@@ -7834,12 +7834,6 @@ CoordinateOperationNNPtr ConcatenatedOperation::createComputeMetadata(
 
     std::vector<CoordinateOperationNNPtr> flattenOps;
     for (const auto &subOp : operationsIn) {
-        auto subOpSourceCRS = subOp->sourceCRS();
-        auto subOpTargetCRS = subOp->targetCRS();
-        if (subOpSourceCRS && subOpTargetCRS &&
-            subOpSourceCRS->isEquivalentTo(NN_CHECK_ASSERT(subOpTargetCRS))) {
-            continue;
-        }
         auto subOpConcat =
             util::nn_dynamic_pointer_cast<ConcatenatedOperation>(subOp);
         if (subOpConcat) {
@@ -8005,6 +7999,9 @@ struct CoordinateOperationContext::Private {
     bool usePROJNames_ = true;
     GridAvailabilityUse gridAvailabilityUse_ =
         GridAvailabilityUse::USE_FOR_SORTING;
+    bool allowUseIntermediateCRS_ = true;
+    std::vector<std::pair<std::string, std::string>>
+        intermediateCRSAuthCodes_{};
 };
 //! @endcond
 
@@ -8162,6 +8159,69 @@ void CoordinateOperationContext::setGridAvailabilityUse(
 CoordinateOperationContext::GridAvailabilityUse
 CoordinateOperationContext::getGridAvailabilityUse() const {
     return d->gridAvailabilityUse_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether an intermediate pivot CRS can be used for researching
+ * coordinate operations between a source and target CRS.
+ *
+ * Concretely if in the database there is an operation from A to C
+ * (or C to A), and another one from C to B (or B to C), but no direct
+ * operation between A and B, setting this parameter to true, allow
+ * chaining both operations.
+ *
+ * The current implementation is limited to researching one intermediate
+ * step.
+ *
+ * By default, all potential C candidates will be used. setIntermediateCRS()
+ * can be used to restrict them.
+ *
+ * The default is true.
+ */
+void CoordinateOperationContext::setAllowUseIntermediateCRS(bool use) {
+    d->allowUseIntermediateCRS_ = use;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether an intermediate pivot CRS can be used for researching
+ * coordinate operations between a source and target CRS.
+ *
+ * Concretely if in the database there is an operation from A to C
+ * (or C to A), and another one from C to B (or B to C), but no direct
+ * operation between A and B, setting this parameter to true, allow
+ * chaining both operations.
+ *
+ * The default is true.
+ */
+bool CoordinateOperationContext::getAllowUseIntermediateCRS() const {
+    return d->allowUseIntermediateCRS_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Restrict the potential pivot CRSs that can be used when trying to
+ * build a coordinate operation between two CRS that have no direct operation.
+ *
+ * @param intermediateCRSAuthCodes a vector of (auth_name, code) that can be
+ * used as potential pivot RS
+ */
+void CoordinateOperationContext::setIntermediateCRS(
+    const std::vector<std::pair<std::string, std::string>>
+        &intermediateCRSAuthCodes) {
+    d->intermediateCRSAuthCodes_ = intermediateCRSAuthCodes;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the potential pivot CRSs that can be used when trying to
+ * build a coordinate operation between two CRS that have no direct operation.
+ *
+ */
+const std::vector<std::pair<std::string, std::string>> &
+CoordinateOperationContext::getIntermediateCRS() const {
+    return d->intermediateCRSAuthCodes_;
 }
 
 // ---------------------------------------------------------------------------
@@ -8504,9 +8564,9 @@ applyInverse(const std::vector<CoordinateOperationNNPtr> &list) {
 //! @cond Doxygen_Suppress
 // Look in the authority registry for operations from sourceCRS to targetCRS
 static std::vector<CoordinateOperationNNPtr>
-findOpsInRegistry(const crs::CRSNNPtr &sourceCRS,
-                  const crs::CRSNNPtr &targetCRS,
-                  CoordinateOperationContextNNPtr context) {
+findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
+                        const crs::CRSNNPtr &targetCRS,
+                        const CoordinateOperationContextNNPtr &context) {
     auto authFactory = context->getAuthorityFactory();
     assert(authFactory);
     for (const auto &idSrc : sourceCRS->identifiers()) {
@@ -8525,6 +8585,47 @@ findOpsInRegistry(const crs::CRSNNPtr &sourceCRS,
                                 CoordinateOperationContext::
                                     GridAvailabilityUse::
                                         DISCARD_OPERATION_IF_MISSING_GRID);
+                    if (!res.empty()) {
+                        return res;
+                    }
+                }
+            }
+        }
+    }
+    return std::vector<CoordinateOperationNNPtr>();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+// Look in the authority registry for operations from sourceCRS to targetCRS
+// using an intermediate pivot
+static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    const CoordinateOperationContextNNPtr &context) {
+    if (!context->getAllowUseIntermediateCRS()) {
+        return std::vector<CoordinateOperationNNPtr>();
+    }
+
+    auto authFactory = context->getAuthorityFactory();
+    assert(authFactory);
+    for (const auto &idSrc : sourceCRS->identifiers()) {
+        auto srcAuthName = *(idSrc->codeSpace());
+        auto srcCode = idSrc->code();
+        if (!srcAuthName.empty()) {
+            for (const auto &idTarget : targetCRS->identifiers()) {
+                auto targetAuthName = *(idTarget->codeSpace());
+                auto targetCode = idTarget->code();
+                if (!targetAuthName.empty()) {
+                    auto res = authFactory->createFromCRSCodesWithIntermediates(
+                        srcAuthName, srcCode, targetAuthName, targetCode,
+                        context->getUsePROJAlternativeGridNames(),
+                        context->getGridAvailabilityUse() ==
+                            CoordinateOperationContext::GridAvailabilityUse::
+                                DISCARD_OPERATION_IF_MISSING_GRID,
+                        context->getIntermediateCRS());
                     if (!res.empty()) {
                         return res;
                     }
@@ -8633,11 +8734,16 @@ CoordinateOperationFactory::Private::createOperations(
         (derivedDst == nullptr ||
          !derivedDst->baseCRS()->isEquivalentTo(
              sourceCRS, util::IComparable::Criterion::EQUIVALENT))) {
-        res = findOpsInRegistry(sourceCRS, targetCRS, context);
+        res = findOpsInRegistryDirect(sourceCRS, targetCRS, context);
         if (!sourceCRS->isEquivalentTo(targetCRS)) {
-            auto resFromInverse =
-                applyInverse(findOpsInRegistry(targetCRS, sourceCRS, context));
+            auto resFromInverse = applyInverse(
+                findOpsInRegistryDirect(targetCRS, sourceCRS, context));
             res.insert(res.end(), resFromInverse.begin(), resFromInverse.end());
+
+            if (res.empty()) {
+                res = findsOpsInRegistryWithIntermediate(sourceCRS, targetCRS,
+                                                         context);
+            }
         }
 
         // If we get at least a result with perfect accuracy, do not bother

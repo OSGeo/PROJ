@@ -32,6 +32,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <utility>
 
 #include "projects.h"
 
@@ -73,6 +74,8 @@ static void usage() {
         << "                [--crs-extent-use none|both|intersection|smallest]"
         << std::endl
         << "                [--grid-check none|discard_missing|sort]"
+        << std::endl
+        << "                [--pivot-crs none|{auth:code[,auth:code]*}]"
         << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                {object_definition} | (-s {srs_def} -t {srs_def})"
@@ -296,6 +299,8 @@ static void outputOperations(
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
+    bool allowPivots,
+    const std::vector<std::pair<std::string, std::string>> &pivots,
     const OutputOptions &outputOpt, bool summary) {
     auto sourceObj = buildObject(sourceCRSStr, true, "source CRS", false);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
@@ -320,6 +325,8 @@ static void outputOperations(
         ctxt->setSpatialCriterion(spatialCriterion);
         ctxt->setSourceAndTargetCRSExtentUse(crsExtentUse);
         ctxt->setGridAvailabilityUse(gridAvailabilityUse);
+        ctxt->setAllowUseIntermediateCRS(allowPivots);
+        ctxt->setIntermediateCRS(pivots);
         list = CoordinateOperationFactory::create()->createOperations(
             NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS), ctxt);
     } catch (const std::exception &e) {
@@ -420,6 +427,8 @@ int main(int argc, char **argv) {
     bool buildBoundCRSToWGS84 = false;
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse =
         CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
+    bool allowPivots = true;
+    std::vector<std::pair<std::string, std::string>> pivots;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -584,6 +593,25 @@ int main(int argc, char **argv) {
                           << value << std::endl;
                 usage();
             }
+        } else if (arg == "--pivot-crs" && i + 1 < argc) {
+            i++;
+            auto value(argv[i]);
+            if (ci_equal(value, "none")) {
+                allowPivots = false;
+            } else {
+                auto splitValue(split(value, ','));
+                for (const auto &v : splitValue) {
+                    auto auth_code = split(v, ':');
+                    if (auth_code.size() != 2) {
+                        std::cerr
+                            << "Unrecognized value for option --grid-check: "
+                            << value << std::endl;
+                        usage();
+                    }
+                    pivots.emplace_back(
+                        std::make_pair(auth_code[0], auth_code[1]));
+                }
+            }
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {
@@ -636,7 +664,7 @@ int main(int argc, char **argv) {
     } else {
         outputOperations(sourceCRSStr, targetCRSStr, bboxFilter,
                          spatialCriterion, crsExtentUse, gridAvailabilityUse,
-                         outputOpt, summary);
+                         allowPivots, pivots, outputOpt, summary);
     }
 
     return 0;

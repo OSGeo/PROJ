@@ -426,7 +426,7 @@ double proj_todeg (double angle_in_radians);
 PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
 double proj_dmstor(const char *is, char **rs);
-char*  proj_rtodms(char *s, double r, int pos, int neg);
+char* proj_rtodms(char *s, double r, int pos, int neg);
 
 /*! @endcond */
 
@@ -438,10 +438,10 @@ char*  proj_rtodms(char *s, double r, int pos, int neg);
 typedef struct PJ_OBJ PJ_OBJ;
 /*! @endcond */
 
-PJ_OBJ PROJ_DLL *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char* wkt);
+PJ_OBJ PROJ_DLL *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
-                                                  const char* proj_string);
+                                                  const char *proj_string);
 
 /** \brief Object category. */
 typedef enum
@@ -453,13 +453,13 @@ typedef enum
 } PJ_OBJ_CATEGORY;
 
 PJ_OBJ PROJ_DLL *proj_obj_create_from_database(PJ_CONTEXT *ctx,
-                                               const char* auth_name,
-                                               const char* code,
+                                               const char *auth_name,
+                                               const char *code,
                                                PJ_OBJ_CATEGORY category,
                                                int usePROJAlternativeGridNames,
-                                               char** options);
+                                               const char* const *options);
 
-void PROJ_DLL proj_obj_unref(PJ_OBJ* obj);
+void PROJ_DLL proj_obj_unref(PJ_OBJ *obj);
 
 /** \brief Object type. */
 typedef enum
@@ -489,27 +489,27 @@ typedef enum
     PJ_OBJ_TYPE_UNKNOWN
 } PJ_OBJ_TYPE;
 
-PJ_OBJ_TYPE PROJ_DLL proj_obj_get_type(PJ_OBJ* obj);
+PJ_OBJ_TYPE PROJ_DLL proj_obj_get_type(PJ_OBJ *obj);
 
 /** \brief Type representing a NULL terminated list of NUL-terminate strings. */
-typedef char** PROJ_STRING_LIST;
+typedef char **PROJ_STRING_LIST;
 
 PROJ_STRING_LIST PROJ_DLL proj_get_authorities_from_database(PJ_CONTEXT *ctx);
 
 PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
-                                             const char* auth_name,
+                                             const char *auth_name,
                                              PJ_OBJ_TYPE type,
                                              int allow_deprecated);
 
 void PROJ_DLL proj_free_string_list(PROJ_STRING_LIST list);
 
-int PROJ_DLL proj_obj_is_crs(PJ_OBJ* obj);
+int PROJ_DLL proj_obj_is_crs(PJ_OBJ *obj);
 
-const char PROJ_DLL* proj_obj_get_name(PJ_OBJ* obj);
+const char PROJ_DLL* proj_obj_get_name(PJ_OBJ *obj);
 
-const char PROJ_DLL* proj_obj_get_id_auth_name(PJ_OBJ* obj, int index);
+const char PROJ_DLL* proj_obj_get_id_auth_name(PJ_OBJ *obj, int index);
 
-const char PROJ_DLL* proj_obj_get_id_code(PJ_OBJ* obj, int index);
+const char PROJ_DLL* proj_obj_get_id_code(PJ_OBJ *obj, int index);
 
 /** \brief WKT version. */
 typedef enum
@@ -526,8 +526,8 @@ typedef enum
     PJ_WKT1_GDAL
 } PJ_WKT_TYPE;
 
-const char PROJ_DLL* proj_obj_as_wkt(PJ_OBJ* obj, PJ_WKT_TYPE type,
-                                     char** options);
+const char PROJ_DLL* proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
+                                     const char* const *options);
 
 /** \brief PROJ string version. */
 typedef enum
@@ -538,13 +538,13 @@ typedef enum
     PJ_PROJ_4,
 } PJ_PROJ_STRING_TYPE;
 
-const char PROJ_DLL* proj_obj_as_proj_string(PJ_OBJ* obj,
+const char PROJ_DLL* proj_obj_as_proj_string(PJ_OBJ *obj,
                                              PJ_PROJ_STRING_TYPE type,
-                                             char** options);
+                                             const char* const *options);
 
-PJ_OBJ PROJ_DLL *proj_obj_get_source_crs(PJ_OBJ* obj);
+PJ_OBJ PROJ_DLL *proj_obj_get_source_crs(PJ_OBJ *obj);
 
-PJ_OBJ PROJ_DLL *proj_obj_get_target_crs(PJ_OBJ* obj);
+PJ_OBJ PROJ_DLL *proj_obj_get_target_crs(PJ_OBJ *obj);
 
 /* ------------------------------------------------------------------------- */
 
@@ -556,14 +556,14 @@ PJ_OPERATION_FACTORY_CONTEXT PROJ_DLL *proj_create_operation_factory_context(
                                             PJ_CONTEXT *ctx);
 
 void PROJ_DLL proj_operation_factory_context_unref(
-                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt);
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt);
 
 void PROJ_DLL proj_operation_factory_context_set_desired_accuracy(
-                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
                                             double accuracy);
 
 void PROJ_DLL proj_operation_factory_context_set_area_of_interest(
-                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
                                             double west_lon,
                                             double south_lat,
                                             double east_lon,
@@ -589,7 +589,7 @@ typedef enum
 } PROJ_CRS_EXTENT_USE;
 
 void PROJ_DLL proj_operation_factory_context_set_crs_extent_use(
-                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
                                             PROJ_CRS_EXTENT_USE use);
 
 /** Spatial criterion to restrict candiate operations. */
@@ -604,7 +604,7 @@ typedef enum {
 } PROJ_SPATIAL_CRITERION;
 
 void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
-                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
                                             PROJ_SPATIAL_CRITERION criterion);
 
 
@@ -623,12 +623,19 @@ typedef enum {
 } PROJ_GRID_AVAILABILITY_USE;
 
 void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
-                                            PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
                                             PROJ_GRID_AVAILABILITY_USE use);
 
 void PROJ_DLL proj_operation_factory_context_set_use_proj_alternative_grid_names(
-    PJ_OPERATION_FACTORY_CONTEXT* ctxt,
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt,
     int usePROJNames);
+
+void PROJ_DLL proj_operation_factory_context_set_allow_use_intermediate_crs(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, int allow);
+
+void PROJ_DLL proj_operation_factory_context_set_allowed_intermediate_crs(
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+    const char* const *list_of_auth_name_codes);
 
 /* ------------------------------------------------------------------------- */
 
@@ -637,71 +644,71 @@ typedef struct PJ_OPERATION_RESULT PJ_OPERATION_RESULT;
 /*! @endcond */
 
 PJ_OPERATION_RESULT PROJ_DLL *proj_obj_create_operations(
-                            PJ_OBJ* source_crs,
-                            PJ_OBJ* target_crs,
-                            PJ_OPERATION_FACTORY_CONTEXT* operationContext);
+                            PJ_OBJ *source_crs,
+                            PJ_OBJ *target_crs,
+                            PJ_OPERATION_FACTORY_CONTEXT *operationContext);
 
-int PROJ_DLL proj_operation_result_get_count(PJ_OPERATION_RESULT* result);
+int PROJ_DLL proj_operation_result_get_count(PJ_OPERATION_RESULT *result);
 
-PJ_OBJ PROJ_DLL *proj_operation_result_get(PJ_OPERATION_RESULT* result,
+PJ_OBJ PROJ_DLL *proj_operation_result_get(PJ_OPERATION_RESULT *result,
                                            int index);
 
-void PROJ_DLL proj_operation_result_unref(PJ_OPERATION_RESULT* result);
+void PROJ_DLL proj_operation_result_unref(PJ_OPERATION_RESULT *result);
 
 /* ------------------------------------------------------------------------- */
 
-PJ_OBJ PROJ_DLL *proj_obj_crs_get_geodetic_crs(PJ_OBJ* crs);
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_geodetic_crs(PJ_OBJ *crs);
 
-PJ_OBJ PROJ_DLL *proj_obj_crs_get_horizontal_datum(PJ_OBJ* crs);
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_horizontal_datum(PJ_OBJ *crs);
 
-PJ_OBJ PROJ_DLL *proj_obj_crs_get_sub_crs(PJ_OBJ* crs, int index);
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_sub_crs(PJ_OBJ *crs, int index);
 
-PJ_OBJ PROJ_DLL *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ* crs);
+PJ_OBJ PROJ_DLL *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ *crs);
 
-PJ_OBJ PROJ_DLL *proj_obj_get_ellipsoid(PJ_OBJ* obj);
+PJ_OBJ PROJ_DLL *proj_obj_get_ellipsoid(PJ_OBJ *obj);
 
-int PROJ_DLL proj_obj_ellipsoid_get_parameters(PJ_OBJ* ellipsoid,
-                                            double* pSemiMajorMetre,
-                                            double* pSemiMinorMetre,
-                                            int*    pIsSemiMinorComputed,
-                                            double* pInverseFlattening);
+int PROJ_DLL proj_obj_ellipsoid_get_parameters(PJ_OBJ *ellipsoid,
+                                            double *pSemiMajorMetre,
+                                            double *pSemiMinorMetre,
+                                            int    *pIsSemiMinorComputed,
+                                            double *pInverseFlattening);
 
-PJ_OBJ PROJ_DLL *proj_obj_get_prime_meridian(PJ_OBJ* obj);
+PJ_OBJ PROJ_DLL *proj_obj_get_prime_meridian(PJ_OBJ *obj);
 
-int PROJ_DLL proj_obj_prime_meridian_get_parameters(PJ_OBJ* prime_meridian,
-                                               double* pLongitude,
-                                               double* pLongitudeUnitConvFactor,
-                                               const char** pLongitudeUnitName);
+int PROJ_DLL proj_obj_prime_meridian_get_parameters(PJ_OBJ *prime_meridian,
+                                               double *pLongitude,
+                                               double *pLongitudeUnitConvFactor,
+                                               const char **pLongitudeUnitName);
 
-PJ_OBJ PROJ_DLL *proj_obj_crs_get_coordoperation(PJ_OBJ* crs,
-                                             const char** pMethodName,
-                                             const char** pMethodAuthorityName,
-                                             const char** pMethodCode);
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_coordoperation(PJ_OBJ *crs,
+                                             const char **pMethodName,
+                                             const char **pMethodAuthorityName,
+                                             const char **pMethodCode);
 
-int PROJ_DLL proj_coordoperation_get_param_count(PJ_OBJ* coordoperation);
+int PROJ_DLL proj_coordoperation_get_param_count(PJ_OBJ *coordoperation);
 
-int PROJ_DLL proj_coordoperation_get_param_index(PJ_OBJ* coordoperation,
-                                                 const char* name);
+int PROJ_DLL proj_coordoperation_get_param_index(PJ_OBJ *coordoperation,
+                                                 const char *name);
 
-int PROJ_DLL proj_coordoperation_get_param(PJ_OBJ* coordoperation,
+int PROJ_DLL proj_coordoperation_get_param(PJ_OBJ *coordoperation,
                                            int index,
-                                           const char** pName,
-                                           const char** pNameAuthorityName,
-                                           const char** pNameCode,
-                                           double* pValue,
+                                           const char **pName,
+                                           const char **pNameAuthorityName,
+                                           const char **pNameCode,
+                                           double *pValue,
                                            const char **pValueString,
-                                           double* pValueUnitConvFactor,
-                                           const char** pValueUnitName);
+                                           double *pValueUnitConvFactor,
+                                           const char **pValueUnitName);
 
-int PROJ_DLL proj_coordoperation_get_grid_used_count(PJ_OBJ* coordoperation);
+int PROJ_DLL proj_coordoperation_get_grid_used_count(PJ_OBJ *coordoperation);
 
-int PROJ_DLL proj_coordoperation_get_grid_used(PJ_OBJ* coordoperation,
+int PROJ_DLL proj_coordoperation_get_grid_used(PJ_OBJ *coordoperation,
                                                int index,
-                                               const char** pShortName,
-                                               const char** pFullName,
-                                               const char** pPackageName,
-                                               const char** pPackageURL,
-                                               int* pAvailable);
+                                               const char **pShortName,
+                                               const char **pFullName,
+                                               const char **pPackageName,
+                                               const char **pPackageURL,
+                                               int *pAvailable);
 
 #ifdef __cplusplus
 }
