@@ -118,7 +118,7 @@ contained in `io.cpp`_
 The code to format WKT and PROJ strings from ISO-19111 objects is mostly
 contained in the related exportToWKT() and exportToPROJString() methods
 overridden in the applicable classes. `io.cpp`_ contains the general mechanics
-to buiild such strings.
+to build such strings.
 
 Regarding WKT strings, three variants are handled in import and export:
 
@@ -229,8 +229,8 @@ resulting coordinate operations are filtered, and sorted, with user provided hin
       used. The rationale is for example when transforming between a national
       ProjectedCRS and a world-scope GeographicCRS to use the are of use of
       this ProjectedCRS to select the appropriate datum shifts.
-    - how the area of use of the candidate transformations and the desired are of
-      used (either explicitly or implicitly defined, as explained above) are
+    - how the area of use of the candidate transformations and the desired area of
+      use (either explicitly or implicitly defined, as explained above) are
       compared. By default, only transformations whose area of use is fully
       contained in the desired area of use are selected. It is also possible
       to relax this test by specifying that only an intersection test must be used.
@@ -252,7 +252,7 @@ result vector. The criteria used are in that order
     - known accuracy: operations with unknown accuracies will be listed
       after operations with known accuracy
     - area of use: operations with smaller area of use (the intersection of the
-      operation area of used with the desried area of use) will be listed after
+      operation area of used with the desired area of use) will be listed after
       the ones with larger area of use
     - accuracy: operations with lower accuracy will be listed after operations
       with higher accuracy (caution: lower accuracy actually means a higher numeric
@@ -354,7 +354,7 @@ be combined together.
 
 - Coordinate operations:
     - `coordinate_operation`: synthetic table listing codes for CoordinateOperation (which are refined in conversion, grid_transformation, helmert_transformation, - other_transformation or concatenated_operation tables)
-    - `coordinate_operation_view`: view giving a number of common attribtes shared by the concrete tables implementing CoordinateOperation
+    - `coordinate_operation_view`: view giving a number of common attributes shared by the concrete tables implementing CoordinateOperation
     - `conversion`: table with definitions of Conversion (mostly parameter and values of Projection)
     - `concatenated_operation`: table with definitions of ConcatenatedOperation.
     - `grid_transformation`: table with all grid-based transformations.
