@@ -7,6 +7,7 @@ C++ API
 .. toctree::
    :maxdepth: 1
 
+   cpp_general
    common
    util
    metadata
@@ -15,3 +16,4 @@ C++ API
    crs
    operation
    io
+

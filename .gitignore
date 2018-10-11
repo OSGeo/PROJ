@@ -124,3 +124,5 @@ test/unit/proj_errno_string_test.o
 jniwrap/out
 
 /docs/build
+
+tmp_breathe

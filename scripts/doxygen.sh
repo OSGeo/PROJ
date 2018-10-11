@@ -18,8 +18,22 @@ TOPDIR="$SCRIPT_DIR/.."
 
 pushd "${TOPDIR}" > /dev/null || exit
 
+# HTML generation
 # Check that doxygen runs warning free
+rm -rf html/
 doxygen > /tmp/docs_log.txt 2>&1
+if grep -i warning /tmp/docs_log.txt; then
+    echo "Doxygen warnings found" && cat /tmp/docs_log.txt && /bin/false;
+else
+    echo "No Doxygen warnings found";
+fi
+
+
+# XML generation (for Breathe)
+mkdir -p tmp_breathe
+python scripts/generate_breathe_friendly_general_doc.py
+rm -rf xml/
+(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src include/proj src/proj.h tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > /tmp/docs_log.txt 2>&1
 if grep -i warning /tmp/docs_log.txt; then
     echo "Doxygen warnings found" && cat /tmp/docs_log.txt && /bin/false;
 else
@@ -38,6 +52,7 @@ done
 
 # There is a confusion for Breathe between PROJStringFormatter::Convention and WKTFormatter:Convention
 sed -i "s/Convention/Convention_/g" ${TOPDIR}/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml
+
 
 popd > /dev/null || exit
 
