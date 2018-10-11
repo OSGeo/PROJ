@@ -88,6 +88,18 @@
         "type": "poly"
     },
     {
+        "filename": "bertin1953.png",
+        "latmax": 90,
+        "latmin": -90,
+        "latmin": -60,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "bertin1953",
+        "projstring": "+proj=bertin1953",
+        "res": "low",
+        "type": "poly"
+    },
+    {
         "filename": "bipc.png",
         "latmax": 90,
         "latmin": -90,
