@@ -867,4 +867,4 @@ Non exhaustively:
 Adoption status
 ---------------
 
-Not submitted to vote.
+To be submitted to vote after discussion phase
