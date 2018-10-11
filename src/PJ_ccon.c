@@ -37,7 +37,7 @@ struct pj_opaque {
 };
 
 PROJ_HEAD(ccon, "Central Conic")
-    "\n\tCentral Conic, Sph.\n\tlat_1=";
+    "\n\tCentral Conic, Sph\n\tlat_1=";
 
 
 

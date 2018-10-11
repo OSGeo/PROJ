@@ -18,7 +18,7 @@ Added ellipsoidal equations by Bojan Savric, 22 August 2018
 
 #include "projects.h"
 
-PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl., Sph&Ell";
+PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl, Sph&Ell";
 
 /* A1..A4, polynomial coefficients */
 #define A1 1.340264
@@ -62,7 +62,7 @@ static XY e_forward (LP lp, PJ *P) {           /* Ellipsoidal/spheroidal, forwar
 
     xy.x = lp.lam * cos(psi) / (M * (A1 + 3 * A2 * psi2 + psi6 * (7 * A3 + 9 * A4 * psi2)));
     xy.y = psi * (A1 + A2 * psi2 + psi6 * (A3 + A4 * psi2));
-    
+
     /* Adjusting x and y for authalic radius */
     xy.x *= Q->rqda;
     xy.y *= Q->rqda;
@@ -155,7 +155,7 @@ PJ *PROJECTION(eqearth) {
        if (0 == Q->apa)
           return destructor(P, ENOMEM);
        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
-       Q->rqda = sqrt(0.5*Q->qp); /* Authalic radius devided by major axis */
+       Q->rqda = sqrt(0.5*Q->qp); /* Authalic radius divided by major axis */
     }
 
     return P;

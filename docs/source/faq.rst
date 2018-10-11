@@ -49,9 +49,6 @@ After downloading and unpacking the PROJ source, also download and unpack the
 set of datum shift files.  See :ref:`download` for instructions how to fetch
 and install these files
 
-On Windows the extra nadshift target must be used.  For instance
-``nmake /f makefile.vc nadshift`` in the ``proj/src`` directory.
-
 A default build and install on Unix will normally build knowledge of the
 directory where the grid shift files are installed into the PROJ library
 (usually ``/usr/local/share/proj``).  On Windows the library is normally built
@@ -133,7 +130,7 @@ How do I use 3 parameter and 7 parameter datum shifting
 
 Datum shifts can be approximated with 3 and 7 parameter transformations. Their
 use with :program:`cs2cs` is more fully described in the
-:ref:`geodetic tranformation<cs2cs_specific_options>` section.
+:ref:`geodetic transformation<cs2cs_specific_options>` section.
 
 More generically, the :ref:`helmert` can be used with :program:`cct`.
 

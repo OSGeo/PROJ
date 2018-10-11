@@ -19,11 +19,11 @@ Required
 
 .. option:: +lsat=<value>
 
-    Landsat satelite used for the projection. Value between 1 and 5.
+    Landsat satellite used for the projection. Value between 1 and 5.
 
 .. option:: +path=<value>
 
-    Selected path of satelite. Value between 1 and 253 when :option:`+lsat` is
+    Selected path of satellite. Value between 1 and 253 when :option:`+lsat` is
     set to 1,2 or 3, otherwise valid input is between 1 and 233.
 
 

@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
 
     if (opt_given (o, "c")) {
         int ncols;
-        /* reset colum numbers to ease comment output later on */
+        /* reset column numbers to ease comment output later on */
         for (i=0; i<4; i++)
             columns_xyzt[i] = 0;
 

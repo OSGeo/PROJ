@@ -113,7 +113,7 @@ PJ *TRANSFORMATION(vgridshift,0) {
    if (pj_param(P->ctx, P->params, "tt_epoch").i)
         Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
 
-    /* historical: the forward direction substracts the grid offset. */
+    /* historical: the forward direction subtracts the grid offset. */
     Q->forward_multiplier = -1.0;
     if (pj_param(P->ctx, P->params, "tmultiplier").i) {
         Q->forward_multiplier = pj_param(P->ctx, P->params, "dmultiplier").f;

@@ -1,7 +1,7 @@
 #define PJ_LIB__
 #include "projects.h"
 
-PROJ_HEAD(lask, "Laskowski") "\n\tMisc Sph, no inv.";
+PROJ_HEAD(lask, "Laskowski") "\n\tMisc Sph, no inv";
 
 #define a10  0.975534
 #define a12 -0.119161

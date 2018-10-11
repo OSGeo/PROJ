@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(mbt_fps, "McBryde-Thomas Flat-Pole Sine (No. 2)") "\n\tCyl., Sph.";
+PROJ_HEAD(mbt_fps, "McBryde-Thomas Flat-Pole Sine (No. 2)") "\n\tCyl, Sph";
 
 #define MAX_ITER    10
 #define LOOP_TOL    1e-7

@@ -40,6 +40,7 @@ SET(SRC_LIBPROJ_PJ
         nad_init.c
         PJ_aea.c
         PJ_aeqd.c
+        PJ_affine.c
         PJ_airy.c
         PJ_aitoff.c
         PJ_august.c

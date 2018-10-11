@@ -3,7 +3,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(eck1, "Eckert I") "\n\tPCyl., Sph.";
+PROJ_HEAD(eck1, "Eckert I") "\n\tPCyl, Sph";
 #define FC  0.92131773192356127802
 #define RP  0.31830988618379067154
 

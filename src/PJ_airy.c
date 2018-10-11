@@ -31,7 +31,7 @@
 #include <errno.h>
 #include "projects.h"
 
-PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv.\n\tno_cut lat_b=";
+PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv\n\tno_cut lat_b=";
 
 
 enum Mode {

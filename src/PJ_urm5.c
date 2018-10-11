@@ -6,7 +6,7 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl., Sph., no inv.\n\tn= q= alpha=";
+PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl, Sph, no inv\n\tn= q= alpha=";
 
 struct pj_opaque {
     double m, rmn, q3, n;

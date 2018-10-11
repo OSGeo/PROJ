@@ -32,7 +32,7 @@ Docker
 A `Docker`_ image with just PROJ binaries and a full compliment of grid shift
 files is available on `DockerHub`_. Get the package with::
 
-    docker pull osgeo/proj.4
+    docker pull osgeo/proj
 
 .. _`Docker`: https://docker.org
 .. _`DockerHub`: https://hub.docker.com/r/osgeo/proj.4/

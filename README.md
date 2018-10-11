@@ -91,32 +91,6 @@ If you are building from the git repository you have to first run
 
 which will generate a configure script that can be used as described above.
 
-### Building on Windows with NMAKE
-
-PROJ can be built with Microsoft Visual C/C++ using the `makefile.vc`
-in the `PROJ` directory.  First edit the `PROJ\nmake.opt` and
-modify the `INSTDIR` value at the top to point to the directory
-where the PROJ tree shall be installed.
-If you want to install into `C:\PROJ`, it can remain unchanged.
-Then use the `makefile.vc` to build the software e.g.:
-
-    C:\> cd proj
-    C:\PROJ> nmake /f makefile.vc
-    C:\PROJ> nmake /f makefile.vc install-all
-
-Note that you have to have the VC++ environment variables, and path
-setup properly.  This may involve running the `VCVARS32.BAT`
-script out of the Visual C++ tree.
-
-The `makefile.vc` builds `proj.exe`, `proj.dll` and `proj.lib`.
-
-On Windows you have to set the `PROJ_LIB` environment variable to make
-sure that PROJ can find the resource files that it needs. For the
-default install directory you can set `PROJ_LIB` with:
-
-    C:\> set PROJ_LIB=C:\PROJ\share
-
-
 ### Distribution files and format
 
 Sources are distributed in one or more files.  The principle elements

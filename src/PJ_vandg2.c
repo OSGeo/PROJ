@@ -9,8 +9,8 @@ struct pj_opaque {
     int vdg3;
 };
 
-PROJ_HEAD(vandg2, "van der Grinten II") "\n\tMisc Sph, no inv.";
-PROJ_HEAD(vandg3, "van der Grinten III") "\n\tMisc Sph, no inv.";
+PROJ_HEAD(vandg2, "van der Grinten II") "\n\tMisc Sph, no inv";
+PROJ_HEAD(vandg3, "van der Grinten III") "\n\tMisc Sph, no inv";
 
 #define TOL    1e-10
 

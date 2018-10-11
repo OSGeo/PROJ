@@ -6,8 +6,8 @@ struct pj_opaque {
     double  A;
 };
 
-PROJ_HEAD(putp3, "Putnins P3") "\n\tPCyl., Sph.";
-PROJ_HEAD(putp3p, "Putnins P3'") "\n\tPCyl., Sph.";
+PROJ_HEAD(putp3, "Putnins P3") "\n\tPCyl, Sph";
+PROJ_HEAD(putp3p, "Putnins P3'") "\n\tPCyl, Sph";
 
 #define C       0.79788456
 #define RPISQ   0.1013211836

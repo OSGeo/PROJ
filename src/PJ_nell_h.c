@@ -4,7 +4,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(nell_h, "Nell-Hammer") "\n\tPCyl., Sph.";
+PROJ_HEAD(nell_h, "Nell-Hammer") "\n\tPCyl, Sph";
 
 #define NITER 9
 #define EPS 1e-7

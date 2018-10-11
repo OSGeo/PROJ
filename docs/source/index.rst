@@ -20,7 +20,7 @@ PROJ
    community/index
    faq
    glossary
-   references
+   zreferences
 
 .. only:: html
 

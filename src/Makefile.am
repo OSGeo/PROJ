@@ -13,7 +13,7 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 include_HEADERS = proj.h proj_api.h geodesic.h \
 	org_proj4_PJ.h
 
-EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
+EXTRA_DIST = proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
 			 lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c
 
@@ -89,7 +89,7 @@ libproj_la_SOURCES = \
 	\
 	proj_4D_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
 	PJ_vgridshift.c PJ_hgridshift.c PJ_unitconvert.c PJ_molodensky.c \
-	PJ_deformation.c pj_internal.c PJ_axisswap.c
+	PJ_deformation.c pj_internal.c PJ_axisswap.c PJ_affine.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)

@@ -12,7 +12,7 @@ Port to PROJ.4 by Bojan Savric, 4 April 2016
 
 #include "projects.h"
 
-PROJ_HEAD(comill, "Compact Miller") "\n\tCyl., Sph.";
+PROJ_HEAD(comill, "Compact Miller") "\n\tCyl, Sph";
 
 #define K1 0.9902
 #define K2 0.1604

@@ -7,7 +7,7 @@
 #include "projects.h"
 #include "proj_math.h"
 
-PROJ_HEAD(gnom, "Gnomonic") "\n\tAzi, Sph.";
+PROJ_HEAD(gnom, "Gnomonic") "\n\tAzi, Sph";
 
 #define EPS10  1.e-10
 

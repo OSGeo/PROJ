@@ -5,7 +5,7 @@
 
 #include "projects.h"
 
-PROJ_HEAD(igh, "Interrupted Goode Homolosine") "\n\tPCyl, Sph.";
+PROJ_HEAD(igh, "Interrupted Goode Homolosine") "\n\tPCyl, Sph";
 
 C_NAMESPACE PJ *pj_sinu(PJ *), *pj_moll(PJ *);
 

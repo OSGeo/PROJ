@@ -5,7 +5,7 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(collg, "Collignon") "\n\tPCyl, Sph.";
+PROJ_HEAD(collg, "Collignon") "\n\tPCyl, Sph";
 #define FXC 1.12837916709551257390
 #define FYC 1.77245385090551602729
 #define ONEEPS  1.0000001
