@@ -456,7 +456,8 @@ PJ_OBJ PROJ_DLL *proj_obj_create_from_database(PJ_CONTEXT *ctx,
                                                const char* auth_name,
                                                const char* code,
                                                PJ_OBJ_CATEGORY category,
-                                               int usePROJAlternativeGridNames);
+                                               int usePROJAlternativeGridNames,
+                                               char** options);
 
 void PROJ_DLL proj_obj_unref(PJ_OBJ* obj);
 
@@ -525,7 +526,8 @@ typedef enum
     PJ_WKT1_GDAL
 } PJ_WKT_TYPE;
 
-const char PROJ_DLL* proj_obj_as_wkt(PJ_OBJ* obj, PJ_WKT_TYPE type);
+const char PROJ_DLL* proj_obj_as_wkt(PJ_OBJ* obj, PJ_WKT_TYPE type,
+                                     char** options);
 
 /** \brief PROJ string version. */
 typedef enum
@@ -537,7 +539,8 @@ typedef enum
 } PJ_PROJ_STRING_TYPE;
 
 const char PROJ_DLL* proj_obj_as_proj_string(PJ_OBJ* obj,
-                                             PJ_PROJ_STRING_TYPE type);
+                                             PJ_PROJ_STRING_TYPE type,
+                                             char** options);
 
 PJ_OBJ PROJ_DLL *proj_obj_get_source_crs(PJ_OBJ* obj);
 

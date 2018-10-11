@@ -233,6 +233,12 @@ class PROJBasedOperation : public SingleOperation {
            const crs::CRSPtr &sourceCRS, const crs::CRSPtr &targetCRS,
            const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
+    static PROJBasedOperationNNPtr
+    create(const util::PropertyMap &properties,
+           const io::IPROJStringExportableNNPtr &projExportable, bool inverse,
+           const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+           const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
     std::set<GridDescription>
     gridsNeeded(io::DatabaseContextNNPtr databaseContext) const override;
 
@@ -240,6 +246,10 @@ class PROJBasedOperation : public SingleOperation {
     PROJBasedOperation(const OperationMethodNNPtr &methodIn,
                        const std::vector<GeneralParameterValueNNPtr> &values);
     INLINED_MAKE_SHARED
+
+  private:
+    io::IPROJStringExportablePtr projStringExportable_{};
+    bool inverse_ = false;
 };
 
 } // namespace operation

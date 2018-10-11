@@ -314,6 +314,8 @@ class PROJStringFormatter {
     PROJ_DLL ~PROJStringFormatter();
     //! @endcond
 
+    PROJ_DLL void setUseETMercForTMerc(bool flag);
+
     PROJ_DLL const std::string &toString() const;
 
     //! @cond Doxygen_Suppress
@@ -331,6 +333,7 @@ class PROJStringFormatter {
     PROJ_DLL void startInversion();
     PROJ_DLL void stopInversion();
     bool isInverted() const;
+    bool getUseETMercForTMerc() const;
 
     PROJ_DLL void
     ingestPROJString(const std::string &str); // throw ParsingException
@@ -428,6 +431,12 @@ class PROJ_DLL IWKTExportable {
 };
 
 // ---------------------------------------------------------------------------
+
+class IPROJStringExportable;
+/** Shared pointer of IPROJStringExportable. */
+using IPROJStringExportablePtr = std::shared_ptr<IPROJStringExportable>;
+/** Non-null shared pointer of IPROJStringExportable. */
+using IPROJStringExportableNNPtr = util::nn<IPROJStringExportablePtr>;
 
 /** \brief Interface for an object that can be exported to a PROJ string. */
 class PROJ_DLL IPROJStringExportable {

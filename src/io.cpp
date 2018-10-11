@@ -3125,6 +3125,7 @@ struct PROJStringFormatter::Private {
     bool omitZUnitConversion_ = false;
     int level_ = 0;
     DatabaseContextPtr dbContext_{};
+    bool useETMercForTMerc_ = false;
 
     std::string result_{};
 
@@ -3168,6 +3169,14 @@ PROJStringFormatter::create(Convention conventionIn,
                             DatabaseContextPtr dbContext) {
     return PROJStringFormatter::nn_make_shared<PROJStringFormatter>(
         conventionIn, dbContext);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether Extented Transverse Mercator (etmerc) should be used
+ * instead of tmerc */
+void PROJStringFormatter::setUseETMercForTMerc(bool flag) {
+    d->useETMercForTMerc_ = flag;
 }
 
 // ---------------------------------------------------------------------------
@@ -3505,6 +3514,12 @@ const std::string &PROJStringFormatter::toString() const {
 
 PROJStringFormatter::Convention PROJStringFormatter::convention() const {
     return d->convention_;
+}
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::getUseETMercForTMerc() const {
+    return d->useETMercForTMerc_;
 }
 
 // ---------------------------------------------------------------------------

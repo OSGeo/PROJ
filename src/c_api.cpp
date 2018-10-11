@@ -26,6 +26,10 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
+
 #include <cassert>
 #include <cstdarg>
 #include <cstring>
@@ -39,6 +43,8 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "proj/internal/internal.hpp"
+
 // PROJ include order is sensitive
 // clang-format off
 #include "proj_internal.h"
@@ -50,6 +56,7 @@ using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;
 using namespace NS_PROJ::datum;
 using namespace NS_PROJ::io;
+using namespace NS_PROJ::internal;
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
@@ -177,15 +184,18 @@ void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
  * @param usePROJAlternativeGridNames Whether PROJ alternative grid names
  * should be substituted to the official grid names. Only used on
  * transformations
+ * @param options should be set to NULL for now
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL in
  * case of error.
  */
 PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                                       const char *code,
                                       PJ_OBJ_CATEGORY category,
-                                      int usePROJAlternativeGridNames) {
+                                      int usePROJAlternativeGridNames,
+                                      char **options) {
     assert(auth_name);
     assert(code);
+    (void)options;
 
     try {
         if (ctx->cpp_context == nullptr) {
@@ -396,10 +406,12 @@ const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
  *
  * @param obj Object (must not be NULL)
  * @param type WKT version.
+ * @param options should be set to NULL for now
  * @return a string, or NULL in case of error.
  */
-const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type) {
+const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type, char **options) {
     assert(obj);
+    (void)options;
     auto iter = obj->mapWKTString.find(type);
     if (iter != obj->mapWKTString.end()) {
         return iter->second.c_str();
@@ -452,9 +464,14 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type) {
  *
  * @param obj Object (must not be NULL)
  * @param type PROJ String version.
+ * @param options NULL-terminated list of strings with "KEY=VALUE" format. or
+ * NULL.
+ * The currently recognized option is USE_ETMERC=YES to use
+ * +proj=etmerc instead of +proj=tmerc
  * @return a string, or NULL in case of error.
  */
-const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type) {
+const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
+                                    char **options) {
     assert(obj);
     auto iter = obj->mapPROJString.find(type);
     if (iter != obj->mapPROJString.end()) {
@@ -481,8 +498,14 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type) {
             obj->ctx->cpp_context = new projCppContext(
                 DatabaseContext::createWithPJContext(obj->ctx));
         }
-        auto wkt = exportable->exportToPROJString(PROJStringFormatter::create(
-            convention, obj->ctx->cpp_context->databaseContext));
+        auto formatter = PROJStringFormatter::create(
+            convention, obj->ctx->cpp_context->databaseContext);
+        if (options != nullptr && options[0] != nullptr) {
+            if (ci_equal(options[0], "USE_ETMERC=YES")) {
+                formatter->setUseETMercForTMerc(true);
+            }
+        }
+        auto wkt = exportable->exportToPROJString(formatter);
         obj->mapPROJString[type] = wkt;
         return obj->mapPROJString[type].c_str();
     } catch (const std::exception &e) {

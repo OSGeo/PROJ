@@ -169,22 +169,24 @@ TEST_F(CApi, proj_obj_as_wkt) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto wkt2_2018 = proj_obj_as_wkt(obj, PJ_WKT2_2018);
+    auto wkt2_2018 = proj_obj_as_wkt(obj, PJ_WKT2_2018, nullptr);
     ASSERT_NE(wkt2_2018, nullptr);
 
-    auto wkt2_2018_bis = proj_obj_as_wkt(obj, PJ_WKT2_2018);
+    auto wkt2_2018_bis = proj_obj_as_wkt(obj, PJ_WKT2_2018, nullptr);
     EXPECT_EQ(wkt2_2018_bis, wkt2_2018);
 
-    auto wkt2_2018_simplified = proj_obj_as_wkt(obj, PJ_WKT2_2018_SIMPLIFIED);
+    auto wkt2_2018_simplified =
+        proj_obj_as_wkt(obj, PJ_WKT2_2018_SIMPLIFIED, nullptr);
     ASSERT_NE(wkt2_2018_simplified, nullptr);
 
-    auto wkt2_2015 = proj_obj_as_wkt(obj, PJ_WKT2_2015);
+    auto wkt2_2015 = proj_obj_as_wkt(obj, PJ_WKT2_2015, nullptr);
     ASSERT_NE(wkt2_2015, nullptr);
 
-    auto wkt2_2015_simplified = proj_obj_as_wkt(obj, PJ_WKT2_2015_SIMPLIFIED);
+    auto wkt2_2015_simplified =
+        proj_obj_as_wkt(obj, PJ_WKT2_2015_SIMPLIFIED, nullptr);
     ASSERT_NE(wkt2_2015_simplified, nullptr);
 
-    auto wkt1_GDAL = proj_obj_as_wkt(obj, PJ_WKT1_GDAL);
+    auto wkt1_GDAL = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, nullptr);
     ASSERT_NE(wkt1_GDAL, nullptr);
 
     EXPECT_TRUE(std::string(wkt2_2018).find("GEOGCRS[") == 0) << wkt2_2018;
@@ -214,7 +216,7 @@ TEST_F(CApi, proj_obj_as_wkt_incompatible_WKT1) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto wkt1_GDAL = proj_obj_as_wkt(obj, PJ_WKT1_GDAL);
+    auto wkt1_GDAL = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, nullptr);
     ASSERT_EQ(wkt1_GDAL, nullptr);
 }
 
@@ -227,13 +229,13 @@ TEST_F(CApi, proj_obj_as_proj_string) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto proj_5 = proj_obj_as_proj_string(obj, PJ_PROJ_5);
+    auto proj_5 = proj_obj_as_proj_string(obj, PJ_PROJ_5, nullptr);
     ASSERT_NE(proj_5, nullptr);
 
-    auto proj_5_bis = proj_obj_as_proj_string(obj, PJ_PROJ_5);
+    auto proj_5_bis = proj_obj_as_proj_string(obj, PJ_PROJ_5, nullptr);
     EXPECT_EQ(proj_5_bis, proj_5);
 
-    auto proj_4 = proj_obj_as_proj_string(obj, PJ_PROJ_4);
+    auto proj_4 = proj_obj_as_proj_string(obj, PJ_PROJ_4, nullptr);
     ASSERT_NE(proj_4, nullptr);
 
     EXPECT_EQ(std::string(proj_5), "+proj=pipeline +step +proj=longlat "
@@ -251,15 +253,29 @@ TEST_F(CApi, proj_obj_as_proj_string_incompatible_WKT1) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto str = proj_obj_as_proj_string(obj, PJ_PROJ_5);
+    auto str = proj_obj_as_proj_string(obj, PJ_PROJ_5, nullptr);
     ASSERT_EQ(str, nullptr);
 }
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_obj_as_proj_string_etmerc_option) {
+    auto obj = proj_obj_create_from_proj_string(m_ctxt, "+proj=tmerc");
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    char *options[] = {const_cast<char *>("USE_ETMERC=YES"), nullptr};
+    auto str = proj_obj_as_proj_string(obj, PJ_PROJ_4, options);
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str, std::string("+proj=etmerc +lat_0=0 +lon_0=0 +k_0=1 +x_0=0 "
+                               "+y_0=0 +datum=WGS84"));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
-    auto crs = proj_obj_create_from_database(m_ctxt, "EPSG", "3844",
-                                             PJ_OBJ_CATEGORY_CRS, false);
+    auto crs = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "3844", PJ_OBJ_CATEGORY_CRS, false, nullptr);
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
@@ -267,7 +283,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
     ObjectKeeper keeper_res(res);
     ASSERT_NE(res, nullptr);
 
-    auto proj_4 = proj_obj_as_proj_string(res, PJ_PROJ_4);
+    auto proj_4 = proj_obj_as_proj_string(res, PJ_PROJ_4, nullptr);
     ASSERT_NE(proj_4, nullptr);
     EXPECT_EQ(std::string(proj_4),
               "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
@@ -433,21 +449,21 @@ TEST_F(CApi, proj_obj_get_type) {
 
 TEST_F(CApi, proj_obj_create_from_database) {
     {
-        auto crs = proj_obj_create_from_database(m_ctxt, "EPSG", "-1",
-                                                 PJ_OBJ_CATEGORY_CRS, false);
+        auto crs = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "-1", PJ_OBJ_CATEGORY_CRS, false, nullptr);
         ASSERT_EQ(crs, nullptr);
     }
     {
-        auto crs = proj_obj_create_from_database(m_ctxt, "EPSG", "4326",
-                                                 PJ_OBJ_CATEGORY_CRS, false);
+        auto crs = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "4326", PJ_OBJ_CATEGORY_CRS, false, nullptr);
         ASSERT_NE(crs, nullptr);
         ObjectKeeper keeper(crs);
         EXPECT_TRUE(proj_obj_is_crs(crs));
         EXPECT_EQ(proj_obj_get_type(crs), PJ_OBJ_TYPE_GEOGRAPHIC_CRS);
     }
     {
-        auto crs = proj_obj_create_from_database(m_ctxt, "EPSG", "6871",
-                                                 PJ_OBJ_CATEGORY_CRS, false);
+        auto crs = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "6871", PJ_OBJ_CATEGORY_CRS, false, nullptr);
         ASSERT_NE(crs, nullptr);
         ObjectKeeper keeper(crs);
         EXPECT_TRUE(proj_obj_is_crs(crs));
@@ -455,14 +471,14 @@ TEST_F(CApi, proj_obj_create_from_database) {
     }
     {
         auto ellipsoid = proj_obj_create_from_database(
-            m_ctxt, "EPSG", "7030", PJ_OBJ_CATEGORY_ELLIPSOID, false);
+            m_ctxt, "EPSG", "7030", PJ_OBJ_CATEGORY_ELLIPSOID, false, nullptr);
         ASSERT_NE(ellipsoid, nullptr);
         ObjectKeeper keeper(ellipsoid);
         EXPECT_EQ(proj_obj_get_type(ellipsoid), PJ_OBJ_TYPE_ELLIPSOID);
     }
     {
         auto datum = proj_obj_create_from_database(
-            m_ctxt, "EPSG", "6326", PJ_OBJ_CATEGORY_DATUM, false);
+            m_ctxt, "EPSG", "6326", PJ_OBJ_CATEGORY_DATUM, false, nullptr);
         ASSERT_NE(datum, nullptr);
         ObjectKeeper keeper(datum);
         EXPECT_EQ(proj_obj_get_type(datum),
@@ -471,7 +487,7 @@ TEST_F(CApi, proj_obj_create_from_database) {
     {
         auto op = proj_obj_create_from_database(
             m_ctxt, "EPSG", "16031", PJ_OBJ_CATEGORY_COORDINATE_OPERATION,
-            false);
+            false, nullptr);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper(op);
         EXPECT_EQ(proj_obj_get_type(op), PJ_OBJ_TYPE_CONVERSION);
@@ -648,7 +664,8 @@ TEST_F(CApi, proj_obj_get_source_target_crs_transformation) {
 
 TEST_F(CApi, proj_obj_get_source_target_crs_conversion_without_crs) {
     auto obj = proj_obj_create_from_database(
-        m_ctxt, "EPSG", "16031", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, false);
+        m_ctxt, "EPSG", "16031", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, false,
+        nullptr);
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
 
@@ -816,7 +833,8 @@ TEST_F(CApi, transformation_from_boundCRS) {
 
 TEST_F(CApi, proj_coordoperation_get_grid_used) {
     auto op = proj_obj_create_from_database(
-        m_ctxt, "EPSG", "1312", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, true);
+        m_ctxt, "EPSG", "1312", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, true,
+        nullptr);
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper(op);
 
@@ -857,12 +875,12 @@ TEST_F(CApi, proj_obj_create_operations) {
     ContextKeeper keeper_ctxt(ctxt);
 
     auto source_crs = proj_obj_create_from_database(
-        m_ctxt, "EPSG", "4267", PJ_OBJ_CATEGORY_CRS, false); // NAD27
+        m_ctxt, "EPSG", "4267", PJ_OBJ_CATEGORY_CRS, false, nullptr); // NAD27
     ASSERT_NE(source_crs, nullptr);
     ObjectKeeper keeper_source_crs(source_crs);
 
     auto target_crs = proj_obj_create_from_database(
-        m_ctxt, "EPSG", "4269", PJ_OBJ_CATEGORY_CRS, false); // NAD83
+        m_ctxt, "EPSG", "4269", PJ_OBJ_CATEGORY_CRS, false, nullptr); // NAD83
     ASSERT_NE(target_crs, nullptr);
     ObjectKeeper keeper_target_crs(target_crs);
 

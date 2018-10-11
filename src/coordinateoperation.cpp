@@ -1095,6 +1095,21 @@ SingleOperationNNPtr SingleOperation::createPROJBased(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static SingleOperationNNPtr createPROJBased(
+    const util::PropertyMap &properties,
+    const io::IPROJStringExportableNNPtr &projExportable,
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies =
+        std::vector<metadata::PositionalAccuracyNNPtr>()) {
+    return util::nn_static_pointer_cast<SingleOperation>(
+        PROJBasedOperation::create(properties, projExportable, false, sourceCRS,
+                                   targetCRS, accuracies));
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 bool SingleOperation::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
@@ -4033,6 +4048,7 @@ std::string Conversion::exportToPROJString(
     auto convName = *(name()->description());
     bool bConversionDone = false;
     bool bEllipsoidParametersDone = false;
+    bool useETMerc = false;
     if (ci_equal(projectionMethodName, EPSG_NAME_METHOD_TRANSVERSE_MERCATOR) ||
         methodEPSGCode == EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
         // Check for UTM
@@ -4045,6 +4061,8 @@ std::string Conversion::exportToPROJString(
             if (!north) {
                 formatter->addParam("south");
             }
+        } else {
+            useETMerc = formatter->getUseETMercForTMerc();
         }
     } else if (ci_equal(projectionMethodName,
                         EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) ||
@@ -4250,7 +4268,7 @@ std::string Conversion::exportToPROJString(
             mapping = getMapping(methodEPSGCode);
         }
         if (mapping && !mapping->proj_names[0].empty()) {
-            formatter->addStep(mapping->proj_names[0]);
+            formatter->addStep(useETMerc ? "etmerc" : mapping->proj_names[0]);
             for (size_t i = 1; i < mapping->proj_names.size(); ++i) {
                 if (internal::starts_with(mapping->proj_names[i], "axis=")) {
                     bAxisSpecFound = true;
@@ -8559,6 +8577,41 @@ createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+static CoordinateOperationNNPtr
+createGeodToGeodPROJBased(const crs::GeodeticCRSNNPtr &geodSrc,
+                          const crs::GeodeticCRSNNPtr &geodDst) {
+    struct MyPROJStringExportable : public io::IPROJStringExportable {
+        crs::GeodeticCRSPtr geodSrc{};
+        crs::GeodeticCRSPtr geodDst{};
+
+        // cppcheck-suppress functionStatic
+        std::string exportToPROJString(
+            io::PROJStringFormatterNNPtr formatter) const override {
+
+            io::PROJStringFormatter::Scope scope(formatter);
+
+            formatter->startInversion();
+            geodSrc->exportToPROJString(formatter);
+            formatter->stopInversion();
+            geodDst->exportToPROJString(formatter);
+
+            return scope.toString();
+        }
+    };
+
+    auto exportable = util::nn_make_shared<MyPROJStringExportable>();
+    exportable->geodSrc = geodSrc;
+    exportable->geodDst = geodDst;
+
+    return createPROJBased(util::PropertyMap(), exportable, geodSrc, geodDst);
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperations(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
@@ -8659,15 +8712,8 @@ CoordinateOperationFactory::Private::createOperations(
                     res.push_back(conv);
                     return res;
                 } else {
-                    auto formatter = io::PROJStringFormatter::create();
-                    io::PROJStringFormatter::Scope scope(formatter);
-                    formatter->startInversion();
-                    geodSrc->exportToPROJString(formatter);
-                    formatter->stopInversion();
-                    geodDst->exportToPROJString(formatter);
-                    res.emplace_back(SingleOperation::createPROJBased(
-                        util::PropertyMap(), scope.toString(), sourceCRS,
-                        targetCRS));
+                    res.emplace_back(createGeodToGeodPROJBased(
+                        NN_CHECK_ASSERT(geodSrc), NN_CHECK_ASSERT(geodDst)));
                     return res;
                 }
             }
@@ -8774,14 +8820,8 @@ CoordinateOperationFactory::Private::createOperations(
         }
 
         // Tranformation between two geocentric systems
-        auto formatter = io::PROJStringFormatter::create();
-        io::PROJStringFormatter::Scope scope(formatter);
-        formatter->startInversion();
-        geodSrc->exportToPROJString(formatter);
-        formatter->stopInversion();
-        geodDst->exportToPROJString(formatter);
-        res.emplace_back(SingleOperation::createPROJBased(
-            util::PropertyMap(), scope.toString(), sourceCRS, targetCRS));
+        res.emplace_back(createGeodToGeodPROJBased(NN_CHECK_ASSERT(geodSrc),
+                                                   NN_CHECK_ASSERT(geodDst)));
         return res;
     }
 
@@ -9024,27 +9064,51 @@ CoordinateOperationFactory::Private::createOperations(
             if (!horizTransforms.empty() && !verticalTransforms.empty()) {
                 for (const auto &horizTransform : horizTransforms) {
                     for (const auto &verticalTransform : verticalTransforms) {
-                        auto formatter = io::PROJStringFormatter::create(
-                            io::PROJStringFormatter::Convention::PROJ_5,
-                            databaseContext);
-                        io::PROJStringFormatter::Scope scope(formatter);
 
-                        formatter->setOmitZUnitConversion(true);
-                        horizTransform->exportToPROJString(formatter);
+                        struct MyPROJStringExportable
+                            : public io::IPROJStringExportable {
+                            CoordinateOperationPtr horizTransform{};
+                            CoordinateOperationPtr verticalTransform{};
+                            crs::GeographicCRSPtr geogSrc{};
+                            crs::GeographicCRSPtr geogDst{};
 
-                        formatter->startInversion();
-                        geogDst->addAngularUnitConvertAndAxisSwap(formatter);
-                        formatter->stopInversion();
-                        formatter->setOmitZUnitConversion(false);
+                            // cppcheck-suppress functionStatic
+                            std::string exportToPROJString(
+                                io::PROJStringFormatterNNPtr formatter)
+                                const override {
 
-                        verticalTransform->exportToPROJString(formatter);
+                                io::PROJStringFormatter::Scope scope(formatter);
 
-                        formatter->setOmitZUnitConversion(true);
-                        geogDst->addAngularUnitConvertAndAxisSwap(formatter);
-                        formatter->setOmitZUnitConversion(false);
+                                formatter->setOmitZUnitConversion(true);
+                                horizTransform->exportToPROJString(formatter);
 
-                        res.emplace_back(SingleOperation::createPROJBased(
-                            util::PropertyMap(), scope.toString(), sourceCRS,
+                                formatter->startInversion();
+                                geogDst->addAngularUnitConvertAndAxisSwap(
+                                    formatter);
+                                formatter->stopInversion();
+                                formatter->setOmitZUnitConversion(false);
+
+                                verticalTransform->exportToPROJString(
+                                    formatter);
+
+                                formatter->setOmitZUnitConversion(true);
+                                geogDst->addAngularUnitConvertAndAxisSwap(
+                                    formatter);
+                                formatter->setOmitZUnitConversion(false);
+
+                                return scope.toString();
+                            }
+                        };
+
+                        auto exportable =
+                            util::nn_make_shared<MyPROJStringExportable>();
+                        exportable->horizTransform = horizTransform;
+                        exportable->verticalTransform = verticalTransform;
+                        exportable->geogSrc = geogSrc;
+                        exportable->geogDst = geogDst;
+
+                        res.emplace_back(createPROJBased(
+                            util::PropertyMap(), exportable, sourceCRS,
                             targetCRS,
                             horizTransform->coordinateOperationAccuracies()));
                     }
@@ -9107,36 +9171,63 @@ CoordinateOperationFactory::Private::createOperations(
                         interpolationGeogCRS, componentsDst[0], context);
                     if (!opSrcCRSToGeogCRS.empty() &&
                         !opGeogCRStoDstCRS.empty()) {
-                        auto formatter = io::PROJStringFormatter::create(
-                            io::PROJStringFormatter::Convention::PROJ_5,
-                            databaseContext);
-                        io::PROJStringFormatter::Scope scope(formatter);
 
-                        formatter->setOmitZUnitConversion(true);
+                        struct MyPROJStringExportable
+                            : public io::IPROJStringExportable {
+                            CoordinateOperationPtr opSrcCRSToGeogCRS{};
+                            CoordinateOperationPtr verticalTransform{};
+                            CoordinateOperationPtr opGeogCRStoDstCRS{};
+                            crs::GeographicCRSPtr interpolationGeogCRS{};
 
-                        opSrcCRSToGeogCRS[0]->exportToPROJString(formatter);
+                            // cppcheck-suppress functionStatic
+                            std::string exportToPROJString(
+                                io::PROJStringFormatterNNPtr formatter)
+                                const override {
 
-                        formatter->startInversion();
-                        interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(
-                            formatter);
-                        formatter->stopInversion();
+                                io::PROJStringFormatter::Scope scope(formatter);
 
-                        formatter->setOmitZUnitConversion(false);
+                                formatter->setOmitZUnitConversion(true);
 
-                        verticalTransform[0]->exportToPROJString(formatter);
+                                opSrcCRSToGeogCRS->exportToPROJString(
+                                    formatter);
 
-                        formatter->setOmitZUnitConversion(true);
+                                formatter->startInversion();
+                                interpolationGeogCRS
+                                    ->addAngularUnitConvertAndAxisSwap(
+                                        formatter);
+                                formatter->stopInversion();
 
-                        interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(
-                            formatter);
+                                formatter->setOmitZUnitConversion(false);
 
-                        opGeogCRStoDstCRS[0]->exportToPROJString(formatter);
+                                verticalTransform->exportToPROJString(
+                                    formatter);
 
-                        formatter->setOmitZUnitConversion(false);
+                                formatter->setOmitZUnitConversion(true);
 
-                        res.emplace_back(SingleOperation::createPROJBased(
-                            util::PropertyMap(), scope.toString(), sourceCRS,
-                            targetCRS));
+                                interpolationGeogCRS
+                                    ->addAngularUnitConvertAndAxisSwap(
+                                        formatter);
+
+                                opGeogCRStoDstCRS->exportToPROJString(
+                                    formatter);
+
+                                formatter->setOmitZUnitConversion(false);
+
+                                return scope.toString();
+                            }
+                        };
+
+                        auto exportable =
+                            util::nn_make_shared<MyPROJStringExportable>();
+                        exportable->opSrcCRSToGeogCRS = opSrcCRSToGeogCRS[0];
+                        exportable->verticalTransform = verticalTransform[0];
+                        exportable->opGeogCRStoDstCRS = opGeogCRStoDstCRS[0];
+                        exportable->interpolationGeogCRS = interpolationGeogCRS;
+
+                        res.emplace_back(createPROJBased(util::PropertyMap(),
+                                                         exportable, sourceCRS,
+                                                         targetCRS));
+
                         return res;
                     }
                 } else {
@@ -9287,7 +9378,59 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
 
 // ---------------------------------------------------------------------------
 
+static const std::string
+    APPROX_PROJSTRING_PARAMETER_NAME("(Approximte) PROJ string");
+
+PROJBasedOperationNNPtr PROJBasedOperation::create(
+    const util::PropertyMap &properties,
+    const io::IPROJStringExportableNNPtr &projExportable, bool inverse,
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    auto parameter = OperationParameter::create(util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY, APPROX_PROJSTRING_PARAMETER_NAME));
+    auto method = OperationMethod::create(
+        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                "PROJ-based operation method"),
+        std::vector<OperationParameterNNPtr>{parameter});
+    std::vector<GeneralParameterValueNNPtr> values;
+
+    auto formatter = io::PROJStringFormatter::create();
+    if (inverse) {
+        formatter->startInversion();
+    }
+    projExportable->exportToPROJString(formatter);
+    if (inverse) {
+        formatter->stopInversion();
+    }
+    auto projString = formatter->toString();
+
+    values.push_back(OperationParameterValue::create(
+        parameter, ParameterValue::create(projString)));
+    auto op =
+        PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method, values);
+    op->assignSelf(op);
+    op->setCRSs(sourceCRS, targetCRS, nullptr);
+    op->setProperties(
+        addDefaultNameIfNeeded(properties, "PROJ-based coordinate operation"));
+    op->setAccuracies(accuracies);
+    op->projStringExportable_ = projExportable.as_nullable();
+    op->inverse_ = inverse;
+    return op;
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
+
+    if (projStringExportable_) {
+        return util::nn_static_pointer_cast<CoordinateOperation>(
+            PROJBasedOperation::create(
+                createPropertiesForInverse(this, false, false),
+                NN_CHECK_ASSERT(projStringExportable_), !inverse_,
+                NN_CHECK_ASSERT(targetCRS()), NN_CHECK_ASSERT(sourceCRS()),
+                coordinateOperationAccuracies()));
+    }
+
     auto formatter = io::PROJStringFormatter::create();
     formatter->startInversion();
     try {
@@ -9300,9 +9443,10 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
     formatter->stopInversion();
 
     return util::nn_static_pointer_cast<CoordinateOperation>(
-        SingleOperation::createPROJBased(
+        PROJBasedOperation::create(
             createPropertiesForInverse(this, false, false),
-            formatter->toString(), targetCRS(), sourceCRS()));
+            formatter->toString(), targetCRS(), sourceCRS(),
+            coordinateOperationAccuracies()));
 }
 
 // ---------------------------------------------------------------------------
@@ -9331,6 +9475,17 @@ PROJBasedOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 std::string PROJBasedOperation::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const {
+    if (projStringExportable_) {
+        if (inverse_) {
+            formatter->startInversion();
+        }
+        projStringExportable_->exportToPROJString(formatter);
+        if (inverse_) {
+            formatter->stopInversion();
+        }
+        return formatter->toString();
+    }
+
     try {
         formatter->ingestPROJString(
             parameterValue(PROJSTRING_PARAMETER_NAME)->stringValue());
@@ -9349,9 +9504,9 @@ std::set<CoordinateOperation::GridDescription> PROJBasedOperation::gridsNeeded(
     std::set<CoordinateOperation::GridDescription> res;
 
     try {
+        auto formatterOut = io::PROJStringFormatter::create();
         auto formatter = io::PROJStringFormatter::create();
-        formatter->ingestPROJString(
-            parameterValue(PROJSTRING_PARAMETER_NAME)->stringValue());
+        formatter->ingestPROJString(exportToPROJString(formatterOut));
         for (const auto &shortName : formatter->getUsedGridNames()) {
             CoordinateOperation::GridDescription desc;
             desc.shortName = shortName;

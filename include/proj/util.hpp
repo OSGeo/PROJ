@@ -80,7 +80,7 @@ namespace proj {}
                                                                                \
   protected:                                                                   \
     Private *getPrivate() { return d.get(); }                                  \
-    const Private *getPrivate() const { return d.get(); }                      \
+    const Private *getPrivate() const { return d.get(); }
 
 // To include in the protected/private section of a class definition,
 // to be able to call make_shared on a protected/private constructor

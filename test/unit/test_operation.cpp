@@ -1058,6 +1058,13 @@ TEST(operation, tmerc_export) {
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
+    {
+        auto formatter = PROJStringFormatter::create();
+        formatter->setUseETMercForTMerc(true);
+        EXPECT_EQ(conv->exportToPROJString(formatter),
+                  "+proj=etmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
+    }
+
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
               "CONVERSION[\"Transverse Mercator\",\n"
               "    METHOD[\"Transverse Mercator\",\n"
@@ -4778,7 +4785,12 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
     auto compound1 = CompoundCRS::create(
         PropertyMap(),
         std::vector<CRSNNPtr>{
-            createUTM31_WGS84(),
+            ProjectedCRS::create(
+                PropertyMap(), GeographicCRS::EPSG_4326,
+                Conversion::createTransverseMercator(PropertyMap(), Angle(1),
+                                                     Angle(2), Scale(3),
+                                                     Length(4), Length(5)),
+                CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)),
             BoundCRS::create(verticalCRS1, verticalCRS2, vtransformation)});
     auto compound2 = CompoundCRS::create(
         PropertyMap(),
@@ -4788,10 +4800,30 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
                                                                     compound2);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
+              "+proj=pipeline +step +inv +proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 "
+              "+x_0=4 +y_0=5 +ellps=WGS84 +step "
               "+proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step "
               "+proj=utm +zone=32 "
               "+ellps=WGS84");
+    {
+        auto formatter = PROJStringFormatter::create();
+        formatter->setUseETMercForTMerc(true);
+        EXPECT_EQ(op->exportToPROJString(formatter),
+                  "+proj=pipeline +step +inv +proj=etmerc +lat_0=1 +lon_0=2 "
+                  "+k_0=3 +x_0=4 +y_0=5 +ellps=WGS84 +step "
+                  "+proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step "
+                  "+proj=utm +zone=32 "
+                  "+ellps=WGS84");
+    }
+    {
+        auto formatter = PROJStringFormatter::create();
+        formatter->setUseETMercForTMerc(true);
+        EXPECT_EQ(op->inverse()->exportToPROJString(formatter),
+                  "+proj=pipeline +step +inv +proj=utm +zone=32 +ellps=WGS84 "
+                  "+step +inv +proj=vgridshift +grids=bla.gtx "
+                  "+multiplier=0.001 +step +proj=etmerc +lat_0=1 +lon_0=2 "
+                  "+k_0=3 +x_0=4 +y_0=5 +ellps=WGS84");
+    }
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         compound2, compound1);
