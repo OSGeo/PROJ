@@ -660,7 +660,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
 static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 
 {
-    unsigned char header[176];
+    unsigned char header[192]; /* 12 records of 16 bytes */
     struct CTABLE *ct;
     LP		ur;
 
@@ -731,7 +731,7 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     ct->cvs = NULL;
 
     gi->ct = ct;
-    gi->grid_offset = pj_ctx_ftell( ctx, fid );
+    gi->grid_offset = (long) sizeof(header);
     gi->format = "ntv1";
 
     return 1;
