@@ -229,15 +229,40 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "geodetic_crs" VALUES('IGNF','%s','%s','geographic 2D','EPSG',%s,'IGNF','%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), cs_code, datum_code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_%s_TO_EPSG_4326','helmert_transformation');""" % (code)
-        all_sql.append(sql)
-
         key = { 'a' : d['a'], 'rf' : d['rf'], 'towgs84' : d['towgs84'], 'pm': pm }
         if "+towgs84=0.0000,0.0000,0.0000 +a=6378137.0000 +rf=298.2572221010000" in line or code == 'WGS84G':
             key['code'] = code
         key_geog_crs = json.dumps(key)
         assert key_geog_crs not in map_geog_crs, (line, map_geog_crs[key_geog_crs])
         map_geog_crs[ key_geog_crs ] = { 'code': code, 'title': d['title'] }
+
+        if code == 'NTFP': # Grades
+            assert cs_code ==  "'6403'" # Lat Long grad
+
+            sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','other_transformation');"""
+            all_sql.append(sql)
+
+            sql = """INSERT INTO "other_transformation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','Nouvelle Triangulation Francaise Paris grades to Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','EPSG','9601','Longitude rotation','IGNF','NTFP','IGNF','NTFG','EPSG','1262',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"""
+            all_sql.append(sql)
+
+            sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_%s_TO_EPSG_4326','concatenated_operation');""" % (code)
+            all_sql.append(sql)
+
+            sql = """INSERT INTO "concatenated_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','Nouvelle Triangulation Francaise Paris grades to WGS 84','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,'IGNF','IGNF_NTFP_TO_IGNF_NTFG','IGNF','IGNF_NTFG_TO_EPSG_4326',NULL,NULL,0);"""
+            all_sql.append(sql)
+
+            sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_%s_TO_EPSG_4326_GRID','concatenated_operation');""" % (code)
+            all_sql.append(sql)
+
+            sql = """INSERT INTO "concatenated_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','Nouvelle Triangulation Francaise Paris grades to WGS 84 (2)','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,'IGNF','IGNF_NTFP_TO_IGNF_NTFG','IGNF','IGNF_NTFG_TO_EPSG_4326_GRID',NULL,NULL,0);"""
+            all_sql.append(sql)
+
+            continue
+
+        assert cs_code ==  "'6422'" # Lat Long deg
+
+        sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_%s_TO_EPSG_4326','helmert_transformation');""" % (code)
+        all_sql.append(sql)
 
         towgs84 = d['towgs84'].split(',')
         assert len(towgs84) in (3, 7), towgs84

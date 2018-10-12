@@ -4914,3 +4914,47 @@ TEST(operation, compoundCRS_to_geogCRS_3D) {
                   "+y_0=0 +ellps=WGS84");
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        AuthorityFactory::create(DatabaseContext::create(), "IGNF")
+            ->createCoordinateReferenceSystem("LAMB1"),
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            ->createCoordinateReferenceSystem("4326"),
+        ctxt);
+    ASSERT_EQ(list.size(), 2);
+
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=lcc +lat_1=49.5 +lat_0=49.5 "
+              "+lon_0=0 +k_0=0.99987734 +x_0=600000 +y_0=200000 "
+              "+ellps=clrk80ign +pm=paris +step +proj=hgridshift "
+              "+grids=ntf_r93.gsb +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=lcc +lat_1=49.5 +lat_0=49.5 "
+              "+lon_0=0 +k_0=0.99987734 +x_0=600000 +y_0=200000 "
+              "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=-168 +y=-60 +z=320 +step +inv +proj=cart "
+              "+ellps=WGS84 +step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+
+    auto list2 = CoordinateOperationFactory::create()->createOperations(
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            // NTF (Paris) / Lambert Nord France equivalent to IGNF:LAMB1
+            ->createCoordinateReferenceSystem("27561"),
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            ->createCoordinateReferenceSystem("4326"),
+        ctxt);
+    ASSERT_EQ(list2.size(), 1);
+
+    EXPECT_EQ(
+        replaceAll(list2[0]->exportToPROJString(PROJStringFormatter::create()),
+                   "0.999877341", "0.99987734"),
+        list[1]->exportToPROJString(PROJStringFormatter::create()));
+}

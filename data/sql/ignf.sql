@@ -491,11 +491,12 @@ INSERT INTO "grid_transformation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326_GRID','N
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_NTFP','Nouvelle Triangulation Francaise Paris grades','EPSG','7011','EPSG','8903','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','NTFP','geographic 2D');
 INSERT INTO "geodetic_crs" VALUES('IGNF','NTFP','Nouvelle Triangulation Francaise Paris grades','geographic 2D','EPSG','6403','IGNF','DATUM_NTFP','EPSG','1262',0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','helmert_transformation');
-INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','Nouvelle Triangulation Francaise Paris grades to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,-168.0000,-60.0000,320.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','grid_transformation');
-INSERT INTO "grid_transformation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','Nouvelle Triangulation Francaise Paris grades to WGS 84 (2)','EPSG','9615','NTv2','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);
-
+INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','other_transformation');
+INSERT INTO "other_transformation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','Nouvelle Triangulation Francaise Paris grades to Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','EPSG','9601','Longitude rotation','IGNF','NTFP','IGNF','NTFG','EPSG','1262',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','concatenated_operation');
+INSERT INTO "concatenated_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','Nouvelle Triangulation Francaise Paris grades to WGS 84','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,'IGNF','IGNF_NTFP_TO_IGNF_NTFG','IGNF','IGNF_NTFG_TO_EPSG_4326',NULL,NULL,0);
+INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','concatenated_operation');
+INSERT INTO "concatenated_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','Nouvelle Triangulation Francaise Paris grades to WGS 84 (2)','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,'IGNF','IGNF_NTFP_TO_IGNF_NTFG','IGNF','IGNF_NTFG_TO_EPSG_4326_GRID',NULL,NULL,0);
 INSERT INTO "crs" VALUES('IGNF','NUKU72GEO','geographic 2D');
 INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU72GEO','IGN 1972 Nuku Hiva','geographic 2D','EPSG','6422','IGNF','DATUM_NUKU72','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NUKU72GEO_TO_EPSG_4326','helmert_transformation');
