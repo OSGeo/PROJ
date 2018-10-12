@@ -28,6 +28,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               directory)
+                      VALUES ('null',
+                              'null',
+                              'CTable2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid',
+                              NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              directory)
                       VALUES ('rgf93_ntf.gsb',
                               'ntf_r93.gsb',    -- the PROJ grid is the reverse way of the EPSG one
                               'NTv2',

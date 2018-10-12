@@ -32,6 +32,11 @@
 
 #include "proj/internal/internal.hpp"
 
+#ifdef _MSC_VER
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #include <exception>
 #include <locale>
 #include <sstream> // std::istringstream
@@ -59,6 +64,23 @@ std::string replaceAll(const std::string &str, const std::string &before,
         }
     }
     return ret;
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Case-insensitive equality test
+ */
+bool ci_equal(const std::string &a, const std::string &b) {
+    const auto size = a.size();
+    if (size != b.size()) {
+        return false;
+    }
+#ifdef _MSC_VER
+    return _strnicmp(a.c_str(), b.c_str(), size) == 0;
+#else
+    return strncasecmp(a.c_str(), b.c_str(), size) == 0;
+#endif
 }
 
 // ---------------------------------------------------------------------------

@@ -7764,18 +7764,29 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
         throw InvalidOperation(
             "ConcatenatedOperation must have at least 2 operations");
     }
+    crs::CRSPtr lastTargetCRS;
     for (size_t i = 0; i < operationsIn.size(); i++) {
-        if (operationsIn[i]->sourceCRS() == nullptr ||
-            operationsIn[i]->targetCRS() == nullptr) {
+        auto l_sourceCRS = operationsIn[i]->sourceCRS();
+        auto l_targetCRS = operationsIn[i]->targetCRS();
+        if (l_sourceCRS == nullptr || l_targetCRS == nullptr) {
             throw InvalidOperation("At least one of the operation lacks a "
                                    "source and/or target CRS");
         }
-        if (i >= 1 &&
-            !operationsIn[i]->sourceCRS()->isEquivalentTo(
-                NN_CHECK_ASSERT(operationsIn[i - 1]->targetCRS()))) {
-            throw InvalidOperation(
-                "Inconsistent chaining of CRS in operations");
+        if (i >= 1) {
+            const auto &sourceCRSIds = l_sourceCRS->identifiers();
+            const auto &targetCRSIds = lastTargetCRS->identifiers();
+            if (sourceCRSIds.size() == 1 && targetCRSIds.size() == 1 &&
+                sourceCRSIds[0]->code() == targetCRSIds[0]->code() &&
+                *sourceCRSIds[0]->codeSpace() ==
+                    *targetCRSIds[0]->codeSpace()) {
+                // same id --> ok
+            } else if (!l_sourceCRS->isEquivalentTo(
+                           NN_CHECK_ASSERT(lastTargetCRS))) {
+                throw InvalidOperation(
+                    "Inconsistent chaining of CRS in operations");
+            }
         }
+        lastTargetCRS = l_targetCRS;
     }
     auto op = ConcatenatedOperation::nn_make_shared<ConcatenatedOperation>(
         operationsIn);
@@ -8303,13 +8314,564 @@ CoordinateOperationPtr CoordinateOperationFactory::createOperation(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+// ---------------------------------------------------------------------------
+
+struct PrecomputedOpCharacteristics {
+    double area_{};
+    double accuracy_{};
+    bool hasGrids_ = false;
+    bool gridsAvailable_ = false;
+    bool gridsKnown_ = false;
+    size_t stepCount_ = 0;
+
+    PrecomputedOpCharacteristics() = default;
+    PrecomputedOpCharacteristics(double area, double accuracy, bool hasGrids,
+                                 bool gridsAvailable, bool gridsKnown,
+                                 size_t stepCount)
+        : area_(area), accuracy_(accuracy), hasGrids_(hasGrids),
+          gridsAvailable_(gridsAvailable), gridsKnown_(gridsKnown),
+          stepCount_(stepCount) {}
+};
+
+// ---------------------------------------------------------------------------
+
+// We could have used a lambda instead of this old-school way, but
+// filterAndSort() is already huge.
+struct SortFunction {
+
+    const std::map<CoordinateOperation *, PrecomputedOpCharacteristics> &map;
+
+    explicit SortFunction(const std::map<CoordinateOperation *,
+                                         PrecomputedOpCharacteristics> &mapIn)
+        : map(mapIn) {}
+
+    // Sorting function
+    // Return true if a < b
+    bool operator()(const CoordinateOperationNNPtr &a,
+                    const CoordinateOperationNNPtr &b) const {
+        auto iterA = map.find(a.get());
+        assert(iterA != map.end());
+        auto iterB = map.find(b.get());
+        assert(iterB != map.end());
+
+        // CAUTION: the order of the comparisons is extremely important
+        // to get the intended result.
+
+        if (iterA->second.hasGrids_ && iterB->second.hasGrids_) {
+            // Operations where grids are all available go before other
+            if (iterA->second.gridsAvailable_ &&
+                !iterB->second.gridsAvailable_) {
+                return true;
+            }
+            if (iterB->second.gridsAvailable_ &&
+                !iterA->second.gridsAvailable_) {
+                return false;
+            }
+        }
+
+        // Operations where grids are all known in our DB go before other
+        if (iterA->second.gridsKnown_ && !iterB->second.gridsKnown_) {
+            return true;
+        }
+        if (iterB->second.gridsKnown_ && !iterA->second.gridsKnown_) {
+            return false;
+        }
+
+        // Operations with known accuracy go before those with unknown accuracy
+        const double accuracyA = iterA->second.accuracy_;
+        const double accuracyB = iterB->second.accuracy_;
+        if (accuracyA >= 0 && accuracyB < 0) {
+            return true;
+        }
+        if (accuracyB >= 0 && accuracyA < 0) {
+            return false;
+        }
+
+        // Operations with larger non-zero area of use go before those with
+        // lower one
+        const double areaA = iterA->second.area_;
+        const double areaB = iterB->second.area_;
+        if (areaA > 0) {
+            if (areaA > areaB) {
+                return true;
+            }
+            if (areaA < areaB) {
+                return false;
+            }
+        } else if (areaB > 0) {
+            return false;
+        }
+
+        // Operations with better accuracy go before those with worse one
+        if (accuracyA >= 0 && accuracyA < accuracyB) {
+            return true;
+        }
+        if (accuracyB >= 0 && accuracyB < accuracyA) {
+            return false;
+        }
+
+        if (accuracyA >= 0 && accuracyA == accuracyB) {
+            // same accuracy ? then prefer operations without grids
+            if (!iterA->second.hasGrids_ && iterB->second.hasGrids_) {
+                return true;
+            }
+            if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
+                return false;
+            }
+        } else if (accuracyA < 0 && accuracyB < 0) {
+            // unknown accuracy ? then prefer operations with grids, which
+            // are likely to have best practical accuracy
+            if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
+                return true;
+            }
+            if (!iterA->second.hasGrids_ && iterB->second.hasGrids_) {
+                return false;
+            }
+        }
+
+        // The less intermediate steps, the better
+        if (iterA->second.stepCount_ < iterB->second.stepCount_) {
+            return true;
+        }
+        if (iterB->second.stepCount_ < iterA->second.stepCount_) {
+            return false;
+        }
+
+        const auto a_name = *(a->name()->description());
+        const auto b_name = *(b->name()->description());
+        // The shorter name, the better ?
+        if (a_name.size() < b_name.size()) {
+            return true;
+        }
+        if (b_name.size() < a_name.size()) {
+            return false;
+        }
+
+        // Arbitrary final criterion
+        return a_name < b_name;
+    }
+};
+
+// ---------------------------------------------------------------------------
+
+static size_t getStepCount(const CoordinateOperationNNPtr &op) {
+    auto concat = util::nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
+    size_t stepCount = 1;
+    if (concat) {
+        stepCount = concat->operations().size();
+    }
+    return stepCount;
+}
+
+// ---------------------------------------------------------------------------
+
+struct FilterAndSort {
+
+    FilterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceListIn,
+                  const CoordinateOperationContextNNPtr &contextIn,
+                  const crs::CRSNNPtr &sourceCRSIn,
+                  const crs::CRSNNPtr &targetCRSIn)
+        : sourceList(sourceListIn), context(contextIn), sourceCRS(sourceCRSIn),
+          targetCRS(targetCRSIn), sourceCRSExtent(getExtent(sourceCRS)),
+          targetCRSExtent(getExtent(targetCRS)),
+          areaOfInterest(context->getAreaOfInterest()),
+          desiredAccuracy(context->getDesiredAccuracy()),
+          sourceAndTargetCRSExtentUse(
+              context->getSourceAndTargetCRSExtentUse()) {
+
+        computeAreaOfIntest();
+        filterOut();
+        sort();
+
+        // And now that we have a sorted list, we can remove uninteresting
+        // results
+        // ...
+        removeSyntheticNullGeogOffset();
+        removeUninterestingOps();
+        removeDuplicateOps();
+    }
+
+    // ----------------------------------------------------------------------
+
+    // cppcheck-suppress functionStatic
+    const std::vector<CoordinateOperationNNPtr> &getRes() { return res; }
+
+    // ----------------------------------------------------------------------
+  private:
+    const std::vector<CoordinateOperationNNPtr> &sourceList;
+    CoordinateOperationContextNNPtr context;
+    crs::CRSNNPtr sourceCRS;
+    crs::CRSNNPtr targetCRS;
+    metadata::ExtentPtr sourceCRSExtent;
+    metadata::ExtentPtr targetCRSExtent;
+    metadata::ExtentPtr areaOfInterest;
+    const double desiredAccuracy = context->getDesiredAccuracy();
+    const CoordinateOperationContext::SourceTargetCRSExtentUse
+        sourceAndTargetCRSExtentUse;
+
+    bool hasOpThatContainsAreaOfInterest = false;
+    std::vector<CoordinateOperationNNPtr> res{};
+
+    // ----------------------------------------------------------------------
+    void computeAreaOfIntest() {
+
+        // Compute an area of interest from the CRS extent if the user did
+        // not specify one
+        if (!areaOfInterest) {
+            if (sourceAndTargetCRSExtentUse ==
+                CoordinateOperationContext::SourceTargetCRSExtentUse::
+                    INTERSECTION) {
+                if (sourceCRSExtent && targetCRSExtent) {
+                    areaOfInterest = sourceCRSExtent->intersection(
+                        NN_CHECK_ASSERT(targetCRSExtent));
+                }
+            } else if (sourceAndTargetCRSExtentUse ==
+                       CoordinateOperationContext::SourceTargetCRSExtentUse::
+                           SMALLEST) {
+                if (sourceCRSExtent && targetCRSExtent) {
+                    if (getPseudoArea(sourceCRSExtent) <
+                        getPseudoArea(targetCRSExtent)) {
+                        areaOfInterest = sourceCRSExtent;
+                    } else {
+                        areaOfInterest = targetCRSExtent;
+                    }
+                } else if (sourceCRSExtent) {
+                    areaOfInterest = sourceCRSExtent;
+                } else {
+                    areaOfInterest = targetCRSExtent;
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+
+    void filterOut() {
+
+        // Filter out operations that do not match the expected accuracy
+        // and area of use.
+        const auto spatialCriterion = context->getSpatialCriterion();
+        for (const auto &op : sourceList) {
+            if (desiredAccuracy != 0) {
+                const double accuracy = getAccuracy(op);
+                if (accuracy < 0 || accuracy > desiredAccuracy) {
+                    continue;
+                }
+            }
+            if (areaOfInterest) {
+                bool emptyIntersection = false;
+                auto extent = getExtent(op, true, emptyIntersection);
+                if (!extent)
+                    continue;
+                bool extentContains =
+                    extent->contains(NN_CHECK_ASSERT(areaOfInterest));
+                if (extentContains) {
+                    hasOpThatContainsAreaOfInterest = true;
+                }
+                if (spatialCriterion ==
+                        CoordinateOperationContext::SpatialCriterion::
+                            STRICT_CONTAINMENT &&
+                    !extentContains) {
+                    continue;
+                }
+                if (spatialCriterion ==
+                        CoordinateOperationContext::SpatialCriterion::
+                            PARTIAL_INTERSECTION &&
+                    !extent->intersects(NN_CHECK_ASSERT(areaOfInterest))) {
+                    continue;
+                }
+            } else if (sourceAndTargetCRSExtentUse ==
+                       CoordinateOperationContext::SourceTargetCRSExtentUse::
+                           BOTH) {
+                bool emptyIntersection = false;
+                auto extent = getExtent(op, true, emptyIntersection);
+                if (!extent)
+                    continue;
+                bool extentContainsSource =
+                    !sourceCRSExtent ||
+                    extent->contains(NN_CHECK_ASSERT(sourceCRSExtent));
+                bool extentContainsTarget =
+                    !targetCRSExtent ||
+                    extent->contains(NN_CHECK_ASSERT(targetCRSExtent));
+                if (extentContainsSource && extentContainsTarget) {
+                    hasOpThatContainsAreaOfInterest = true;
+                }
+                if (spatialCriterion ==
+                    CoordinateOperationContext::SpatialCriterion::
+                        STRICT_CONTAINMENT) {
+                    if (!extentContainsSource || !extentContainsTarget) {
+                        continue;
+                    }
+                } else if (spatialCriterion ==
+                           CoordinateOperationContext::SpatialCriterion::
+                               PARTIAL_INTERSECTION) {
+                    bool extentIntersectsSource =
+                        !sourceCRSExtent ||
+                        extent->intersects(NN_CHECK_ASSERT(sourceCRSExtent));
+                    bool extentIntersectsTarget =
+                        targetCRSExtent &&
+                        extent->intersects(NN_CHECK_ASSERT(targetCRSExtent));
+                    if (!extentIntersectsSource || !extentIntersectsTarget) {
+                        continue;
+                    }
+                }
+            }
+            res.emplace_back(op);
+        }
+    }
+
+    // ----------------------------------------------------------------------
+
+    void sort() {
+
+        // Precompute a number of parameters for each operation that will be
+        // useful for the sorting.
+        std::map<CoordinateOperation *, PrecomputedOpCharacteristics> map;
+        for (const auto &op : res) {
+            bool dummy = false;
+            auto extentOp = getExtent(op, true, dummy);
+            double area = 0.0;
+            if (extentOp) {
+                if (areaOfInterest) {
+                    area = getPseudoArea(extentOp->intersection(
+                        NN_CHECK_ASSERT(areaOfInterest)));
+                } else if (sourceCRSExtent && targetCRSExtent) {
+                    auto x = extentOp->intersection(
+                        NN_CHECK_ASSERT(sourceCRSExtent));
+                    auto y = extentOp->intersection(
+                        NN_CHECK_ASSERT(targetCRSExtent));
+                    area = getPseudoArea(x) + getPseudoArea(y) -
+                           ((x && y) ? getPseudoArea(
+                                           x->intersection(NN_CHECK_ASSERT(y)))
+                                     : 0.0);
+                } else if (sourceCRSExtent) {
+                    area = getPseudoArea(extentOp->intersection(
+                        NN_CHECK_ASSERT(sourceCRSExtent)));
+                } else if (targetCRSExtent) {
+                    area = getPseudoArea(extentOp->intersection(
+                        NN_CHECK_ASSERT(targetCRSExtent)));
+                } else {
+                    area = getPseudoArea(extentOp);
+                }
+            }
+
+            bool hasGrids = false;
+            bool gridsAvailable = true;
+            bool gridsKnown = true;
+            if (context->getAuthorityFactory() &&
+                context->getGridAvailabilityUse() ==
+                    CoordinateOperationContext::GridAvailabilityUse::
+                        USE_FOR_SORTING) {
+                for (const auto &gridDesc : op->gridsNeeded(
+                         context->getAuthorityFactory()->databaseContext())) {
+                    hasGrids = true;
+                    if (!gridDesc.available) {
+                        gridsAvailable = false;
+                    }
+                    if (gridDesc.packageName.empty()) {
+                        gridsKnown = false;
+                    }
+                }
+            }
+
+            const auto stepCount = getStepCount(op);
+
+            map[op.get()] = PrecomputedOpCharacteristics(
+                area, getAccuracy(op), hasGrids, gridsAvailable, gridsKnown,
+                stepCount);
+        }
+
+        // Sort !
+        std::sort(res.begin(), res.end(), SortFunction(map));
+    }
+
+    // ----------------------------------------------------------------------
+
+    void removeSyntheticNullGeogOffset() {
+
+        // If we have more than one result, and than the last result is the
+        // default
+        // "Null geographic offset" operation we have synthetized, remove it as
+        // all previous results are necessarily better
+        if (hasOpThatContainsAreaOfInterest && res.size() > 1 &&
+            (*(res.back()->name()->description()))
+                    .find("Null geographic offset") != std::string::npos) {
+            std::vector<CoordinateOperationNNPtr> resTemp;
+            for (size_t i = 0; i < res.size() - 1; i++) {
+                resTemp.emplace_back(res[i]);
+            }
+            res = std::move(resTemp);
+        }
+    }
+
+    // ----------------------------------------------------------------------
+
+    void removeUninterestingOps() {
+
+        // Eliminate operations that bring nothing, ie for a given area of use,
+        // do not keep operations that have greater accuracy. Actually we must
+        // be a bit more subtle than that, and take into account grid
+        // availability
+        std::vector<CoordinateOperationNNPtr> resTemp;
+        metadata::ExtentPtr lastExtent;
+        double lastAccuracy = -1;
+        bool lastHasGrids = false;
+        bool lastGridsAvailable = true;
+        std::set<std::set<std::string>> setOfSetOfGrids;
+        size_t lastStepCount = 0;
+        CoordinateOperationPtr lastOp;
+
+        bool first = true;
+        for (const auto &op : res) {
+            const auto curAccuracy = getAccuracy(op);
+            bool dummy = false;
+            const auto curExtent = getExtent(op, true, dummy);
+            bool curHasGrids = false;
+            bool curGridsAvailable = true;
+            std::set<std::string> curSetOfGrids;
+
+            const auto curStepCount = getStepCount(op);
+
+            if (context->getAuthorityFactory()) {
+                for (const auto &gridDesc : op->gridsNeeded(
+                         context->getAuthorityFactory()->databaseContext())) {
+                    curHasGrids = true;
+                    curSetOfGrids.insert(gridDesc.shortName);
+                    if (!gridDesc.available) {
+                        curGridsAvailable = false;
+                    }
+                }
+            }
+
+            if (first) {
+                resTemp.emplace_back(op);
+
+                lastHasGrids = curHasGrids;
+                lastGridsAvailable = curGridsAvailable;
+                first = false;
+            } else {
+                if (lastOp->isEquivalentTo(op)) {
+                    continue;
+                }
+                const bool sameExtent =
+                    ((!curExtent && !lastExtent) ||
+                     (curExtent && lastExtent &&
+                      curExtent->contains(NN_CHECK_ASSERT(lastExtent)) &&
+                      lastExtent->contains(NN_CHECK_ASSERT(curExtent))));
+                if (curAccuracy > lastAccuracy && sameExtent) {
+                    // If that set of grids has always been used for that
+                    // extent,
+                    // no need to add them again
+                    if (setOfSetOfGrids.find(curSetOfGrids) !=
+                        setOfSetOfGrids.end()) {
+                        continue;
+                    }
+                    // If we have already found a operation without grids for
+                    // that extent, no need to add any lower accuracy operation
+                    if (!lastHasGrids) {
+                        continue;
+                    }
+                    // If we had only operations involving grids, but one
+                    // past operation had available grids, no need to add
+                    // the new one.
+                    if (curHasGrids && curGridsAvailable &&
+                        lastGridsAvailable) {
+                        continue;
+                    }
+                } else if (curAccuracy == lastAccuracy && sameExtent) {
+                    if (curStepCount > lastStepCount) {
+                        continue;
+                    }
+                }
+
+                resTemp.emplace_back(op);
+
+                if (sameExtent) {
+                    if (!curHasGrids) {
+                        lastHasGrids = false;
+                    }
+                    if (curGridsAvailable) {
+                        lastGridsAvailable = true;
+                    }
+                } else {
+                    setOfSetOfGrids.clear();
+
+                    lastHasGrids = curHasGrids;
+                    lastGridsAvailable = curGridsAvailable;
+                }
+            }
+
+            lastOp = op.as_nullable();
+            lastStepCount = curStepCount;
+            lastExtent = curExtent;
+            lastAccuracy = curAccuracy;
+            if (!curSetOfGrids.empty()) {
+                setOfSetOfGrids.insert(curSetOfGrids);
+            }
+        }
+        res = std::move(resTemp);
+    }
+
+    // ----------------------------------------------------------------------
+
+    void removeDuplicateOps() {
+
+        // When going from EPSG:4807 (NTF Paris) to EPSG:4171 (RGC93), we get
+        // EPSG:7811, NTF (Paris) to RGF93 (2), 1 m
+        // and unknown id, NTF (Paris) to NTF (1) + Inverse of RGF93 to NTF (2),
+        // 1 m
+        // both have same PROJ string and extent
+        // Do not keep the later (that has more steps) as it adds no value.
+
+        std::set<std::string> setPROJPlusExtent;
+        std::vector<CoordinateOperationNNPtr> resTemp;
+        for (const auto &op : res) {
+            auto formatter = io::PROJStringFormatter::create();
+            try {
+                std::string key(op->exportToPROJString(formatter));
+                bool dummy = false;
+                std::ostringstream buffer;
+                buffer.imbue(std::locale::classic());
+                auto extentOp = getExtent(op, true, dummy);
+                if (extentOp) {
+                    auto geogElts = extentOp->geographicElements();
+                    if (geogElts.size() == 1) {
+                        auto bbox = util::nn_dynamic_pointer_cast<
+                            metadata::GeographicBoundingBox>(geogElts[0]);
+                        if (bbox) {
+                            double w = bbox->westBoundLongitude();
+                            double s = bbox->southBoundLatitude();
+                            double e = bbox->eastBoundLongitude();
+                            double n = bbox->northBoundLatitude();
+                            buffer << "-" << w;
+                            buffer << "-" << s;
+                            buffer << "-" << e;
+                            buffer << "-" << n;
+                        }
+                    }
+                }
+
+                if (setPROJPlusExtent.find(key) == setPROJPlusExtent.end()) {
+                    resTemp.emplace_back(op);
+                    setPROJPlusExtent.insert(key);
+                }
+            } catch (const std::exception &) {
+                resTemp.emplace_back(op);
+            }
+        }
+        res = std::move(resTemp);
+    }
+};
+
+// ---------------------------------------------------------------------------
+
 /** \brief Filter operations and sort them given context.
  *
  * If a desired accuracy is specified, only keep operations whose accuracy
  * is at least the desired one.
  * If an area of interest is specified, only keep operations whose area of
- * use
- * include the area of interest.
+ * use include the area of interest.
  * Then sort remaining operations by descending area of use, and increasing
  * accuracy.
  */
@@ -8317,231 +8879,7 @@ static std::vector<CoordinateOperationNNPtr>
 filterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceList,
               CoordinateOperationContextNNPtr context,
               const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) {
-    std::vector<CoordinateOperationNNPtr> res;
-    const double desiredAccuracy = context->getDesiredAccuracy();
-    auto areaOfInterest = context->getAreaOfInterest();
-    const auto sourceAndTargetCRSExtentUse =
-        context->getSourceAndTargetCRSExtentUse();
-    auto sourceCRSExtent = getExtent(sourceCRS);
-    auto targetCRSExtent = getExtent(targetCRS);
-    if (!areaOfInterest) {
-        if (sourceAndTargetCRSExtentUse ==
-            CoordinateOperationContext::SourceTargetCRSExtentUse::
-                INTERSECTION) {
-            if (sourceCRSExtent && targetCRSExtent) {
-                areaOfInterest = sourceCRSExtent->intersection(
-                    NN_CHECK_ASSERT(targetCRSExtent));
-            }
-        } else if (sourceAndTargetCRSExtentUse ==
-                   CoordinateOperationContext::SourceTargetCRSExtentUse::
-                       SMALLEST) {
-            if (sourceCRSExtent && targetCRSExtent) {
-                if (getPseudoArea(sourceCRSExtent) <
-                    getPseudoArea(targetCRSExtent)) {
-                    areaOfInterest = sourceCRSExtent;
-                } else {
-                    areaOfInterest = targetCRSExtent;
-                }
-            } else if (sourceCRSExtent) {
-                areaOfInterest = sourceCRSExtent;
-            } else {
-                areaOfInterest = targetCRSExtent;
-            }
-        }
-    }
-    const auto spatialCriterion = context->getSpatialCriterion();
-    bool hasOpThatContainsAreaOfInterset = false;
-    for (const auto &op : sourceList) {
-        if (desiredAccuracy != 0) {
-            const double accuracy = getAccuracy(op);
-            if (accuracy < 0 || accuracy > desiredAccuracy) {
-                continue;
-            }
-        }
-        if (areaOfInterest) {
-            bool emptyIntersection = false;
-            auto extent = getExtent(op, true, emptyIntersection);
-            if (!extent)
-                continue;
-            bool extentContains =
-                extent->contains(NN_CHECK_ASSERT(areaOfInterest));
-            if (extentContains) {
-                hasOpThatContainsAreaOfInterset = true;
-            }
-            if (spatialCriterion == CoordinateOperationContext::
-                                        SpatialCriterion::STRICT_CONTAINMENT &&
-                !extentContains) {
-                continue;
-            }
-            if (spatialCriterion ==
-                    CoordinateOperationContext::SpatialCriterion::
-                        PARTIAL_INTERSECTION &&
-                !extent->intersects(NN_CHECK_ASSERT(areaOfInterest))) {
-                continue;
-            }
-        } else if (sourceAndTargetCRSExtentUse ==
-                   CoordinateOperationContext::SourceTargetCRSExtentUse::BOTH) {
-            bool emptyIntersection = false;
-            auto extent = getExtent(op, true, emptyIntersection);
-            if (!extent)
-                continue;
-            bool extentContainsSource =
-                !sourceCRSExtent ||
-                extent->contains(NN_CHECK_ASSERT(sourceCRSExtent));
-            bool extentContainsTarget =
-                !targetCRSExtent ||
-                extent->contains(NN_CHECK_ASSERT(targetCRSExtent));
-            if (extentContainsSource && extentContainsTarget) {
-                hasOpThatContainsAreaOfInterset = true;
-            }
-            if (spatialCriterion == CoordinateOperationContext::
-                                        SpatialCriterion::STRICT_CONTAINMENT) {
-                if (!extentContainsSource || !extentContainsTarget) {
-                    continue;
-                }
-            } else if (spatialCriterion ==
-                       CoordinateOperationContext::SpatialCriterion::
-                           PARTIAL_INTERSECTION) {
-                bool extentIntersectsSource =
-                    !sourceCRSExtent ||
-                    extent->intersects(NN_CHECK_ASSERT(sourceCRSExtent));
-                bool extentIntersectsTarget =
-                    targetCRSExtent &&
-                    extent->intersects(NN_CHECK_ASSERT(targetCRSExtent));
-                if (!extentIntersectsSource || !extentIntersectsTarget) {
-                    continue;
-                }
-            }
-        }
-        res.emplace_back(op);
-    }
-
-    struct AreaAccuracy {
-        double area_{};
-        double accuracy_{};
-        bool gridsAvailable_ = false;
-        bool gridsKnown_ = false;
-
-        AreaAccuracy() = default;
-        AreaAccuracy(double area, double accuracy, bool gridsAvailable,
-                     bool gridsKnown)
-            : area_(area), accuracy_(accuracy), gridsAvailable_(gridsAvailable),
-              gridsKnown_(gridsKnown) {}
-    };
-
-    std::map<CoordinateOperation *, AreaAccuracy> map;
-    for (const auto &op : res) {
-        bool dummy = false;
-        auto extentOp = getExtent(op, true, dummy);
-        double area = 0.0;
-        if (extentOp) {
-            if (areaOfInterest) {
-                area = getPseudoArea(
-                    extentOp->intersection(NN_CHECK_ASSERT(areaOfInterest)));
-            } else if (sourceCRSExtent && targetCRSExtent) {
-                auto x =
-                    extentOp->intersection(NN_CHECK_ASSERT(sourceCRSExtent));
-                auto y =
-                    extentOp->intersection(NN_CHECK_ASSERT(targetCRSExtent));
-                area = getPseudoArea(x) + getPseudoArea(y) -
-                       ((x && y)
-                            ? getPseudoArea(x->intersection(NN_CHECK_ASSERT(y)))
-                            : 0.0);
-            } else if (sourceCRSExtent) {
-                area = getPseudoArea(
-                    extentOp->intersection(NN_CHECK_ASSERT(sourceCRSExtent)));
-            } else if (targetCRSExtent) {
-                area = getPseudoArea(
-                    extentOp->intersection(NN_CHECK_ASSERT(targetCRSExtent)));
-            } else {
-                area = getPseudoArea(extentOp);
-            }
-        }
-
-        bool gridsAvailable = true;
-        bool gridsKnown = true;
-        if (context->getAuthorityFactory() &&
-            context->getGridAvailabilityUse() ==
-                CoordinateOperationContext::GridAvailabilityUse::
-                    USE_FOR_SORTING) {
-            for (const auto &gridDesc : op->gridsNeeded(
-                     context->getAuthorityFactory()->databaseContext())) {
-                if (!gridDesc.available) {
-                    gridsAvailable = false;
-                }
-                if (gridDesc.packageName.empty()) {
-                    gridsKnown = false;
-                }
-            }
-        }
-
-        map.insert(std::pair<CoordinateOperation *, AreaAccuracy>(
-            op.get(),
-            AreaAccuracy(area, getAccuracy(op), gridsAvailable, gridsKnown)));
-    }
-
-    auto sortLambda = [&map](CoordinateOperationNNPtr a,
-                             CoordinateOperationNNPtr b) {
-        auto iterA = map.find(a.get());
-        assert(iterA != map.end());
-        auto iterB = map.find(b.get());
-        assert(iterB != map.end());
-        const double areaA = iterA->second.area_;
-        const double areaB = iterB->second.area_;
-        const double accuracyA = iterA->second.accuracy_;
-        const double accuracyB = iterB->second.accuracy_;
-
-        if (iterA->second.gridsAvailable_ && !iterB->second.gridsAvailable_) {
-            return 0;
-        }
-        if (iterB->second.gridsAvailable_ && !iterA->second.gridsAvailable_) {
-            return 1;
-        }
-
-        if (!iterA->second.gridsKnown_ && iterB->second.gridsKnown_) {
-            return 0;
-        }
-        if (!iterB->second.gridsKnown_ && iterA->second.gridsKnown_) {
-            return 1;
-        }
-
-        if (accuracyA < 0 && accuracyB >= 0) {
-            return 0;
-        }
-        if (accuracyB < 0 && accuracyA >= 0) {
-            return 1;
-        }
-
-        if (areaA > 0) {
-            if (areaA > areaB) {
-                return 1;
-            }
-            if (areaA < areaB) {
-                return 0;
-            }
-        } else if (areaB > 0) {
-            return 0;
-        }
-
-        if (accuracyA >= 0 && accuracyA < accuracyB) {
-            return 1;
-        }
-        return 0;
-    };
-
-    std::sort(res.begin(), res.end(), sortLambda);
-
-    if (hasOpThatContainsAreaOfInterset && res.size() > 1 &&
-        (*(res.back()->name()->description())).find("Null geographic offset") !=
-            std::string::npos) {
-        std::vector<CoordinateOperationNNPtr> resTemp;
-        for (size_t i = 0; i < res.size() - 1; i++) {
-            resTemp.emplace_back(res[i]);
-        }
-        res = std::move(resTemp);
-    }
-
-    return res;
+    return FilterAndSort(sourceList, context, sourceCRS, targetCRS).getRes();
 }
 //! @endcond
 
@@ -8734,22 +9072,37 @@ CoordinateOperationFactory::Private::createOperations(
         (derivedDst == nullptr ||
          !derivedDst->baseCRS()->isEquivalentTo(
              sourceCRS, util::IComparable::Criterion::EQUIVALENT))) {
+
         res = findOpsInRegistryDirect(sourceCRS, targetCRS, context);
         if (!sourceCRS->isEquivalentTo(targetCRS)) {
             auto resFromInverse = applyInverse(
                 findOpsInRegistryDirect(targetCRS, sourceCRS, context));
             res.insert(res.end(), resFromInverse.begin(), resFromInverse.end());
 
-            if (res.empty()) {
-                res = findsOpsInRegistryWithIntermediate(sourceCRS, targetCRS,
-                                                         context);
+            // If we get at least a result with perfect accuracy, do not bother
+            // generating synthetic transforms.
+            for (const auto &op : res) {
+                const double acc = getAccuracy(op);
+                if (acc == 0.0) {
+                    return res;
+                }
+            }
+
+            // NAD27 to NAD83 has tens of results already. No need to look
+            // for a pivot
+            if (res.size() < 5 || getenv("PROJ_FORCE_SEARCH_PIVOT")) {
+                auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
+                    sourceCRS, targetCRS, context);
+                res.insert(res.end(), resWithIntermediate.begin(),
+                           resWithIntermediate.end());
             }
         }
 
         // If we get at least a result with perfect accuracy, do not bother
         // generating synthetic transforms.
         for (const auto &op : res) {
-            if (getAccuracy(op) == 0.0) {
+            const double acc = getAccuracy(op);
+            if (acc == 0.0) {
                 return res;
             }
         }

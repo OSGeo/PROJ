@@ -7,6 +7,7 @@
     - test sphericalCS
     - identification of CRS code from registry from name, etc
     - proj.db: integrate ESRI catalog ?
+    - identify ? (cf OSRFindMatches)
 
     - transformation with WEST longitude
     GEOGCS["Mars2015",
@@ -87,4 +88,11 @@ DATABASE the official and custom one, and for every table, create a temporary
 view that UNION ALL the tables of both dbs. Then that would be transparent for 
 the rest of the code that does database queries.
 
+~~~~~~~~~~~~~~~~~~~~~
 
+IGNF registry
+
+There's a much better way to build the IGNF registry using the .xml file at
+https://registre.ign.fr/ign/IGNF/IGNF/
+More details:
+https://lists.osgeo.org/pipermail/francophone/2018-October/006240.html

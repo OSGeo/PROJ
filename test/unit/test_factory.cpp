@@ -1414,22 +1414,22 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         }
     }
 
-    void createGridTransformationForPivotTesting(const std::string &src,
-                                                 const std::string &dst) {
+    void createTransformationForPivotTesting(const std::string &src,
+                                             const std::string &dst) {
         ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
                             "VALUES('OTHER','" +
-                            src + "_" + dst + "','grid_transformation');"))
+                            src + "_" + dst + "','helmert_transformation');"))
             << last_error();
-        ASSERT_TRUE(
-            execute("INSERT INTO grid_transformation "
-                    "VALUES('OTHER','" +
-                    src + "_" + dst + "','name','EPSG','9615'"
-                                      ",'NTv2','NS_" +
-                    src + "','" + src + "','NS_" + dst + "','" + dst +
-                    "','EPSG'"
-                    ",'1262',1.0,'EPSG','"
-                    "8656','Latitude and longitude difference "
-                    "file','foo.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        ASSERT_TRUE(execute(
+            "INSERT INTO helmert_transformation "
+            "VALUES('OTHER','" +
+            src + "_" + dst + "','name','EPSG','9603','"
+                              "Geocentric translations (geog2D domain)','NS_" +
+            src + "','" + src + "','NS_" + dst + "','" + dst +
+            "','EPSG'"
+            ",'1262',1.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+            "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
     }
 
@@ -1827,8 +1827,8 @@ TEST_F(
     populateWithFakeEPSG();
     createSourceTargetPivotCRS();
 
-    createGridTransformationForPivotTesting("SOURCE", "PIVOT");
-    createGridTransformationForPivotTesting("TARGET", "PIVOT");
+    createTransformationForPivotTesting("SOURCE", "PIVOT");
+    createTransformationForPivotTesting("TARGET", "PIVOT");
 
     checkSourceToOther();
 }
@@ -1842,8 +1842,8 @@ TEST_F(
     populateWithFakeEPSG();
     createSourceTargetPivotCRS();
 
-    createGridTransformationForPivotTesting("SOURCE", "PIVOT");
-    createGridTransformationForPivotTesting("PIVOT", "TARGET");
+    createTransformationForPivotTesting("SOURCE", "PIVOT");
+    createTransformationForPivotTesting("PIVOT", "TARGET");
 
     checkSourceToOther();
 }
@@ -1857,8 +1857,8 @@ TEST_F(
     populateWithFakeEPSG();
     createSourceTargetPivotCRS();
 
-    createGridTransformationForPivotTesting("PIVOT", "SOURCE");
-    createGridTransformationForPivotTesting("PIVOT", "TARGET");
+    createTransformationForPivotTesting("PIVOT", "SOURCE");
+    createTransformationForPivotTesting("PIVOT", "TARGET");
 
     checkSourceToOther();
 }
@@ -1872,8 +1872,8 @@ TEST_F(
     populateWithFakeEPSG();
     createSourceTargetPivotCRS();
 
-    createGridTransformationForPivotTesting("PIVOT", "SOURCE");
-    createGridTransformationForPivotTesting("TARGET", "PIVOT");
+    createTransformationForPivotTesting("PIVOT", "SOURCE");
+    createTransformationForPivotTesting("TARGET", "PIVOT");
 
     checkSourceToOther();
 }

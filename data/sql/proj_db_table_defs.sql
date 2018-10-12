@@ -423,7 +423,7 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_method must be ''vridshift'' when proj_grid_format is ''GTX''')
         WHERE NEW.proj_method != 'vgridshift' AND NEW.proj_grid_format IN ('GTX');
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: original_grid_name must be referenced in grid_transformation.grid_name')
-        WHERE NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
+        WHERE NEW.original_grid_name NOT IN ('null') AND NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: NEW.inverse_direction must be 0 when original_grid_name = proj_grid_name')
         WHERE NEW.original_grid_name = NEW.proj_grid_name AND NEW.inverse_direction != 0;
 END;

@@ -339,6 +339,30 @@ static void PROJ_SQLITE_pseudo_area_from_swne(sqlite3_context *pContext,
 
 // ---------------------------------------------------------------------------
 
+static void PROJ_SQLITE_intersects_bbox(sqlite3_context *pContext,
+                                        int /* argc */, sqlite3_value **argv) {
+    bool b0, b1, b2, b3, b4, b5, b6, b7;
+    double south_lat1 = PROJ_SQLITE_GetValAsDouble(argv[0], b0);
+    double west_lon1 = PROJ_SQLITE_GetValAsDouble(argv[1], b1);
+    double north_lat1 = PROJ_SQLITE_GetValAsDouble(argv[2], b2);
+    double east_lon1 = PROJ_SQLITE_GetValAsDouble(argv[3], b3);
+    double south_lat2 = PROJ_SQLITE_GetValAsDouble(argv[4], b4);
+    double west_lon2 = PROJ_SQLITE_GetValAsDouble(argv[5], b5);
+    double north_lat2 = PROJ_SQLITE_GetValAsDouble(argv[6], b6);
+    double east_lon2 = PROJ_SQLITE_GetValAsDouble(argv[7], b7);
+    if (!b0 || !b1 || !b2 || !b3 || !b4 || !b5 || !b6 || !b7) {
+        sqlite3_result_null(pContext);
+        return;
+    }
+    auto bbox1 = metadata::GeographicBoundingBox::create(west_lon1, south_lat1,
+                                                         east_lon1, north_lat1);
+    auto bbox2 = metadata::GeographicBoundingBox::create(west_lon2, south_lat2,
+                                                         east_lon2, north_lat2);
+    sqlite3_result_int(pContext, bbox1->intersects(bbox2) ? 1 : 0);
+}
+
+// ---------------------------------------------------------------------------
+
 #ifndef SQLITE_DETERMINISTIC
 #define SQLITE_DETERMINISTIC 0
 #endif
@@ -348,6 +372,10 @@ void DatabaseContext::Private::registerFunctions() {
                             SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
                             PROJ_SQLITE_pseudo_area_from_swne, nullptr,
                             nullptr);
+
+    sqlite3_create_function(sqlite_handle_, "intersects_bbox", 8,
+                            SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
+                            PROJ_SQLITE_intersects_bbox, nullptr, nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -2534,6 +2562,33 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             if (!accuracy.empty()) {
                 accuracies.emplace_back(
                     metadata::PositionalAccuracy::create(accuracy));
+            } else {
+                // Try to compute a reasonable accuracy from the members
+                double totalAcc = -1;
+                try {
+                    for (const auto &op : operations) {
+                        auto accs = op->coordinateOperationAccuracies();
+                        if (accs.size() == 1) {
+                            double acc = c_locale_stod(accs[0]->value());
+                            if (totalAcc < 0) {
+                                totalAcc = acc;
+                            } else {
+                                totalAcc += acc;
+                            }
+                        } else {
+                            totalAcc = -1;
+                            break;
+                        }
+                    }
+                    if (totalAcc >= 0) {
+                        std::ostringstream buffer;
+                        buffer.imbue(std::locale::classic());
+                        buffer << totalAcc;
+                        accuracies.emplace_back(
+                            metadata::PositionalAccuracy::create(buffer.str()));
+                    }
+                } catch (const std::exception &) {
+                }
             }
             return operation::ConcatenatedOperation::create(props, operations,
                                                             accuracies);
@@ -2685,6 +2740,37 @@ buildIntermediateWhere(const std::vector<std::pair<std::string, std::string>>
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
+                               const std::string &sourceCRSAuthName,
+                               const std::string &sourceCRSCode,
+                               const std::string &targetCRSAuthName,
+                               const std::string &targetCRSCode) {
+    auto concat =
+        util::nn_dynamic_pointer_cast<operation::ConcatenatedOperation>(op);
+    if (!concat) {
+        return false;
+    }
+    auto ops = concat->operations();
+    for (size_t i = 0; i + 1 < ops.size(); i++) {
+        auto targetCRS = ops[i]->targetCRS();
+        if (targetCRS) {
+            auto ids = targetCRS->identifiers();
+            if (ids.size() == 1 &&
+                ((*ids[0]->codeSpace() == sourceCRSAuthName &&
+                  ids[0]->code() == sourceCRSCode) ||
+                 (*ids[0]->codeSpace() == targetCRSAuthName &&
+                  ids[0]->code() == targetCRSCode))) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns a list operation::CoordinateOperation between two CRS,
  * using intermediate codes.
  *
@@ -2727,12 +2813,25 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         &intermediateCRSAuthCodes) const {
 
     const std::string sqlProlog(
-        "SELECT v1.auth_name as auth_name1, v1.code as code1, "
-        "v1.accuracy as accuracy1, "
-        "v2.auth_name as auth_name2, v2.code as code2, "
-        "v2.accuracy as accuracy2 "
+        "SELECT v1.auth_name AS auth_name1, v1.code AS code1, "
+        "v1.accuracy AS accuracy1, "
+        "v2.auth_name AS auth_name2, v2.code AS code2, "
+        "v2.accuracy as accuracy2, "
+        "a1.south_lat AS south_lat1, "
+        "a1.west_lon AS west_lon1, "
+        "a1.north_lat AS north_lat1, "
+        "a1.east_lon AS east_lon1, "
+        "a2.south_lat AS south_lat2, "
+        "a2.west_lon AS west_lon2, "
+        "a2.north_lat AS north_lat2, "
+        "a2.east_lon AS east_lon2 "
         "FROM coordinate_operation_view v1 "
         "JOIN coordinate_operation_view v2 ");
+    const std::string joinArea(
+        "JOIN area a1 ON v1.area_of_use_auth_name = a1.auth_name "
+        "AND v1.area_of_use_code = a1.code "
+        "JOIN area a2 ON v2.area_of_use_auth_name = a2.auth_name "
+        "AND v2.area_of_use_code = a2.code ");
     const std::string orderBy(
         "ORDER BY (CASE WHEN accuracy1 is NULL THEN 1 ELSE 0 END) + "
         "(CASE WHEN accuracy2 is NULL THEN 1 ELSE 0 END), "
@@ -2742,15 +2841,18 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
     // Case (source->intermediate) and (intermediate->target)
     std::string sql(
-        sqlProlog +
-        "ON v1.target_crs_auth_name = v2.source_crs_auth_name "
-        "AND v1.target_crs_code = v2.source_crs_code "
+        sqlProlog + "ON v1.target_crs_auth_name = v2.source_crs_auth_name "
+                    "AND v1.target_crs_code = v2.source_crs_code " +
+        joinArea +
         "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
         "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ");
     auto params = std::vector<SQLValues>{sourceCRSAuthName, sourceCRSCode,
                                          targetCRSAuthName, targetCRSCode};
 
-    std::string additionalWhere("AND v1.deprecated = 0 AND v2.deprecated = 0 ");
+    std::string additionalWhere(
+        "AND v1.deprecated = 0 AND v2.deprecated = 0 "
+        "AND intersects_bbox(south_lat1, west_lon1, north_lat1, east_lon1, "
+        "south_lat2, west_lon2, north_lat2, east_lon2) == 1 ");
     if (!getAuthority().empty()) {
         additionalWhere += "AND v1.auth_name = ? AND v2.auth_name = ? ";
         params.emplace_back(getAuthority());
@@ -2777,18 +2879,27 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         auto op1 = d->createFactory(auth_name1)
                        ->createCoordinateOperation(code1, true,
                                                    usePROJAlternativeGridNames);
+        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
         auto op2 = d->createFactory(auth_name2)
                        ->createCoordinateOperation(code2, true,
                                                    usePROJAlternativeGridNames);
+        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+
         listTmp.emplace_back(
             operation::ConcatenatedOperation::createComputeMetadata({op1, op2},
                                                                     false));
     }
 
     // Case (source->intermediate) and (target->intermediate)
-    sql = sqlProlog +
-          "ON v1.target_crs_auth_name = v2.target_crs_auth_name "
-          "AND v1.target_crs_code = v2.target_crs_code "
+    sql = sqlProlog + "ON v1.target_crs_auth_name = v2.target_crs_auth_name "
+                      "AND v1.target_crs_code = v2.target_crs_code " +
+          joinArea +
           "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
     intermediateWhere =
@@ -2805,18 +2916,27 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         auto op1 = d->createFactory(auth_name1)
                        ->createCoordinateOperation(code1, true,
                                                    usePROJAlternativeGridNames);
+        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
         auto op2 = d->createFactory(auth_name2)
                        ->createCoordinateOperation(code2, true,
                                                    usePROJAlternativeGridNames);
+        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+
         listTmp.emplace_back(
             operation::ConcatenatedOperation::createComputeMetadata(
                 {op1, op2->inverse()}, false));
     }
 
     // Case (intermediate->source) and (intermediate->target)
-    sql = sqlProlog +
-          "ON v1.source_crs_auth_name = v2.source_crs_auth_name "
-          "AND v1.source_crs_code = v2.source_crs_code "
+    sql = sqlProlog + "ON v1.source_crs_auth_name = v2.source_crs_auth_name "
+                      "AND v1.source_crs_code = v2.source_crs_code " +
+          joinArea +
           "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
           "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ";
     intermediateWhere =
@@ -2833,18 +2953,27 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         auto op1 = d->createFactory(auth_name1)
                        ->createCoordinateOperation(code1, true,
                                                    usePROJAlternativeGridNames);
+        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
         auto op2 = d->createFactory(auth_name2)
                        ->createCoordinateOperation(code2, true,
                                                    usePROJAlternativeGridNames);
+        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+
         listTmp.emplace_back(
             operation::ConcatenatedOperation::createComputeMetadata(
                 {op1->inverse(), op2}, false));
     }
 
     // Case (intermediate->source) and (target->intermediate)
-    sql = sqlProlog +
-          "ON v1.source_crs_auth_name = v2.target_crs_auth_name "
-          "AND v1.source_crs_code = v2.target_crs_code "
+    sql = sqlProlog + "ON v1.source_crs_auth_name = v2.target_crs_auth_name "
+                      "AND v1.source_crs_code = v2.target_crs_code " +
+          joinArea +
           "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
     intermediateWhere =
@@ -2861,9 +2990,18 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         auto op1 = d->createFactory(auth_name1)
                        ->createCoordinateOperation(code1, true,
                                                    usePROJAlternativeGridNames);
+        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
         auto op2 = d->createFactory(auth_name2)
                        ->createCoordinateOperation(code2, true,
                                                    usePROJAlternativeGridNames);
+        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+
         listTmp.emplace_back(
             operation::ConcatenatedOperation::createComputeMetadata(
                 {op1->inverse(), op2->inverse()}, false));

@@ -3188,6 +3188,19 @@ const std::string &PROJStringFormatter::toString() const {
         return d->result_;
     }
 
+    for (size_t i = 0; i < d->steps_.size(); ++i) {
+        // Remove no-op helmert
+        if (d->steps_[i].name == "helmert" &&
+            d->steps_[i].paramValues.size() == 3 &&
+            d->steps_[i].paramValues[0] == "x=0" &&
+            d->steps_[i].paramValues[1] == "y=0" &&
+            d->steps_[i].paramValues[2] == "z=0") {
+            d->steps_.erase(d->steps_.begin() + i, d->steps_.begin() + i + 1);
+            --i;
+            continue;
+        }
+    }
+
     bool changeDone;
     do {
         changeDone = false;
@@ -3368,6 +3381,25 @@ const std::string &PROJStringFormatter::toString() const {
                 changeDone = true;
                 break;
             }
+
+#ifdef not_needed_for_now
+            // for practical purposes WGS84 and GRS80 ellipsoids are
+            // equivalents. No need to do a cart roundtrip for that...
+            if (d->steps_[i].name == "cart" &&
+                d->steps_[i - 1].name == "cart" &&
+                d->steps_[i].inverted == !d->steps_[i - 1].inverted &&
+                d->steps_[i].paramValues.size() == 1 &&
+                d->steps_[i - 1].paramValues.size() == 1 &&
+                ((d->steps_[i].paramValues[0] == "ellps=WGS84" &&
+                  d->steps_[i - 1].paramValues[0] == "ellps=GRS80") ||
+                 (d->steps_[i].paramValues[0] == "ellps=GRS80" &&
+                  d->steps_[i - 1].paramValues[0] == "ellps=WGS84"))) {
+                d->steps_.erase(d->steps_.begin() + i - 1,
+                                d->steps_.begin() + i + 1);
+                changeDone = true;
+                break;
+            }
+#endif
 
             // hermert followed by its inverse is a no-op
             try {

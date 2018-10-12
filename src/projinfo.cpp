@@ -301,7 +301,8 @@ static void outputOperations(
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
     bool allowPivots,
     const std::vector<std::pair<std::string, std::string>> &pivots,
-    const OutputOptions &outputOpt, bool summary) {
+    bool usePROJGridAlternatives, const OutputOptions &outputOpt,
+    bool summary) {
     auto sourceObj = buildObject(sourceCRSStr, true, "source CRS", false);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
@@ -327,6 +328,7 @@ static void outputOperations(
         ctxt->setGridAvailabilityUse(gridAvailabilityUse);
         ctxt->setAllowUseIntermediateCRS(allowPivots);
         ctxt->setIntermediateCRS(pivots);
+        ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         list = CoordinateOperationFactory::create()->createOperations(
             NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS), ctxt);
     } catch (const std::exception &e) {
@@ -429,6 +431,7 @@ int main(int argc, char **argv) {
         CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
     bool allowPivots = true;
     std::vector<std::pair<std::string, std::string>> pivots;
+    bool usePROJGridAlternatives = true;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -542,6 +545,11 @@ int main(int argc, char **argv) {
             summary = true;
         } else if (ci_equal(arg, "--boundcrs-to-wgs84")) {
             buildBoundCRSToWGS84 = true;
+
+            // undocumented: only for debugging purposes
+        } else if (ci_equal(arg, "--no-proj-grid-alternatives")) {
+            usePROJGridAlternatives = false;
+
         } else if (arg == "--spatial-test" && i + 1 < argc) {
             i++;
             std::string value(argv[i]);
@@ -664,7 +672,8 @@ int main(int argc, char **argv) {
     } else {
         outputOperations(sourceCRSStr, targetCRSStr, bboxFilter,
                          spatialCriterion, crsExtentUse, gridAvailabilityUse,
-                         allowPivots, pivots, outputOpt, summary);
+                         allowPivots, pivots, usePROJGridAlternatives,
+                         outputOpt, summary);
     }
 
     return 0;

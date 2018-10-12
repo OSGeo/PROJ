@@ -975,11 +975,13 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
                                                                     pivots);
         proj_operation_factory_context_set_spatial_criterion(
             ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+        proj_operation_factory_context_set_grid_availability_use(
+            ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
 
         auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         OperationResultKeeper keeper_res(res);
-        EXPECT_EQ(proj_operation_result_get_count(res), 9);
+        EXPECT_EQ(proj_operation_result_get_count(res), 5);
         auto op = proj_operation_result_get(res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
@@ -1001,6 +1003,8 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
                                                                     pivots);
         proj_operation_factory_context_set_spatial_criterion(
             ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+        proj_operation_factory_context_set_grid_availability_use(
+            ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
 
         auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
@@ -1013,7 +1017,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
         EXPECT_EQ(
             proj_obj_get_name(op),
             std::string(
-                "Inverse of JGD2000 to WGS 84 (1) + JGD2000 to JGD2011 (1)"));
+                "Inverse of JGD2000 to WGS 84 (1) + JGD2000 to JGD2011 (2)"));
     }
 }
 
