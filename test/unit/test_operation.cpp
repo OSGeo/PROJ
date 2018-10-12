@@ -4535,21 +4535,23 @@ TEST(operation, transformation_height_to_PROJ_string) {
 
     auto grids = transf->gridsNeeded(DatabaseContext::create());
     ASSERT_EQ(grids.size(), 1);
-    EXPECT_EQ(grids.begin()->shortName, "egm08_25.gtx");
-    EXPECT_EQ(grids.begin()->packageName, "proj-datumgrid-world");
-    EXPECT_TRUE(grids.begin()->packageURL.find(
+    auto gridDesc = *(grids.begin());
+    EXPECT_EQ(gridDesc.shortName, "egm08_25.gtx");
+    EXPECT_EQ(gridDesc.packageName, "proj-datumgrid-world");
+    EXPECT_TRUE(gridDesc.url.find(
                     "https://download.osgeo.org/proj/proj-datumgrid-world-") ==
                 0)
-        << grids.begin()->packageURL;
-    if (grids.begin()->available) {
-        EXPECT_TRUE(!grids.begin()->fullName.empty())
-            << grids.begin()->fullName;
-        EXPECT_TRUE(grids.begin()->fullName.find(grids.begin()->shortName) !=
+        << gridDesc.url;
+    if (gridDesc.available) {
+        EXPECT_TRUE(!gridDesc.fullName.empty()) << gridDesc.fullName;
+        EXPECT_TRUE(gridDesc.fullName.find(gridDesc.shortName) !=
                     std::string::npos)
-            << grids.begin()->fullName;
+            << gridDesc.fullName;
     } else {
-        EXPECT_TRUE(grids.begin()->fullName.empty()) << grids.begin()->fullName;
+        EXPECT_TRUE(gridDesc.fullName.empty()) << gridDesc.fullName;
     }
+    EXPECT_EQ(gridDesc.directDownload, true);
+    EXPECT_EQ(gridDesc.openLicense, true);
 }
 
 // ---------------------------------------------------------------------------
@@ -4989,7 +4991,7 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
         AuthorityFactory::create(DatabaseContext::create(), "EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
-    ASSERT_GE(list2.size(), 3);
+    ASSERT_GE(list2.size(), 3U);
 
     EXPECT_EQ(
         replaceAll(list2[0]->exportToPROJString(PROJStringFormatter::create()),

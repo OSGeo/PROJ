@@ -707,7 +707,9 @@ int PROJ_DLL proj_coordoperation_get_grid_used(PJ_OBJ *coordoperation,
                                                const char **pShortName,
                                                const char **pFullName,
                                                const char **pPackageName,
-                                               const char **pPackageURL,
+                                               const char **pURL,
+                                               int *pDirectDownload,
+                                               int *pOpenLicense,
                                                int *pAvailable);
 
 #ifdef __cplusplus

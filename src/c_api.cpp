@@ -1264,8 +1264,12 @@ int proj_coordoperation_get_grid_used_count(PJ_OBJ *coordoperation) {
  * or NULL
  * @param pPackageName Pointer to a string value to store the package name where
  * the grid might be found. or NULL
- * @param pPackageURL Pointer to a string value to store the package URL where
- * the grid might be found. or NULL
+ * @param pURL Pointer to a string value to store the grid URL or the
+ * package URL where the grid might be found. or NULL
+ * @param pDirectDownload Pointer to a int (boolean) value to store whether
+ * *pURL can be downloaded directly. or NULL
+ * @param pOpenLicense Pointer to a int (boolean) value to store whether
+ * the grid is released with an open license. or NULL
  * @param pAvailable Pointer to a int (boolean) value to store whether the grid
  * is available at runtime. or NULL
  * @return TRUE in case of success.
@@ -1275,8 +1279,8 @@ int proj_coordoperation_get_grid_used(PJ_OBJ *coordoperation, int index,
                                       const char **pShortName,
                                       const char **pFullName,
                                       const char **pPackageName,
-                                      const char **pPackageURL,
-                                      int *pAvailable) {
+                                      const char **pURL, int *pDirectDownload,
+                                      int *pOpenLicense, int *pAvailable) {
     const int count = proj_coordoperation_get_grid_used_count(coordoperation);
     if (index < 0 || index >= count) {
         proj_log_error(coordoperation->ctx, __FUNCTION__, "Invalid index");
@@ -1295,8 +1299,16 @@ int proj_coordoperation_get_grid_used(PJ_OBJ *coordoperation, int index,
         *pPackageName = coordoperation->gridsNeeded[index].packageName.c_str();
     }
 
-    if (pPackageURL) {
-        *pPackageURL = coordoperation->gridsNeeded[index].packageURL.c_str();
+    if (pURL) {
+        *pURL = coordoperation->gridsNeeded[index].url.c_str();
+    }
+
+    if (pDirectDownload) {
+        *pDirectDownload = coordoperation->gridsNeeded[index].directDownload;
+    }
+
+    if (pOpenLicense) {
+        *pOpenLicense = coordoperation->gridsNeeded[index].openLicense;
     }
 
     if (pAvailable) {

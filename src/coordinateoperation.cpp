@@ -1148,8 +1148,8 @@ SingleOperation::gridsNeeded(io::DatabaseContextNNPtr databaseContext) const {
                 CoordinateOperation::GridDescription desc;
                 desc.shortName = value->valueFile();
                 databaseContext->lookForGridInfo(
-                    desc.shortName, desc.fullName, desc.packageName,
-                    desc.packageURL, desc.available);
+                    desc.shortName, desc.fullName, desc.packageName, desc.url,
+                    desc.directDownload, desc.openLicense, desc.available);
                 res.insert(desc);
             }
         }
@@ -9995,9 +9995,9 @@ std::set<CoordinateOperation::GridDescription> PROJBasedOperation::gridsNeeded(
         for (const auto &shortName : formatter->getUsedGridNames()) {
             CoordinateOperation::GridDescription desc;
             desc.shortName = shortName;
-            databaseContext->lookForGridInfo(desc.shortName, desc.fullName,
-                                             desc.packageName, desc.packageURL,
-                                             desc.available);
+            databaseContext->lookForGridInfo(
+                desc.shortName, desc.fullName, desc.packageName, desc.url,
+                desc.directDownload, desc.openLicense, desc.available);
             res.insert(desc);
         }
     } catch (const io::ParsingException &) {

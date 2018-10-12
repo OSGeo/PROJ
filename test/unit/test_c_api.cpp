@@ -842,29 +842,34 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
     const char *shortName = nullptr;
     const char *fullName = nullptr;
     const char *packageName = nullptr;
-    const char *packageURL = nullptr;
+    const char *url = nullptr;
+    int directDownload = 0;
+    int openLicense = 0;
     int available = 0;
     EXPECT_EQ(proj_coordoperation_get_grid_used(op, -1, nullptr, nullptr,
-                                                nullptr, nullptr, nullptr),
+                                                nullptr, nullptr, nullptr,
+                                                nullptr, nullptr),
               0);
     EXPECT_EQ(proj_coordoperation_get_grid_used(op, 1, nullptr, nullptr,
-                                                nullptr, nullptr, nullptr),
+                                                nullptr, nullptr, nullptr,
+                                                nullptr, nullptr),
               0);
-    EXPECT_EQ(proj_coordoperation_get_grid_used(op, 0, &shortName, &fullName,
-                                                &packageName, &packageURL,
-                                                &available),
+    EXPECT_EQ(proj_coordoperation_get_grid_used(
+                  op, 0, &shortName, &fullName, &packageName, &url,
+                  &directDownload, &openLicense, &available),
               1);
     ASSERT_NE(shortName, nullptr);
     ASSERT_NE(fullName, nullptr);
     ASSERT_NE(packageName, nullptr);
-    ASSERT_NE(packageURL, nullptr);
+    ASSERT_NE(url, nullptr);
     EXPECT_EQ(shortName, std::string("ntv1_can.dat"));
     // EXPECT_EQ(fullName, std::string(""));
     EXPECT_EQ(packageName, std::string("proj-datumgrid"));
-    EXPECT_TRUE(std::string(packageURL)
-                    .find("https://download.osgeo.org/proj/proj-datumgrid-") ==
-                0)
-        << std::string(packageURL);
+    EXPECT_TRUE(std::string(url).find(
+                    "https://download.osgeo.org/proj/proj-datumgrid-") == 0)
+        << std::string(url);
+    EXPECT_EQ(directDownload, 1);
+    EXPECT_EQ(openLicense, 1);
 }
 
 // ---------------------------------------------------------------------------

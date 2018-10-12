@@ -532,35 +532,48 @@ bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::lookForGridInfo(const std::string &gridName,
+bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
                                       std::string &fullFilename,
                                       std::string &packageName,
-                                      std::string &packageURL,
-                                      bool &gridAvailable) {
+                                      std::string &url, bool &directDownload,
+                                      bool &openLicense, bool &gridAvailable) {
     fullFilename.clear();
     packageName.clear();
-    packageURL.clear();
+    url.clear();
+    openLicense = false;
+    directDownload = false;
 
     fullFilename.resize(2048);
     if (d->pjCtxt() == nullptr) {
         d->setPjCtxt(pj_get_default_ctx());
     }
     gridAvailable =
-        pj_find_file(d->pjCtxt(), gridName.c_str(), &fullFilename[0],
+        pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
                      fullFilename.size() - 1) != 0;
     fullFilename.resize(strlen(fullFilename.c_str()));
 
     auto res =
-        d->run("SELECT grid_packages.package_name, grid_packages.url FROM "
-               "grid_alternatives JOIN grid_packages ON "
+        d->run("SELECT "
+               "grid_packages.package_name, "
+               "grid_alternatives.url, "
+               "grid_packages.url AS package_url, "
+               "grid_alternatives.open_license, "
+               "grid_packages.open_license AS package_open_license, "
+               "grid_alternatives.direct_download, "
+               "grid_packages.direct_download AS package_direct_download "
+               "FROM grid_alternatives "
+               "LEFT JOIN grid_packages ON "
                "grid_alternatives.package_name = grid_packages.package_name "
                "WHERE proj_grid_name = ?",
-               {gridName});
+               {projFilename});
     if (res.empty()) {
-        return;
+        return false;
     }
     packageName = res[0][0];
-    packageURL = res[0][1];
+    url = res[0][1].empty() ? res[0][2] : res[0][1];
+    openLicense = (res[0][3].empty() ? res[0][4] : res[0][3]) == "1";
+    directDownload = (res[0][5].empty() ? res[0][6] : res[0][5]) == "1";
+    return true;
 }
 
 //! @endcond

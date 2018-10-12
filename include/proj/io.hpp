@@ -606,9 +606,11 @@ class DatabaseContext {
                                 std::string &projFilename,
                                 std::string &projFormat, bool &inverse);
 
-    void lookForGridInfo(const std::string &gridName, std::string &fullFilename,
-                         std::string &packageName, std::string &packageURL,
-                         bool &gridAvailable);
+    PROJ_DLL bool lookForGridInfo(const std::string &projFilename,
+                                  std::string &fullFilename,
+                                  std::string &packageName, std::string &url,
+                                  bool &directDownload, bool &openLicense,
+                                  bool &gridAvailable);
     //! @endcond
 
   protected:

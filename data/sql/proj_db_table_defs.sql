@@ -393,10 +393,23 @@ CREATE TABLE grid_transformation(
     CONSTRAINT fk_grid_transformation_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
 
+-- Table that describe packages/archives that contain several grids
 CREATE TABLE grid_packages(
     package_name TEXT NOT NULL NULL PRIMARY KEY,    -- package name that contains the file
-    url TEXT                                        -- optional URL where to download the PROJ grid
+    description TEXT,
+    url TEXT,                                       -- optional URL where to download the PROJ grid
+    direct_download BOOLEAN,                        -- whether the URL can be used directly (if 0, authentication etc mightbe needed)
+    open_license BOOLEAN
 );
+
+CREATE TRIGGER grid_packages_insert_trigger
+BEFORE INSERT ON grid_packages
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on grid_packages violates constraint: open_license must be set when url is not NULL')
+        WHERE NEW.open_license IS NULL AND NEW.url IS NOT NULL;
+    SELECT RAISE(ABORT, 'insert on grid_packages violates constraint: direct_download must be set when url is not NULL')
+        WHERE NEW.direct_download IS NULL AND NEW.url IS NOT NULL;
+END;
 
 -- Table that contain alternative names for original grid names coming from the authority
 CREATE TABLE grid_alternatives(
@@ -405,7 +418,10 @@ CREATE TABLE grid_alternatives(
     proj_grid_format TEXT NOT NULL,                 -- one of 'CTable2', 'NTv1', 'NTv2', 'GTX'
     proj_method TEXT NOT NULL,                      -- hgridshift or vgridshift
     inverse_direction BOOLEAN NOT NULL,             -- whether the PROJ grid direction is reversed w.r.t to the authority one (TRUE in that case)
-    package_name TEXT NOT NULL,                     -- package name that contains the file
+    package_name TEXT,                              -- package name that contains the file
+    url TEXT,                                       -- optional URL where to download the PROJ grid
+    direct_download BOOLEAN,                        -- whether the URL can be used directly (if 0, authentication etc mightbe needed)
+    open_license BOOLEAN,
     directory TEXT,                                 -- optional directory where the file might be located
 
     CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name)
@@ -426,6 +442,12 @@ FOR EACH ROW BEGIN
         WHERE NEW.original_grid_name NOT IN ('null') AND NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: NEW.inverse_direction must be 0 when original_grid_name = proj_grid_name')
         WHERE NEW.original_grid_name = NEW.proj_grid_name AND NEW.inverse_direction != 0;
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: package_name must be NULL when url is not NULL')
+        WHERE NEW.package_name IS NOT NULL AND NEW.url IS NOT NULL;
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: direct_download must be set when url is not NULL')
+        WHERE NEW.direct_download IS NULL AND NEW.url IS NOT NULL;
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: open_license must be set when url is not NULL')
+        WHERE NEW.open_license IS NULL AND NEW.url IS NOT NULL;
 END;
 
 CREATE TABLE other_transformation(

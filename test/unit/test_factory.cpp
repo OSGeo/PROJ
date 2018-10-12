@@ -1902,4 +1902,42 @@ TEST_F(FactoryWithTmpDatabase, getAuthorities) {
     EXPECT_EQ(res.size(), 2);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase, lookForGridInfo) {
+    createStructure();
+
+    ASSERT_TRUE(execute("INSERT INTO grid_alternatives(original_grid_name,"
+                        "proj_grid_name, "
+                        "proj_grid_format, "
+                        "proj_method, "
+                        "inverse_direction, "
+                        "package_name, "
+                        "url, direct_download, open_license, directory) "
+                        "VALUES ('fake_grid', "
+                        "'PROJ_fake_grid', "
+                        "'CTable2', "
+                        "'hgridshift', "
+                        "0, "
+                        "NULL, "
+                        "'url', 1, 1, NULL);"))
+        << last_error();
+
+    std::string fullFilename;
+    std::string packageName;
+    std::string url;
+    bool directDownload = false;
+    bool openLicense = false;
+    bool gridAvailable = false;
+    EXPECT_TRUE(DatabaseContext::create(m_ctxt)->lookForGridInfo(
+        "PROJ_fake_grid", fullFilename, packageName, url, directDownload,
+        openLicense, gridAvailable));
+    EXPECT_TRUE(fullFilename.empty());
+    EXPECT_TRUE(packageName.empty());
+    EXPECT_EQ(url, "url");
+    EXPECT_EQ(directDownload, true);
+    EXPECT_EQ(openLicense, true);
+    EXPECT_EQ(gridAvailable, false);
+}
+
 } // namespace

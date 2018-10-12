@@ -55,22 +55,6 @@ OGRFeature(epsg_coordoperation):3859
 
 - Once integrated with GDAL, test with BAG WKT
 
-
-~~~~~~~~~~~~~~~~~~~
-
-> Another question is what to do with grids
-> with license that does not allow redistribution - should we have
-> entries with URL in grid_transformation table for such grid files as
-> well? (maybe with a flag that it is not direct link to a package, just
-> a web page about that grid)
-
-I guess grid_alternatives could receive additional columns, which would be 
-used if package_name is NULL, perhaps something like:
-
-open_license BOOLEAN
-download_url TEXT
-direct_download BOOLEAN
-
 ~~~~~~~~~~~~~~~~~~~
 
  E.g. to
