@@ -3621,6 +3621,32 @@ ConversionNNPtr Conversion::createSphericalCrossTrackHeight(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Equal Earth]
+ * (https://proj4.org/operations/projections/eqearth.html) projection method.
+ *
+ * This method is defined as [EPSG:1078]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1078)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEqualEarth(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    return create(properties, EPSG_CODE_METHOD_EQUAL_EARTH,
+                  {
+                      ParameterValue::create(centerLong),
+                      ParameterValue::create(falseEasting),
+                      ParameterValue::create(falseNorthing),
+                  });
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a conversion based on the Change of Vertical Unit
  * method.
  *

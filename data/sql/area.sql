@@ -3496,8 +3496,10 @@ INSERT INTO "area" VALUES('EPSG','4516','USA - CONUS and GoM','United States (US
 INSERT INTO "area" VALUES('EPSG','4517','Canada - NAD27','Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.',40.04,83.17,-141.01,-47.74,0);
 INSERT INTO "area" VALUES('EPSG','4518','Pacific - Guam and NMI east of 144°E','Guam and Northern Mariana Islands; onshore and offshore east of 144°E.',11.05,23.9,144.0,149.55,0);
 INSERT INTO "area" VALUES('EPSG','4519','Algeria - 32°N to 34°39''N','Algeria - 35.6 grads to 38.5 grads North (32°N to 34°39''N).',31.99,34.66,-2.95,9.09,0);
+INSERT INTO "area" VALUES('EPSG','4520','World centred on 90°W','World centred on the Americas.',-90.0,90.0,-180.0,180.0,0);
 INSERT INTO "area" VALUES('EPSG','4521','Northern Mariana Islands - onshore','Northern Mariana Islands - onshore.',14.06,20.61,144.83,146.12,0);
 INSERT INTO "area" VALUES('EPSG','4522','Finland - mainland south of 66°N','Finland - onshore mainland south of approximately 66°N.',59.75,66.73,20.95,31.59,0);
+INSERT INTO "area" VALUES('EPSG','4523','World centred on 150°E','World centred on Asia-Pacific.',-90.0,90.0,-180.0,180.0,0);
 INSERT INTO "area" VALUES('EPSG','4524','Saudi Arabia - west of 36°E','Saudi Arabia - onshore and offshore - west of 36°E.',24.92,29.38,34.44,36.01,0);
 INSERT INTO "area" VALUES('EPSG','4525','Pacific - Guam and NMI - onshore','Guam - onshore. Northern Mariana Islands - onshore.',13.18,20.61,144.58,146.12,0);
 INSERT INTO "area" VALUES('EPSG','4526','Saudi Arabia - 36°E to 42°E','Saudi Arabia - onshore and offshore - between 36°E and 42°E.',16.29,32.16,36.0,42.0,0);

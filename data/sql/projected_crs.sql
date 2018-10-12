@@ -3564,6 +3564,9 @@ INSERT INTO "projected_crs" VALUES('EPSG','8837','MTRF-2000 / UTM zone 37N','EPS
 INSERT INTO "projected_crs" VALUES('EPSG','8838','MTRF-2000 / UTM zone 38N','EPSG','4400','EPSG','8818','EPSG','16038','EPSG','4527',0);
 INSERT INTO "projected_crs" VALUES('EPSG','8839','MTRF-2000 / UTM zone 39N','EPSG','4400','EPSG','8818','EPSG','16039','EPSG','4528',0);
 INSERT INTO "projected_crs" VALUES('EPSG','8840','MTRF-2000 / UTM zone 40N','EPSG','4400','EPSG','8818','EPSG','16040','EPSG','3106',0);
+INSERT INTO "projected_crs" VALUES('EPSG','8857','WGS 84 / Equal Earth Greenwich','EPSG','4400','EPSG','4326','EPSG','8854','EPSG','1262',0);
+INSERT INTO "projected_crs" VALUES('EPSG','8858','WGS 84 / Equal Earth Americas','EPSG','4400','EPSG','4326','EPSG','8855','EPSG','1262',0);
+INSERT INTO "projected_crs" VALUES('EPSG','8859','WGS 84 / Equal Earth Asia-Pacific','EPSG','4400','EPSG','4326','EPSG','8856','EPSG','1262',0);
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4','EPSG','4530','EPSG','4200','EPSG','16204','EPSG','1763',0);
 INSERT INTO "projected_crs" VALUES('EPSG','20005','Pulkovo 1995 / Gauss-Kruger zone 5','EPSG','4530','EPSG','4200','EPSG','16205','EPSG','1764',0);
 INSERT INTO "projected_crs" VALUES('EPSG','20006','Pulkovo 1995 / Gauss-Kruger zone 6','EPSG','4530','EPSG','4200','EPSG','16206','EPSG','1765',0);

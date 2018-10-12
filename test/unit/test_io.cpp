@@ -4704,7 +4704,7 @@ TEST(io, projparse_projected_vunits) {
 
 TEST(io, projparse_projected_unknown) {
     auto obj = PROJStringParser().createFromPROJString(
-        "+proj=eqearth +unused_flag +lat_0=45 +lon_0=0 +k=1 +x_0=10 +y_0=0");
+        "+proj=mbt_s +unused_flag +lat_0=45 +lon_0=0 +k=1 +x_0=10 +y_0=0");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
@@ -4715,7 +4715,7 @@ TEST(io, projparse_projected_unknown) {
         crs->exportToWKT(f);
         auto wkt = f->toString();
         EXPECT_TRUE(
-            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ eqearth "
+            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ mbt_s "
                      "unused_flag\"],PARAMETER[\"lat_0\",45,ANGLEUNIT["
                      "\"degree\",0.0174532925199433]],PARAMETER[\"lon_0\","
                      "0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
@@ -4734,7 +4734,7 @@ TEST(io, projparse_projected_unknown) {
         "\"9122\"]],AXIS[\"Longitude\",EAST],AXIS[\"Latitude\",NORTH]],"
         "PROJECTION[\"custom_proj4\"],UNIT[\"metre\",1,AUTHORITY[\"EPSG\","
         "\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],EXTENSION["
-        "\"PROJ4\",\"+proj=eqearth +datum=WGS84 +unused_flag +lat_0=45 "
+        "\"PROJ4\",\"+proj=mbt_s +datum=WGS84 +unused_flag +lat_0=45 "
         "+lon_0=0 +k=1 +x_0=10 +y_0=0 +wktext +no_defs\"]]";
 
     {
@@ -4749,13 +4749,13 @@ TEST(io, projparse_projected_unknown) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_4)),
-              "+proj=eqearth +unused_flag +lat_0=45 +lon_0=0 +k=1 +x_0=10 "
+              "+proj=mbt_s +unused_flag +lat_0=45 +lon_0=0 +k=1 +x_0=10 "
               "+y_0=0 +datum=WGS84");
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_5)),
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=eqearth +unused_flag +lat_0=45 +lon_0=0 +k=1 "
+              "+step +proj=mbt_s +unused_flag +lat_0=45 +lon_0=0 +k=1 "
               "+x_0=10 +y_0=0 +ellps=WGS84");
 
     {
@@ -4769,7 +4769,7 @@ TEST(io, projparse_projected_unknown) {
         crs2->exportToWKT(f);
         auto wkt = f->toString();
         EXPECT_TRUE(
-            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ eqearth "
+            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ mbt_s "
                      "unused_flag\"],PARAMETER[\"lat_0\",45,ANGLEUNIT["
                      "\"degree\",0.0174532925199433]],PARAMETER[\"lon_0\","
                      "0,ANGLEUNIT[\"degree\",0.0174532925199433]],"

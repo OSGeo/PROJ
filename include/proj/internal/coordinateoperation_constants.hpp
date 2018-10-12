@@ -229,6 +229,10 @@ static const std::string PROJ_WKT2_NAME_METHOD_QUADRILATERALIZED_SPHERICAL_CUBE(
 
 static const std::string PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT(
     "Spherical Cross-Track Height");
+
+static const std::string EPSG_NAME_METHOD_EQUAL_EARTH("Equal Earth");
+constexpr int EPSG_CODE_METHOD_EQUAL_EARTH = 1078;
+
 // ---------------------------------------------------------------------------
 
 static const std::string
@@ -1456,6 +1460,15 @@ static const MethodMapping methodMappings[] = {
          paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
          paramFalseNorthing,
      }},
+
+    {EPSG_NAME_METHOD_EQUAL_EARTH,
+     EPSG_CODE_METHOD_EQUAL_EARTH,
+     "",
+     "eqearth",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
 };
 
 // ---------------------------------------------------------------------------

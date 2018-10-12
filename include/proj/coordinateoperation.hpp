@@ -1195,6 +1195,12 @@ class Conversion : public SingleOperation {
         const common::Length &pegPointHeight);
 
     PROJ_DLL static ConversionNNPtr
+    createEqualEarth(const util::PropertyMap &properties,
+                     const common::Angle &centerLong,
+                     const common::Length &falseEasting,
+                     const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
     createChangeVerticalUnit(const util::PropertyMap &properties,
                              const common::Scale &factor);
 

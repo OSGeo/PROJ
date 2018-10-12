@@ -3537,6 +3537,31 @@ TEST(operation, conversion_inverse) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, eqearth_export) {
+
+    auto conv = Conversion::createEqualEarth(PropertyMap(), Angle(1), Length(2),
+                                             Length(3));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=eqearth +lon_0=1 +x_0=2 +y_0=3");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Equal Earth\",\n"
+              "    METHOD[\"Equal Earth\",\n"
+              "        ID[\"EPSG\",1078]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",2,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, PROJ_based) {
     auto conv = SingleOperation::createPROJBased(PropertyMap(), "+proj=merc",
                                                  nullptr, nullptr);
