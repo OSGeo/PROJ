@@ -30,6 +30,7 @@ SQL_ORDERED_LIST = sql/proj_db_table_defs.sql \
 		sql/concatenated_operation.sql \
 		sql/ignf.sql \
 		sql/grid_alternatives.sql \
+		sql/grid_alternatives_generated.sql \
 		sql/customizations.sql \
 		sql/commit.sql
 
