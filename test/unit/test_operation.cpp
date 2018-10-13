@@ -4681,6 +4681,19 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, transformation_vertical_offset_to_PROJ_string) {
+
+    auto transformation = Transformation::createVerticalOffset(
+        PropertyMap(), createVerticalCRS(), createVerticalCRS(), Length(1), {});
+    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=geogoffset +dh=1");
+    EXPECT_EQ(transformation->inverse()->exportToPROJString(
+                  PROJStringFormatter::create()),
+              "+proj=geogoffset +dh=-1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_with_boundVerticalCRS_to_geogCRS) {
 
     auto compound = CompoundCRS::create(

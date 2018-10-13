@@ -1230,6 +1230,33 @@ VerticalCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void VerticalCRS::addLinearUnitConvert(
+    io::PROJStringFormatterNNPtr formatter) const {
+    auto &axisList = coordinateSystem()->axisList();
+
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_5) {
+        if (!axisList.empty()) {
+            auto projUnit = axisList[0]->unit().exportToPROJString();
+            if (axisList[0]->unit().conversionToSI() != 1.0) {
+                formatter->addStep("unitconvert");
+                formatter->addParam("z_in", "m");
+                auto projVUnit = axisList[0]->unit().exportToPROJString();
+                if (projVUnit.empty()) {
+                    formatter->addParam("z_out",
+                                        axisList[0]->unit().conversionToSI());
+                } else {
+                    formatter->addParam("z_out", projVUnit);
+                }
+            }
+        }
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a VerticalCRS from a datum::VerticalReferenceFrame and a
  * cs::VerticalCS.
  *

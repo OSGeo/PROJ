@@ -2477,7 +2477,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             // In case the operation is a conversion (we hope this is the
             // forward case!)
             if (!operations[1]->sourceCRS() || !operations[1]->targetCRS()) {
-                if (!step3_auth_name.empty()) {
+                if (step3_auth_name.empty()) {
                     operations[1]->setCRSs(
                         NN_CHECK_ASSERT(operations[0]->targetCRS()),
                         d->createFactory(target_crs_auth_name)

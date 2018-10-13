@@ -4256,10 +4256,64 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','1891','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','1991','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','3895','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','3913','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4441','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4442','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4443','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4444','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4445','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4446','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4447','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4448','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4449','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4450','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4451','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4452','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','4453','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5133','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5134','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5238','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5241','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5400','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5401','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5402','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5403','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5404','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5405','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5406','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5407','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5408','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5412','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5413','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5414','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5419','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5425','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5427','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5432','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5438','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5440','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5441','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5442','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5443','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5445','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5446','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5447','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5448','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5449','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5450','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5452','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5453','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5454','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','5455','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','6699','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7653','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7654','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7873','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7874','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7964','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7966','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7977','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7980','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7981','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','15596','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','15597','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','15598','other_transformation');
@@ -4374,9 +4428,14 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','6714','concatenated_operation'
 INSERT INTO "coordinate_operation" VALUES('EPSG','6739','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','6874','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7811','concatenated_operation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7965','concatenated_operation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7967','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7973','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7974','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7975','concatenated_operation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7983','concatenated_operation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7986','concatenated_operation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','7987','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8047','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8094','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8174','concatenated_operation');
@@ -4679,19 +4738,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (4067, u'transformation', u'Katanga 1955 to RGRDC 2005 (2)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4695, 4046, 3614, 0.5, 0)
 --- Non imported: (4068, u'transformation', u'Katanga 1955 to WGS 84 (2)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4695, 4326, 3614, 1.0, 0)
 --- Non imported: (4072, u'transformation', u'Karbala 1979 / UTM zone 38N to IGRS / UTM zone 38N (1)', 9656, u'Cartesian Grid Offsets', 3392, 3891, 3702, 3.0, 0)
---- Non imported: (4441, u'transformation', u'NZVD2009 height to One Tree Point 1964 height (1)', 9616, u'Vertical Offset', 4440, 5767, 3762, 0.03, 0)
---- Non imported: (4442, u'transformation', u'NZVD2009 height to Auckland 1946 height (1)', 9616, u'Vertical Offset', 4440, 5759, 3764, 0.05, 0)
---- Non imported: (4443, u'transformation', u'NZVD2009 height to Moturiki 1953 height  (1)', 9616, u'Vertical Offset', 4440, 5764, 3768, 0.06, 0)
---- Non imported: (4444, u'transformation', u'NZVD2009 height to Nelson 1955 height (1)', 9616, u'Vertical Offset', 4440, 5766, 3802, 0.07, 0)
---- Non imported: (4445, u'transformation', u'NZVD2009 height to Gisborne 1926 height (1)', 9616, u'Vertical Offset', 4440, 5762, 3771, 0.02, 0)
---- Non imported: (4446, u'transformation', u'NZVD2009 height to Napier 1962 height (1)', 9616, u'Vertical Offset', 4440, 5765, 3772, 0.05, 0)
---- Non imported: (4447, u'transformation', u'NZVD2009 height to Taranaki 1970 height (1)', 9616, u'Vertical Offset', 4440, 5769, 3769, 0.05, 0)
---- Non imported: (4448, u'transformation', u'NZVD2009 height to Wellington 1953 height (1)', 9616, u'Vertical Offset', 4440, 5770, 3773, 0.04, 0)
---- Non imported: (4449, u'transformation', u'NZVD2009 height to Lyttelton 1937 height (1)', 9616, u'Vertical Offset', 4440, 5763, 3804, 0.09, 0)
---- Non imported: (4450, u'transformation', u'NZVD2009 height to Dunedin 1958 height (1)', 9616, u'Vertical Offset', 4440, 5761, 3803, 0.07, 0)
---- Non imported: (4451, u'transformation', u'NZVD2009 height to Bluff 1955 height (1)', 9616, u'Vertical Offset', 4440, 5760, 3801, 0.05, 0)
---- Non imported: (4452, u'transformation', u'NZVD2009 height to Stewart Island 1977 height (1)', 9616, u'Vertical Offset', 4440, 5772, 3338, 0.15, 0)
---- Non imported: (4453, u'transformation', u'NZVD2009 height to Dunedin-Bluff 1960 height (1)', 9616, u'Vertical Offset', 4440, 4458, 3806, 0.04, 0)
 --- Non imported: (4464, u'transformation', u'Alias test (999)', 9653, u'Complex polynomial of degree 4', 5806, 5807, 1262, 1.0, 1)
 --- Non imported: (4649, u'transformation', u'DHDN / 3-degree Gauss-Kruger zone 3 to ETRS89 / zone TM32 (1)', 1036, u'Cartesian Grid Offsets from Form Function', 31467, 4647, 3659, 0.05, 0)
 --- Non imported: (4650, u'transformation', u'DHDN / 3-degree Gauss-Kruger zone 4 to ETRS89 / zone TM32 (1)', 1036, u'Cartesian Grid Offsets from Form Function', 31468, 4647, 3644, 0.05, 0)
@@ -4752,56 +4798,25 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (5215, u'transformation', u'Genoa height to EVRF2007 height (1)', 1046, u'Vertical Offset and Slope', 5214, 5621, 2372, 0.1, 0)
 --- Non imported: (5216, u'transformation', u'Genoa height to EVRF2000 height (2)', 1046, u'Vertical Offset and Slope', 5214, 5730, 2340, 0.1, 0)
 --- Non imported: (5217, u'transformation', u'Genoa height to EVRF2007 height (2)', 1046, u'Vertical Offset and Slope', 5214, 5621, 2340, 0.1, 0)
---- Non imported: (5400, u'transformation', u'Baltic height to Caspian depth (1)', 9616, u'Vertical Offset', 5705, 5706, 1291, 0.0, 1)
---- Non imported: (5401, u'transformation', u'Belfast to Malin Head', 9616, u'Vertical Offset', 5732, 5731, 1305, 0.01, 1)
---- Non imported: (5402, u'transformation', u'Baltic height to AIOC95 depth (1)', 9616, u'Vertical Offset', 5705, 5734, 2592, 0.0, 1)
---- Non imported: (5403, u'transformation', u'AIOC95 depth to Caspian depth (1)', 9616, u'Vertical Offset', 5734, 5706, 2592, 0.0, 0)
---- Non imported: (5404, u'transformation', u'Baltic to Black Sea (1)', 9616, u'Vertical Offset', 5705, 5735, 1102, 0.0, 1)
---- Non imported: (5405, u'transformation', u'Hong Kong Principal height to Hong Kong Chart depth (1)', 9616, u'Vertical Offset', 5738, 5739, 1118, 0.0, 1)
---- Non imported: (5406, u'transformation', u'Belfast to Malin Head (1)', 9616, u'Vertical Offset', 5732, 5731, 1305, 0.01, 1)
---- Non imported: (5407, u'transformation', u'Poolbeg to Malin Head (1)', 9616, u'Vertical Offset', 5754, 5731, 1305, 0.1, 1)
---- Non imported: (5408, u'transformation', u'Poolbeg to Belfast (1)', 9616, u'Vertical Offset', 5754, 5732, 1305, 0.1, 1)
---- Non imported: (5412, u'transformation', u'KOC CD to Kuwait PWD (1)', 9616, u'Vertical Offset', 5790, 5788, 1136, 0.1, 1)
---- Non imported: (5413, u'transformation', u'KOC CD height to KOC WD depth (1)', 9616, u'Vertical Offset', 5790, 5789, 3267, 0.1, 1)
---- Non imported: (5414, u'transformation', u'KOC WD to Kuwait PWD (1)', 9616, u'Vertical Offset', 5789, 5788, 1136, 0.1, 1)
 --- Non imported: (5415, u'transformation', u'GHA height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5778, 5730, 1037, 0.1, 0)
 --- Non imported: (5416, u'transformation', u'Baltic 1982 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5786, 5730, 3224, 0.1, 0)
 --- Non imported: (5417, u'transformation', u'DNN height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5733, 5730, 3237, 0.1, 0)
 --- Non imported: (5418, u'transformation', u'Baltic to EVRF2000 (1)', 9657, u'Vertical Offset and Slope', 5705, 5730, 1090, 0.1, 1)
---- Non imported: (5419, u'transformation', u'NGF IGN69 height to EVRF2000 height (1)', 9616, u'Vertical Offset', 5720, 5730, 1326, 0.1, 0)
 --- Non imported: (5420, u'transformation', u'DHHN92 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5783, 5730, 3339, 0.1, 0)
 --- Non imported: (5421, u'transformation', u'DHHN85 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5784, 5730, 2326, 0.1, 0)
 --- Non imported: (5422, u'transformation', u'SNN76 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5785, 5730, 1343, 0.1, 0)
 --- Non imported: (5423, u'transformation', u'Newlyn to EVRF2000 (1)', 9657, u'Vertical Offset and Slope', 5778, 5730, 2792, 0.1, 1)
 --- Non imported: (5424, u'transformation', u'EOMA height 1980 to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5787, 5730, 1119, 0.1, 0)
---- Non imported: (5425, u'transformation', u'NAP height to EVRF2000 height (1)', 9616, u'Vertical Offset', 5709, 5730, 1275, 0.1, 0)
 --- Non imported: (5426, u'transformation', u'NN54 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5776, 5730, 1352, 0.1, 0)
---- Non imported: (5427, u'transformation', u'Cascais height to EVRF2000 height (1)', 9616, u'Vertical Offset', 5780, 5730, 1294, 0.1, 0)
 --- Non imported: (5428, u'transformation', u'NVN99 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5779, 5730, 3307, 0.1, 0)
 --- Non imported: (5429, u'transformation', u'Alicante height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5782, 5730, 4188, 0.1, 0)
 --- Non imported: (5430, u'transformation', u'RH70 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5718, 5730, 3313, 0.1, 0)
 --- Non imported: (5431, u'transformation', u'LN02 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5728, 5730, 1286, 0.1, 0)
---- Non imported: (5432, u'transformation', u'N60 height to EVRF2000 height (1)', 9616, u'Vertical Offset', 5717, 5730, 3333, 0.1, 0)
 --- Non imported: (5433, u'transformation', u'Newlyn height to EVRF2000 height (1)', 9657, u'Vertical Offset and Slope', 5701, 5730, 2792, 0.1, 1)
 --- Non imported: (5434, u'transformation', u'Baltic to EVRF2000 (2)', 9657, u'Vertical Offset and Slope', 5705, 5730, 1145, 0.1, 1)
 --- Non imported: (5435, u'transformation', u'Baltic 1957 height to EVRF2000 height (3)', 1046, u'Vertical Offset and Slope', 8357, 5730, 1211, 0.1, 0)
 --- Non imported: (5436, u'transformation', u'Baltic 1977 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5705, 5730, 3246, 0.1, 0)
 --- Non imported: (5437, u'transformation', u'Baltic 1977 height to EVRF2000 height (2)', 1046, u'Vertical Offset and Slope', 5705, 5730, 3272, 0.1, 0)
---- Non imported: (5438, u'transformation', u'Baltic 1977 height to Caspian height (1)', 9616, u'Vertical Offset', 5705, 5611, 1291, 0.0, 0)
---- Non imported: (5440, u'transformation', u'Baltic 1977 depth to Caspian depth (1)', 9616, u'Vertical Offset', 5612, 5706, 1291, 0.0, 0)
---- Non imported: (5441, u'transformation', u'Baltic depth to Caspian height (1)', 9616, u'Vertical Offset', 5612, 5611, 1291, 0.0, 1)
---- Non imported: (5442, u'transformation', u'Baltic height to Baltic depth (1)', 9616, u'Vertical Offset', 5705, 5612, 1284, 0.0, 1)
---- Non imported: (5443, u'transformation', u'Baltic 1977 height to AIOC95 height (1)', 9616, u'Vertical Offset', 5705, 5797, 2592, 0.0, 0)
---- Non imported: (5445, u'transformation', u'Baltic 1977 depth to AIOC95 depth (1)', 9616, u'Vertical Offset', 5612, 5734, 2592, 0.0, 0)
---- Non imported: (5446, u'transformation', u'Baltic depth to AIOC95 height (1)', 9616, u'Vertical Offset', 5612, 5797, 2592, 0.0, 1)
---- Non imported: (5447, u'transformation', u'Baltic 1977 height to Black Sea height (1)', 9616, u'Vertical Offset', 5705, 5735, 3251, 0.0, 0)
---- Non imported: (5448, u'transformation', u'Poolbeg height to Malin Head height (1)', 9616, u'Vertical Offset', 5754, 5731, 1305, 0.1, 1)
---- Non imported: (5449, u'transformation', u'Poolbeg height to Belfast height (1)', 9616, u'Vertical Offset', 5754, 5732, 2530, 0.1, 1)
---- Non imported: (5450, u'transformation', u'KOC CD height to Kuwait PWD height (1)', 9616, u'Vertical Offset', 5790, 5788, 3267, 0.1, 0)
---- Non imported: (5452, u'transformation', u'Belfast height to Malin Head height (1)', 9616, u'Vertical Offset', 5732, 5731, 2530, 0.01, 0)
---- Non imported: (5453, u'transformation', u'KOC CD height to KOC WD depth (ft) (1)', 9616, u'Vertical Offset', 5790, 5614, 3267, 0.1, 1)
---- Non imported: (5454, u'transformation', u'HKPD height to HKCD depth (1)', 9616, u'Vertical Offset', 5738, 5739, 1118, 0.0, 1)
---- Non imported: (5455, u'transformation', u'KOC WD depth to Kuwait PWD height (1)', 9616, u'Vertical Offset', 5789, 5788, 3267, 0.1, 1)
 --- Non imported: (5483, u'transformation', u'Luxembourg 1930 to ETRS89 (4)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4181, 4258, 1146, 0.1, 0)
 --- Non imported: (5484, u'transformation', u'Luxembourg 1930 to WGS 84 (4)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4181, 4326, 1146, 1.0, 0)
 --- Non imported: (5557, u'transformation', u'GHA height to EVRF2007 height (1)', 1046, u'Vertical Offset and Slope', 5778, 5621, 1037, 0.1, 0)
@@ -4822,7 +4837,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (6304, u'transformation', u'ED50 / UTM zone 31N to Amersfoort / RD New (2)', 9653, u'Complex polynomial of degree 4', 23031, 28992, 1275, 1.0, 0)
 --- Non imported: (6305, u'transformation', u'ED50 / UTM zone 31N to Belge 72 / Lambert (1)', 9652, u'Complex polynomial of degree 3', 23031, 31300, 1347, 1.0, 0)
 --- Non imported: (6306, u'transformation', u'ED50 / TM 5 NE to Amersfoort / RD New (1)', 9653, u'Complex polynomial of degree 4', 23095, 28992, 1275, 1.0, 0)
---- Non imported: (6699, u'transformation', u'JGD2000 (vertical) height to JGD2011 (vertical) height (1)', 9616, u'Vertical Offset', 6694, 6695, 4165, 0.01, 0)
 --- Non imported: (6724, u'transformation', u'CIG85 to GDA94 / MGA zone 48', 9656, u'Cartesian Grid Offsets', 6715, 28348, 4169, 5.0, 0)
 --- Non imported: (6889, u'transformation', u'Ocotepeque 1935 to WGS 84 (2)', 1063, u'Molodensky-Badekas (PV geog2D domain)', 5451, 4326, 3232, 5.0, 0)
 --- Non imported: (6918, u'transformation', u'[enter here name of (I = J+90\xb0) bin grid]', 9666, u'P6 (I = J+90\xb0) seismic bin grid transformation', 32631, 5818, 4205, 0.0, 0)
@@ -4853,29 +4867,15 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (7030, u'transformation', u'Nahrwan 1934 / UTM zone 38N to Karbala 1979 / UTM zone 38N (23)', 9656, u'Cartesian Grid Offsets', 7006, 3392, 3708, 5.0, 0)
 --- Non imported: (7031, u'transformation', u'Nahrwan 1934 / UTM zone 38N to Karbala 1979 / UTM zone 38N (24)', 9656, u'Cartesian Grid Offsets', 7006, 3392, 3711, 5.0, 0)
 --- Non imported: (7032, u'transformation', u'Nahrwan 1934 / UTM zone 38N to Karbala 1979 / UTM zone 38N (25)', 9656, u'Cartesian Grid Offsets', 7006, 3392, 3712, 5.0, 0)
---- Non imported: (7653, u'transformation', u'EGM96 height to Kumul 34 height (1)', 9616, u'Vertical Offset', 5773, 7651, 4013, 0.0, 0)
---- Non imported: (7654, u'transformation', u'EGM2008 height to Kiunga height (1)', 9616, u'Vertical Offset', 3855, 7652, 4383, 0.0, 0)
 --- Non imported: (7697, u'transformation', u'Egypt 1907 to WGS 84 (4)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4229, 4326, 1086, 1.2, 0)
 --- Non imported: (7701, u'transformation', u'Latvia 2000 height to EVRF2007 height (1)', 1046, u'Vertical Offset and Slope', 7700, 5621, 3268, 0.1, 0)
 --- Non imported: (7708, u'transformation', u'OSGB 1936 / British National Grid to ETRS89 (3)', 9633, u'Ordnance Survey National Transformation', 27700, 4258, 4390, 0.0, 1)
 --- Non imported: (7806, u'transformation', u'Pulkovo 1942(83) to BGS2005 (1)', 1063, u'Molodensky-Badekas (PV geog2D domain)', 4178, 7798, 3224, 5.0, 0)
 --- Non imported: (7810, u'concatenated operation', u'NTF (Paris) to RGF93 (1)', None, None, 4807, 4171, 3694, None, 0)
 --- Non imported: (7838, u'transformation', u'DHHN2016 height to EVRF2007 height (1)', 1046, u'Vertical Offset and Slope', 7837, 5621, 3339, 0.1, 0)
---- Non imported: (7873, u'transformation', u'EGM96 height to POM96 height (1)', 9616, u'Vertical Offset', 5773, 7832, 4425, 0.0, 0)
---- Non imported: (7874, u'transformation', u'EGM2008 height to POM08 height (1)', 9616, u'Vertical Offset', 3855, 7841, 4425, 0.0, 0)
 --- Non imported: (7913, u'transformation', u'ETRS89 to OSGB 1936 / British National Grid (1)', 9633, u'Ordnance Survey National Transformation', 4258, 27700, 1264, 0.2, 0)
 --- Non imported: (7952, u'transformation', u'ETRS89 to OSGB 1936 / British National Grid (2)', 9633, u'Ordnance Survey National Transformation', 4258, 27700, 1264, 0.0, 0)
 --- Non imported: (7953, u'transformation', u'ETRS89 to OSGB 1936 / British National Grid (3)', 9633, u'Ordnance Survey National Transformation', 4258, 27700, 4390, 0.0, 0)
---- Non imported: (7964, u'transformation', u'Poolbeg height (m) to Malin Head height (1)', 9616, u'Vertical Offset', 7962, 5731, 1305, 0.1, 0)
---- Non imported: (7965, u'concatenated operation', u'Poolbeg height (ft(Br36)) to Malin Head height (1)', None, None, 5754, 5731, 1305, None, 0)
---- Non imported: (7966, u'transformation', u'Poolbeg height (m) to Belfast height (1)', 9616, u'Vertical Offset', 7962, 5732, 1305, 0.1, 0)
---- Non imported: (7967, u'concatenated operation', u'Poolbeg height (ft(Br36)) to Belfast height (1)', None, None, 5754, 5732, 1305, None, 0)
---- Non imported: (7977, u'transformation', u'HKPD depth to HKCD depth (1)', 9616, u'Vertical Offset', 7976, 5739, 3335, 0.0, 0)
---- Non imported: (7980, u'transformation', u'KOC CD height to KOC WD height (1)', 9616, u'Vertical Offset', 5790, 7979, 3267, 0.1, 0)
---- Non imported: (7981, u'transformation', u'Kuwait PWD height to KOC WD height (1)', 9616, u'Vertical Offset', 5788, 7979, 3267, 0.1, 0)
---- Non imported: (7983, u'concatenated operation', u'HKPD height to HKCD depth (1)', None, None, 5738, 5739, 3335, None, 0)
---- Non imported: (7986, u'concatenated operation', u'KOC CD height to KOC WD depth (1)', None, None, 5790, 5789, 3267, None, 0)
---- Non imported: (7987, u'concatenated operation', u'KOC CD height to KOC WD depth (ft) (1)', None, None, 5790, 5614, 3267, None, 0)
 --- Non imported: (8046, u'concatenated operation', u'ED50 to WGS 84 (14)', None, None, 4230, 4326, 2330, None, 1)
 --- Non imported: (8241, u'concatenated operation', u'Madrid 1870 (Madrid) to WGS 84 (1)', None, None, 4903, 4326, 2366, None, 0)
 --- Non imported: (8435, u'transformation', u'Macao 2008 to Macao 1920 (1)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 8431, 8428, 1147, 999.0, 0)

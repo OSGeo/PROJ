@@ -6052,6 +6052,44 @@ TransformationNNPtr Transformation::createGeographic2DWithHeightOffsets(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a transformation with method Vertical Offset.
+ *
+ * This method is defined as [EPSG:9616]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9616)
+ * *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param offsetHeight Geoid undulation to add.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
+TransformationNNPtr Transformation::createVerticalOffset(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const common::Length &offsetHeight,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    return create(properties, sourceCRSIn, targetCRSIn, nullptr,
+                  util::PropertyMap()
+                      .set(common::IdentifiedObject::NAME_KEY,
+                           EPSG_NAME_METHOD_VERTICAL_OFFSET)
+                      .set(metadata::Identifier::CODESPACE_KEY,
+                           metadata::Identifier::EPSG)
+                      .set(metadata::Identifier::CODE_KEY,
+                           EPSG_CODE_METHOD_VERTICAL_OFFSET),
+                  {OperationParameter::create(
+                      util::PropertyMap()
+                          .set(common::IdentifiedObject::NAME_KEY,
+                               EPSG_NAME_PARAMETER_VERTICAL_OFFSET)
+                          .set(metadata::Identifier::CODESPACE_KEY,
+                               metadata::Identifier::EPSG)
+                          .set(metadata::Identifier::CODE_KEY,
+                               EPSG_CODE_PARAMETER_VERTICAL_OFFSET))},
+                  {ParameterValue::create(offsetHeight)}, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 static TransformationNNPtr
 createGeographicGeocentric(const util::PropertyMap &properties,
@@ -6520,6 +6558,22 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                 createPropertiesForInverse(this, false, false), targetCRS(),
                 sourceCRS(), newOffsetLat, newOffsetLong, newOffsetHeight,
                 coordinateOperationAccuracies()));
+    }
+
+    if (ci_equal(method_name, EPSG_NAME_METHOD_VERTICAL_OFFSET) ||
+        method()->isEPSG(EPSG_CODE_METHOD_VERTICAL_OFFSET)) {
+
+        auto offsetHeight =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_VERTICAL_OFFSET,
+                                  EPSG_CODE_PARAMETER_VERTICAL_OFFSET);
+        const common::Length newOffsetHeight(negate(offsetHeight.value()),
+                                             offsetHeight.unit());
+
+        return d->registerInv(
+            shared_from_this(),
+            createVerticalOffset(createPropertiesForInverse(this, false, false),
+                                 targetCRS(), sourceCRS(), newOffsetHeight,
+                                 coordinateOperationAccuracies()));
     }
 
     if (ci_equal(method_name, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
@@ -7513,6 +7567,42 @@ std::string Transformation::exportToPROJString(
         }
 
         targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
+        return scope.toString();
+    }
+
+    if (ci_equal(method_name, EPSG_NAME_METHOD_VERTICAL_OFFSET) ||
+        method()->isEPSG(EPSG_CODE_METHOD_VERTICAL_OFFSET)) {
+
+        auto sourceCRSVert =
+            util::nn_dynamic_pointer_cast<crs::VerticalCRS>(sourceCRS());
+        if (!sourceCRSVert) {
+            throw io::FormattingException(
+                "Can apply Vertical offset only to VerticalCRS");
+        }
+
+        auto targetCRSVert =
+            util::nn_dynamic_pointer_cast<crs::VerticalCRS>(targetCRS());
+        if (!targetCRSVert) {
+            throw io::FormattingException(
+                "Can apply Vertical offset only to VerticalCRS");
+        }
+
+        auto offsetHeight =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_VERTICAL_OFFSET,
+                                  EPSG_CODE_PARAMETER_VERTICAL_OFFSET)
+                .getSIValue();
+
+        io::PROJStringFormatter::Scope scope(formatter);
+
+        formatter->startInversion();
+        sourceCRSVert->addLinearUnitConvert(formatter);
+        formatter->stopInversion();
+
+        formatter->addStep("geogoffset");
+        formatter->addParam("dh", offsetHeight);
+
+        targetCRSVert->addLinearUnitConvert(formatter);
 
         return scope.toString();
     }

@@ -12,9 +12,14 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','6714','Tokyo to JGD2011 (1)'
 INSERT INTO "concatenated_operation" VALUES('EPSG','6739','NAD27 to NAD83(HARN) (22)','EPSG','4267','EPSG','4152','EPSG','1410',NULL,'EPSG','1241','EPSG','1496',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','6874','Tananarive (Paris) to WGS 84 (2)','EPSG','4810','EPSG','4326','EPSG','3273',NULL,'EPSG','1265','EPSG','6873',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','7811','NTF (Paris) to RGF93 (2)','EPSG','4807','EPSG','4171','EPSG','3694',NULL,'EPSG','1763','EPSG','15958',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','7965','Poolbeg height (ft(Br36)) to Malin Head height (1)','EPSG','5754','EPSG','5731','EPSG','1305',NULL,'EPSG','7963','EPSG','7964',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','7967','Poolbeg height (ft(Br36)) to Belfast height (1)','EPSG','5754','EPSG','5732','EPSG','1305',NULL,'EPSG','7963','EPSG','7966',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','7973','NGVD29 height (ftUS) to NAVD88 height (1)','EPSG','5702','EPSG','5703','EPSG','2950',NULL,'EPSG','7972','EPSG','7969',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','7974','NGVD29 height (ftUS) to NAVD88 height (2)','EPSG','5702','EPSG','5703','EPSG','2949',NULL,'EPSG','7972','EPSG','7970',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','7975','NGVD29 height (ftUS) to NAVD88 height (3)','EPSG','5702','EPSG','5703','EPSG','2948',NULL,'EPSG','7972','EPSG','7971',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','7983','HKPD height to HKCD depth (1)','EPSG','5738','EPSG','5739','EPSG','3335',NULL,'EPSG','7982','EPSG','7977',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','7986','KOC CD height to KOC WD depth (1)','EPSG','5790','EPSG','5789','EPSG','3267',NULL,'EPSG','7980','EPSG','7984',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','7987','KOC CD height to KOC WD depth (ft) (1)','EPSG','5790','EPSG','5614','EPSG','3267',NULL,'EPSG','7980','EPSG','7984','EPSG','7985',0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','8047','ED50 to WGS 84 (15)','EPSG','4230','EPSG','4326','EPSG','2332',NULL,'EPSG','1147','EPSG','1146',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','8094','NTF (Paris) to WGS 84 (1)','EPSG','4807','EPSG','4326','EPSG','3694',NULL,'EPSG','1763','EPSG','1193',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','8174','Bogota 1975 (Bogota) to WGS 84 (1)','EPSG','4802','EPSG','4326','EPSG','3229',NULL,'EPSG','1755','EPSG','1125',NULL,NULL,0);

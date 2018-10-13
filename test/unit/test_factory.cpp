@@ -1015,7 +1015,9 @@ TEST(factory, AuthorityFactory_build_all_concatenated) {
         AuthorityFactory::ObjectType::CONCATENATED_OPERATION, false);
     EXPECT_LT(setConcatenatedNoDeprecated.size(), setConcatenated.size());
     for (const auto &code : setConcatenated) {
-        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572"})) {
+        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572",
+                      // the issue with 7987 is the chaining of two conversions
+                      "7987"})) {
             EXPECT_THROW(factory->createCoordinateOperation(code, false),
                          FactoryException);
         } else {

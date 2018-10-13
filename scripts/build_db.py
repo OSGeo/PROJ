@@ -342,10 +342,11 @@ def fill_grid_transformation(proj_db_cursor):
 
 def fill_other_transformation(proj_db_cursor):
     # 9601: Longitude rotation
+    # 9616: Vertical offset
     # 9618: Geographic2D with Height offsets
     # 9619: Geographic2D offsets
     # 9660: Geographic3D offsets
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601, 9618, 9619, 9660)")
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601, 9616, 9618, 9619, 9660)")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7

@@ -360,6 +360,10 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
            const datum::DatumEnsemblePtr &datumEnsembleIn,
            const cs::VerticalCSNNPtr &csIn);
 
+    //! @cond Doxygen_Suppress
+    void addLinearUnitConvert(io::PROJStringFormatterNNPtr formatter) const;
+    //! @endcond
+
   protected:
     VerticalCRS(const datum::VerticalReferenceFramePtr &datumIn,
                 const datum::DatumEnsemblePtr &datumEnsembleIn,

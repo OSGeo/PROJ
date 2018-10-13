@@ -494,6 +494,9 @@ constexpr int EPSG_CODE_METHOD_LONGITUDE_ROTATION = 9601;
 static const std::string
     EPSG_NAME_METHOD_LONGITUDE_ROTATION("Longitude rotation");
 
+constexpr int EPSG_CODE_METHOD_VERTICAL_OFFSET = 9616;
+static const std::string EPSG_NAME_METHOD_VERTICAL_OFFSET("Vertical Offset");
+
 constexpr int EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS = 9619;
 static const std::string
     EPSG_NAME_METHOD_GEOGRAPHIC2D_OFFSETS("Geographic2D offsets");

@@ -1396,6 +1396,11 @@ class Transformation : public SingleOperation {
         const common::Angle &offsetLon, const common::Length &offsetHeight,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
+    PROJ_DLL static TransformationNNPtr createVerticalOffset(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const common::Length &offsetHeight,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
     PROJ_DLL TransformationNNPtr substitutePROJAlternativeGridNames(
         io::DatabaseContextNNPtr databaseContext) const;
 
