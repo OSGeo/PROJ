@@ -345,144 +345,144 @@ INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS84_TO_EPSG_4978','helm
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS84_TO_EPSG_4978','World Geodetic System 1984 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','WGS84','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','AMST63GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','AMST63GEO','Ile d''Amsterdam 1963','geographic 2D','EPSG','6422','IGNF','DATUM_AMST63','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','AMST63GEO','Ile d''Amsterdam 1963','geographic 2D','EPSG','6424','IGNF','DATUM_AMST63','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_AMST63GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_AMST63GEO_TO_EPSG_4326','Ile d''Amsterdam 1963 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','AMST63GEO','EPSG','4326','EPSG','1262',NULL,109.7530,-528.1330,-362.2440,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','ANAA92GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','ANAA92GEO','MOP92 (Anaa) Tuamotu','geographic 2D','EPSG','6422','IGNF','DATUM_ANAA92','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','ANAA92GEO','MOP92 (Anaa) Tuamotu','geographic 2D','EPSG','6424','IGNF','DATUM_ANAA92','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ANAA92GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ANAA92GEO_TO_EPSG_4326','MOP92 (Anaa) Tuamotu to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ANAA92GEO','EPSG','4326','EPSG','1262',NULL,1.5000,3.8400,4.8100,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','APAT86GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','APAT86GEO','MOP86 (Apataki, Rapa, Hao) Tuamotu','geographic 2D','EPSG','6422','IGNF','DATUM_APAT86','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','APAT86GEO','MOP86 (Apataki, Rapa, Hao) Tuamotu','geographic 2D','EPSG','6424','IGNF','DATUM_APAT86','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_APAT86GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_APAT86GEO_TO_EPSG_4326','MOP86 (Apataki, Rapa, Hao) Tuamotu to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','APAT86GEO','EPSG','4326','EPSG','1262',NULL,216.8400,118.8100,19.6100,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','ATIGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','ATIGEO','Ancienne Triangulation des Ingenieurs','geographic 2D','EPSG','6422','IGNF','DATUM_ATI','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','ATIGEO','Ancienne Triangulation des Ingenieurs','geographic 2D','EPSG','6424','IGNF','DATUM_ATI','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ATIGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ATIGEO_TO_EPSG_4326','Ancienne Triangulation des Ingenieurs to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ATIGEO','EPSG','4326','EPSG','1262',NULL,1127.0000,22.0000,57.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','CAD97GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','CAD97GEO','Cadastre 1997','geographic 2D','EPSG','6422','IGNF','DATUM_CAD97','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','CAD97GEO','Cadastre 1997','geographic 2D','EPSG','6424','IGNF','DATUM_CAD97','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CAD97GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CAD97GEO_TO_EPSG_4326','Cadastre 1997 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','CAD97GEO','EPSG','4326','EPSG','1262',NULL,-381.7880,-57.5010,-256.6730,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','CROZ63GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','CROZ63GEO','Crozet 1963','geographic 2D','EPSG','6422','IGNF','DATUM_CROZ63','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','CROZ63GEO','Crozet 1963','geographic 2D','EPSG','6424','IGNF','DATUM_CROZ63','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CROZ63GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CROZ63GEO_TO_EPSG_4326','Crozet 1963 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','CROZ63GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','CSG67GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','CSG67GEO','Guyane CSG67','geographic 2D','EPSG','6422','IGNF','DATUM_CSG67','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','CSG67GEO','Guyane CSG67','geographic 2D','EPSG','6424','IGNF','DATUM_CSG67','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CSG67GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CSG67GEO_TO_EPSG_4326','Guyane CSG67 to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','CSG67GEO','EPSG','4326','EPSG','1262',NULL,-193.0660,236.9930,105.4470,'EPSG','9001',0.4814,-0.8074,0.1276,'EPSG','9104',1.564900,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','ED50G','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','ED50G','ED50','geographic 2D','EPSG','6422','IGNF','DATUM_ED50','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','ED50G','ED50','geographic 2D','EPSG','6424','IGNF','DATUM_ED50','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ED50G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ED50G_TO_EPSG_4326','ED50 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ED50G','EPSG','4326','EPSG','1262',NULL,-84.0000,-97.0000,-117.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','EFATE57GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','EFATE57GEO','EFATE-IGN 1957','geographic 2D','EPSG','6422','IGNF','DATUM_EFATE57','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','EFATE57GEO','EFATE-IGN 1957','geographic 2D','EPSG','6424','IGNF','DATUM_EFATE57','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_EFATE57GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_EFATE57GEO_TO_EPSG_4326','EFATE-IGN 1957 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','EFATE57GEO','EPSG','4326','EPSG','1262',NULL,-127.0000,-769.0000,472.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_ETRS89GEO','ETRS89 geographiques (dms)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','ETRS89GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','ETRS89GEO','ETRS89 geographiques (dms)','geographic 2D','EPSG','6422','IGNF','DATUM_ETRS89GEO','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','ETRS89GEO','ETRS89 geographiques (dms)','geographic 2D','EPSG','6424','IGNF','DATUM_ETRS89GEO','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ETRS89GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ETRS89GEO_TO_EPSG_4326','ETRS89 geographiques (dms) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ETRS89GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','FANGA84GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','FANGA84GEO','MOP84 (Fangataufa 1984)','geographic 2D','EPSG','6422','IGNF','DATUM_FANGA84','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','FANGA84GEO','MOP84 (Fangataufa 1984)','geographic 2D','EPSG','6424','IGNF','DATUM_FANGA84','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_FANGA84GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_FANGA84GEO_TO_EPSG_4326','MOP84 (Fangataufa 1984) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','FANGA84GEO','EPSG','4326','EPSG','1262',NULL,150.5700,158.3300,118.3200,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','GUAD48GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','GUAD48GEO','Guadeloupe Ste Anne','geographic 2D','EPSG','6422','IGNF','DATUM_GUAD48','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','GUAD48GEO','Guadeloupe Ste Anne','geographic 2D','EPSG','6424','IGNF','DATUM_GUAD48','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_GUAD48GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_GUAD48GEO_TO_EPSG_4326','Guadeloupe Ste Anne to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','GUAD48GEO','EPSG','4326','EPSG','1262',NULL,-472.2900,-5.6300,-304.1200,'EPSG','9001',0.4362,-0.8374,0.2563,'EPSG','9104',1.898400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','GUADFM49GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','GUADFM49GEO','Guadeloupe Fort Marigot','geographic 2D','EPSG','6422','IGNF','DATUM_GUADFM49','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','GUADFM49GEO','Guadeloupe Fort Marigot','geographic 2D','EPSG','6424','IGNF','DATUM_GUADFM49','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_GUADFM49GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_GUADFM49GEO_TO_EPSG_4326','Guadeloupe Fort Marigot to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','GUADFM49GEO','EPSG','4326','EPSG','1262',NULL,136.5960,248.1480,-429.7890,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','IGN63GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','IGN63GEO','IGN 1963 (Hiva Oa, Tahuata, Mohotani)','geographic 2D','EPSG','6422','IGNF','DATUM_IGN63','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','IGN63GEO','IGN 1963 (Hiva Oa, Tahuata, Mohotani)','geographic 2D','EPSG','6424','IGNF','DATUM_IGN63','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_IGN63GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_IGN63GEO_TO_EPSG_4326','IGN 1963 (Hiva Oa, Tahuata, Mohotani) to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','IGN63GEO','EPSG','4326','EPSG','1262',NULL,410.7210,55.0490,80.7460,'EPSG','9001',-2.5779,-2.3514,-0.6664,'EPSG','9104',17.331100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','IGN72GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','IGN72GEO','IGN 1972 Grande-Terre / Ile des Pins','geographic 2D','EPSG','6422','IGNF','DATUM_IGN72','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','IGN72GEO','IGN 1972 Grande-Terre / Ile des Pins','geographic 2D','EPSG','6424','IGNF','DATUM_IGN72','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_IGN72GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_IGN72GEO_TO_EPSG_4326','IGN 1972 Grande-Terre / Ile des Pins to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','IGN72GEO','EPSG','4326','EPSG','1262',NULL,-11.6400,-348.6000,291.6800,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','KAUE70GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','KAUE70GEO','MHPF70 (Kauehi) Tuamotu','geographic 2D','EPSG','6422','IGNF','DATUM_KAUE70','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','KAUE70GEO','MHPF70 (Kauehi) Tuamotu','geographic 2D','EPSG','6424','IGNF','DATUM_KAUE70','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_KAUE70GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_KAUE70GEO_TO_EPSG_4326','MHPF70 (Kauehi) Tuamotu to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','KAUE70GEO','EPSG','4326','EPSG','1262',NULL,126.7400,300.1000,-75.4900,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','KERG62GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','KERG62GEO','Kerguelen - K0','geographic 2D','EPSG','6422','IGNF','DATUM_KERG62CAR','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','KERG62GEO','Kerguelen - K0','geographic 2D','EPSG','6424','IGNF','DATUM_KERG62CAR','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_KERG62GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_KERG62GEO_TO_EPSG_4326','Kerguelen - K0 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','KERG62GEO','EPSG','4326','EPSG','1262',NULL,144.8990,-186.7700,100.9230,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','LIFOU56GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','LIFOU56GEO','Lifou - Iles Loyaute (IGN56)','geographic 2D','EPSG','6422','IGNF','DATUM_LIFOU56','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','LIFOU56GEO','Lifou - Iles Loyaute (IGN56)','geographic 2D','EPSG','6424','IGNF','DATUM_LIFOU56','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_LIFOU56GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_LIFOU56GEO_TO_EPSG_4326','Lifou - Iles Loyaute (IGN56) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','LIFOU56GEO','EPSG','4326','EPSG','1262',NULL,336.0000,223.0000,-231.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','LUXGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','LUXGEO','Nouvelle Triangulation du Grand Duche du Luxembourg','geographic 2D','EPSG','6422','IGNF','DATUM_LUREF','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','LUXGEO','Nouvelle Triangulation du Grand Duche du Luxembourg','geographic 2D','EPSG','6424','IGNF','DATUM_LUREF','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_LUXGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_LUXGEO_TO_EPSG_4326','Nouvelle Triangulation du Grand Duche du Luxembourg to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','LUXGEO','EPSG','4326','EPSG','1262',NULL,-192.9860,13.6730,-39.3090,'EPSG','9001',-0.4099,-2.9332,2.6881,'EPSG','9104',0.430000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','MARE53GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','MARE53GEO','Mare - Iles Loyaute (IGN53)','geographic 2D','EPSG','6422','IGNF','DATUM_MARE53','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','MARE53GEO','Mare - Iles Loyaute (IGN53)','geographic 2D','EPSG','6424','IGNF','DATUM_MARE53','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MARE53GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MARE53GEO_TO_EPSG_4326','Mare - Iles Loyaute (IGN53) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','MARE53GEO','EPSG','4326','EPSG','1262',NULL,287.0000,178.0000,-136.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','MARQUI72GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','MARQUI72GEO','IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises','geographic 2D','EPSG','6422','IGNF','DATUM_MARQUI72','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','MARQUI72GEO','IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises','geographic 2D','EPSG','6424','IGNF','DATUM_MARQUI72','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MARQUI72GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MARQUI72GEO_TO_EPSG_4326','IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','MARQUI72GEO','EPSG','4326','EPSG','1262',NULL,327.8400,-14.9600,59.3300,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','MART38GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','MART38GEO','Martinique Fort-Desaix','geographic 2D','EPSG','6422','IGNF','DATUM_MART38','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','MART38GEO','Martinique Fort-Desaix','geographic 2D','EPSG','6424','IGNF','DATUM_MART38','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MART38GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MART38GEO_TO_EPSG_4326','Martinique Fort-Desaix to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','MART38GEO','EPSG','4326','EPSG','1262',NULL,126.9260,547.9390,130.4090,'EPSG','9001',-2.7867,5.1612,-0.8584,'EPSG','9104',13.822650,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','MAYO50GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','MAYO50GEO','Mayotte Combani','geographic 2D','EPSG','6422','IGNF','DATUM_MAYO50','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','MAYO50GEO','Mayotte Combani','geographic 2D','EPSG','6424','IGNF','DATUM_MAYO50','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MAYO50GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MAYO50GEO_TO_EPSG_4326','Mayotte Combani to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','MAYO50GEO','EPSG','4326','EPSG','1262',NULL,-599.9280,-275.5520,-195.6650,'EPSG','9001',-0.0835,-0.4715,0.0602,'EPSG','9104',49.281400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','MHEFO55FGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','MHEFO55FGEO','MHEFO 1955 (Fatu Huku)','geographic 2D','EPSG','6422','IGNF','DATUM_MHEFO55F','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','MHEFO55FGEO','MHEFO 1955 (Fatu Huku)','geographic 2D','EPSG','6424','IGNF','DATUM_MHEFO55F','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MHEFO55FGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MHEFO55FGEO_TO_EPSG_4326','MHEFO 1955 (Fatu Huku) to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','MHEFO55FGEO','EPSG','4326','EPSG','1262',NULL,347.1030,1078.1250,2623.9220,'EPSG','9001',33.8875,-70.6773,9.3943,'EPSG','9104',186.074000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','MHPF67GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','MHPF67GEO','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles)','geographic 2D','EPSG','6422','IGNF','DATUM_MHPF67','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','MHPF67GEO','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles)','geographic 2D','EPSG','6424','IGNF','DATUM_MHPF67','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MHPF67GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MHPF67GEO_TO_EPSG_4326','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','MHPF67GEO','EPSG','4326','EPSG','1262',NULL,338.0800,212.5800,-296.1700,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','MOOREA87GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','MOOREA87GEO','Moorea 1987','geographic 2D','EPSG','6422','IGNF','DATUM_MOOREA87','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','MOOREA87GEO','Moorea 1987','geographic 2D','EPSG','6424','IGNF','DATUM_MOOREA87','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MOOREA87GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MOOREA87GEO_TO_EPSG_4326','Moorea 1987 to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','MOOREA87GEO','EPSG','4326','EPSG','1262',NULL,215.9820,149.5930,176.2290,'EPSG','9001',3.2624,1.6920,1.1571,'EPSG','9104',10.477300,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','MOP90GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','MOP90GEO','MOP90 (Tetiaroa) Iles de la Societe','geographic 2D','EPSG','6422','IGNF','DATUM_MOP90','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','MOP90GEO','MOP90 (Tetiaroa) Iles de la Societe','geographic 2D','EPSG','6424','IGNF','DATUM_MOP90','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MOP90GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MOP90GEO_TO_EPSG_4326','MOP90 (Tetiaroa) Iles de la Societe to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','MOP90GEO','EPSG','4326','EPSG','1262',NULL,217.0370,86.9590,23.9560,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_NTFG','Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','EPSG','7011','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','NTFG','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','NTFG','Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','geographic 2D','EPSG','6422','IGNF','DATUM_NTFG','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','NTFG','Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','geographic 2D','EPSG','6424','IGNF','DATUM_NTFG','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326','Nouvelle Triangulation Francaise Greenwich degres sexagesimaux to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','NTFG','EPSG','4326','EPSG','1262',NULL,-168.0000,-60.0000,320.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326_GRID','grid_transformation');
@@ -490,7 +490,7 @@ INSERT INTO "grid_transformation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326_GRID','N
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_NTFP','Nouvelle Triangulation Francaise Paris grades','EPSG','7011','EPSG','8903','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','NTFP','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','NTFP','Nouvelle Triangulation Francaise Paris grades','geographic 2D','EPSG','6403','IGNF','DATUM_NTFP','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','NTFP','Nouvelle Triangulation Francaise Paris grades','geographic 2D','EPSG','6425','IGNF','DATUM_NTFP','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','other_transformation');
 INSERT INTO "other_transformation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','Nouvelle Triangulation Francaise Paris grades to Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','EPSG','9601','Longitude rotation','IGNF','NTFP','IGNF','NTFG','EPSG','1262',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','concatenated_operation');
@@ -498,150 +498,150 @@ INSERT INTO "concatenated_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','Nou
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','concatenated_operation');
 INSERT INTO "concatenated_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','Nouvelle Triangulation Francaise Paris grades to WGS 84 (2)','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,'IGNF','IGNF_NTFP_TO_IGNF_NTFG','IGNF','IGNF_NTFG_TO_EPSG_4326_GRID',NULL,NULL,0);
 INSERT INTO "crs" VALUES('IGNF','NUKU72GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU72GEO','IGN 1972 Nuku Hiva','geographic 2D','EPSG','6422','IGNF','DATUM_NUKU72','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU72GEO','IGN 1972 Nuku Hiva','geographic 2D','EPSG','6424','IGNF','DATUM_NUKU72','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NUKU72GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NUKU72GEO_TO_EPSG_4326','IGN 1972 Nuku Hiva to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','NUKU72GEO','EPSG','4326','EPSG','1262',NULL,165.7320,216.7200,180.5050,'EPSG','9001',-0.6434,-0.4512,-0.0791,'EPSG','9104',7.420400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','NUKU94GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU94GEO','SAT94 (Nukutavake) Tuamotu','geographic 2D','EPSG','6422','IGNF','DATUM_NUKU94','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU94GEO','SAT94 (Nukutavake) Tuamotu','geographic 2D','EPSG','6424','IGNF','DATUM_NUKU94','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NUKU94GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NUKU94GEO_TO_EPSG_4326','SAT94 (Nukutavake) Tuamotu to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','NUKU94GEO','EPSG','4326','EPSG','1262',NULL,197.1600,200.1700,-48.0800,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','OUVEA72GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','OUVEA72GEO','Ouvea - Iles Loyaute (MHNC 1972 - OUVEA)','geographic 2D','EPSG','6422','IGNF','DATUM_OUVEA72CAR','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','OUVEA72GEO','Ouvea - Iles Loyaute (MHNC 1972 - OUVEA)','geographic 2D','EPSG','6424','IGNF','DATUM_OUVEA72CAR','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_OUVEA72GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_OUVEA72GEO_TO_EPSG_4326','Ouvea - Iles Loyaute (MHNC 1972 - OUVEA) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','OUVEA72GEO','EPSG','4326','EPSG','1262',NULL,-13.0000,-348.0000,292.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','RAIA53GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RAIA53GEO','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine','geographic 2D','EPSG','6422','IGNF','DATUM_RAIA53','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RAIA53GEO','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine','geographic 2D','EPSG','6424','IGNF','DATUM_RAIA53','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RAIA53GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RAIA53GEO_TO_EPSG_4326','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RAIA53GEO','EPSG','4326','EPSG','1262',NULL,65.0300,341.5500,76.6700,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','REUN47GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','REUN47GEO','Reunion 1947','geographic 2D','EPSG','6422','IGNF','DATUM_REUN47','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','REUN47GEO','Reunion 1947','geographic 2D','EPSG','6424','IGNF','DATUM_REUN47','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_REUN47GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_REUN47GEO_TO_EPSG_4326','Reunion 1947 to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','REUN47GEO','EPSG','4326','EPSG','1262',NULL,789.5240,-626.4860,-89.9040,'EPSG','9001',0.6006,76.7946,-10.5788,'EPSG','9104',-32.324100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','RGF93G','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RGF93G','Reseau geodesique francais 1993','geographic 2D','EPSG','6422','IGNF','DATUM_RGF93','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RGF93G','Reseau geodesique francais 1993','geographic 2D','EPSG','6424','IGNF','DATUM_RGF93','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGF93G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGF93G_TO_EPSG_4326','Reseau geodesique francais 1993 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGF93G','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','RGFG95GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RGFG95GEO','Reseau geodesique francais de Guyane 1995','geographic 2D','EPSG','6422','IGNF','DATUM_RGFG95','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RGFG95GEO','Reseau geodesique francais de Guyane 1995','geographic 2D','EPSG','6424','IGNF','DATUM_RGFG95','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGFG95GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGFG95GEO_TO_EPSG_4326','Reseau geodesique francais de Guyane 1995 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGFG95GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','RGM04GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RGM04GEO','RGM04 (Reseau Geodesique de Mayotte 2004)','geographic 2D','EPSG','6422','IGNF','DATUM_RGM04','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RGM04GEO','RGM04 (Reseau Geodesique de Mayotte 2004)','geographic 2D','EPSG','6424','IGNF','DATUM_RGM04','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGM04GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGM04GEO_TO_EPSG_4326','RGM04 (Reseau Geodesique de Mayotte 2004) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGM04GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','RGNCGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RGNCGEO','Reseau Geodesique de Nouvelle-Caledonie','geographic 2D','EPSG','6422','IGNF','DATUM_RGNC','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RGNCGEO','Reseau Geodesique de Nouvelle-Caledonie','geographic 2D','EPSG','6424','IGNF','DATUM_RGNC','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGNCGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGNCGEO_TO_EPSG_4326','Reseau Geodesique de Nouvelle-Caledonie to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGNCGEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','RGPFGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RGPFGEO','RGPF (Reseau Geodesique de Polynesie Francaise)','geographic 2D','EPSG','6422','IGNF','DATUM_RGPF','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RGPFGEO','RGPF (Reseau Geodesique de Polynesie Francaise)','geographic 2D','EPSG','6424','IGNF','DATUM_RGPF','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGPFGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGPFGEO_TO_EPSG_4326','RGPF (Reseau Geodesique de Polynesie Francaise) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGPFGEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGR92GEO','Reseau geodesique de la Reunion 1992','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','RGR92GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RGR92GEO','Reseau geodesique de la Reunion 1992','geographic 2D','EPSG','6422','IGNF','DATUM_RGR92GEO','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RGR92GEO','Reseau geodesique de la Reunion 1992','geographic 2D','EPSG','6424','IGNF','DATUM_RGR92GEO','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGR92GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGR92GEO_TO_EPSG_4326','Reseau geodesique de la Reunion 1992 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGR92GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGSPM06GEO','Saint-Pierre-et-Miquelon (2006)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','RGSPM06GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RGSPM06GEO','Saint-Pierre-et-Miquelon (2006)','geographic 2D','EPSG','6422','IGNF','DATUM_RGSPM06GEO','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RGSPM06GEO','Saint-Pierre-et-Miquelon (2006)','geographic 2D','EPSG','6424','IGNF','DATUM_RGSPM06GEO','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGSPM06GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGSPM06GEO_TO_EPSG_4326','Saint-Pierre-et-Miquelon (2006) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGSPM06GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGTAAF07G','Reseau Geodesique des TAAF (2007) (dms)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','RGTAAF07G','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','RGTAAF07G','Reseau Geodesique des TAAF (2007) (dms)','geographic 2D','EPSG','6422','IGNF','DATUM_RGTAAF07G','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','RGTAAF07G','Reseau Geodesique des TAAF (2007) (dms)','geographic 2D','EPSG','6424','IGNF','DATUM_RGTAAF07G','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGTAAF07G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGTAAF07G_TO_EPSG_4326','Reseau Geodesique des TAAF (2007) (dms) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGTAAF07G','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','SAT84GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','SAT84GEO','SAT84 (Rurutu) Iles Australes','geographic 2D','EPSG','6422','IGNF','DATUM_SAT84','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','SAT84GEO','SAT84 (Rurutu) Iles Australes','geographic 2D','EPSG','6424','IGNF','DATUM_SAT84','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_SAT84GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_SAT84GEO_TO_EPSG_4326','SAT84 (Rurutu) Iles Australes to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','SAT84GEO','EPSG','4326','EPSG','1262',NULL,202.1300,174.6000,-15.7400,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','SHOM84GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','SHOM84GEO','SHOM 1984 Martinique Montagne Du Vauclin','geographic 2D','EPSG','6422','IGNF','DATUM_SHOM84','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','SHOM84GEO','SHOM 1984 Martinique Montagne Du Vauclin','geographic 2D','EPSG','6424','IGNF','DATUM_SHOM84','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_SHOM84GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_SHOM84GEO_TO_EPSG_4326','SHOM 1984 Martinique Montagne Du Vauclin to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','SHOM84GEO','EPSG','4326','EPSG','1262',NULL,189.5060,486.5470,148.7830,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','STPL69GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','STPL69GEO','Ile de Saint-Paul 1969','geographic 2D','EPSG','6422','IGNF','DATUM_STPL69','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','STPL69GEO','Ile de Saint-Paul 1969','geographic 2D','EPSG','6424','IGNF','DATUM_STPL69','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_STPL69GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_STPL69GEO_TO_EPSG_4326','Ile de Saint-Paul 1969 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','STPL69GEO','EPSG','4326','EPSG','1262',NULL,225.5710,-346.6080,-46.5670,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_STPM50GEO','St Pierre et Miquelon 1950 ','EPSG','7008','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','STPM50GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','STPM50GEO','St Pierre et Miquelon 1950 ','geographic 2D','EPSG','6422','IGNF','DATUM_STPM50GEO','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','STPM50GEO','St Pierre et Miquelon 1950 ','geographic 2D','EPSG','6424','IGNF','DATUM_STPM50GEO','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_STPM50GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_STPM50GEO_TO_EPSG_4326','St Pierre et Miquelon 1950  to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','STPM50GEO','EPSG','4326','EPSG','1262',NULL,-95.5930,573.7630,173.4420,'EPSG','9001',-0.9602,1.2510,-1.3918,'EPSG','9104',42.626500,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','TAHAAGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','TAHAAGEO','Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est)','geographic 2D','EPSG','6422','IGNF','DATUM_TAHAA','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','TAHAAGEO','Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est)','geographic 2D','EPSG','6424','IGNF','DATUM_TAHAA','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHAAGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHAAGEO_TO_EPSG_4326','Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est) to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','TAHAAGEO','EPSG','4326','EPSG','1262',NULL,72.4380,345.9180,79.4860,'EPSG','9001',-1.6045,-0.8823,-0.5565,'EPSG','9104',1.374600,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','TAHI51GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','TAHI51GEO','Tahiti-Terme Nord 1951','geographic 2D','EPSG','6422','IGNF','DATUM_TAHI51','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','TAHI51GEO','Tahiti-Terme Nord 1951','geographic 2D','EPSG','6424','IGNF','DATUM_TAHI51','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHI51GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHI51GEO_TO_EPSG_4326','Tahiti-Terme Nord 1951 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TAHI51GEO','EPSG','4326','EPSG','1262',NULL,162.0000,117.0000,154.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','TAHI79GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','TAHI79GEO','IGN79 (Tahiti) Iles de la Societe','geographic 2D','EPSG','6422','IGNF','DATUM_TAHI79','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','TAHI79GEO','IGN79 (Tahiti) Iles de la Societe','geographic 2D','EPSG','6424','IGNF','DATUM_TAHI79','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHI79GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHI79GEO_TO_EPSG_4326','IGN79 (Tahiti) Iles de la Societe to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','TAHI79GEO','EPSG','4326','EPSG','1262',NULL,221.5250,152.9480,176.7680,'EPSG','9001',2.3847,1.3896,0.8770,'EPSG','9104',11.474100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','TANNAGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','TANNAGEO','Tanna Bloc Sud','geographic 2D','EPSG','6422','IGNF','DATUM_TANNA','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','TANNAGEO','Tanna Bloc Sud','geographic 2D','EPSG','6424','IGNF','DATUM_TANNA','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TANNAGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TANNAGEO_TO_EPSG_4326','Tanna Bloc Sud to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TANNAGEO','EPSG','4326','EPSG','1262',NULL,-139.0000,-967.0000,436.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','TERA50G','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','TERA50G','Pointe Geologie - Perroud 1950','geographic 2D','EPSG','6422','IGNF','DATUM_TERA50','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','TERA50G','Pointe Geologie - Perroud 1950','geographic 2D','EPSG','6424','IGNF','DATUM_TERA50','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TERA50G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TERA50G_TO_EPSG_4326','Pointe Geologie - Perroud 1950 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TERA50G','EPSG','4326','EPSG','1262',NULL,324.9120,153.2820,172.0260,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','TUBU69GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','TUBU69GEO','MHPF 1969 (Tubuai) Iles Australes','geographic 2D','EPSG','6422','IGNF','DATUM_TUBU69','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','TUBU69GEO','MHPF 1969 (Tubuai) Iles Australes','geographic 2D','EPSG','6424','IGNF','DATUM_TUBU69','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TUBU69GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TUBU69GEO_TO_EPSG_4326','MHPF 1969 (Tubuai) Iles Australes to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TUBU69GEO','EPSG','4326','EPSG','1262',NULL,237.1700,171.6100,-77.8400,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WALL78GEO','Wallis - Uvea 1978 (MOP78)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','WALL78GEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','WALL78GEO','Wallis - Uvea 1978 (MOP78)','geographic 2D','EPSG','6422','IGNF','DATUM_WALL78GEO','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','WALL78GEO','Wallis - Uvea 1978 (MOP78)','geographic 2D','EPSG','6424','IGNF','DATUM_WALL78GEO','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WALL78GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WALL78GEO_TO_EPSG_4326','Wallis - Uvea 1978 (MOP78) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','WALL78GEO','EPSG','4326','EPSG','1262',NULL,253.0000,-133.0000,-127.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WGS72G','WGS72','EPSG','7043','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','WGS72G','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','WGS72G','WGS72','geographic 2D','EPSG','6422','IGNF','DATUM_WGS72G','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','WGS72G','WGS72','geographic 2D','EPSG','6424','IGNF','DATUM_WGS72G','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS72G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS72G_TO_EPSG_4326','WGS72 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','WGS72G','EPSG','4326','EPSG','1262',NULL,0.0000,12.0000,6.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "crs" VALUES('IGNF','WGS84G','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','WGS84G','World Geodetic System 1984','geographic 2D','EPSG','6422','IGNF','DATUM_WGS84','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','WGS84G','World Geodetic System 1984','geographic 2D','EPSG','6424','IGNF','DATUM_WGS84','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS84G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS84G_TO_EPSG_4326','World Geodetic System 1984 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','WGS84G','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WGS84RRAFGEO','Reseau de reference des Antilles francaises (1988-1991)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','WGS84RRAFGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','WGS84RRAFGEO','Reseau de reference des Antilles francaises (1988-1991)','geographic 2D','EPSG','6422','IGNF','DATUM_WGS84RRAFGEO','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','WGS84RRAFGEO','Reseau de reference des Antilles francaises (1988-1991)','geographic 2D','EPSG','6424','IGNF','DATUM_WGS84RRAFGEO','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS84RRAFGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS84RRAFGEO_TO_EPSG_4326','Reseau de reference des Antilles francaises (1988-1991) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','WGS84RRAFGEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_XGEO','Systeme CIO-BIH','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "crs" VALUES('IGNF','XGEO','geographic 2D');
-INSERT INTO "geodetic_crs" VALUES('IGNF','XGEO','Systeme CIO-BIH','geographic 2D','EPSG','6422','IGNF','DATUM_XGEO','EPSG','1262',0);
+INSERT INTO "geodetic_crs" VALUES('IGNF','XGEO','Systeme CIO-BIH','geographic 2D','EPSG','6424','IGNF','DATUM_XGEO','EPSG','1262',0);
 INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_XGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_XGEO_TO_EPSG_4326','Systeme CIO-BIH to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','XGEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.5000,'EPSG','9001',0.0000,0.0000,0.0140,'EPSG','9104',-0.100000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 

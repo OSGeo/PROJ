@@ -222,9 +222,9 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','geographic 2D');""" % (code)
         all_sql.append(sql)
 
-        cs_code = "'6422'" # Lat Long deg
+        cs_code = "'6424'" # Long Lat deg
         if 'grades' in d['title']:
-            cs_code = "'6403'" # Lat Long grad
+            cs_code = "'6425'" # Long Lat grad
 
         sql = """INSERT INTO "geodetic_crs" VALUES('IGNF','%s','%s','geographic 2D','EPSG',%s,'IGNF','%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), cs_code, datum_code)
         all_sql.append(sql)
@@ -237,7 +237,7 @@ for line in open(IGNF_file, 'rt').readlines():
         map_geog_crs[ key_geog_crs ] = { 'code': code, 'title': d['title'] }
 
         if code == 'NTFP': # Grades
-            assert cs_code ==  "'6403'" # Lat Long grad
+            assert cs_code == "'6425'" # Long Lat grad
 
             sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','other_transformation');"""
             all_sql.append(sql)
@@ -259,7 +259,7 @@ for line in open(IGNF_file, 'rt').readlines():
 
             continue
 
-        assert cs_code ==  "'6422'" # Lat Long deg
+        assert cs_code ==  "'6424'" # Long Lat deg
 
         sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_%s_TO_EPSG_4326','helmert_transformation');""" % (code)
         all_sql.append(sql)
