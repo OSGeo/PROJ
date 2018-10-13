@@ -268,7 +268,7 @@ class GeneralParameterValue : public util::BaseObject,
     GeneralParameterValue(const GeneralParameterValue &other);
 
     friend class Conversion;
-    friend class Transformation;
+    friend class SingleOperation;
     virtual std::string _exportToWKT(io::WKTFormatterNNPtr formatter,
                                      const MethodMapping *mapping)
         const = 0; // throw(io::FormattingException)
@@ -532,6 +532,9 @@ class SingleOperation : virtual public CoordinateOperation {
 
     void
     setParameterValues(const std::vector<GeneralParameterValueNNPtr> &values);
+
+    std::string
+    exportTransformationToWKT(io::WKTFormatterNNPtr formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

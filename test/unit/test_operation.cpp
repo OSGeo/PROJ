@@ -4881,7 +4881,12 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         compound2, compound1);
     ASSERT_TRUE(opInverse != nullptr);
-    EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(NN_CHECK_ASSERT(op)));
+    {
+        auto formatter = PROJStringFormatter::create();
+        auto formatter2 = PROJStringFormatter::create();
+        EXPECT_EQ(opInverse->inverse()->exportToPROJString(formatter),
+                  op->exportToPROJString(formatter2));
+    }
 }
 
 // ---------------------------------------------------------------------------
