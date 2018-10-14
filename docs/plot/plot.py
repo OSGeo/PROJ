@@ -157,8 +157,14 @@ def project(coordinates, proj_string, in_radians=False):
     args = [PROJ, '-b']
     args.extend(proj_string.split(' '))
 
-    proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                            env={'PROJ_LIB': os.path.abspath(PROJ_LIB)})
+    try:
+        proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                env={'PROJ_LIB': os.path.abspath(PROJ_LIB)})
+    except FileNotFoundError:
+        print("'proj' binary not found, please update PROJ constant in plot.py "
+              "to point to your local 'proj' binary")
+        exit(1)
+
     stdout, _ = proc.communicate(coordinates.tobytes(order='C'))
 
     out = np.frombuffer(stdout, dtype=np.double)
@@ -304,7 +310,7 @@ def plotproj(plotdef, data, outdir):
 
     # Make sure the plot is not stretched
     axes.set_aspect('equal')
-    
+
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     plt.savefig(outdir + '/' + plotdef['filename'],
