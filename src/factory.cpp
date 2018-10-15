@@ -120,11 +120,32 @@ struct DatabaseContext::Private {
     run(const std::string &sql,
         const std::vector<SQLValues> &parameters = std::vector<SQLValues>());
 
+    // Mechanism to detect recursion in calls from
+    // AuthorityFactory::createXXX() -> createFromUserInput() ->
+    // AuthorityFacotry::createXXX()
+    struct RecursionDetector {
+        explicit RecursionDetector(const DatabaseContextNNPtr &context)
+            : dbContext_(context) {
+            if (dbContext_->getPrivate()->recLevel_ == 2) {
+                // Throw exception before incrementing, since the destructor
+                // will not be called
+                throw FactoryException("Too many recursive calls");
+            }
+            ++dbContext_->getPrivate()->recLevel_;
+        }
+
+        ~RecursionDetector() { --dbContext_->getPrivate()->recLevel_; }
+
+      private:
+        DatabaseContextNNPtr dbContext_;
+    };
+
   private:
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
+    int recLevel_ = 0;
 
     // cppcheck-suppress functionStatic
     void registerFunctions();
@@ -146,6 +167,7 @@ DatabaseContext::Private::Private() = default;
 // ---------------------------------------------------------------------------
 
 DatabaseContext::Private::~Private() {
+    assert(recLevel_ == 0);
     for (auto &pair : mapSqlToStatement_) {
         sqlite3_finalize(pair.second);
     }
@@ -1483,6 +1505,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         }
 
         if (!text_definition.empty()) {
+            DatabaseContext::Private::RecursionDetector detector(d->context());
             auto obj = createFromUserInput(text_definition, d->context());
             auto geodCRS = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(obj);
             if (!geodCRS) {
@@ -1750,6 +1773,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         }
 
         if (!text_definition.empty()) {
+            DatabaseContext::Private::RecursionDetector detector(d->context());
             auto obj = createFromUserInput(text_definition, d->context());
             auto projCRS =
                 util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(obj);

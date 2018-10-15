@@ -3064,7 +3064,9 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
         }
     }
     if (starts_with(text, "+proj=")) {
-        return PROJStringParser().createFromPROJString(text);
+        return PROJStringParser()
+            .attachDatabaseContext(dbContext)
+            .createFromPROJString(text);
     }
 
     auto tokens = split(text, ':');
@@ -4041,7 +4043,7 @@ PROJStringParser::~PROJStringParser() = default;
 /** \brief Attach a database context, to allow queries in it if needed.
  */
 PROJStringParser &
-PROJStringParser::attachDatabaseContext(DatabaseContextNNPtr dbContext) {
+PROJStringParser::attachDatabaseContext(const DatabaseContextPtr &dbContext) {
     d->dbContext_ = dbContext;
     return *this;
 }

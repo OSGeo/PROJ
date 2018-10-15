@@ -1969,7 +1969,7 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
         execute("INSERT INTO crs VALUES('TEST_NS','TEST','geographic 2D');"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES('TEST_NS','TEST','my "
-                        "name','geographic "
+                        "name TEST','geographic "
                         "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=longlat +a=2 "
                         "+rf=300',0);"))
         << last_error();
@@ -1982,6 +1982,16 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
                         "'+proj=geocent +a=2 +rf=300',0);"))
         << last_error();
 
+    ASSERT_TRUE(
+        execute("INSERT INTO crs "
+                "VALUES('TEST_NS','TEST_REF_ANOTHER','geographic 2D');"))
+        << last_error();
+    ASSERT_TRUE(execute(
+        "INSERT INTO geodetic_crs "
+        "VALUES('TEST_NS','TEST_REF_ANOTHER','my name TEST_REF_ANOTHER',"
+        "'geographic 2D',NULL,NULL,NULL,NULL,NULL,NULL,'TEST_NS:TEST',0);"))
+        << last_error();
+
     ASSERT_TRUE(execute(
         "INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','geographic 2D');"))
         << last_error();
@@ -1990,12 +2000,21 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
                         "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=merc',0);"))
         << last_error();
 
+    ASSERT_TRUE(execute(
+        "INSERT INTO crs VALUES('TEST_NS','TEST_RECURSIVE','geographic 2D');"))
+        << last_error();
+    ASSERT_TRUE(execute(
+        "INSERT INTO geodetic_crs "
+        "VALUES('TEST_NS','TEST_RECURSIVE','my name','geographic "
+        "2D',NULL,NULL,NULL,NULL,NULL,NULL,'TEST_NS:TEST_RECURSIVE',0);"))
+        << last_error();
+
     auto factory =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
     {
         auto crs = factory->createGeodeticCRS("TEST");
         EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
-        EXPECT_EQ(*(crs->name()->description()), "my name");
+        EXPECT_EQ(*(crs->name()->description()), "my name TEST");
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
         EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
@@ -2008,8 +2027,19 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
         EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
         EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
     }
+    {
+        auto crs = factory->createGeodeticCRS("TEST_REF_ANOTHER");
+        EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
+        EXPECT_EQ(*(crs->name()->description()), "my name TEST_REF_ANOTHER");
+        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
+        EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
+    }
 
     EXPECT_THROW(factory->createGeodeticCRS("TEST_WRONG"), FactoryException);
+
+    EXPECT_THROW(factory->createGeodeticCRS("TEST_RECURSIVE"),
+                 FactoryException);
 }
 
 // ---------------------------------------------------------------------------

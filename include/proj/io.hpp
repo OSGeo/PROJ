@@ -573,7 +573,7 @@ class PROJStringParser {
     //! @endcond
 
     PROJ_DLL PROJStringParser &
-    attachDatabaseContext(DatabaseContextNNPtr dbContext);
+    attachDatabaseContext(const DatabaseContextPtr &dbContext);
 
     PROJ_DLL std::vector<std::string> warningList() const;
 
