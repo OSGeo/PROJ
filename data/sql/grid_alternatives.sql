@@ -142,6 +142,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid',
                               NULL, NULL, NULL, NULL);
 
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('OSTN15_NTv2_OSGBtoETRS.gsb',
+                              'OSTN15_NTv2_OSGBtoETRS.gsb', -- no change. Just document the package
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
 -- EGM models
 
 INSERT INTO grid_alternatives(original_grid_name,
