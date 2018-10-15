@@ -3412,6 +3412,33 @@ TEST(io, projstringformatter) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_merge_consecutive_helmert_3_param) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->addStep("helmert");
+    fmt->addParam("x", 10);
+    fmt->addParam("y", 20);
+    fmt->addParam("z", 30);
+    fmt->addStep("helmert");
+    fmt->addParam("x", -1);
+    fmt->addParam("y", -2);
+    fmt->addParam("z", -3);
+    EXPECT_EQ(fmt->toString(), "+proj=helmert +x=9 +y=18 +z=27");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter_cart_grs80_wgs84) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->addStep("cart");
+    fmt->addParam("ellps", "WGS84");
+    fmt->addStep("cart");
+    fmt->setCurrentStepInverted(true);
+    fmt->addParam("ellps", "GRS80");
+    EXPECT_EQ(fmt->toString(), "");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat) {
 
     auto expected = "GEODCRS[\"unknown\",\n"

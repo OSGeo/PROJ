@@ -3181,6 +3181,17 @@ void PROJStringFormatter::setUseETMercForTMerc(bool flag) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static std::string toStr(double d) {
+    std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
+    buffer << d;
+    return buffer.str();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns the PROJ string. */
 const std::string &PROJStringFormatter::toString() const {
     d->result_.clear();
@@ -3382,9 +3393,11 @@ const std::string &PROJStringFormatter::toString() const {
                 break;
             }
 
-#ifdef not_needed_for_now
             // for practical purposes WGS84 and GRS80 ellipsoids are
-            // equivalents. No need to do a cart roundtrip for that...
+            // equivalents (cartesian transform between both lead to differences
+            // of the order of 1e-14 deg..).
+            // No need to do a cart roundtrip for that...
+            // and actually IGNF uses the GRS80 definition for the WGS84 datum
             if (d->steps_[i].name == "cart" &&
                 d->steps_[i - 1].name == "cart" &&
                 d->steps_[i].inverted == !d->steps_[i - 1].inverted &&
@@ -3399,7 +3412,53 @@ const std::string &PROJStringFormatter::toString() const {
                 changeDone = true;
                 break;
             }
-#endif
+
+            try {
+                if (d->steps_[i].name == "helmert" &&
+                    d->steps_[i - 1].name == "helmert" &&
+                    !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
+                    d->steps_[i].paramValues.size() == 3 &&
+                    d->steps_[i].paramValues.size() ==
+                        d->steps_[i - 1].paramValues.size()) {
+                    std::map<std::string, double> leftParamsMap;
+                    std::map<std::string, double> rightParamsMap;
+                    for (const auto &str : d->steps_[i - 1].paramValues) {
+                        auto key_value = split(str, '=');
+                        if (key_value.size() == 2) {
+                            leftParamsMap[key_value[0]] =
+                                c_locale_stod(key_value[1]);
+                        }
+                    }
+                    for (const auto &str : d->steps_[i].paramValues) {
+                        auto key_value = split(str, '=');
+                        if (key_value.size() == 2) {
+                            rightParamsMap[key_value[0]] =
+                                c_locale_stod(key_value[1]);
+                        }
+                    }
+                    if (leftParamsMap.find("x") != leftParamsMap.end() &&
+                        leftParamsMap.find("y") != leftParamsMap.end() &&
+                        leftParamsMap.find("z") != leftParamsMap.end() &&
+                        rightParamsMap.find("x") != rightParamsMap.end() &&
+                        rightParamsMap.find("y") != rightParamsMap.end() &&
+                        rightParamsMap.find("z") != rightParamsMap.end()) {
+
+                        d->steps_[i - 1].paramValues[0] =
+                            "x=" +
+                            toStr(leftParamsMap["x"] + rightParamsMap["x"]);
+                        d->steps_[i - 1].paramValues[1] =
+                            "y=" +
+                            toStr(leftParamsMap["y"] + rightParamsMap["y"]);
+                        d->steps_[i - 1].paramValues[2] =
+                            "z=" +
+                            toStr(leftParamsMap["z"] + rightParamsMap["z"]);
+
+                        d->steps_.erase(d->steps_.begin() + i);
+                        changeDone = true;
+                    }
+                }
+            } catch (const std::invalid_argument &) {
+            }
 
             // hermert followed by its inverse is a no-op
             try {

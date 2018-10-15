@@ -8617,6 +8617,7 @@ struct FilterAndSort {
         removeSyntheticNullGeogOffset();
         removeUninterestingOps();
         removeDuplicateOps();
+        removeSyntheticNullGeogOffset();
     }
 
     // ----------------------------------------------------------------------
