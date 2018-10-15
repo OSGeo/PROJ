@@ -6,6 +6,7 @@ pkgdata_DATA = GL27 nad.lst proj_def.dat nad27 nad83 world epsg esri \
 		ITRF2000 ITRF2008 ITRF2014 proj.db
 
 SQL_ORDERED_LIST = sql/proj_db_table_defs.sql \
+		sql/conversion_triggers.sql \
 		sql/begin.sql \
 		sql/metadata.sql \
 		sql/unit_of_measure.sql \

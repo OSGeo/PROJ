@@ -320,7 +320,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_%s','conversion');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['k_0'], d['x_0'], d['y_0'])
+        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['k_0'], d['x_0'], d['y_0'])
         all_sql.append(sql)
 
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
@@ -344,7 +344,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_%s','conversion');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9820','Lambert Azimuthal Equal Area','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['x_0'], d['y_0'])
+        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9820','Lambert Azimuthal Equal Area','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['x_0'], d['y_0'])
         all_sql.append(sql)
 
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
@@ -371,10 +371,10 @@ for line in open(IGNF_file, 'rt').readlines():
         all_sql.append(sql)
 
         if 'lat_2' in d:
-            sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',%s,'EPSG','9102','EPSG','8822','Longitude of false origin',%s,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',%s,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',%s,'EPSG','9102','EPSG','8826','Easting at false origin',%s,'EPSG','9001','EPSG','8827','Northing at false origin',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['lat_1'], d['lat_2'], d['x_0'], d['y_0'])
+            sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',%s,'EPSG','9102','EPSG','8822','Longitude of false origin',%s,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',%s,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',%s,'EPSG','9102','EPSG','8826','Easting at false origin',%s,'EPSG','9001','EPSG','8827','Northing at false origin',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['lat_1'], d['lat_2'], d['x_0'], d['y_0'])
         else:
             assert d['lat_0'] == d['lat_1'], line
-            sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['k_0'], d['x_0'], d['y_0'])
+            sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['k_0'], d['x_0'], d['y_0'])
 
         all_sql.append(sql)
 
@@ -401,7 +401,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_%s','conversion');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);""" % (code, escape_literal(d['title']), d['lat_ts'], d['lon_0'], d['x_0'], d['y_0'])
+        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), d['lat_ts'], d['lon_0'], d['x_0'], d['y_0'])
         all_sql.append(sql)
 
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
@@ -426,7 +426,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_%s','conversion');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262',NULL,NULL,'Gauss Schreiber Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['k_0'], d['x_0'], d['y_0'])
+        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262',NULL,NULL,'Gauss Schreiber Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), d['lat_0'], d['lon_0'], d['k_0'], d['x_0'], d['y_0'])
         all_sql.append(sql)
 
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
@@ -455,7 +455,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_%s','conversion');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9829','Polar Stereographic (variant B)','EPSG','8832','Latitude of standard parallel',%s,'EPSG','9102','EPSG','8833','Longitude of origin',%s,'EPSG','9102','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);""" % (code, escape_literal(d['title']), d['lat_ts'], d['lon_0'], d['x_0'], d['y_0'])
+        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262','EPSG','9829','Polar Stereographic (variant B)','EPSG','8832','Latitude of standard parallel',%s,'EPSG','9102','EPSG','8833','Longitude of origin',%s,'EPSG','9102','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), d['lat_ts'], d['lon_0'], d['x_0'], d['y_0'])
         all_sql.append(sql)
 
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
@@ -482,7 +482,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_%s','conversion');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262',NULL,NULL,'PROJ mill',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);""" % (code, escape_literal(d['title']))
+        sql = """INSERT INTO "conversion" VALUES('IGNF','CONV_%s','Conversion for %s','EPSG','1262',NULL,NULL,'PROJ mill',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']))
         all_sql.append(sql)
 
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)

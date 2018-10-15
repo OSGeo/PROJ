@@ -1541,7 +1541,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
         buffer << ", param" << i << "_uom_auth_name";
         buffer << ", param" << i << "_uom_code";
     }
-    buffer << " FROM conversion WHERE auth_name = ? AND code = ?";
+    buffer << ", deprecated FROM conversion WHERE auth_name = ? AND code = ?";
 
     auto res =
         d->context()->getPrivate()->run(buffer.str(), {getAuthority(), code});
@@ -1585,6 +1585,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
             values.emplace_back(operation::ParameterValue::create(
                 common::Measure(normalized_value, *uom)));
         }
+        const bool deprecated = row[base_param_idx + N_MAX_PARAMS * 6] == "1";
 
         auto extent = d->createFactory(area_of_use_auth_name)
                           ->createExtent(area_of_use_code);
@@ -1594,6 +1595,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
                 .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
                 .set(metadata::Identifier::CODE_KEY, code)
                 .set(common::IdentifiedObject::NAME_KEY, name)
+                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
                 .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
 
         auto propMethod = util::PropertyMap().set(

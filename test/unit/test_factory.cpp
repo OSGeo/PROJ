@@ -1303,7 +1303,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "easting',500000.0,'EPSG','9001','EPSG','8807','False "
             "northing',0.0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,"
-            "NULL,NULL,NULL,NULL);"))
+            "NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(execute(

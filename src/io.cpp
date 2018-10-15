@@ -3455,6 +3455,7 @@ const std::string &PROJStringFormatter::toString() const {
 
                         d->steps_.erase(d->steps_.begin() + i);
                         changeDone = true;
+                        break;
                     }
                 }
             } catch (const std::invalid_argument &) {

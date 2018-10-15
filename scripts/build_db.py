@@ -130,10 +130,17 @@ def fill_vertical_crs(proj_db_cursor):
         "INSERT INTO crs SELECT ?, coord_ref_sys_code, coord_ref_sys_kind FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('vertical') AND datum_code IS NOT NULL", (EPSG_AUTHORITY,))
     proj_db_cursor.execute("INSERT INTO vertical_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, ?, coord_sys_code, ?, datum_code, ?, area_of_use_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('vertical') AND datum_code IS NOT NULL", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
-
 def fill_conversion(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, area_of_use_code, coord_op_method_code, coord_op_method_name FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH'")
-    for (code, name, area_of_use_code, method_code, method_name) in proj_db_cursor.fetchall():
+
+    already_mapped_methods = set()
+    trigger_sql = """
+CREATE TRIGGER conversion_method_check_insert_trigger
+BEFORE INSERT ON conversion
+FOR EACH ROW BEGIN
+"""
+
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, area_of_use_code, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH'")
+    for (code, name, area_of_use_code, method_code, method_name, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7
         param_auth_name = [None for i in range(max_n_params)]
@@ -142,9 +149,10 @@ def fill_conversion(proj_db_cursor):
         param_value = [None for i in range(max_n_params)]
         param_uom_auth_name = [None for i in range(max_n_params)]
         param_uom_code = [None for i in range(max_n_params)]
+        param_uom_type = [None for i in range(max_n_params)]
 
-        iterator = proj_db_cursor.execute("SELECT sort_order, cop.parameter_code, parameter_name, parameter_value, uom_code from epsg_coordoperationparam cop LEFT JOIN epsg_coordoperationparamvalue copv LEFT JOIN epsg_coordoperationparamusage copu ON cop.parameter_code = copv.parameter_code AND copu.parameter_code = copv.parameter_code WHERE copu.coord_op_method_code = copv.coord_op_method_code AND coord_op_code = ? AND copv.coord_op_method_code = ? ORDER BY sort_order", (code, method_code))
-        for (order, parameter_code, parameter_name, parameter_value, uom_code) in iterator:
+        iterator = proj_db_cursor.execute("SELECT sort_order, cop.parameter_code, parameter_name, parameter_value, uom_code, uom.unit_of_meas_type FROM epsg_coordoperationparam cop LEFT JOIN epsg_coordoperationparamvalue copv LEFT JOIN epsg_unitofmeasure uom USING (uom_code) LEFT JOIN epsg_coordoperationparamusage copu ON cop.parameter_code = copv.parameter_code AND copu.parameter_code = copv.parameter_code WHERE copu.coord_op_method_code = copv.coord_op_method_code AND coord_op_code = ? AND copv.coord_op_method_code = ? ORDER BY sort_order", (code, method_code))
+        for (order, parameter_code, parameter_name, parameter_value, uom_code, uom_type) in iterator:
             # Modified Krovak and Krovak North Oriented: keep only the 7 first parameters
             if order == max_n_params + 1 and method_code in (1042, 1043):
                 break
@@ -154,9 +162,29 @@ def fill_conversion(proj_db_cursor):
             param_code[order - 1] = parameter_code
             param_name[order - 1] = parameter_name
             param_value[order - 1] = parameter_value
-            param_uom_auth_name[order - 1] = EPSG_AUTHORITY
+            param_uom_auth_name[order - 1] = EPSG_AUTHORITY if uom_code else None
             param_uom_code[order - 1] = uom_code
+            param_uom_type[order - 1] = uom_type
             expected_order += 1
+
+        if method_code not in already_mapped_methods:
+            already_mapped_methods.add(method_code)
+            trigger_sql += """
+    SELECT RAISE(ABORT, 'insert on conversion violates constraint: bad parameters for %(method_name)s')
+        WHERE NEW.deprecated != 1 AND NEW.method_auth_name = 'EPSG' AND NEW.method_code = '%(method_code)s' AND (NEW.method_name != '%(method_name)s'""" % {'method_name': method_name, 'method_code' : method_code}
+            for i in range(expected_order-1):
+                trigger_sql += " OR NEW.param%(n)d_auth_name != 'EPSG' OR NEW.param%(n)d_code != '%(code)d' OR NEW.param%(n)d_name != '%(param_name)s'" % {'n': i+1, 'code': param_code[i], 'param_name': param_name[i]}
+
+                if method_name in ('Change of Vertical Unit'):
+                    trigger_sql += " OR (NOT((NEW.param%(n)d_value IS NULL AND NEW.param%(n)d_uom_auth_name IS NULL AND NEW.param%(n)d_uom_code IS NULL) OR (NEW.param%(n)d_value IS NOT NULL AND (SELECT type FROM unit_of_measure WHERE auth_name = NEW.param%(n)s_uom_auth_name AND code = NEW.param%(n)s_uom_code) = 'scale')))" % {'n': i+1, 'param_name': param_name[i]}
+                else:
+                    trigger_sql += " OR NEW.param%(n)d_value IS NULL OR NEW.param%(n)d_uom_auth_name IS NULL OR NEW.param%(n)d_uom_code IS NULL" % {'n': i+1, 'param_name': param_name[i]}
+
+                if param_uom_type[i]:
+                    trigger_sql += " OR (SELECT type FROM unit_of_measure WHERE auth_name = NEW.param%(n)s_uom_auth_name AND code = NEW.param%(n)s_uom_code) != '%(uom_type)s'" % {'n': i+1, 'uom_type': param_uom_type[i]}
+            for i in range(expected_order-1, max_n_params):
+                trigger_sql += " OR NEW.param%(n)d_auth_name IS NOT NULL OR NEW.param%(n)d_code IS NOT NULL OR NEW.param%(n)d_name IS NOT NULL OR NEW.param%(n)d_value IS NOT NULL OR NEW.param%(n)d_uom_auth_name IS NOT NULL OR NEW.param%(n)d_uom_code IS NOT NULL" % {'n': i+1}
+            trigger_sql += ");\n"
 
         arg = (EPSG_AUTHORITY, code, name,
                EPSG_AUTHORITY, area_of_use_code,
@@ -174,12 +202,17 @@ def fill_conversion(proj_db_cursor):
                param_code[5], param_name[5], param_value[5],
                param_uom_auth_name[5], param_uom_code[5], param_auth_name[6],
                param_code[6], param_name[6], param_value[6],
-               param_uom_auth_name[6], param_uom_code[6])
+               param_uom_auth_name[6], param_uom_code[6],
+               deprecated)
 
         proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'conversion')", (EPSG_AUTHORITY, code))
         proj_db_cursor.execute('INSERT INTO conversion VALUES (' +
             '?,?,?, ?,?, ?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ' +
-            '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?)', arg)
+            '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?)', arg)
+
+    trigger_sql += "END;";
+    #print(trigger_sql)
+    proj_db_cursor.execute(trigger_sql)
 
 
 def fill_projected_crs(proj_db_cursor):
@@ -498,6 +531,15 @@ for line in proj_db_conn.iterdump():
     if line.startswith('INSERT INTO "'):
         table_name = line[len('INSERT INTO "'):]
         table_name = table_name[0:table_name.find('"')]
+        if table_name in files:
+            f = files[table_name]
+        else:
+            f = open(os.path.join(sql_dir_name, table_name) + '.sql', 'wb')
+            f.write("--- This file has been generated by scripts/build_db.py. DO NOT EDIT !\n\n".encode('UTF-8'))
+            files[table_name] = f
+        f.write((line + '\n').encode('UTF-8'))
+    elif line.startswith('CREATE TRIGGER conversion_method_check_insert_trigger'):
+        table_name = 'conversion_triggers'
         if table_name in files:
             f = files[table_name]
         else:
