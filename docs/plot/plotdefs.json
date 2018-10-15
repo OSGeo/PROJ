@@ -1255,6 +1255,17 @@
         "type": "poly"
     },
     {
+        "filename": "tobmerc.png",
+        "latmax": 80,
+        "latmin": -80,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "tobmerc",
+        "projstring": "+proj=tobmerc",
+        "res": "low",
+        "type": "poly"
+    },
+    {
         "filename": "tpeqd.png",
         "latmax": 90,
         "latmin": -90,

@@ -141,6 +141,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_tcea.c
         PJ_times.c
         PJ_tmerc.c
+        PJ_tobmerc.c
         PJ_tpeqd.c
         PJ_unitconvert.c
         PJ_urm5.c
