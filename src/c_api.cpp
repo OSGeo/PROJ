@@ -1100,6 +1100,39 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_OBJ *crs, const char **pMethodName,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether a coordinate operation can be instanciated as
+ * a PROJ pipeline, checking in particular that referenced grids are
+ * available.
+ *
+ * @param coordoperation Objet of type CoordinateOperation or derived classes
+ * (must not be NULL)
+ * @return TRUE or FALSE.
+ */
+
+int proj_coordoperation_is_instanciable(PJ_OBJ *coordoperation) {
+    assert(coordoperation);
+    auto op = nn_dynamic_pointer_cast<CoordinateOperation>(coordoperation->obj);
+    if (!op) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__,
+                       "Object is not a CoordinateOperation");
+        return 0;
+    }
+    try {
+        if (coordoperation->ctx->cpp_context == nullptr) {
+            coordoperation->ctx->cpp_context = new projCppContext(
+                DatabaseContext::createWithPJContext(coordoperation->ctx));
+        }
+        return op->isPROJInstanciable(
+                   coordoperation->ctx->cpp_context->databaseContext)
+                   ? 1
+                   : 0;
+    } catch (const std::exception &) {
+        return 0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the number of parameters of a SingleOperation
  *
  * @param coordoperation Objet of type SingleOperation or derived classes

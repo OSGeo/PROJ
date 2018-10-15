@@ -5023,3 +5023,38 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
                    "0.999877341", "0.99987734"),
         list[1]->exportToPROJString(PROJStringFormatter::create()));
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, isPROJInstanciable) {
+
+    {
+        auto transformation = Transformation::createGeocentricTranslations(
+            PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326,
+            1.0, 2.0, 3.0, {});
+        EXPECT_TRUE(
+            transformation->isPROJInstanciable(DatabaseContext::create()));
+    }
+
+    // Missing grid
+    {
+        auto transformation = Transformation::createNTv2(
+            PropertyMap(), GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
+            "foo.gsb", std::vector<PositionalAccuracyNNPtr>());
+        EXPECT_FALSE(
+            transformation->isPROJInstanciable(DatabaseContext::create()));
+    }
+
+    // Unsupported method
+    {
+        auto transformation = Transformation::create(
+            PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326,
+            nullptr,
+            OperationMethod::create(PropertyMap(),
+                                    std::vector<OperationParameterNNPtr>{}),
+            std::vector<GeneralParameterValueNNPtr>{},
+            std::vector<PositionalAccuracyNNPtr>{});
+        EXPECT_FALSE(
+            transformation->isPROJInstanciable(DatabaseContext::create()));
+    }
+}

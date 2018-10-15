@@ -524,6 +524,27 @@ void CoordinateOperation::setAccuracies(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether a coordinate operation can be instanciated as
+ * a PROJ pipeline, checking in particular that referenced grids are
+ * available.
+ */
+bool CoordinateOperation::isPROJInstanciable(
+    const io::DatabaseContextNNPtr &databaseContext) const {
+    try {
+        exportToPROJString(io::PROJStringFormatter::create());
+    } catch (const std::exception &) {
+        return false;
+    }
+    for (const auto &gridDesc : gridsNeeded(databaseContext)) {
+        if (!gridDesc.available) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct OperationMethod::Private {
     util::optional<std::string> formula_{};

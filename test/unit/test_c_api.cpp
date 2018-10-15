@@ -894,6 +894,17 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_coordoperation_is_instanciable) {
+    auto op = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "1671", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, true,
+        nullptr);
+    ASSERT_NE(op, nullptr);
+    ObjectKeeper keeper(op);
+    EXPECT_EQ(proj_coordoperation_is_instanciable(op), 1);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_obj_create_operations) {
     auto ctxt = proj_create_operation_factory_context(m_ctxt);
     ASSERT_NE(ctxt, nullptr);

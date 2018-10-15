@@ -688,6 +688,8 @@ PJ_OBJ PROJ_DLL *proj_obj_crs_get_coordoperation(PJ_OBJ *crs,
                                              const char **pMethodAuthorityName,
                                              const char **pMethodCode);
 
+int PROJ_DLL proj_coordoperation_is_instanciable(PJ_OBJ *coordoperation);
+
 int PROJ_DLL proj_coordoperation_get_param_count(PJ_OBJ *coordoperation);
 
 int PROJ_DLL proj_coordoperation_get_param_index(PJ_OBJ *coordoperation,

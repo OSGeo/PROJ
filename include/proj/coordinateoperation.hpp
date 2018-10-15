@@ -141,6 +141,9 @@ class CoordinateOperation : public common::ObjectUsage,
     PROJ_DLL virtual std::set<GridDescription>
     gridsNeeded(io::DatabaseContextNNPtr databaseContext) const = 0;
 
+    PROJ_DLL bool
+    isPROJInstanciable(const io::DatabaseContextNNPtr &databaseContext) const;
+
   protected:
     CoordinateOperation();
     CoordinateOperation(const CoordinateOperation &other);
