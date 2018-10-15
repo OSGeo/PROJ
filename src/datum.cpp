@@ -363,35 +363,47 @@ struct Ellipsoid::Private {
     util::optional<common::Scale> inverseFlattening_{};
     util::optional<common::Length> semiMinorAxis_{};
     util::optional<common::Length> semiMedianAxis_{};
+    std::string celestialBody_{};
 
-    explicit Private(const common::Length &radius) : semiMajorAxis_(radius) {}
+    explicit Private(const common::Length &radius,
+                     const std::string &celestialBody)
+        : semiMajorAxis_(radius), celestialBody_(celestialBody) {}
 
     Private(const common::Length &semiMajorAxisIn,
-            const common::Scale &invFlattening)
-        : semiMajorAxis_(semiMajorAxisIn), inverseFlattening_(invFlattening) {}
+            const common::Scale &invFlattening,
+            const std::string &celestialBody)
+        : semiMajorAxis_(semiMajorAxisIn), inverseFlattening_(invFlattening),
+          celestialBody_(celestialBody) {}
 
     Private(const common::Length &semiMajorAxisIn,
-            const common::Length &semiMinorAxisIn)
-        : semiMajorAxis_(semiMajorAxisIn), semiMinorAxis_(semiMinorAxisIn) {}
+            const common::Length &semiMinorAxisIn,
+            const std::string &celestialBody)
+        : semiMajorAxis_(semiMajorAxisIn), semiMinorAxis_(semiMinorAxisIn),
+          celestialBody_(celestialBody) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-Ellipsoid::Ellipsoid(const common::Length &radius)
-    : d(internal::make_unique<Private>(radius)) {}
+Ellipsoid::Ellipsoid(const common::Length &radius,
+                     const std::string &celestialBodyIn)
+    : d(internal::make_unique<Private>(radius, celestialBodyIn)) {}
 
 // ---------------------------------------------------------------------------
 
 Ellipsoid::Ellipsoid(const common::Length &semiMajorAxisIn,
-                     const common::Scale &invFlattening)
-    : d(internal::make_unique<Private>(semiMajorAxisIn, invFlattening)) {}
+                     const common::Scale &invFlattening,
+                     const std::string &celestialBodyIn)
+    : d(internal::make_unique<Private>(semiMajorAxisIn, invFlattening,
+                                       celestialBodyIn)) {}
 
 // ---------------------------------------------------------------------------
 
 Ellipsoid::Ellipsoid(const common::Length &semiMajorAxisIn,
-                     const common::Length &semiMinorAxisIn)
-    : d(internal::make_unique<Private>(semiMajorAxisIn, semiMinorAxisIn)) {}
+                     const common::Length &semiMinorAxisIn,
+                     const std::string &celestialBodyIn)
+    : d(internal::make_unique<Private>(semiMajorAxisIn, semiMinorAxisIn,
+                                       celestialBodyIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -536,16 +548,28 @@ common::Length Ellipsoid::computeSemiMinorAxis() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the name of the celestial body on which the ellipsoid refers
+ * to.
+ */
+const std::string &Ellipsoid::celestialBody() const {
+    return d->celestialBody_;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a Ellipsoid as a sphere.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
  * @param radius the sphere radius (semi-major axis).
+ * @param celestialBody Name of the celestial body on which the ellipsoid refers
+ * to.
  * @return new Ellipsoid.
  */
 EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
-                                       const common::Length &radius) {
-    auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(radius));
+                                       const common::Length &radius,
+                                       const std::string &celestialBody) {
+    auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(radius, celestialBody));
     ellipsoid->setProperties(properties);
     return ellipsoid;
 }
@@ -558,14 +582,15 @@ EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
  * At minimum the name should be defined.
  * @param semiMajorAxisIn the semi-major axis.
  * @param invFlattening the inverse/reverse flattening.
+ * @param celestialBody Name of the celestial body on which the ellipsoid refers
+ * to.
  * @return new Ellipsoid.
  */
-EllipsoidNNPtr
-Ellipsoid::createFlattenedSphere(const util::PropertyMap &properties,
-                                 const common::Length &semiMajorAxisIn,
-                                 const common::Scale &invFlattening) {
-    auto ellipsoid(
-        Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn, invFlattening));
+EllipsoidNNPtr Ellipsoid::createFlattenedSphere(
+    const util::PropertyMap &properties, const common::Length &semiMajorAxisIn,
+    const common::Scale &invFlattening, const std::string &celestialBody) {
+    auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(
+        semiMajorAxisIn, invFlattening, celestialBody));
     ellipsoid->setProperties(properties);
     return ellipsoid;
 }
@@ -578,13 +603,16 @@ Ellipsoid::createFlattenedSphere(const util::PropertyMap &properties,
  * At minimum the name should be defined.
  * @param semiMajorAxisIn the semi-major axis.
  * @param semiMinorAxisIn the semi-minor axis.
+ * @param celestialBody Name of the celestial body on which the ellipsoid refers
+ * to.
  * @return new Ellipsoid.
  */
 EllipsoidNNPtr Ellipsoid::createTwoAxis(const util::PropertyMap &properties,
                                         const common::Length &semiMajorAxisIn,
-                                        const common::Length &semiMinorAxisIn) {
-    auto ellipsoid(
-        Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn, semiMinorAxisIn));
+                                        const common::Length &semiMinorAxisIn,
+                                        const std::string &celestialBody) {
+    auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(
+        semiMajorAxisIn, semiMinorAxisIn, celestialBody));
     ellipsoid->setProperties(properties);
     return ellipsoid;
 }

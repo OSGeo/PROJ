@@ -164,6 +164,7 @@ TEST(factory, AuthorityFactory_createEllipsoid) {
     EXPECT_TRUE(ellipsoid->inverseFlattening().has_value());
     EXPECT_EQ(ellipsoid->semiMajorAxis(), Length(6378137));
     EXPECT_EQ(*ellipsoid->inverseFlattening(), Scale(298.257223563));
+    EXPECT_EQ(ellipsoid->celestialBody(), "Earth");
 }
 
 // ---------------------------------------------------------------------------
@@ -1232,8 +1233,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                     "VALUES('EPSG','8901','Greenwich',0.0,'EPSG','9102',0);"))
             << last_error();
         ASSERT_TRUE(
-            execute("INSERT INTO ellipsoid VALUES('EPSG','7030','WGS "
-                    "84',6378137.0,'EPSG','9001',298.257223563,NULL,0);"))
+            execute("INSERT INTO ellipsoid VALUES('EPSG','7030','WGS 84',"
+                    "'Earth',6378137.0,'EPSG','9001',298.257223563,NULL,0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_datum "

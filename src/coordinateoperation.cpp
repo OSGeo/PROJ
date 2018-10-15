@@ -9394,6 +9394,13 @@ CoordinateOperationFactory::Private::createOperations(
     auto geodDst = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(targetCRS);
     if (geodSrc && geodDst && !derivedSrc && !derivedDst) {
 
+        if (geodSrc->ellipsoid()->celestialBody() !=
+            geodDst->ellipsoid()->celestialBody()) {
+            throw util::UnsupportedOperationException(
+                "Source and target ellipsoid do not belong to the same "
+                "celestial body");
+        }
+
         auto geogSrc =
             util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS);
         auto geogDst =

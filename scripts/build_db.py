@@ -75,7 +75,7 @@ def fill_unit_of_measure(proj_db_cursor):
 
 def fill_ellipsoid(proj_db_cursor):
     proj_db_cursor.execute(
-        "INSERT INTO ellipsoid SELECT ?, ellipsoid_code, ellipsoid_name, semi_major_axis, ?, uom_code, inv_flattening, semi_minor_axis, deprecated FROM epsg.epsg_ellipsoid", (EPSG_AUTHORITY, EPSG_AUTHORITY))
+        "INSERT INTO ellipsoid SELECT ?, ellipsoid_code, ellipsoid_name, 'Earth', semi_major_axis, ?, uom_code, inv_flattening, semi_minor_axis, deprecated FROM epsg.epsg_ellipsoid", (EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
 def fill_area(proj_db_cursor):

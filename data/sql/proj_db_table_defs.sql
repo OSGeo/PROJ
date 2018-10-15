@@ -22,6 +22,7 @@ CREATE TABLE ellipsoid (
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    celestial_body TEXT NOT NULL, -- typically Earth
     semi_major_axis FLOAT NOT NULL CHECK (semi_major_axis > 0),
     uom_auth_name TEXT NOT NULL,
     uom_code TEXT NOT NULL,

@@ -552,6 +552,9 @@ const PrimeMeridianNNPtr PrimeMeridian::PARIS(PrimeMeridian::createPARIS());
 
 // ---------------------------------------------------------------------------
 
+/** \brief Earth celestial body */
+const std::string Ellipsoid::EARTH("Earth");
+
 /** \brief The EPSG:7008 / "Clarke 1866" Ellipsoid */
 const EllipsoidNNPtr Ellipsoid::CLARKE_1866(Ellipsoid::createCLARKE_1866());
 

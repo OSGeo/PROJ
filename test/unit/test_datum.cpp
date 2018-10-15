@@ -60,6 +60,7 @@ TEST(datum, ellipsoid_from_sphere) {
     EXPECT_FALSE(ellipsoid->semiMedianAxis().has_value());
     EXPECT_TRUE(ellipsoid->isSphere());
     EXPECT_EQ(ellipsoid->semiMajorAxis(), Length(6378137));
+    EXPECT_EQ(ellipsoid->celestialBody(), "Earth");
 
     EXPECT_EQ(ellipsoid->computeSemiMinorAxis(), Length(6378137));
     EXPECT_EQ(ellipsoid->computeInverseFlattening(), Scale(0));
@@ -69,6 +70,15 @@ TEST(datum, ellipsoid_from_sphere) {
 
     EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid));
     EXPECT_FALSE(ellipsoid->isEquivalentTo(createUnrelatedObject()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, ellipsoid_non_earth) {
+
+    auto ellipsoid = Ellipsoid::createSphere(PropertyMap(), Length(1),
+                                             "Unity sphere");
+    EXPECT_EQ(ellipsoid->celestialBody(),  "Unity sphere");
 }
 
 // ---------------------------------------------------------------------------

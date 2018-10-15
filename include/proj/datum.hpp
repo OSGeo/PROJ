@@ -258,19 +258,26 @@ class Ellipsoid : public common::IdentifiedObject,
     PROJ_DLL common::Scale computeInverseFlattening() const;
     PROJ_DLL common::Length computeSemiMinorAxis() const;
 
+    PROJ_DLL const std::string &celestialBody() const;
+
+    PROJ_DLL static const std::string EARTH;
+
     PROJ_DLL static EllipsoidNNPtr
     createSphere(const util::PropertyMap &properties,
-                 const common::Length &radius);
+                 const common::Length &radius,
+                 const std::string &celestialBody = EARTH);
 
     PROJ_DLL static EllipsoidNNPtr
     createFlattenedSphere(const util::PropertyMap &properties,
                           const common::Length &semiMajorAxisIn,
-                          const common::Scale &invFlattening);
+                          const common::Scale &invFlattening,
+                          const std::string &celestialBody = EARTH);
 
     PROJ_DLL static EllipsoidNNPtr
     createTwoAxis(const util::PropertyMap &properties,
                   const common::Length &semiMajorAxisIn,
-                  const common::Length &semiMinorAxisIn);
+                  const common::Length &semiMinorAxisIn,
+                  const std::string &celestialBody = EARTH);
 
     PROJ_DLL EllipsoidNNPtr identify() const;
 
@@ -299,13 +306,16 @@ class Ellipsoid : public common::IdentifiedObject,
     common::Length *semiMedianAxis_;
 #endif
 
-    explicit Ellipsoid(const common::Length &radius);
+    explicit Ellipsoid(const common::Length &radius,
+                       const std::string &celestialBody);
 
     Ellipsoid(const common::Length &semiMajorAxisIn,
-              const common::Scale &invFlattening);
+              const common::Scale &invFlattening,
+              const std::string &celestialBody);
 
     Ellipsoid(const common::Length &semiMajorAxisIn,
-              const common::Length &semiMinorAxisIn);
+              const common::Length &semiMinorAxisIn,
+              const std::string &celestialBody);
 
     Ellipsoid(const Ellipsoid &other);
 

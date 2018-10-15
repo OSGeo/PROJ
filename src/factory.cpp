@@ -1059,7 +1059,7 @@ datum::EllipsoidNNPtr
 AuthorityFactory::createEllipsoid(const std::string &code) const {
     auto res = d->context()->getPrivate()->run(
         "SELECT name, semi_major_axis, uom_auth_name, uom_code, "
-        "inv_flattening, semi_minor_axis, deprecated FROM "
+        "inv_flattening, semi_minor_axis, celestial_body, deprecated FROM "
         "ellipsoid WHERE "
         "auth_name = ? AND code = ?",
         {getAuthority(), code});
@@ -1076,7 +1076,8 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
         const auto &uom_code = row[3];
         const auto &inv_flattening_str = row[4];
         const auto &semi_minor_axis_str = row[5];
-        const bool deprecated = row[6] == "1";
+        const auto &body = row[6];
+        const bool deprecated = row[7] == "1";
         auto uom =
             d->createFactory(uom_auth_name)->createUnitOfMeasure(uom_code);
         auto props =
@@ -1088,14 +1089,14 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
         if (!inv_flattening_str.empty()) {
             return datum::Ellipsoid::createFlattenedSphere(
                 props, common::Length(semi_major_axis, *uom),
-                common::Scale(c_locale_stod(inv_flattening_str)));
+                common::Scale(c_locale_stod(inv_flattening_str)), body);
         } else if (semi_major_axis_str == semi_minor_axis_str) {
             return datum::Ellipsoid::createSphere(
-                props, common::Length(semi_major_axis, *uom));
+                props, common::Length(semi_major_axis, *uom), body);
         } else {
             return datum::Ellipsoid::createTwoAxis(
                 props, common::Length(semi_major_axis, *uom),
-                common::Length(c_locale_stod(semi_minor_axis_str), *uom));
+                common::Length(c_locale_stod(semi_minor_axis_str), *uom), body);
         }
     } catch (const std::exception &ex) {
         throw FactoryException("cannot build ellipsoid " + code + ": " +
