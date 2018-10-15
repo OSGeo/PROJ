@@ -154,7 +154,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','geocentric');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "geodetic_crs" VALUES('IGNF','%s','%s','geocentric','EPSG','6500','IGNF','%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), datum_code)
+        sql = """INSERT INTO "geodetic_crs" VALUES('IGNF','%s','%s','geocentric','EPSG','6500','IGNF','%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), datum_code)
         all_sql.append(sql)
 
         sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_%s_TO_EPSG_4978','helmert_transformation');""" % (code)
@@ -226,7 +226,7 @@ for line in open(IGNF_file, 'rt').readlines():
         if 'grades' in d['title']:
             cs_code = "'6425'" # Long Lat grad
 
-        sql = """INSERT INTO "geodetic_crs" VALUES('IGNF','%s','%s','geographic 2D','EPSG',%s,'IGNF','%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), cs_code, datum_code)
+        sql = """INSERT INTO "geodetic_crs" VALUES('IGNF','%s','%s','geographic 2D','EPSG',%s,'IGNF','%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), cs_code, datum_code)
         all_sql.append(sql)
 
         key = { 'a' : d['a'], 'rf' : d['rf'], 'towgs84' : d['towgs84'], 'pm': pm }
@@ -326,7 +326,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
+        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
         all_sql.append(sql)
 
         all_sql.append('')
@@ -350,7 +350,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
+        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
         all_sql.append(sql)
 
         all_sql.append('')
@@ -381,7 +381,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
+        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
         all_sql.append(sql)
 
         all_sql.append('')
@@ -407,7 +407,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
+        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
         all_sql.append(sql)
 
         all_sql.append('')
@@ -432,7 +432,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
+        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
         all_sql.append(sql)
 
         all_sql.append('')
@@ -462,7 +462,7 @@ for line in open(IGNF_file, 'rt').readlines():
         all_sql.append(sql)
 
         # Hardcoding 1025 for coordinate system since the only instance uses it
-        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','1025','IGNF','%s','IGNF','CONV_%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
+        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','1025','IGNF','%s','IGNF','CONV_%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
         all_sql.append(sql)
 
         all_sql.append('')
@@ -488,7 +488,7 @@ for line in open(IGNF_file, 'rt').readlines():
         sql = """INSERT INTO "crs" VALUES('IGNF','%s','projected');""" % (code)
         all_sql.append(sql)
 
-        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
+        sql = """INSERT INTO "projected_crs" VALUES('IGNF','%s','%s','EPSG','4499','IGNF','%s','IGNF','CONV_%s','EPSG','1262',NULL,0);""" % (code, escape_literal(d['title']), geogcrs_code, code)
         all_sql.append(sql)
 
         all_sql.append('')

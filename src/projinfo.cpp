@@ -87,6 +87,10 @@ static void usage() {
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
               << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "{object_definition} might be a PROJ string, a WKT string, "
+                 " a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
+              << std::endl;
     std::exit(1);
 }
 
@@ -95,63 +99,21 @@ static void usage() {
 static BaseObjectNNPtr buildObject(const std::string &user_string,
                                    bool kindIsCRS, const std::string &context,
                                    bool buildBoundCRSToWGS84) {
-    bool isWKT = false;
-    try {
-        WKTNode::createFrom(user_string);
-        isWKT = true;
-    } catch (...) {
-    }
-
     BaseObjectPtr obj;
-    if (isWKT) {
-        try {
-            obj = WKTParser().createFromWKT(user_string).as_nullable();
-        } catch (const std::exception &e) {
-            std::cerr << context
-                      << ": parsing of WKT string failed: " << e.what()
-                      << std::endl;
-            std::exit(1);
-        }
-    } else if (user_string.find("+proj=") != std::string::npos ||
-               user_string.find("+vunits=") != std::string::npos ||
-               user_string.find("+vto_meter=") != std::string::npos ||
-               user_string.find("+geoidgrids=") != std::string::npos) {
-        try {
-            obj = PROJStringParser()
-                      .createFromPROJString(user_string)
+    try {
+        auto tokens = split(user_string, ':');
+        if (!kindIsCRS && tokens.size() == 2) {
+            auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
+                       tokens[1];
+            obj = createFromUserInput(urn, DatabaseContext::create())
                       .as_nullable();
-        } catch (const std::exception &e) {
-            std::cerr << context
-                      << ": parsing of PROJ string failed: " << e.what()
-                      << std::endl;
-            std::exit(1);
+        } else {
+            obj = createFromUserInput(user_string, DatabaseContext::create())
+                      .as_nullable();
         }
-    } else {
-        size_t columnPos = user_string.find(':');
-        if (columnPos != std::string::npos) {
-            auto authority(user_string.substr(0, columnPos));
-            auto code(user_string.substr(columnPos + 1));
-            try {
-                auto factory = AuthorityFactory::create(
-                    DatabaseContext::create(), authority);
-                if (kindIsCRS) {
-                    obj = factory->createCoordinateReferenceSystem(code)
-                              .as_nullable();
-                } else {
-                    obj = factory->createCoordinateOperation(code, true)
-                              .as_nullable();
-                }
-            } catch (const std::exception &e) {
-                std::cerr << context
-                          << ": error while querying database: " << e.what()
-                          << std::endl;
-                std::exit(1);
-            }
-        }
-    }
-
-    if (!obj) {
-        std::cerr << context << ": unrecognized format." << std::endl;
+    } catch (const std::exception &e) {
+        std::cerr << context << ": parsing of user string failed: " << e.what()
+                  << std::endl;
         std::exit(1);
     }
 

@@ -172,9 +172,18 @@ const ExtentNNPtr Extent::WORLD(Extent::createFromBBOX(-180, -90, 180, 90));
 
 // ---------------------------------------------------------------------------
 
-#define DEFINE_WKT_CONSTANT(x) const std::string WKTConstants::x(#x)
-
 //! @cond Doxygen_Suppress
+
+std::vector<std::string> WKTConstants::constants_;
+
+const char *WKTConstants::createAndAddToConstantList(const char *text) {
+    WKTConstants::constants_.push_back(text);
+    return text;
+}
+
+#define DEFINE_WKT_CONSTANT(x)                                                 \
+    const std::string WKTConstants::x(createAndAddToConstantList(#x))
+
 DEFINE_WKT_CONSTANT(GEOCCS);
 DEFINE_WKT_CONSTANT(GEOGCS);
 DEFINE_WKT_CONSTANT(DATUM);

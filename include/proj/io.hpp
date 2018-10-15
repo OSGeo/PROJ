@@ -537,6 +537,11 @@ class WKTNode {
 
 // ---------------------------------------------------------------------------
 
+PROJ_DLL util::BaseObjectNNPtr
+createFromUserInput(const std::string &text, DatabaseContextPtr dbContext);
+
+// ---------------------------------------------------------------------------
+
 /** \brief Parse a WKT string into the appropriate suclass of util::BaseObject.
  */
 class WKTParser {
@@ -566,6 +571,9 @@ class PROJStringParser {
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PROJStringParser();
     //! @endcond
+
+    PROJ_DLL PROJStringParser &
+    attachDatabaseContext(DatabaseContextNNPtr dbContext);
 
     PROJ_DLL std::vector<std::string> warningList() const;
 
@@ -655,6 +663,9 @@ class AuthorityFactory {
 
     PROJ_DLL datum::PrimeMeridianNNPtr
     createPrimeMeridian(const std::string &code) const;
+
+    PROJ_DLL std::string identifyBodyFromSemiMajorAxis(double a,
+                                                       double tolerance) const;
 
     PROJ_DLL datum::EllipsoidNNPtr
     createEllipsoid(const std::string &code) const;

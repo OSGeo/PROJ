@@ -438,6 +438,9 @@ char* proj_rtodms(char *s, double r, int pos, int neg);
 typedef struct PJ_OBJ PJ_OBJ;
 /*! @endcond */
 
+PJ_OBJ PROJ_DLL *proj_obj_create_from_user_input(PJ_CONTEXT *ctx,
+                                                 const char *text);
+
 PJ_OBJ PROJ_DLL *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,

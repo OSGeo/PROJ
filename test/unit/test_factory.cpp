@@ -151,6 +151,15 @@ TEST(factory, AuthorityFactory_createPrimeMeridian) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_identifyBodyFromSemiMajorAxis) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_EQ(factory->identifyBodyFromSemiMajorAxis(6378137, 1e-5), "Earth");
+    EXPECT_THROW(factory->identifyBodyFromSemiMajorAxis(1, 1e-5),
+                 FactoryException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createEllipsoid) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createEllipsoid("-1"), NoSuchAuthorityCodeException);
@@ -1200,9 +1209,9 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         auto referenceDbHandle =
             static_cast<sqlite3 *>(referenceDb->getSqliteHandle());
         ASSERT_TRUE(m_ctxt != nullptr);
-        ASSERT_TRUE(get_table(
-            "SELECT sql FROM sqlite_master WHERE type IN ('table', 'view')",
-            referenceDbHandle));
+        ASSERT_TRUE(get_table("SELECT sql FROM sqlite_master WHERE type IN "
+                              "('table', 'view', 'trigger')",
+                              referenceDbHandle));
         for (int i = 0; i < m_nRows; i++) {
             ASSERT_TRUE(execute(m_papszResult[i + 1])) << last_error();
         }
@@ -1233,8 +1242,13 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                     "VALUES('EPSG','8901','Greenwich',0.0,'EPSG','9102',0);"))
             << last_error();
         ASSERT_TRUE(
+            execute("INSERT INTO celestial_body VALUES('PROJ','EARTH','Earth',"
+                    "6378137.0);"))
+            << last_error();
+        ASSERT_TRUE(
             execute("INSERT INTO ellipsoid VALUES('EPSG','7030','WGS 84',"
-                    "'Earth',6378137.0,'EPSG','9001',298.257223563,NULL,0);"))
+                    "'PROJ','EARTH',6378137.0,'EPSG','9001',298.257223563,"
+                    "NULL,0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_datum "
@@ -1262,7 +1276,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_crs VALUES('EPSG','4326','WGS "
                     "84','geographic "
-                    "2D','EPSG','6422','EPSG','6326','EPSG','1262',0);"))
+                    "2D','EPSG','6422','EPSG','6326','EPSG','1262',NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(execute("INSERT INTO coordinate_system "
@@ -1331,7 +1345,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         ASSERT_TRUE(execute("INSERT INTO projected_crs "
                             "VALUES('EPSG','32631','WGS 84 / UTM zone "
                             "31N','EPSG','4400','EPSG','4326','EPSG','16031','"
-                            "EPSG','2060',0);"))
+                            "EPSG','2060',NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(
@@ -1407,12 +1421,11 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             ASSERT_TRUE(execute("INSERT INTO crs VALUES('NS_" + val + "','" +
                                 val + "','geographic 2D');"))
                 << last_error();
-            ASSERT_TRUE(
-                execute("INSERT INTO geodetic_crs "
-                        "VALUES('NS_" +
-                        val + "','" + val + "','" + val +
-                        "','geographic "
-                        "2D','EPSG','6422','EPSG','6326','EPSG','1262',0);"))
+            ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
+                                "VALUES('NS_" +
+                                val + "','" + val + "','" + val +
+                                "','geographic 2D','EPSG','6422','EPSG','6326',"
+                                "'EPSG','1262',NULL,0);"))
                 << last_error();
         }
     }
@@ -1689,7 +1702,7 @@ TEST_F(FactoryWithTmpDatabase,
     ASSERT_TRUE(
         execute("INSERT INTO geodetic_crs VALUES('OTHER','OTHER_4326','WGS "
                 "84','geographic "
-                "2D','EPSG','6422','EPSG','6326','EPSG','1262',0);"))
+                "2D','EPSG','6422','EPSG','6326','EPSG','1262',NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(
@@ -1698,7 +1711,7 @@ TEST_F(FactoryWithTmpDatabase,
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
                         "VALUES('OTHER','OTHER_32631','WGS 84 / UTM zone "
                         "31N','EPSG','4400','OTHER','OTHER_4326','EPSG','16031'"
-                        ",'EPSG','2060',0);"))
+                        ",'EPSG','2060',NULL,0);"))
         << last_error();
 
     auto factoryGeneral = AuthorityFactory::create(
@@ -1902,7 +1915,10 @@ TEST_F(FactoryWithTmpDatabase, getAuthorities) {
         << last_error();
 
     auto res = DatabaseContext::create(m_ctxt)->getAuthorities();
-    EXPECT_EQ(res.size(), 2);
+    EXPECT_EQ(res.size(), 3);
+    EXPECT_TRUE(res.find("EPSG") != res.end());
+    EXPECT_TRUE(res.find("OTHER") != res.end());
+    EXPECT_TRUE(res.find("PROJ") != res.end());
 }
 
 // ---------------------------------------------------------------------------
@@ -1917,7 +1933,7 @@ TEST_F(FactoryWithTmpDatabase, lookForGridInfo) {
                         "inverse_direction, "
                         "package_name, "
                         "url, direct_download, open_license, directory) "
-                        "VALUES ('fake_grid', "
+                        "VALUES ('null', "
                         "'PROJ_fake_grid', "
                         "'CTable2', "
                         "'hgridshift', "
@@ -1941,6 +1957,96 @@ TEST_F(FactoryWithTmpDatabase, lookForGridInfo) {
     EXPECT_EQ(directDownload, true);
     EXPECT_EQ(openLicense, true);
     EXPECT_EQ(gridAvailable, false);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO crs VALUES('TEST_NS','TEST','geographic 2D');"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES('TEST_NS','TEST','my "
+                        "name','geographic "
+                        "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=longlat +a=2 "
+                        "+rf=300',0);"))
+        << last_error();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO crs VALUES('TEST_NS','TEST_GC','geocentric');"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES('TEST_NS','TEST_GC',"
+                        "'my name','geocentric',NULL,NULL,NULL,NULL,NULL,NULL,"
+                        "'+proj=geocent +a=2 +rf=300',0);"))
+        << last_error();
+
+    ASSERT_TRUE(execute(
+        "INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','geographic 2D');"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
+                        "VALUES('TEST_NS','TEST_WRONG','my name','geographic "
+                        "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=merc',0);"))
+        << last_error();
+
+    auto factory =
+        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
+    {
+        auto crs = factory->createGeodeticCRS("TEST");
+        EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
+        EXPECT_EQ(*(crs->name()->description()), "my name");
+        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
+        EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
+    }
+    {
+        auto crs = factory->createGeodeticCRS("TEST_GC");
+        EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) == nullptr);
+        EXPECT_EQ(*(crs->name()->description()), "my name");
+        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
+        EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
+    }
+
+    EXPECT_THROW(factory->createGeodeticCRS("TEST_WRONG"), FactoryException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO crs VALUES('TEST_NS','TEST','projected');"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO projected_crs "
+                        "VALUES('TEST_NS','TEST','my "
+                        "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
+                        "mbt_s +unused_flag',0);"))
+        << last_error();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','projected');"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO projected_crs "
+                        "VALUES('TEST_NS','TEST_WRONG','my "
+                        "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
+                        "longlat',0);"))
+        << last_error();
+
+    auto factory =
+        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
+    auto crs = factory->createProjectedCRS("TEST");
+    EXPECT_EQ(*(crs->name()->description()), "my name");
+    EXPECT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=mbt_s +unused_flag +ellps=WGS84");
+
+    EXPECT_THROW(factory->createProjectedCRS("TEST_WRONG"), FactoryException);
 }
 
 } // namespace

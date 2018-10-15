@@ -18,11 +18,22 @@ CREATE TABLE unit_of_measure(
     CONSTRAINT pk_unit_of_measure PRIMARY KEY (auth_name, code)
 );
 
+CREATE TABLE celestial_body (
+    auth_name TEXT NOT NULL,
+    code TEXT NOT NULL,
+    name TEXT NOT NULL,
+    semi_major_axis FLOAT NOT NULL CHECK (semi_major_axis > 0), -- approximate (in metre)
+    CONSTRAINT pk_celestial_body PRIMARY KEY (auth_name, code)
+);
+
+INSERT INTO celestial_body VALUES('PROJ', 'EARTH', 'Earth', 6378137.0);
+
 CREATE TABLE ellipsoid (
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
-    celestial_body TEXT NOT NULL, -- typically Earth
+    celestial_body_auth_name TEXT NOT NULL,
+    celestial_body_code TEXT NOT NULL,
     semi_major_axis FLOAT NOT NULL CHECK (semi_major_axis > 0),
     uom_auth_name TEXT NOT NULL,
     uom_code TEXT NOT NULL,
@@ -30,6 +41,7 @@ CREATE TABLE ellipsoid (
     semi_minor_axis FLOAT CHECK (semi_minor_axis > 0 AND semi_minor_axis <= semi_major_axis),
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_ellipsoid PRIMARY KEY (auth_name, code),
+    CONSTRAINT fk_ellipsoid_celestial_body FOREIGN KEY (celestial_body_auth_name, celestial_body_code) REFERENCES celestial_body(auth_name, code),
     CONSTRAINT fk_ellipsoid_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code)
 );
 
@@ -165,12 +177,13 @@ CREATE TABLE geodetic_crs(
     code TEXT NOT NULL,
     name TEXT NOT NULL,
     type TEXT NOT NULL CHECK (type IN ('geographic 2D', 'geographic 3D', 'geocentric')),
-    coordinate_system_auth_name TEXT NOT NULL,
-    coordinate_system_code TEXT NOT NULL,
-    datum_auth_name TEXT NOT NULL,
-    datum_code TEXT NOT NULL,
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
+    coordinate_system_auth_name TEXT,
+    coordinate_system_code TEXT,
+    datum_auth_name TEXT,
+    datum_code TEXT,
+    area_of_use_auth_name TEXT,
+    area_of_use_code TEXT,
+    text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_crs_crs FOREIGN KEY (auth_name, code) REFERENCES crs(auth_name, code),
@@ -184,6 +197,21 @@ BEFORE INSERT ON geodetic_crs
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: type must be equal to crs.type')
         WHERE NEW.type != (SELECT type FROM crs WHERE crs.auth_name = NEW.auth_name AND crs.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system must be defined when text_definition is NULL')
+        WHERE (NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must be defined when text_definition is NULL')
+        WHERE (NEW.datum_auth_name IS NULL OR NEW.datum_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system must NOT be defined when text_definition is NOT NULL')
+        WHERE (NOT(NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL)) AND NEW.text_definition IS NOT NULL;
+
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must NOT be defined when text_definition is NOT NULL')
+        WHERE (NOT(NEW.datum_auth_name IS NULL OR NEW.datum_code IS NULL)) AND NEW.text_definition IS NOT NULL;
+
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: area_of_use must be defined when text_definition is NULL')
+        WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
 
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system.dimension must be 3 for type = ''geocentric''')
         WHERE NEW.type = 'geocentric' AND (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 3;
@@ -380,14 +408,15 @@ CREATE TABLE projected_crs(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
-    coordinate_system_auth_name TEXT NOT NULL,
-    coordinate_system_code TEXT NOT NULL,
-    geodetic_crs_auth_name TEXT NOT NULL,
-    geodetic_crs_code TEXT NOT NULL,
-    conversion_auth_name TEXT NOT NULL,
-    conversion_code TEXT NOT NULL,
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
+    coordinate_system_auth_name TEXT,
+    coordinate_system_code TEXT,
+    geodetic_crs_auth_name TEXT,
+    geodetic_crs_code TEXTL,
+    conversion_auth_name TEXT,
+    conversion_code TEXT,
+    area_of_use_auth_name TEXT,
+    area_of_use_code TEXT,
+    text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_projected_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_projected_crs_crs FOREIGN KEY (auth_name, code) REFERENCES crs(auth_name, code),
@@ -402,8 +431,31 @@ BEFORE INSERT ON projected_crs
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: crs.type must be equal to ''projected''')
         WHERE (SELECT type FROM crs WHERE crs.auth_name = NEW.auth_name AND crs.code = NEW.code) != 'projected';
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system must be defined when text_definition is NULL')
+        WHERE (NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must be defined when text_definition is NULL')
+        WHERE (NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must be defined when text_definition is NULL')
+        WHERE (NEW.conversion_auth_name IS NULL OR NEW.conversion_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system must NOT be defined when text_definition is NOT NULL')
+        WHERE (NOT(NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL)) AND NEW.text_definition IS NOT NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must NOT be defined when text_definition is NOT NULL')
+        WHERE (NOT(NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL)) AND NEW.text_definition IS NOT NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must be defined when text_definition is NULL')
+        WHERE (NEW.conversion_auth_name IS NULL OR NEW.conversion_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must be defined when text_definition is NULL')
+        WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
+
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system.type must be ''cartesian''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'Cartesian';
+
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system.dimension must be 2')
     -- EPSG:4461 is topocentric
         WHERE NOT(NEW.coordinate_system_auth_name = 'EPSG' AND NEW.coordinate_system_code = '4461') AND (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 2;
@@ -819,6 +871,8 @@ CREATE VIEW crs_view AS
 CREATE VIEW object_view AS
     SELECT 'unit_of_measure' AS table_name, auth_name, code, name, NULL as area_of_use_auth_name, NULL as area_of_use_code, deprecated FROM unit_of_measure
     UNION ALL
+    SELECT 'celestial_body', auth_name, code, name, NULL, NULL, 0 FROM celestial_body
+    UNION ALL
     SELECT 'ellipsoid', auth_name, code, name, NULL, NULL, deprecated FROM ellipsoid
     UNION ALL
     SELECT 'area', auth_name, code, name, NULL, NULL, deprecated FROM area
@@ -840,6 +894,8 @@ CREATE VIEW object_view AS
 
 CREATE VIEW authority_list AS
     SELECT DISTINCT auth_name FROM unit_of_measure
+    UNION
+    SELECT DISTINCT auth_name FROM celestial_body
     UNION
     SELECT DISTINCT auth_name FROM ellipsoid
     UNION

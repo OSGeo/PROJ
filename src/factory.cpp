@@ -75,19 +75,26 @@ namespace io {
 // ---------------------------------------------------------------------------
 
 struct SQLValues {
-    enum class Type { STRING };
+    enum class Type { STRING, DOUBLE };
 
     // cppcheck-suppress noExplicitConstructor
     SQLValues(const std::string &value) : type_(Type::STRING), str_(value) {}
+
+    // cppcheck-suppress noExplicitConstructor
+    SQLValues(double value) : type_(Type::DOUBLE), double_(value) {}
 
     const Type &type() const { return type_; }
 
     // cppcheck-suppress functionStatic
     const std::string &stringValue() const { return str_; }
 
+    // cppcheck-suppress functionStatic
+    double doubleValue() const { return double_; }
+
   private:
     Type type_;
     std::string str_{};
+    double double_ = 0.0;
 };
 
 // ---------------------------------------------------------------------------
@@ -402,10 +409,15 @@ DatabaseContext::Private::run(const std::string &sql,
 
     int nBindField = 1;
     for (const auto &param : parameters) {
-        assert(param.type() == SQLValues::Type::STRING);
-        auto strValue = param.stringValue();
-        sqlite3_bind_text(stmt, nBindField, strValue.c_str(),
-                          static_cast<int>(strValue.size()), SQLITE_TRANSIENT);
+        if (param.type() == SQLValues::Type::STRING) {
+            auto strValue = param.stringValue();
+            sqlite3_bind_text(stmt, nBindField, strValue.c_str(),
+                              static_cast<int>(strValue.size()),
+                              SQLITE_TRANSIENT);
+        } else {
+            assert(param.type() == SQLValues::Type::DOUBLE);
+            sqlite3_bind_double(stmt, nBindField, param.doubleValue());
+        }
         nBindField++;
     }
 
@@ -1047,6 +1059,32 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Identify a celestial body from an approximate radius.
+ *
+ * @param semi_major_axis Approximate semi-major axis.
+ * @param tolerance Relative error allowed.
+ * @return celestial body name if one single match found.
+ * @throw FactoryException
+ */
+
+std::string
+AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
+                                                double tolerance) const {
+    auto res = d->context()->getPrivate()->run(
+        "SELECT name, (ABS(semi_major_axis - ?) / semi_major_axis ) "
+        "AS rel_error FROM celestial_body WHERE rel_error <= ?",
+        {semi_major_axis, tolerance});
+    if (res.empty()) {
+        throw FactoryException("no match found");
+    }
+    if (res.size() > 1) {
+        throw FactoryException("more than one match found");
+    }
+    return res[0][0];
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns a datum::Ellipsoid from the specified code.
  *
  * @param code Object code allocated by authority.
@@ -1058,10 +1096,14 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
 datum::EllipsoidNNPtr
 AuthorityFactory::createEllipsoid(const std::string &code) const {
     auto res = d->context()->getPrivate()->run(
-        "SELECT name, semi_major_axis, uom_auth_name, uom_code, "
-        "inv_flattening, semi_minor_axis, celestial_body, deprecated FROM "
-        "ellipsoid WHERE "
-        "auth_name = ? AND code = ?",
+        "SELECT ellipsoid.name, ellipsoid.semi_major_axis, "
+        "ellipsoid.uom_auth_name, ellipsoid.uom_code, "
+        "ellipsoid.inv_flattening, ellipsoid.semi_minor_axis, "
+        "celestial_body.name AS body_name, ellipsoid.deprecated FROM "
+        "ellipsoid JOIN celestial_body "
+        "ON ellipsoid.celestial_body_auth_name = celestial_body.auth_name AND "
+        "ellipsoid.celestial_body_code = celestial_body.code WHERE "
+        "ellipsoid.auth_name = ? AND ellipsoid.code = ?",
         {getAuthority(), code});
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("ellipsoid not found",
@@ -1400,7 +1442,8 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
     }
     std::string sql("SELECT name, type, coordinate_system_auth_name, "
                     "coordinate_system_code, datum_auth_name, datum_code, "
-                    "area_of_use_auth_name, area_of_use_code, deprecated FROM "
+                    "area_of_use_auth_name, area_of_use_code, text_definition, "
+                    "deprecated FROM "
                     "geodetic_crs WHERE auth_name = ? AND code = ?");
     if (geographicOnly) {
         sql += " AND type in ('geographic 2D', 'geographic 3D')";
@@ -1420,20 +1463,58 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         const auto &datum_code = row[5];
         const auto &area_of_use_auth_name = row[6];
         const auto &area_of_use_code = row[7];
-        const bool deprecated = row[8] == "1";
-        auto cs =
-            d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
-        auto datum =
-            d->createFactory(datum_auth_name)->createGeodeticDatum(datum_code);
-        auto extent = d->createFactory(area_of_use_auth_name)
-                          ->createExtent(area_of_use_code);
+        const auto &text_definition = row[8];
+        const bool deprecated = row[9] == "1";
+
+        auto extent = area_of_use_auth_name.empty()
+                          ? nullptr
+                          : d->createFactory(area_of_use_auth_name)
+                                ->createExtent(area_of_use_code)
+                                .as_nullable();
         auto props =
             util::PropertyMap()
                 .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
                 .set(metadata::Identifier::CODE_KEY, code)
                 .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
+        if (extent) {
+            props.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                      NN_CHECK_ASSERT(extent));
+        }
+
+        if (!text_definition.empty()) {
+            auto obj = createFromUserInput(text_definition, d->context());
+            auto geodCRS = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(obj);
+            if (!geodCRS) {
+                throw FactoryException(
+                    "text_definition does not define a GeodeticCRS");
+            }
+            auto cs = geodCRS->coordinateSystem();
+            auto datum = geodCRS->datum();
+            if (!datum) {
+                return NN_CHECK_ASSERT(geodCRS);
+            }
+            auto ellipsoidalCS =
+                util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
+            if (ellipsoidalCS) {
+                return crs::GeographicCRS::create(
+                    props, NN_CHECK_ASSERT(datum),
+                    NN_CHECK_ASSERT(ellipsoidalCS));
+            }
+            auto geocentricCS =
+                util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
+            if (geocentricCS) {
+                return crs::GeodeticCRS::create(props, NN_CHECK_ASSERT(datum),
+                                                NN_CHECK_ASSERT(geocentricCS));
+            }
+            return NN_CHECK_ASSERT(geodCRS);
+        }
+
+        auto cs =
+            d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
+        auto datum =
+            d->createFactory(datum_auth_name)->createGeodeticDatum(datum_code);
+
         auto ellipsoidalCS =
             util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
         if ((type == "geographic 2D" || type == "geographic 3D") &&
@@ -1631,8 +1712,8 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         "SELECT name, coordinate_system_auth_name, "
         "coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, "
         "conversion_auth_name, conversion_code, "
-        "area_of_use_auth_name, area_of_use_code, deprecated FROM "
-        "projected_crs WHERE auth_name = ? AND code = ?",
+        "area_of_use_auth_name, area_of_use_code, text_definition, "
+        "deprecated FROM projected_crs WHERE auth_name = ? AND code = ?",
         {getAuthority(), code});
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("projectedCRS not found",
@@ -1649,7 +1730,38 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         const auto &conversion_code = row[6];
         const auto &area_of_use_auth_name = row[7];
         const auto &area_of_use_code = row[8];
-        const bool deprecated = row[9] == "1";
+        const auto &text_definition = row[9];
+        const bool deprecated = row[10] == "1";
+
+        auto extent = area_of_use_auth_name.empty()
+                          ? nullptr
+                          : d->createFactory(area_of_use_auth_name)
+                                ->createExtent(area_of_use_code)
+                                .as_nullable();
+        auto props =
+            util::PropertyMap()
+                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                .set(metadata::Identifier::CODE_KEY, code)
+                .set(common::IdentifiedObject::NAME_KEY, name)
+                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
+        if (extent) {
+            props.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                      NN_CHECK_ASSERT(extent));
+        }
+
+        if (!text_definition.empty()) {
+            auto obj = createFromUserInput(text_definition, d->context());
+            auto projCRS =
+                util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(obj);
+            if (!projCRS) {
+                throw FactoryException(
+                    "text_definition does not define a ProjectedCRS");
+            }
+            return crs::ProjectedCRS::create(props, projCRS->baseCRS(),
+                                             projCRS->derivingConversion(),
+                                             projCRS->coordinateSystem());
+        }
+
         auto cs =
             d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
 
@@ -1659,15 +1771,6 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         auto conv = d->createFactory(conversion_auth_name)
                         ->createConversion(conversion_code);
 
-        auto extent = d->createFactory(area_of_use_auth_name)
-                          ->createExtent(area_of_use_code);
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
         auto cartesianCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (cartesianCS) {
             return crs::ProjectedCRS::create(props, baseCRS, conv,

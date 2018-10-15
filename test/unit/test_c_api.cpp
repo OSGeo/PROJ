@@ -140,6 +140,26 @@ class CApi : public ::testing::Test {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_obj_create_from_user_input) {
+    proj_obj_unref(nullptr);
+    EXPECT_EQ(proj_obj_create_from_user_input(m_ctxt, "invalid"), nullptr);
+    {
+        auto obj = proj_obj_create_from_user_input(
+            m_ctxt,
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create())
+                .c_str());
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+    }
+    {
+        auto obj = proj_obj_create_from_user_input(m_ctxt, "EPSG:4326");
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_obj_create_from_wkt) {
     proj_obj_unref(nullptr);
     EXPECT_EQ(proj_obj_create_from_wkt(m_ctxt, "invalid"), nullptr);

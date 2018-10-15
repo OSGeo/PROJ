@@ -3050,6 +3050,65 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a sub-class of BaseObject from a WKT string, PROJ string
+ * or database code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+ * "urn:ogc:def:coordinateOperation:EPSG::1671").
+ *
+ * @throw ParsingException
+ */
+BaseObjectNNPtr createFromUserInput(const std::string &text,
+                                    DatabaseContextPtr dbContext) {
+    for (const auto &wktConstants : WKTConstants::constants()) {
+        if (ci_starts_with(text, wktConstants)) {
+            return WKTParser().createFromWKT(text);
+        }
+    }
+    if (starts_with(text, "+proj=")) {
+        return PROJStringParser().createFromPROJString(text);
+    }
+
+    auto tokens = split(text, ':');
+    if (tokens.size() == 2) {
+        if (!dbContext) {
+            throw ParsingException("no database context specified");
+        }
+        auto factory =
+            AuthorityFactory::create(NN_CHECK_ASSERT(dbContext), tokens[0]);
+        return factory->createCoordinateReferenceSystem(tokens[1]);
+    }
+
+    // urn:ogc:def:crs:EPSG::4326
+    if (tokens.size() == 7) {
+        if (!dbContext) {
+            throw ParsingException("no database context specified");
+        }
+        const auto &type = tokens[3];
+        auto factory =
+            AuthorityFactory::create(NN_CHECK_ASSERT(dbContext), tokens[4]);
+        const auto &code = tokens[6];
+        if (type == "crs") {
+            return factory->createCoordinateReferenceSystem(code);
+        }
+        if (type == "coordinateOperation") {
+            return factory->createCoordinateOperation(code, true);
+        }
+        if (type == "datum") {
+            return factory->createDatum(code);
+        }
+        if (type == "ellipsoid") {
+            return factory->createEllipsoid(code);
+        }
+        if (type == "meridian") {
+            return factory->createPrimeMeridian(code);
+        }
+        throw ParsingException("unhandled object type: " + type);
+    }
+
+    throw ParsingException("unrecognized format");
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a sub-class of BaseObject from a WKT string.
  * @throw ParsingException
  */
@@ -3921,6 +3980,7 @@ DatabaseContextPtr PROJStringFormatter::databaseContext() const {
 
 //! @cond Doxygen_Suppress
 struct PROJStringParser::Private {
+    DatabaseContextPtr dbContext_{};
     std::vector<std::string> warningList_{};
 
     struct Step {
@@ -3936,6 +3996,8 @@ struct PROJStringParser::Private {
 
     // cppcheck-suppress functionStatic
     std::string getParamValue(const Step &step, const std::string &key);
+
+    std::string guessBodyName(double a);
 
     PrimeMeridianNNPtr buildPrimeMeridian(const Step &step);
     GeodeticReferenceFrameNNPtr buildDatum(const Step &step,
@@ -3973,6 +4035,16 @@ PROJStringParser::PROJStringParser() : d(internal::make_unique<Private>()) {}
 //! @cond Doxygen_Suppress
 PROJStringParser::~PROJStringParser() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Attach a database context, to allow queries in it if needed.
+ */
+PROJStringParser &
+PROJStringParser::attachDatabaseContext(DatabaseContextNNPtr dbContext) {
+    d->dbContext_ = dbContext;
+    return *this;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -4240,6 +4312,25 @@ PrimeMeridianNNPtr PROJStringParser::Private::buildPrimeMeridian(
 
 // ---------------------------------------------------------------------------
 
+std::string PROJStringParser::Private::guessBodyName(double a) {
+    constexpr double relError = 0.005;
+    constexpr double earthMeanRadius = 6375000.0;
+    if (std::fabs(a - earthMeanRadius) < relError * earthMeanRadius) {
+        return Ellipsoid::EARTH;
+    }
+    if (dbContext_) {
+        try {
+            auto factory = AuthorityFactory::create(NN_CHECK_ASSERT(dbContext_),
+                                                    std::string());
+            return factory->identifyBodyFromSemiMajorAxis(a, relError);
+        } catch (const std::exception &) {
+        }
+    }
+    return "Non-Earth body";
+}
+
+// ---------------------------------------------------------------------------
+
 GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
     const PROJStringParser::Private::Step &step, const std::string &title) {
 
@@ -4368,7 +4459,7 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
         auto ellipsoid =
             Ellipsoid::createTwoAxis(
                 PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                Length(a), Length(b))
+                Length(a), Length(b), guessBodyName(a))
                 ->identify();
         datum = GeodeticReferenceFrame::create(
                     PropertyMap().set(IdentifiedObject::NAME_KEY,
@@ -4393,7 +4484,7 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
         auto ellipsoid =
             Ellipsoid::createFlattenedSphere(
                 PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                Length(a), Scale(rf))
+                Length(a), Scale(rf), guessBodyName(a))
                 ->identify();
         datum = GeodeticReferenceFrame::create(
                     PropertyMap().set(IdentifiedObject::NAME_KEY,
@@ -4410,8 +4501,8 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
             throw ParsingException("Invalid Rvalue");
         }
         auto ellipsoid = Ellipsoid::createSphere(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-            Length(R));
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), Length(R),
+            guessBodyName(R));
         datum = GeodeticReferenceFrame::create(
                     PropertyMap().set(IdentifiedObject::NAME_KEY,
                                       title.empty() ? "unknown" : title),

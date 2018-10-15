@@ -75,7 +75,7 @@ def fill_unit_of_measure(proj_db_cursor):
 
 def fill_ellipsoid(proj_db_cursor):
     proj_db_cursor.execute(
-        "INSERT INTO ellipsoid SELECT ?, ellipsoid_code, ellipsoid_name, 'Earth', semi_major_axis, ?, uom_code, inv_flattening, semi_minor_axis, deprecated FROM epsg.epsg_ellipsoid", (EPSG_AUTHORITY, EPSG_AUTHORITY))
+        "INSERT INTO ellipsoid SELECT ?, ellipsoid_code, ellipsoid_name, 'PROJ', 'EARTH', semi_major_axis, ?, uom_code, inv_flattening, semi_minor_axis, deprecated FROM epsg.epsg_ellipsoid", (EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
 def fill_area(proj_db_cursor):
@@ -122,7 +122,7 @@ def fill_geodetic_crs(proj_db_cursor):
 
     proj_db_cursor.execute(
         "INSERT INTO crs SELECT ?, coord_ref_sys_code, coord_ref_sys_kind FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric') AND datum_code IS NOT NULL", (EPSG_AUTHORITY,))
-    proj_db_cursor.execute("INSERT INTO geodetic_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, coord_ref_sys_kind, ?, coord_sys_code, ?, datum_code, ?, area_of_use_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric') AND datum_code IS NOT NULL", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+    proj_db_cursor.execute("INSERT INTO geodetic_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, coord_ref_sys_kind, ?, coord_sys_code, ?, datum_code, ?, area_of_use_code, NULL, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric') AND datum_code IS NOT NULL", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
 def fill_vertical_crs(proj_db_cursor):
@@ -225,7 +225,7 @@ def fill_projected_crs(proj_db_cursor):
         proj_db_cursor.execute("SELECT 1 FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_code = ? AND coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric')", (geodetic_crs_code,))
         if proj_db_cursor.fetchone():
             proj_db_cursor.execute("INSERT INTO crs VALUES (?, ?, 'projected')", (EPSG_AUTHORITY, code))
-            proj_db_cursor.execute("INSERT INTO projected_crs VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", row)
+            proj_db_cursor.execute("INSERT INTO projected_crs VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL,?)", row)
 
 def fill_compound_crs(proj_db_cursor):
     proj_db_cursor.execute(

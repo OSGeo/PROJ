@@ -76,9 +76,9 @@ TEST(datum, ellipsoid_from_sphere) {
 
 TEST(datum, ellipsoid_non_earth) {
 
-    auto ellipsoid = Ellipsoid::createSphere(PropertyMap(), Length(1),
-                                             "Unity sphere");
-    EXPECT_EQ(ellipsoid->celestialBody(),  "Unity sphere");
+    auto ellipsoid =
+        Ellipsoid::createSphere(PropertyMap(), Length(1), "Unity sphere");
+    EXPECT_EQ(ellipsoid->celestialBody(), "Unity sphere");
 }
 
 // ---------------------------------------------------------------------------

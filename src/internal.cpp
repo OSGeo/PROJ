@@ -146,6 +146,15 @@ bool starts_with(const std::string &str, const std::string &prefix) {
 
 // ---------------------------------------------------------------------------
 
+bool ci_starts_with(const std::string &str, const std::string &prefix) {
+    if (str.size() < prefix.size()) {
+        return false;
+    }
+    return ci_equal(str.substr(0, prefix.size()), prefix);
+}
+
+// ---------------------------------------------------------------------------
+
 bool ends_with(const std::string &str, const std::string &suffix) {
     if (str.size() < suffix.size()) {
         return false;

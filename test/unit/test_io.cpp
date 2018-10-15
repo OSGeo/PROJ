@@ -3641,6 +3641,7 @@ TEST(io, projparse_longlat_a_b) {
                     "            ORDER[2],\n"
                     "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
     EXPECT_EQ(f->toString(), expected);
+    EXPECT_EQ(crs->ellipsoid()->celestialBody(), "Non-Earth body");
 }
 
 // ---------------------------------------------------------------------------
@@ -3667,6 +3668,7 @@ TEST(io, projparse_longlat_a_rf_WGS84) {
                     "            ORDER[2],\n"
                     "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
     EXPECT_EQ(f->toString(), expected);
+    EXPECT_EQ(crs->ellipsoid()->celestialBody(), Ellipsoid::EARTH);
 }
 
 // ---------------------------------------------------------------------------
@@ -5284,4 +5286,45 @@ TEST(io, projparse_projected_errors) {
     EXPECT_THROW(
         PROJStringParser().createFromPROJString("+proj=tmerc +lat_0=foo"),
         ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, createFromUserInput) {
+    EXPECT_THROW(createFromUserInput("foo", nullptr), ParsingException);
+    EXPECT_THROW(createFromUserInput("GEOGCRS", nullptr), ParsingException);
+    EXPECT_THROW(createFromUserInput("+proj=unhandled", nullptr),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput("EPSG:4326", nullptr), ParsingException);
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:unhandled:EPSG::4326",
+                                     DatabaseContext::create()),
+                 ParsingException);
+
+    EXPECT_NO_THROW(createFromUserInput("+proj=longlat", nullptr));
+    EXPECT_NO_THROW(
+        createFromUserInput("EPSG:4326", DatabaseContext::create()));
+    EXPECT_NO_THROW(createFromUserInput("urn:ogc:def:crs:EPSG::4326",
+                                        DatabaseContext::create()));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:ogc:def:coordinateOperation:EPSG::1671",
+                            DatabaseContext::create()));
+    EXPECT_NO_THROW(createFromUserInput("urn:ogc:def:datum:EPSG::6326",
+                                        DatabaseContext::create()));
+    EXPECT_NO_THROW(createFromUserInput("urn:ogc:def:meridian:EPSG::8901",
+                                        DatabaseContext::create()));
+    EXPECT_NO_THROW(createFromUserInput("urn:ogc:def:ellipsoid:EPSG::7030",
+                                        DatabaseContext::create()));
+    EXPECT_NO_THROW(createFromUserInput(
+        "GEOGCRS[\"WGS 84\",\n"
+        "    DATUM[\"World Geodetic System 1984\",\n"
+        "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+        "    CS[ellipsoidal,3],\n"
+        "        AXIS[\"latitude\",north,\n"
+        "            UNIT[\"degree\",0.0174532925199433]],\n"
+        "        AXIS[\"longitude\",east,\n"
+        "            UNIT[\"degree\",0.0174532925199433]],\n"
+        "        AXIS[\"ellipsoidal height\",up,\n"
+        "            UNIT[\"metre\",1]],\n"
+        "    ID[\"EPSG\",4979]]",
+        nullptr));
 }

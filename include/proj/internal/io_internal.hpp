@@ -34,6 +34,7 @@
 #define IO_INTERNAL_HH_INCLUDED
 
 #include <string>
+#include <vector>
 
 #include "proj/util.hpp"
 
@@ -140,6 +141,12 @@ class WKTConstants {
     static const std::string ENGINEERINGDATUM;
     static const std::string ENGINEERINGCRS;
     static const std::string PARAMETRICDATUM;
+
+    static const std::vector<std::string> &constants() { return constants_; }
+
+  private:
+    static std::vector<std::string> constants_;
+    static const char *createAndAddToConstantList(const char *text);
 };
 
 } // namespace io

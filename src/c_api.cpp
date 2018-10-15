@@ -98,6 +98,60 @@ struct PJ_OBJ {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+/** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
+struct projCppContext {
+    DatabaseContextNNPtr databaseContext;
+
+    explicit projCppContext(const DatabaseContextNNPtr &databaseContextIn)
+        : databaseContext(databaseContextIn) {}
+};
+
+// ---------------------------------------------------------------------------
+
+void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
+    delete cppContext;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate an object from a WKT string, PROJ string or object code
+ * (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+ * "urn:ogc:def:coordinateOperation:EPSG::1671").
+ *
+ * This function calls osgeo::proj::io::createFromUserInput()
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param text String (must not be NULL)
+ * @return Object that must be unreferenced with proj_obj_unref(), or NULL in
+ * case of error.
+ */
+PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    assert(text);
+    try {
+        if (ctx->cpp_context == nullptr) {
+            ctx->cpp_context =
+                new projCppContext(DatabaseContext::createWithPJContext(ctx));
+        }
+        return new PJ_OBJ(
+            ctx, createFromUserInput(text, ctx->cpp_context->databaseContext));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate an object from a WKT string.
  *
  * This function calls osgeo::proj::io::WKTParser::createFromWKT()
@@ -151,26 +205,6 @@ PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
         return nullptr;
     }
 }
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-
-/** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
-struct projCppContext {
-    DatabaseContextNNPtr databaseContext;
-
-    explicit projCppContext(const DatabaseContextNNPtr &databaseContextIn)
-        : databaseContext(databaseContextIn) {}
-};
-
-// ---------------------------------------------------------------------------
-
-void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
-    delete cppContext;
-}
-
-//! @endcond
 
 // ---------------------------------------------------------------------------
 
