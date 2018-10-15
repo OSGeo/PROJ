@@ -39,6 +39,14 @@
 
 #include <sqlite3.h>
 
+#ifdef _MSC_VER
+#include <stdio.h>
+#else
+#include <unistd.h>
+#endif
+
+//#undef SQLITE_OPEN_URI
+
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
@@ -1206,14 +1214,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
     void createStructure() {
         auto referenceDb = DatabaseContext::create();
-        auto referenceDbHandle =
-            static_cast<sqlite3 *>(referenceDb->getSqliteHandle());
-        ASSERT_TRUE(m_ctxt != nullptr);
-        ASSERT_TRUE(get_table("SELECT sql FROM sqlite_master WHERE type IN "
-                              "('table', 'view', 'trigger')",
-                              referenceDbHandle));
-        for (int i = 0; i < m_nRows; i++) {
-            ASSERT_TRUE(execute(m_papszResult[i + 1])) << last_error();
+        for (const auto &sql : referenceDb->getDatabaseStructure()) {
+            ASSERT_TRUE(execute(sql)) << last_error();
         }
         ASSERT_TRUE(execute("PRAGMA foreign_keys = 1;")) << last_error();
     }
@@ -2077,6 +2079,144 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
               "+step +proj=mbt_s +unused_flag +ellps=WGS84");
 
     EXPECT_THROW(factory->createProjectedCRS("TEST_WRONG"), FactoryException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, attachExtraDatabases_none) {
+    auto ctxt = DatabaseContext::create(std::string(), {});
+    auto factory = AuthorityFactory::create(ctxt, "EPSG");
+    auto crs = factory->createGeodeticCRS("4979");
+    auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+}
+
+// ---------------------------------------------------------------------------
+
+#ifndef SQLITE_OPEN_URI
+static int MyUnlink(const std::string &filename) {
+#ifdef _MSC_VER
+    return _unlink(filename.c_str());
+#else
+    return unlink(filename.c_str());
+#endif
+}
+#endif
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, attachExtraDatabases_auxiliary) {
+
+#ifdef SQLITE_OPEN_URI
+    std::string auxDbName("file:proj_test_aux.db?mode=memory&cache=shared");
+#else
+    const char *temp = getenv("TEMP");
+    if (!temp) {
+        temp = getenv("TMP");
+    }
+    if (!temp) {
+        temp = "/tmp";
+    }
+    std::string auxDbName(std::string(temp) + "/proj_test_aux.db");
+    MyUnlink(auxDbName);
+#endif
+    {
+        sqlite3 *dbAux = nullptr;
+        sqlite3_open_v2(auxDbName.c_str(), &dbAux,
+                        SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
+#ifdef SQLITE_OPEN_URI
+                            | SQLITE_OPEN_URI
+#endif
+                        ,
+                        nullptr);
+        ASSERT_TRUE(dbAux != nullptr);
+        ASSERT_TRUE(sqlite3_exec(dbAux, "BEGIN", nullptr, nullptr, nullptr) ==
+                    SQLITE_OK);
+        {
+            auto ctxt = DatabaseContext::create();
+            for (const auto &sql : ctxt->getDatabaseStructure()) {
+                if (sql.find("CREATE TRIGGER") == std::string::npos) {
+                    ASSERT_TRUE(sqlite3_exec(dbAux, sql.c_str(), nullptr,
+                                             nullptr, nullptr) == SQLITE_OK);
+                }
+            }
+        }
+
+        ASSERT_TRUE(
+            sqlite3_exec(
+                dbAux,
+                "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic 2D');",
+                nullptr, nullptr, nullptr) == SQLITE_OK);
+        ASSERT_TRUE(
+            sqlite3_exec(
+                dbAux,
+                "INSERT INTO geodetic_crs VALUES('OTHER','OTHER_4326','WGS "
+                "84','geographic "
+                "2D','EPSG','6422','EPSG','6326','EPSG','1262',NULL,0);",
+                nullptr, nullptr, nullptr) == SQLITE_OK);
+        ASSERT_TRUE(sqlite3_exec(dbAux, "COMMIT", nullptr, nullptr, nullptr) ==
+                    SQLITE_OK);
+
+        {
+            auto ctxt = DatabaseContext::create(std::string(), {auxDbName});
+            // Look for object located in main DB
+            {
+                auto factory = AuthorityFactory::create(ctxt, "EPSG");
+                auto crs = factory->createGeodeticCRS("4326");
+                auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+            }
+            // Look for object located in auxiliary DB
+            {
+                auto factory = AuthorityFactory::create(ctxt, "OTHER");
+                auto crs = factory->createGeodeticCRS("OTHER_4326");
+                auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+            }
+        }
+
+        {
+            auto ctxt =
+                DatabaseContext::create(std::string(), {auxDbName, ":memory:"});
+            // Look for object located in main DB
+            {
+                auto factory = AuthorityFactory::create(ctxt, "EPSG");
+                auto crs = factory->createGeodeticCRS("4326");
+                auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+            }
+            // Look for object located in auxiliary DB
+            {
+                auto factory = AuthorityFactory::create(ctxt, "OTHER");
+                auto crs = factory->createGeodeticCRS("OTHER_4326");
+                auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+            }
+        }
+
+        {
+            auto ctxt = DatabaseContext::create(std::string(), {":memory:"});
+            // Look for object located in main DB
+            {
+                auto factory = AuthorityFactory::create(ctxt, "EPSG");
+                auto crs = factory->createGeodeticCRS("4326");
+                auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+            }
+            // Look for object located in auxiliary DB
+            {
+                auto factory = AuthorityFactory::create(ctxt, "OTHER");
+                EXPECT_THROW(factory->createGeodeticCRS("OTHER_4326"),
+                             FactoryException);
+            }
+        }
+
+        sqlite3_close(dbAux);
+    }
+#ifndef SQLITE_OPEN_URI
+    MyUnlink(auxDbName);
+#endif
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, attachExtraDatabases_auxiliary_error) {
+    EXPECT_THROW(DatabaseContext::create(std::string(), {"i_dont_exist_db"}),
+                 FactoryException);
 }
 
 } // namespace

@@ -55,23 +55,6 @@ OGRFeature(epsg_coordoperation):3859
 
 - Once integrated with GDAL, test with BAG WKT
 
-~~~~~~~~~~~~~~~~~~~
-
- E.g. to
-> have system proj.db and user proj.db with customizations?
-
-That's another issue. An easy solution would be to copy the system proj.db in 
-a editable location and point PROJ_LIB to it
-
-Having both at the same time is more tricky. For example if you add custom 
-transformations in the user proj.db between official CRS of the system 
-proj.db, you'd have an issue with broken foreign keys, so the user proj.db 
-shouldn't enforce foreign keys.
-and then PROJ could potentially create a in-memory database, that would ATTACH 
-DATABASE the official and custom one, and for every table, create a temporary 
-view that UNION ALL the tables of both dbs. Then that would be transparent for 
-the rest of the code that does database queries.
-
 ~~~~~~~~~~~~~~~~~~~~~
 
 IGNF registry

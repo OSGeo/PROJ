@@ -1057,4 +1057,73 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_set_database_path_null) {
+
+    EXPECT_TRUE(proj_context_set_database_path(m_ctxt, nullptr, nullptr));
+    auto source_crs = proj_obj_create_from_database(m_ctxt, "EPSG", "4326",
+                                                    PJ_OBJ_CATEGORY_CRS, false,
+                                                    nullptr); // WGS84
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_set_database_path_main_memory_one_aux) {
+
+    auto c_path = proj_context_get_database_path(m_ctxt);
+    ASSERT_TRUE(c_path != nullptr);
+    std::string path(c_path);
+    const char *aux_db_list[] = {path.c_str(), nullptr};
+
+    // This is super exotic and a miracle that it works. :memory: as the
+    // main DB is empty. The real stuff is in the aux_db_list. No view
+    // is created in the ':memory:' internal DB, but as there's only one
+    // aux DB its tables and views can be directly queried...
+    // If that breaks at some point, that wouldn't be a big issue.
+    // Keeping that one as I had a hard time figuring out why it worked !
+    // The real thing is tested by the C++
+    // factory::attachExtraDatabases_auxiliary
+    EXPECT_TRUE(
+        proj_context_set_database_path(m_ctxt, ":memory:", aux_db_list));
+
+    auto source_crs = proj_obj_create_from_database(m_ctxt, "EPSG", "4326",
+                                                    PJ_OBJ_CATEGORY_CRS, false,
+                                                    nullptr); // WGS84
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_set_database_path_error_1) {
+
+    EXPECT_FALSE(
+        proj_context_set_database_path(m_ctxt, "i_do_not_exist.db", nullptr));
+
+    // We will eventually re-open on the default DB
+    auto source_crs = proj_obj_create_from_database(m_ctxt, "EPSG", "4326",
+                                                    PJ_OBJ_CATEGORY_CRS, false,
+                                                    nullptr); // WGS84
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_set_database_path_error_2) {
+
+    const char *aux_db_list[] = {"i_do_not_exist.db", nullptr};
+    EXPECT_FALSE(proj_context_set_database_path(m_ctxt, nullptr, aux_db_list));
+
+    // We will eventually re-open on the default DB
+    auto source_crs = proj_obj_create_from_database(m_ctxt, "EPSG", "4326",
+                                                    PJ_OBJ_CATEGORY_CRS, false,
+                                                    nullptr); // WGS84
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+}
+
 } // namespace

@@ -601,14 +601,22 @@ class DatabaseContext {
     PROJ_DLL static DatabaseContextNNPtr
     create(const std::string &databasePath);
 
+    PROJ_DLL static DatabaseContextNNPtr
+    create(const std::string &databasePath,
+           const std::vector<std::string> &auxiliaryDatabasePaths);
+
+    PROJ_DLL const std::string &getPath() const;
+
     PROJ_DLL std::set<std::string> getAuthorities() const;
+
+    PROJ_DLL std::vector<std::string> getDatabaseStructure() const;
 
     //! @cond Doxygen_Suppress
     PROJ_DLL void *getSqliteHandle() const;
 
     PROJ_DLL static DatabaseContextNNPtr create(void *sqlite_handle);
 
-    static DatabaseContextNNPtr createWithPJContext(void *pjCtxt);
+    void attachPJContext(void *pjCtxt);
 
     bool lookForGridAlternative(const std::string &officialName,
                                 std::string &projFilename,

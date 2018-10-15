@@ -120,6 +120,14 @@ struct DatabaseContext::Private {
     run(const std::string &sql,
         const std::vector<SQLValues> &parameters = std::vector<SQLValues>());
 
+    std::vector<std::string> getDatabaseStructure();
+
+    // cppcheck-suppress functionStatic
+    const std::string &getPath() const { return databasePath_; }
+
+    void attachExtraDatabases(
+        const std::vector<std::string> &auxiliaryDatabasePaths);
+
     // Mechanism to detect recursion in calls from
     // AuthorityFactory::createXXX() -> createFromUserInput() ->
     // AuthorityFacotry::createXXX()
@@ -141,6 +149,7 @@ struct DatabaseContext::Private {
     };
 
   private:
+    std::string databasePath_{};
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
@@ -311,14 +320,119 @@ void DatabaseContext::Private::open(const std::string &databasePath) {
         throw FactoryException("Open of " + path + " failed");
     }
 
+    databasePath_ = path;
     registerFunctions();
 }
 
 // ---------------------------------------------------------------------------
 
 void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
+
+    assert(sqlite_handle);
+    assert(!sqlite_handle_);
     sqlite_handle_ = sqlite_handle;
     close_handle_ = false;
+
+    registerFunctions();
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
+    auto sqlRes = run("SELECT sql FROM sqlite_master WHERE type "
+                      "IN ('table', 'trigger', 'view') ORDER BY type");
+    std::vector<std::string> res;
+    for (const auto &row : sqlRes) {
+        res.emplace_back(row[0]);
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+static std::string asString(size_t v) {
+    std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
+    buffer << v;
+    return buffer.str();
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::attachExtraDatabases(
+    const std::vector<std::string> &auxiliaryDatabasePaths) {
+    assert(close_handle_);
+    assert(sqlite_handle_);
+
+    auto tables =
+        run("SELECT name FROM sqlite_master WHERE type IN ('table', 'view')");
+    std::map<std::string, std::vector<std::string>> tableStructure;
+    for (const auto &rowTable : tables) {
+        auto tableName = rowTable[0];
+        auto tableInfo = run("PRAGMA table_info(\"" +
+                             replaceAll(tableName, "\"", "\"\"") + "\")");
+        for (const auto &rowCol : tableInfo) {
+            const auto &colName = rowCol[1];
+            tableStructure[tableName].push_back(colName);
+        }
+    }
+    for (auto &pair : mapSqlToStatement_) {
+        sqlite3_finalize(pair.second);
+    }
+    mapSqlToStatement_.clear();
+
+    sqlite3_close(sqlite_handle_);
+    sqlite_handle_ = nullptr;
+
+    sqlite3_open_v2(":memory:", &sqlite_handle_,
+                    SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX
+#ifdef SQLITE_OPEN_URI
+                        | SQLITE_OPEN_URI
+#endif
+                    ,
+                    nullptr);
+    if (!sqlite_handle_) {
+        throw FactoryException("cannot create in memory database");
+    }
+
+    run("ATTACH DATABASE '" + replaceAll(databasePath_, "'", "''") +
+        "' AS db_0");
+    int count = 1;
+    for (const auto &otherDb : auxiliaryDatabasePaths) {
+        std::string sql = "ATTACH DATABASE '" + replaceAll(otherDb, "'", "''") +
+                          "' AS db_" + asString(count);
+        count++;
+        run(sql);
+    }
+
+    for (const auto &pair : tableStructure) {
+        auto sql = "CREATE TEMP VIEW " + pair.first + " AS ";
+        for (size_t i = 0; i <= auxiliaryDatabasePaths.size(); ++i) {
+            std::string selectFromAux("SELECT ");
+            bool firstCol = true;
+            for (const auto &colName : pair.second) {
+                if (!firstCol) {
+                    selectFromAux += ", ";
+                }
+                firstCol = false;
+                selectFromAux += colName;
+            }
+            selectFromAux += " FROM db_" + asString(i) + "." + pair.first;
+
+            try {
+                // Check that the request will succeed. In case of 'sparse'
+                // databases...
+                run(selectFromAux + " LIMIT 0");
+
+                if (i > 0) {
+                    sql += " UNION ALL ";
+                }
+                sql += selectFromAux;
+            } catch (const std::exception &) {
+            }
+        }
+        run(sql);
+    }
 
     registerFunctions();
 }
@@ -489,9 +603,7 @@ DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
  * @throw FactoryException
  */
 DatabaseContextNNPtr DatabaseContext::create() {
-    auto ctxt = DatabaseContext::nn_make_shared<DatabaseContext>();
-    ctxt->getPrivate()->open();
-    return ctxt;
+    return create(std::string(), {});
 }
 
 // ---------------------------------------------------------------------------
@@ -499,12 +611,33 @@ DatabaseContextNNPtr DatabaseContext::create() {
 /** \brief Instanciate a database context from a full filename.
  *
  * This database context should be used only by one thread at a time.
- * @param databasePath Path and filename of the database.
+ * @param databasePath Path and filename of the database. Might be empty
+ * string for the default rules to locate the default proj.db
  * @throw FactoryException
  */
 DatabaseContextNNPtr DatabaseContext::create(const std::string &databasePath) {
+    return create(databasePath, {});
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a database context from a full filename, and attach
+ * auxiliary databases to it.
+ *
+ * This database context should be used only by one thread at a time.
+ * @param databasePath Path and filename of the database. Might be empty
+ * string for the default rules to locate the default proj.db
+ * @param auxiliaryDatabasePaths Path and filename of auxiliary databases;
+ * @throw FactoryException
+ */
+DatabaseContextNNPtr DatabaseContext::create(
+    const std::string &databasePath,
+    const std::vector<std::string> &auxiliaryDatabasePaths) {
     auto ctxt = DatabaseContext::nn_make_shared<DatabaseContext>();
     ctxt->getPrivate()->open(databasePath);
+    if (!auxiliaryDatabasePaths.empty()) {
+        ctxt->getPrivate()->attachExtraDatabases(auxiliaryDatabasePaths);
+    }
     return ctxt;
 }
 
@@ -520,6 +653,21 @@ std::set<std::string> DatabaseContext::getAuthorities() const {
     }
     return list;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the list of SQL commands (CREATE TABLE, CREATE TRIGGER,
+ * CREATE VIEW) needed to initialize a new database.
+ */
+std::vector<std::string> DatabaseContext::getDatabaseStructure() const {
+    return d->getDatabaseStructure();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the path to the database.
+ */
+const std::string &DatabaseContext::getPath() const { return d->getPath(); }
 
 // ---------------------------------------------------------------------------
 
@@ -539,10 +687,8 @@ void *DatabaseContext::getSqliteHandle() const {
 
 // ---------------------------------------------------------------------------
 
-DatabaseContextNNPtr DatabaseContext::createWithPJContext(void *pjCtxt) {
-    auto ctxt = create(std::string());
-    ctxt->getPrivate()->setPjCtxt(static_cast<PJ_CONTEXT *>(pjCtxt));
-    return ctxt;
+void DatabaseContext::attachPJContext(void *pjCtxt) {
+    d->setPjCtxt(static_cast<PJ_CONTEXT *>(pjCtxt));
 }
 
 // ---------------------------------------------------------------------------

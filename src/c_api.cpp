@@ -104,8 +104,20 @@ struct PJ_OBJ {
 struct projCppContext {
     DatabaseContextNNPtr databaseContext;
 
-    explicit projCppContext(const DatabaseContextNNPtr &databaseContextIn)
-        : databaseContext(databaseContextIn) {}
+    explicit projCppContext(PJ_CONTEXT *ctxt, const char *dbPath = nullptr,
+                            const char *const *auxDbPaths = nullptr)
+        : databaseContext(DatabaseContext::create(
+              dbPath ? dbPath : std::string(), toVector(auxDbPaths))) {
+        databaseContext->attachPJContext(ctxt);
+    }
+
+    static std::vector<std::string> toVector(const char *const *auxDbPaths) {
+        std::vector<std::string> res;
+        for (auto iter = auxDbPaths; iter && *iter; ++iter) {
+            res.emplace_back(*iter);
+        }
+        return res;
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -115,6 +127,74 @@ void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
 }
 
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+#define SANITIZE_CTX(ctx)                                                      \
+    do {                                                                       \
+        if (ctx == nullptr) {                                                  \
+            ctx = pj_get_default_ctx();                                        \
+        }                                                                      \
+    } while (0)
+
+// ---------------------------------------------------------------------------
+
+static DatabaseContextNNPtr getDBcontext(PJ_CONTEXT *ctx) {
+    if (ctx->cpp_context == nullptr) {
+        ctx->cpp_context = new projCppContext(ctx);
+    }
+    return ctx->cpp_context->databaseContext;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Explicitly point to the main PROJ CRS and coordinate operation
+ * definition database ("proj.db"), and potentially auxiliary databases with
+ * same structure.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param dbPath Path to main database, or NULL for default.
+ * @param auxDbPaths NULL-terminated list of auxiliary database filenames, or
+ * NULL.
+ * @return TRUE in case of success
+ */
+int proj_context_set_database_path(PJ_CONTEXT *ctx, const char *dbPath,
+                                   const char *const *auxDbPaths) {
+    SANITIZE_CTX(ctx);
+    delete ctx->cpp_context;
+    ctx->cpp_context = nullptr;
+    try {
+        ctx->cpp_context = new projCppContext(ctx, dbPath, auxDbPaths);
+        return true;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return false;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the path to the database.
+ *
+ * The returned pointer remains valid while ctx is valid, and until
+ * proj_context_set_database_path() is called.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @return path, or nullptr
+ */
+const char *proj_context_get_database_path(PJ_CONTEXT *ctx) {
+    SANITIZE_CTX(ctx);
+    try {
+        return getDBcontext(ctx)->getPath().c_str();
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
 
 // ---------------------------------------------------------------------------
 
@@ -133,17 +213,10 @@ void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
  * case of error.
  */
 PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text) {
-    if (ctx == nullptr) {
-        ctx = pj_get_default_ctx();
-    }
+    SANITIZE_CTX(ctx);
     assert(text);
     try {
-        if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context =
-                new projCppContext(DatabaseContext::createWithPJContext(ctx));
-        }
-        return new PJ_OBJ(
-            ctx, createFromUserInput(text, ctx->cpp_context->databaseContext));
+        return new PJ_OBJ(ctx, createFromUserInput(text, getDBcontext(ctx)));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -165,9 +238,7 @@ PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text) {
  * case of error.
  */
 PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt) {
-    if (ctx == nullptr) {
-        ctx = pj_get_default_ctx();
-    }
+    SANITIZE_CTX(ctx);
     assert(wkt);
     try {
         return new PJ_OBJ(ctx, WKTParser().createFromWKT(wkt));
@@ -193,9 +264,7 @@ PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt) {
  */
 PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
                                          const char *proj_string) {
-    if (ctx == nullptr) {
-        ctx = pj_get_default_ctx();
-    }
+    SANITIZE_CTX(ctx);
     assert(proj_string);
     try {
         return new PJ_OBJ(ctx,
@@ -232,14 +301,9 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     assert(auth_name);
     assert(code);
     (void)options;
-
+    SANITIZE_CTX(ctx);
     try {
-        if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context =
-                new projCppContext(DatabaseContext::createWithPJContext(ctx));
-        }
-        auto factory = AuthorityFactory::create(
-            ctx->cpp_context->databaseContext, auth_name);
+        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
         switch (category) {
         case PJ_OBJ_CATEGORY_ELLIPSOID:
             return new PJ_OBJ(ctx, factory->createEllipsoid(code));
@@ -531,12 +595,8 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
         break;
     }
     try {
-        if (obj->ctx->cpp_context == nullptr) {
-            obj->ctx->cpp_context = new projCppContext(
-                DatabaseContext::createWithPJContext(obj->ctx));
-        }
-        auto formatter = PROJStringFormatter::create(
-            convention, obj->ctx->cpp_context->databaseContext);
+        auto formatter =
+            PROJStringFormatter::create(convention, getDBcontext(obj->ctx));
         if (options != nullptr && options[0] != nullptr) {
             if (ci_equal(options[0], "USE_ETMERC=YES")) {
                 formatter->setUseETMercForTMerc(true);
@@ -905,13 +965,9 @@ static PROJ_STRING_LIST set_to_string_list(const std::set<std::string> &set) {
  * freed with proj_free_string_list(), or NULL in case of error.
  */
 PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
+    SANITIZE_CTX(ctx);
     try {
-        if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context =
-                new projCppContext(DatabaseContext::createWithPJContext(ctx));
-        }
-        return set_to_string_list(
-            ctx->cpp_context->databaseContext->getAuthorities());
+        return set_to_string_list(getDBcontext(ctx)->getAuthorities());
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -938,13 +994,9 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                               PJ_OBJ_TYPE type,
                                               int allow_deprecated) {
     assert(auth_name);
+    SANITIZE_CTX(ctx);
     try {
-        if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context =
-                new projCppContext(DatabaseContext::createWithPJContext(ctx));
-        }
-        auto factory = AuthorityFactory::create(
-            ctx->cpp_context->databaseContext, auth_name);
+        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
 
         AuthorityFactory::ObjectType typeInternal =
             AuthorityFactory::ObjectType::CRS;
@@ -1118,14 +1170,8 @@ int proj_coordoperation_is_instanciable(PJ_OBJ *coordoperation) {
         return 0;
     }
     try {
-        if (coordoperation->ctx->cpp_context == nullptr) {
-            coordoperation->ctx->cpp_context = new projCppContext(
-                DatabaseContext::createWithPJContext(coordoperation->ctx));
-        }
-        return op->isPROJInstanciable(
-                   coordoperation->ctx->cpp_context->databaseContext)
-                   ? 1
-                   : 0;
+        return op->isPROJInstanciable(getDBcontext(coordoperation->ctx)) ? 1
+                                                                         : 0;
     } catch (const std::exception &) {
         return 0;
     }
@@ -1310,7 +1356,7 @@ int proj_coordoperation_get_grid_used_count(PJ_OBJ *coordoperation) {
     if (!coordoperation->gridsNeededAsked) {
         coordoperation->gridsNeededAsked = true;
         const auto gridsNeeded =
-            co->gridsNeeded(coordoperation->ctx->cpp_context->databaseContext);
+            co->gridsNeeded(getDBcontext(coordoperation->ctx));
         for (const auto &gridDesc : gridsNeeded) {
             coordoperation->gridsNeeded.emplace_back(gridDesc);
         }
@@ -1419,14 +1465,11 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
  */
 PJ_OPERATION_FACTORY_CONTEXT *
 proj_create_operation_factory_context(PJ_CONTEXT *ctx) {
+    SANITIZE_CTX(ctx);
     try {
-        if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context =
-                new projCppContext(DatabaseContext::createWithPJContext(ctx));
-        }
         auto factory = CoordinateOperationFactory::create();
-        auto authFactory = AuthorityFactory::create(
-            ctx->cpp_context->databaseContext, std::string());
+        auto authFactory =
+            AuthorityFactory::create(getDBcontext(ctx), std::string());
         auto operationContext =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
         return new PJ_OPERATION_FACTORY_CONTEXT(ctx, operationContext);

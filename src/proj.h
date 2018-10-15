@@ -438,6 +438,12 @@ char* proj_rtodms(char *s, double r, int pos, int neg);
 typedef struct PJ_OBJ PJ_OBJ;
 /*! @endcond */
 
+int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
+                                            const char *dbPath,
+                                            const char *const *auxDbPaths);
+
+const char PROJ_DLL *proj_context_get_database_path(PJ_CONTEXT *ctx);
+
 PJ_OBJ PROJ_DLL *proj_obj_create_from_user_input(PJ_CONTEXT *ctx,
                                                  const char *text);
 

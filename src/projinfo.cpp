@@ -78,6 +78,8 @@ static void usage() {
         << "                [--pivot-crs none|{auth:code[,auth:code]*}]"
         << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
+        << "                [--main-db-path path] [--aux-db-path path]*"
+        << std::endl
         << "                {object_definition} | (-s {srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
@@ -96,7 +98,8 @@ static void usage() {
 
 // ---------------------------------------------------------------------------
 
-static BaseObjectNNPtr buildObject(const std::string &user_string,
+static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
+                                   const std::string &user_string,
                                    bool kindIsCRS, const std::string &context,
                                    bool buildBoundCRSToWGS84) {
     BaseObjectPtr obj;
@@ -105,11 +108,9 @@ static BaseObjectNNPtr buildObject(const std::string &user_string,
         if (!kindIsCRS && tokens.size() == 2) {
             auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
                        tokens[1];
-            obj = createFromUserInput(urn, DatabaseContext::create())
-                      .as_nullable();
+            obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
-            obj = createFromUserInput(user_string, DatabaseContext::create())
-                      .as_nullable();
+            obj = createFromUserInput(user_string, dbContext).as_nullable();
         }
     } catch (const std::exception &e) {
         std::cerr << context << ": parsing of user string failed: " << e.what()
@@ -129,7 +130,8 @@ static BaseObjectNNPtr buildObject(const std::string &user_string,
 
 // ---------------------------------------------------------------------------
 
-static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
+static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
+                         const OutputOptions &outputOpt) {
     auto projStringExportable =
         nn_dynamic_pointer_cast<IPROJStringExportable>(obj);
     bool alreadyOutputed = false;
@@ -142,7 +144,7 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
                 std::cout << projStringExportable->exportToPROJString(
                                  PROJStringFormatter::create(
                                      PROJStringFormatter::Convention::PROJ_5,
-                                     DatabaseContext::create()))
+                                     dbContext))
                           << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
@@ -174,7 +176,7 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
                 std::cout << objToExport->exportToPROJString(
                                  PROJStringFormatter::create(
                                      PROJStringFormatter::Convention::PROJ_4,
-                                     DatabaseContext::create()))
+                                     dbContext))
                           << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
@@ -256,8 +258,8 @@ static void outputObject(BaseObjectNNPtr obj, const OutputOptions &outputOpt) {
 // ---------------------------------------------------------------------------
 
 static void outputOperations(
-    const std::string &sourceCRSStr, const std::string &targetCRSStr,
-    const ExtentPtr &bboxFilter,
+    DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
+    const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
@@ -265,14 +267,16 @@ static void outputOperations(
     const std::vector<std::pair<std::string, std::string>> &pivots,
     bool usePROJGridAlternatives, const OutputOptions &outputOpt,
     bool summary) {
-    auto sourceObj = buildObject(sourceCRSStr, true, "source CRS", false);
+    auto sourceObj =
+        buildObject(dbContext, sourceCRSStr, true, "source CRS", false);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
 
-    auto targetObj = buildObject(targetCRSStr, true, "target CRS", false);
+    auto targetObj =
+        buildObject(dbContext, targetCRSStr, true, "target CRS", false);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -281,8 +285,12 @@ static void outputOperations(
 
     std::vector<CoordinateOperationNNPtr> list;
     try {
+        if (!dbContext) {
+            std::cerr << "ERROR: No database context" << std::endl;
+            std::exit(1);
+        }
         auto authFactory =
-            AuthorityFactory::create(DatabaseContext::create(), std::string());
+            AuthorityFactory::create(NN_CHECK_ASSERT(dbContext), std::string());
         auto ctxt =
             CoordinateOperationContext::create(authFactory, bboxFilter, 0);
         ctxt->setSpatialCriterion(spatialCriterion);
@@ -299,7 +307,7 @@ static void outputOperations(
         std::exit(1);
     }
     if (outputOpt.quiet && !list.empty()) {
-        outputObject(list[0], outputOpt);
+        outputObject(dbContext, list[0], outputOpt);
         return;
     }
     if (summary) {
@@ -362,7 +370,7 @@ static void outputOperations(
                           << (i + 1) << ":" << std::endl
                           << std::endl;
             }
-            outputObject(op, outputOpt);
+            outputObject(dbContext, op, outputOpt);
         }
     }
 }
@@ -394,6 +402,8 @@ int main(int argc, char **argv) {
     bool allowPivots = true;
     std::vector<std::pair<std::string, std::string>> pivots;
     bool usePROJGridAlternatives = true;
+    std::string mainDBPath;
+    std::vector<std::string> auxDBPath;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -582,6 +592,12 @@ int main(int argc, char **argv) {
                         std::make_pair(auth_code[0], auth_code[1]));
                 }
             }
+        } else if (arg == "--main-db-path" && i + 1 < argc) {
+            i++;
+            mainDBPath = argv[i];
+        } else if (arg == "--aux-db-path" && i + 1 < argc) {
+            i++;
+            auxDBPath.push_back(argv[i]);
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {
@@ -596,6 +612,21 @@ int main(int argc, char **argv) {
             }
         }
     }
+
+    DatabaseContextPtr dbContext;
+    try {
+        dbContext =
+            DatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
+    } catch (const std::exception &e) {
+        if (!mainDBPath.empty() || !auxDBPath.empty()) {
+            std::cerr << "ERROR: Cannot create database connection: "
+                      << e.what() << std::endl;
+            std::exit(1);
+        }
+        std::cerr << "WARNING: Cannot create database connection: " << e.what()
+                  << std::endl;
+    }
+
     if (!sourceCRSStr.empty() && targetCRSStr.empty()) {
         std::cerr << "Source CRS specified, but missing target CRS"
                   << std::endl;
@@ -628,11 +659,11 @@ int main(int argc, char **argv) {
     }
 
     if (!user_string.empty()) {
-        auto obj(buildObject(user_string, kindIsCRS, "input string",
+        auto obj(buildObject(dbContext, user_string, kindIsCRS, "input string",
                              buildBoundCRSToWGS84));
-        outputObject(obj, outputOpt);
+        outputObject(dbContext, obj, outputOpt);
     } else {
-        outputOperations(sourceCRSStr, targetCRSStr, bboxFilter,
+        outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
                          spatialCriterion, crsExtentUse, gridAvailabilityUse,
                          allowPivots, pivots, usePROJGridAlternatives,
                          outputOpt, summary);

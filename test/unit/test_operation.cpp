@@ -5049,9 +5049,8 @@ TEST(operation, isPROJInstanciable) {
     {
         auto transformation = Transformation::create(
             PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326,
-            nullptr,
-            OperationMethod::create(PropertyMap(),
-                                    std::vector<OperationParameterNNPtr>{}),
+            nullptr, OperationMethod::create(
+                         PropertyMap(), std::vector<OperationParameterNNPtr>{}),
             std::vector<GeneralParameterValueNNPtr>{},
             std::vector<PositionalAccuracyNNPtr>{});
         EXPECT_FALSE(
