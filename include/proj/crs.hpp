@@ -116,10 +116,12 @@ class SingleCRS : public CRS {
     PROJ_DLL const datum::DatumEnsemblePtr &datumEnsemble() const;
     PROJ_DLL const cs::CoordinateSystemNNPtr &coordinateSystem() const;
 
-    //! @cond Doxygen_Suppress
-    void exportDatumOrDatumEnsembleToWkt(io::WKTFormatterNNPtr formatter)
-        const; // throw(io::FormattingException)
-               //! @endcond
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        void
+        exportDatumOrDatumEnsembleToWkt(io::WKTFormatterNNPtr formatter)
+            const; // throw(io::FormattingException)
+                   //! @endcond
 
   protected:
     SingleCRS(const datum::DatumPtr &datumIn,
@@ -213,13 +215,15 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
-    //! @cond Doxygen_Suppress
-    void addDatumInfoToPROJString(io::PROJStringFormatterNNPtr formatter) const;
+    PROJ_DLL static const GeodeticCRSNNPtr EPSG_4978; // WGS 84 Geocentric
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        void
+        addDatumInfoToPROJString(io::PROJStringFormatterNNPtr formatter) const;
     void addGeocentricUnitConversionIntoPROJString(
         io::PROJStringFormatterNNPtr formatter) const;
     //! @endcond
-
-    PROJ_DLL static const GeodeticCRSNNPtr EPSG_4978; // WGS 84 Geocentric
 
   protected:
     GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
@@ -284,9 +288,11 @@ class GeographicCRS : public GeodeticCRS {
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4807; // NTF Paris
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4979; // WGS 84 3D
 
-    //! @cond Doxygen_Suppress
-    void addAngularUnitConvertAndAxisSwap(
-        io::PROJStringFormatterNNPtr formatter) const;
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        void
+        addAngularUnitConvertAndAxisSwap(
+            io::PROJStringFormatterNNPtr formatter) const;
     //! @endcond
 
   protected:
@@ -360,8 +366,10 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
            const datum::DatumEnsemblePtr &datumEnsembleIn,
            const cs::VerticalCSNNPtr &csIn);
 
-    //! @cond Doxygen_Suppress
-    void addLinearUnitConvert(io::PROJStringFormatterNNPtr formatter) const;
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        void
+        addLinearUnitConvert(io::PROJStringFormatterNNPtr formatter) const;
     //! @endcond
 
   protected:
@@ -399,14 +407,15 @@ class DerivedCRS : virtual public SingleCRS {
     PROJ_DLL const SingleCRSNNPtr &baseCRS() const;
     PROJ_DLL const operation::ConversionNNPtr derivingConversion() const;
 
-    //! @cond Doxygen_Suppress
-    const operation::ConversionNNPtr &derivingConversionRef() const;
-    //! @endcond
-
     PROJ_DLL bool
     isEquivalentTo(const util::BaseObjectNNPtr &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        const operation::ConversionNNPtr &
+        derivingConversionRef() const;
+    //! @endcond
 
   protected:
     DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
@@ -473,9 +482,11 @@ class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
-    //! @cond Doxygen_Suppress
-    void addUnitConvertAndAxisSwap(io::PROJStringFormatterNNPtr formatter,
-                                   bool axisSpecFound) const;
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        void
+        addUnitConvertAndAxisSwap(io::PROJStringFormatterNNPtr formatter,
+                                  bool axisSpecFound) const;
     //! @endcond
 
   protected:

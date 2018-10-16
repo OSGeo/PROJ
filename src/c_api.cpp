@@ -1192,8 +1192,7 @@ int proj_coordoperation_is_instanciable(PJ_OBJ *coordoperation) {
                        "Object is not a CoordinateOperation");
         return 0;
     }
-    auto dbContext =
-        getDBcontextNoException(coordoperation->ctx, __FUNCTION__);
+    auto dbContext = getDBcontextNoException(coordoperation->ctx, __FUNCTION__);
     try {
         return op->isPROJInstanciable(dbContext) ? 1 : 0;
     } catch (const std::exception &) {
@@ -1377,8 +1376,7 @@ int proj_coordoperation_get_grid_used_count(PJ_OBJ *coordoperation) {
                        "Object is not a CoordinateOperation");
         return 0;
     }
-    auto dbContext =
-        getDBcontextNoException(coordoperation->ctx, __FUNCTION__);
+    auto dbContext = getDBcontextNoException(coordoperation->ctx, __FUNCTION__);
     try {
         if (!coordoperation->gridsNeededAsked) {
             coordoperation->gridsNeededAsked = true;

@@ -74,7 +74,7 @@ class Citation : public util::BaseObject {
     PROJ_DLL const util::optional<std::string> &title() const;
 
   protected:
-    FRIEND_OPTIONAL(Citation);
+    PROJ_FRIEND_OPTIONAL(Citation);
     Citation &operator=(const Citation &other);
 
   private:
@@ -375,18 +375,20 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
     std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
-    //! @cond Doxygen_Suppress
-    static std::string canonicalizeName(const std::string &str);
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        static std::string
+        canonicalizeName(const std::string &str);
     //! @endcond
 
   protected:
     explicit Identifier(const std::string &codeIn = std::string());
 
-    FRIEND_OPTIONAL(Identifier);
+    PROJ_FRIEND_OPTIONAL(Identifier);
     INLINED_MAKE_SHARED
     Identifier &operator=(const Identifier &other);
 
-    FRIEND(common::IdentifiedObject);
+    PROJ_FRIEND(common::IdentifiedObject);
 
     // Non-standard
     void setProperties(const util::PropertyMap

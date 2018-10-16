@@ -148,9 +148,9 @@ class CoordinateOperation : public common::ObjectUsage,
     CoordinateOperation();
     CoordinateOperation(const CoordinateOperation &other);
 
-    FRIEND(crs::DerivedCRS);
-    FRIEND(io::AuthorityFactory);
-    FRIEND(CoordinateOperationFactory);
+    PROJ_FRIEND(crs::DerivedCRS);
+    PROJ_FRIEND(io::AuthorityFactory);
+    PROJ_FRIEND(CoordinateOperationFactory);
     void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                                 std::weak_ptr<crs::CRS> targetCRSIn);
     void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
@@ -395,10 +395,11 @@ class OperationParameterValue : public GeneralParameterValue {
     create(const OperationParameterNNPtr &parameterIn,
            const ParameterValueNNPtr &valueIn);
 
-    //! @cond Doxygen_Suppress
-    static bool convertFromAbridged(const std::string &paramName, double &val,
-                                    common::UnitOfMeasure &unit,
-                                    int &paramEPSGCode);
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        static bool
+        convertFromAbridged(const std::string &paramName, double &val,
+                            common::UnitOfMeasure &unit, int &paramEPSGCode);
     //! @endcond
 
   protected:
@@ -1221,7 +1222,7 @@ class Conversion : public SingleOperation {
     Conversion(const Conversion &other);
     INLINED_MAKE_SHARED
 
-    FRIEND(crs::ProjectedCRS);
+    PROJ_FRIEND(crs::ProjectedCRS);
     void addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const;
 
   private:
@@ -1410,8 +1411,10 @@ class Transformation : public SingleOperation {
     PROJ_DLL TransformationNNPtr substitutePROJAlternativeGridNames(
         io::DatabaseContextNNPtr databaseContext) const;
 
-    //! @cond Doxygen_Suppress
-    std::string getNTv2Filename() const;
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        std::string
+        getNTv2Filename() const;
     std::string getHeightToGeographic3DFilename() const;
     bool isLongitudeRotation() const;
     //! @endcond

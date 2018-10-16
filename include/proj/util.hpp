@@ -97,11 +97,15 @@ namespace proj {}
     }
 
 #ifdef DOXYGEN_ENABLED
-#define FRIEND(mytype)
-#define FRIEND_OPTIONAL(mytype)
+#define PROJ_FRIEND(mytype)
+#define PROJ_FRIEND_OPTIONAL(mytype)
 #else
-#define FRIEND(mytype) friend class mytype
-#define FRIEND_OPTIONAL(mytype) friend class util::optional<mytype>
+#define PROJ_FRIEND(mytype) friend class mytype
+#define PROJ_FRIEND_OPTIONAL(mytype) friend class util::optional<mytype>
+#endif
+
+#ifndef PROJ_PRIVATE
+#define PROJ_PRIVATE public
 #endif
 
 //! @endcond
@@ -275,8 +279,10 @@ class BoxedValue : public BaseObject {
     // cppcheck-suppress noExplicitConstructor
     PROJ_DLL BoxedValue(bool booleanValueIn);
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL BoxedValue(const BoxedValue &other);
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_DLL
+        BoxedValue(const BoxedValue &other);
     PROJ_DLL BoxedValue &operator=(const BoxedValue &other);
     PROJ_DLL ~BoxedValue() override;
 
@@ -316,13 +322,15 @@ class ArrayOfBaseObject : public BaseObject {
 
     PROJ_DLL void add(BaseObjectNNPtr obj);
 
-    //! @cond Doxygen_Suppress
-    std::vector<BaseObjectNNPtr>::const_iterator begin() const;
+    PROJ_DLL static ArrayOfBaseObjectNNPtr create();
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        std::vector<BaseObjectNNPtr>::const_iterator
+        begin() const;
     std::vector<BaseObjectNNPtr>::const_iterator end() const;
     bool empty() const;
     //! @endcond
-
-    PROJ_DLL static ArrayOfBaseObjectNNPtr create();
 
   protected:
     ArrayOfBaseObject();
@@ -353,13 +361,12 @@ class PropertyMap {
     PROJ_DLL PropertyMap &set(const std::string &key,
                               const std::vector<std::string> &array);
 
-    //! @cond Doxygen_Suppress
-    std::map<std::string, BaseObjectNNPtr>::iterator
-    find(const std::string &key) const;
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        std::map<std::string, BaseObjectNNPtr>::iterator
+        find(const std::string &key) const;
     std::map<std::string, BaseObjectNNPtr>::iterator end() const;
-    //! @endcond
 
-    //! @cond Doxygen_Suppress
     // throw(InvalidValueTypeException)
     bool getStringValue(const std::string &key, std::string &outVal) const;
     //! @endcond
@@ -443,8 +450,8 @@ class NameSpace {
     PROJ_DLL const GenericNamePtr &name() const;
 
   protected:
-    FRIEND(NameFactory);
-    FRIEND(LocalName);
+    PROJ_FRIEND(NameFactory);
+    PROJ_FRIEND(LocalName);
     explicit NameSpace(const GenericNamePtr &name);
     NameSpace(const NameSpace &other);
     NameSpaceNNPtr getGlobalFromThis() const;
@@ -481,8 +488,8 @@ class LocalName : public GenericName {
     PROJ_DLL GenericNameNNPtr toFullyQualifiedName() const override;
 
   protected:
-    FRIEND(NameFactory);
-    FRIEND(NameSpace);
+    PROJ_FRIEND(NameFactory);
+    PROJ_FRIEND(NameSpace);
     explicit LocalName(const std::string &nameIn);
     LocalName(const LocalName &other);
     LocalName(const NameSpacePtr &ns, const std::string &name);

@@ -176,7 +176,7 @@ class Scale : public Measure {
     //! @endcond
 
   protected:
-    FRIEND_OPTIONAL(Scale);
+    PROJ_FRIEND_OPTIONAL(Scale);
     Scale &operator=(const Scale &);
 };
 
@@ -196,7 +196,7 @@ class Angle : public Measure {
     PROJ_DLL Angle convertToUnit(const UnitOfMeasure &otherUnit) const;
 
   protected:
-    FRIEND_OPTIONAL(Angle);
+    PROJ_FRIEND_OPTIONAL(Angle);
     Angle &operator=(const Angle &);
 };
 
@@ -216,7 +216,7 @@ class Length : public Measure {
     PROJ_DLL Length convertToUnit(const UnitOfMeasure &otherUnit) const;
 
   protected:
-    FRIEND_OPTIONAL(Length);
+    PROJ_FRIEND_OPTIONAL(Length);
     Length &operator=(const Length &);
 };
 
@@ -239,7 +239,7 @@ class DateTime {
 
   protected:
     DateTime();
-    FRIEND_OPTIONAL(DateTime);
+    PROJ_FRIEND_OPTIONAL(DateTime);
 
   private:
     explicit DateTime(const std::string &str);
@@ -300,8 +300,10 @@ class IdentifiedObject : public util::BaseObject {
     PROJ_DLL int getEPSGCode() const;
     PROJ_DLL bool isEPSG(int code) const;
 
-    //! @cond Doxygen_Suppress
-    void formatID(io::WKTFormatterNNPtr formatter) const;
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        void
+        formatID(io::WKTFormatterNNPtr formatter) const;
     void formatRemarks(io::WKTFormatterNNPtr formatter) const;
 
     bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
@@ -310,7 +312,7 @@ class IdentifiedObject : public util::BaseObject {
     //! @endcond
 
   protected:
-    FRIEND_OPTIONAL(IdentifiedObject);
+    PROJ_FRIEND_OPTIONAL(IdentifiedObject);
     INLINED_MAKE_SHARED
     IdentifiedObject();
     IdentifiedObject(const IdentifiedObject &other);
@@ -351,15 +353,17 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
     create(const util::optional<std::string> &scopeIn,
            const metadata::ExtentPtr &extent);
 
-    //! @cond Doxygen_Suppress
-    std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const; // throw(io::FormattingException)
-               //! @endcond
-
     PROJ_DLL bool
     isEquivalentTo(const util::BaseObjectNNPtr &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        std::string
+        exportToWKT(io::WKTFormatterNNPtr formatter)
+            const; // throw(io::FormattingException)
+                   //! @endcond
 
   protected:
     ObjectDomain();

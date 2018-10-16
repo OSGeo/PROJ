@@ -186,10 +186,6 @@ class PrimeMeridian : public common::IdentifiedObject,
     PROJ_DLL static const PrimeMeridianNNPtr GREENWICH;
     PROJ_DLL static const PrimeMeridianNNPtr PARIS;
 
-    //! @cond Doxygen_Suppress
-    static std::string getPROJStringWellKnownName(const common::Angle &angle);
-    //! @endcond
-
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
@@ -201,6 +197,13 @@ class PrimeMeridian : public common::IdentifiedObject,
     isEquivalentTo(const util::BaseObjectNNPtr &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        static std::string
+        getPROJStringWellKnownName(const common::Angle &angle);
+    //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -485,7 +488,7 @@ class RealizationMethod : public util::CodeList {
     PROJ_DLL static const RealizationMethod TIDAL;
 
   private:
-    FRIEND_OPTIONAL(RealizationMethod);
+    PROJ_FRIEND_OPTIONAL(RealizationMethod);
     PROJ_DLL explicit RealizationMethod(
         const std::string &nameIn = std::string());
     PROJ_DLL RealizationMethod(const RealizationMethod &other);

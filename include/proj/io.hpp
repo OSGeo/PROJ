@@ -206,8 +206,10 @@ class WKTFormatter {
 
     PROJ_DLL const std::string &toString() const;
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL WKTFormatter &setOutputId(bool outputIdIn);
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_DLL WKTFormatter &
+        setOutputId(bool outputIdIn);
 
     void enter();
     void leave();
@@ -319,9 +321,10 @@ class PROJStringFormatter {
 
     PROJ_DLL const std::string &toString() const;
 
-    //! @cond Doxygen_Suppress
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
 
-    class Scope {
+        class Scope {
       public:
         explicit Scope(const PROJStringFormatterNNPtr &formatter);
         ~Scope();
@@ -611,8 +614,10 @@ class DatabaseContext {
 
     PROJ_DLL std::vector<std::string> getDatabaseStructure() const;
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL void *getSqliteHandle() const;
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_DLL void *
+        getSqliteHandle() const;
 
     PROJ_DLL static DatabaseContextNNPtr create(void *sqlite_handle);
 
@@ -632,7 +637,7 @@ class DatabaseContext {
   protected:
     DatabaseContext();
     INLINED_MAKE_SHARED
-    FRIEND(AuthorityFactory);
+    PROJ_FRIEND(AuthorityFactory);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
