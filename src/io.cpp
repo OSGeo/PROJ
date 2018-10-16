@@ -113,9 +113,9 @@ struct WKTFormatter::Private {
     std::vector<bool> outputUnitStack_{true};
     std::vector<bool> outputIdStack_{true};
     std::vector<UnitOfMeasureNNPtr> axisLinearUnitStack_{
-        util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::NONE)};
+        util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::METRE)};
     std::vector<UnitOfMeasureNNPtr> axisAngularUnitStack_{
-        util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::NONE)};
+        util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::DEGREE)};
     bool abridgedTransformation_ = false;
     bool useDerivingConversion_ = false;
     std::vector<double> toWGS84Parameters_{};

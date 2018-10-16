@@ -520,7 +520,7 @@ TEST(crs, EPSG_4269) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string) {
+TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string_and_WKT1) {
     auto obj = WKTParser().createFromWKT(
         "PROJCRS[\"NTF (Paris) / Lambert Nord France\",\n"
         "  BASEGEODCRS[\"NTF (Paris)\",\n"
@@ -561,6 +561,29 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string) {
     EXPECT_TRUE(nn_crs->isEquivalentTo(nn_crs));
     EXPECT_FALSE(nn_crs->isEquivalentTo(createUnrelatedObject()));
     EXPECT_FALSE(nn_crs->DerivedCRS::isEquivalentTo(createUnrelatedObject()));
+
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+    EXPECT_EQ(
+        wkt1,
+        "PROJCS[\"NTF (Paris) / Lambert Nord France\",\n"
+        "    GEOGCS[\"NTF (Paris)\",\n"
+        "        DATUM[\"Nouvelle_Triangulation_Francaise_(Paris)\",\n"
+        "            SPHEROID[\"Clarke 1880 (IGN)\",6378249.2,293.4660213]],\n"
+        "        PRIMEM[\"Paris\",2.33722917000759],\n"
+        "        UNIT[\"grad\",0.015707963268],\n"
+        "        AXIS[\"Latitude\",NORTH],\n"
+        "        AXIS[\"Longitude\",EAST]],\n"
+        "    PROJECTION[\"Lambert_Conformal_Conic_1SP\"],\n"
+        "    PARAMETER[\"latitude_of_origin\",55],\n"
+        "    PARAMETER[\"central_meridian\",0],\n"
+        "    PARAMETER[\"scale_factor\",0.999877341],\n"
+        "    PARAMETER[\"false_easting\",600000],\n"
+        "    PARAMETER[\"false_northing\",200000],\n"
+        "    UNIT[\"metre\",1],\n"
+        "    AXIS[\"Easting\",EAST],\n"
+        "    AXIS[\"Northing\",NORTH],\n"
+        "    AUTHORITY[\"EPSG\",\"27561\"]]");
 }
 
 // ---------------------------------------------------------------------------
@@ -597,7 +620,7 @@ TEST(crs, EPSG_3040_projected_northing_easting_as_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_2222_projected_unit_foot_as_PROJ_string) {
+TEST(crs, EPSG_2222_projected_unit_foot_as_PROJ_string_and_WKT1) {
     auto obj = WKTParser().createFromWKT(
         "PROJCRS[\"NAD83 / Arizona East (ft)\",\n"
         "  BASEGEODCRS[\"NAD83\",\n"
@@ -631,6 +654,77 @@ TEST(crs, EPSG_2222_projected_unit_foot_as_PROJ_string) {
                   PROJStringFormatter::Convention::PROJ_4)),
               "+proj=tmerc +lat_0=31 +lon_0=-110.166666667025 +k_0=0.9999 "
               "+x_0=213360 +y_0=0 +datum=NAD83 +units=ft");
+
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+    EXPECT_EQ(wkt1,
+              "PROJCS[\"NAD83 / Arizona East (ft)\",\n"
+              "    GEOGCS[\"NAD83\",\n"
+              "        DATUM[\"North_American_Datum_1983\",\n"
+              "            SPHEROID[\"GRS 1980\",6378137,298.257222101]],\n"
+              "        PRIMEM[\"Greenwich\",0,\n"
+              "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+              "        UNIT[\"degree\",0.0174532925199433,\n"
+              "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+              "        AXIS[\"Latitude\",NORTH],\n"
+              "        AXIS[\"Longitude\",EAST]],\n"
+              "    PROJECTION[\"Transverse_Mercator\"],\n"
+              "    PARAMETER[\"latitude_of_origin\",31.0000000001007],\n"
+              "    PARAMETER[\"central_meridian\",-110.166666667025],\n"
+              "    PARAMETER[\"scale_factor\",0.9999],\n"
+              "    PARAMETER[\"false_easting\",700000],\n"
+              "    PARAMETER[\"false_northing\",0],\n"
+              "    UNIT[\"foot\",0.3048],\n"
+              "    AXIS[\"Easting\",EAST],\n"
+              "    AXIS[\"Northing\",NORTH],\n"
+              "    AUTHORITY[\"EPSG\",\"2222\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projected_with_parameter_unit_different_than_cs_unit_as_WKT1) {
+    auto obj = WKTParser().createFromWKT(
+        "PROJCRS[\"unknown\","
+        "    BASEGEODCRS[\"unknown\","
+        "        DATUM[\"Unknown based on GRS80 ellipsoid\","
+        "            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,"
+        "                LENGTHUNIT[\"metre\",1]]],"
+        "        PRIMEM[\"Greenwich\",0]],"
+        "    CONVERSION[\"UTM zone 32N\","
+        "        METHOD[\"Transverse Mercator\"],"
+        "        PARAMETER[\"Latitude of natural origin\",0],"
+        "        PARAMETER[\"Longitude of natural origin\",9],"
+        "        PARAMETER[\"Scale factor at natural origin\",0.9996],"
+        "        PARAMETER[\"False easting\",500000,LENGTHUNIT[\"metre\",1]],"
+        "        PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1]]],"
+        "    CS[Cartesian,2],"
+        "        AXIS[\"(E)\",east],"
+        "        AXIS[\"(N)\",north],"
+        "    LENGTHUNIT[\"US survey foot\",0.304800609601219]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+    EXPECT_EQ(wkt1,
+              "PROJCS[\"unknown\",\n"
+              "    GEOGCS[\"unknown\",\n"
+              "        DATUM[\"Unknown_based_on_GRS80_ellipsoid\",\n"
+              "            SPHEROID[\"GRS 1980\",6378137,298.257222101]],\n"
+              "        PRIMEM[\"Greenwich\",0],\n"
+              "        UNIT[\"degree\",0.0174532925199433,\n"
+              "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+              "        AXIS[\"Latitude\",NORTH],\n"
+              "        AXIS[\"Longitude\",EAST]],\n"
+              "    PROJECTION[\"Transverse_Mercator\"],\n"
+              "    PARAMETER[\"latitude_of_origin\",0],\n"
+              "    PARAMETER[\"central_meridian\",9],\n"
+              "    PARAMETER[\"scale_factor\",0.9996],\n"
+              "    PARAMETER[\"false_easting\",1640416.66666667],\n"
+              "    PARAMETER[\"false_northing\",0],\n"
+              "    UNIT[\"US survey foot\",0.304800609601219],\n"
+              "    AXIS[\"Easting\",EAST],\n"
+              "    AXIS[\"Northing\",NORTH]]");
 }
 
 // ---------------------------------------------------------------------------

@@ -1349,21 +1349,39 @@ std::string ParameterValue::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
     if (formatter->abridgedTransformation() && type() == Type::MEASURE) {
-        if (value().unit().type() == common::UnitOfMeasure::Type::LINEAR) {
+        const auto &unit = value().unit();
+        if (unit.type() == common::UnitOfMeasure::Type::LINEAR) {
             formatter->add(value().getSIValue());
-        } else if (value().unit().type() ==
-                   common::UnitOfMeasure::Type::ANGULAR) {
+        } else if (unit.type() == common::UnitOfMeasure::Type::ANGULAR) {
             formatter->add(value()
                                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
                                .value());
-        } else if (value().unit() == common::UnitOfMeasure::PARTS_PER_MILLION) {
+        } else if (unit == common::UnitOfMeasure::PARTS_PER_MILLION) {
             formatter->add(1.0 + value().value() * 1e-6);
         } else {
             formatter->add(value().value());
         }
     } else if (type() == Type::MEASURE) {
-        formatter->add(value().value());
         const auto &unit = value().unit();
+        if (isWKT2) {
+            formatter->add(value().value());
+        } else {
+            // In WKT1, as we don't output the natural unit, output to the
+            // registered linear / angular unit.
+            if (unit.type() == common::UnitOfMeasure::Type::LINEAR) {
+                formatter->add(
+                    value()
+                        .convertToUnit(*(formatter->axisLinearUnit()))
+                        .value());
+            } else if (unit.type() == common::UnitOfMeasure::Type::ANGULAR) {
+                formatter->add(
+                    value()
+                        .convertToUnit(*(formatter->axisAngularUnit()))
+                        .value());
+            } else {
+                formatter->add(value().getSIValue());
+            }
+        }
         if (isWKT2 && unit != common::UnitOfMeasure::NONE) {
             if (!formatter->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
                 (unit != common::UnitOfMeasure::SCALE_UNITY &&
