@@ -529,7 +529,7 @@ void CoordinateOperation::setAccuracies(
  * available.
  */
 bool CoordinateOperation::isPROJInstanciable(
-    const io::DatabaseContextNNPtr &databaseContext) const {
+    const io::DatabaseContextPtr &databaseContext) const {
     try {
         exportToPROJString(io::PROJStringFormatter::create());
     } catch (const std::exception &) {
@@ -1157,7 +1157,7 @@ bool SingleOperation::isEquivalentTo(
 // ---------------------------------------------------------------------------
 
 std::set<CoordinateOperation::GridDescription>
-SingleOperation::gridsNeeded(io::DatabaseContextNNPtr databaseContext) const {
+SingleOperation::gridsNeeded(io::DatabaseContextPtr databaseContext) const {
     std::set<CoordinateOperation::GridDescription> res;
     for (const auto &genOpParamvalue : parameterValues()) {
         const auto &opParamvalue =
@@ -1168,9 +1168,12 @@ SingleOperation::gridsNeeded(io::DatabaseContextNNPtr databaseContext) const {
             if (value->type() == ParameterValue::Type::FILENAME) {
                 CoordinateOperation::GridDescription desc;
                 desc.shortName = value->valueFile();
-                databaseContext->lookForGridInfo(
-                    desc.shortName, desc.fullName, desc.packageName, desc.url,
-                    desc.directDownload, desc.openLicense, desc.available);
+                if (databaseContext) {
+                    databaseContext->lookForGridInfo(
+                        desc.shortName, desc.fullName, desc.packageName,
+                        desc.url, desc.directDownload, desc.openLicense,
+                        desc.available);
+                }
                 res.insert(desc);
             }
         }
@@ -8134,7 +8137,7 @@ bool ConcatenatedOperation::isEquivalentTo(
 
 std::set<CoordinateOperation::GridDescription>
 ConcatenatedOperation::gridsNeeded(
-    io::DatabaseContextNNPtr databaseContext) const {
+    io::DatabaseContextPtr databaseContext) const {
     std::set<CoordinateOperation::GridDescription> res;
     for (const auto &operation : operations()) {
         for (const auto &gridDesc : operation->gridsNeeded(databaseContext)) {
@@ -10181,8 +10184,8 @@ std::string PROJBasedOperation::exportToPROJString(
 
 // ---------------------------------------------------------------------------
 
-std::set<CoordinateOperation::GridDescription> PROJBasedOperation::gridsNeeded(
-    io::DatabaseContextNNPtr databaseContext) const {
+std::set<CoordinateOperation::GridDescription>
+PROJBasedOperation::gridsNeeded(io::DatabaseContextPtr databaseContext) const {
     std::set<CoordinateOperation::GridDescription> res;
 
     try {
@@ -10192,9 +10195,11 @@ std::set<CoordinateOperation::GridDescription> PROJBasedOperation::gridsNeeded(
         for (const auto &shortName : formatter->getUsedGridNames()) {
             CoordinateOperation::GridDescription desc;
             desc.shortName = shortName;
-            databaseContext->lookForGridInfo(
-                desc.shortName, desc.fullName, desc.packageName, desc.url,
-                desc.directDownload, desc.openLicense, desc.available);
+            if (databaseContext) {
+                databaseContext->lookForGridInfo(
+                    desc.shortName, desc.fullName, desc.packageName, desc.url,
+                    desc.directDownload, desc.openLicense, desc.available);
+            }
             res.insert(desc);
         }
     } catch (const io::ParsingException &) {

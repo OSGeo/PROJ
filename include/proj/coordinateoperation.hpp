@@ -139,10 +139,10 @@ class CoordinateOperation : public common::ObjectUsage,
 
     /** \brief Return grids needed by an operation. */
     PROJ_DLL virtual std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const = 0;
+    gridsNeeded(io::DatabaseContextPtr databaseContext) const = 0;
 
     PROJ_DLL bool
-    isPROJInstanciable(const io::DatabaseContextNNPtr &databaseContext) const;
+    isPROJInstanciable(const io::DatabaseContextPtr &databaseContext) const;
 
   protected:
     CoordinateOperation();
@@ -527,7 +527,7 @@ class SingleOperation : virtual public CoordinateOperation {
                        util::IComparable::Criterion::STRICT) const override;
 
     PROJ_DLL std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const override;
+    gridsNeeded(io::DatabaseContextPtr databaseContext) const override;
 
   protected:
     explicit SingleOperation(const OperationMethodNNPtr &methodIn);
@@ -1509,7 +1509,7 @@ class ConcatenatedOperation : public CoordinateOperation {
         bool checkExtent); // throw InvalidOperation
 
     PROJ_DLL std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextNNPtr databaseContext) const override;
+    gridsNeeded(io::DatabaseContextPtr databaseContext) const override;
 
   protected:
     explicit ConcatenatedOperation(

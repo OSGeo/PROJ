@@ -75,6 +75,16 @@ static void proj_log_error(PJ_CONTEXT *ctx, const char *function,
 
 // ---------------------------------------------------------------------------
 
+static void proj_log_debug(PJ_CONTEXT *ctx, const char *function,
+                           const char *text) {
+    std::string msg(function);
+    msg += ": ";
+    msg += text;
+    ctx->logger(ctx->app_data, PJ_LOG_DEBUG, msg.c_str());
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Opaque object representing a Ellipsoid, Datum, CRS or Coordinate
  * Operation. Should be used by at most one thread at a time. */
 struct PJ_OBJ {
@@ -148,6 +158,18 @@ static DatabaseContextNNPtr getDBcontext(PJ_CONTEXT *ctx) {
     return ctx->cpp_context->databaseContext;
 }
 
+// ---------------------------------------------------------------------------
+
+static DatabaseContextPtr getDBcontextNoException(PJ_CONTEXT *ctx,
+                                                  const char *function) {
+    try {
+        return getDBcontext(ctx).as_nullable();
+    } catch (const std::exception &e) {
+        proj_log_debug(ctx, function, e.what());
+        return nullptr;
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -215,8 +237,9 @@ const char *proj_context_get_database_path(PJ_CONTEXT *ctx) {
 PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text) {
     SANITIZE_CTX(ctx);
     assert(text);
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        return new PJ_OBJ(ctx, createFromUserInput(text, getDBcontext(ctx)));
+        return new PJ_OBJ(ctx, createFromUserInput(text, dbContext));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -594,9 +617,9 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
         convention = PROJStringFormatter::Convention::PROJ_4;
         break;
     }
+    auto dbContext = getDBcontextNoException(obj->ctx, __FUNCTION__);
     try {
-        auto formatter =
-            PROJStringFormatter::create(convention, getDBcontext(obj->ctx));
+        auto formatter = PROJStringFormatter::create(convention, dbContext);
         if (options != nullptr && options[0] != nullptr) {
             if (ci_equal(options[0], "USE_ETMERC=YES")) {
                 formatter->setUseETMercForTMerc(true);
@@ -1169,9 +1192,10 @@ int proj_coordoperation_is_instanciable(PJ_OBJ *coordoperation) {
                        "Object is not a CoordinateOperation");
         return 0;
     }
+    auto dbContext =
+        getDBcontextNoException(coordoperation->ctx, __FUNCTION__);
     try {
-        return op->isPROJInstanciable(getDBcontext(coordoperation->ctx)) ? 1
-                                                                         : 0;
+        return op->isPROJInstanciable(dbContext) ? 1 : 0;
     } catch (const std::exception &) {
         return 0;
     }
@@ -1353,15 +1377,21 @@ int proj_coordoperation_get_grid_used_count(PJ_OBJ *coordoperation) {
                        "Object is not a CoordinateOperation");
         return 0;
     }
-    if (!coordoperation->gridsNeededAsked) {
-        coordoperation->gridsNeededAsked = true;
-        const auto gridsNeeded =
-            co->gridsNeeded(getDBcontext(coordoperation->ctx));
-        for (const auto &gridDesc : gridsNeeded) {
-            coordoperation->gridsNeeded.emplace_back(gridDesc);
+    auto dbContext =
+        getDBcontextNoException(coordoperation->ctx, __FUNCTION__);
+    try {
+        if (!coordoperation->gridsNeededAsked) {
+            coordoperation->gridsNeededAsked = true;
+            const auto gridsNeeded = co->gridsNeeded(dbContext);
+            for (const auto &gridDesc : gridsNeeded) {
+                coordoperation->gridsNeeded.emplace_back(gridDesc);
+            }
         }
+        return static_cast<int>(coordoperation->gridsNeeded.size());
+    } catch (const std::exception &e) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__, e.what());
+        return 0;
     }
-    return static_cast<int>(coordoperation->gridsNeeded.size());
 }
 
 // ---------------------------------------------------------------------------
