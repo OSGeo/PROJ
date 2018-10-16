@@ -1494,13 +1494,20 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
 PJ_OPERATION_FACTORY_CONTEXT *
 proj_create_operation_factory_context(PJ_CONTEXT *ctx) {
     SANITIZE_CTX(ctx);
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        auto factory = CoordinateOperationFactory::create();
-        auto authFactory =
-            AuthorityFactory::create(getDBcontext(ctx), std::string());
-        auto operationContext =
-            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
-        return new PJ_OPERATION_FACTORY_CONTEXT(ctx, operationContext);
+        if (dbContext) {
+            auto factory = CoordinateOperationFactory::create();
+            auto authFactory = AuthorityFactory::create(
+                NN_CHECK_ASSERT(dbContext), std::string());
+            auto operationContext =
+                CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+            return new PJ_OPERATION_FACTORY_CONTEXT(ctx, operationContext);
+        } else {
+            auto operationContext =
+                CoordinateOperationContext::create(nullptr, nullptr, 0.0);
+            return new PJ_OPERATION_FACTORY_CONTEXT(ctx, operationContext);
+        }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
