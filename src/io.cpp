@@ -1275,9 +1275,22 @@ UnitOfMeasure WKTParser::Private::buildUnit(WKTNodeNNPtr node,
                 type = UnitOfMeasure::Type::ANGULAR;
             }
         }
+
+        double convFactor =
+            children.size() >= 2 ? asDouble(children[1]->value()) : 0.0;
+        constexpr double US_FOOT_CONV_FACTOR = 12.0 / 39.37;
+        constexpr double REL_ERROR = 1e-10;
+        // Fix common rounding errors
+        if (std::fabs(convFactor - UnitOfMeasure::DEGREE.conversionToSI()) <
+            REL_ERROR * convFactor) {
+            convFactor = UnitOfMeasure::DEGREE.conversionToSI();
+        } else if (std::fabs(convFactor - US_FOOT_CONV_FACTOR) <
+                   REL_ERROR * convFactor) {
+            convFactor = US_FOOT_CONV_FACTOR;
+        }
+
         return UnitOfMeasure(
-            stripQuotes(children[0]->value()),
-            children.size() >= 2 ? asDouble(children[1]->value()) : 0.0, type,
+            stripQuotes(children[0]->value()), convFactor, type,
             hasValidNode ? stripQuotes(idNode->children()[0]->value())
                          : std::string(),
             hasValidNode ? stripQuotes(idNode->children()[1]->value())
