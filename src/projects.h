@@ -475,30 +475,11 @@ struct ARG_list {
 typedef union { double  f; int  i; char *s; } PROJVALUE;
 
 
-struct PJ_ELLPS {
-    char    *id;           /* ellipse keyword name */
-    char    *major;        /* a= value */
-    char    *ell;          /* elliptical parameter */
-    char    *name;         /* comments */
-};
-
-struct PJ_UNITS {
-    char    *id;           /* units keyword */
-    char    *to_meter;     /* multiply by value to get meters */
-    char    *name;         /* comments */
-    double   factor;       /* to_meter factor in actual numbers */
-};
-
 struct PJ_DATUMS {
     char    *id;           /* datum keyword */
     char    *defn;         /* ie. "to_wgs84=..." */
     char    *ellipse_id;   /* ie from ellipse table */
     char    *comments;     /* EPSG code, etc */
-};
-
-struct PJ_PRIME_MERIDIANS {
-    char    *id;           /* prime meridian keyword */
-    char    *defn;         /* offset from greenwich in DMS format. */
 };
 
 
@@ -612,29 +593,8 @@ struct projCtx_t {
 
 
 /* Generate pj_list external or make list from include file */
-
-struct PJ_LIST {
-    char    *id;                 /* projection keyword */
-    PJ *(*proj)(PJ *);           /* projection entry point */
-    char    * const *descr;      /* description text */
-};
-
-
-#ifndef USE_PJ_LIST_H
-extern struct PJ_LIST pj_list[];
-#endif
-
-#ifndef PJ_ELLPS__
-extern struct PJ_ELLPS pj_ellps[];
-#endif
-
-#ifndef PJ_UNITS__
-extern struct PJ_UNITS pj_units[];
-#endif
-
 #ifndef PJ_DATUMS__
 extern struct PJ_DATUMS pj_datums[];
-extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #endif
 
 
@@ -736,13 +696,12 @@ double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(doubl
 
 PROJVALUE pj_param(projCtx ctx, paralist *, const char *);
 paralist *pj_param_exists (paralist *list, const char *parameter);
-paralist *pj_mkparam(char *);
-paralist *pj_mkparam_ws (char *str);
+paralist *pj_mkparam(const char *);
+paralist *pj_mkparam_ws (const char *str);
 
 
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);
 int pj_datum_set(projCtx,paralist *, PJ *);
-int pj_prime_meridian_set(paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
 
 paralist *pj_clone_paralist( const paralist* );
@@ -854,11 +813,7 @@ LP     pj_inv_gauss(projCtx, LP, const void *);
 
 extern char const pj_release[];
 
-struct PJ_ELLPS            *pj_get_ellps_ref( void );
 struct PJ_DATUMS           *pj_get_datums_ref( void );
-struct PJ_UNITS            *pj_get_units_ref( void );
-struct PJ_LIST             *pj_get_list_ref( void );
-struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
 
 void *pj_default_destructor (PJ *P, int errlev);
 

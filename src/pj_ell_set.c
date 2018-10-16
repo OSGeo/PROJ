@@ -424,15 +424,19 @@ static char *pj_param_value (paralist *list) {
 
 static const PJ_ELLPS *pj_find_ellps (char *name) {
     int i;
-    char *s;
+    const char *s;
+    const PJ_ELLPS *ellps;
+
     if (0==name)
         return 0;
 
+    ellps = proj_list_ellps();
+
     /* Search through internal ellipsoid list for name */
-    for (i = 0; (s = pj_ellps[i].id) && strcmp(name, s) ; ++i);
+    for (i = 0; (s = ellps[i].id) && strcmp(name, s) ; ++i);
     if (0==s)
         return 0;
-    return pj_ellps + i;
+    return ellps + i;
 }
 
 

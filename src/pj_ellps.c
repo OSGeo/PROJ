@@ -3,8 +3,6 @@
 #include <stddef.h>
 
 #include "proj.h"
-
-#define PJ_ELLPS__
 #include "projects.h"
 
 C_NAMESPACE_VAR const struct PJ_ELLPS
@@ -57,11 +55,6 @@ pj_ellps[] = {
 {"sphere",	"a=6370997.0",		"b=6370997.0",		"Normal Sphere (r=6370997)"},
 {NULL,		NULL,			NULL,			NULL}
 };
-
-struct PJ_ELLPS *pj_get_ellps_ref()
-{
-    return (struct PJ_ELLPS *)pj_ellps;
-}
 
 const PJ_ELLPS *proj_list_ellps(void)
 {

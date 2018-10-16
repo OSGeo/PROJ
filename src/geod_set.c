@@ -32,7 +32,7 @@ geod_set(int argc, char **argv) {
 	if (pj_ell_set(pj_get_default_ctx(),start, &geod_a, &es)) emess(1,"ellipse setup failure");
 	/* set units */
 	if ((name = pj_param(NULL,start, "sunits").s) != NULL) {
-		char *s;
+		const char *s;
                 const struct PJ_UNITS *unit_list = proj_list_units();
 		for (i = 0; (s = unit_list[i].id) && strcmp(name, s) ; ++i) ;
 		if (!s)

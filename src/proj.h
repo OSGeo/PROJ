@@ -180,16 +180,34 @@ struct PJ_INIT_INFO;
 typedef struct PJ_INIT_INFO PJ_INIT_INFO;
 
 /* Data types for list of operations, ellipsoids, datums and units used in PROJ.4 */
-struct PJ_LIST;
+struct PJ_LIST {
+    const char  *id;                /* projection keyword */
+    PJ          *(*proj)(PJ *);     /* projection entry point */
+    const char  * const *descr;     /* description text */
+};
+
 typedef struct PJ_LIST PJ_OPERATIONS;
 
-struct PJ_ELLPS;
+struct PJ_ELLPS {
+    const char  *id;    /* ellipse keyword name */
+    const char  *major; /* a= value */
+    const char  *ell;   /* elliptical parameter */
+    const char  *name;  /* comments */
+};
 typedef struct PJ_ELLPS PJ_ELLPS;
 
-struct PJ_UNITS;
+struct PJ_UNITS {
+    const char  *id;        /* units keyword */
+    const char  *to_meter;  /* multiply by value to get meters */
+    const char  *name;      /* comments */
+    double      factor;     /* to_meter factor in actual numbers */
+};
 typedef struct PJ_UNITS PJ_UNITS;
 
-struct PJ_PRIME_MERIDIANS;
+struct PJ_PRIME_MERIDIANS {
+    const char  *id;        /* prime meridian keyword */
+    const char  *defn;      /* offset from greenwich in DMS format. */
+};
 typedef struct PJ_PRIME_MERIDIANS PJ_PRIME_MERIDIANS;
 
 

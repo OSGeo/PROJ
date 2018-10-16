@@ -9,7 +9,7 @@
 #include "projects.h"
 
 /* create parameter list entry */
-paralist *pj_mkparam(char *str) {
+paralist *pj_mkparam(const char *str) {
     paralist *newitem;
 
     if((newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) != NULL) {
@@ -24,7 +24,7 @@ paralist *pj_mkparam(char *str) {
 
 
 /* As pj_mkparam, but payload ends at first whitespace, rather than at end of <str> */
-paralist *pj_mkparam_ws (char *str) {
+paralist *pj_mkparam_ws (const char *str) {
     paralist *newitem;
     size_t len = 0;
 

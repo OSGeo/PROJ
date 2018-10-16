@@ -36,11 +36,6 @@ pj_units[] = {
     {NULL,      NULL,                   NULL,                           0.0}
 };
 
-struct PJ_UNITS *pj_get_units_ref()
-{
-    return (struct PJ_UNITS *)pj_units;
-}
-
 const PJ_UNITS *proj_list_units()
 {
     return pj_units;
