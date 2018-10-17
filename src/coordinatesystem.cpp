@@ -695,6 +695,31 @@ EllipsoidalCS::createLongitudeLatitude(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the axis order in an enumerated way. */
+EllipsoidalCS::AxisOrder EllipsoidalCS::axisOrder() const {
+    auto l_axisList = axisList();
+    if (l_axisList.size() >= 2) {
+        if (l_axisList[0]->direction() == AxisDirection::NORTH &&
+            l_axisList[1]->direction() == AxisDirection::EAST) {
+            if (l_axisList.size() == 2) {
+                return AxisOrder::LAT_NORTH_LONG_EAST;
+            } else if (l_axisList[2]->direction() == AxisDirection::UP) {
+                return AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP;
+            }
+        } else if (l_axisList[0]->direction() == AxisDirection::EAST &&
+                   l_axisList[1]->direction() == AxisDirection::NORTH) {
+            if (l_axisList.size() == 2) {
+                return AxisOrder::LONG_EAST_LAT_NORTH;
+            } else if (l_axisList[2]->direction() == AxisDirection::UP) {
+                return AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP;
+            }
+        }
+    }
+    return AxisOrder::OTHER;
+}
+
+// ---------------------------------------------------------------------------
+
 VerticalCS::VerticalCS() = default;
 
 // ---------------------------------------------------------------------------

@@ -312,8 +312,7 @@ PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
     projCtx ctxt = pj_ctx_alloc();
     auto proj_pm = proj_list_prime_meridians();
     for (int i = 0; proj_pm[i].id != nullptr; ++i) {
-        double valRefRad =
-            dmstor_ctx(ctxt, proj_pm[i].defn, nullptr);
+        double valRefRad = dmstor_ctx(ctxt, proj_pm[i].defn, nullptr);
         if (::fabs(valRad - valRefRad) < 1e-10) {
             projPMName = proj_pm[i].id;
             break;

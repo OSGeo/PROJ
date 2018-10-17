@@ -989,6 +989,19 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4326() {
 
 // ---------------------------------------------------------------------------
 
+GeographicCRSNNPtr GeographicCRS::createOGC_CRS84() {
+    util::PropertyMap propertiesCRS;
+    propertiesCRS
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::OGC)
+        .set(metadata::Identifier::CODE_KEY, "CRS84")
+        .set(common::IdentifiedObject::NAME_KEY, "WGS 84");
+    return create(propertiesCRS, datum::GeodeticReferenceFrame::EPSG_6326,
+                  cs::EllipsoidalCS::createLongitudeLatitude( // Long Lat !
+                      common::UnitOfMeasure::DEGREE));
+}
+
+// ---------------------------------------------------------------------------
+
 GeographicCRSNNPtr GeographicCRS::createEPSG_4979() {
     util::PropertyMap propertiesCRS;
     propertiesCRS

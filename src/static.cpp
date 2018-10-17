@@ -106,6 +106,10 @@ const std::string Identifier::URI_KEY("uri");
  */
 const std::string Identifier::EPSG("EPSG");
 
+/** \brief OGC codespace.
+ */
+const std::string Identifier::OGC("OGC");
+
 // ---------------------------------------------------------------------------
 
 /** \brief Key to set the name of a common::IdentifiedObject
@@ -611,6 +615,10 @@ const GeographicCRSNNPtr
 /** \brief EPSG:4326 / "WGS 84" 2D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4326(GeographicCRS::createEPSG_4326());
+
+/** \brief OGC:CRS84 / "CRS 84" 2D GeographicCRS (long, lat)*/
+const GeographicCRSNNPtr
+    GeographicCRS::OGC_CRS84(GeographicCRS::createOGC_CRS84());
 
 /** \brief EPSG:4807 / "NTF (Paris)" 2D GeographicCRS */
 const GeographicCRSNNPtr

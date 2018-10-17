@@ -4419,7 +4419,8 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
             for (int i = 0; proj_ellps[i].id != nullptr; i++) {
                 if (ellpsStr == proj_ellps[i].id) {
                     assert(strncmp(proj_ellps[i].major, "a=", 2) == 0);
-                    const double a_iter = c_locale_stod(proj_ellps[i].major + 2);
+                    const double a_iter =
+                        c_locale_stod(proj_ellps[i].major + 2);
                     EllipsoidPtr ellipsoid;
                     if (strncmp(proj_ellps[i].ell, "b=", 2) == 0) {
                         const double b_iter =

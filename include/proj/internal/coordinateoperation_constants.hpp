@@ -553,6 +553,16 @@ constexpr int EPSG_CODE_PARAMETER_B2 = 8641;
 
 // ---------------------------------------------------------------------------
 
+constexpr int EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D = 9843;
+static const std::string
+    EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_2D("Axis Order Reversal (2D)");
+
+constexpr int EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_3D = 9844;
+static const std::string EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_3D(
+    "Axis Order Reversal (Geographic3D horizontal)");
+
+// ---------------------------------------------------------------------------
+
 static const ParamMapping paramLatitudeNatOrigin = {
     EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, WKT1_LATITUDE_OF_ORIGIN,

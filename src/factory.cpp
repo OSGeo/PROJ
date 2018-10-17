@@ -39,6 +39,7 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "proj/internal/coordinateoperation_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 #include "proj/internal/lru_cache.hpp"
@@ -2720,6 +2721,15 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             if (!accuracy.empty()) {
                 accuracies.emplace_back(
                     metadata::PositionalAccuracy::create(accuracy));
+            }
+            if (operation::isAxisOrderReversal(
+                    method_name, method_auth_name == metadata::Identifier::EPSG
+                                     ? std::atoi(method_code.c_str())
+                                     : 0)) {
+                auto op = operation::Conversion::create(props, propsMethod,
+                                                        parameters, values);
+                op->setCRSs(sourceCRS, targetCRS, nullptr);
+                return op;
             }
             return operation::Transformation::create(
                 props, sourceCRS, targetCRS, nullptr, propsMethod, parameters,

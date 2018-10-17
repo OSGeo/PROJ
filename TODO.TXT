@@ -26,8 +26,6 @@
         - time-specific Helmert (codes 1065 and 1066)
         - sourceEpochCoordinate and targetEpochCoordinate in CoordinateOperation are unused/unset
 
-    - add the 51 HARN grids in grid_alternatives
-
     - multi intermediate coordinate transforms ?? like
 
 OGRFeature(epsg_coordoperation):10013

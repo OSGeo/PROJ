@@ -1219,6 +1219,8 @@ class Conversion : public SingleOperation {
     createChangeVerticalUnit(const util::PropertyMap &properties,
                              const common::Scale &factor);
 
+    PROJ_DLL static ConversionNNPtr createAxisOrderReversal(bool is3D);
+
   protected:
     Conversion(const OperationMethodNNPtr &methodIn,
                const std::vector<GeneralParameterValueNNPtr> &values);

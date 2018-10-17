@@ -345,6 +345,22 @@ class EllipsoidalCS : public CoordinateSystem {
     PROJ_DLL static EllipsoidalCSNNPtr
     createLongitudeLatitude(const common::UnitOfMeasure &unit);
 
+    /** \brief Typical axis order. */
+    enum class AxisOrder {
+        /** Latitude(North), Longitude(East) */
+        LAT_NORTH_LONG_EAST,
+        /** Latitude(North), Longitude(East), Height(up) */
+        LAT_NORTH_LONG_EAST_HEIGHT_UP,
+        /** Longitude(East), Latitude(North) */
+        LONG_EAST_LAT_NORTH,
+        /** Longitude(East), Latitude(North), Height(up) */
+        LONG_EAST_LAT_NORTH_HEIGHT_UP,
+        /** Other axis order. */
+        OTHER
+    };
+
+    AxisOrder axisOrder() const;
+
   protected:
     EllipsoidalCS();
     explicit EllipsoidalCS(

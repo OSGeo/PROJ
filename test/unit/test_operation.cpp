@@ -4138,13 +4138,54 @@ TEST(operation, geogCRS_to_projCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_longlat_to_geogCS_latlong) {
+
+    auto sourceCRS = GeographicCRS::OGC_CRS84;
+    auto targetCRS = GeographicCRS::EPSG_4326;
+    auto op = CoordinateOperationFactory::create()->createOperation(sourceCRS,
+                                                                    targetCRS);
+    ASSERT_TRUE(op != nullptr);
+    auto conv = std::dynamic_pointer_cast<Conversion>(op);
+    ASSERT_TRUE(conv != nullptr);
+    EXPECT_TRUE(op->sourceCRS() && op->sourceCRS()->isEquivalentTo(sourceCRS));
+    EXPECT_TRUE(op->targetCRS() && op->targetCRS()->isEquivalentTo(targetCRS));
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=axisswap +order=2,1");
+    auto convInverse = nn_dynamic_pointer_cast<Conversion>(conv->inverse());
+    ASSERT_TRUE(convInverse != nullptr);
+    EXPECT_TRUE(convInverse->sourceCRS() &&
+                convInverse->sourceCRS()->isEquivalentTo(targetCRS));
+    EXPECT_TRUE(convInverse->targetCRS() &&
+                convInverse->targetCRS()->isEquivalentTo(sourceCRS));
+    EXPECT_EQ(conv->method()->exportToWKT(WKTFormatter::create()),
+              convInverse->method()->exportToWKT(WKTFormatter::create()));
+    EXPECT_TRUE(conv->method()->isEquivalentTo(convInverse->method()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_longlat_to_geogCS_latlong_database) {
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        AuthorityFactory::create(DatabaseContext::create(), "OGC")
+            ->createCoordinateReferenceSystem("CRS84"),
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            ->createCoordinateReferenceSystem("4326"),
+        ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_longlat_to_projCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
-        GeographicCRS::create(
-            PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
-            EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE)),
-        createUTM31_WGS84());
+        GeographicCRS::OGC_CRS84, createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "

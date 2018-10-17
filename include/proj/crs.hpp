@@ -302,6 +302,7 @@ class GeographicCRS : public GeodeticCRS {
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4267; // NAD27
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4269; // NAD83
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4326; // WGS 84 2D
+    PROJ_DLL static const GeographicCRSNNPtr OGC_CRS84; // CRS84 (Long, Lat)
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4807; // NTF Paris
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4979; // WGS 84 3D
 
@@ -326,6 +327,7 @@ class GeographicCRS : public GeodeticCRS {
     static GeographicCRSNNPtr createEPSG_4267();
     static GeographicCRSNNPtr createEPSG_4269();
     static GeographicCRSNNPtr createEPSG_4326();
+    static GeographicCRSNNPtr createOGC_CRS84();
     static GeographicCRSNNPtr createEPSG_4807();
     static GeographicCRSNNPtr createEPSG_4979();
     GeographicCRS &operator=(const GeographicCRS &other) = delete;

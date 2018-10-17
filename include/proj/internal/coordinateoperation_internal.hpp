@@ -80,6 +80,9 @@ const ParamMapping *getMapping(const MethodMapping *mapping,
                                const OperationParameterValue *param);
 const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
                                        const std::string &wkt1_name);
+// ---------------------------------------------------------------------------
+
+bool isAxisOrderReversal(const std::string &methodName, int methodEPSGCode);
 
 // ---------------------------------------------------------------------------
 

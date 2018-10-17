@@ -712,17 +712,27 @@ TEST_F(CApi, proj_obj_get_source_target_crs_invalid_object) {
 
 // ---------------------------------------------------------------------------
 
+struct ListFreer {
+    PROJ_STRING_LIST list;
+    ListFreer(PROJ_STRING_LIST ptrIn) : list(ptrIn) {}
+    ~ListFreer() { proj_free_string_list(list); }
+};
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_get_authorities_from_database) {
     auto list = proj_get_authorities_from_database(m_ctxt);
+    ListFreer feer(list);
     ASSERT_NE(list, nullptr);
     ASSERT_TRUE(list[0] != nullptr);
     EXPECT_EQ(list[0], std::string("EPSG"));
     ASSERT_TRUE(list[1] != nullptr);
     EXPECT_EQ(list[1], std::string("IGNF"));
     ASSERT_TRUE(list[2] != nullptr);
-    EXPECT_EQ(list[2], std::string("PROJ"));
-    EXPECT_EQ(list[3], nullptr);
-    proj_free_string_list(list);
+    EXPECT_EQ(list[2], std::string("OGC"));
+    ASSERT_TRUE(list[3] != nullptr);
+    EXPECT_EQ(list[3], std::string("PROJ"));
+    EXPECT_EQ(list[4], nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -755,6 +765,7 @@ TEST_F(CApi, proj_get_codes_from_database) {
                                  PJ_OBJ_TYPE_UNKNOWN};
     for (const auto &type : listTypes) {
         auto list = proj_get_codes_from_database(m_ctxt, "EPSG", type, true);
+        ListFreer feer(list);
         if (type == PJ_OBJ_TYPE_TEMPORAL_CRS || type == PJ_OBJ_TYPE_BOUND_CRS ||
             type == PJ_OBJ_TYPE_UNKNOWN) {
             EXPECT_EQ(list, nullptr) << type;
@@ -762,7 +773,6 @@ TEST_F(CApi, proj_get_codes_from_database) {
             ASSERT_NE(list, nullptr) << type;
             ASSERT_NE(list[0], nullptr) << type;
         }
-        proj_free_string_list(list);
     }
 }
 
