@@ -1976,6 +1976,16 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
                         "+rf=300',0);"))
         << last_error();
 
+    ASSERT_TRUE(execute(
+        "INSERT INTO crs VALUES('TEST_NS','TEST_BOUND','geographic 2D');"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES"
+                        "('TEST_NS','TEST_BOUND',"
+                        "'my name TEST','geographic "
+                        "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=longlat +a=2 "
+                        "+rf=300 +towgs84=1,2,3',0);"))
+        << last_error();
+
     ASSERT_TRUE(
         execute("INSERT INTO crs VALUES('TEST_NS','TEST_GC','geocentric');"))
         << last_error();
@@ -2020,6 +2030,16 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
         EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
+        EXPECT_TRUE(crs->canonicalBoundCRS() == nullptr);
+    }
+    {
+        auto crs = factory->createGeodeticCRS("TEST_BOUND");
+        EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
+        EXPECT_EQ(*(crs->name()->description()), "my name TEST");
+        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
+        EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
+        EXPECT_TRUE(crs->canonicalBoundCRS() != nullptr);
     }
     {
         auto crs = factory->createGeodeticCRS("TEST_GC");
@@ -2060,6 +2080,15 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         << last_error();
 
     ASSERT_TRUE(
+        execute("INSERT INTO crs VALUES('TEST_NS','TEST_BOUND','projected');"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO projected_crs "
+                        "VALUES('TEST_NS','TEST_BOUND','my "
+                        "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
+                        "mbt_s +unused_flag +towgs84=1,2,3',0);"))
+        << last_error();
+
+    ASSERT_TRUE(
         execute("INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','projected');"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
@@ -2070,13 +2099,28 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
 
     auto factory =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
-    auto crs = factory->createProjectedCRS("TEST");
-    EXPECT_EQ(*(crs->name()->description()), "my name");
-    EXPECT_EQ(crs->identifiers().size(), 1);
-    EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=mbt_s +unused_flag +ellps=WGS84");
+    {
+        auto crs = factory->createProjectedCRS("TEST");
+        EXPECT_EQ(*(crs->name()->description()), "my name");
+        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
+        EXPECT_EQ(
+            crs->exportToPROJString(PROJStringFormatter::create()),
+            "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=mbt_s +unused_flag +ellps=WGS84");
+        EXPECT_TRUE(crs->canonicalBoundCRS() == nullptr);
+    }
+    {
+        auto crs = factory->createProjectedCRS("TEST_BOUND");
+        EXPECT_EQ(*(crs->name()->description()), "my name");
+        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
+        EXPECT_EQ(
+            crs->exportToPROJString(PROJStringFormatter::create()),
+            "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=mbt_s +unused_flag +ellps=WGS84");
+        EXPECT_TRUE(crs->canonicalBoundCRS() != nullptr);
+    }
 
     EXPECT_THROW(factory->createProjectedCRS("TEST_WRONG"), FactoryException);
 }

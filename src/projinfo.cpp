@@ -121,7 +121,7 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
     if (buildBoundCRSToWGS84) {
         auto crs = std::dynamic_pointer_cast<CRS>(obj);
         if (crs) {
-            obj = crs->createBoundCRSToWGS84IfPossible().as_nullable();
+            obj = crs->createBoundCRSToWGS84IfPossible(dbContext).as_nullable();
         }
     }
 
@@ -167,7 +167,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (crs) {
                     objToExport =
                         nn_dynamic_pointer_cast<IPROJStringExportable>(
-                            crs->createBoundCRSToWGS84IfPossible());
+                            crs->createBoundCRSToWGS84IfPossible(dbContext));
                 }
                 if (!objToExport) {
                     objToExport = projStringExportable;
@@ -237,7 +237,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 std::shared_ptr<IWKTExportable> objToExport;
                 if (crs) {
                     objToExport = nn_dynamic_pointer_cast<IWKTExportable>(
-                        crs->createBoundCRSToWGS84IfPossible());
+                        crs->createBoundCRSToWGS84IfPossible(dbContext));
                 }
                 if (!objToExport) {
                     objToExport = wktExportable;
@@ -285,12 +285,11 @@ static void outputOperations(
 
     std::vector<CoordinateOperationNNPtr> list;
     try {
-        if (!dbContext) {
-            std::cerr << "ERROR: No database context" << std::endl;
-            std::exit(1);
-        }
-        auto authFactory =
-            AuthorityFactory::create(NN_CHECK_ASSERT(dbContext), std::string());
+        auto authFactory = dbContext
+                               ? AuthorityFactory::create(
+                                     NN_CHECK_ASSERT(dbContext), std::string())
+                                     .as_nullable()
+                               : nullptr;
         auto ctxt =
             CoordinateOperationContext::create(authFactory, bboxFilter, 0);
         ctxt->setSpatialCriterion(spatialCriterion);

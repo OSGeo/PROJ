@@ -8412,8 +8412,7 @@ CoordinateOperationContext::getIntermediateCRS() const {
  * not be used simultaneously by more than one thread.
  *
  * @param authorityFactory Authority factory, or null if no database lookup
- * is
- * allowed.
+ * is allowed.
  * Use io::authorityFactory::create(context, std::string()) to allow all
  * authorities to be used.
  * @param extent Area of interest, or null if none is known.
@@ -9658,6 +9657,12 @@ CoordinateOperationFactory::Private::createOperations(
                  util::IComparable::Criterion::EQUIVALENT) ||
              hubSrcGeog->is2DPartOf3D(NN_CHECK_ASSERT(geogDst))) &&
             geogCRSOfBaseOfBoundSrc) {
+            if (boundSrc->baseCRS() == geogCRSOfBaseOfBoundSrc) {
+                // Optimization to avoid creating a useless concatenated
+                // operation
+                res.emplace_back(boundSrc->transformation());
+                return res;
+            }
             auto opsFirst = createOperations(
                 boundSrc->baseCRS(), NN_CHECK_ASSERT(geogCRSOfBaseOfBoundSrc),
                 context);
@@ -9802,6 +9807,10 @@ CoordinateOperationFactory::Private::createOperations(
                 NN_CHECK_ASSERT(hubDstGeog),
                 util::IComparable::Criterion::EQUIVALENT) &&
             geogCRSOfBaseOfBoundSrc && geogCRSOfBaseOfBoundDst) {
+            const bool firstIsNoOp = geogCRSOfBaseOfBoundSrc->isEquivalentTo(
+                boundSrc->baseCRS(), util::IComparable::Criterion::EQUIVALENT);
+            const bool lastIsNoOp = geogCRSOfBaseOfBoundDst->isEquivalentTo(
+                boundDst->baseCRS(), util::IComparable::Criterion::EQUIVALENT);
             auto opsFirst = createOperations(
                 boundSrc->baseCRS(), NN_CHECK_ASSERT(geogCRSOfBaseOfBoundSrc),
                 context);
@@ -9814,12 +9823,18 @@ CoordinateOperationFactory::Private::createOperations(
                 for (const auto &opFirst : opsFirst) {
                     for (const auto &opLast : opsLast) {
                         try {
+                            std::vector<CoordinateOperationNNPtr> ops;
+                            if (!firstIsNoOp) {
+                                ops.push_back(opFirst);
+                            }
+                            ops.push_back(opSecond);
+                            ops.push_back(opThird);
+                            if (!lastIsNoOp) {
+                                ops.push_back(opLast);
+                            }
                             res.emplace_back(
                                 ConcatenatedOperation::createComputeMetadata(
-                                    {
-                                        opFirst, opSecond, opThird, opLast,
-                                    },
-                                    !allowEmptyIntersection));
+                                    ops, !allowEmptyIntersection));
                         } catch (const InvalidOperationEmptyIntersection &) {
                         }
                     }
@@ -9961,8 +9976,17 @@ std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::createOperations(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     CoordinateOperationContextNNPtr context) const {
-    return filterAndSort(d->createOperations(sourceCRS, targetCRS, context),
-                         context, sourceCRS, targetCRS);
+
+    // Look if we are called on CRS that have a link to a 'canonical' BoundCRS
+    // If so, use that one as input
+    auto srcBoundCRS = sourceCRS->canonicalBoundCRS();
+    auto targetBoundCRS = targetCRS->canonicalBoundCRS();
+    auto l_sourceCRS = srcBoundCRS ? NN_CHECK_ASSERT(srcBoundCRS) : sourceCRS;
+    auto l_targetCRS =
+        targetBoundCRS ? NN_CHECK_ASSERT(targetBoundCRS) : targetCRS;
+
+    return filterAndSort(d->createOperations(l_sourceCRS, l_targetCRS, context),
+                         context, l_sourceCRS, l_targetCRS);
 }
 
 // ---------------------------------------------------------------------------

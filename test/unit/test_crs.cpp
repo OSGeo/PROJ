@@ -93,6 +93,8 @@ TEST(crs, EPSG_4326_get_components) {
 TEST(crs, GeographicCRS_isEquivalentTo) {
     auto crs = GeographicCRS::EPSG_4326;
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
+
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
     EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::EPSG_4979));
     EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::EPSG_4979,
@@ -768,6 +770,7 @@ TEST(crs, geocentricCRS_as_WKT2) {
               expected);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
 }
 
@@ -870,15 +873,28 @@ static ProjectedCRSNNPtr createProjected() {
 // ---------------------------------------------------------------------------
 
 TEST(crs, projectedCRS_derivingConversion) {
-    auto conv = createProjected()->derivingConversion();
+    auto crs = createProjected();
+    auto conv = crs->derivingConversion();
     EXPECT_TRUE(conv->sourceCRS() != nullptr);
     ASSERT_TRUE(conv->targetCRS() != nullptr);
+    EXPECT_EQ(conv->targetCRS().get(), crs.get());
 
     // derivingConversion() returns a copy of the internal conversion
     auto targetCRSAsProjCRS =
         std::dynamic_pointer_cast<ProjectedCRS>(conv->targetCRS());
     ASSERT_TRUE(targetCRSAsProjCRS != nullptr);
     EXPECT_NE(targetCRSAsProjCRS->derivingConversion(), conv);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_shallowClone) {
+    auto crs = createProjected();
+    EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    auto clone = nn_dynamic_pointer_cast<ProjectedCRS>(crs->shallowClone());
+    EXPECT_TRUE(clone->isEquivalentTo(crs));
+    EXPECT_EQ(clone->derivingConversion()->targetCRS().get(), clone.get());
 }
 
 // ---------------------------------------------------------------------------
@@ -1243,6 +1259,7 @@ TEST(crs, verticalCRS_as_WKT2) {
                     "    ID[\"EPSG\",5701]]";
 
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
 
     EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()), expected);
@@ -1402,6 +1419,7 @@ TEST(crs, compoundCRS_isEquivalentTo) {
 
     auto crs = createCompoundCRS();
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
     auto compoundCRSOfProjCRS =
         CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
@@ -1661,7 +1679,107 @@ TEST(crs, boundCRS_to_WKT2) {
               replaceAll(replaceAll(expected, " ", ""), "\n", ""));
 
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, boundCRS_crs_link) {
+
+    {
+        std::weak_ptr<CRS> oriBaseCRS;
+        {
+            auto baseCRSIn = GeographicCRS::EPSG_4267->shallowClone();
+            oriBaseCRS = baseCRSIn.as_nullable();
+            EXPECT_EQ(oriBaseCRS.use_count(), 1);
+            {
+                auto boundCRS = BoundCRS::createFromTOWGS84(
+                    baseCRSIn, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+                EXPECT_EQ(oriBaseCRS.use_count(), 3);
+            }
+            EXPECT_EQ(oriBaseCRS.use_count(), 1);
+        }
+        EXPECT_TRUE(oriBaseCRS.expired());
+    }
+
+    {
+        CRSPtr baseCRS;
+        {
+            auto baseCRSIn = GeographicCRS::EPSG_4267->shallowClone();
+            CRS *baseCRSPtr = baseCRSIn.get();
+            auto boundCRS = BoundCRS::createFromTOWGS84(
+                baseCRSIn, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+            baseCRS = boundCRS->baseCRS().as_nullable();
+            EXPECT_TRUE(baseCRS.get() == baseCRSPtr);
+        }
+        EXPECT_TRUE(baseCRS->isEquivalentTo(GeographicCRS::EPSG_4267));
+        EXPECT_TRUE(baseCRS->canonicalBoundCRS() == nullptr);
+    }
+
+    {
+        CRSPtr baseCRS;
+        {
+            auto boundCRS = BoundCRS::createFromTOWGS84(
+                GeographicCRS::EPSG_4267->shallowClone(),
+                std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+            baseCRS = boundCRS->baseCRSWithCanonicalBoundCRS().as_nullable();
+        }
+        EXPECT_TRUE(baseCRS->isEquivalentTo(GeographicCRS::EPSG_4267));
+        EXPECT_TRUE(baseCRS->canonicalBoundCRS() != nullptr);
+
+        EXPECT_TRUE(
+            baseCRS->createBoundCRSToWGS84IfPossible(nullptr)->isEquivalentTo(
+                NN_CHECK_ASSERT(baseCRS->canonicalBoundCRS())));
+    }
+
+    {
+        std::weak_ptr<CRS> oriBaseCRS;
+        {
+            BoundCRSPtr boundCRSExterior;
+            {
+                auto baseCRS = GeographicCRS::EPSG_4267->shallowClone();
+                oriBaseCRS = baseCRS.as_nullable();
+                EXPECT_EQ(oriBaseCRS.use_count(), 1);
+                auto boundCRS = BoundCRS::createFromTOWGS84(
+                    baseCRS, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+                EXPECT_EQ(oriBaseCRS.use_count(), 3);
+                boundCRSExterior = boundCRS->baseCRSWithCanonicalBoundCRS()
+                                       ->canonicalBoundCRS();
+                EXPECT_EQ(oriBaseCRS.use_count(), 4);
+            }
+            EXPECT_EQ(oriBaseCRS.use_count(), 2);
+            EXPECT_TRUE(!oriBaseCRS.expired());
+            EXPECT_TRUE(boundCRSExterior->baseCRS()->isEquivalentTo(
+                GeographicCRS::EPSG_4267));
+        }
+        EXPECT_EQ(oriBaseCRS.use_count(), 0);
+        EXPECT_TRUE(oriBaseCRS.expired());
+    }
+
+    {
+        std::weak_ptr<CRS> oriBaseCRS;
+        {
+            BoundCRSPtr boundCRSExterior;
+            {
+                auto baseCRS = createProjected();
+                oriBaseCRS = baseCRS.as_nullable();
+                EXPECT_EQ(oriBaseCRS.use_count(), 1);
+                auto boundCRS = BoundCRS::createFromTOWGS84(
+                    baseCRS, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+                EXPECT_EQ(oriBaseCRS.use_count(), 2);
+                boundCRSExterior = boundCRS->baseCRSWithCanonicalBoundCRS()
+                                       ->canonicalBoundCRS();
+                EXPECT_EQ(oriBaseCRS.use_count(), 3);
+            }
+            EXPECT_EQ(oriBaseCRS.use_count(), 1);
+            EXPECT_TRUE(!oriBaseCRS.expired());
+            EXPECT_TRUE(
+                boundCRSExterior->baseCRS()->isEquivalentTo(createProjected()));
+        }
+        EXPECT_EQ(oriBaseCRS.use_count(), 0);
+        EXPECT_TRUE(oriBaseCRS.expired());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2003,6 +2121,7 @@ TEST(crs, derivedGeographicCRS_WKT2) {
         expected);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
 }
 
@@ -2137,6 +2256,7 @@ TEST(crs, derivedGeodeticCRS_WKT2) {
         expected);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
 }
 
@@ -2246,6 +2366,7 @@ TEST(crs, derivedProjectedCRS_WKT2_2018) {
               expected);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
 }
 
@@ -2308,6 +2429,7 @@ TEST(crs, dateTimeTemporalCRS_WKT2) {
                  FormattingException);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
     EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
 }
 
@@ -2468,9 +2590,14 @@ TEST(crs, engineeringCRS_WKT2) {
                     "            LENGTHUNIT[\"metre\",1,\n"
                     "                ID[\"EPSG\",9001]]]]";
 
-    EXPECT_EQ(createEngineeringCRS()->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
-              expected);
+    auto crs = createEngineeringCRS();
+    EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+
+    EXPECT_EQ(
+        crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+        expected);
 }
 
 // ---------------------------------------------------------------------------
@@ -2554,9 +2681,14 @@ TEST(crs, DerivedVerticalCRS_WKT2) {
                     "            LENGTHUNIT[\"metre\",1,\n"
                     "                ID[\"EPSG\",9001]]]]";
 
-    EXPECT_EQ(createDerivedVerticalCRS()->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
-              expected);
+    auto crs = createDerivedVerticalCRS();
+    EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+
+    EXPECT_EQ(
+        crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+        expected);
 }
 
 // ---------------------------------------------------------------------------
@@ -2571,26 +2703,30 @@ TEST(crs, DerivedVerticalCRS_WKT1) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
     {
         auto crs_4326 = factory->createCoordinateReferenceSystem("4326");
-        EXPECT_EQ(crs_4326->createBoundCRSToWGS84IfPossible(), crs_4326);
+        EXPECT_EQ(crs_4326->createBoundCRSToWGS84IfPossible(dbContext),
+                  crs_4326);
     }
     {
         auto crs_32631 = factory->createCoordinateReferenceSystem("32631");
-        EXPECT_EQ(crs_32631->createBoundCRSToWGS84IfPossible(), crs_32631);
+        EXPECT_EQ(crs_32631->createBoundCRSToWGS84IfPossible(dbContext),
+                  crs_32631);
     }
     {
         // Pulkovo 42 East Germany
         auto crs_5670 = factory->createCoordinateReferenceSystem("5670");
-        EXPECT_EQ(crs_5670->createBoundCRSToWGS84IfPossible(), crs_5670);
+        EXPECT_EQ(crs_5670->createBoundCRSToWGS84IfPossible(dbContext),
+                  crs_5670);
     }
     {
         // Pulkovo 42 Romania
         auto crs_3844 = factory->createCoordinateReferenceSystem("3844");
-        auto bound = crs_3844->createBoundCRSToWGS84IfPossible();
+        auto bound = crs_3844->createBoundCRSToWGS84IfPossible(dbContext);
         EXPECT_NE(bound, crs_3844);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
@@ -2602,9 +2738,9 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // Pulkovo 42 Poland
         auto crs_2171 = factory->createCoordinateReferenceSystem("2171");
-        auto bound = crs_2171->createBoundCRSToWGS84IfPossible();
+        auto bound = crs_2171->createBoundCRSToWGS84IfPossible(dbContext);
         EXPECT_NE(bound, crs_2171);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
@@ -2616,9 +2752,9 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // NTF (Paris)
         auto crs_4807 = factory->createCoordinateReferenceSystem("4807");
-        auto bound = crs_4807->createBoundCRSToWGS84IfPossible();
+        auto bound = crs_4807->createBoundCRSToWGS84IfPossible(dbContext);
         EXPECT_NE(bound, crs_4807);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
@@ -2629,9 +2765,9 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // NTF (Paris) / Lambert zone II + NGF-IGN69 height
         auto crs_7421 = factory->createCoordinateReferenceSystem("7421");
-        auto bound = crs_7421->createBoundCRSToWGS84IfPossible();
+        auto bound = crs_7421->createBoundCRSToWGS84IfPossible(dbContext);
         EXPECT_NE(bound, crs_7421);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(PROJStringFormatter::create(
@@ -2642,13 +2778,13 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     }
     {
         auto crs = createVerticalCRS();
-        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(), crs);
+        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(dbContext), crs);
     }
     {
         auto factoryIGNF =
             AuthorityFactory::create(DatabaseContext::create(), "IGNF");
         auto crs = factoryIGNF->createCoordinateReferenceSystem("TERA50STEREO");
-        auto bound = crs->createBoundCRSToWGS84IfPossible();
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
@@ -2662,7 +2798,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         auto factoryIGNF =
             AuthorityFactory::create(DatabaseContext::create(), "IGNF");
         auto crs = factoryIGNF->createCoordinateReferenceSystem("AMST63");
-        auto bound = crs->createBoundCRSToWGS84IfPossible();
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);

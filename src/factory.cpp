@@ -1627,6 +1627,29 @@ AuthorityFactory::createGeographicCRS(const std::string &code) const {
 
 // ---------------------------------------------------------------------------
 
+static crs::GeodeticCRSNNPtr
+cloneWithProps(const crs::GeodeticCRSNNPtr &geodCRS,
+               const util::PropertyMap &props) {
+    auto cs = geodCRS->coordinateSystem();
+    auto datum = geodCRS->datum();
+    if (!datum) {
+        return geodCRS;
+    }
+    auto ellipsoidalCS = util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
+    if (ellipsoidalCS) {
+        return crs::GeographicCRS::create(props, NN_CHECK_ASSERT(datum),
+                                          NN_CHECK_ASSERT(ellipsoidalCS));
+    }
+    auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
+    if (geocentricCS) {
+        return crs::GeodeticCRS::create(props, NN_CHECK_ASSERT(datum),
+                                        NN_CHECK_ASSERT(geocentricCS));
+    }
+    return geodCRS;
+}
+
+// ---------------------------------------------------------------------------
+
 crs::GeodeticCRSNNPtr
 AuthorityFactory::createGeodeticCRS(const std::string &code,
                                     bool geographicOnly) const {
@@ -1681,29 +1704,26 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             DatabaseContext::Private::RecursionDetector detector(d->context());
             auto obj = createFromUserInput(text_definition, d->context());
             auto geodCRS = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(obj);
-            if (!geodCRS) {
-                throw FactoryException(
-                    "text_definition does not define a GeodeticCRS");
+            if (geodCRS) {
+                return cloneWithProps(NN_CHECK_ASSERT(geodCRS), props);
             }
-            auto cs = geodCRS->coordinateSystem();
-            auto datum = geodCRS->datum();
-            if (!datum) {
-                return NN_CHECK_ASSERT(geodCRS);
+
+            auto boundCRS = util::nn_dynamic_pointer_cast<crs::BoundCRS>(obj);
+            if (boundCRS) {
+                geodCRS = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+                    boundCRS->baseCRS());
+                if (geodCRS) {
+                    auto newBoundCRS = crs::BoundCRS::create(
+                        cloneWithProps(NN_CHECK_ASSERT(geodCRS), props),
+                        boundCRS->hubCRS(), boundCRS->transformation());
+                    return NN_CHECK_ASSERT(
+                        util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+                            newBoundCRS->baseCRSWithCanonicalBoundCRS()));
+                }
             }
-            auto ellipsoidalCS =
-                util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
-            if (ellipsoidalCS) {
-                return crs::GeographicCRS::create(
-                    props, NN_CHECK_ASSERT(datum),
-                    NN_CHECK_ASSERT(ellipsoidalCS));
-            }
-            auto geocentricCS =
-                util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
-            if (geocentricCS) {
-                return crs::GeodeticCRS::create(props, NN_CHECK_ASSERT(datum),
-                                                NN_CHECK_ASSERT(geocentricCS));
-            }
-            return NN_CHECK_ASSERT(geodCRS);
+
+            throw FactoryException(
+                "text_definition does not define a GeodeticCRS");
         }
 
         auto cs =
@@ -1950,13 +1970,30 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
             auto obj = createFromUserInput(text_definition, d->context());
             auto projCRS =
                 util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(obj);
-            if (!projCRS) {
-                throw FactoryException(
-                    "text_definition does not define a ProjectedCRS");
+            if (projCRS) {
+                return crs::ProjectedCRS::create(props, projCRS->baseCRS(),
+                                                 projCRS->derivingConversion(),
+                                                 projCRS->coordinateSystem());
             }
-            return crs::ProjectedCRS::create(props, projCRS->baseCRS(),
-                                             projCRS->derivingConversion(),
-                                             projCRS->coordinateSystem());
+
+            auto boundCRS = util::nn_dynamic_pointer_cast<crs::BoundCRS>(obj);
+            if (boundCRS) {
+                projCRS = util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(
+                    boundCRS->baseCRS());
+                if (projCRS) {
+                    auto newBoundCRS = crs::BoundCRS::create(
+                        crs::ProjectedCRS::create(props, projCRS->baseCRS(),
+                                                  projCRS->derivingConversion(),
+                                                  projCRS->coordinateSystem()),
+                        boundCRS->hubCRS(), boundCRS->transformation());
+                    return NN_CHECK_ASSERT(
+                        util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(
+                            newBoundCRS->baseCRSWithCanonicalBoundCRS()));
+                }
+            }
+
+            throw FactoryException(
+                "text_definition does not define a ProjectedCRS");
         }
 
         auto cs =

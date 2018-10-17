@@ -62,6 +62,12 @@ using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
 /** Non-null shared pointer of VerticalCRS */
 using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
 
+class BoundCRS;
+/** Shared pointer of BoundCRS */
+using BoundCRSPtr = std::shared_ptr<BoundCRS>;
+/** Non-null shared pointer of BoundCRS */
+using BoundCRSNNPtr = util::nn<BoundCRSPtr>;
+
 // ---------------------------------------------------------------------------
 
 class CRS;
@@ -88,11 +94,20 @@ class CRS : public common::ObjectUsage,
     PROJ_DLL GeodeticCRSPtr extractGeodeticCRS() const;
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
     PROJ_DLL VerticalCRSPtr extractVerticalCRS() const;
-    PROJ_DLL CRSNNPtr createBoundCRSToWGS84IfPossible() const;
+    PROJ_DLL CRSNNPtr
+    createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const;
     PROJ_DLL CRSNNPtr stripVerticalComponent() const;
+
+    /** \brief Return a shallow clone of this object. */
+    PROJ_DLL virtual CRSNNPtr shallowClone() const = 0;
+
+    PROJ_DLL BoundCRSPtr canonicalBoundCRS() const;
 
   protected:
     CRS();
+    CRS(const CRS &other);
+    friend class BoundCRS;
+    void setCanonicalBoundCRS(const BoundCRSNNPtr &boundCRS);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -127,6 +142,7 @@ class SingleCRS : public CRS {
     SingleCRS(const datum::DatumPtr &datumIn,
               const datum::DatumEnsemblePtr &datumEnsembleIn,
               const cs::CoordinateSystemNNPtr &csIn);
+    SingleCRS(const SingleCRS &other);
 
     bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
                          util::IComparable::Criterion criterion =
@@ -135,7 +151,6 @@ class SingleCRS : public CRS {
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     SingleCRS &operator=(const SingleCRS &other) = delete;
-    SingleCRS(const SingleCRS &other) = delete;
 };
 
 /** Shared pointer of SingleCRS */
@@ -215,6 +230,8 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
     PROJ_DLL static const GeodeticCRSNNPtr EPSG_4978; // WGS 84 Geocentric
 
     PROJ_PRIVATE :
@@ -235,6 +252,7 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::CartesianCSNNPtr &csIn);
+    GeodeticCRS(const GeodeticCRS &other);
     INLINED_MAKE_SHARED
 
     datum::GeodeticReferenceFrameNNPtr oneDatum() const;
@@ -242,7 +260,6 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     static GeodeticCRSNNPtr createEPSG_4978();
-    GeodeticCRS(const GeodeticCRS &other) = delete;
     GeodeticCRS &operator=(const GeodeticCRS &other) = delete;
 };
 
@@ -288,6 +305,8 @@ class GeographicCRS : public GeodeticCRS {
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4807; // NTF Paris
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4979; // WGS 84 3D
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         void
@@ -299,6 +318,7 @@ class GeographicCRS : public GeodeticCRS {
     GeographicCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                   const datum::DatumEnsemblePtr &datumEnsembleIn,
                   const cs::EllipsoidalCSNNPtr &csIn);
+    GeographicCRS(const GeographicCRS &other);
     INLINED_MAKE_SHARED
 
   private:
@@ -308,7 +328,6 @@ class GeographicCRS : public GeodeticCRS {
     static GeographicCRSNNPtr createEPSG_4326();
     static GeographicCRSNNPtr createEPSG_4807();
     static GeographicCRSNNPtr createEPSG_4979();
-    GeographicCRS(const GeographicCRS &other) = delete;
     GeographicCRS &operator=(const GeographicCRS &other) = delete;
 };
 
@@ -366,6 +385,8 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
            const datum::DatumEnsemblePtr &datumEnsembleIn,
            const cs::VerticalCSNNPtr &csIn);
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         void
@@ -376,11 +397,11 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     VerticalCRS(const datum::VerticalReferenceFramePtr &datumIn,
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::VerticalCSNNPtr &csIn);
+    VerticalCRS(const VerticalCRS &other);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    VerticalCRS(const VerticalCRS &other) = delete;
     VerticalCRS &operator=(const VerticalCRS &other) = delete;
 };
 
@@ -421,12 +442,12 @@ class DerivedCRS : virtual public SingleCRS {
     DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
                const operation::ConversionNNPtr &derivingConversionIn,
                const cs::CoordinateSystemNNPtr &cs);
+    DerivedCRS(const DerivedCRS &other);
 
     void setDerivingConversionCRS();
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    DerivedCRS(const DerivedCRS &other) = delete;
     DerivedCRS &operator=(const DerivedCRS &other) = delete;
 };
 
@@ -482,6 +503,8 @@ class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         void
@@ -493,11 +516,11 @@ class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
     ProjectedCRS(const GeodeticCRSNNPtr &baseCRSIn,
                  const operation::ConversionNNPtr &derivingConversionIn,
                  const cs::CartesianCSNNPtr &csIn);
+    ProjectedCRS(const ProjectedCRS &other);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    ProjectedCRS(const ProjectedCRS &other) = delete;
     ProjectedCRS &operator=(const ProjectedCRS &other) = delete;
 };
 
@@ -549,24 +572,20 @@ class CompoundCRS : public CRS, public io::IPROJStringExportable {
     create(const util::PropertyMap &properties,
            const std::vector<CRSNNPtr> &components);
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     // relaxed: standard say SingleCRSNNPtr
     explicit CompoundCRS(const std::vector<CRSNNPtr> &components);
-    CompoundCRS(const CompoundCRS &other) = delete;
-    CompoundCRS &operator=(const CompoundCRS &other) = delete;
+    CompoundCRS(const CompoundCRS &other);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    CompoundCRS &operator=(const CompoundCRS &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
-
-class BoundCRS;
-/** Shared pointer of BoundCRS */
-using BoundCRSPtr = std::shared_ptr<BoundCRS>;
-/** Non-null shared pointer of BoundCRS */
-using BoundCRSNNPtr = util::nn<BoundCRSPtr>;
 
 /** \brief A coordinate reference system with an associated transformation to
  * a target/hub CRS.
@@ -600,6 +619,8 @@ class BoundCRS : public CRS, public io::IPROJStringExportable {
     //! @endcond
 
     PROJ_DLL const CRSNNPtr &baseCRS() const;
+    PROJ_DLL CRSNNPtr baseCRSWithCanonicalBoundCRS() const;
+
     PROJ_DLL const CRSNNPtr &hubCRS() const;
     PROJ_DLL const operation::TransformationNNPtr &transformation() const;
 
@@ -626,18 +647,21 @@ class BoundCRS : public CRS, public io::IPROJStringExportable {
     PROJ_DLL static BoundCRSNNPtr
     createFromNadgrids(const CRSNNPtr &baseCRSIn, const std::string &filename);
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
              const operation::TransformationNNPtr &transformationIn);
+    BoundCRS(const BoundCRS &other);
     INLINED_MAKE_SHARED
 
+    BoundCRSNNPtr shallowCloneAsBoundCRS() const;
     bool isTOWGS84Compatible() const;
     std::string getHDatumPROJ4GRIDS() const;
     std::string getVDatumPROJ4GRIDS() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    BoundCRS(const BoundCRS &other) = delete;
     BoundCRS &operator=(const BoundCRS &other) = delete;
 };
 
@@ -688,6 +712,8 @@ class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
@@ -695,11 +721,11 @@ class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
     DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const cs::SphericalCSNNPtr &csIn);
+    DerivedGeodeticCRS(const DerivedGeodeticCRS &other);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    DerivedGeodeticCRS(const DerivedGeodeticCRS &other) = delete;
     DerivedGeodeticCRS &operator=(const DerivedGeodeticCRS &other) = delete;
 };
 
@@ -746,16 +772,18 @@ class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     DerivedGeographicCRS(const GeodeticCRSNNPtr &baseCRSIn,
                          const operation::ConversionNNPtr &derivingConversionIn,
                          const cs::EllipsoidalCSNNPtr &csIn);
+    DerivedGeographicCRS(const DerivedGeographicCRS &other);
 
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    DerivedGeographicCRS(const DerivedGeographicCRS &other) = delete;
     DerivedGeographicCRS &operator=(const DerivedGeographicCRS &other) = delete;
 };
 
@@ -803,16 +831,18 @@ class DerivedProjectedCRS : public DerivedCRS,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     DerivedProjectedCRS(const ProjectedCRSNNPtr &baseCRSIn,
                         const operation::ConversionNNPtr &derivingConversionIn,
                         const cs::CoordinateSystemNNPtr &csIn);
+    DerivedProjectedCRS(const DerivedProjectedCRS &other);
 
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    DerivedProjectedCRS(const DerivedProjectedCRS &other) = delete;
     DerivedProjectedCRS &operator=(const DerivedProjectedCRS &other) = delete;
 };
 
@@ -852,15 +882,17 @@ class TemporalCRS : virtual public SingleCRS {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
                 const cs::TemporalCSNNPtr &csIn);
+    TemporalCRS(const TemporalCRS &other);
 
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    TemporalCRS(const TemporalCRS &other) = delete;
     TemporalCRS &operator=(const TemporalCRS &other) = delete;
 };
 
@@ -902,15 +934,17 @@ class EngineeringCRS : virtual public SingleCRS {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
                    const cs::CoordinateSystemNNPtr &csIn);
+    EngineeringCRS(const EngineeringCRS &other);
 
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    EngineeringCRS(const EngineeringCRS &other) = delete;
     EngineeringCRS &operator=(const EngineeringCRS &other) = delete;
 };
 
@@ -954,15 +988,17 @@ class ParametricCRS : virtual public SingleCRS {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
                   const cs::ParametricCSNNPtr &csIn);
+    ParametricCRS(const ParametricCRS &other);
 
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    ParametricCRS(const ParametricCRS &other) = delete;
     ParametricCRS &operator=(const ParametricCRS &other) = delete;
 };
 
@@ -1006,16 +1042,18 @@ class DerivedVerticalCRS : public VerticalCRS, public DerivedCRS {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
   protected:
     DerivedVerticalCRS(const VerticalCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const cs::VerticalCSNNPtr &csIn);
+    DerivedVerticalCRS(const DerivedVerticalCRS &other);
 
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    DerivedVerticalCRS(const DerivedVerticalCRS &other) = delete;
     DerivedVerticalCRS &operator=(const DerivedVerticalCRS &other) = delete;
 };
 

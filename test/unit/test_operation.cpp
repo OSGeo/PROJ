@@ -5057,3 +5057,37 @@ TEST(operation, isPROJInstanciable) {
             transformation->isPROJInstanciable(DatabaseContext::create()));
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
+    auto boundCRS = BoundCRS::createFromTOWGS84(
+        GeographicCRS::EPSG_4267, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto crs = boundCRS->baseCRSWithCanonicalBoundCRS();
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            crs, GeographicCRS::EPSG_4326);
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_TRUE(op->isEquivalentTo(boundCRS->transformation()));
+        {
+            auto wkt1 = op->exportToWKT(
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+            auto wkt2 = boundCRS->transformation()->exportToWKT(
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+            EXPECT_EQ(wkt1, wkt2);
+        }
+    }
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            GeographicCRS::EPSG_4326, crs);
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_TRUE(op->isEquivalentTo(boundCRS->transformation()->inverse()));
+        {
+            auto wkt1 = op->exportToWKT(
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+            auto wkt2 = boundCRS->transformation()->inverse()->exportToWKT(
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+            EXPECT_EQ(wkt1, wkt2);
+        }
+    }
+}

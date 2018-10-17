@@ -722,7 +722,11 @@ PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ *crs) {
         proj_log_error(crs->ctx, __FUNCTION__, "Object is not a CRS");
         return nullptr;
     }
-    return new PJ_OBJ(crs->ctx, l_crs->createBoundCRSToWGS84IfPossible());
+    auto dbContext = crs->ctx->cpp_context
+                         ? getDBcontextNoException(crs->ctx, __FUNCTION__)
+                         : nullptr;
+    return new PJ_OBJ(crs->ctx,
+                      l_crs->createBoundCRSToWGS84IfPossible(dbContext));
 }
 
 // ---------------------------------------------------------------------------

@@ -54,7 +54,9 @@ namespace crs {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct CRS::Private {};
+struct CRS::Private {
+    BoundCRSPtr canonicalBoundCRS_{};
+};
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -63,9 +65,26 @@ CRS::CRS() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
+CRS::CRS(const CRS &other)
+    : ObjectUsage(other), d(internal::make_unique<Private>(*(other.d))) {}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 CRS::~CRS() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the BoundCRS potentially attached to this CRS.
+ *
+ * In the case this method is called on a object returned by
+ * BoundCRS::baseCRSWithCanonicalBoundCRS(), this method will return this
+ * BoundCRS
+ *
+ * @return a BoundCRSPtr, that might be null.
+ */
+BoundCRSPtr CRS::canonicalBoundCRS() const { return d->canonicalBoundCRS_; }
 
 // ---------------------------------------------------------------------------
 
@@ -165,12 +184,20 @@ VerticalCRSPtr CRS::extractVerticalCRS() const {
  *
  * @return a CRS.
  */
-CRSNNPtr CRS::createBoundCRSToWGS84IfPossible() const {
-    auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+CRSNNPtr
+CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
     auto thisAsCRS = NN_CHECK_ASSERT(
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
+    auto boundCRS = util::nn_dynamic_pointer_cast<BoundCRS>(thisAsCRS);
+    if (!boundCRS) {
+        boundCRS = canonicalBoundCRS();
+    }
     if (boundCRS) {
-        return thisAsCRS;
+        if (boundCRS->hubCRS()->isEquivalentTo(
+                GeographicCRS::EPSG_4326,
+                util::IComparable::Criterion::EQUIVALENT)) {
+            return NN_CHECK_ASSERT(boundCRS);
+        }
     }
 
     auto geodCRS = util::nn_dynamic_pointer_cast<GeodeticCRS>(thisAsCRS);
@@ -193,9 +220,11 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible() const {
     }
 
     try {
-        auto dbContext = io::DatabaseContext::create();
-        auto authFactory =
-            io::AuthorityFactory::create(dbContext, std::string());
+        auto authFactory = dbContext
+                               ? io::AuthorityFactory::create(
+                                     NN_CHECK_ASSERT(dbContext), std::string())
+                                     .as_nullable()
+                               : nullptr;
         auto ctxt = operation::CoordinateOperationContext::create(authFactory,
                                                                   extent, 0.0);
         // ctxt->setSpatialCriterion(
@@ -323,11 +352,8 @@ SingleCRS::SingleCRS(const datum::DatumPtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
 SingleCRS::SingleCRS(const SingleCRS &other)
-    : // CRS(other),
-      d(internal::make_unique<Private>(*other.d)) {}
-#endif
+    : CRS(other), d(internal::make_unique<Private>(*other.d)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -464,16 +490,22 @@ GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
 GeodeticCRS::GeodeticCRS(const GeodeticCRS &other)
     : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
-#endif
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 GeodeticCRS::~GeodeticCRS() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr GeodeticCRS::shallowClone() const {
+    auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(*this));
+    crs->assignSelf(crs);
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -825,17 +857,23 @@ GeographicCRS::GeographicCRS(const datum::GeodeticReferenceFramePtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
 GeographicCRS::GeographicCRS(const GeographicCRS &other)
     : SingleCRS(other), GeodeticCRS(other),
       d(internal::make_unique<Private>(*other.d)) {}
-#endif
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 GeographicCRS::~GeographicCRS() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr GeographicCRS::shallowClone() const {
+    auto crs(GeographicCRS::nn_make_shared<GeographicCRS>(*this));
+    crs->assignSelf(crs);
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1125,16 +1163,22 @@ VerticalCRS::VerticalCRS(const datum::VerticalReferenceFramePtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
 VerticalCRS::VerticalCRS(const VerticalCRS &other)
     : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
-#endif
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 VerticalCRS::~VerticalCRS() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr VerticalCRS::shallowClone() const {
+    auto crs(VerticalCRS::nn_make_shared<VerticalCRS>(*this));
+    crs->assignSelf(crs);
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1319,6 +1363,12 @@ struct DerivedCRS::Private {
     Private(const SingleCRSNNPtr &baseCRSIn,
             const operation::ConversionNNPtr &derivingConversionIn)
         : baseCRS_(baseCRSIn), derivingConversion_(derivingConversionIn) {}
+
+    // For the conversion make a shallowClone(), so that we can later set
+    // its targetCRS to this.
+    Private(const Private &other)
+        : baseCRS_(other.baseCRS_),
+          derivingConversion_(other.derivingConversion_->shallowClone()) {}
 };
 
 //! @endcond
@@ -1347,7 +1397,6 @@ DerivedCRS::DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
 DerivedCRS::DerivedCRS(const DerivedCRS &other)
     :
 #if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
@@ -1355,7 +1404,6 @@ DerivedCRS::DerivedCRS(const DerivedCRS &other)
 #endif
       d(internal::make_unique<Private>(*other.d)) {
 }
-#endif
 
 // ---------------------------------------------------------------------------
 
@@ -1429,17 +1477,24 @@ ProjectedCRS::ProjectedCRS(
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
 ProjectedCRS::ProjectedCRS(const ProjectedCRS &other)
     : SingleCRS(other), DerivedCRS(other),
       d(internal::make_unique<Private>(*other.d)) {}
-#endif
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 ProjectedCRS::~ProjectedCRS() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr ProjectedCRS::shallowClone() const {
+    auto crs(ProjectedCRS::nn_make_shared<ProjectedCRS>(*this));
+    crs->assignSelf(crs);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1711,9 +1766,22 @@ CompoundCRS::CompoundCRS(const std::vector<CRSNNPtr> &components)
 
 // ---------------------------------------------------------------------------
 
+CompoundCRS::CompoundCRS(const CompoundCRS &other)
+    : CRS(other), d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 CompoundCRS::~CompoundCRS() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr CompoundCRS::shallowClone() const {
+    auto crs(CompoundCRS::nn_make_shared<CompoundCRS>(*this));
+    crs->assignSelf(crs);
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1859,9 +1927,28 @@ BoundCRS::BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
 
 // ---------------------------------------------------------------------------
 
+BoundCRS::BoundCRS(const BoundCRS &other)
+    : CRS(other), d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 BoundCRS::~BoundCRS() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+BoundCRSNNPtr BoundCRS::shallowCloneAsBoundCRS() const {
+    auto crs(BoundCRS::nn_make_shared<BoundCRS>(*this));
+    crs->assignSelf(crs);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr BoundCRS::shallowClone() const {
+    return shallowCloneAsBoundCRS();
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1872,6 +1959,35 @@ BoundCRS::~BoundCRS() = default;
  * @return the base CRS.
  */
 const CRSNNPtr &BoundCRS::baseCRS() const { return d->baseCRS_; }
+
+// ---------------------------------------------------------------------------
+
+// The only legit caller is BoundCRS::baseCRSWithCanonicalBoundCRS()
+void CRS::setCanonicalBoundCRS(const BoundCRSNNPtr &boundCRS) {
+
+    d->canonicalBoundCRS_ = boundCRS;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a shallow clone of the base CRS that points to a
+ * shallow clone of this BoundCRS.
+ *
+ * The base CRS is the CRS into which coordinates of the BoundCRS are expressed.
+ *
+ * The returned CRS will actually be a shallow clone of the actual base CRS,
+ * with the extra property that CRS::canonicalBoundCRS() will point to a
+ * shallow clone of this BoundCRS. Use this only if you want to work with
+ * the base CRS object rather than the BoundCRS, but wanting to be able to
+ * retrieve the BoundCRS later.
+ *
+ * @return the base CRS.
+ */
+CRSNNPtr BoundCRS::baseCRSWithCanonicalBoundCRS() const {
+    auto baseCRSClone = baseCRS()->shallowClone();
+    baseCRSClone->setCanonicalBoundCRS(shallowCloneAsBoundCRS());
+    return baseCRSClone;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -2138,6 +2254,21 @@ DerivedGeodeticCRS::DerivedGeodeticCRS(
 
 // ---------------------------------------------------------------------------
 
+DerivedGeodeticCRS::DerivedGeodeticCRS(const DerivedGeodeticCRS &other)
+    : SingleCRS(other), GeodeticCRS(other), DerivedCRS(other),
+      d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr DerivedGeodeticCRS::shallowClone() const {
+    auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(*this));
+    crs->assignSelf(crs);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the base CRS (a GeodeticCRS) of a DerivedGeodeticCRS.
  *
  * @return the base CRS.
@@ -2284,6 +2415,21 @@ DerivedGeographicCRS::DerivedGeographicCRS(
 
 // ---------------------------------------------------------------------------
 
+DerivedGeographicCRS::DerivedGeographicCRS(const DerivedGeographicCRS &other)
+    : SingleCRS(other), GeographicCRS(other), DerivedCRS(other),
+      d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr DerivedGeographicCRS::shallowClone() const {
+    auto crs(DerivedGeographicCRS::nn_make_shared<DerivedGeographicCRS>(*this));
+    crs->assignSelf(crs);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the base CRS (a GeodeticCRS) of a DerivedGeographicCRS.
  *
  * @return the base CRS.
@@ -2397,6 +2543,21 @@ DerivedProjectedCRS::DerivedProjectedCRS(
     : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
       d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+DerivedProjectedCRS::DerivedProjectedCRS(const DerivedProjectedCRS &other)
+    : SingleCRS(other), DerivedCRS(other),
+      d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr DerivedProjectedCRS::shallowClone() const {
+    auto crs(DerivedProjectedCRS::nn_make_shared<DerivedProjectedCRS>(*this));
+    crs->assignSelf(crs);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -2532,6 +2693,19 @@ TemporalCRS::TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
+TemporalCRS::TemporalCRS(const TemporalCRS &other)
+    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr TemporalCRS::shallowClone() const {
+    auto crs(TemporalCRS::nn_make_shared<TemporalCRS>(*this));
+    crs->assignSelf(crs);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the datum::TemporalDatum associated with the CRS.
  *
  * @return a TemporalDatum
@@ -2618,6 +2792,19 @@ EngineeringCRS::EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
+EngineeringCRS::EngineeringCRS(const EngineeringCRS &other)
+    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr EngineeringCRS::shallowClone() const {
+    auto crs(EngineeringCRS::nn_make_shared<EngineeringCRS>(*this));
+    crs->assignSelf(crs);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the datum::EngineeringDatum associated with the CRS.
  *
  * @return a EngineeringDatum
@@ -2693,6 +2880,19 @@ ParametricCRS::ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
                              const cs::ParametricCSNNPtr &csIn)
     : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
       d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+ParametricCRS::ParametricCRS(const ParametricCRS &other)
+    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr ParametricCRS::shallowClone() const {
+    auto crs(ParametricCRS::nn_make_shared<ParametricCRS>(*this));
+    crs->assignSelf(crs);
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -2787,6 +2987,21 @@ DerivedVerticalCRS::DerivedVerticalCRS(
       VerticalCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
       d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+DerivedVerticalCRS::DerivedVerticalCRS(const DerivedVerticalCRS &other)
+    : SingleCRS(other), VerticalCRS(other), DerivedCRS(other),
+      d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr DerivedVerticalCRS::shallowClone() const {
+    auto crs(DerivedVerticalCRS::nn_make_shared<DerivedVerticalCRS>(*this));
+    crs->assignSelf(crs);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
