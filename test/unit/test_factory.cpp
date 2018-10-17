@@ -928,6 +928,18 @@ TEST(factory, AuthorityFactory_test_uom_9110) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_affine_parametric_transform) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("10087", false);
+    // Do not do axis unit change
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=affine +xoff=82357.457 +s11=0.304794369 "
+              "+s12=1.5417425e-05 +yoff=28091.324 +s21=-1.5417425e-05 "
+              "+s22=0.304794369");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory,
      AuthorityFactory_createCoordinateOperation_concatenated_operation) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");

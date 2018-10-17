@@ -540,6 +540,9 @@ class SingleOperation : virtual public CoordinateOperation {
     std::string
     exportTransformationToWKT(io::WKTFormatterNNPtr formatter) const;
 
+    bool
+    exportToPROJStringGeneric(io::PROJStringFormatterNNPtr formatter) const;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     SingleOperation &operator=(const SingleOperation &other) = delete;

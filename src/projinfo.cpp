@@ -31,6 +31,7 @@
 #define FROM_PROJ_CPP
 
 #include <cstdlib>
+#include <fstream> // std::ifstream
 #include <iostream>
 #include <utility>
 
@@ -103,14 +104,38 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
                                    bool kindIsCRS, const std::string &context,
                                    bool buildBoundCRSToWGS84) {
     BaseObjectPtr obj;
+
+    std::string l_user_string(user_string);
+    if (!user_string.empty() && user_string[0] == '@') {
+        std::ifstream fs;
+        auto filename = user_string.substr(1);
+        fs.open(filename, std::fstream::in | std::fstream::binary);
+        if (!fs.is_open()) {
+            std::cerr << context << ": cannot open " << filename << std::endl;
+            std::exit(1);
+        }
+        l_user_string.clear();
+        while (!fs.eof()) {
+            char buffer[256];
+            fs.read(buffer, sizeof(buffer));
+            l_user_string.append(buffer, static_cast<size_t>(fs.gcount()));
+            if (l_user_string.size() > 100 * 1000) {
+                fs.close();
+                std::cerr << context << ": too big file" << std::endl;
+                std::exit(1);
+            }
+        }
+        fs.close();
+    }
+
     try {
-        auto tokens = split(user_string, ':');
+        auto tokens = split(l_user_string, ':');
         if (!kindIsCRS && tokens.size() == 2) {
             auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
                        tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
-            obj = createFromUserInput(user_string, dbContext).as_nullable();
+            obj = createFromUserInput(l_user_string, dbContext).as_nullable();
         }
     } catch (const std::exception &e) {
         std::cerr << context << ": parsing of user string failed: " << e.what()

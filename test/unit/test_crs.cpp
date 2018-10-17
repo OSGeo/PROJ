@@ -2209,6 +2209,49 @@ TEST(crs, derivedGeographicCRS_to_PROJ) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, derivedGeographicCRS_with_affine_transform_to_PROJ) {
+
+    auto wkt = "GEODCRS[\"WGS 84 Translated\",\n"
+               "    BASEGEODCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1]]],\n"
+               "        PRIMEM[\"Greenwich\",0]],\n"
+               "    DERIVINGCONVERSION[\"Translation\",\n"
+               "        METHOD[\"Affine parametric transformation\",\n"
+               "            ID[\"EPSG\",9624]],\n"
+               "        PARAMETER[\"A0\",0.5,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8623]],\n"
+               "        PARAMETER[\"A1\",1,\n"
+               "            SCALEUNIT[\"coefficient\",1],\n"
+               "            ID[\"EPSG\",8624]],\n"
+               "        PARAMETER[\"A2\",0,\n"
+               "            SCALEUNIT[\"coefficient\",1],\n"
+               "            ID[\"EPSG\",8625]],\n"
+               "        PARAMETER[\"B0\",2.5,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8639]],\n"
+               "        PARAMETER[\"B1\",0,\n"
+               "            SCALEUNIT[\"coefficient\",1],\n"
+               "            ID[\"EPSG\",8640]],\n"
+               "        PARAMETER[\"B2\",1,\n"
+               "            SCALEUNIT[\"coefficient\",1],\n"
+               "            ID[\"EPSG\",8641]]],\n"
+               "    CS[ellipsoidal,2],\n"
+               "        AXIS[\"latitude\",north],\n"
+               "        AXIS[\"longitude\",east],\n"
+               "        ANGLEUNIT[\"degree\",0.0174532925199433]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=affine +xoff=0.5 +s11=1 +s12=0 +yoff=2.5 +s21=0 +s22=1");
+}
+
+// ---------------------------------------------------------------------------
+
 static DerivedGeodeticCRSNNPtr createDerivedGeodeticCRS() {
 
     auto derivingConversion = Conversion::create(

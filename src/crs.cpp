@@ -1946,9 +1946,7 @@ BoundCRSNNPtr BoundCRS::shallowCloneAsBoundCRS() const {
 
 // ---------------------------------------------------------------------------
 
-CRSNNPtr BoundCRS::shallowClone() const {
-    return shallowCloneAsBoundCRS();
-}
+CRSNNPtr BoundCRS::shallowClone() const { return shallowCloneAsBoundCRS(); }
 
 // ---------------------------------------------------------------------------
 

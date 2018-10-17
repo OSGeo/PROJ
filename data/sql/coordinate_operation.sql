@@ -4314,6 +4314,11 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','7966','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7977','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7980','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7981','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','10087','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','10088','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','10095','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','10096','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','10097','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','15596','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','15597','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','15598','other_transformation');
@@ -4416,6 +4421,12 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','15694','other_transformation')
 INSERT INTO "coordinate_operation" VALUES('EPSG','15695','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','15696','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','15697','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15857','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15858','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15859','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15861','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15862','other_transformation');
+INSERT INTO "coordinate_operation" VALUES('EPSG','15863','other_transformation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','3896','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','3966','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','4435','concatenated_operation');
@@ -4920,11 +4931,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (8866, u'transformation', u'NAD83(FBN) to NAD83(MA11) (1)', 1075, u'NADCON5 (3D)', 8860, 6325, 4525, 0.05, 0)
 --- Non imported: (8867, u'transformation', u'NAD83(HARN Corrected) to NAD83(FBN) (1)', 1075, u'NADCON5 (3D)', 8545, 8860, 3634, 0.05, 0)
 --- Non imported: (8868, u'transformation', u'NAD83(FBN) to NAD83(NSRS2007) (2)', 1075, u'NADCON5 (3D)', 8860, 4759, 3634, 0.05, 0)
---- Non imported: (10087, u'transformation', u'Jamaica 1875 / Jamaica (Old Grid) to JAD69 / Jamaica National Grid (1)', 9624, u'Affine parametric transformation', 24100, 24200, 3342, 1.5, 0)
---- Non imported: (10088, u'transformation', u'JAD69 / Jamaica National Grid to Jamaica 1875 / Jamaica (Old Grid) (1)', 9624, u'Affine parametric transformation', 24200, 24100, 3342, 1.5, 1)
---- Non imported: (10095, u'transformation', u'Mauritania 1999 / UTM zone 28N to WGS 84 / UTM zone 28N (1)', 9624, u'Affine parametric transformation', 3103, 32628, 2971, 40.0, 1)
---- Non imported: (10096, u'transformation', u'Mauritania 1999 / UTM zone 29N to WGS 84 / UTM zone 29N (1)', 9624, u'Affine parametric transformation', 3104, 32629, 2970, 40.0, 1)
---- Non imported: (10097, u'transformation', u'Mauritania 1999 / UTM zone 30N to WGS 84 / UTM zone 30N (1)', 9624, u'Affine parametric transformation', 3105, 32630, 2969, 40.0, 1)
 --- Non imported: (15487, u'transformation', u'TWD67 / TM2 zone 121 to TWD97 / TM2 zone 121 (1)', 9656, u'Cartesian Grid Offsets', 3828, 3826, 3982, 7.0, 0)
 --- Non imported: (15730, u'transformation', u'Bogota 1975 to MAGNA-SIRGAS (9)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4218, 4686, 3082, 1.0, 0)
 --- Non imported: (15731, u'transformation', u'Bogota 1975 to MAGNA-SIRGAS (10)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4218, 4686, 3083, 1.0, 0)
@@ -4938,12 +4944,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (15744, u'transformation', u'[enter here name of (I = J+90\xb0) bin grid]', 9666, u'P6 (I = J+90\xb0) seismic bin grid transformation', 5818, 32631, 1263, 0.0, 1)
 --- Non imported: (15747, u'transformation', u'Tombak LNG Plant Grid to Nakhl-e Ghanem / UTM zone 39N (1)', 9621, u'Similarity transformation', 5817, 3307, 3141, 0.0, 0)
 --- Non imported: (15753, u'transformation', u'ED50 to ED87 (1)', 9651, u'Reversible polynomial of degree 4', 4230, 4231, 2330, 1.0, 0)
---- Non imported: (15857, u'transformation', u'IGN Astro 1960 / UTM zone 28N to Mauritania 1999 / UTM zone 28N (1)', 9624, u'Affine parametric transformation', 3367, 3343, 2971, 40.0, 0)
---- Non imported: (15858, u'transformation', u'IGN Astro 1960 / UTM zone 29N to Mauritania 1999 / UTM zone 29N (1)', 9624, u'Affine parametric transformation', 3368, 3344, 2970, 40.0, 0)
---- Non imported: (15859, u'transformation', u'IGN Astro 1960 / UTM zone 30N to Mauritania 1999 / UTM zone 30N (1)', 9624, u'Affine parametric transformation', 3369, 3345, 2969, 40.0, 0)
---- Non imported: (15861, u'transformation', u'IGN Astro 1960 / UTM zone 28N to WGS 84 / UTM zone 28N (1)', 9624, u'Affine parametric transformation', 3367, 32628, 2971, 40.0, 0)
---- Non imported: (15862, u'transformation', u'IGN Astro 1960 / UTM zone 29N to WGS 84 / UTM zone 29N (1)', 9624, u'Affine parametric transformation', 3368, 32629, 2970, 1.0, 0)
---- Non imported: (15863, u'transformation', u'IGN Astro 1960 / UTM zone 30N to WGS 84 / UTM zone 30N (1)', 9624, u'Affine parametric transformation', 3369, 32630, 2969, 1.0, 0)
 --- Non imported: (15905, u'transformation', u'Viti Levu 1912 / Viti Levu Grid to Fiji 1986 / Fiji Map Grid (1)', 9645, u'General polynomial of degree 2', 3140, 3143, 3195, 1.0, 1)
 --- Non imported: (15906, u'transformation', u'Vanua Levu 1915 / Vanua Levu Grid to Fiji 1986 / Fiji Map Grid (1)', 9645, u'General polynomial of degree 2', 3139, 3143, 3401, 1.0, 1)
 --- Non imported: (15922, u'transformation', u'Kertau 1968 / Singapore Grid to SVY21 / Singapore TM (1)', 9656, u'Cartesian Grid Offsets', 24500, 3414, 1210, 2.0, 0)

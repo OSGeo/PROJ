@@ -529,6 +529,30 @@ constexpr int EPSG_CODE_PARAMETER_GEOID_UNDULATION = 8604;
 
 // ---------------------------------------------------------------------------
 
+constexpr int EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION = 9624;
+static const std::string EPSG_NAME_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION(
+    "Affine parametric transformation");
+
+static const std::string EPSG_NAME_PARAMETER_A0("A0");
+constexpr int EPSG_CODE_PARAMETER_A0 = 8623;
+
+static const std::string EPSG_NAME_PARAMETER_A1("A1");
+constexpr int EPSG_CODE_PARAMETER_A1 = 8624;
+
+static const std::string EPSG_NAME_PARAMETER_A2("A2");
+constexpr int EPSG_CODE_PARAMETER_A2 = 8625;
+
+static const std::string EPSG_NAME_PARAMETER_B0("B0");
+constexpr int EPSG_CODE_PARAMETER_B0 = 8639;
+
+static const std::string EPSG_NAME_PARAMETER_B1("B1");
+constexpr int EPSG_CODE_PARAMETER_B1 = 8640;
+
+static const std::string EPSG_NAME_PARAMETER_B2("B2");
+constexpr int EPSG_CODE_PARAMETER_B2 = 8641;
+
+// ---------------------------------------------------------------------------
+
 static const ParamMapping paramLatitudeNatOrigin = {
     EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, WKT1_LATITUDE_OF_ORIGIN,

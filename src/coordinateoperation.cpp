@@ -4089,9 +4089,13 @@ std::string Conversion::exportToPROJString(
     const bool isZUnitConversion =
         ci_equal(projectionMethodName, EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT) ||
         methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT;
+    const bool isAffineParametric =
+        (ci_equal(projectionMethodName,
+                  EPSG_NAME_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION) ||
+         methodEPSGCode == EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION);
 
     auto l_sourceCRS = sourceCRS();
-    if (l_sourceCRS && !isZUnitConversion &&
+    if (l_sourceCRS && !isZUnitConversion && !isAffineParametric &&
         formatter->convention() ==
             io::PROJStringFormatter::Convention::PROJ_5) {
         auto geogCRS =
@@ -4383,13 +4387,15 @@ std::string Conversion::exportToPROJString(
             }
 
         } else {
-            throw io::FormattingException("Unsupported conversion method: " +
-                                          projectionMethodName);
+            if (!exportToPROJStringGeneric(formatter)) {
+                throw io::FormattingException(
+                    "Unsupported conversion method: " + projectionMethodName);
+            }
         }
     }
 
     auto l_targetCRS = targetCRS();
-    if (l_targetCRS && !isZUnitConversion) {
+    if (l_targetCRS && !isZUnitConversion && !isAffineParametric) {
         if (!bEllipsoidParametersDone) {
             auto targetGeogCRS = l_targetCRS->extractGeographicCRS();
             if (targetGeogCRS) {
@@ -7867,7 +7873,58 @@ std::string Transformation::exportToPROJString(
         }
     }
 
+    {
+        io::PROJStringFormatter::Scope scope(formatter);
+        if (exportToPROJStringGeneric(formatter)) {
+            return scope.toString();
+        }
+    }
+
     throw io::FormattingException("Unimplemented");
+}
+
+// ---------------------------------------------------------------------------
+
+bool SingleOperation::exportToPROJStringGeneric(
+    io::PROJStringFormatterNNPtr formatter) const {
+    auto method_name = *(method()->name()->description());
+
+    if (ci_equal(method_name,
+                 EPSG_NAME_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION) ||
+        method()->isEPSG(EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION)) {
+        const double A0 = parameterValueMeasure(EPSG_NAME_PARAMETER_A0,
+                                                EPSG_CODE_PARAMETER_A0)
+                              .value();
+        const double A1 = parameterValueMeasure(EPSG_NAME_PARAMETER_A1,
+                                                EPSG_CODE_PARAMETER_A1)
+                              .value();
+        const double A2 = parameterValueMeasure(EPSG_NAME_PARAMETER_A2,
+                                                EPSG_CODE_PARAMETER_A2)
+                              .value();
+        const double B0 = parameterValueMeasure(EPSG_NAME_PARAMETER_B0,
+                                                EPSG_CODE_PARAMETER_B0)
+                              .value();
+        const double B1 = parameterValueMeasure(EPSG_NAME_PARAMETER_B1,
+                                                EPSG_CODE_PARAMETER_B1)
+                              .value();
+        const double B2 = parameterValueMeasure(EPSG_NAME_PARAMETER_B2,
+                                                EPSG_CODE_PARAMETER_B2)
+                              .value();
+
+        // Do not mess with axis unit and order for that transformation
+
+        formatter->addStep("affine");
+        formatter->addParam("xoff", A0);
+        formatter->addParam("s11", A1);
+        formatter->addParam("s12", A2);
+        formatter->addParam("yoff", B0);
+        formatter->addParam("s21", B1);
+        formatter->addParam("s22", B2);
+
+        return true;
+    }
+
+    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -7950,7 +8007,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
                     *targetCRSIds[0]->codeSpace()) {
                 // same id --> ok
             } else if (!l_sourceCRS->isEquivalentTo(
-                           NN_CHECK_ASSERT(lastTargetCRS))) {
+                           NN_CHECK_ASSERT(lastTargetCRS),
+                           util::IComparable::Criterion::EQUIVALENT)) {
                 throw InvalidOperation(
                     "Inconsistent chaining of CRS in operations");
             }
