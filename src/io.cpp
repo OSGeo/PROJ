@@ -4302,14 +4302,15 @@ PrimeMeridianNNPtr PROJStringParser::Private::buildPrimeMeridian(
                 found = true;
                 pm = PrimeMeridian::PARIS;
             }
-            for (int i = 0; !found && pj_prime_meridians[i].id != nullptr;
+            auto proj_prime_meridians = proj_list_prime_meridians();
+            for (int i = 0; !found && proj_prime_meridians[i].id != nullptr;
                  i++) {
-                if (pmStr == pj_prime_meridians[i].id) {
+                if (pmStr == proj_prime_meridians[i].id) {
                     found = true;
                     std::string name = static_cast<char>(::toupper(pmStr[0])) +
                                        pmStr.substr(1);
                     double pmValue =
-                        dmstor(pj_prime_meridians[i].defn, nullptr) *
+                        dmstor(proj_prime_meridians[i].defn, nullptr) *
                         RAD_TO_DEG;
                     pm = PrimeMeridian::create(
                         PropertyMap().set(IdentifiedObject::NAME_KEY, name),
@@ -4414,28 +4415,29 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                         Ellipsoid::GRS1980, util::optional<std::string>(), pm)
                         .as_nullable();
         } else {
-            for (int i = 0; pj_ellps[i].id != nullptr; i++) {
-                if (ellpsStr == pj_ellps[i].id) {
-                    assert(strncmp(pj_ellps[i].major, "a=", 2) == 0);
-                    const double a_iter = c_locale_stod(pj_ellps[i].major + 2);
+            auto proj_ellps = proj_list_ellps();
+            for (int i = 0; proj_ellps[i].id != nullptr; i++) {
+                if (ellpsStr == proj_ellps[i].id) {
+                    assert(strncmp(proj_ellps[i].major, "a=", 2) == 0);
+                    const double a_iter = c_locale_stod(proj_ellps[i].major + 2);
                     EllipsoidPtr ellipsoid;
-                    if (strncmp(pj_ellps[i].ell, "b=", 2) == 0) {
+                    if (strncmp(proj_ellps[i].ell, "b=", 2) == 0) {
                         const double b_iter =
-                            c_locale_stod(pj_ellps[i].ell + 2);
+                            c_locale_stod(proj_ellps[i].ell + 2);
                         ellipsoid =
                             Ellipsoid::createTwoAxis(
                                 PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                                  pj_ellps[i].name),
+                                                  proj_ellps[i].name),
                                 Length(a_iter), Length(b_iter))
                                 .as_nullable();
                     } else {
-                        assert(strncmp(pj_ellps[i].ell, "rf=", 3) == 0);
+                        assert(strncmp(proj_ellps[i].ell, "rf=", 3) == 0);
                         const double rf_iter =
-                            c_locale_stod(pj_ellps[i].ell + 3);
+                            c_locale_stod(proj_ellps[i].ell + 3);
                         ellipsoid =
                             Ellipsoid::createFlattenedSphere(
                                 PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                                  pj_ellps[i].name),
+                                                  proj_ellps[i].name),
                                 Length(a_iter), Scale(rf_iter))
                                 .as_nullable();
                     }
@@ -4444,7 +4446,7 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                                     IdentifiedObject::NAME_KEY,
                                     title.empty()
                                         ? std::string("Unknown based on ") +
-                                              pj_ellps[i].name + " ellipsoid"
+                                              proj_ellps[i].name + " ellipsoid"
                                         : title),
                                 NN_CHECK_ASSERT(ellipsoid),
                                 util::optional<std::string>(), pm)

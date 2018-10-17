@@ -51,3 +51,8 @@ pj_angular_units[] = {
     {"grad",        "0.015707963267948967",  "Grad",   GRAD_TO_RAD},
     {NULL,          NULL,                     NULL,    0.0}
 };
+
+const PJ_UNITS *proj_list_angular_units()
+{
+    return pj_angular_units;
+}

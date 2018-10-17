@@ -414,6 +414,7 @@ PJ_INIT_INFO proj_init_info(const char *initname);
 const PJ_OPERATIONS       *proj_list_operations(void);
 const PJ_ELLPS            *proj_list_ellps(void);
 const PJ_UNITS            *proj_list_units(void);
+const PJ_UNITS            *proj_list_angular_units(void);
 const PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
 
 /* These are trivial, and while occasionally useful in real code, primarily here to      */

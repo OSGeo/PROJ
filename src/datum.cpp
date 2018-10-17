@@ -41,6 +41,7 @@
 
 // PROJ include order is sensitive
 // clang-format off
+#include "proj.h"
 #include "projects.h"
 #include "proj_api.h"
 // clang-format on
@@ -309,11 +310,12 @@ PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
     const double valRad = angle.getSIValue();
     std::string projPMName;
     projCtx ctxt = pj_ctx_alloc();
-    for (int i = 0; pj_prime_meridians[i].id != nullptr; ++i) {
+    auto proj_pm = proj_list_prime_meridians();
+    for (int i = 0; proj_pm[i].id != nullptr; ++i) {
         double valRefRad =
-            dmstor_ctx(ctxt, pj_prime_meridians[i].defn, nullptr);
+            dmstor_ctx(ctxt, proj_pm[i].defn, nullptr);
         if (::fabs(valRad - valRefRad) < 1e-10) {
-            projPMName = pj_prime_meridians[i].id;
+            projPMName = proj_pm[i].id;
             break;
         }
     }
@@ -695,23 +697,24 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
     const double a = semiMajorAxis().getSIValue();
     const double b = computeSemiMinorAxis().getSIValue();
     const double rf = computeInverseFlattening().getSIValue();
-    for (int i = 0; pj_ellps[i].id != nullptr; i++) {
-        assert(strncmp(pj_ellps[i].major, "a=", 2) == 0);
-        const double a_iter = c_locale_stod(pj_ellps[i].major + 2);
+    auto proj_ellps = proj_list_ellps();
+    for (int i = 0; proj_ellps[i].id != nullptr; i++) {
+        assert(strncmp(proj_ellps[i].major, "a=", 2) == 0);
+        const double a_iter = c_locale_stod(proj_ellps[i].major + 2);
         if (::fabs(a - a_iter) < 1e-10 * a_iter) {
-            if (strncmp(pj_ellps[i].ell, "b=", 2) == 0) {
-                const double b_iter = c_locale_stod(pj_ellps[i].ell + 2);
+            if (strncmp(proj_ellps[i].ell, "b=", 2) == 0) {
+                const double b_iter = c_locale_stod(proj_ellps[i].ell + 2);
                 if (::fabs(b - b_iter) < 1e-10 * b_iter) {
-                    projEllpsName = pj_ellps[i].id;
-                    ellpsName = pj_ellps[i].name;
+                    projEllpsName = proj_ellps[i].id;
+                    ellpsName = proj_ellps[i].name;
                     return true;
                 }
             } else {
-                assert(strncmp(pj_ellps[i].ell, "rf=", 3) == 0);
-                const double rf_iter = c_locale_stod(pj_ellps[i].ell + 3);
+                assert(strncmp(proj_ellps[i].ell, "rf=", 3) == 0);
+                const double rf_iter = c_locale_stod(proj_ellps[i].ell + 3);
                 if (::fabs(rf - rf_iter) < 1e-10 * rf_iter) {
-                    projEllpsName = pj_ellps[i].id;
-                    ellpsName = pj_ellps[i].name;
+                    projEllpsName = proj_ellps[i].id;
+                    ellpsName = proj_ellps[i].name;
                     return true;
                 }
             }

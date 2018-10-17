@@ -38,7 +38,7 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
-#include "projects.h"
+#include "proj.h"
 
 #include <cmath> // M_PI
 #include <cstdlib>
@@ -230,17 +230,19 @@ bool UnitOfMeasure::operator!=(const UnitOfMeasure &other) const {
 //! @cond Doxygen_Suppress
 std::string UnitOfMeasure::exportToPROJString() const {
     if (type() == Type::LINEAR) {
-        for (int i = 0; pj_units[i].id != nullptr; i++) {
-            if (::fabs(pj_units[i].factor - conversionToSI()) <
+        auto proj_units = proj_list_units();
+        for (int i = 0; proj_units[i].id != nullptr; i++) {
+            if (::fabs(proj_units[i].factor - conversionToSI()) <
                 1e-10 * conversionToSI()) {
-                return pj_units[i].id;
+                return proj_units[i].id;
             }
         }
     } else if (type() == Type::ANGULAR) {
-        for (int i = 0; pj_angular_units[i].id != nullptr; i++) {
-            if (::fabs(pj_angular_units[i].factor - conversionToSI()) <
+        auto proj_angular_units = proj_list_angular_units();
+        for (int i = 0; proj_angular_units[i].id != nullptr; i++) {
+            if (::fabs(proj_angular_units[i].factor - conversionToSI()) <
                 1e-10 * conversionToSI()) {
-                return pj_angular_units[i].id;
+                return proj_angular_units[i].id;
             }
         }
     }
