@@ -155,6 +155,9 @@ struct DatabaseContext::Private {
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
     int recLevel_ = 0;
+    bool detach_ = false;
+
+    void closeDB();
 
     // cppcheck-suppress functionStatic
     void registerFunctions();
@@ -177,18 +180,46 @@ DatabaseContext::Private::Private() = default;
 
 DatabaseContext::Private::~Private() {
     assert(recLevel_ == 0);
-    for (auto &pair : mapSqlToStatement_) {
-        sqlite3_finalize(pair.second);
-    }
-    if (close_handle_) {
-        sqlite3_close(sqlite_handle_);
-    }
+
+    closeDB();
+
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
     if (vfs_) {
         sqlite3_vfs_unregister(vfs_);
         delete vfs_;
     }
 #endif
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::closeDB() {
+
+    if (detach_) {
+        // Workaround a bug visible in SQLite 3.8.1 and 3.8.2 that causes
+        // a crash in TEST(factory, attachExtraDatabases_auxiliary)
+        // due to possible wrong caching of key info.
+        // The bug is specific to using a memory file with shared cache as an
+        // auxiliary DB.
+        // The efinitive fix was likely in 3.8.8
+        // https://github.com/mackyle/sqlite/commit/d412d4b8731991ecbd8811874aa463d0821673eb
+        // But just after 3.8.2,
+        // https://github.com/mackyle/sqlite/commit/ccf328c4318eacedab9ed08c404bc4f402dcad19
+        // also seemed to hide the issue.
+        // Detaching a database hides the issue, not sure if it is by chance...
+        run("DETACH DATABASE db_0");
+        detach_ = false;
+    }
+
+    for (auto &pair : mapSqlToStatement_) {
+        sqlite3_finalize(pair.second);
+    }
+    mapSqlToStatement_.clear();
+
+    if (close_handle_ && sqlite_handle_ != nullptr) {
+        sqlite3_close(sqlite_handle_);
+        sqlite_handle_ = nullptr;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -376,13 +407,8 @@ void DatabaseContext::Private::attachExtraDatabases(
             tableStructure[tableName].push_back(colName);
         }
     }
-    for (auto &pair : mapSqlToStatement_) {
-        sqlite3_finalize(pair.second);
-    }
-    mapSqlToStatement_.clear();
 
-    sqlite3_close(sqlite_handle_);
-    sqlite_handle_ = nullptr;
+    closeDB();
 
     sqlite3_open_v2(":memory:", &sqlite_handle_,
                     SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX
@@ -397,6 +423,7 @@ void DatabaseContext::Private::attachExtraDatabases(
 
     run("ATTACH DATABASE '" + replaceAll(databasePath_, "'", "''") +
         "' AS db_0");
+    detach_ = true;
     int count = 1;
     for (const auto &otherDb : auxiliaryDatabasePaths) {
         std::string sql = "ATTACH DATABASE '" + replaceAll(otherDb, "'", "''") +
