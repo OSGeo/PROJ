@@ -5,7 +5,7 @@
 #include "proj.h"
 #include "projects.h"
 
-C_NAMESPACE_VAR const struct PJ_ELLPS
+static const struct PJ_ELLPS
 pj_ellps[] = {
 {"MERIT",	"a=6378137.0",		"rf=298.257",		"MERIT 1983"},
 {"SGS85",	"a=6378136.0",		"rf=298.257",		"Soviet Geodetic System 85"},

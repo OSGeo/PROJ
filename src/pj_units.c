@@ -10,7 +10,7 @@
 /* Field 2 that contains the multiplier to convert named units to meters
 ** may be expressed by either a simple floating point constant or a
 ** numerator/denomenator values (e.g. 1/1000) */
-C_NAMESPACE_VAR const struct PJ_UNITS
+static const struct PJ_UNITS
 pj_units[] = {
     {"km",      "1000",                 "Kilometer",                    1000.0},
     {"m",       "1",                    "Meter",                        1.0},
