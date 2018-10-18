@@ -1733,9 +1733,8 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(
 
     if (formatter->convention() ==
             io::PROJStringFormatter::Convention::PROJ_5 &&
-        !axisSpecFound) {
-        if (axisList.size() >= 2 &&
-            !(axisList[0]->direction() == cs::AxisDirection::EAST &&
+        !axisSpecFound && axisList.size() >= 2) {
+        if (!(axisList[0]->direction() == cs::AxisDirection::EAST &&
               axisList[1]->direction() == cs::AxisDirection::NORTH) &&
             // For polar projections, that have south+south direction,
             // we don't want to mess with axes.
@@ -1757,6 +1756,26 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(
                 formatter->addStep("axisswap");
                 formatter->addParam("order", order[0] + "," + order[1]);
             }
+        }
+        // case of EPSG:32661 ["WGS 84 / UPS North (N,E)]"
+        else if (axisList[0]->direction() == cs::AxisDirection::SOUTH &&
+                 axisList[1]->direction() == cs::AxisDirection::SOUTH &&
+                 ci_starts_with(*(axisList[0]->name()->description()),
+                                "northing") &&
+                 ci_starts_with(*(axisList[1]->name()->description()),
+                                "easting")) {
+            formatter->addStep("axisswap");
+            formatter->addParam("order", "2,1");
+        }
+        // case of EPSG:32761 ["WGS 84 / UPS South (N,E)]"
+        else if (axisList[0]->direction() == cs::AxisDirection::NORTH &&
+                 axisList[1]->direction() == cs::AxisDirection::NORTH &&
+                 ci_starts_with(*(axisList[0]->name()->description()),
+                                "northing") &&
+                 ci_starts_with(*(axisList[1]->name()->description()),
+                                "easting")) {
+            formatter->addStep("axisswap");
+            formatter->addParam("order", "2,1");
         }
     }
 }

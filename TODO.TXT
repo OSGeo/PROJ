@@ -18,7 +18,6 @@
         UNIT["Degree",0.017453292519943295],
         AXIS["latitude",NORTH],
         AXIS["longitude",WEST]]
-    - axis inversion for polar cases: EPSG 5041 (East-North) vs EPSG 32661 (North-East)
     - We might currently create COMPOUNDCRS of horiz CRS + BoundCRS of VertCRS, which is apparently illegal
 
     - Time dependent stuff:

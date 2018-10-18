@@ -4361,6 +4361,42 @@ TEST(operation, projCRS_to_projCRS_context_incompatible_areas) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, projCRS_to_projCRS_north_pole_inverted_axis) {
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            ->createCoordinateReferenceSystem("32661"),
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            ->createCoordinateReferenceSystem("5041"),
+        ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, projCRS_to_projCRS_south_pole_inverted_axis) {
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            ->createCoordinateReferenceSystem("32761"),
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            ->createCoordinateReferenceSystem("5042"),
+        ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_of_geogCRS_to_geogCRS) {
     auto boundCRS = BoundCRS::createFromTOWGS84(
         GeographicCRS::EPSG_4807, std::vector<double>{1, 2, 3, 4, 5, 6, 7});

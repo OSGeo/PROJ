@@ -731,6 +731,96 @@ TEST(crs, projected_with_parameter_unit_different_than_cs_unit_as_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_32661_projected_north_pole_north_east) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("32661");
+    auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
+    ASSERT_TRUE(proj_crs != nullptr);
+    auto proj_string =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=stere "
+        "+lat_0=90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 "
+        "+ellps=WGS84 +step +proj=axisswap +order=2,1";
+    EXPECT_EQ(proj_crs->exportToPROJString(PROJStringFormatter::create()),
+              proj_string);
+
+    auto obj_from_proj = PROJStringParser().createFromPROJString(proj_string);
+    auto crs_from_proj = nn_dynamic_pointer_cast<ProjectedCRS>(obj_from_proj);
+    ASSERT_TRUE(crs_from_proj != nullptr);
+    EXPECT_EQ(crs_from_proj->exportToPROJString(PROJStringFormatter::create()),
+              proj_string);
+    EXPECT_TRUE(crs_from_proj->coordinateSystem()->isEquivalentTo(
+        proj_crs->coordinateSystem()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_5041_projected_north_pole_east_north) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("5041");
+    auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
+    ASSERT_TRUE(proj_crs != nullptr);
+    auto proj_string =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=stere "
+        "+lat_0=90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 "
+        "+ellps=WGS84";
+    EXPECT_EQ(proj_crs->exportToPROJString(PROJStringFormatter::create()),
+              proj_string);
+
+    auto obj_from_proj = PROJStringParser().createFromPROJString(proj_string);
+    auto crs_from_proj = nn_dynamic_pointer_cast<ProjectedCRS>(obj_from_proj);
+    ASSERT_TRUE(crs_from_proj != nullptr);
+    EXPECT_EQ(crs_from_proj->exportToPROJString(PROJStringFormatter::create()),
+              proj_string);
+    EXPECT_TRUE(crs_from_proj->coordinateSystem()->isEquivalentTo(
+        proj_crs->coordinateSystem()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_32761_projected_south_pole_north_east) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("32761");
+    auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
+    ASSERT_TRUE(proj_crs != nullptr);
+    auto proj_string =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=stere "
+        "+lat_0=-90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 "
+        "+ellps=WGS84 +step +proj=axisswap +order=2,1";
+    EXPECT_EQ(proj_crs->exportToPROJString(PROJStringFormatter::create()),
+              proj_string);
+
+    auto obj_from_proj = PROJStringParser().createFromPROJString(proj_string);
+    auto crs_from_proj = nn_dynamic_pointer_cast<ProjectedCRS>(obj_from_proj);
+    ASSERT_TRUE(crs_from_proj != nullptr);
+    EXPECT_EQ(crs_from_proj->exportToPROJString(PROJStringFormatter::create()),
+              proj_string);
+    EXPECT_TRUE(crs_from_proj->coordinateSystem()->isEquivalentTo(
+        proj_crs->coordinateSystem()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_5042_projected_south_pole_east_north) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("5042");
+    auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
+    ASSERT_TRUE(proj_crs != nullptr);
+    EXPECT_EQ(proj_crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=stere "
+              "+lat_0=-90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 "
+              "+ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
 static GeodeticCRSNNPtr createGeocentric() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
