@@ -2257,6 +2257,30 @@ TEST(wkt_parse, DerivedVerticalCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedEngineeringCRS) {
+
+    auto wkt = "ENGCRS[\"Derived EngineeringCRS\",\n"
+               "    BASEENGCRS[\"Engineering CRS\",\n"
+               "        EDATUM[\"Engineering datum\"]],\n"
+               "    DERIVINGCONVERSION[\"unnamed\",\n"
+               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"(E)\",east,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(N)\",north,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedEngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, ensemble) {
     auto wkt = "ENSEMBLE[\"test\",\n"
                "    MEMBER[\"World Geodetic System 1984\",\n"
@@ -3414,6 +3438,39 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
                      "    CS[parametric,1],\n"
                      "        AXIS[\"gravity-related height (H)\",up]]"),
                  ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_DerivedEngineeringCRS) {
+    EXPECT_NO_THROW(
+        WKTParser().createFromWKT("ENGCRS[\"Derived EngineeringCRS\",\n"
+                                  "    BASEENGCRS[\"Engineering CRS\",\n"
+                                  "        EDATUM[\"Engineering datum\"]],\n"
+                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
+                                  "        METHOD[\"PROJ unimplemented\"]],\n"
+                                  "    CS[Cartesian,2],\n"
+                                  "        AXIS[\"(E)\",east],\n"
+                                  "        AXIS[\"(N)\",north],\n"
+                                  "        LENGTHUNIT[\"metre\",1]]"));
+
+    EXPECT_THROW(
+        WKTParser().createFromWKT("ENGCRS[\"Derived EngineeringCRS\",\n"
+                                  "    BASEENGCRS[\"Engineering CRS\",\n"
+                                  "        EDATUM[\"Engineering datum\"]],\n"
+                                  "    CS[Cartesian,2],\n"
+                                  "        AXIS[\"(E)\",east],\n"
+                                  "        AXIS[\"(N)\",north],\n"
+                                  "        LENGTHUNIT[\"metre\",1]]"),
+        ParsingException);
+
+    EXPECT_THROW(
+        WKTParser().createFromWKT("ENGCRS[\"Derived EngineeringCRS\",\n"
+                                  "    BASEENGCRS[\"Engineering CRS\",\n"
+                                  "        EDATUM[\"Engineering datum\"]],\n"
+                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
+                                  "        METHOD[\"PROJ unimplemented\"]]]"),
+        ParsingException);
 }
 
 // ---------------------------------------------------------------------------

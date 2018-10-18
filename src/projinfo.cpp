@@ -61,6 +61,7 @@ struct OutputOptions {
     bool WKT2_2018 = false;
     bool WKT2_2015 = false;
     bool WKT1_GDAL = false;
+    bool c_ify = false;
 };
 
 // ---------------------------------------------------------------------------
@@ -95,6 +96,28 @@ static void usage() {
                  " a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
               << std::endl;
     std::exit(1);
+}
+
+// ---------------------------------------------------------------------------
+
+static std::string un_c_ify_string(const std::string &str) {
+    std::string out(str);
+    out = out.substr(1, out.size() - 2);
+    out = replaceAll(out, "\\\"", "{ESCAPED_DOUBLE_QUOTE}");
+    out = replaceAll(out, "\\n\"", "");
+    out = replaceAll(out, "\"", "");
+    out = replaceAll(out, "{ESCAPED_DOUBLE_QUOTE}", "\"");
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+
+static std::string c_ify_string(const std::string &str) {
+    std::string out(str);
+    out = replaceAll(out, "\"", "{DOUBLE_QUOTE}");
+    out = replaceAll(out, "\n", "\\n\"\n\"");
+    out = replaceAll(out, "{DOUBLE_QUOTE}", "\\\"");
+    return "\"" + out + "\"";
 }
 
 // ---------------------------------------------------------------------------
@@ -135,6 +158,12 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
                        tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
+            // Convenience to be able to use C escaped strings...
+            if (l_user_string.size() > 2 && l_user_string[0] == '"' &&
+                l_user_string.back() == '"' &&
+                l_user_string.find("\\\"") != std::string::npos) {
+                l_user_string = un_c_ify_string(l_user_string);
+            }
             obj = createFromUserInput(l_user_string, dbContext).as_nullable();
         }
     } catch (const std::exception &e) {
@@ -221,9 +250,12 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (!outputOpt.quiet) {
                     std::cout << "WKT2_2015 string: " << std::endl;
                 }
-                std::cout << wktExportable->exportToWKT(WKTFormatter::create(
-                                 WKTFormatter::Convention::WKT2_2015))
-                          << std::endl;
+                auto wkt = wktExportable->exportToWKT(
+                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2015));
+                if (outputOpt.c_ify) {
+                    wkt = c_ify_string(wkt);
+                }
+                std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to WKT2_2015: " << e.what()
                           << std::endl;
@@ -239,9 +271,12 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (!outputOpt.quiet) {
                     std::cout << "WKT2_2018 string: " << std::endl;
                 }
-                std::cout << wktExportable->exportToWKT(WKTFormatter::create(
-                                 WKTFormatter::Convention::WKT2_2018))
-                          << std::endl;
+                auto wkt = wktExportable->exportToWKT(
+                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+                if (outputOpt.c_ify) {
+                    wkt = c_ify_string(wkt);
+                }
+                std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to WKT2_2018: " << e.what()
                           << std::endl;
@@ -268,9 +303,12 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     objToExport = wktExportable;
                 }
 
-                std::cout << objToExport->exportToWKT(WKTFormatter::create(
-                                 WKTFormatter::Convention::WKT1_GDAL))
-                          << std::endl;
+                auto wkt = objToExport->exportToWKT(
+                    WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+                if (outputOpt.c_ify) {
+                    wkt = c_ify_string(wkt);
+                }
+                std::cout << wkt << std::endl;
                 std::cout << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to WKT1_GDAL: " << e.what()
@@ -537,6 +575,8 @@ int main(int argc, char **argv) {
             targetCRSStr = argv[i];
         } else if (arg == "-q" || arg == "--quiet") {
             outputOpt.quiet = true;
+        } else if (arg == "--c-ify") {
+            outputOpt.c_ify = true;
         } else if (arg == "--summary") {
             summary = true;
         } else if (ci_equal(arg, "--boundcrs-to-wgs84")) {

@@ -2839,6 +2839,66 @@ TEST(crs, DerivedVerticalCRS_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+static DerivedEngineeringCRSNNPtr createDerivedEngineeringCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedEngineeringCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived EngineeringCRS"),
+        createEngineeringCRS(), derivingConversion,
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, DerivedEngineeringCRS_WKT2) {
+
+    auto expected = "ENGCRS[\"Derived EngineeringCRS\",\n"
+                    "    BASEENGCRS[\"Engineering CRS\",\n"
+                    "        EDATUM[\"Engineering datum\"]],\n"
+                    "    DERIVINGCONVERSION[\"unnamed\",\n"
+                    "        METHOD[\"PROJ unimplemented\"]],\n"
+                    "    CS[Cartesian,2],\n"
+                    "        AXIS[\"(E)\",east,\n"
+                    "            ORDER[1],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]],\n"
+                    "        AXIS[\"(N)\",north,\n"
+                    "            ORDER[2],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]]]";
+
+    auto crs = createDerivedEngineeringCRS();
+    EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)));
+    EXPECT_TRUE(crs->datum()->isEquivalentTo(createEngineeringCRS()->datum()));
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+    EXPECT_THROW(createDerivedEngineeringCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT2_2015)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, DerivedEngineeringCRS_WKT1) {
+
+    EXPECT_THROW(createDerivedEngineeringCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     auto dbContext = DatabaseContext::create();
     auto factory = AuthorityFactory::create(dbContext, "EPSG");

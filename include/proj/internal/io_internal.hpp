@@ -128,6 +128,7 @@ class WKTConstants {
     static const std::string PARAMETRICCRS;
     static const std::string PARAMETRICUNIT;
     static const std::string BASEVERTCRS;
+    static const std::string BASEENGCRS;
 
     // WKT2 alternate (longer or shorter)
     static const std::string GEODETICCRS;

@@ -528,6 +528,165 @@ class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
 
 // ---------------------------------------------------------------------------
 
+class TemporalCRS;
+/** Shared pointer of TemporalCRS */
+using TemporalCRSPtr = std::shared_ptr<TemporalCRS>;
+/** Non-null shared pointer of TemporalCRS */
+using TemporalCRSNNPtr = util::nn<TemporalCRSPtr>;
+
+/** \brief A coordinate reference system associated with a temporal datum and a
+ * one-dimensional temporal coordinate system.
+ *
+ * \remark Implements TemporalCRS from \ref ISO_19111_2018
+ */
+class TemporalCRS : virtual public SingleCRS {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~TemporalCRS() override;
+    //! @endcond
+
+    PROJ_DLL const datum::TemporalDatumNNPtr datum() const;
+
+    PROJ_DLL const cs::TemporalCSNNPtr coordinateSystem() const;
+
+    PROJ_DLL static TemporalCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::TemporalDatumNNPtr &datumIn,
+           const cs::TemporalCSNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
+  protected:
+    TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
+                const cs::TemporalCSNNPtr &csIn);
+    TemporalCRS(const TemporalCRS &other);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    TemporalCRS &operator=(const TemporalCRS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class EngineeringCRS;
+/** Shared pointer of EngineeringCRS */
+using EngineeringCRSPtr = std::shared_ptr<EngineeringCRS>;
+/** Non-null shared pointer of EngineeringCRS */
+using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
+
+/** \brief Contextually local coordinate reference system associated with an
+ * engineering datum.
+ *
+ * It is applied either to activities on or near the surface of the Earth
+ * without geodetic corrections, or on moving platforms such as road vehicles,
+ * vessels, aircraft or spacecraft, or as the internal CRS of an image.
+ *
+ * In \ref WKT2, it maps to a ENGINEERINGCRS / ENGCRS keyword. In \ref WKT1,
+ * it maps to a LOCAL_CS keyword.
+ *
+ * \remark Implements EngineeringCRS from \ref ISO_19111_2018
+ */
+class EngineeringCRS : virtual public SingleCRS {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~EngineeringCRS() override;
+    //! @endcond
+
+    PROJ_DLL const datum::EngineeringDatumNNPtr datum() const;
+
+    PROJ_DLL static EngineeringCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::EngineeringDatumNNPtr &datumIn,
+           const cs::CoordinateSystemNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
+  protected:
+    EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
+                   const cs::CoordinateSystemNNPtr &csIn);
+    EngineeringCRS(const EngineeringCRS &other);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    EngineeringCRS &operator=(const EngineeringCRS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class ParametricCRS;
+/** Shared pointer of ParametricCRS */
+using ParametricCRSPtr = std::shared_ptr<ParametricCRS>;
+/** Non-null shared pointer of ParametricCRS */
+using ParametricCRSNNPtr = util::nn<ParametricCRSPtr>;
+
+/** \brief Contextually local coordinate reference system associated with an
+ * engineering datum.
+ *
+ * This is applied either to activities on or near the surface of the Earth
+ * without geodetic corrections, or on moving platforms such as road vehicles
+ * vessels, aircraft or spacecraft, or as the internal CRS of an image.
+ *
+ * \remark Implements ParametricCRS from \ref ISO_19111_2018
+ */
+class ParametricCRS : virtual public SingleCRS {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~ParametricCRS() override;
+    //! @endcond
+
+    PROJ_DLL const datum::ParametricDatumNNPtr datum() const;
+
+    PROJ_DLL const cs::ParametricCSNNPtr coordinateSystem() const;
+
+    PROJ_DLL static ParametricCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::ParametricDatumNNPtr &datumIn,
+           const cs::ParametricCSNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
+  protected:
+    ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
+                  const cs::ParametricCSNNPtr &csIn);
+    ParametricCRS(const ParametricCRS &other);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    ParametricCRS &operator=(const ParametricCRS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
 class CompoundCRS;
 /** Shared pointer of CompoundCRS */
 using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
@@ -850,165 +1009,6 @@ class DerivedProjectedCRS : public DerivedCRS,
 
 // ---------------------------------------------------------------------------
 
-class TemporalCRS;
-/** Shared pointer of TemporalCRS */
-using TemporalCRSPtr = std::shared_ptr<TemporalCRS>;
-/** Non-null shared pointer of TemporalCRS */
-using TemporalCRSNNPtr = util::nn<TemporalCRSPtr>;
-
-/** \brief A coordinate reference system associated with a temporal datum and a
- * one-dimensional temporal coordinate system.
- *
- * \remark Implements TemporalCRS from \ref ISO_19111_2018
- */
-class TemporalCRS : virtual public SingleCRS {
-  public:
-    //! @cond Doxygen_Suppress
-    PROJ_DLL ~TemporalCRS() override;
-    //! @endcond
-
-    PROJ_DLL const datum::TemporalDatumNNPtr datum() const;
-
-    PROJ_DLL const cs::TemporalCSNNPtr coordinateSystem() const;
-
-    PROJ_DLL static TemporalCRSNNPtr
-    create(const util::PropertyMap &properties,
-           const datum::TemporalDatumNNPtr &datumIn,
-           const cs::TemporalCSNNPtr &csIn);
-
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
-  protected:
-    TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
-                const cs::TemporalCSNNPtr &csIn);
-    TemporalCRS(const TemporalCRS &other);
-
-    INLINED_MAKE_SHARED
-
-  private:
-    PROJ_OPAQUE_PRIVATE_DATA
-    TemporalCRS &operator=(const TemporalCRS &other) = delete;
-};
-
-// ---------------------------------------------------------------------------
-
-class EngineeringCRS;
-/** Shared pointer of EngineeringCRS */
-using EngineeringCRSPtr = std::shared_ptr<EngineeringCRS>;
-/** Non-null shared pointer of EngineeringCRS */
-using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
-
-/** \brief Contextually local coordinate reference system associated with an
- * engineering datum.
- *
- * It is applied either to activities on or near the surface of the Earth
- * without geodetic corrections, or on moving platforms such as road vehicles,
- * vessels, aircraft or spacecraft, or as the internal CRS of an image.
- *
- * In \ref WKT2, it maps to a ENGINEERINGCRS / ENGCRS keyword. In \ref WKT1,
- * it maps to a LOCAL_CS keyword.
- *
- * \remark Implements EngineeringCRS from \ref ISO_19111_2018
- */
-class EngineeringCRS : virtual public SingleCRS {
-  public:
-    //! @cond Doxygen_Suppress
-    PROJ_DLL ~EngineeringCRS() override;
-    //! @endcond
-
-    PROJ_DLL const datum::EngineeringDatumNNPtr datum() const;
-
-    PROJ_DLL static EngineeringCRSNNPtr
-    create(const util::PropertyMap &properties,
-           const datum::EngineeringDatumNNPtr &datumIn,
-           const cs::CoordinateSystemNNPtr &csIn);
-
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
-  protected:
-    EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
-                   const cs::CoordinateSystemNNPtr &csIn);
-    EngineeringCRS(const EngineeringCRS &other);
-
-    INLINED_MAKE_SHARED
-
-  private:
-    PROJ_OPAQUE_PRIVATE_DATA
-    EngineeringCRS &operator=(const EngineeringCRS &other) = delete;
-};
-
-// ---------------------------------------------------------------------------
-
-class ParametricCRS;
-/** Shared pointer of ParametricCRS */
-using ParametricCRSPtr = std::shared_ptr<ParametricCRS>;
-/** Non-null shared pointer of ParametricCRS */
-using ParametricCRSNNPtr = util::nn<ParametricCRSPtr>;
-
-/** \brief Contextually local coordinate reference system associated with an
- * engineering datum.
- *
- * This is applied either to activities on or near the surface of the Earth
- * without geodetic corrections, or on moving platforms such as road vehicles
- * vessels, aircraft or spacecraft, or as the internal CRS of an image.
- *
- * \remark Implements ParametricCRS from \ref ISO_19111_2018
- */
-class ParametricCRS : virtual public SingleCRS {
-  public:
-    //! @cond Doxygen_Suppress
-    PROJ_DLL ~ParametricCRS() override;
-    //! @endcond
-
-    PROJ_DLL const datum::ParametricDatumNNPtr datum() const;
-
-    PROJ_DLL const cs::ParametricCSNNPtr coordinateSystem() const;
-
-    PROJ_DLL static ParametricCRSNNPtr
-    create(const util::PropertyMap &properties,
-           const datum::ParametricDatumNNPtr &datumIn,
-           const cs::ParametricCSNNPtr &csIn);
-
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
-  protected:
-    ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
-                  const cs::ParametricCSNNPtr &csIn);
-    ParametricCRS(const ParametricCRS &other);
-
-    INLINED_MAKE_SHARED
-
-  private:
-    PROJ_OPAQUE_PRIVATE_DATA
-    ParametricCRS &operator=(const ParametricCRS &other) = delete;
-};
-
-// ---------------------------------------------------------------------------
-
 class DerivedVerticalCRS;
 /** Shared pointer of DerivedVerticalCRS */
 using DerivedVerticalCRSPtr = std::shared_ptr<DerivedVerticalCRS>;
@@ -1064,13 +1064,63 @@ class DerivedVerticalCRS : public VerticalCRS, public DerivedCRS {
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
+class DerivedEngineeringCRS;
+/** Shared pointer of DerivedEngineeringCRS */
+using DerivedEngineeringCRSPtr = std::shared_ptr<DerivedEngineeringCRS>;
+/** Non-null shared pointer of DerivedEngineeringCRS */
+using DerivedEngineeringCRSNNPtr = util::nn<DerivedEngineeringCRSPtr>;
+
+/** \brief A derived coordinate reference system which has an engineering
+ * coordinate reference system as its base CRS, thereby inheriting an
+ * engineering datum, and is associated with one of the coordinate system
+ * types for an EngineeringCRS
+ *
+ * \remark Implements DerivedVerticalCRS from \ref ISO_19111_2018
+ */
+class DerivedEngineeringCRS : public EngineeringCRS, public DerivedCRS {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~DerivedEngineeringCRS() override;
+    //! @endcond
+
+    PROJ_DLL const EngineeringCRSNNPtr baseCRS() const;
+
+    PROJ_DLL const datum::EngineeringDatumNNPtr datum() const;
+
+    PROJ_DLL static DerivedEngineeringCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const EngineeringCRSNNPtr &baseCRSIn,
+           const operation::ConversionNNPtr &derivingConversionIn,
+           const cs::CoordinateSystemNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+
+  protected:
+    DerivedEngineeringCRS(
+        const EngineeringCRSNNPtr &baseCRSIn,
+        const operation::ConversionNNPtr &derivingConversionIn,
+        const cs::CoordinateSystemNNPtr &csIn);
+    DerivedEngineeringCRS(const DerivedEngineeringCRS &other);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DerivedEngineeringCRS &
+    operator=(const DerivedEngineeringCRS &other) = delete;
+};
 
 // ---------------------------------------------------------------------------
 
-class DerivedEngineeringCRS : public EngineeringCRS, public DerivedCRS {
-    // TODO
-};
+#ifdef notdef
 
 // ---------------------------------------------------------------------------
 

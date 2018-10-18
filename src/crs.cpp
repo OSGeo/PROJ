@@ -3120,5 +3120,131 @@ bool DerivedVerticalCRS::isEquivalentTo(
            DerivedCRS::isEquivalentTo(other, criterion);
 }
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct DerivedEngineeringCRS::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+DerivedEngineeringCRS::~DerivedEngineeringCRS() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+DerivedEngineeringCRS::DerivedEngineeringCRS(
+    const EngineeringCRSNNPtr &baseCRSIn,
+    const operation::ConversionNNPtr &derivingConversionIn,
+    const cs::CoordinateSystemNNPtr &csIn)
+    : SingleCRS(baseCRSIn->datum().as_nullable(), nullptr, csIn),
+      EngineeringCRS(baseCRSIn->datum(), csIn),
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+DerivedEngineeringCRS::DerivedEngineeringCRS(const DerivedEngineeringCRS &other)
+    : SingleCRS(other), EngineeringCRS(other), DerivedCRS(other),
+      d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr DerivedEngineeringCRS::shallowClone() const {
+    auto crs(
+        DerivedEngineeringCRS::nn_make_shared<DerivedEngineeringCRS>(*this));
+    crs->assignSelf(crs);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the base CRS (a EngineeringCRS) of a DerivedEngineeringCRS.
+ *
+ * @return the base CRS.
+ */
+const EngineeringCRSNNPtr DerivedEngineeringCRS::baseCRS() const {
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<EngineeringCRS>(
+        DerivedCRS::getPrivate()->baseCRS_));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the datum::EngineeringDatum associated with the CRS.
+ *
+ * @return a EngineeringDatum
+ */
+const datum::EngineeringDatumNNPtr DerivedEngineeringCRS::datum() const {
+    return NN_CHECK_ASSERT(std::dynamic_pointer_cast<datum::EngineeringDatum>(
+        SingleCRS::getPrivate()->datum));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a DerivedEngineeringCRS from a base CRS, a deriving
+ * conversion and a cs::CoordinateSystem.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param baseCRSIn base CRS.
+ * @param derivingConversionIn the deriving conversion from the base CRS to this
+ * CRS.
+ * @param csIn the coordinate system.
+ * @return new DerivedEngineeringCRS.
+ */
+DerivedEngineeringCRSNNPtr DerivedEngineeringCRS::create(
+    const util::PropertyMap &properties, const EngineeringCRSNNPtr &baseCRSIn,
+    const operation::ConversionNNPtr &derivingConversionIn,
+    const cs::CoordinateSystemNNPtr &csIn) {
+    auto crs(DerivedEngineeringCRS::nn_make_shared<DerivedEngineeringCRS>(
+        baseCRSIn, derivingConversionIn, csIn));
+    crs->assignSelf(crs);
+    crs->setProperties(properties);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+DerivedEngineeringCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2 || !formatter->use2018Keywords()) {
+        throw io::FormattingException(
+            "DerivedEngineeringCRS can only be exported to WKT2:2018");
+    }
+    formatter->startNode(io::WKTConstants::ENGCRS, !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+
+    auto l_baseCRS = baseCRS();
+    formatter->startNode(io::WKTConstants::BASEENGCRS,
+                         !l_baseCRS->identifiers().empty());
+    formatter->addQuotedString(*(l_baseCRS->name()->description()));
+    l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
+    formatter->endNode();
+
+    formatter->setUseDerivingConversion(true);
+    derivingConversionRef()->exportToWKT(formatter);
+    formatter->setUseDerivingConversion(false);
+
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool DerivedEngineeringCRS::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDerivedGeogCRS =
+        util::nn_dynamic_pointer_cast<DerivedEngineeringCRS>(other);
+    return otherDerivedGeogCRS != nullptr &&
+           DerivedCRS::isEquivalentTo(other, criterion);
+}
+
 } // namespace crs
 NS_PROJ_END

@@ -983,6 +983,9 @@ struct WKTParser::Private {
     EngineeringCRSNNPtr
     buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node);
 
+    DerivedEngineeringCRSNNPtr
+    buildDerivedEngineeringCRS(const WKTNodeNNPtr &node);
+
     ParametricCRSNNPtr buildParametricCRS(const WKTNodeNNPtr &node);
 
     DerivedProjectedCRSNNPtr buildDerivedProjectedCRS(const WKTNodeNNPtr &node);
@@ -1721,7 +1724,8 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 return EllipsoidalCS::createLatitudeLongitude(unit);
             }
         } else if (ci_equal(parentNode->value(), WKTConstants::PROJCS) ||
-                   ci_equal(parentNode->value(), WKTConstants::BASEPROJCRS)) {
+                   ci_equal(parentNode->value(), WKTConstants::BASEPROJCRS) ||
+                   ci_equal(parentNode->value(), WKTConstants::BASEENGCRS)) {
             csType = "Cartesian";
             if (axisCount == 0) {
                 auto unit =
@@ -2853,9 +2857,10 @@ WKTParser::Private::buildEngineeringCRS(const WKTNodeNNPtr &node) {
     auto datum = buildEngineeringDatum(NN_CHECK_ASSERT(datumNode));
 
     auto csNode = node->lookForChild(WKTConstants::CS);
-    if (!csNode) {
+    if (!csNode && !ci_equal(node->value(), WKTConstants::BASEENGCRS)) {
         throw ParsingException("Missing CS node");
     }
+
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     return EngineeringCRS::create(buildProperties(node), datum, cs);
 }
@@ -2875,6 +2880,36 @@ WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
     auto datum =
         EngineeringDatum::create(buildProperties(NN_CHECK_ASSERT(datumNode)));
     return EngineeringCRS::create(buildProperties(node), datum, cs);
+}
+
+// ---------------------------------------------------------------------------
+
+DerivedEngineeringCRSNNPtr
+WKTParser::Private::buildDerivedEngineeringCRS(const WKTNodeNNPtr &node) {
+
+    auto baseEngCRSNode = node->lookForChild(WKTConstants::BASEENGCRS);
+    assert(baseEngCRSNode !=
+           nullptr); // given the constraints enforced on calling code path
+
+    auto baseEngCRS = buildEngineeringCRS(NN_CHECK_ASSERT(baseEngCRSNode));
+
+    auto derivingConversionNode =
+        node->lookForChild(WKTConstants::DERIVINGCONVERSION);
+    if (!derivingConversionNode) {
+        throw ParsingException("Missing DERIVINGCONVERSION node");
+    }
+    auto derivingConversion =
+        buildConversion(NN_CHECK_ASSERT(derivingConversionNode),
+                        UnitOfMeasure::NONE, UnitOfMeasure::NONE);
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+
+    return DerivedEngineeringCRS::create(buildProperties(node), baseEngCRS,
+                                         derivingConversion, cs);
 }
 
 // ---------------------------------------------------------------------------
@@ -2997,7 +3032,12 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
 
     if (ci_equal(name, WKTConstants::ENGCRS) ||
         ci_equal(name, WKTConstants::ENGINEERINGCRS)) {
-        return util::nn_static_pointer_cast<CRS>(buildEngineeringCRS(node));
+        if (node->lookForChild(WKTConstants::BASEENGCRS)) {
+            return util::nn_static_pointer_cast<CRS>(
+                buildDerivedEngineeringCRS(node));
+        } else {
+            return util::nn_static_pointer_cast<CRS>(buildEngineeringCRS(node));
+        }
     }
 
     if (ci_equal(name, WKTConstants::LOCAL_CS)) {
