@@ -1742,16 +1742,19 @@ std::string EngineeringDatum::exportToWKT(
     io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2) {
-        throw io::FormattingException(
-            "EngineeringDatum can only be exported to WKT2");
-    }
-    formatter->startNode(io::WKTConstants::EDATUM, !identifiers().empty());
+    formatter->startNode(isWKT2 ? io::WKTConstants::EDATUM
+                                : io::WKTConstants::LOCAL_DATUM,
+                         !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
-    if (anchorDefinition()) {
+    if (isWKT2 && anchorDefinition()) {
         formatter->startNode(io::WKTConstants::ANCHOR, false);
         formatter->addQuotedString(*anchorDefinition());
         formatter->endNode();
+    } else if (!isWKT2) {
+        // Somewhat picked up arbitrarily from OGC 01-009:
+        // CS_LD_Max (Attribute) : 32767
+        // Highest possible value for local datum types.
+        formatter->add(32767);
     }
     formatter->endNode();
     return formatter->toString();

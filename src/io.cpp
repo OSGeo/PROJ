@@ -980,6 +980,9 @@ struct WKTParser::Private {
 
     EngineeringCRSNNPtr buildEngineeringCRS(const WKTNodeNNPtr &node);
 
+    EngineeringCRSNNPtr
+    buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node);
+
     ParametricCRSNNPtr buildParametricCRS(const WKTNodeNNPtr &node);
 
     DerivedProjectedCRSNNPtr buildDerivedProjectedCRS(const WKTNodeNNPtr &node);
@@ -1746,6 +1749,22 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                     }
                 }
                 return VerticalCS::createGravityRelatedHeight(unit);
+            }
+        } else if (ci_equal(parentNode->value(), WKTConstants::LOCAL_CS)) {
+            if (axisCount == 0) {
+                auto unit =
+                    buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
+                if (unit == UnitOfMeasure::NONE) {
+                    unit = UnitOfMeasure::METRE;
+                }
+                return CartesianCS::createEastingNorthing(unit);
+            } else if (axisCount == 1) {
+                csType = "vertical";
+            } else if (axisCount == 2) {
+                csType = "Cartesian";
+            } else {
+                throw ParsingException(
+                    "buildCS: unexpected AXIS count for LOCAL_CS");
             }
         } else {
             // Shouldn't happen normally
@@ -2843,6 +2862,23 @@ WKTParser::Private::buildEngineeringCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+EngineeringCRSNNPtr
+WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
+    auto datumNode = node->lookForChild(WKTConstants::LOCAL_DATUM);
+    auto cs = buildCS(nullptr, node, UnitOfMeasure::NONE);
+    if (!datumNode) {
+        // In theory OGC 01-009 mandates LOCAL_DATUM, but GDAL has a
+        // tradition of emitting just LOCAL_CS["foo"]
+        auto datum = EngineeringDatum::create(util::PropertyMap());
+        return EngineeringCRS::create(buildProperties(node), datum, cs);
+    }
+    auto datum =
+        EngineeringDatum::create(buildProperties(NN_CHECK_ASSERT(datumNode)));
+    return EngineeringCRS::create(buildProperties(node), datum, cs);
+}
+
+// ---------------------------------------------------------------------------
+
 ParametricCRSNNPtr
 WKTParser::Private::buildParametricCRS(const WKTNodeNNPtr &node) {
     auto datumNode = node->lookForChild(WKTConstants::PDATUM);
@@ -2962,6 +2998,11 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     if (ci_equal(name, WKTConstants::ENGCRS) ||
         ci_equal(name, WKTConstants::ENGINEERINGCRS)) {
         return util::nn_static_pointer_cast<CRS>(buildEngineeringCRS(node));
+    }
+
+    if (ci_equal(name, WKTConstants::LOCAL_CS)) {
+        return util::nn_static_pointer_cast<CRS>(
+            buildEngineeringCRSFromLocalCS(node));
     }
 
     if (ci_equal(name, WKTConstants::PARAMETRICCRS)) {

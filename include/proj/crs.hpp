@@ -913,6 +913,9 @@ using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
  * without geodetic corrections, or on moving platforms such as road vehicles,
  * vessels, aircraft or spacecraft, or as the internal CRS of an image.
  *
+ * In \ref WKT2, it maps to a ENGINEERINGCRS / ENGCRS keyword. In \ref WKT1,
+ * it maps to a LOCAL_CS keyword.
+ *
  * \remark Implements EngineeringCRS from \ref ISO_19111_2018
  */
 class EngineeringCRS : virtual public SingleCRS {

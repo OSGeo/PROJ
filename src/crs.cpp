@@ -2868,14 +2868,14 @@ EngineeringCRS::create(const util::PropertyMap &properties,
 
 std::string EngineeringCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2) {
-        throw io::FormattingException(
-            "EngineeringCRS can only be exported to WKT2");
-    }
-    formatter->startNode(io::WKTConstants::ENGCRS, !identifiers().empty());
+    formatter->startNode(isWKT2 ? io::WKTConstants::ENGCRS
+                                : io::WKTConstants::LOCAL_CS,
+                         !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
-    datum()->exportToWKT(formatter);
-    coordinateSystem()->exportToWKT(formatter);
+    if (isWKT2 || datum()->name()->description().has_value()) {
+        datum()->exportToWKT(formatter);
+        coordinateSystem()->exportToWKT(formatter);
+    }
     ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
     return formatter->toString();

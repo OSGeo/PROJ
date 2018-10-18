@@ -2111,6 +2111,60 @@ TEST(wkt_parse, ENGINEERINGCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, LOCAL_CS_short) {
+    auto wkt = "LOCAL_CS[\"Engineering CRS\"]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Engineering CRS");
+    EXPECT_FALSE(crs->datum()->name()->description().has_value());
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 2);
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, LOCAL_CS_long_one_aix) {
+    auto wkt = "LOCAL_CS[\"Engineering CRS\",\n"
+               "    LOCAL_DATUM[\"Engineering datum\",12345],\n"
+               "    AXIS[\"height\",up]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Engineering CRS");
+    EXPECT_EQ(*(crs->datum()->name()->description()), "Engineering datum");
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, LOCAL_CS_long_two_axis) {
+    auto wkt = "LOCAL_CS[\"Engineering CRS\",\n"
+               "    LOCAL_DATUM[\"Engineering datum\",12345],\n"
+               "    AXIS[\"Easting\",EAST],\n"
+               "    AXIS[\"Northing\",NORTH]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Engineering CRS");
+    EXPECT_EQ(*(crs->datum()->name()->description()), "Engineering datum");
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 2);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, PDATUM) {
     auto wkt = "PDATUM[\"Parametric datum\",\n"
                "    ANCHOR[\"my anchor\"]]";
@@ -3211,6 +3265,19 @@ TEST(wkt_parse, invalid_EngineeingCRS) {
     EXPECT_THROW(WKTParser().createFromWKT("ENGCRS[\"name\",\n"
                                            "    EDATUM[\"name\"]]"),
                  ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_LOCAL_CS) {
+
+    EXPECT_THROW(
+        WKTParser().createFromWKT("LOCAL_CS[\"name\",\n"
+                                  "  LOCAL_DATUM[\"name\",1234],\n"
+                                  "  AXIS[\"Geodetic latitude\",NORTH],\n"
+                                  "  AXIS[\"Geodetic longitude\",EAST],\n"
+                                  "  AXIS[\"Ellipsoidal height\",UP]]"),
+        ParsingException);
 }
 
 // ---------------------------------------------------------------------------

@@ -2737,9 +2737,13 @@ TEST(crs, engineeringCRS_WKT2) {
 
 TEST(crs, engineeringCRS_WKT1) {
 
-    EXPECT_THROW(createEngineeringCRS()->exportToWKT(
-                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-                 FormattingException);
+    auto expected = "LOCAL_CS[\"Engineering CRS\",\n"
+                    "    LOCAL_DATUM[\"Engineering datum\",32767],\n"
+                    "    AXIS[\"Easting\",EAST],\n"
+                    "    AXIS[\"Northing\",NORTH]]";
+    EXPECT_EQ(createEngineeringCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              expected);
 }
 
 // ---------------------------------------------------------------------------
