@@ -65,8 +65,8 @@ using namespace NS_PROJ::util;
 
 // ---------------------------------------------------------------------------
 
-static void proj_log_error(PJ_CONTEXT *ctx, const char *function,
-                           const char *text) {
+static void PROJ_NO_INLINE proj_log_error(PJ_CONTEXT *ctx, const char *function,
+                                          const char *text) {
     std::string msg(function);
     msg += ": ";
     msg += text;
@@ -75,8 +75,8 @@ static void proj_log_error(PJ_CONTEXT *ctx, const char *function,
 
 // ---------------------------------------------------------------------------
 
-static void proj_log_debug(PJ_CONTEXT *ctx, const char *function,
-                           const char *text) {
+static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
+                                          const char *text) {
     std::string msg(function);
     msg += ": ";
     msg += text;
@@ -151,7 +151,8 @@ void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
 
 // ---------------------------------------------------------------------------
 
-static DatabaseContextNNPtr getDBcontext(PJ_CONTEXT *ctx) {
+static PROJ_NO_INLINE const DatabaseContextNNPtr &
+getDBcontext(PJ_CONTEXT *ctx) {
     if (ctx->cpp_context == nullptr) {
         ctx->cpp_context = new projCppContext(ctx);
     }
@@ -160,8 +161,8 @@ static DatabaseContextNNPtr getDBcontext(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
-static DatabaseContextPtr getDBcontextNoException(PJ_CONTEXT *ctx,
-                                                  const char *function) {
+static PROJ_NO_INLINE DatabaseContextPtr
+getDBcontextNoException(PJ_CONTEXT *ctx, const char *function) {
     try {
         return getDBcontext(ctx).as_nullable();
     } catch (const std::exception &e) {
@@ -325,23 +326,29 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     assert(code);
     (void)options;
     SANITIZE_CTX(ctx);
+    const std::string codeStr(code);
     try {
         auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
+        BaseObjectPtr obj;
         switch (category) {
         case PJ_OBJ_CATEGORY_ELLIPSOID:
-            return new PJ_OBJ(ctx, factory->createEllipsoid(code));
-
+            obj = factory->createEllipsoid(codeStr).as_nullable();
+            break;
         case PJ_OBJ_CATEGORY_DATUM:
-            return new PJ_OBJ(ctx, factory->createDatum(code));
-
+            obj = factory->createDatum(codeStr).as_nullable();
+            break;
         case PJ_OBJ_CATEGORY_CRS:
-            return new PJ_OBJ(ctx,
-                              factory->createCoordinateReferenceSystem(code));
-
+            obj =
+                factory->createCoordinateReferenceSystem(codeStr).as_nullable();
+            break;
         case PJ_OBJ_CATEGORY_COORDINATE_OPERATION:
-            return new PJ_OBJ(ctx, factory->createCoordinateOperation(
-                                       code, usePROJAlternativeGridNames != 0));
+            obj = factory
+                      ->createCoordinateOperation(
+                          codeStr, usePROJAlternativeGridNames != 0)
+                      .as_nullable();
+            break;
         }
+        return new PJ_OBJ(ctx, NN_NO_CHECK(obj));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -368,61 +375,62 @@ void proj_obj_unref(PJ_OBJ *obj) { delete obj; }
  */
 PJ_OBJ_TYPE proj_obj_get_type(PJ_OBJ *obj) {
     assert(obj);
-    if (nn_dynamic_pointer_cast<Ellipsoid>(obj->obj)) {
+    auto ptr = obj->obj.get();
+    if (dynamic_cast<Ellipsoid *>(ptr)) {
         return PJ_OBJ_TYPE_ELLIPSOID;
     }
 
-    if (nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(obj->obj)) {
+    if (dynamic_cast<DynamicGeodeticReferenceFrame *>(ptr)) {
         return PJ_OBJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME;
     }
-    if (nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj->obj)) {
+    if (dynamic_cast<GeodeticReferenceFrame *>(ptr)) {
         return PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME;
     }
-    if (nn_dynamic_pointer_cast<DynamicVerticalReferenceFrame>(obj->obj)) {
+    if (dynamic_cast<DynamicVerticalReferenceFrame *>(ptr)) {
         return PJ_OBJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME;
     }
-    if (nn_dynamic_pointer_cast<VerticalReferenceFrame>(obj->obj)) {
+    if (dynamic_cast<VerticalReferenceFrame *>(ptr)) {
         return PJ_OBJ_TYPE_VERTICAL_REFERENCE_FRAME;
     }
-    if (nn_dynamic_pointer_cast<DatumEnsemble>(obj->obj)) {
+    if (dynamic_cast<DatumEnsemble *>(ptr)) {
         return PJ_OBJ_TYPE_DATUM_ENSEMBLE;
     }
 
-    if (nn_dynamic_pointer_cast<GeographicCRS>(obj->obj)) {
+    if (dynamic_cast<GeographicCRS *>(ptr)) {
         return PJ_OBJ_TYPE_GEOGRAPHIC_CRS;
     }
-    if (nn_dynamic_pointer_cast<GeodeticCRS>(obj->obj)) {
+    if (dynamic_cast<GeodeticCRS *>(ptr)) {
         return PJ_OBJ_TYPE_GEODETIC_CRS;
     }
-    if (nn_dynamic_pointer_cast<VerticalCRS>(obj->obj)) {
+    if (dynamic_cast<VerticalCRS *>(ptr)) {
         return PJ_OBJ_TYPE_VERTICAL_CRS;
     }
-    if (nn_dynamic_pointer_cast<ProjectedCRS>(obj->obj)) {
+    if (dynamic_cast<ProjectedCRS *>(ptr)) {
         return PJ_OBJ_TYPE_PROJECTED_CRS;
     }
-    if (nn_dynamic_pointer_cast<CompoundCRS>(obj->obj)) {
+    if (dynamic_cast<CompoundCRS *>(ptr)) {
         return PJ_OBJ_TYPE_COMPOUND_CRS;
     }
-    if (nn_dynamic_pointer_cast<TemporalCRS>(obj->obj)) {
+    if (dynamic_cast<TemporalCRS *>(ptr)) {
         return PJ_OBJ_TYPE_TEMPORAL_CRS;
     }
-    if (nn_dynamic_pointer_cast<BoundCRS>(obj->obj)) {
+    if (dynamic_cast<BoundCRS *>(ptr)) {
         return PJ_OBJ_TYPE_BOUND_CRS;
     }
-    if (nn_dynamic_pointer_cast<CRS>(obj->obj)) {
+    if (dynamic_cast<CRS *>(ptr)) {
         return PJ_OBJ_TYPE_OTHER_CRS;
     }
 
-    if (nn_dynamic_pointer_cast<Conversion>(obj->obj)) {
+    if (dynamic_cast<Conversion *>(ptr)) {
         return PJ_OBJ_TYPE_CONVERSION;
     }
-    if (nn_dynamic_pointer_cast<Transformation>(obj->obj)) {
+    if (dynamic_cast<Transformation *>(ptr)) {
         return PJ_OBJ_TYPE_TRANSFORMATION;
     }
-    if (nn_dynamic_pointer_cast<ConcatenatedOperation>(obj->obj)) {
+    if (dynamic_cast<ConcatenatedOperation *>(ptr)) {
         return PJ_OBJ_TYPE_CONCATENATED_OPERATION;
     }
-    if (nn_dynamic_pointer_cast<CoordinateOperation>(obj->obj)) {
+    if (dynamic_cast<CoordinateOperation *>(ptr)) {
         return PJ_OBJ_TYPE_OTHER_COORDINATE_OPERATION;
     }
 
@@ -437,7 +445,7 @@ PJ_OBJ_TYPE proj_obj_get_type(PJ_OBJ *obj) {
  */
 int proj_obj_is_crs(PJ_OBJ *obj) {
     assert(obj);
-    return nn_dynamic_pointer_cast<CRS>(obj->obj) != nullptr;
+    return dynamic_cast<CRS *>(obj->obj.get()) != nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -451,16 +459,19 @@ int proj_obj_is_crs(PJ_OBJ *obj) {
  */
 const char *proj_obj_get_name(PJ_OBJ *obj) {
     assert(obj);
-    auto identifiable = nn_dynamic_pointer_cast<IdentifiedObject>(obj->obj);
+    auto identifiable = dynamic_cast<const IdentifiedObject *>(obj->obj.get());
     if (!identifiable) {
         proj_log_error(obj->ctx, __FUNCTION__,
                        "Object type not castable to IdentifiedObject");
         return nullptr;
     }
-    if (!identifiable->name()->description().has_value()) {
+    const auto &desc = identifiable->name()->description();
+    if (!desc.has_value()) {
         return nullptr;
     }
-    return identifiable->name()->description()->c_str();
+    // The object will still be alived after the function call.
+    // cppcheck-suppress stlcstr
+    return desc->c_str();
 }
 
 // ---------------------------------------------------------------------------
@@ -475,20 +486,23 @@ const char *proj_obj_get_name(PJ_OBJ *obj) {
  */
 const char *proj_obj_get_id_auth_name(PJ_OBJ *obj, int index) {
     assert(obj);
-    auto identifiable = nn_dynamic_pointer_cast<IdentifiedObject>(obj->obj);
+    auto identifiable = dynamic_cast<const IdentifiedObject *>(obj->obj.get());
     if (!identifiable) {
         proj_log_error(obj->ctx, __FUNCTION__,
                        "Object type not castable to IdentifiedObject");
         return nullptr;
     }
-    if (index < 0 ||
-        static_cast<size_t>(index) >= identifiable->identifiers().size()) {
+    const auto &ids = identifiable->identifiers();
+    if (index < 0 || static_cast<size_t>(index) >= ids.size()) {
         return nullptr;
     }
-    if (!identifiable->identifiers()[index]->codeSpace().has_value()) {
+    const auto &codeSpace = ids[index]->codeSpace();
+    if (!codeSpace.has_value()) {
         return nullptr;
     }
-    return identifiable->identifiers()[index]->codeSpace()->c_str();
+    // The object will still be alived after the function call.
+    // cppcheck-suppress stlcstr
+    return codeSpace->c_str();
 }
 
 // ---------------------------------------------------------------------------
@@ -503,17 +517,17 @@ const char *proj_obj_get_id_auth_name(PJ_OBJ *obj, int index) {
  */
 const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
     assert(obj);
-    auto identifiable = nn_dynamic_pointer_cast<IdentifiedObject>(obj->obj);
+    auto identifiable = dynamic_cast<const IdentifiedObject *>(obj->obj.get());
     if (!identifiable) {
         proj_log_error(obj->ctx, __FUNCTION__,
                        "Object type not castable to IdentifiedObject");
         return nullptr;
     }
-    if (index < 0 ||
-        static_cast<size_t>(index) >= identifiable->identifiers().size()) {
+    const auto &ids = identifiable->identifiers();
+    if (index < 0 || static_cast<size_t>(index) >= ids.size()) {
         return nullptr;
     }
-    return identifiable->identifiers()[index]->code().c_str();
+    return ids[index]->code().c_str();
 }
 
 // ---------------------------------------------------------------------------
@@ -540,7 +554,7 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
     if (iter != obj->mapWKTString.end()) {
         return iter->second.c_str();
     }
-    auto wktExportable = nn_dynamic_pointer_cast<IWKTExportable>(obj->obj);
+    auto wktExportable = dynamic_cast<const IWKTExportable *>(obj->obj.get());
     if (!wktExportable) {
         proj_log_error(obj->ctx, __FUNCTION__,
                        "Object type not exportable to WKT");
@@ -601,7 +615,8 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
     if (iter != obj->mapPROJString.end()) {
         return iter->second.c_str();
     }
-    auto exportable = nn_dynamic_pointer_cast<IPROJStringExportable>(obj->obj);
+    auto exportable =
+        dynamic_cast<const IPROJStringExportable *>(obj->obj.get());
     if (!exportable) {
         proj_log_error(obj->ctx, __FUNCTION__,
                        "Object type not exportable to PROJ");
@@ -638,7 +653,7 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
 
 static GeodeticCRSPtr extractGeodeticCRS(PJ_OBJ *crs, const char *fname) {
     assert(crs);
-    auto l_crs = nn_dynamic_pointer_cast<CRS>(crs->obj);
+    auto l_crs = dynamic_cast<const CRS *>(crs->obj.get());
     if (!l_crs) {
         proj_log_error(crs->ctx, fname, "Object is not a CRS");
         return nullptr;
@@ -646,7 +661,6 @@ static GeodeticCRSPtr extractGeodeticCRS(PJ_OBJ *crs, const char *fname) {
     auto geodCRS = l_crs->extractGeodeticCRS();
     if (!geodCRS) {
         proj_log_error(crs->ctx, fname, "CRS has no geodetic CRS");
-        return nullptr;
     }
     return geodCRS;
 }
@@ -668,7 +682,7 @@ PJ_OBJ *proj_obj_crs_get_geodetic_crs(PJ_OBJ *crs) {
     if (!geodCRS) {
         return nullptr;
     }
-    return new PJ_OBJ(crs->ctx, NN_CHECK_ASSERT(geodCRS));
+    return new PJ_OBJ(crs->ctx, NN_NO_CHECK(geodCRS));
 }
 
 // ---------------------------------------------------------------------------
@@ -687,7 +701,7 @@ PJ_OBJ *proj_obj_crs_get_geodetic_crs(PJ_OBJ *crs) {
  */
 PJ_OBJ *proj_obj_crs_get_sub_crs(PJ_OBJ *crs, int index) {
     assert(crs);
-    auto l_crs = nn_dynamic_pointer_cast<CompoundCRS>(crs->obj);
+    auto l_crs = dynamic_cast<CompoundCRS *>(crs->obj.get());
     if (!l_crs) {
         proj_log_error(crs->ctx, __FUNCTION__, "Object is not a CompoundCRS");
         return nullptr;
@@ -717,14 +731,12 @@ PJ_OBJ *proj_obj_crs_get_sub_crs(PJ_OBJ *crs, int index) {
  */
 PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ *crs) {
     assert(crs);
-    auto l_crs = nn_dynamic_pointer_cast<CRS>(crs->obj);
+    auto l_crs = dynamic_cast<const CRS *>(crs->obj.get());
     if (!l_crs) {
         proj_log_error(crs->ctx, __FUNCTION__, "Object is not a CRS");
         return nullptr;
     }
-    auto dbContext = crs->ctx->cpp_context
-                         ? getDBcontextNoException(crs->ctx, __FUNCTION__)
-                         : nullptr;
+    auto dbContext = getDBcontextNoException(crs->ctx, __FUNCTION__);
     return new PJ_OBJ(crs->ctx,
                       l_crs->createBoundCRSToWGS84IfPossible(dbContext));
 }
@@ -742,14 +754,15 @@ PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ *crs) {
  * in case of error.
  */
 PJ_OBJ *proj_obj_get_ellipsoid(PJ_OBJ *obj) {
-    if (nn_dynamic_pointer_cast<CRS>(obj->obj)) {
+    auto ptr = obj->obj.get();
+    if (dynamic_cast<const CRS *>(ptr)) {
         auto geodCRS = extractGeodeticCRS(obj, __FUNCTION__);
         if (!geodCRS) {
             return nullptr;
         }
         return new PJ_OBJ(obj->ctx, geodCRS->ellipsoid());
     } else {
-        auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj->obj);
+        auto datum = dynamic_cast<const GeodeticReferenceFrame *>(ptr);
         if (datum) {
             return new PJ_OBJ(obj->ctx, datum->ellipsoid());
         }
@@ -777,15 +790,16 @@ PJ_OBJ *proj_obj_crs_get_horizontal_datum(PJ_OBJ *crs) {
         return nullptr;
     }
     auto datum = geodCRS->datum();
-    if (!datum) {
-        auto datumEnsemble = geodCRS->datumEnsemble();
-        if (datumEnsemble) {
-            return new PJ_OBJ(crs->ctx, NN_CHECK_ASSERT(datumEnsemble));
-        }
-        proj_log_error(crs->ctx, __FUNCTION__, "CRS has no datum");
-        return nullptr;
+    if (datum) {
+        return new PJ_OBJ(crs->ctx, NN_NO_CHECK(datum));
     }
-    return new PJ_OBJ(crs->ctx, NN_CHECK_ASSERT(datum));
+
+    auto datumEnsemble = geodCRS->datumEnsemble();
+    if (datumEnsemble) {
+        return new PJ_OBJ(crs->ctx, NN_NO_CHECK(datumEnsemble));
+    }
+    proj_log_error(crs->ctx, __FUNCTION__, "CRS has no datum");
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -810,7 +824,7 @@ int proj_obj_ellipsoid_get_parameters(PJ_OBJ *ellipsoid,
                                       int *pIsSemiMinorComputed,
                                       double *pInverseFlattening) {
     assert(ellipsoid);
-    auto l_ellipsoid = nn_dynamic_pointer_cast<Ellipsoid>(ellipsoid->obj);
+    auto l_ellipsoid = dynamic_cast<const Ellipsoid *>(ellipsoid->obj.get());
     if (!l_ellipsoid) {
         proj_log_error(ellipsoid->ctx, __FUNCTION__,
                        "Object is not a Ellipsoid");
@@ -847,14 +861,14 @@ int proj_obj_ellipsoid_get_parameters(PJ_OBJ *ellipsoid,
  */
 
 PJ_OBJ *proj_obj_get_prime_meridian(PJ_OBJ *obj) {
-    if (nn_dynamic_pointer_cast<CRS>(obj->obj)) {
+    auto ptr = obj->obj.get();
+    if (dynamic_cast<CRS *>(ptr)) {
         auto geodCRS = extractGeodeticCRS(obj, __FUNCTION__);
-        if (!geodCRS) {
-            return nullptr;
+        if (geodCRS) {
+            return new PJ_OBJ(obj->ctx, geodCRS->primeMeridian());
         }
-        return new PJ_OBJ(obj->ctx, geodCRS->primeMeridian());
     } else {
-        auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj->obj);
+        auto datum = dynamic_cast<const GeodeticReferenceFrame *>(ptr);
         if (datum) {
             return new PJ_OBJ(obj->ctx, datum->primeMeridian());
         }
@@ -882,7 +896,7 @@ int proj_obj_prime_meridian_get_parameters(PJ_OBJ *prime_meridian,
                                            double *pLongitudeUnitConvFactor,
                                            const char **pLongitudeUnitName) {
     assert(prime_meridian);
-    auto l_pm = nn_dynamic_pointer_cast<PrimeMeridian>(prime_meridian->obj);
+    auto l_pm = dynamic_cast<const PrimeMeridian *>(prime_meridian->obj.get());
     if (!l_pm) {
         proj_log_error(prime_meridian->ctx, __FUNCTION__,
                        "Object is not a PrimeMeridian");
@@ -892,11 +906,12 @@ int proj_obj_prime_meridian_get_parameters(PJ_OBJ *prime_meridian,
     if (pLongitude) {
         *pLongitude = longitude.value();
     }
+    const auto &unit = longitude.unit();
     if (pLongitudeUnitConvFactor) {
-        *pLongitudeUnitConvFactor = longitude.unit().conversionToSI();
+        *pLongitudeUnitConvFactor = unit.conversionToSI();
     }
     if (pLongitudeUnitName) {
-        *pLongitudeUnitName = longitude.unit().name().c_str();
+        *pLongitudeUnitName = unit.name().c_str();
     }
     return true;
 }
@@ -916,15 +931,16 @@ int proj_obj_prime_meridian_get_parameters(PJ_OBJ *prime_meridian,
  */
 PJ_OBJ *proj_obj_get_source_crs(PJ_OBJ *obj) {
     assert(obj);
-    auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj->obj);
+    auto ptr = obj->obj.get();
+    auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
         return new PJ_OBJ(obj->ctx, boundCRS->baseCRS());
     }
-    auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj->obj);
+    auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
         auto sourceCRS = co->sourceCRS();
         if (sourceCRS) {
-            return new PJ_OBJ(obj->ctx, NN_CHECK_ASSERT(sourceCRS));
+            return new PJ_OBJ(obj->ctx, NN_NO_CHECK(sourceCRS));
         }
         return nullptr;
     }
@@ -948,15 +964,16 @@ PJ_OBJ *proj_obj_get_source_crs(PJ_OBJ *obj) {
  */
 PJ_OBJ *proj_obj_get_target_crs(PJ_OBJ *obj) {
     assert(obj);
-    auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj->obj);
+    auto ptr = obj->obj.get();
+    auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
         return new PJ_OBJ(obj->ctx, boundCRS->hubCRS());
     }
-    auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj->obj);
+    auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
         auto targetCRS = co->targetCRS();
         if (targetCRS) {
-            return new PJ_OBJ(obj->ctx, NN_CHECK_ASSERT(targetCRS));
+            return new PJ_OBJ(obj->ctx, NN_NO_CHECK(targetCRS));
         }
         return nullptr;
     }
@@ -1144,11 +1161,11 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_OBJ *crs, const char **pMethodName,
     assert(crs);
     SingleOperationPtr co;
 
-    auto derivedCRS = nn_dynamic_pointer_cast<DerivedCRS>(crs->obj);
+    auto derivedCRS = dynamic_cast<const DerivedCRS *>(crs->obj.get());
     if (derivedCRS) {
         co = derivedCRS->derivingConversion().as_nullable();
     } else {
-        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(crs->obj);
+        auto boundCRS = dynamic_cast<const BoundCRS *>(crs->obj.get());
         if (boundCRS) {
             co = boundCRS->transformation().as_nullable();
         } else {
@@ -1165,16 +1182,19 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_OBJ *crs, const char **pMethodName,
     }
     if (pMethodAuthorityName) {
         if (!method_ids.empty()) {
-            *pMethodAuthorityName =
-                method->identifiers()[0]->codeSpace()->c_str();
+            *pMethodAuthorityName = method_ids[0]->codeSpace()->c_str();
         } else {
             *pMethodAuthorityName = nullptr;
         }
     }
     if (pMethodCode) {
-        *pMethodCode = method->identifiers()[0]->code().c_str();
+        if (!method_ids.empty()) {
+            *pMethodCode = method_ids[0]->code().c_str();
+        } else {
+            *pMethodCode = nullptr;
+        }
     }
-    return new PJ_OBJ(crs->ctx, NN_CHECK_ASSERT(co));
+    return new PJ_OBJ(crs->ctx, NN_NO_CHECK(co));
 }
 
 // ---------------------------------------------------------------------------
@@ -1190,7 +1210,8 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_OBJ *crs, const char **pMethodName,
 
 int proj_coordoperation_is_instanciable(PJ_OBJ *coordoperation) {
     assert(coordoperation);
-    auto op = nn_dynamic_pointer_cast<CoordinateOperation>(coordoperation->obj);
+    auto op =
+        dynamic_cast<const CoordinateOperation *>(coordoperation->obj.get());
     if (!op) {
         proj_log_error(coordoperation->ctx, __FUNCTION__,
                        "Object is not a CoordinateOperation");
@@ -1214,13 +1235,13 @@ int proj_coordoperation_is_instanciable(PJ_OBJ *coordoperation) {
 
 int proj_coordoperation_get_param_count(PJ_OBJ *coordoperation) {
     assert(coordoperation);
-    auto co = nn_dynamic_pointer_cast<SingleOperation>(coordoperation->obj);
-    if (!co) {
+    auto op = dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
+    if (!op) {
         proj_log_error(coordoperation->ctx, __FUNCTION__,
                        "Object is not a SingleOperation");
         return 0;
     }
-    return static_cast<int>(co->parameterValues().size());
+    return static_cast<int>(op->parameterValues().size());
 }
 
 // ---------------------------------------------------------------------------
@@ -1237,16 +1258,17 @@ int proj_coordoperation_get_param_index(PJ_OBJ *coordoperation,
                                         const char *name) {
     assert(coordoperation);
     assert(name);
-    auto co = nn_dynamic_pointer_cast<SingleOperation>(coordoperation->obj);
-    if (!co) {
+    auto op = dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
+    if (!op) {
         proj_log_error(coordoperation->ctx, __FUNCTION__,
                        "Object is not a SingleOperation");
         return -1;
     }
     int index = 0;
-    for (const auto &genParam : co->method()->parameters()) {
+    const std::string nameStr(name);
+    for (const auto &genParam : op->method()->parameters()) {
         if (Identifier::isEquivalentName(*genParam->name()->description(),
-                                         name)) {
+                                         nameStr)) {
             return index;
         }
         index++;
@@ -1285,14 +1307,14 @@ int proj_coordoperation_get_param(PJ_OBJ *coordoperation, int index,
                                   double *pValueUnitConvFactor,
                                   const char **pValueUnitName) {
     assert(coordoperation);
-    auto co = nn_dynamic_pointer_cast<SingleOperation>(coordoperation->obj);
-    if (!co) {
+    auto op = dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
+    if (!op) {
         proj_log_error(coordoperation->ctx, __FUNCTION__,
                        "Object is not a SingleOperation");
         return false;
     }
-    const auto &parameters = co->method()->parameters();
-    const auto &values = co->parameterValues();
+    const auto &parameters = op->method()->parameters();
+    const auto &values = op->parameterValues();
     if (index < 0 || static_cast<size_t>(index) >= parameters.size() ||
         static_cast<size_t>(index) >= values.size()) {
         proj_log_error(coordoperation->ctx, __FUNCTION__, "Invalid index");
@@ -1321,7 +1343,8 @@ int proj_coordoperation_get_param(PJ_OBJ *coordoperation, int index,
 
     const auto &value = values[index];
     ParameterValuePtr paramValue = nullptr;
-    auto opParamValue = nn_dynamic_pointer_cast<OperationParameterValue>(value);
+    auto opParamValue =
+        dynamic_cast<const OperationParameterValue *>(value.get());
     if (opParamValue) {
         paramValue = opParamValue->parameterValue().as_nullable();
     }
@@ -1374,7 +1397,8 @@ int proj_coordoperation_get_param(PJ_OBJ *coordoperation, int index,
 
 int proj_coordoperation_get_grid_used_count(PJ_OBJ *coordoperation) {
     assert(coordoperation);
-    auto co = nn_dynamic_pointer_cast<CoordinateOperation>(coordoperation->obj);
+    auto co =
+        dynamic_cast<const CoordinateOperation *>(coordoperation->obj.get());
     if (!co) {
         proj_log_error(coordoperation->ctx, __FUNCTION__,
                        "Object is not a CoordinateOperation");
@@ -1432,32 +1456,33 @@ int proj_coordoperation_get_grid_used(PJ_OBJ *coordoperation, int index,
         return false;
     }
 
+    const auto &gridDesc = coordoperation->gridsNeeded[index];
     if (pShortName) {
-        *pShortName = coordoperation->gridsNeeded[index].shortName.c_str();
+        *pShortName = gridDesc.shortName.c_str();
     }
 
     if (pFullName) {
-        *pFullName = coordoperation->gridsNeeded[index].fullName.c_str();
+        *pFullName = gridDesc.fullName.c_str();
     }
 
     if (pPackageName) {
-        *pPackageName = coordoperation->gridsNeeded[index].packageName.c_str();
+        *pPackageName = gridDesc.packageName.c_str();
     }
 
     if (pURL) {
-        *pURL = coordoperation->gridsNeeded[index].url.c_str();
+        *pURL = gridDesc.url.c_str();
     }
 
     if (pDirectDownload) {
-        *pDirectDownload = coordoperation->gridsNeeded[index].directDownload;
+        *pDirectDownload = gridDesc.directDownload;
     }
 
     if (pOpenLicense) {
-        *pOpenLicense = coordoperation->gridsNeeded[index].openLicense;
+        *pOpenLicense = gridDesc.openLicense;
     }
 
     if (pAvailable) {
-        *pAvailable = coordoperation->gridsNeeded[index].available;
+        *pAvailable = gridDesc.available;
     }
 
     return true;
@@ -1502,8 +1527,8 @@ proj_create_operation_factory_context(PJ_CONTEXT *ctx) {
     try {
         if (dbContext) {
             auto factory = CoordinateOperationFactory::create();
-            auto authFactory = AuthorityFactory::create(
-                NN_CHECK_ASSERT(dbContext), std::string());
+            auto authFactory =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
             auto operationContext =
                 CoordinateOperationContext::create(authFactory, nullptr, 0.0);
             return new PJ_OPERATION_FACTORY_CONTEXT(ctx, operationContext);
@@ -1788,8 +1813,8 @@ proj_obj_create_operations(PJ_OBJ *source_crs, PJ_OBJ *target_crs,
         auto factory = CoordinateOperationFactory::create();
         return new PJ_OPERATION_RESULT(
             operationContext->ctx,
-            factory->createOperations(NN_CHECK_ASSERT(sourceCRS),
-                                      NN_CHECK_ASSERT(targetCRS),
+            factory->createOperations(NN_NO_CHECK(sourceCRS),
+                                      NN_NO_CHECK(targetCRS),
                                       operationContext->operationContext));
     } catch (const std::exception &e) {
         proj_log_error(operationContext->ctx, __FUNCTION__, e.what());

@@ -179,7 +179,7 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
         }
     }
 
-    return NN_CHECK_ASSERT(obj);
+    return NN_NO_CHECK(obj);
 }
 
 // ---------------------------------------------------------------------------
@@ -350,7 +350,7 @@ static void outputOperations(
     try {
         auto authFactory = dbContext
                                ? AuthorityFactory::create(
-                                     NN_CHECK_ASSERT(dbContext), std::string())
+                                     NN_NO_CHECK(dbContext), std::string())
                                      .as_nullable()
                                : nullptr;
         auto ctxt =
@@ -362,7 +362,7 @@ static void outputOperations(
         ctxt->setIntermediateCRS(pivots);
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         list = CoordinateOperationFactory::create()->createOperations(
-            NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS), ctxt);
+            NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), ctxt);
     } catch (const std::exception &e) {
         std::cerr << "createOperations() failed with: " << e.what()
                   << std::endl;

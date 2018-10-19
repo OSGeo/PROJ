@@ -236,7 +236,7 @@ static double getAccuracy(const std::vector<CoordinateOperationNNPtr> &ops);
 // Returns the accuracy of an operation, or -1 if unknown
 static double getAccuracy(CoordinateOperationNNPtr op) {
 
-    if (util::nn_dynamic_pointer_cast<Conversion>(op)) {
+    if (dynamic_cast<const Conversion *>(op.get())) {
         // A conversion is perfectly accurate.
         return 0.0;
     }
@@ -250,7 +250,7 @@ static double getAccuracy(CoordinateOperationNNPtr op) {
         }
     } else {
         auto concatenated =
-            util::nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
+            dynamic_cast<const ConcatenatedOperation *>(op.get());
         if (concatenated) {
             accuracy = getAccuracy(concatenated->operations());
         }
@@ -334,7 +334,7 @@ getExtent(const std::vector<CoordinateOperationNNPtr> &ops,
         if (res == nullptr) {
             res = subExtent;
         } else {
-            res = res->intersection(NN_CHECK_ASSERT(subExtent));
+            res = res->intersection(NN_NO_CHECK(subExtent));
             if (!res) {
                 emptyIntersection = true;
                 return nullptr;
@@ -1473,8 +1473,8 @@ ConversionNNPtr Conversion::shallowClone() const {
     auto l_sourceCRS = sourceCRS();
     auto l_targetCRS = targetCRS();
     if (l_sourceCRS && l_targetCRS) {
-        conv->setCRSs(NN_CHECK_ASSERT(l_sourceCRS),
-                      NN_CHECK_ASSERT(l_targetCRS), interpolationCRS());
+        conv->setCRSs(NN_NO_CHECK(l_sourceCRS), NN_NO_CHECK(l_targetCRS),
+                      interpolationCRS());
     }
     return conv;
 }
@@ -3838,7 +3838,7 @@ InverseConversion::~InverseConversion() = default;
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr InverseConversion::inverseAsConversion() const {
-    return NN_CHECK_ASSERT(
+    return NN_NO_CHECK(
         util::nn_dynamic_pointer_cast<Conversion>(forwardOperation_));
 }
 
@@ -3894,8 +3894,8 @@ CoordinateOperationNNPtr Conversion::inverse() const {
         auto l_sourceCRS = sourceCRS();
         auto l_targetCRS = targetCRS();
         if (l_sourceCRS && l_targetCRS) {
-            conv->setCRSs(NN_CHECK_ASSERT(l_targetCRS),
-                          NN_CHECK_ASSERT(l_sourceCRS), nullptr);
+            conv->setCRSs(NN_NO_CHECK(l_targetCRS), NN_NO_CHECK(l_sourceCRS),
+                          nullptr);
         }
         return conv;
     }
@@ -3909,13 +3909,13 @@ CoordinateOperationNNPtr Conversion::inverse() const {
         auto l_sourceCRS = sourceCRS();
         auto l_targetCRS = targetCRS();
         if (l_sourceCRS && l_targetCRS) {
-            conv->setCRSs(NN_CHECK_ASSERT(l_targetCRS),
-                          NN_CHECK_ASSERT(l_sourceCRS), nullptr);
+            conv->setCRSs(NN_NO_CHECK(l_targetCRS), NN_NO_CHECK(l_sourceCRS),
+                          nullptr);
         }
         return conv;
     }
 
-    return InverseConversion::create(NN_CHECK_ASSERT(
+    return InverseConversion::create(NN_NO_CHECK(
         util::nn_dynamic_pointer_cast<Conversion>(shared_from_this())));
 }
 
@@ -4678,7 +4678,7 @@ Transformation::~Transformation() = default;
  * @return the source CRS.
  */
 const crs::CRSNNPtr Transformation::sourceCRS() const {
-    return NN_CHECK_ASSERT(CoordinateOperation::sourceCRS());
+    return NN_NO_CHECK(CoordinateOperation::sourceCRS());
 }
 
 // ---------------------------------------------------------------------------
@@ -4688,7 +4688,7 @@ const crs::CRSNNPtr Transformation::sourceCRS() const {
  * @return the target CRS.
  */
 const crs::CRSNNPtr Transformation::targetCRS() const {
-    return NN_CHECK_ASSERT(CoordinateOperation::targetCRS());
+    return NN_NO_CHECK(CoordinateOperation::targetCRS());
 }
 
 // ---------------------------------------------------------------------------
@@ -5831,7 +5831,7 @@ TransformationNNPtr Transformation::createTOWGS84(
                 common::IdentifiedObject::NAME_KEY,
                 "Transformation from " +
                     *(transformSourceCRS->name()->description()) + " to WGS84"),
-            NN_CHECK_ASSERT(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
+            NN_NO_CHECK(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
             TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
             {});
     }
@@ -5841,7 +5841,7 @@ TransformationNNPtr Transformation::createTOWGS84(
             common::IdentifiedObject::NAME_KEY,
             "Transformation from " +
                 *(transformSourceCRS->name()->description()) + " to WGS84"),
-        NN_CHECK_ASSERT(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
+        NN_NO_CHECK(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
         TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
         TOWGS84Parameters[3], TOWGS84Parameters[4], TOWGS84Parameters[5],
         TOWGS84Parameters[6], {});
@@ -6537,7 +6537,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
     auto methodName = *(method()->name()->description());
 
     if (d->forwardOperation_) {
-        return NN_CHECK_ASSERT(d->forwardOperation_);
+        return NN_NO_CHECK(d->forwardOperation_);
     }
 
     // For geocentric translation, the inverse is exactly the negation of
@@ -6721,7 +6721,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                 sourceCRS()));
     }
 
-    return InverseTransformation::create(NN_CHECK_ASSERT(
+    return InverseTransformation::create(NN_NO_CHECK(
         util::nn_dynamic_pointer_cast<Transformation>(shared_from_this())));
 }
 
@@ -7108,7 +7108,7 @@ createNTv1(const util::PropertyMap &properties,
  */
 TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
     io::DatabaseContextNNPtr databaseContext) const {
-    auto self = NN_CHECK_ASSERT(std::dynamic_pointer_cast<Transformation>(
+    auto self = NN_NO_CHECK(std::dynamic_pointer_cast<Transformation>(
         shared_from_this().as_nullable()));
 
     auto methodName = *(method()->name()->description());
@@ -7757,8 +7757,8 @@ std::string Transformation::exportToPROJString(
     // Substitute grid names with PROJ friendly names.
     if (formatter->databaseContext()) {
         auto alternate = substitutePROJAlternativeGridNames(
-            NN_CHECK_ASSERT(formatter->databaseContext()));
-        auto self = NN_CHECK_ASSERT(std::dynamic_pointer_cast<Transformation>(
+            NN_NO_CHECK(formatter->databaseContext()));
+        auto self = NN_NO_CHECK(std::dynamic_pointer_cast<Transformation>(
             shared_from_this().as_nullable()));
 
         if (alternate != self) {
@@ -8102,7 +8102,7 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
                     *targetCRSIds[0]->codeSpace()) {
                 // same id --> ok
             } else if (!l_sourceCRS->isEquivalentTo(
-                           NN_CHECK_ASSERT(lastTargetCRS),
+                           NN_NO_CHECK(lastTargetCRS),
                            util::IComparable::Criterion::EQUIVALENT)) {
                 throw InvalidOperation(
                     "Inconsistent chaining of CRS in operations");
@@ -8114,8 +8114,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
         operationsIn);
     op->assignSelf(op);
     op->setProperties(properties);
-    op->setCRSs(NN_CHECK_ASSERT(operationsIn[0]->sourceCRS()),
-                NN_CHECK_ASSERT(operationsIn.back()->targetCRS()), nullptr);
+    op->setCRSs(NN_NO_CHECK(operationsIn[0]->sourceCRS()),
+                NN_NO_CHECK(operationsIn.back()->targetCRS()), nullptr);
     op->setAccuracies(accuracies);
     return op;
 }
@@ -8195,7 +8195,7 @@ CoordinateOperationNNPtr ConcatenatedOperation::createComputeMetadata(
     }
     if (extent) {
         properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                       NN_CHECK_ASSERT(extent));
+                       NN_NO_CHECK(extent));
     }
 
     std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
@@ -8852,7 +8852,7 @@ struct FilterAndSort {
                     INTERSECTION) {
                 if (sourceCRSExtent && targetCRSExtent) {
                     areaOfInterest = sourceCRSExtent->intersection(
-                        NN_CHECK_ASSERT(targetCRSExtent));
+                        NN_NO_CHECK(targetCRSExtent));
                 }
             } else if (sourceAndTargetCRSExtentUse ==
                        CoordinateOperationContext::SourceTargetCRSExtentUse::
@@ -8893,7 +8893,7 @@ struct FilterAndSort {
                 if (!extent)
                     continue;
                 bool extentContains =
-                    extent->contains(NN_CHECK_ASSERT(areaOfInterest));
+                    extent->contains(NN_NO_CHECK(areaOfInterest));
                 if (extentContains) {
                     hasOpThatContainsAreaOfInterest = true;
                 }
@@ -8906,7 +8906,7 @@ struct FilterAndSort {
                 if (spatialCriterion ==
                         CoordinateOperationContext::SpatialCriterion::
                             PARTIAL_INTERSECTION &&
-                    !extent->intersects(NN_CHECK_ASSERT(areaOfInterest))) {
+                    !extent->intersects(NN_NO_CHECK(areaOfInterest))) {
                     continue;
                 }
             } else if (sourceAndTargetCRSExtentUse ==
@@ -8918,10 +8918,10 @@ struct FilterAndSort {
                     continue;
                 bool extentContainsSource =
                     !sourceCRSExtent ||
-                    extent->contains(NN_CHECK_ASSERT(sourceCRSExtent));
+                    extent->contains(NN_NO_CHECK(sourceCRSExtent));
                 bool extentContainsTarget =
                     !targetCRSExtent ||
-                    extent->contains(NN_CHECK_ASSERT(targetCRSExtent));
+                    extent->contains(NN_NO_CHECK(targetCRSExtent));
                 if (extentContainsSource && extentContainsTarget) {
                     hasOpThatContainsAreaOfInterest = true;
                 }
@@ -8936,10 +8936,10 @@ struct FilterAndSort {
                                PARTIAL_INTERSECTION) {
                     bool extentIntersectsSource =
                         !sourceCRSExtent ||
-                        extent->intersects(NN_CHECK_ASSERT(sourceCRSExtent));
+                        extent->intersects(NN_NO_CHECK(sourceCRSExtent));
                     bool extentIntersectsTarget =
                         targetCRSExtent &&
-                        extent->intersects(NN_CHECK_ASSERT(targetCRSExtent));
+                        extent->intersects(NN_NO_CHECK(targetCRSExtent));
                     if (!extentIntersectsSource || !extentIntersectsTarget) {
                         continue;
                     }
@@ -8962,23 +8962,23 @@ struct FilterAndSort {
             double area = 0.0;
             if (extentOp) {
                 if (areaOfInterest) {
-                    area = getPseudoArea(extentOp->intersection(
-                        NN_CHECK_ASSERT(areaOfInterest)));
+                    area = getPseudoArea(
+                        extentOp->intersection(NN_NO_CHECK(areaOfInterest)));
                 } else if (sourceCRSExtent && targetCRSExtent) {
-                    auto x = extentOp->intersection(
-                        NN_CHECK_ASSERT(sourceCRSExtent));
-                    auto y = extentOp->intersection(
-                        NN_CHECK_ASSERT(targetCRSExtent));
+                    auto x =
+                        extentOp->intersection(NN_NO_CHECK(sourceCRSExtent));
+                    auto y =
+                        extentOp->intersection(NN_NO_CHECK(targetCRSExtent));
                     area = getPseudoArea(x) + getPseudoArea(y) -
-                           ((x && y) ? getPseudoArea(
-                                           x->intersection(NN_CHECK_ASSERT(y)))
-                                     : 0.0);
+                           ((x && y)
+                                ? getPseudoArea(x->intersection(NN_NO_CHECK(y)))
+                                : 0.0);
                 } else if (sourceCRSExtent) {
-                    area = getPseudoArea(extentOp->intersection(
-                        NN_CHECK_ASSERT(sourceCRSExtent)));
+                    area = getPseudoArea(
+                        extentOp->intersection(NN_NO_CHECK(sourceCRSExtent)));
                 } else if (targetCRSExtent) {
-                    area = getPseudoArea(extentOp->intersection(
-                        NN_CHECK_ASSERT(targetCRSExtent)));
+                    area = getPseudoArea(
+                        extentOp->intersection(NN_NO_CHECK(targetCRSExtent)));
                 } else {
                     area = getPseudoArea(extentOp);
                 }
@@ -9085,8 +9085,8 @@ struct FilterAndSort {
                 const bool sameExtent =
                     ((!curExtent && !lastExtent) ||
                      (curExtent && lastExtent &&
-                      curExtent->contains(NN_CHECK_ASSERT(lastExtent)) &&
-                      lastExtent->contains(NN_CHECK_ASSERT(curExtent))));
+                      curExtent->contains(NN_NO_CHECK(lastExtent)) &&
+                      lastExtent->contains(NN_NO_CHECK(curExtent))));
                 if (curAccuracy > lastAccuracy && sameExtent) {
                     // If that set of grids has always been used for that
                     // extent,
@@ -9309,11 +9309,11 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
 static TransformationNNPtr
 createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
                            const crs::CRSNNPtr &targetCRS) {
-    if (util::nn_dynamic_pointer_cast<crs::SingleCRS>(sourceCRS)
+    if (dynamic_cast<const crs::SingleCRS *>(sourceCRS.get())
                 ->coordinateSystem()
                 ->axisList()
                 .size() == 3 ||
-        util::nn_dynamic_pointer_cast<crs::SingleCRS>(targetCRS)
+        dynamic_cast<const crs::SingleCRS *>(targetCRS.get())
                 ->coordinateSystem()
                 ->axisList()
                 .size() == 3) {
@@ -9432,7 +9432,7 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
 
     if (extent) {
         properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                       NN_CHECK_ASSERT(extent));
+                       NN_NO_CHECK(extent));
     }
 
     std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
@@ -9510,7 +9510,7 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
 
     if (extent) {
         properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                       NN_CHECK_ASSERT(extent));
+                       NN_NO_CHECK(extent));
     }
 
     std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
@@ -9589,7 +9589,7 @@ CoordinateOperationFactory::Private::createOperations(
     // Do the CRS differ only by their axis order ?
     if (geogSrc->datum() != nullptr && geogDst->datum() != nullptr &&
         geogSrc->datum()->isEquivalentTo(
-            NN_CHECK_ASSERT(geogDst->datum()),
+            NN_NO_CHECK(geogDst->datum()),
             util::IComparable::Criterion::EQUIVALENT) &&
         !geogSrc->coordinateSystem()->isEquivalentTo(
             geogDst->coordinateSystem(),
@@ -9689,11 +9689,11 @@ CoordinateOperationFactory::Private::createOperations(
                              *(interm_crs->name()->description()))
                     .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
                          metadata::Extent::WORLD),
-                geogSrc, NN_CHECK_ASSERT(interm_crs), offset_pm));
+                geogSrc, NN_NO_CHECK(interm_crs), offset_pm));
         }
 
         steps.emplace_back(
-            createNullGeographicOffset(NN_CHECK_ASSERT(interm_crs), geogDst));
+            createNullGeographicOffset(NN_NO_CHECK(interm_crs), geogDst));
     }
 
     res.emplace_back(ConcatenatedOperation::createComputeMetadata(
@@ -9782,8 +9782,8 @@ CoordinateOperationFactory::Private::createOperations(
             util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS);
 
         if (geogSrc && geogDst) {
-            return createOperations(res, NN_CHECK_ASSERT(geogSrc),
-                                    NN_CHECK_ASSERT(geogDst));
+            return createOperations(res, NN_NO_CHECK(geogSrc),
+                                    NN_NO_CHECK(geogDst));
         }
 
         bool isSrcGeocentric = geodSrc->isGeocentric();
@@ -9803,8 +9803,8 @@ CoordinateOperationFactory::Private::createOperations(
         }
 
         // Tranformation between two geocentric systems
-        res.emplace_back(createGeodToGeodPROJBased(NN_CHECK_ASSERT(geodSrc),
-                                                   NN_CHECK_ASSERT(geodDst)));
+        res.emplace_back(createGeodToGeodPROJBased(NN_NO_CHECK(geodSrc),
+                                                   NN_NO_CHECK(geodDst)));
         return res;
     }
 
@@ -9846,11 +9846,10 @@ CoordinateOperationFactory::Private::createOperations(
             util::nn_dynamic_pointer_cast<crs::GeographicCRS>(hubSrc);
         auto geogCRSOfBaseOfBoundSrc =
             boundSrc->baseCRS()->extractGeographicCRS();
-        if (hubSrcGeog &&
-            (hubSrcGeog->isEquivalentTo(
-                 NN_CHECK_ASSERT(geogDst),
-                 util::IComparable::Criterion::EQUIVALENT) ||
-             hubSrcGeog->is2DPartOf3D(NN_CHECK_ASSERT(geogDst))) &&
+        if (hubSrcGeog && (hubSrcGeog->isEquivalentTo(
+                               NN_NO_CHECK(geogDst),
+                               util::IComparable::Criterion::EQUIVALENT) ||
+                           hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst))) &&
             geogCRSOfBaseOfBoundSrc) {
             if (boundSrc->baseCRS() == geogCRSOfBaseOfBoundSrc) {
                 // Optimization to avoid creating a useless concatenated
@@ -9858,9 +9857,9 @@ CoordinateOperationFactory::Private::createOperations(
                 res.emplace_back(boundSrc->transformation());
                 return res;
             }
-            auto opsFirst = createOperations(
-                boundSrc->baseCRS(), NN_CHECK_ASSERT(geogCRSOfBaseOfBoundSrc),
-                context);
+            auto opsFirst =
+                createOperations(boundSrc->baseCRS(),
+                                 NN_NO_CHECK(geogCRSOfBaseOfBoundSrc), context);
             if (!opsFirst.empty()) {
                 for (const auto &opFirst : opsFirst) {
                     try {
@@ -9879,7 +9878,7 @@ CoordinateOperationFactory::Private::createOperations(
 
         if (hubSrcGeog &&
             hubSrcGeog->isEquivalentTo(
-                NN_CHECK_ASSERT(geogDst),
+                NN_NO_CHECK(geogDst),
                 util::IComparable::Criterion::EQUIVALENT) &&
             util::nn_dynamic_pointer_cast<crs::VerticalCRS>(
                 boundSrc->baseCRS())) {
@@ -9907,7 +9906,7 @@ CoordinateOperationFactory::Private::createOperations(
         auto hubSrcVert =
             util::nn_dynamic_pointer_cast<crs::VerticalCRS>(hubSrc);
         if (baseSrcVert && hubSrcVert &&
-            vertDst->isEquivalentTo(NN_CHECK_ASSERT(hubSrcVert),
+            vertDst->isEquivalentTo(NN_NO_CHECK(hubSrcVert),
                                     util::IComparable::Criterion::EQUIVALENT)) {
             res.emplace_back(boundSrc->transformation());
             return res;
@@ -9927,7 +9926,7 @@ CoordinateOperationFactory::Private::createOperations(
         const auto &dstDatum = vertDst->datum();
         if (srcDatum && dstDatum &&
             srcDatum->isEquivalentTo(
-                NN_CHECK_ASSERT(dstDatum),
+                NN_NO_CHECK(dstDatum),
                 util::IComparable::Criterion::EQUIVALENT)) {
             const double convSrc = vertSrc->coordinateSystem()
                                        ->axisList()[0]
@@ -9999,18 +9998,18 @@ CoordinateOperationFactory::Private::createOperations(
             boundDst->baseCRS()->extractGeographicCRS();
         if (hubSrcGeog && hubDstGeog &&
             hubSrcGeog->isEquivalentTo(
-                NN_CHECK_ASSERT(hubDstGeog),
+                NN_NO_CHECK(hubDstGeog),
                 util::IComparable::Criterion::EQUIVALENT) &&
             geogCRSOfBaseOfBoundSrc && geogCRSOfBaseOfBoundDst) {
             const bool firstIsNoOp = geogCRSOfBaseOfBoundSrc->isEquivalentTo(
                 boundSrc->baseCRS(), util::IComparable::Criterion::EQUIVALENT);
             const bool lastIsNoOp = geogCRSOfBaseOfBoundDst->isEquivalentTo(
                 boundDst->baseCRS(), util::IComparable::Criterion::EQUIVALENT);
-            auto opsFirst = createOperations(
-                boundSrc->baseCRS(), NN_CHECK_ASSERT(geogCRSOfBaseOfBoundSrc),
-                context);
+            auto opsFirst =
+                createOperations(boundSrc->baseCRS(),
+                                 NN_NO_CHECK(geogCRSOfBaseOfBoundSrc), context);
             auto opsLast =
-                createOperations(NN_CHECK_ASSERT(geogCRSOfBaseOfBoundDst),
+                createOperations(NN_NO_CHECK(geogCRSOfBaseOfBoundDst),
                                  boundDst->baseCRS(), context);
             if (!opsFirst.empty() && !opsLast.empty()) {
                 auto opSecond = boundSrc->transformation();
@@ -10102,8 +10101,8 @@ CoordinateOperationFactory::Private::createOperations(
                 }
 
                 for (const auto &verticalTransform : verticalTransforms) {
-                    auto interpolationGeogCRS = NN_CHECK_ASSERT(
-                        componentsSrc[0]->extractGeographicCRS());
+                    auto interpolationGeogCRS =
+                        NN_NO_CHECK(componentsSrc[0]->extractGeographicCRS());
                     auto transformationVerticalTransform =
                         util::nn_dynamic_pointer_cast<Transformation>(
                             verticalTransform);
@@ -10112,13 +10111,12 @@ CoordinateOperationFactory::Private::createOperations(
                             transformationVerticalTransform->interpolationCRS();
                         if (interpTransformCRS) {
                             auto nn_interpTransformCRS =
-                                NN_CHECK_ASSERT(interpTransformCRS);
-                            if (util::nn_dynamic_pointer_cast<
-                                    crs::GeographicCRS>(
-                                    nn_interpTransformCRS)) {
-                                interpolationGeogCRS = NN_CHECK_ASSERT(
-                                    util::nn_dynamic_pointer_cast<
-                                        crs::GeographicCRS>(
+                                NN_NO_CHECK(interpTransformCRS);
+                            if (dynamic_cast<const crs::GeographicCRS *>(
+                                    nn_interpTransformCRS.get())) {
+                                interpolationGeogCRS =
+                                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<
+                                                crs::GeographicCRS>(
                                         nn_interpTransformCRS));
                             }
                         }
@@ -10177,9 +10175,8 @@ CoordinateOperationFactory::createOperations(
     // If so, use that one as input
     auto srcBoundCRS = sourceCRS->canonicalBoundCRS();
     auto targetBoundCRS = targetCRS->canonicalBoundCRS();
-    auto l_sourceCRS = srcBoundCRS ? NN_CHECK_ASSERT(srcBoundCRS) : sourceCRS;
-    auto l_targetCRS =
-        targetBoundCRS ? NN_CHECK_ASSERT(targetBoundCRS) : targetCRS;
+    auto l_sourceCRS = srcBoundCRS ? NN_NO_CHECK(srcBoundCRS) : sourceCRS;
+    auto l_targetCRS = targetBoundCRS ? NN_NO_CHECK(targetBoundCRS) : targetCRS;
 
     return filterAndSort(d->createOperations(l_sourceCRS, l_targetCRS, context),
                          context, l_sourceCRS, l_targetCRS);
@@ -10214,8 +10211,8 @@ void InverseCoordinateOperation::setPropertiesFromForward() {
         createPropertiesForInverse(forwardOperation_.get(), false, false));
     setAccuracies(forwardOperation_->coordinateOperationAccuracies());
     if (forwardOperation_->sourceCRS() && forwardOperation_->targetCRS()) {
-        setCRSs(NN_CHECK_ASSERT(forwardOperation_->targetCRS()),
-                NN_CHECK_ASSERT(forwardOperation_->sourceCRS()),
+        setCRSs(NN_NO_CHECK(forwardOperation_->targetCRS()),
+                NN_NO_CHECK(forwardOperation_->sourceCRS()),
                 forwardOperation_->interpolationCRS());
     }
 }
@@ -10285,8 +10282,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
         PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method, values);
     op->assignSelf(op);
     if (sourceCRS && targetCRS) {
-        op->setCRSs(NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS),
-                    nullptr);
+        op->setCRSs(NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), nullptr);
     }
     op->setProperties(
         addDefaultNameIfNeeded(properties, "PROJ-based coordinate operation"));
@@ -10344,8 +10340,8 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
         return util::nn_static_pointer_cast<CoordinateOperation>(
             PROJBasedOperation::create(
                 createPropertiesForInverse(this, false, false),
-                NN_CHECK_ASSERT(projStringExportable_), !inverse_,
-                NN_CHECK_ASSERT(targetCRS()), NN_CHECK_ASSERT(sourceCRS()),
+                NN_NO_CHECK(projStringExportable_), !inverse_,
+                NN_NO_CHECK(targetCRS()), NN_NO_CHECK(sourceCRS()),
                 coordinateOperationAccuracies()));
     }
 

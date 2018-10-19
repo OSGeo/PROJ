@@ -541,7 +541,8 @@ class WKTNode {
 // ---------------------------------------------------------------------------
 
 PROJ_DLL util::BaseObjectNNPtr
-createFromUserInput(const std::string &text, DatabaseContextPtr dbContext);
+createFromUserInput(const std::string &text,
+                    const DatabaseContextPtr &dbContext);
 
 // ---------------------------------------------------------------------------
 

@@ -128,11 +128,9 @@ public:
 
   // Semi-private constructor for use by NN_CHECK_ macros.
   explicit nn(i_promise_i_checked_for_null_t, const PtrType &arg) : ptr(arg) {
-    assert(ptr);
   }
   explicit nn(i_promise_i_checked_for_null_t, PtrType &&arg)
       : ptr(std::move(arg)) {
-    assert(ptr);
   }
 
   // Type-converting move and copy constructor. We have four separate cases

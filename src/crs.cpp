@@ -190,7 +190,7 @@ VerticalCRSPtr CRS::extractVerticalCRS() const {
  */
 CRSNNPtr
 CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
-    auto thisAsCRS = NN_CHECK_ASSERT(
+    auto thisAsCRS = NN_NO_CHECK(
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
     auto boundCRS = util::nn_dynamic_pointer_cast<BoundCRS>(thisAsCRS);
     if (!boundCRS) {
@@ -200,7 +200,7 @@ CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
         if (boundCRS->hubCRS()->isEquivalentTo(
                 GeographicCRS::EPSG_4326,
                 util::IComparable::Criterion::EQUIVALENT)) {
-            return NN_CHECK_ASSERT(boundCRS);
+            return NN_NO_CHECK(boundCRS);
         }
     }
 
@@ -226,7 +226,7 @@ CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
     try {
         auto authFactory = dbContext
                                ? io::AuthorityFactory::create(
-                                     NN_CHECK_ASSERT(dbContext), std::string())
+                                     NN_NO_CHECK(dbContext), std::string())
                                      .as_nullable()
                                : nullptr;
         auto ctxt = operation::CoordinateOperationContext::create(authFactory,
@@ -235,7 +235,7 @@ CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
         //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
         auto list =
             operation::CoordinateOperationFactory::create()->createOperations(
-                NN_CHECK_ASSERT(geodCRS), hubCRS, ctxt);
+                NN_NO_CHECK(geodCRS), hubCRS, ctxt);
         for (const auto &op : list) {
             auto transf =
                 util::nn_dynamic_pointer_cast<operation::Transformation>(op);
@@ -245,11 +245,12 @@ CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
                 } catch (const std::exception &) {
                     continue;
                 }
-                return util::nn_static_pointer_cast<CRS>(BoundCRS::create(
-                    thisAsCRS, hubCRS, NN_CHECK_ASSERT(transf)));
+                return util::nn_static_pointer_cast<CRS>(
+                    BoundCRS::create(thisAsCRS, hubCRS, NN_NO_CHECK(transf)));
             } else {
-                auto concatenated = util::nn_dynamic_pointer_cast<
-                    operation::ConcatenatedOperation>(op);
+                auto concatenated =
+                    dynamic_cast<const operation::ConcatenatedOperation *>(
+                        op.get());
                 if (concatenated) {
                     // Case for EPSG:4807 / "NTF (Paris)" that is made of a
                     // longitude rotation followed by a Helmert
@@ -257,15 +258,14 @@ CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
                     const auto &subops = concatenated->operations();
                     if (subops.size() == 2) {
                         auto firstOpIsTransformation =
-                            util::nn_dynamic_pointer_cast<
-                                operation::Transformation>(subops[0]);
+                            dynamic_cast<const operation::Transformation *>(
+                                subops[0].get());
                         auto firstOpIsConversion =
-                            util::nn_dynamic_pointer_cast<
-                                operation::Conversion>(subops[0]);
+                            dynamic_cast<const operation::Conversion *>(
+                                subops[0].get());
                         if ((firstOpIsTransformation &&
                              firstOpIsTransformation->isLongitudeRotation()) ||
-                            (util::nn_dynamic_pointer_cast<DerivedCRS>(
-                                 thisAsCRS) &&
+                            (dynamic_cast<DerivedCRS *>(thisAsCRS.get()) &&
                              firstOpIsConversion)) {
                             transf = util::nn_dynamic_pointer_cast<
                                 operation::Transformation>(subops[1]);
@@ -277,7 +277,7 @@ CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
                                 }
                                 return util::nn_static_pointer_cast<CRS>(
                                     BoundCRS::create(thisAsCRS, hubCRS,
-                                                     NN_CHECK_ASSERT(transf)));
+                                                     NN_NO_CHECK(transf)));
                             }
                         }
                     }
@@ -297,7 +297,7 @@ CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
  * @return a CRS.
  */
 CRSNNPtr CRS::stripVerticalComponent() const {
-    auto self = NN_CHECK_ASSERT(
+    auto self = NN_NO_CHECK(
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
 
     auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
@@ -403,7 +403,7 @@ const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() const {
 
 bool SingleCRS::_isEquivalentTo(const util::BaseObjectNNPtr &other,
                                 util::IComparable::Criterion criterion) const {
-    auto otherSingleCRS = util::nn_dynamic_pointer_cast<SingleCRS>(other);
+    auto otherSingleCRS = dynamic_cast<const SingleCRS *>(other.get());
     if (otherSingleCRS == nullptr ||
         !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
@@ -412,7 +412,7 @@ bool SingleCRS::_isEquivalentTo(const util::BaseObjectNNPtr &other,
         return false;
     }
     if (datum() &&
-        !datum()->isEquivalentTo(NN_CHECK_ASSERT(otherSingleCRS->datum()),
+        !datum()->isEquivalentTo(NN_NO_CHECK(otherSingleCRS->datum()),
                                  criterion))
         return false;
 
@@ -528,7 +528,7 @@ const datum::GeodeticReferenceFramePtr GeodeticCRS::datum() const {
 datum::GeodeticReferenceFrameNNPtr GeodeticCRS::oneDatum() const {
     auto l_datum = datum();
     if (l_datum)
-        return NN_CHECK_ASSERT(l_datum);
+        return NN_NO_CHECK(l_datum);
     auto l_datumEnsemble = datumEnsemble();
     assert(l_datumEnsemble);
     auto l_datums = l_datumEnsemble->datums();
@@ -536,7 +536,7 @@ datum::GeodeticReferenceFrameNNPtr GeodeticCRS::oneDatum() const {
     auto first_datum = std::dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
         l_datums[0].as_nullable());
     assert(first_datum);
-    return NN_CHECK_ASSERT(first_datum);
+    return NN_NO_CHECK(first_datum);
 }
 
 // ---------------------------------------------------------------------------
@@ -825,7 +825,7 @@ void GeodeticCRS::addDatumInfoToPROJString(
 
 bool GeodeticCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
                                  util::IComparable::Criterion criterion) const {
-    auto otherGeodCRS = util::nn_dynamic_pointer_cast<GeodeticCRS>(other);
+    auto otherGeodCRS = dynamic_cast<const GeodeticCRS *>(other.get());
     // TODO test velocityModel
     return otherGeodCRS != nullptr &&
            SingleCRS::_isEquivalentTo(other, criterion);
@@ -886,7 +886,7 @@ CRSNNPtr GeographicCRS::shallowClone() const {
  * @return a EllipsoidalCS.
  */
 const cs::EllipsoidalCSNNPtr GeographicCRS::coordinateSystem() const {
-    return NN_CHECK_THROW(util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(
         SingleCRS::getPrivate()->coordinateSystem));
 }
 
@@ -947,7 +947,7 @@ bool GeographicCRS::is2DPartOf3D(const GeographicCRSNNPtr &other) const {
     auto otherAxis = other->coordinateSystem()->axisList();
     return axis.size() == 2 && otherAxis.size() == 3 && datum() &&
            other->datum() &&
-           datum()->isEquivalentTo(NN_CHECK_ASSERT(other->datum())) &&
+           datum()->isEquivalentTo(NN_NO_CHECK(other->datum())) &&
            axis[0]->isEquivalentTo(otherAxis[0]) &&
            axis[1]->isEquivalentTo(otherAxis[1]);
 }
@@ -1240,7 +1240,7 @@ VerticalCRS::velocityModel() const {
  * @return a VerticalCS.
  */
 const cs::VerticalCSNNPtr VerticalCRS::coordinateSystem() const {
-    return NN_CHECK_THROW(util::nn_dynamic_pointer_cast<cs::VerticalCS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<cs::VerticalCS>(
         SingleCRS::getPrivate()->coordinateSystem));
 }
 
@@ -1364,7 +1364,7 @@ VerticalCRS::create(const util::PropertyMap &properties,
 
 bool VerticalCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
                                  util::IComparable::Criterion criterion) const {
-    auto otherVertCRS = util::nn_dynamic_pointer_cast<VerticalCRS>(other);
+    auto otherVertCRS = dynamic_cast<const VerticalCRS *>(other.get());
     // TODO test geoidModel and velocityModel
     return otherVertCRS != nullptr &&
            SingleCRS::_isEquivalentTo(other, criterion);
@@ -1458,7 +1458,7 @@ const operation::ConversionNNPtr &DerivedCRS::derivingConversionRef() const {
 
 bool DerivedCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
                                 util::IComparable::Criterion criterion) const {
-    auto otherDerivedCRS = util::nn_dynamic_pointer_cast<DerivedCRS>(other);
+    auto otherDerivedCRS = dynamic_cast<const DerivedCRS *>(other.get());
     if (otherDerivedCRS == nullptr ||
         !SingleCRS::_isEquivalentTo(other, criterion)) {
         return false;
@@ -1521,7 +1521,7 @@ CRSNNPtr ProjectedCRS::shallowClone() const {
  * @return the base CRS.
  */
 const GeodeticCRSNNPtr ProjectedCRS::baseCRS() const {
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<GeodeticCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
 }
 
@@ -1532,7 +1532,7 @@ const GeodeticCRSNNPtr ProjectedCRS::baseCRS() const {
  * @return a CartesianCS
  */
 const cs::CartesianCSNNPtr ProjectedCRS::coordinateSystem() const {
-    return NN_CHECK_THROW(util::nn_dynamic_pointer_cast<cs::CartesianCS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<cs::CartesianCS>(
         SingleCRS::getPrivate()->coordinateSystem));
 }
 
@@ -1697,7 +1697,7 @@ ProjectedCRS::create(const util::PropertyMap &properties,
 bool ProjectedCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
-    auto otherProjCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(other);
+    auto otherProjCRS = dynamic_cast<const ProjectedCRS *>(other.get());
     return otherProjCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
@@ -1832,7 +1832,7 @@ std::vector<CRSNNPtr> CompoundCRS::componentReferenceSystems() const {
     // Flatten the potential hierarchy to return only SingleCRS
     std::vector<CRSNNPtr> res;
     for (const auto &crs : d->components_) {
-        auto childCompound = util::nn_dynamic_pointer_cast<CompoundCRS>(crs);
+        auto childCompound = dynamic_cast<const CompoundCRS *>(crs.get());
         if (childCompound) {
             auto childFlattened = childCompound->componentReferenceSystems();
             res.insert(res.end(), childFlattened.begin(), childFlattened.end());
@@ -1908,7 +1908,7 @@ CompoundCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 {
     for (const auto &crs : componentReferenceSystems()) {
         auto crs_exportable =
-            util::nn_dynamic_pointer_cast<IPROJStringExportable>(crs);
+            dynamic_cast<const IPROJStringExportable *>(crs.get());
         if (crs_exportable) {
             crs_exportable->exportToPROJString(formatter);
         }
@@ -1921,7 +1921,7 @@ CompoundCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
 bool CompoundCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
                                  util::IComparable::Criterion criterion) const {
-    auto otherCompoundCRS = util::nn_dynamic_pointer_cast<CompoundCRS>(other);
+    auto otherCompoundCRS = dynamic_cast<const CompoundCRS *>(other.get());
     if (otherCompoundCRS == nullptr ||
         !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
@@ -2100,7 +2100,7 @@ BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
 BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
                                            const std::string &filename) {
     const CRSPtr sourceGeographicCRS = baseCRSIn->extractGeographicCRS();
-    auto transformationSourceCRS = NN_CHECK_ASSERT(
+    auto transformationSourceCRS = NN_NO_CHECK(
         sourceGeographicCRS ? sourceGeographicCRS : baseCRSIn.as_nullable());
     std::string transformationName =
         *(transformationSourceCRS->name()->description());
@@ -2125,7 +2125,7 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
 // ---------------------------------------------------------------------------
 
 bool BoundCRS::isTOWGS84Compatible() const {
-    return util::nn_dynamic_pointer_cast<GeodeticCRS>(hubCRS()) != nullptr &&
+    return dynamic_cast<GeodeticCRS *>(hubCRS().get()) != nullptr &&
            ci_equal(*(hubCRS()->name()->description()), "WGS 84");
 }
 
@@ -2141,7 +2141,7 @@ std::string BoundCRS::getHDatumPROJ4GRIDS() const {
 // ---------------------------------------------------------------------------
 
 std::string BoundCRS::getVDatumPROJ4GRIDS() const {
-    if (util::nn_dynamic_pointer_cast<VerticalCRS>(baseCRS()) &&
+    if (dynamic_cast<VerticalCRS *>(baseCRS().get()) &&
         ci_equal(*(hubCRS()->name()->description()), "WGS 84")) {
         return transformation()->getHeightToGeographic3DFilename();
     }
@@ -2207,7 +2207,7 @@ std::string BoundCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     }
 
     auto crs_exportable =
-        util::nn_dynamic_pointer_cast<io::IPROJStringExportable>(baseCRS());
+        dynamic_cast<const io::IPROJStringExportable *>(baseCRS().get());
     if (!crs_exportable) {
         throw io::FormattingException(
             "baseCRS of BoundCRS cannot be exported as a PROJ string");
@@ -2241,7 +2241,7 @@ std::string BoundCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
 bool BoundCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
                               util::IComparable::Criterion criterion) const {
-    auto otherBoundCRS = util::nn_dynamic_pointer_cast<BoundCRS>(other);
+    auto otherBoundCRS = dynamic_cast<const BoundCRS *>(other.get());
     if (otherBoundCRS == nullptr ||
         !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
@@ -2308,7 +2308,7 @@ CRSNNPtr DerivedGeodeticCRS::shallowClone() const {
  * @return the base CRS.
  */
 const GeodeticCRSNNPtr DerivedGeodeticCRS::baseCRS() const {
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<GeodeticCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
 }
 
@@ -2419,7 +2419,7 @@ bool DerivedGeodeticCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
     auto otherDerivedCRS =
-        util::nn_dynamic_pointer_cast<DerivedGeodeticCRS>(other);
+        dynamic_cast<const DerivedGeodeticCRS *>(other.get());
     return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
@@ -2469,7 +2469,7 @@ CRSNNPtr DerivedGeographicCRS::shallowClone() const {
  * @return the base CRS.
  */
 const GeodeticCRSNNPtr DerivedGeographicCRS::baseCRS() const {
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<GeodeticCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
 }
 
@@ -2551,7 +2551,7 @@ bool DerivedGeographicCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
     auto otherDerivedCRS =
-        util::nn_dynamic_pointer_cast<DerivedGeographicCRS>(other);
+        dynamic_cast<const DerivedGeographicCRS *>(other.get());
     return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
@@ -2600,7 +2600,7 @@ CRSNNPtr DerivedProjectedCRS::shallowClone() const {
  * @return the base CRS.
  */
 const ProjectedCRSNNPtr DerivedProjectedCRS::baseCRS() const {
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<ProjectedCRS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<ProjectedCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
 }
 
@@ -2701,7 +2701,7 @@ bool DerivedProjectedCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
     auto otherDerivedCRS =
-        util::nn_dynamic_pointer_cast<DerivedProjectedCRS>(other);
+        dynamic_cast<const DerivedProjectedCRS *>(other.get());
     return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
@@ -2745,7 +2745,7 @@ CRSNNPtr TemporalCRS::shallowClone() const {
  * @return a TemporalDatum
  */
 const datum::TemporalDatumNNPtr TemporalCRS::datum() const {
-    return NN_CHECK_ASSERT(std::dynamic_pointer_cast<datum::TemporalDatum>(
+    return NN_NO_CHECK(std::dynamic_pointer_cast<datum::TemporalDatum>(
         SingleCRS::getPrivate()->datum));
 }
 
@@ -2756,7 +2756,7 @@ const datum::TemporalDatumNNPtr TemporalCRS::datum() const {
  * @return a TemporalCS
  */
 const cs::TemporalCSNNPtr TemporalCRS::coordinateSystem() const {
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<cs::TemporalCS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<cs::TemporalCS>(
         SingleCRS::getPrivate()->coordinateSystem));
 }
 
@@ -2800,7 +2800,7 @@ std::string TemporalCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 bool TemporalCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
                                  util::IComparable::Criterion criterion) const {
-    auto otherTemporalCRS = util::nn_dynamic_pointer_cast<TemporalCRS>(other);
+    auto otherTemporalCRS = dynamic_cast<const TemporalCRS *>(other.get());
     return otherTemporalCRS != nullptr &&
            SingleCRS::_isEquivalentTo(other, criterion);
 }
@@ -2844,7 +2844,7 @@ CRSNNPtr EngineeringCRS::shallowClone() const {
  * @return a EngineeringDatum
  */
 const datum::EngineeringDatumNNPtr EngineeringCRS::datum() const {
-    return NN_CHECK_ASSERT(std::dynamic_pointer_cast<datum::EngineeringDatum>(
+    return NN_NO_CHECK(std::dynamic_pointer_cast<datum::EngineeringDatum>(
         SingleCRS::getPrivate()->datum));
 }
 
@@ -2891,7 +2891,7 @@ bool EngineeringCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
     auto otherEngineeringCRS =
-        util::nn_dynamic_pointer_cast<EngineeringCRS>(other);
+        dynamic_cast<const EngineeringCRS *>(other.get());
     return otherEngineeringCRS != nullptr &&
            SingleCRS::_isEquivalentTo(other, criterion);
 }
@@ -2935,7 +2935,7 @@ CRSNNPtr ParametricCRS::shallowClone() const {
  * @return a ParametricDatum
  */
 const datum::ParametricDatumNNPtr ParametricCRS::datum() const {
-    return NN_CHECK_ASSERT(std::dynamic_pointer_cast<datum::ParametricDatum>(
+    return NN_NO_CHECK(std::dynamic_pointer_cast<datum::ParametricDatum>(
         SingleCRS::getPrivate()->datum));
 }
 
@@ -2946,7 +2946,7 @@ const datum::ParametricDatumNNPtr ParametricCRS::datum() const {
  * @return a TemporalCS
  */
 const cs::ParametricCSNNPtr ParametricCRS::coordinateSystem() const {
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<cs::ParametricCS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<cs::ParametricCS>(
         SingleCRS::getPrivate()->coordinateSystem));
 }
 
@@ -2993,8 +2993,7 @@ std::string ParametricCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 bool ParametricCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
-    auto otherParametricCRS =
-        util::nn_dynamic_pointer_cast<ParametricCRS>(other);
+    auto otherParametricCRS = dynamic_cast<const ParametricCRS *>(other.get());
     return otherParametricCRS != nullptr &&
            SingleCRS::_isEquivalentTo(other, criterion);
 }
@@ -3044,7 +3043,7 @@ CRSNNPtr DerivedVerticalCRS::shallowClone() const {
  * @return the base CRS.
  */
 const VerticalCRSNNPtr DerivedVerticalCRS::baseCRS() const {
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<VerticalCRS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<VerticalCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
 }
 
@@ -3119,7 +3118,7 @@ bool DerivedVerticalCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
     auto otherDerivedCRS =
-        util::nn_dynamic_pointer_cast<DerivedVerticalCRS>(other);
+        dynamic_cast<const DerivedVerticalCRS *>(other.get());
     return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
@@ -3163,7 +3162,7 @@ template <class DerivedCRSTraits>
 const typename DerivedCRSTemplate<DerivedCRSTraits>::BaseNNPtr
 DerivedCRSTemplate<DerivedCRSTraits>::baseCRS() const {
     auto l_baseCRS = DerivedCRS::getPrivate()->baseCRS_;
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<BaseType>(l_baseCRS));
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<BaseType>(l_baseCRS));
 }
 
 // ---------------------------------------------------------------------------
@@ -3234,7 +3233,7 @@ bool DerivedCRSTemplate<DerivedCRSTraits>::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
     auto otherDerivedCRS =
-        util::nn_dynamic_pointer_cast<DerivedCRSTemplate>(other);
+        dynamic_cast<const DerivedCRSTemplate *>(other.get());
     return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }

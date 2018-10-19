@@ -812,7 +812,7 @@ ExtentPtr Extent::intersection(const ExtentNNPtr &other) const {
         if (contains(other)) {
             return other.as_nullable();
         }
-        auto self = NN_CHECK_ASSERT(
+        auto self = NN_NO_CHECK(
             util::nn_dynamic_pointer_cast<Extent>(shared_from_this()));
         if (other->contains(self)) {
             return self.as_nullable();
@@ -822,7 +822,7 @@ ExtentPtr Extent::intersection(const ExtentNNPtr &other) const {
         if (geogIntersection) {
             return create(util::optional<std::string>(),
                           std::vector<GeographicExtentNNPtr>{
-                              NN_CHECK_ASSERT(geogIntersection)},
+                              NN_NO_CHECK(geogIntersection)},
                           std::vector<VerticalExtentNNPtr>{},
                           std::vector<TemporalExtentNNPtr>{});
         }

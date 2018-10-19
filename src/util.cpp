@@ -80,7 +80,7 @@ BaseObjectNNPtr BaseObject::shared_from_this() const {
     // This assertion checks that in all code paths where we create a
     // shared pointer, we took care of assigning it to self_, by calling
     // assignSelf();
-    return NN_CHECK_ASSERT(d->self_.lock());
+    return NN_NO_CHECK(d->self_.lock());
 }
 
 // ---------------------------------------------------------------------------
@@ -172,9 +172,7 @@ const BoxedValue::Type &BoxedValue::type() const { return d->type_; }
 
 // ---------------------------------------------------------------------------
 
-BaseObjectNNPtr BoxedValue::object() const {
-    return NN_CHECK_ASSERT(d->object_);
-}
+BaseObjectNNPtr BoxedValue::object() const { return NN_NO_CHECK(d->object_); }
 
 // ---------------------------------------------------------------------------
 

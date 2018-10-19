@@ -178,7 +178,7 @@ bool Datum::_isEquivalentTo(const util::BaseObjectNNPtr &other,
         }
         if (conventionalRS() && otherDatum->conventionalRS() &&
             conventionalRS()->_isEquivalentTo(
-                NN_CHECK_ASSERT(otherDatum->conventionalRS()), criterion)) {
+                NN_NO_CHECK(otherDatum->conventionalRS()), criterion)) {
             return false;
         }
     }

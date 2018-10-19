@@ -131,6 +131,17 @@ using ::dropbox::oxygen::nn_make_shared;
 using ::dropbox::oxygen::nn_static_pointer_cast;
 
 template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
+
+#define NN_NO_CHECK(p)                                                         \
+    ::dropbox::oxygen::nn<typename std::remove_reference<decltype(p)>::type>(  \
+        dropbox::oxygen::i_promise_i_checked_for_null, (p))
+
+#if defined(__GNU_C__)
+#define PROJ_NO_INLINE __attribute__((noinline))
+#else
+#define PROJ_NO_INLINE
+#endif
+
 //! @endcond
 
 // To avoid formatting differences between clang-format 3.8 and 7

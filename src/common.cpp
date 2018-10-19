@@ -680,7 +680,7 @@ void IdentifiedObject::Private::setName(
     } else {
         if (auto identifier =
                 util::nn_dynamic_pointer_cast<Identifier>(oIter->second)) {
-            name = NN_CHECK_ASSERT(identifier);
+            name = NN_NO_CHECK(identifier);
         } else {
             throw InvalidValueTypeException("Invalid value type for " +
                                             NAME_KEY);
@@ -707,7 +707,7 @@ void IdentifiedObject::Private::setIdentifiers(
     if (auto identifier =
             util::nn_dynamic_pointer_cast<Identifier>(oIter->second)) {
         identifiers.clear();
-        identifiers.push_back(NN_CHECK_ASSERT(identifier));
+        identifiers.push_back(NN_NO_CHECK(identifier));
     } else {
         if (auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
                 oIter->second)) {
@@ -715,7 +715,7 @@ void IdentifiedObject::Private::setIdentifiers(
             for (const auto &val : *array) {
                 identifier = util::nn_dynamic_pointer_cast<Identifier>(val);
                 if (identifier) {
-                    identifiers.push_back(NN_CHECK_ASSERT(identifier));
+                    identifiers.push_back(NN_NO_CHECK(identifier));
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
                                                     IDENTIFIERS_KEY);
@@ -740,7 +740,7 @@ void IdentifiedObject::Private::setAliases(
     if (auto l_name =
             util::nn_dynamic_pointer_cast<GenericName>(oIter->second)) {
         aliases.clear();
-        aliases.push_back(NN_CHECK_ASSERT(l_name));
+        aliases.push_back(NN_NO_CHECK(l_name));
     } else {
         if (auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
                 oIter->second)) {
@@ -748,7 +748,7 @@ void IdentifiedObject::Private::setAliases(
             for (const auto &val : *array) {
                 l_name = util::nn_dynamic_pointer_cast<GenericName>(val);
                 if (l_name) {
-                    aliases.push_back(NN_CHECK_ASSERT(l_name));
+                    aliases.push_back(NN_NO_CHECK(l_name));
                 } else {
                     if (auto genVal =
                             util::nn_dynamic_pointer_cast<BoxedValue>(val)) {
@@ -988,7 +988,7 @@ bool ObjectDomain::isEquivalentTo(
         return false;
     return domainOfValidity().get() == nullptr ||
            domainOfValidity()->isEquivalentTo(
-               NN_CHECK_ASSERT(otherDomain->domainOfValidity()), criterion);
+               NN_NO_CHECK(otherDomain->domainOfValidity()), criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -1059,7 +1059,7 @@ void ObjectUsage::setProperties(
         if (oIter != properties.end()) {
             if (auto objectDomain = util::nn_dynamic_pointer_cast<ObjectDomain>(
                     oIter->second)) {
-                d->domains_.emplace_back(NN_CHECK_ASSERT(objectDomain));
+                d->domains_.emplace_back(NN_NO_CHECK(objectDomain));
             } else if (auto array =
                            util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
                                oIter->second)) {
@@ -1067,7 +1067,7 @@ void ObjectUsage::setProperties(
                     objectDomain =
                         util::nn_dynamic_pointer_cast<ObjectDomain>(val);
                     if (objectDomain) {
-                        d->domains_.emplace_back(NN_CHECK_ASSERT(objectDomain));
+                        d->domains_.emplace_back(NN_NO_CHECK(objectDomain));
                     } else {
                         throw InvalidValueTypeException(
                             "Invalid value type for " + OBJECT_DOMAIN_KEY);

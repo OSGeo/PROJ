@@ -852,7 +852,7 @@ AuthorityFactory::Private::createFactory(const std::string &auth_name) {
     auto lockedThisFactory(thisFactory_.lock());
     assert(lockedThisFactory);
     if (auth_name == lockedThisFactory->getAuthority()) {
-        return NN_CHECK_ASSERT(lockedThisFactory);
+        return NN_NO_CHECK(lockedThisFactory);
     }
 
     // Find if there is already a child factory with the passed name.
@@ -1125,7 +1125,7 @@ AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
     {
         auto uom = d->getUOMFromCache(code);
         if (uom) {
-            return NN_CHECK_ASSERT(uom);
+            return NN_NO_CHECK(uom);
         }
     }
     auto res = d->context()->getPrivate()->run(
@@ -1357,7 +1357,7 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
     {
         auto datum = d->getGeodeticDatumFromCache(code);
         if (datum) {
-            return NN_CHECK_ASSERT(datum);
+            return NN_NO_CHECK(datum);
         }
     }
     auto res = d->context()->getPrivate()->run(
@@ -1622,7 +1622,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code) const {
 
 crs::GeographicCRSNNPtr
 AuthorityFactory::createGeographicCRS(const std::string &code) const {
-    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+    return NN_NO_CHECK(util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
         createGeodeticCRS(code, true)));
 }
 
@@ -1638,13 +1638,13 @@ cloneWithProps(const crs::GeodeticCRSNNPtr &geodCRS,
     }
     auto ellipsoidalCS = util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
-        return crs::GeographicCRS::create(props, NN_CHECK_ASSERT(datum),
-                                          NN_CHECK_ASSERT(ellipsoidalCS));
+        return crs::GeographicCRS::create(props, NN_NO_CHECK(datum),
+                                          NN_NO_CHECK(ellipsoidalCS));
     }
     auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
     if (geocentricCS) {
-        return crs::GeodeticCRS::create(props, NN_CHECK_ASSERT(datum),
-                                        NN_CHECK_ASSERT(geocentricCS));
+        return crs::GeodeticCRS::create(props, NN_NO_CHECK(datum),
+                                        NN_NO_CHECK(geocentricCS));
     }
     return geodCRS;
 }
@@ -1657,7 +1657,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
     auto crs =
         std::dynamic_pointer_cast<crs::GeodeticCRS>(d->getCRSFromCache(code));
     if (crs) {
-        return NN_CHECK_ASSERT(crs);
+        return NN_NO_CHECK(crs);
     }
     std::string sql("SELECT name, type, coordinate_system_auth_name, "
                     "coordinate_system_code, datum_auth_name, datum_code, "
@@ -1698,7 +1698,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
                 .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
         if (extent) {
             props.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                      NN_CHECK_ASSERT(extent));
+                      NN_NO_CHECK(extent));
         }
 
         if (!text_definition.empty()) {
@@ -1706,7 +1706,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             auto obj = createFromUserInput(text_definition, d->context());
             auto geodCRS = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(obj);
             if (geodCRS) {
-                return cloneWithProps(NN_CHECK_ASSERT(geodCRS), props);
+                return cloneWithProps(NN_NO_CHECK(geodCRS), props);
             }
 
             auto boundCRS = util::nn_dynamic_pointer_cast<crs::BoundCRS>(obj);
@@ -1715,9 +1715,9 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
                     boundCRS->baseCRS());
                 if (geodCRS) {
                     auto newBoundCRS = crs::BoundCRS::create(
-                        cloneWithProps(NN_CHECK_ASSERT(geodCRS), props),
+                        cloneWithProps(NN_NO_CHECK(geodCRS), props),
                         boundCRS->hubCRS(), boundCRS->transformation());
-                    return NN_CHECK_ASSERT(
+                    return NN_NO_CHECK(
                         util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
                             newBoundCRS->baseCRSWithCanonicalBoundCRS()));
                 }
@@ -1737,14 +1737,14 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         if ((type == "geographic 2D" || type == "geographic 3D") &&
             ellipsoidalCS) {
             auto crsRet = crs::GeographicCRS::create(
-                props, datum, NN_CHECK_ASSERT(ellipsoidalCS));
+                props, datum, NN_NO_CHECK(ellipsoidalCS));
             d->cache(code, crsRet);
             return crsRet;
         }
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (type == "geocentric" && geocentricCS) {
-            auto crsRet = crs::GeodeticCRS::create(
-                props, datum, NN_CHECK_ASSERT(geocentricCS));
+            auto crsRet = crs::GeodeticCRS::create(props, datum,
+                                                   NN_NO_CHECK(geocentricCS));
             d->cache(code, crsRet);
             return crsRet;
         }
@@ -1805,7 +1805,7 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
         auto verticalCS = util::nn_dynamic_pointer_cast<cs::VerticalCS>(cs);
         if (verticalCS) {
             return crs::VerticalCRS::create(props, datum,
-                                            NN_CHECK_ASSERT(verticalCS));
+                                            NN_NO_CHECK(verticalCS));
         }
         throw FactoryException("unsupported CS type for verticalCRS: " +
                                cs->getWKT2Type(WKTFormatter::create()));
@@ -1963,7 +1963,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                 .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
         if (extent) {
             props.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                      NN_CHECK_ASSERT(extent));
+                      NN_NO_CHECK(extent));
         }
 
         if (!text_definition.empty()) {
@@ -1987,7 +1987,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                                                   projCRS->derivingConversion(),
                                                   projCRS->coordinateSystem()),
                         boundCRS->hubCRS(), boundCRS->transformation());
-                    return NN_CHECK_ASSERT(
+                    return NN_NO_CHECK(
                         util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(
                             newBoundCRS->baseCRSWithCanonicalBoundCRS()));
                 }
@@ -2009,7 +2009,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         auto cartesianCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (cartesianCS) {
             return crs::ProjectedCRS::create(props, baseCRS, conv,
-                                             NN_CHECK_ASSERT(cartesianCS));
+                                             NN_NO_CHECK(cartesianCS));
         }
         throw FactoryException("unsupported CS type for projectedCRS: " +
                                cs->getWKT2Type(WKTFormatter::create()));
@@ -2094,7 +2094,7 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                                   bool allowCompound) const {
     auto crs = d->getCRSFromCache(code);
     if (crs) {
-        return NN_CHECK_ASSERT(crs);
+        return NN_NO_CHECK(crs);
     }
     auto res = d->context()->getPrivate()->run(
         "SELECT type FROM crs WHERE auth_name = ? AND code = ?",
@@ -2802,7 +2802,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 operations[0]->setCRSs(
                     d->createFactory(source_crs_auth_name)
                         ->createCoordinateReferenceSystem(source_crs_code),
-                    NN_CHECK_ASSERT(operations[1]->sourceCRS()), nullptr);
+                    NN_NO_CHECK(operations[1]->sourceCRS()), nullptr);
             }
 
             // Some concatenated operations, like 8443, might actually chain
@@ -2829,7 +2829,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             if (!operations[1]->sourceCRS() || !operations[1]->targetCRS()) {
                 if (step3_auth_name.empty()) {
                     operations[1]->setCRSs(
-                        NN_CHECK_ASSERT(operations[0]->targetCRS()),
+                        NN_NO_CHECK(operations[0]->targetCRS()),
                         d->createFactory(target_crs_auth_name)
                             ->createCoordinateReferenceSystem(target_crs_code),
                         nullptr);
@@ -2839,8 +2839,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                             "chaining of conversion not supported");
                     }
                     operations[1]->setCRSs(
-                        NN_CHECK_ASSERT(operations[0]->targetCRS()),
-                        NN_CHECK_ASSERT(operations[2]->sourceCRS()), nullptr);
+                        NN_NO_CHECK(operations[0]->targetCRS()),
+                        NN_NO_CHECK(operations[2]->sourceCRS()), nullptr);
                 }
             }
 
@@ -2878,7 +2878,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 if (!operations[2]->sourceCRS() ||
                     !operations[2]->targetCRS()) {
                     operations[2]->setCRSs(
-                        NN_CHECK_ASSERT(operations[1]->targetCRS()),
+                        NN_NO_CHECK(operations[1]->targetCRS()),
                         d->createFactory(target_crs_auth_name)
                             ->createCoordinateReferenceSystem(target_crs_code),
                         nullptr);
