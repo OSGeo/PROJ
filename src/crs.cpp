@@ -30,6 +30,10 @@
 #define FROM_PROJ_CPP
 #endif
 
+//! @cond Doxygen_Suppress
+#define DO_NOT_DEFINE_EXTERN_DERIVED_CRS_TEMPLATE
+//! @endcond
+
 #include "proj/crs.hpp"
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
@@ -2414,9 +2418,9 @@ DerivedGeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 bool DerivedGeodeticCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
-    auto otherDerivedGeodCRS =
+    auto otherDerivedCRS =
         util::nn_dynamic_pointer_cast<DerivedGeodeticCRS>(other);
-    return otherDerivedGeodCRS != nullptr &&
+    return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
 
@@ -2546,9 +2550,9 @@ DerivedGeographicCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 bool DerivedGeographicCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
-    auto otherDerivedGeogCRS =
+    auto otherDerivedCRS =
         util::nn_dynamic_pointer_cast<DerivedGeographicCRS>(other);
-    return otherDerivedGeogCRS != nullptr &&
+    return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
 
@@ -2696,9 +2700,9 @@ DerivedProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 bool DerivedProjectedCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
-    auto otherDerivedGeogCRS =
+    auto otherDerivedCRS =
         util::nn_dynamic_pointer_cast<DerivedProjectedCRS>(other);
-    return otherDerivedGeogCRS != nullptr &&
+    return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
 
@@ -3114,9 +3118,9 @@ DerivedVerticalCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 bool DerivedVerticalCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
-    auto otherDerivedGeogCRS =
+    auto otherDerivedCRS =
         util::nn_dynamic_pointer_cast<DerivedVerticalCRS>(other);
-    return otherDerivedGeogCRS != nullptr &&
+    return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
 
@@ -3168,17 +3172,6 @@ CRSNNPtr DerivedEngineeringCRS::shallowClone() const {
 const EngineeringCRSNNPtr DerivedEngineeringCRS::baseCRS() const {
     return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<EngineeringCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Return the datum::EngineeringDatum associated with the CRS.
- *
- * @return a EngineeringDatum
- */
-const datum::EngineeringDatumNNPtr DerivedEngineeringCRS::datum() const {
-    return NN_CHECK_ASSERT(std::dynamic_pointer_cast<datum::EngineeringDatum>(
-        SingleCRS::getPrivate()->datum));
 }
 
 // ---------------------------------------------------------------------------
@@ -3240,11 +3233,160 @@ DerivedEngineeringCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 bool DerivedEngineeringCRS::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
-    auto otherDerivedGeogCRS =
+    auto otherDerivedCRS =
         util::nn_dynamic_pointer_cast<DerivedEngineeringCRS>(other);
-    return otherDerivedGeogCRS != nullptr &&
+    return otherDerivedCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+template <class DerivedCRSTraits>
+struct DerivedCRSTemplate<DerivedCRSTraits>::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+template <class DerivedCRSTraits>
+DerivedCRSTemplate<DerivedCRSTraits>::~DerivedCRSTemplate() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+template <class DerivedCRSTraits>
+DerivedCRSTemplate<DerivedCRSTraits>::DerivedCRSTemplate(
+    const BaseNNPtr &baseCRSIn,
+    const operation::ConversionNNPtr &derivingConversionIn, const CSNNPtr &csIn)
+    : SingleCRS(baseCRSIn->datum().as_nullable(), nullptr, csIn),
+      BaseType(baseCRSIn->datum(), csIn),
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+template <class DerivedCRSTraits>
+DerivedCRSTemplate<DerivedCRSTraits>::DerivedCRSTemplate(
+    const DerivedCRSTemplate &other)
+    : SingleCRS(other), BaseType(other), DerivedCRS(other),
+      d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
+template <class DerivedCRSTraits>
+const typename DerivedCRSTemplate<DerivedCRSTraits>::BaseNNPtr
+DerivedCRSTemplate<DerivedCRSTraits>::baseCRS() const {
+    auto l_baseCRS = DerivedCRS::getPrivate()->baseCRS_;
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<BaseType>(l_baseCRS));
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+template <class DerivedCRSTraits>
+CRSNNPtr DerivedCRSTemplate<DerivedCRSTraits>::shallowClone() const {
+    auto crs(DerivedCRSTemplate::nn_make_shared<DerivedCRSTemplate>(*this));
+    crs->assignSelf(crs);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+template <class DerivedCRSTraits>
+typename DerivedCRSTemplate<DerivedCRSTraits>::NNPtr
+DerivedCRSTemplate<DerivedCRSTraits>::create(
+    const util::PropertyMap &properties, const BaseNNPtr &baseCRSIn,
+    const operation::ConversionNNPtr &derivingConversionIn,
+    const CSNNPtr &csIn) {
+    auto crs(DerivedCRSTemplate::nn_make_shared<DerivedCRSTemplate>(
+        baseCRSIn, derivingConversionIn, csIn));
+    crs->assignSelf(crs);
+    crs->setProperties(properties);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+template <class DerivedCRSTraits>
+std::string DerivedCRSTemplate<DerivedCRSTraits>::exportToWKT(
+    io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw io::FormattingException(DerivedCRSTraits::CRSName() +
+                                      " can only be exported to WKT2");
+    }
+    formatter->startNode(DerivedCRSTraits::WKTKeyword(),
+                         !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+
+    auto l_baseCRS = baseCRS();
+    formatter->startNode(DerivedCRSTraits::WKTBaseKeyword(),
+                         !l_baseCRS->identifiers().empty());
+    formatter->addQuotedString(*(l_baseCRS->name()->description()));
+    l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
+    formatter->endNode();
+
+    formatter->setUseDerivingConversion(true);
+    derivingConversionRef()->exportToWKT(formatter);
+    formatter->setUseDerivingConversion(false);
+
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+template <class DerivedCRSTraits>
+bool DerivedCRSTemplate<DerivedCRSTraits>::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDerivedCRS =
+        util::nn_dynamic_pointer_cast<DerivedCRSTemplate>(other);
+    return otherDerivedCRS != nullptr &&
+           DerivedCRS::isEquivalentTo(other, criterion);
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+const std::string DerivedParametricCRSTraits::CRSName() {
+    return "DerivedParametricCRS";
+}
+const std::string DerivedParametricCRSTraits::WKTKeyword() {
+    return io::WKTConstants::PARAMETRICCRS;
+}
+const std::string DerivedParametricCRSTraits::WKTBaseKeyword() {
+    return io::WKTConstants::BASEPARAMCRS;
+}
+
+template class DerivedCRSTemplate<DerivedParametricCRSTraits>;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+const std::string DerivedTemporalCRSTraits::CRSName() {
+    return "DerivedTemporalCRS";
+}
+const std::string DerivedTemporalCRSTraits::WKTKeyword() {
+    return io::WKTConstants::TIMECRS;
+}
+const std::string DerivedTemporalCRSTraits::WKTBaseKeyword() {
+    return io::WKTConstants::BASETIMECRS;
+}
+
+template class DerivedCRSTemplate<DerivedTemporalCRSTraits>;
+//! @endcond
+
+// ---------------------------------------------------------------------------
 
 } // namespace crs
 NS_PROJ_END

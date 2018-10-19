@@ -978,6 +978,8 @@ struct WKTParser::Private {
 
     TemporalCRSNNPtr buildTemporalCRS(const WKTNodeNNPtr &node);
 
+    DerivedTemporalCRSNNPtr buildDerivedTemporalCRS(const WKTNodeNNPtr &node);
+
     EngineeringCRSNNPtr buildEngineeringCRS(const WKTNodeNNPtr &node);
 
     EngineeringCRSNNPtr
@@ -987,6 +989,9 @@ struct WKTParser::Private {
     buildDerivedEngineeringCRS(const WKTNodeNNPtr &node);
 
     ParametricCRSNNPtr buildParametricCRS(const WKTNodeNNPtr &node);
+
+    DerivedParametricCRSNNPtr
+    buildDerivedParametricCRS(const WKTNodeNNPtr &node);
 
     DerivedProjectedCRSNNPtr buildDerivedProjectedCRS(const WKTNodeNNPtr &node);
 
@@ -1770,6 +1775,38 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 throw ParsingException(
                     "buildCS: unexpected AXIS count for LOCAL_CS");
             }
+        } else if (ci_equal(parentNode->value(), WKTConstants::BASEPARAMCRS)) {
+            csType = "parametric";
+            if (axisCount == 0) {
+                auto unit =
+                    buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
+                if (unit == UnitOfMeasure::NONE) {
+                    unit = UnitOfMeasure("unknown", 1,
+                                         UnitOfMeasure::Type::PARAMETRIC);
+                }
+                return ParametricCS::create(
+                    PropertyMap(),
+                    CoordinateSystemAxis::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          "unknown parametric"),
+                        std::string(), AxisDirection::UNSPECIFIED, unit));
+            }
+        } else if (ci_equal(parentNode->value(), WKTConstants::BASETIMECRS)) {
+            csType = "temporal";
+            if (axisCount == 0) {
+                auto unit =
+                    buildUnitInSubNode(parentNode, UnitOfMeasure::Type::TIME);
+                if (unit == UnitOfMeasure::NONE) {
+                    unit =
+                        UnitOfMeasure("unknown", 1, UnitOfMeasure::Type::TIME);
+                }
+                return DateTimeTemporalCS::create(
+                    PropertyMap(),
+                    CoordinateSystemAxis::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          "unknown temporal"),
+                        std::string(), AxisDirection::FUTURE, unit));
+            }
         } else {
             // Shouldn't happen normally
             throw ParsingException(
@@ -1850,12 +1887,9 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
         }
     } else if (ci_equal(csType, "ordinal")) { // WKT2-2018
         return OrdinalCS::create(csMap, axisList);
-    } else if (ci_equal(csType, "parametric")) { // WKT2-2015
+    } else if (ci_equal(csType, "parametric")) {
         if (axisCount == 1) {
-            return ParametricCS::create(
-                csMap,
-                axisList[0]); // FIXME: there are 3 possible subtypes of
-                              // TemporalCS
+            return ParametricCS::create(csMap, axisList[0]);
         } else {
             throw ParsingException("buildCS: invalid CS axis count for " +
                                    csType);
@@ -2830,7 +2864,7 @@ WKTParser::Private::buildTemporalCRS(const WKTNodeNNPtr &node) {
     auto datum = buildTemporalDatum(NN_CHECK_ASSERT(datumNode));
 
     auto csNode = node->lookForChild(WKTConstants::CS);
-    if (!csNode) {
+    if (!csNode && !ci_equal(node->value(), WKTConstants::BASETIMECRS)) {
         throw ParsingException("Missing CS node");
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
@@ -2841,6 +2875,41 @@ WKTParser::Private::buildTemporalCRS(const WKTNodeNNPtr &node) {
 
     return TemporalCRS::create(buildProperties(node), datum,
                                NN_CHECK_ASSERT(temporalCS));
+}
+
+// ---------------------------------------------------------------------------
+
+DerivedTemporalCRSNNPtr
+WKTParser::Private::buildDerivedTemporalCRS(const WKTNodeNNPtr &node) {
+
+    auto baseCRSNode = node->lookForChild(WKTConstants::BASETIMECRS);
+    assert(baseCRSNode !=
+           nullptr); // given the constraints enforced on calling code path
+
+    auto baseCRS = buildTemporalCRS(NN_CHECK_ASSERT(baseCRSNode));
+
+    auto derivingConversionNode =
+        node->lookForChild(WKTConstants::DERIVINGCONVERSION);
+    if (!derivingConversionNode) {
+        throw ParsingException("Missing DERIVINGCONVERSION node");
+    }
+    auto derivingConversion =
+        buildConversion(NN_CHECK_ASSERT(derivingConversionNode),
+                        UnitOfMeasure::NONE, UnitOfMeasure::NONE);
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+    auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
+    if (!temporalCS) {
+        throw ParsingException("CS node is not of type temporal");
+    }
+
+    return DerivedTemporalCRS::create(buildProperties(node), baseCRS,
+                                      derivingConversion,
+                                      NN_CHECK_ASSERT(temporalCS));
 }
 
 // ---------------------------------------------------------------------------
@@ -2926,7 +2995,7 @@ WKTParser::Private::buildParametricCRS(const WKTNodeNNPtr &node) {
     auto datum = buildParametricDatum(NN_CHECK_ASSERT(datumNode));
 
     auto csNode = node->lookForChild(WKTConstants::CS);
-    if (!csNode) {
+    if (!csNode && !ci_equal(node->value(), WKTConstants::BASEPARAMCRS)) {
         throw ParsingException("Missing CS node");
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
@@ -2937,6 +3006,41 @@ WKTParser::Private::buildParametricCRS(const WKTNodeNNPtr &node) {
 
     return ParametricCRS::create(buildProperties(node), datum,
                                  NN_CHECK_ASSERT(parametricCS));
+}
+
+// ---------------------------------------------------------------------------
+
+DerivedParametricCRSNNPtr
+WKTParser::Private::buildDerivedParametricCRS(const WKTNodeNNPtr &node) {
+
+    auto baseParamCRSNode = node->lookForChild(WKTConstants::BASEPARAMCRS);
+    assert(baseParamCRSNode !=
+           nullptr); // given the constraints enforced on calling code path
+
+    auto baseParamCRS = buildParametricCRS(NN_CHECK_ASSERT(baseParamCRSNode));
+
+    auto derivingConversionNode =
+        node->lookForChild(WKTConstants::DERIVINGCONVERSION);
+    if (!derivingConversionNode) {
+        throw ParsingException("Missing DERIVINGCONVERSION node");
+    }
+    auto derivingConversion =
+        buildConversion(NN_CHECK_ASSERT(derivingConversionNode),
+                        UnitOfMeasure::NONE, UnitOfMeasure::NONE);
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+    auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
+    if (!parametricCS) {
+        throw ParsingException("CS node is not of type parametric");
+    }
+
+    return DerivedParametricCRS::create(buildProperties(node), baseParamCRS,
+                                        derivingConversion,
+                                        NN_CHECK_ASSERT(parametricCS));
 }
 
 // ---------------------------------------------------------------------------
@@ -3022,7 +3126,12 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     }
 
     if (ci_equal(name, WKTConstants::TIMECRS)) {
-        return util::nn_static_pointer_cast<CRS>(buildTemporalCRS(node));
+        if (node->lookForChild(WKTConstants::BASETIMECRS)) {
+            return util::nn_static_pointer_cast<CRS>(
+                buildDerivedTemporalCRS(node));
+        } else {
+            return util::nn_static_pointer_cast<CRS>(buildTemporalCRS(node));
+        }
     }
 
     if (ci_equal(name, WKTConstants::DERIVEDPROJCRS)) {
@@ -3046,7 +3155,12 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     }
 
     if (ci_equal(name, WKTConstants::PARAMETRICCRS)) {
-        return util::nn_static_pointer_cast<CRS>(buildParametricCRS(node));
+        if (node->lookForChild(WKTConstants::BASEPARAMCRS)) {
+            return util::nn_static_pointer_cast<CRS>(
+                buildDerivedParametricCRS(node));
+        } else {
+            return util::nn_static_pointer_cast<CRS>(buildParametricCRS(node));
+        }
     }
 
     return nullptr;

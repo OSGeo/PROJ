@@ -716,6 +716,8 @@ struct ListFreer {
     PROJ_STRING_LIST list;
     ListFreer(PROJ_STRING_LIST ptrIn) : list(ptrIn) {}
     ~ListFreer() { proj_free_string_list(list); }
+    ListFreer(const ListFreer &) = delete;
+    ListFreer &operator=(const ListFreer &) = delete;
 };
 
 // ---------------------------------------------------------------------------

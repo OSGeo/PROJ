@@ -2524,6 +2524,17 @@ TEST(crs, derivedProjectedCRS_to_PROJ) {
 
 // ---------------------------------------------------------------------------
 
+static DateTimeTemporalCSNNPtr createDateTimeTemporalCS() {
+    return DateTimeTemporalCS::create(
+        PropertyMap(),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Time"), "T",
+            AxisDirection::FUTURE, UnitOfMeasure::NONE));
+    ;
+}
+
+// ---------------------------------------------------------------------------
+
 static TemporalCRSNNPtr createDateTimeTemporalCRS() {
 
     auto datum = TemporalDatum::create(
@@ -2531,15 +2542,9 @@ static TemporalCRSNNPtr createDateTimeTemporalCRS() {
         DateTime::create("0000-01-01"),
         TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN);
 
-    auto cs = DateTimeTemporalCS::create(
-        PropertyMap(),
-        CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "Time"), "T",
-            AxisDirection::FUTURE, UnitOfMeasure::NONE));
-
     return TemporalCRS::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "Temporal CRS"), datum,
-        cs);
+        createDateTimeTemporalCS());
 }
 
 // ---------------------------------------------------------------------------
@@ -2748,6 +2753,18 @@ TEST(crs, engineeringCRS_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+static ParametricCSNNPtr createParametricCS() {
+
+    return ParametricCS::create(
+        PropertyMap(),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "pressure"), "hPa",
+            AxisDirection::UP, UnitOfMeasure("HectoPascal", 100,
+                                             UnitOfMeasure::Type::PARAMETRIC)));
+}
+
+// ---------------------------------------------------------------------------
+
 static ParametricCRSNNPtr createParametricCRS() {
 
     auto datum = ParametricDatum::create(
@@ -2755,13 +2772,7 @@ static ParametricCRSNNPtr createParametricCRS() {
 
     return ParametricCRS::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "Parametric CRS"), datum,
-        ParametricCS::create(
-            PropertyMap(),
-            CoordinateSystemAxis::create(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "pressure"),
-                "hPa", AxisDirection::UP,
-                UnitOfMeasure("HectoPascal", 100,
-                              UnitOfMeasure::Type::PARAMETRIC))));
+        createParametricCS());
 }
 
 // ---------------------------------------------------------------------------
@@ -2773,10 +2784,14 @@ TEST(crs, parametricCRS_WKT2) {
                     "    CS[parametric,1],\n"
                     "        AXIS[\"pressure (hPa)\",up,\n"
                     "            PARAMETRICUNIT[\"HectoPascal\",100]]]";
+    auto crs = createParametricCRS();
+    EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
 
-    EXPECT_EQ(createParametricCRS()->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
-              expected);
+    EXPECT_EQ(
+        crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+        expected);
 }
 
 // ---------------------------------------------------------------------------
@@ -2893,6 +2908,108 @@ TEST(crs, DerivedEngineeringCRS_WKT2) {
 TEST(crs, DerivedEngineeringCRS_WKT1) {
 
     EXPECT_THROW(createDerivedEngineeringCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+static DerivedParametricCRSNNPtr createDerivedParametricCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedParametricCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived ParametricCRS"),
+        createParametricCRS(), derivingConversion, createParametricCS());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, DerivedParametricCRS_WKT2) {
+
+    auto expected = "PARAMETRICCRS[\"Derived ParametricCRS\",\n"
+                    "    BASEPARAMCRS[\"Parametric CRS\",\n"
+                    "        PDATUM[\"Parametric datum\"]],\n"
+                    "    DERIVINGCONVERSION[\"unnamed\",\n"
+                    "        METHOD[\"PROJ unimplemented\"]],\n"
+                    "    CS[parametric,1],\n"
+                    "        AXIS[\"pressure (hPa)\",up,\n"
+                    "            PARAMETRICUNIT[\"HectoPascal\",100]]]";
+
+    auto crs = createDerivedParametricCRS();
+    EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(createParametricCS()));
+    EXPECT_TRUE(crs->datum()->isEquivalentTo(createParametricCRS()->datum()));
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, DerivedParametricCRS_WKT1) {
+
+    EXPECT_THROW(createDerivedParametricCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+static DerivedTemporalCRSNNPtr createDerivedTemporalCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedTemporalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived TemporalCRS"),
+        createDateTimeTemporalCRS(), derivingConversion,
+        createDateTimeTemporalCS());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, DeriveTemporalCRS_WKT2) {
+
+    auto expected = "TIMECRS[\"Derived TemporalCRS\",\n"
+                    "    BASETIMECRS[\"Temporal CRS\",\n"
+                    "        TDATUM[\"Gregorian calendar\",\n"
+                    "            CALENDAR[\"proleptic Gregorian\"],\n"
+                    "            TIMEORIGIN[0000-01-01]]],\n"
+                    "    DERIVINGCONVERSION[\"unnamed\",\n"
+                    "        METHOD[\"PROJ unimplemented\"]],\n"
+                    "    CS[TemporalDateTime,1],\n"
+                    "        AXIS[\"time (T)\",future]]";
+
+    auto crs = createDerivedTemporalCRS();
+    EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(
+        crs->coordinateSystem()->isEquivalentTo(createDateTimeTemporalCS()));
+    EXPECT_TRUE(
+        crs->datum()->isEquivalentTo(createDateTimeTemporalCRS()->datum()));
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, DeriveTemporalCRS_WKT1) {
+
+    EXPECT_THROW(createDerivedTemporalCRS()->exportToWKT(
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
 }

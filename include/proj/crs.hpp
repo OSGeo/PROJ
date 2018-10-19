@@ -1075,7 +1075,7 @@ using DerivedEngineeringCRSNNPtr = util::nn<DerivedEngineeringCRSPtr>;
  * engineering datum, and is associated with one of the coordinate system
  * types for an EngineeringCRS
  *
- * \remark Implements DerivedVerticalCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedEngineeringCRS from \ref ISO_19111_2018
  */
 class DerivedEngineeringCRS : public EngineeringCRS, public DerivedCRS {
   public:
@@ -1084,8 +1084,6 @@ class DerivedEngineeringCRS : public EngineeringCRS, public DerivedCRS {
     //! @endcond
 
     PROJ_DLL const EngineeringCRSNNPtr baseCRS() const;
-
-    PROJ_DLL const datum::EngineeringDatumNNPtr datum() const;
 
     PROJ_DLL static DerivedEngineeringCRSNNPtr
     create(const util::PropertyMap &properties,
@@ -1120,23 +1118,150 @@ class DerivedEngineeringCRS : public EngineeringCRS, public DerivedCRS {
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
+/** \brief Template representing a derived coordinate reference system.
+ */
+template <class DerivedCRSTraits>
+class DerivedCRSTemplate : public DerivedCRSTraits::BaseType,
+                           public DerivedCRS {
+  protected:
+    /** Base type */
+    typedef typename DerivedCRSTraits::BaseType BaseType;
+    /** CSType */
+    typedef typename DerivedCRSTraits::CSType CSType;
 
-// ---------------------------------------------------------------------------
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~DerivedCRSTemplate() override;
+    //! @endcond
 
-class DerivedParametricCRS : public ParametricCRS, public DerivedCRS {
-    // TODO
+    /** Non-null shared pointer of DerivedCRSTemplate */
+    typedef typename util::nn<std::shared_ptr<DerivedCRSTemplate>> NNPtr;
+    /** Non-null shared pointer of BaseType */
+    typedef util::nn<std::shared_ptr<BaseType>> BaseNNPtr;
+    /** Non-null shared pointer of CSType */
+    typedef util::nn<std::shared_ptr<CSType>> CSNNPtr;
+
+    /** \brief Return the base CRS of a DerivedCRSTemplate.
+    *
+    * @return the base CRS.
+    */
+    PROJ_DLL const BaseNNPtr baseCRS() const;
+
+    /** \brief Instanciate a DerivedCRSTemplate from a base CRS, a deriving
+    * conversion and a cs::CoordinateSystem.
+    *
+    * @param properties See \ref general_properties.
+    * At minimum the name should be defined.
+    * @param baseCRSIn base CRS.
+    * @param derivingConversionIn the deriving conversion from the base CRS to
+    * this
+    * CRS.
+    * @param csIn the coordinate system.
+    * @return new DerivedCRSTemplate.
+    */
+    PROJ_DLL static NNPtr
+    create(const util::PropertyMap &properties, const BaseNNPtr &baseCRSIn,
+           const operation::ConversionNNPtr &derivingConversionIn,
+           const CSNNPtr &csIn);
+
+    //! @cond Doxygen_Suppress
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL CRSNNPtr shallowClone() const override;
+    //! @endcond
+
+  protected:
+    DerivedCRSTemplate(const BaseNNPtr &baseCRSIn,
+                       const operation::ConversionNNPtr &derivingConversionIn,
+                       const CSNNPtr &csIn);
+    DerivedCRSTemplate(const DerivedCRSTemplate &other);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DerivedCRSTemplate &operator=(const DerivedCRSTemplate &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
 
-class DerivedTemporalCRS : public TemporalCRS, public DerivedCRS {
-    // TODO
+//! @cond Doxygen_Suppress
+struct DerivedParametricCRSTraits {
+    typedef ParametricCRS BaseType;
+    typedef cs::ParametricCS CSType;
+    // old x86_64-w64-mingw32-g++ has issues with static variables. use method
+    // instead
+    inline static const std::string CRSName();
+    inline static const std::string WKTKeyword();
+    inline static const std::string WKTBaseKeyword();
 };
+//! @endcond
 
-// ---------------------------------------------------------------------------
-
+/** \brief A derived coordinate reference system which has a parametric
+ * coordinate reference system as its base CRS, thereby inheriting a parametric
+ * datum, and a parametric coordinate system.
+ *
+ * \remark Implements DerivedParametricCRS from \ref ISO_19111_2018
+ */
+#ifdef DOXYGEN_ENABLED
+class DerivedParametricCRS
+    : public DerivedCRSTemplate<DerivedParametricCRSTraits> {};
+#else
+using DerivedParametricCRS = DerivedCRSTemplate<DerivedParametricCRSTraits>;
 #endif
+
+#ifndef DO_NOT_DEFINE_EXTERN_DERIVED_CRS_TEMPLATE
+extern template class DerivedCRSTemplate<DerivedParametricCRSTraits>;
+#endif
+
+/** Shared pointer of DerivedParametricCRS */
+using DerivedParametricCRSPtr = std::shared_ptr<DerivedParametricCRS>;
+/** Non-null shared pointer of DerivedParametricCRS */
+using DerivedParametricCRSNNPtr = util::nn<DerivedParametricCRSPtr>;
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct DerivedTemporalCRSTraits {
+    typedef TemporalCRS BaseType;
+    typedef cs::TemporalCS CSType;
+    // old x86_64-w64-mingw32-g++ has issues with static variables. use method
+    // instead
+    inline static const std::string CRSName();
+    inline static const std::string WKTKeyword();
+    inline static const std::string WKTBaseKeyword();
+};
+//! @endcond
+
+/** \brief A derived coordinate reference system which has a temporal
+ * coordinate reference system as its base CRS, thereby inheriting a temporal
+ * datum, and a temporal coordinate system.
+ *
+ * \remark Implements DerivedTemporalCRS from \ref ISO_19111_2018
+ */
+#ifdef DOXYGEN_ENABLED
+class DerivedTemporalCRS : public DerivedCRSTemplate<DerivedTemporalCRSTraits> {
+};
+#else
+using DerivedTemporalCRS = DerivedCRSTemplate<DerivedTemporalCRSTraits>;
+#endif
+
+#ifndef DO_NOT_DEFINE_EXTERN_DERIVED_CRS_TEMPLATE
+extern template class DerivedCRSTemplate<DerivedTemporalCRSTraits>;
+#endif
+
+/** Shared pointer of DerivedTemporalCRS */
+using DerivedTemporalCRSPtr = std::shared_ptr<DerivedTemporalCRS>;
+/** Non-null shared pointer of DerivedTemporalCRS */
+using DerivedTemporalCRSNNPtr = util::nn<DerivedTemporalCRSPtr>;
+
+// ---------------------------------------------------------------------------
 
 } // namespace crs
 

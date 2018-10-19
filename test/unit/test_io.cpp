@@ -2281,6 +2281,43 @@ TEST(wkt_parse, DerivedEngineeringCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedParametricCRS) {
+
+    auto wkt = "PARAMETRICCRS[\"Derived ParametricCRS\",\n"
+               "    BASEPARAMCRS[\"Parametric CRS\",\n"
+               "        PDATUM[\"Parametric datum\"]],\n"
+               "    DERIVINGCONVERSION[\"unnamed\",\n"
+               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "    CS[parametric,1],\n"
+               "        AXIS[\"pressure (hPa)\",up,\n"
+               "            PARAMETRICUNIT[\"HectoPascal\",100]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedParametricCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, DerivedTemporalCRS) {
+
+    auto wkt = "TIMECRS[\"Derived TemporalCRS\",\n"
+               "    BASETIMECRS[\"Temporal CRS\",\n"
+               "        TDATUM[\"Gregorian calendar\",\n"
+               "            CALENDAR[\"proleptic Gregorian\"],\n"
+               "            TIMEORIGIN[0000-01-01]]],\n"
+               "    DERIVINGCONVERSION[\"unnamed\",\n"
+               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "    CS[TemporalDateTime,1],\n"
+               "        AXIS[\"time (T)\",future]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedTemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, ensemble) {
     auto wkt = "ENSEMBLE[\"test\",\n"
                "    MEMBER[\"World Geodetic System 1984\",\n"
@@ -3371,6 +3408,7 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
                                   "        AXIS[\"(N)\",north]]"),
         ParsingException);
 
+    // Missing DERIVINGCONVERSION
     EXPECT_THROW(
         WKTParser().createFromWKT(
             "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
@@ -3386,6 +3424,7 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
             "        AXIS[\"(N)\",north]]"),
         ParsingException);
 
+    // Missing CS
     EXPECT_THROW(
         WKTParser().createFromWKT(
             "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
@@ -3413,6 +3452,7 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
         "    CS[vertical,1],\n"
         "        AXIS[\"gravity-related height (H)\",up]]"));
 
+    // Missing DERIVINGCONVERSION
     EXPECT_THROW(WKTParser().createFromWKT(
                      "VERTCRS[\"Derived vertCRS\",\n"
                      "    BASEVERTCRS[\"ODN height\",\n"
@@ -3421,6 +3461,7 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
                      "        AXIS[\"gravity-related height (H)\",up]]"),
                  ParsingException);
 
+    // Missing CS
     EXPECT_THROW(WKTParser().createFromWKT(
                      "VERTCRS[\"Derived vertCRS\",\n"
                      "    BASEVERTCRS[\"ODN height\",\n"
@@ -3429,6 +3470,7 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
                      "        METHOD[\"PROJ unimplemented\"]]]"),
                  ParsingException);
 
+    // Wrong CS type
     EXPECT_THROW(WKTParser().createFromWKT(
                      "VERTCRS[\"Derived vertCRS\",\n"
                      "    BASEVERTCRS[\"ODN height\",\n"
@@ -3454,6 +3496,7 @@ TEST(wkt_parse, invalid_DerivedEngineeringCRS) {
                                   "        AXIS[\"(N)\",north],\n"
                                   "        LENGTHUNIT[\"metre\",1]]"));
 
+    // Missing DERIVINGCONVERSION
     EXPECT_THROW(
         WKTParser().createFromWKT("ENGCRS[\"Derived EngineeringCRS\",\n"
                                   "    BASEENGCRS[\"Engineering CRS\",\n"
@@ -3464,6 +3507,7 @@ TEST(wkt_parse, invalid_DerivedEngineeringCRS) {
                                   "        LENGTHUNIT[\"metre\",1]]"),
         ParsingException);
 
+    // Missing CS
     EXPECT_THROW(
         WKTParser().createFromWKT("ENGCRS[\"Derived EngineeringCRS\",\n"
                                   "    BASEENGCRS[\"Engineering CRS\",\n"
@@ -3471,6 +3515,101 @@ TEST(wkt_parse, invalid_DerivedEngineeringCRS) {
                                   "    DERIVINGCONVERSION[\"unnamed\",\n"
                                   "        METHOD[\"PROJ unimplemented\"]]]"),
         ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_DerivedParametricCRS) {
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "PARAMETRICCRS[\"Derived ParametricCRS\",\n"
+        "    BASEPARAMCRS[\"Parametric CRS\",\n"
+        "        PDATUM[\"Parametric datum\"]],\n"
+        "    DERIVINGCONVERSION[\"unnamed\",\n"
+        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "    CS[parametric,1],\n"
+        "        AXIS[\"pressure (hPa)\",up,\n"
+        "            PARAMETRICUNIT[\"HectoPascal\",100]]]"));
+
+    // Missing DERIVINGCONVERSION
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "PARAMETRICCRS[\"Derived ParametricCRS\",\n"
+                     "    BASEPARAMCRS[\"Parametric CRS\",\n"
+                     "        PDATUM[\"Parametric datum\"]],\n"
+                     "    CS[parametric,1],\n"
+                     "        AXIS[\"pressure (hPa)\",up,\n"
+                     "            PARAMETRICUNIT[\"HectoPascal\",100]]]"),
+                 ParsingException);
+
+    // Missing CS
+    EXPECT_THROW(
+        WKTParser().createFromWKT("PARAMETRICCRS[\"Derived ParametricCRS\",\n"
+                                  "    BASEPARAMCRS[\"Parametric CRS\",\n"
+                                  "        PDATUM[\"Parametric datum\"]],\n"
+                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
+                                  "        METHOD[\"PROJ unimplemented\"]]]"),
+        ParsingException);
+
+    // Wrong CS type
+    EXPECT_THROW(
+        WKTParser().createFromWKT("PARAMETRICCRS[\"Derived ParametricCRS\",\n"
+                                  "    BASEPARAMCRS[\"Parametric CRS\",\n"
+                                  "        PDATUM[\"Parametric datum\"]],\n"
+                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
+                                  "        METHOD[\"PROJ unimplemented\"]],\n"
+                                  "    CS[TemporalDateTime,1],\n"
+                                  "        AXIS[\"time (T)\",future]]"),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_DerivedTemporalCRS) {
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "TIMECRS[\"Derived TemporalCRS\",\n"
+        "    BASETIMECRS[\"Temporal CRS\",\n"
+        "        TDATUM[\"Gregorian calendar\",\n"
+        "            CALENDAR[\"proleptic Gregorian\"],\n"
+        "            TIMEORIGIN[0000-01-01]]],\n"
+        "    DERIVINGCONVERSION[\"unnamed\",\n"
+        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "    CS[TemporalDateTime,1],\n"
+        "        AXIS[\"time (T)\",future]]"));
+
+    // Missing DERIVINGCONVERSION
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "TIMECRS[\"Derived TemporalCRS\",\n"
+                     "    BASETIMECRS[\"Temporal CRS\",\n"
+                     "        TDATUM[\"Gregorian calendar\",\n"
+                     "            CALENDAR[\"proleptic Gregorian\"],\n"
+                     "            TIMEORIGIN[0000-01-01]]],\n"
+                     "    CS[TemporalDateTime,1],\n"
+                     "        AXIS[\"time (T)\",future]]"),
+                 ParsingException);
+
+    // Missing CS
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "TIMECRS[\"Derived TemporalCRS\",\n"
+                     "    BASETIMECRS[\"Temporal CRS\",\n"
+                     "        TDATUM[\"Gregorian calendar\",\n"
+                     "            CALENDAR[\"proleptic Gregorian\"],\n"
+                     "            TIMEORIGIN[0000-01-01]]],\n"
+                     "    DERIVINGCONVERSION[\"unnamed\",\n"
+                     "        METHOD[\"PROJ unimplemented\"]]]"),
+                 ParsingException);
+
+    // Wrong CS type
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "TIMECRS[\"Derived TemporalCRS\",\n"
+                     "    BASETIMECRS[\"Temporal CRS\",\n"
+                     "        TDATUM[\"Gregorian calendar\",\n"
+                     "            CALENDAR[\"proleptic Gregorian\"],\n"
+                     "            TIMEORIGIN[0000-01-01]]],\n"
+                     "    DERIVINGCONVERSION[\"unnamed\",\n"
+                     "        METHOD[\"PROJ unimplemented\"]],\n"
+                     "    CS[parametric,1],\n"
+                     "        AXIS[\"pressure (hPa)\",up,\n"
+                     "            PARAMETRICUNIT[\"HectoPascal\",100]]]"),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------

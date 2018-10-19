@@ -3,7 +3,6 @@
     - WKTv2 Bison based validator ?
     - import from Proj4
             init= syntax
-    - derived crs
     - test sphericalCS
     - identification of CRS code from registry from name, etc
     - proj.db: integrate ESRI catalog ?
