@@ -1064,60 +1064,6 @@ class DerivedVerticalCRS : public VerticalCRS, public DerivedCRS {
 
 // ---------------------------------------------------------------------------
 
-class DerivedEngineeringCRS;
-/** Shared pointer of DerivedEngineeringCRS */
-using DerivedEngineeringCRSPtr = std::shared_ptr<DerivedEngineeringCRS>;
-/** Non-null shared pointer of DerivedEngineeringCRS */
-using DerivedEngineeringCRSNNPtr = util::nn<DerivedEngineeringCRSPtr>;
-
-/** \brief A derived coordinate reference system which has an engineering
- * coordinate reference system as its base CRS, thereby inheriting an
- * engineering datum, and is associated with one of the coordinate system
- * types for an EngineeringCRS
- *
- * \remark Implements DerivedEngineeringCRS from \ref ISO_19111_2018
- */
-class DerivedEngineeringCRS : public EngineeringCRS, public DerivedCRS {
-  public:
-    //! @cond Doxygen_Suppress
-    PROJ_DLL ~DerivedEngineeringCRS() override;
-    //! @endcond
-
-    PROJ_DLL const EngineeringCRSNNPtr baseCRS() const;
-
-    PROJ_DLL static DerivedEngineeringCRSNNPtr
-    create(const util::PropertyMap &properties,
-           const EngineeringCRSNNPtr &baseCRSIn,
-           const operation::ConversionNNPtr &derivingConversionIn,
-           const cs::CoordinateSystemNNPtr &csIn);
-
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
-  protected:
-    DerivedEngineeringCRS(
-        const EngineeringCRSNNPtr &baseCRSIn,
-        const operation::ConversionNNPtr &derivingConversionIn,
-        const cs::CoordinateSystemNNPtr &csIn);
-    DerivedEngineeringCRS(const DerivedEngineeringCRS &other);
-
-    INLINED_MAKE_SHARED
-
-  private:
-    PROJ_OPAQUE_PRIVATE_DATA
-    DerivedEngineeringCRS &
-    operator=(const DerivedEngineeringCRS &other) = delete;
-};
-
-// ---------------------------------------------------------------------------
-
 /** \brief Template representing a derived coordinate reference system.
  */
 template <class DerivedCRSTraits>
@@ -1192,6 +1138,44 @@ class DerivedCRSTemplate : public DerivedCRSTraits::BaseType,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+struct DerivedEngineeringCRSTraits {
+    typedef EngineeringCRS BaseType;
+    typedef cs::CoordinateSystem CSType;
+    // old x86_64-w64-mingw32-g++ has issues with static variables. use method
+    // instead
+    inline static const std::string CRSName();
+    inline static const std::string WKTKeyword();
+    inline static const std::string WKTBaseKeyword();
+    static const bool wkt2_2018_only = true;
+};
+//! @endcond
+
+/** \brief A derived coordinate reference system which has an engineering
+ * coordinate reference system as its base CRS, thereby inheriting an
+ * engineering datum, and is associated with one of the coordinate system
+ * types for an EngineeringCRS
+ *
+ * \remark Implements DerivedEngineeringCRS from \ref ISO_19111_2018
+ */
+#ifdef DOXYGEN_ENABLED
+class DerivedEngineeringCRS
+    : public DerivedCRSTemplate<DerivedEngineeringCRSTraits> {};
+#else
+using DerivedEngineeringCRS = DerivedCRSTemplate<DerivedEngineeringCRSTraits>;
+#endif
+
+#ifndef DO_NOT_DEFINE_EXTERN_DERIVED_CRS_TEMPLATE
+extern template class DerivedCRSTemplate<DerivedEngineeringCRSTraits>;
+#endif
+
+/** Shared pointer of DerivedEngineeringCRS */
+using DerivedEngineeringCRSPtr = std::shared_ptr<DerivedEngineeringCRS>;
+/** Non-null shared pointer of DerivedEngineeringCRS */
+using DerivedEngineeringCRSNNPtr = util::nn<DerivedEngineeringCRSPtr>;
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct DerivedParametricCRSTraits {
     typedef ParametricCRS BaseType;
     typedef cs::ParametricCS CSType;
@@ -1200,6 +1184,7 @@ struct DerivedParametricCRSTraits {
     inline static const std::string CRSName();
     inline static const std::string WKTKeyword();
     inline static const std::string WKTBaseKeyword();
+    static const bool wkt2_2018_only = false;
 };
 //! @endcond
 
@@ -1236,6 +1221,7 @@ struct DerivedTemporalCRSTraits {
     inline static const std::string CRSName();
     inline static const std::string WKTKeyword();
     inline static const std::string WKTBaseKeyword();
+    static const bool wkt2_2018_only = false;
 };
 //! @endcond
 
