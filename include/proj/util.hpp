@@ -132,6 +132,11 @@ using ::dropbox::oxygen::nn_static_pointer_cast;
 
 template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args &&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 #define NN_NO_CHECK(p)                                                         \
     ::dropbox::oxygen::nn<typename std::remove_reference<decltype(p)>::type>(  \
         dropbox::oxygen::i_promise_i_checked_for_null, (p))
@@ -222,7 +227,7 @@ class BaseObject {
 
   protected:
     PROJ_DLL BaseObject();
-    PROJ_DLL void assignSelf(BaseObjectNNPtr self);
+    PROJ_DLL void assignSelf(const BaseObjectNNPtr &self);
     PROJ_DLL BaseObjectNNPtr shared_from_this() const;
 
   private:
@@ -266,8 +271,6 @@ class BoxedValue : public BaseObject {
     //! @cond Doxygen_Suppress
     /** Type of data stored in the BoxedValue. */
     enum class Type {
-        /** a BaseObjectNNPtr */
-        OTHER_OBJECT,
         /** a std::string */
         STRING,
         /** an integer */
@@ -276,9 +279,6 @@ class BoxedValue : public BaseObject {
         BOOLEAN
     };
     //! @endcond
-
-    // cppcheck-suppress noExplicitConstructor
-    PROJ_DLL BoxedValue(const BaseObjectNNPtr &objectIn);
 
     // cppcheck-suppress noExplicitConstructor
     PROJ_DLL BoxedValue(const char *stringValueIn); // needed to avoid the bool
@@ -294,11 +294,10 @@ class BoxedValue : public BaseObject {
         //! @cond Doxygen_Suppress
         PROJ_DLL
         BoxedValue(const BoxedValue &other);
-    PROJ_DLL BoxedValue &operator=(const BoxedValue &other);
+
     PROJ_DLL ~BoxedValue() override;
 
     PROJ_DLL const Type &type() const;
-    PROJ_DLL BaseObjectNNPtr object() const;
     PROJ_DLL const std::string &stringValue() const;
     PROJ_DLL int integerValue() const;
     PROJ_DLL bool booleanValue() const;
@@ -306,6 +305,7 @@ class BoxedValue : public BaseObject {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    BoxedValue &operator=(const BoxedValue &) = delete;
 
     BoxedValue();
 };
@@ -331,7 +331,7 @@ class ArrayOfBaseObject : public BaseObject {
     PROJ_DLL ~ArrayOfBaseObject() override;
     //! @endcond
 
-    PROJ_DLL void add(BaseObjectNNPtr obj);
+    PROJ_DLL void add(const BaseObjectNNPtr &obj);
 
     PROJ_DLL static ArrayOfBaseObjectNNPtr create();
 

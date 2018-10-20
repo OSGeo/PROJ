@@ -32,6 +32,7 @@
 
 #include "proj/internal/internal.hpp"
 
+#include <cstring>
 #ifdef _MSC_VER
 #include <string.h>
 #else
@@ -142,6 +143,16 @@ bool starts_with(const std::string &str, const std::string &prefix) {
         return false;
     }
     return str.substr(0, prefix.size()) == prefix;
+}
+
+// ---------------------------------------------------------------------------
+
+bool starts_with(const std::string &str, const char *prefix) {
+    const size_t prefixSize = std::strlen(prefix);
+    if (str.size() < prefixSize) {
+        return false;
+    }
+    return std::strncmp(str.c_str(), prefix, prefixSize) == 0;
 }
 
 // ---------------------------------------------------------------------------

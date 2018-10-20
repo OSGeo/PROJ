@@ -244,7 +244,7 @@ class VerticalExtent : public util::BaseObject, public util::IComparable {
 
     PROJ_DLL double minimumValue() const;
     PROJ_DLL double maximumValue() const;
-    PROJ_DLL common::UnitOfMeasureNNPtr unit() const;
+    PROJ_DLL common::UnitOfMeasureNNPtr &unit() const;
 
     PROJ_DLL static VerticalExtentNNPtr
     create(double minimumValue, double maximumValue,

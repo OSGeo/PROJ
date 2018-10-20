@@ -5736,7 +5736,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             d->steps_.back().inverted = inverted;
             if (!title.empty()) {
                 d->steps_.back().paramValues.push_back(
-                    std::make_pair("title", title));
+                    std::pair<std::string, std::string>("title", title));
                 title.clear();
             }
             prevWasStep = false;
@@ -5751,7 +5751,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             } else {
                 key = word;
             }
-            auto pair = std::make_pair(key, value);
+            auto pair = std::pair<std::string, std::string>(key, value);
             if (d->steps_.empty()) {
                 d->globalParamValues_.push_back(pair);
             } else {

@@ -69,7 +69,7 @@ BaseObject::~BaseObject() = default;
 /** Keep a reference to ourselves as an internal weak pointer. So that
  * extractGeographicBaseObject() can later return a shared pointer on itself.
  */
-void BaseObject::assignSelf(BaseObjectNNPtr self) {
+void BaseObject::assignSelf(const BaseObjectNNPtr &self) {
     assert(self.get() == this);
     d->self_ = self.as_nullable();
 }
@@ -80,21 +80,17 @@ BaseObjectNNPtr BaseObject::shared_from_this() const {
     // This assertion checks that in all code paths where we create a
     // shared pointer, we took care of assigning it to self_, by calling
     // assignSelf();
-    return NN_NO_CHECK(d->self_.lock());
+    return NN_CHECK_ASSERT(d->self_.lock());
 }
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 struct BoxedValue::Private {
-    BoxedValue::Type type_{BoxedValue::Type::OTHER_OBJECT};
-    BaseObjectPtr object_{};
+    BoxedValue::Type type_{BoxedValue::Type::INTEGER};
     std::string stringValue_{};
     int integerValue_{};
     bool booleanValue_{};
-
-    explicit Private(const BaseObjectNNPtr &valueIn)
-        : type_(BoxedValue::Type::OTHER_OBJECT), object_(valueIn) {}
 
     explicit Private(const std::string &stringValueIn)
         : type_(BoxedValue::Type::STRING), stringValue_(stringValueIn) {}
@@ -110,13 +106,6 @@ struct BoxedValue::Private {
 // ---------------------------------------------------------------------------
 
 BoxedValue::BoxedValue() : d(internal::make_unique<Private>(std::string())) {}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Constructs a BoxedValue from a BaseObjectNNPtr.
- */
-BoxedValue::BoxedValue(const BaseObjectNNPtr &valueIn)
-    : d(internal::make_unique<Private>(valueIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -159,20 +148,7 @@ BoxedValue::~BoxedValue() = default;
 
 // ---------------------------------------------------------------------------
 
-BoxedValue &BoxedValue::operator=(const BoxedValue &other) {
-    if (this != &other) {
-        *d = *other.d;
-    }
-    return *this;
-}
-
-// ---------------------------------------------------------------------------
-
 const BoxedValue::Type &BoxedValue::type() const { return d->type_; }
-
-// ---------------------------------------------------------------------------
-
-BaseObjectNNPtr BoxedValue::object() const { return NN_NO_CHECK(d->object_); }
 
 // ---------------------------------------------------------------------------
 
@@ -210,7 +186,9 @@ ArrayOfBaseObject::~ArrayOfBaseObject() = default;
  *
  * @param obj the object to add.
  */
-void ArrayOfBaseObject::add(BaseObjectNNPtr obj) { d->values_.push_back(obj); }
+void ArrayOfBaseObject::add(const BaseObjectNNPtr &obj) {
+    d->values_.emplace_back(obj);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -334,21 +312,15 @@ bool PropertyMap::getStringValue(
     std::string &outVal) const // throw(InvalidValueTypeException)
 {
     auto oIter = d->map_.find(key);
-    if (oIter != d->map_.end()) {
-        auto genVal = util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second);
-        if (genVal) {
-            if (genVal->type() == BoxedValue::Type::STRING) {
-                outVal = genVal->stringValue();
-                return true;
-            } else {
-                throw InvalidValueTypeException("Invalid value type for " +
-                                                key);
-            }
-        } else {
-            throw InvalidValueTypeException("Invalid value type for " + key);
-        }
+    if (oIter == d->map_.end()) {
+        return false;
     }
-    return false;
+    auto genVal = dynamic_cast<const BoxedValue *>(oIter->second.get());
+    if (genVal && genVal->type() == BoxedValue::Type::STRING) {
+        outVal = genVal->stringValue();
+        return true;
+    }
+    throw InvalidValueTypeException("Invalid value type for " + key);
 }
 //! @endcond
 

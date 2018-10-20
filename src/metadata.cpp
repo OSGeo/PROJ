@@ -125,6 +125,10 @@ struct GeographicBoundingBox::Private {
 
     Private(double west, double south, double east, double north)
         : west_(west), south_(south), east_(east), north_(north) {}
+
+    bool intersects(const Private &other) const;
+
+    std::unique_ptr<Private> intersection(const Private &other) const;
 };
 //! @endcond
 
@@ -211,224 +215,202 @@ GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
 
 bool GeographicBoundingBox::isEquivalentTo(const util::BaseObjectNNPtr &other,
                                            util::IComparable::Criterion) const {
-    auto otherExtent =
-        util::nn_dynamic_pointer_cast<GeographicBoundingBox>(other);
+    auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other.get());
     if (!otherExtent)
         return false;
-    return westBoundLongitude() == otherExtent->westBoundLongitude() &&
-           southBoundLatitude() == otherExtent->southBoundLatitude() &&
-           eastBoundLongitude() == otherExtent->eastBoundLongitude() &&
-           northBoundLatitude() == otherExtent->northBoundLatitude();
+    return d->west_ == otherExtent->d->west_ &&
+           d->south_ == otherExtent->d->south_ &&
+           d->east_ == otherExtent->d->east_ &&
+           d->north_ == otherExtent->d->north_;
 }
 
 // ---------------------------------------------------------------------------
 
 bool GeographicBoundingBox::contains(const GeographicExtentNNPtr &other) const {
-    auto otherExtent =
-        util::nn_dynamic_pointer_cast<GeographicBoundingBox>(other);
+    auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other.get());
     if (!otherExtent) {
         return false;
     }
+    const double W = d->west_;
+    const double E = d->east_;
+    const double N = d->north_;
+    const double S = d->south_;
+    const double oW = otherExtent->d->west_;
+    const double oE = otherExtent->d->east_;
+    const double oN = otherExtent->d->north_;
+    const double oS = otherExtent->d->south_;
 
-    if (!(southBoundLatitude() <= otherExtent->southBoundLatitude() &&
-          northBoundLatitude() >= otherExtent->northBoundLatitude())) {
+    if (!(S <= oS && N >= oN)) {
         return false;
     }
 
-    if (westBoundLongitude() == -180.0 && eastBoundLongitude() == 180.0) {
+    if (W == -180.0 && E == 180.0) {
         return true;
     }
 
-    if (otherExtent->westBoundLongitude() == -180.0 &&
-        otherExtent->eastBoundLongitude() == 180.0) {
+    if (oW == -180.0 && oE == 180.0) {
         return false;
     }
 
     // Normal bounding box ?
-    if (westBoundLongitude() < eastBoundLongitude()) {
-        if (otherExtent->westBoundLongitude() <
-            otherExtent->eastBoundLongitude()) {
-            return westBoundLongitude() <= otherExtent->westBoundLongitude() &&
-                   eastBoundLongitude() >= otherExtent->eastBoundLongitude();
+    if (W < E) {
+        if (oW < oE) {
+            return W <= oW && E >= oE;
         } else {
             return false;
         }
         // No: crossing antimerian
     } else {
-        if (otherExtent->westBoundLongitude() <
-            otherExtent->eastBoundLongitude()) {
-            if (otherExtent->westBoundLongitude() >= westBoundLongitude()) {
+        if (oW < oE) {
+            if (oW >= W) {
                 return true;
-            } else if (otherExtent->eastBoundLongitude() <=
-                       eastBoundLongitude()) {
+            } else if (oE <= E) {
                 return true;
             } else {
                 return false;
             }
         } else {
-            return westBoundLongitude() <= otherExtent->westBoundLongitude() &&
-                   eastBoundLongitude() >= otherExtent->eastBoundLongitude();
+            return W <= oW && E >= oE;
         }
     }
 }
 
 // ---------------------------------------------------------------------------
 
-bool GeographicBoundingBox::intersects(
-    const GeographicExtentNNPtr &other) const {
-    auto otherExtent =
-        util::nn_dynamic_pointer_cast<GeographicBoundingBox>(other);
-    if (!otherExtent) {
+//! @cond Doxygen_Suppress
+bool GeographicBoundingBox::Private::intersects(const Private &other) const {
+    const double W = west_;
+    const double E = east_;
+    const double N = north_;
+    const double S = south_;
+    const double oW = other.west_;
+    const double oE = other.east_;
+    const double oN = other.north_;
+    const double oS = other.south_;
+
+    if (N < oS || S > oN) {
         return false;
     }
 
-    if (northBoundLatitude() < otherExtent->southBoundLatitude() ||
-        southBoundLatitude() > otherExtent->northBoundLatitude()) {
-        return false;
-    }
-
-    if (westBoundLongitude() == -180.0 && eastBoundLongitude() == 180.0 &&
-        otherExtent->westBoundLongitude() > otherExtent->eastBoundLongitude()) {
+    if (W == -180.0 && E == 180.0 && oW > oE) {
         return true;
     }
 
-    if (otherExtent->westBoundLongitude() == -180.0 &&
-        otherExtent->eastBoundLongitude() == 180.0 &&
-        westBoundLongitude() > eastBoundLongitude()) {
+    if (oW == -180.0 && oE == 180.0 && W > E) {
         return true;
     }
 
     // Normal bounding box ?
-    if (westBoundLongitude() <= eastBoundLongitude()) {
-        if (otherExtent->westBoundLongitude() <
-            otherExtent->eastBoundLongitude()) {
-            if (std::max(westBoundLongitude(),
-                         otherExtent->westBoundLongitude()) <
-                std::min(eastBoundLongitude(),
-                         otherExtent->eastBoundLongitude())) {
+    if (W <= E) {
+        if (oW < oE) {
+            if (std::max(W, oW) < std::min(E, oE)) {
                 return true;
             }
             return false;
         }
 
-        return intersects(GeographicBoundingBox::create(
-                   otherExtent->westBoundLongitude(),
-                   otherExtent->southBoundLatitude(), 180.0,
-                   otherExtent->northBoundLatitude())) ||
-               intersects(GeographicBoundingBox::create(
-                   -180.0, otherExtent->southBoundLatitude(),
-                   otherExtent->eastBoundLongitude(),
-                   otherExtent->northBoundLatitude()));
+        return intersects(Private(oW, oS, 180.0, oN)) ||
+               intersects(Private(-180.0, oS, oE, oN));
 
         // No: crossing antimerian
     } else {
-        if (otherExtent->westBoundLongitude() <=
-            otherExtent->eastBoundLongitude()) {
-            return otherExtent->intersects(GeographicBoundingBox::create(
-                westBoundLongitude(), southBoundLatitude(),
-                eastBoundLongitude(), northBoundLatitude()));
+        if (oW <= oE) {
+            return other.intersects(*this);
         }
 
         return true;
     }
+}
+//! @endcond
+
+bool GeographicBoundingBox::intersects(
+    const GeographicExtentNNPtr &other) const {
+    auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other.get());
+    if (!otherExtent) {
+        return false;
+    }
+    return d->intersects(*(otherExtent->d));
 }
 
 // ---------------------------------------------------------------------------
 
 GeographicExtentPtr
 GeographicBoundingBox::intersection(const GeographicExtentNNPtr &other) const {
-    auto otherExtent =
-        util::nn_dynamic_pointer_cast<GeographicBoundingBox>(other);
+    auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other.get());
     if (!otherExtent) {
         return nullptr;
     }
+    auto ret = d->intersection(*(otherExtent->d));
+    if (ret) {
+        auto bbox = GeographicBoundingBox::create(ret->west_, ret->south_,
+                                                  ret->east_, ret->north_);
+        return bbox.as_nullable();
+    }
+    return nullptr;
+}
 
-    if (northBoundLatitude() < otherExtent->southBoundLatitude() ||
-        southBoundLatitude() > otherExtent->northBoundLatitude()) {
+//! @cond Doxygen_Suppress
+std::unique_ptr<GeographicBoundingBox::Private>
+GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
+    const double W = west_;
+    const double E = east_;
+    const double N = north_;
+    const double S = south_;
+    const double oW = otherExtent.west_;
+    const double oE = otherExtent.east_;
+    const double oN = otherExtent.north_;
+    const double oS = otherExtent.south_;
+
+    if (N < oS || S > oN) {
         return nullptr;
     }
 
-    if (westBoundLongitude() == -180.0 && eastBoundLongitude() == 180.0 &&
-        otherExtent->westBoundLongitude() > otherExtent->eastBoundLongitude()) {
-        auto res = GeographicBoundingBox::create(
-            otherExtent->westBoundLongitude(),
-            std::max(southBoundLatitude(), otherExtent->southBoundLatitude()),
-            otherExtent->eastBoundLongitude(),
-            std::min(northBoundLatitude(), otherExtent->northBoundLatitude()));
-        return util::nn_static_pointer_cast<GeographicExtent>(res);
+    if (W == -180.0 && E == 180.0 && oW > oE) {
+        return util::make_unique<Private>(oW, std::max(S, oS), oE,
+                                          std::min(N, oN));
     }
 
-    if (otherExtent->westBoundLongitude() == -180.0 &&
-        otherExtent->eastBoundLongitude() == 180.0 &&
-        westBoundLongitude() > eastBoundLongitude()) {
-        auto res = GeographicBoundingBox::create(
-            westBoundLongitude(),
-            std::max(southBoundLatitude(), otherExtent->southBoundLatitude()),
-            eastBoundLongitude(),
-            std::min(northBoundLatitude(), otherExtent->northBoundLatitude()));
-        return util::nn_static_pointer_cast<GeographicExtent>(res);
+    if (oW == -180.0 && oE == 180.0 && W > E) {
+        return util::make_unique<Private>(W, std::max(S, oS), E,
+                                          std::min(N, oN));
     }
 
     // Normal bounding box ?
-    if (westBoundLongitude() <= eastBoundLongitude()) {
-        if (otherExtent->westBoundLongitude() <
-            otherExtent->eastBoundLongitude()) {
-            auto res = GeographicBoundingBox::create(
-                std::max(westBoundLongitude(),
-                         otherExtent->westBoundLongitude()),
-                std::max(southBoundLatitude(),
-                         otherExtent->southBoundLatitude()),
-                std::min(eastBoundLongitude(),
-                         otherExtent->eastBoundLongitude()),
-                std::min(northBoundLatitude(),
-                         otherExtent->northBoundLatitude()));
-            if (res->westBoundLongitude() < res->eastBoundLongitude()) {
-                return util::nn_static_pointer_cast<GeographicExtent>(res);
+    if (W <= E) {
+        if (oW < oE) {
+            auto res =
+                util::make_unique<Private>(std::max(W, oW), std::max(S, oS),
+                                           std::min(E, oE), std::min(N, oN));
+            if (res->west_ < res->east_) {
+                return res;
             }
             return nullptr;
         }
 
         // Return larger of two parts of the multipolygon
-        auto raw_inter1 = intersection(GeographicBoundingBox::create(
-            otherExtent->westBoundLongitude(),
-            otherExtent->southBoundLatitude(), 180.0,
-            otherExtent->northBoundLatitude()));
-        auto inter1 =
-            std::dynamic_pointer_cast<GeographicBoundingBox>(raw_inter1);
-        auto raw_inter2 = intersection(GeographicBoundingBox::create(
-            -180.0, otherExtent->southBoundLatitude(),
-            otherExtent->eastBoundLongitude(),
-            otherExtent->northBoundLatitude()));
-        auto inter2 =
-            std::dynamic_pointer_cast<GeographicBoundingBox>(raw_inter2);
+        auto inter1 = intersection(Private(oW, oS, 180.0, oN));
+        auto inter2 = intersection(Private(-180.0, oS, oE, oN));
         if (!inter1) {
             return inter2;
         }
         if (!inter2) {
             return inter1;
         }
-        if (inter1->eastBoundLongitude() - inter1->westBoundLongitude() >
-            inter2->eastBoundLongitude() - inter2->westBoundLongitude()) {
+        if (inter1->east_ - inter1->west_ > inter2->east_ - inter2->west_) {
             return inter1;
         }
         return inter2;
         // No: crossing antimerian
     } else {
-        if (otherExtent->westBoundLongitude() <=
-            otherExtent->eastBoundLongitude()) {
-            return otherExtent->intersection(GeographicBoundingBox::create(
-                westBoundLongitude(), southBoundLatitude(),
-                eastBoundLongitude(), northBoundLatitude()));
+        if (oW <= oE) {
+            return otherExtent.intersection(*this);
         }
 
-        auto res = GeographicBoundingBox::create(
-            std::max(westBoundLongitude(), otherExtent->westBoundLongitude()),
-            std::max(southBoundLatitude(), otherExtent->southBoundLatitude()),
-            std::min(eastBoundLongitude(), otherExtent->eastBoundLongitude()),
-            std::min(northBoundLatitude(), otherExtent->northBoundLatitude()));
-        return util::nn_static_pointer_cast<GeographicExtent>(res);
+        return util::make_unique<Private>(std::max(W, oW), std::max(S, oS),
+                                          std::min(E, oE), std::min(N, oN));
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -472,7 +454,7 @@ double VerticalExtent::maximumValue() const { return d->maximum_; }
 
 /** \brief Returns the unit of the vertical extent.
  */
-common::UnitOfMeasureNNPtr VerticalExtent::unit() const { return d->unit_; }
+common::UnitOfMeasureNNPtr &VerticalExtent::unit() const { return d->unit_; }
 
 // ---------------------------------------------------------------------------
 
@@ -494,12 +476,12 @@ VerticalExtent::create(double minimumIn, double maximumIn,
 
 bool VerticalExtent::isEquivalentTo(const util::BaseObjectNNPtr &other,
                                     util::IComparable::Criterion) const {
-    auto otherExtent = util::nn_dynamic_pointer_cast<VerticalExtent>(other);
+    auto otherExtent = dynamic_cast<const VerticalExtent *>(other.get());
     if (!otherExtent)
         return false;
-    return minimumValue() == otherExtent->minimumValue() &&
-           maximumValue() == otherExtent->maximumValue() &&
-           unit() == otherExtent->unit();
+    return d->minimum_ == otherExtent->d->minimum_ &&
+           d->maximum_ == otherExtent->d->maximum_ &&
+           d->unit_ == otherExtent->d->unit_;
 }
 
 // ---------------------------------------------------------------------------
@@ -507,12 +489,10 @@ bool VerticalExtent::isEquivalentTo(const util::BaseObjectNNPtr &other,
 /** \brief Returns whether this extent contains the other one.
  */
 bool VerticalExtent::contains(const VerticalExtentNNPtr &other) const {
-    return common::Measure(minimumValue(), *unit()).getSIValue() <=
-               common::Measure(other->minimumValue(), *other->unit())
-                   .getSIValue() &&
-           common::Measure(maximumValue(), *unit()).getSIValue() >=
-               common::Measure(other->maximumValue(), *other->unit())
-                   .getSIValue();
+    const double thisUnitToSI = d->unit_->conversionToSI();
+    const double otherUnitToSI = other->d->unit_->conversionToSI();
+    return d->minimum_ * thisUnitToSI <= other->d->minimum_ * otherUnitToSI &&
+           d->maximum_ * thisUnitToSI >= other->d->maximum_ * otherUnitToSI;
 }
 
 // ---------------------------------------------------------------------------
@@ -520,12 +500,10 @@ bool VerticalExtent::contains(const VerticalExtentNNPtr &other) const {
 /** \brief Returns whether this extent intersects the other one.
  */
 bool VerticalExtent::intersects(const VerticalExtentNNPtr &other) const {
-    return common::Measure(minimumValue(), *unit()).getSIValue() <=
-               common::Measure(other->maximumValue(), *other->unit())
-                   .getSIValue() &&
-           common::Measure(maximumValue(), *unit()).getSIValue() >=
-               common::Measure(other->minimumValue(), *other->unit())
-                   .getSIValue();
+    const double thisUnitToSI = d->unit_->conversionToSI();
+    const double otherUnitToSI = other->d->unit_->conversionToSI();
+    return d->minimum_ * thisUnitToSI <= other->d->maximum_ * otherUnitToSI &&
+           d->maximum_ * thisUnitToSI >= other->d->minimum_ * otherUnitToSI;
 }
 
 // ---------------------------------------------------------------------------
@@ -581,7 +559,7 @@ TemporalExtentNNPtr TemporalExtent::create(const std::string &start,
 
 bool TemporalExtent::isEquivalentTo(const util::BaseObjectNNPtr &other,
                                     util::IComparable::Criterion) const {
-    auto otherExtent = util::nn_dynamic_pointer_cast<TemporalExtent>(other);
+    auto otherExtent = dynamic_cast<const TemporalExtent *>(other.get());
     if (!otherExtent)
         return false;
     return start() == otherExtent->start() && stop() == otherExtent->stop();
@@ -723,27 +701,29 @@ Extent::createFromBBOX(double west, double south, double east, double north,
 
 bool Extent::isEquivalentTo(const util::BaseObjectNNPtr &other,
                             util::IComparable::Criterion criterion) const {
-    auto otherExtent = util::nn_dynamic_pointer_cast<Extent>(other);
+    auto otherExtent = dynamic_cast<const Extent *>(other.get());
     bool ret =
         (otherExtent &&
          description().has_value() == otherExtent->description().has_value() &&
          *description() == *otherExtent->description() &&
-         geographicElements().size() ==
-             otherExtent->geographicElements().size() &&
-         verticalElements().size() == otherExtent->verticalElements().size() &&
-         temporalElements().size() == otherExtent->temporalElements().size());
+         d->geographicElements_.size() ==
+             otherExtent->d->geographicElements_.size() &&
+         d->verticalElements_.size() ==
+             otherExtent->d->verticalElements_.size() &&
+         d->temporalElements_.size() ==
+             otherExtent->d->temporalElements_.size());
     if (ret) {
-        for (size_t i = 0; ret && i < geographicElements().size(); ++i) {
-            ret = geographicElements()[i]->isEquivalentTo(
-                otherExtent->geographicElements()[i], criterion);
+        for (size_t i = 0; ret && i < d->geographicElements_.size(); ++i) {
+            ret = d->geographicElements_[i]->isEquivalentTo(
+                otherExtent->d->geographicElements_[i], criterion);
         }
-        for (size_t i = 0; ret && i < verticalElements().size(); ++i) {
-            ret = verticalElements()[i]->isEquivalentTo(
-                otherExtent->verticalElements()[i], criterion);
+        for (size_t i = 0; ret && i < d->verticalElements_.size(); ++i) {
+            ret = d->verticalElements_[i]->isEquivalentTo(
+                otherExtent->d->verticalElements_[i], criterion);
         }
-        for (size_t i = 0; ret && i < temporalElements().size(); ++i) {
-            ret = temporalElements()[i]->isEquivalentTo(
-                otherExtent->temporalElements()[i], criterion);
+        for (size_t i = 0; ret && i < d->temporalElements_.size(); ++i) {
+            ret = d->temporalElements_[i]->isEquivalentTo(
+                otherExtent->d->temporalElements_[i], criterion);
         }
     }
     return ret;
@@ -758,17 +738,18 @@ bool Extent::isEquivalentTo(const util::BaseObjectNNPtr &other,
  */
 bool Extent::contains(const ExtentNNPtr &other) const {
     bool res = true;
-    if (geographicElements().size() == 1 &&
-        other->geographicElements().size() == 1) {
-        res = geographicElements()[0]->contains(other->geographicElements()[0]);
+    if (d->geographicElements_.size() == 1 &&
+        other->d->geographicElements_.size() == 1) {
+        res = d->geographicElements_[0]->contains(
+            other->d->geographicElements_[0]);
     }
-    if (res && verticalElements().size() == 1 &&
-        other->verticalElements().size() == 1) {
-        res = verticalElements()[0]->contains(other->verticalElements()[0]);
+    if (res && d->verticalElements_.size() == 1 &&
+        other->d->verticalElements_.size() == 1) {
+        res = d->verticalElements_[0]->contains(other->d->verticalElements_[0]);
     }
-    if (res && temporalElements().size() == 1 &&
-        other->temporalElements().size() == 1) {
-        res = temporalElements()[0]->contains(other->temporalElements()[0]);
+    if (res && d->temporalElements_.size() == 1 &&
+        other->d->temporalElements_.size() == 1) {
+        res = d->temporalElements_[0]->contains(other->d->temporalElements_[0]);
     }
     return res;
 }
@@ -782,18 +763,20 @@ bool Extent::contains(const ExtentNNPtr &other) const {
  */
 bool Extent::intersects(const ExtentNNPtr &other) const {
     bool res = true;
-    if (geographicElements().size() == 1 &&
-        other->geographicElements().size() == 1) {
+    if (d->geographicElements_.size() == 1 &&
+        other->d->geographicElements_.size() == 1) {
+        res = d->geographicElements_[0]->intersects(
+            other->d->geographicElements_[0]);
+    }
+    if (res && d->verticalElements_.size() == 1 &&
+        other->d->verticalElements_.size() == 1) {
         res =
-            geographicElements()[0]->intersects(other->geographicElements()[0]);
+            d->verticalElements_[0]->intersects(other->d->verticalElements_[0]);
     }
-    if (res && verticalElements().size() == 1 &&
-        other->verticalElements().size() == 1) {
-        res = verticalElements()[0]->intersects(other->verticalElements()[0]);
-    }
-    if (res && temporalElements().size() == 1 &&
-        other->temporalElements().size() == 1) {
-        res = temporalElements()[0]->intersects(other->temporalElements()[0]);
+    if (res && d->temporalElements_.size() == 1 &&
+        other->d->temporalElements_.size() == 1) {
+        res =
+            d->temporalElements_[0]->intersects(other->d->temporalElements_[0]);
     }
     return res;
 }
@@ -807,8 +790,8 @@ bool Extent::intersects(const ExtentNNPtr &other) const {
  * Returns nullptr otherwise.
  */
 ExtentPtr Extent::intersection(const ExtentNNPtr &other) const {
-    if (geographicElements().size() == 1 &&
-        other->geographicElements().size() == 1) {
+    if (d->geographicElements_.size() == 1 &&
+        other->d->geographicElements_.size() == 1) {
         if (contains(other)) {
             return other.as_nullable();
         }
@@ -817,8 +800,8 @@ ExtentPtr Extent::intersection(const ExtentNNPtr &other) const {
         if (other->contains(self)) {
             return self.as_nullable();
         }
-        auto geogIntersection = geographicElements()[0]->intersection(
-            other->geographicElements()[0]);
+        auto geogIntersection = d->geographicElements_[0]->intersection(
+            other->d->geographicElements_[0]);
         if (geogIntersection) {
             return create(util::optional<std::string>(),
                           std::vector<GeographicExtentNNPtr>{
@@ -960,7 +943,7 @@ void Identifier::setProperties(
         auto oIter = properties.find(AUTHORITY_KEY);
         if (oIter != properties.end()) {
             if (auto genVal =
-                    util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
+                    dynamic_cast<const BoxedValue *>(oIter->second.get())) {
                 if (genVal->type() == BoxedValue::Type::STRING) {
                     d->authority_ = Citation(genVal->stringValue());
                 } else {
@@ -968,8 +951,8 @@ void Identifier::setProperties(
                                                     AUTHORITY_KEY);
                 }
             } else {
-                if (auto citation = util::nn_dynamic_pointer_cast<Citation>(
-                        oIter->second)) {
+                if (auto citation =
+                        dynamic_cast<const Citation *>(oIter->second.get())) {
                     d->authority_ = Citation(*citation);
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
@@ -983,7 +966,7 @@ void Identifier::setProperties(
         auto oIter = properties.find(CODE_KEY);
         if (oIter != properties.end()) {
             if (auto genVal =
-                    util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
+                    dynamic_cast<const BoxedValue *>(oIter->second.get())) {
                 if (genVal->type() == BoxedValue::Type::INTEGER) {
                     std::ostringstream buffer;
                     buffer << genVal->integerValue();

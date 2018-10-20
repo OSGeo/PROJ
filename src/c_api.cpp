@@ -1747,8 +1747,8 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
     std::vector<std::pair<std::string, std::string>> pivots;
     for (auto iter = list_of_auth_name_codes; iter && iter[0] && iter[1];
          iter += 2) {
-        pivots.emplace_back(
-            std::make_pair(std::string(iter[0]), std::string(iter[1])));
+        pivots.emplace_back(std::pair<std::string, std::string>(
+            std::string(iter[0]), std::string(iter[1])));
     }
     ctxt->operationContext->setIntermediateCRS(pivots);
 }

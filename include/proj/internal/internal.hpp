@@ -104,6 +104,8 @@ size_t ci_find(const std::string &osStr, const std::string &needle,
 
 bool starts_with(const std::string &str, const std::string &prefix);
 
+bool starts_with(const std::string &str, const char *prefix);
+
 bool ci_starts_with(const std::string &str, const std::string &prefix);
 
 bool ends_with(const std::string &str, const std::string &suffix);
