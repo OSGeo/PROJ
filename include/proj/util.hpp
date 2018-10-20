@@ -132,11 +132,6 @@ using ::dropbox::oxygen::nn_static_pointer_cast;
 
 template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args &&... args) {
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
 #define NN_NO_CHECK(p)                                                         \
     ::dropbox::oxygen::nn<typename std::remove_reference<decltype(p)>::type>(  \
         dropbox::oxygen::i_promise_i_checked_for_null, (p))

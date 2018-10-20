@@ -345,8 +345,11 @@ class PROJStringFormatter {
     PROJ_DLL void addStep(const std::string &step);
     PROJ_DLL void setCurrentStepInverted(bool inverted);
     PROJ_DLL void addParam(const std::string &paramName);
+    PROJ_DLL void addParam(const char *paramName, double val);
     PROJ_DLL void addParam(const std::string &paramName, double val);
+    PROJ_DLL void addParam(const char *paramName, int val);
     PROJ_DLL void addParam(const std::string &paramName, int val);
+    PROJ_DLL void addParam(const char *paramName, const char *val);
     PROJ_DLL void addParam(const std::string &paramName, const char *val);
     PROJ_DLL void addParam(const std::string &paramName,
                            const std::string &val);

@@ -1272,8 +1272,8 @@ class Transformation : public SingleOperation {
     PROJ_DLL ~Transformation() override;
     //! @endcond
 
-    PROJ_DLL const crs::CRSNNPtr sourceCRS() const;
-    PROJ_DLL const crs::CRSNNPtr targetCRS() const;
+    PROJ_DLL const crs::CRSNNPtr &sourceCRS() const;
+    PROJ_DLL const crs::CRSNNPtr &targetCRS() const;
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 

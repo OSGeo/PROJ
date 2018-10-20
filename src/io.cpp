@@ -4024,15 +4024,16 @@ void PROJStringFormatter::addParam(const std::string &paramName) {
 
 // ---------------------------------------------------------------------------
 
+void PROJStringFormatter::addParam(const char *paramName, int val) {
+    addParam(std::string(paramName), val);
+}
+
 void PROJStringFormatter::addParam(const std::string &paramName, int val) {
     std::ostringstream buffer;
     buffer.imbue(std::locale::classic());
     buffer << val;
 
-    if (d->steps_.empty()) {
-        addStep(std::string());
-    }
-    d->steps_.back().paramValues.push_back(paramName + "=" + buffer.str());
+    addParam(paramName, buffer.str());
 }
 
 // ---------------------------------------------------------------------------
@@ -4054,34 +4055,33 @@ static std::string formatToString(double val) {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::addParam(const std::string &paramName, double val) {
+void PROJStringFormatter::addParam(const char *paramName, double val) {
+    addParam(std::string(paramName), val);
+}
 
-    if (d->steps_.empty()) {
-        addStep(std::string());
-    }
-    d->steps_.back().paramValues.push_back(paramName + "=" +
-                                           formatToString(val));
+void PROJStringFormatter::addParam(const std::string &paramName, double val) {
+    addParam(paramName, formatToString(val));
 }
 
 // ---------------------------------------------------------------------------
 
 void PROJStringFormatter::addParam(const std::string &paramName,
                                    const std::vector<double> &vals) {
-    std::string paramValue = paramName + "=";
+    std::string paramValue;
     for (size_t i = 0; i < vals.size(); ++i) {
         if (i > 0) {
             paramValue += ",";
         }
         paramValue += formatToString(vals[i]);
     }
-
-    if (d->steps_.empty()) {
-        addStep(std::string());
-    }
-    d->steps_.back().paramValues.push_back(paramValue);
+    addParam(paramName, paramValue);
 }
 
 // ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addParam(const char *paramName, const char *val) {
+    addParam(std::string(paramName), val);
+}
 
 void PROJStringFormatter::addParam(const std::string &paramName,
                                    const char *val) {

@@ -366,21 +366,21 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
     }
 
     if (W == -180.0 && E == 180.0 && oW > oE) {
-        return util::make_unique<Private>(oW, std::max(S, oS), oE,
-                                          std::min(N, oN));
+        return internal::make_unique<Private>(oW, std::max(S, oS), oE,
+                                              std::min(N, oN));
     }
 
     if (oW == -180.0 && oE == 180.0 && W > E) {
-        return util::make_unique<Private>(W, std::max(S, oS), E,
-                                          std::min(N, oN));
+        return internal::make_unique<Private>(W, std::max(S, oS), E,
+                                              std::min(N, oN));
     }
 
     // Normal bounding box ?
     if (W <= E) {
         if (oW < oE) {
-            auto res =
-                util::make_unique<Private>(std::max(W, oW), std::max(S, oS),
-                                           std::min(E, oE), std::min(N, oN));
+            auto res = internal::make_unique<Private>(
+                std::max(W, oW), std::max(S, oS), std::min(E, oE),
+                std::min(N, oN));
             if (res->west_ < res->east_) {
                 return res;
             }
@@ -406,8 +406,8 @@ GeographicBoundingBox::Private::intersection(const Private &otherExtent) const {
             return otherExtent.intersection(*this);
         }
 
-        return util::make_unique<Private>(std::max(W, oW), std::max(S, oS),
-                                          std::min(E, oE), std::min(N, oN));
+        return internal::make_unique<Private>(std::max(W, oW), std::max(S, oS),
+                                              std::min(E, oE), std::min(N, oN));
     }
 }
 //! @endcond
