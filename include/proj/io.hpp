@@ -342,6 +342,7 @@ class PROJStringFormatter {
     PROJ_DLL void
     ingestPROJString(const std::string &str); // throw ParsingException
 
+    PROJ_DLL void addStep(const char *step);
     PROJ_DLL void addStep(const std::string &step);
     PROJ_DLL void setCurrentStepInverted(bool inverted);
     PROJ_DLL void addParam(const std::string &paramName);

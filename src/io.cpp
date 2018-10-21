@@ -3393,6 +3393,8 @@ struct PROJStringFormatter::Private {
 
     // cppcheck-suppress functionStatic
     void appendToResult(const std::string &str);
+    // cppcheck-suppress functionStatic
+    void addStep();
 };
 //! @endcond
 
@@ -4000,10 +4002,22 @@ bool PROJStringFormatter::isInverted() const {
 
 // ---------------------------------------------------------------------------
 
+void PROJStringFormatter::Private::addStep() {
+    steps_.emplace_back(Private::Step());
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addStep(const char *stepName) {
+    d->addStep();
+    d->steps_.back().name.assign(stepName);
+}
+
+// ---------------------------------------------------------------------------
+
 void PROJStringFormatter::addStep(const std::string &stepName) {
-    PROJStringFormatter::Private::Step step;
-    step.name = stepName;
-    d->steps_.push_back(step);
+    d->addStep();
+    d->steps_.back().name = stepName;
 }
 
 // ---------------------------------------------------------------------------
@@ -4017,7 +4031,7 @@ void PROJStringFormatter::setCurrentStepInverted(bool inverted) {
 
 void PROJStringFormatter::addParam(const std::string &paramName) {
     if (d->steps_.empty()) {
-        addStep(std::string());
+        d->addStep();
     }
     d->steps_.back().paramValues.push_back(paramName);
 }
@@ -4093,7 +4107,7 @@ void PROJStringFormatter::addParam(const std::string &paramName,
 void PROJStringFormatter::addParam(const std::string &paramName,
                                    const std::string &val) {
     if (d->steps_.empty()) {
-        addStep(std::string());
+        d->addStep();
     }
     d->steps_.back().paramValues.push_back(paramName + "=" + val);
 }
@@ -4736,7 +4750,7 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
     }
 
     if (!datum) {
-        if (pm->isEquivalentTo(PrimeMeridian::GREENWICH)) {
+        if (pm->isEquivalentTo(PrimeMeridian::GREENWICH.get())) {
             datum = GeodeticReferenceFrame::EPSG_6326;
         } else {
             datum = GeodeticReferenceFrame::create(
@@ -5087,7 +5101,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     auto title = getParamValue(step, "title");
 
-    if (!buildPrimeMeridian(step)->isEquivalentTo(geogCRS->primeMeridian())) {
+    if (!buildPrimeMeridian(step)->isEquivalentTo(
+            geogCRS->primeMeridian().get())) {
         throw ParsingException("inconsistant pm values between projectedCRS "
                                "and its base geographicalCRS");
     }

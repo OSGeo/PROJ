@@ -54,8 +54,13 @@ using namespace osgeo::proj::operation;
 using namespace osgeo::proj::util;
 
 namespace {
-struct UnrelatedObject : public BaseObject {
+struct UnrelatedObject : public IComparable {
     UnrelatedObject() = default;
+
+    bool isEquivalentTo(const IComparable *, Criterion) const override {
+        assert(false);
+        return false;
+    }
 };
 
 static nn<std::shared_ptr<UnrelatedObject>> createUnrelatedObject() {
@@ -70,13 +75,13 @@ TEST(crs, EPSG_4326_get_components) {
     ASSERT_EQ(crs->identifiers().size(), 1);
     EXPECT_EQ(crs->identifiers()[0]->code(), "4326");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
-    EXPECT_EQ(*(crs->name()->description()), "WGS 84");
+    EXPECT_EQ(crs->nameStr(), "WGS 84");
 
     auto datum = crs->datum();
     ASSERT_EQ(datum->identifiers().size(), 1);
     EXPECT_EQ(datum->identifiers()[0]->code(), "6326");
     EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
-    EXPECT_EQ(*(datum->name()->description()), "World Geodetic System 1984");
+    EXPECT_EQ(datum->nameStr(), "World Geodetic System 1984");
 
     auto ellipsoid = datum->ellipsoid();
     EXPECT_EQ(ellipsoid->semiMajorAxis().value(), 6378137.0);
@@ -85,38 +90,40 @@ TEST(crs, EPSG_4326_get_components) {
     ASSERT_EQ(ellipsoid->identifiers().size(), 1);
     EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");
     EXPECT_EQ(*(ellipsoid->identifiers()[0]->codeSpace()), "EPSG");
-    EXPECT_EQ(*(ellipsoid->name()->description()), "WGS 84");
+    EXPECT_EQ(ellipsoid->nameStr(), "WGS 84");
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(crs, GeographicCRS_isEquivalentTo) {
     auto crs = GeographicCRS::EPSG_4326;
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
 
-    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
-    EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::EPSG_4979));
-    EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::EPSG_4979,
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
+    EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::EPSG_4979.get()));
+    EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::EPSG_4979.get(),
                                      IComparable::Criterion::EQUIVALENT));
 
     EXPECT_FALSE(
         GeographicCRS::create(
             PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
-            ->isEquivalentTo(crs));
+            ->isEquivalentTo(crs.get()));
 
     EXPECT_FALSE(
         GeographicCRS::create(
             PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
-            ->isEquivalentTo(GeographicCRS::create(
-                PropertyMap(),
-                GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
-                                               optional<std::string>(),
-                                               PrimeMeridian::GREENWICH),
-                EllipsoidalCS::createLatitudeLongitude(
-                    UnitOfMeasure::DEGREE))));
+            ->isEquivalentTo(
+                GeographicCRS::create(PropertyMap(),
+                                      GeodeticReferenceFrame::create(
+                                          PropertyMap(), Ellipsoid::WGS84,
+                                          optional<std::string>(),
+                                          PrimeMeridian::GREENWICH),
+                                      EllipsoidalCS::createLatitudeLongitude(
+                                          UnitOfMeasure::DEGREE))
+                    .get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -560,9 +567,10 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string_and_WKT1) {
               "+x_0=600000 +y_0=200000 +ellps=clrk80ign +pm=paris");
 
     auto nn_crs = NN_CHECK_ASSERT(crs);
-    EXPECT_TRUE(nn_crs->isEquivalentTo(nn_crs));
-    EXPECT_FALSE(nn_crs->isEquivalentTo(createUnrelatedObject()));
-    EXPECT_FALSE(nn_crs->DerivedCRS::isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(nn_crs->isEquivalentTo(nn_crs.get()));
+    EXPECT_FALSE(nn_crs->isEquivalentTo(createUnrelatedObject().get()));
+    EXPECT_FALSE(
+        nn_crs->DerivedCRS::isEquivalentTo(createUnrelatedObject().get()));
 
     auto wkt1 = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
@@ -751,7 +759,7 @@ TEST(crs, EPSG_32661_projected_north_pole_north_east) {
     EXPECT_EQ(crs_from_proj->exportToPROJString(PROJStringFormatter::create()),
               proj_string);
     EXPECT_TRUE(crs_from_proj->coordinateSystem()->isEquivalentTo(
-        proj_crs->coordinateSystem()));
+        proj_crs->coordinateSystem().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -776,7 +784,7 @@ TEST(crs, EPSG_5041_projected_north_pole_east_north) {
     EXPECT_EQ(crs_from_proj->exportToPROJString(PROJStringFormatter::create()),
               proj_string);
     EXPECT_TRUE(crs_from_proj->coordinateSystem()->isEquivalentTo(
-        proj_crs->coordinateSystem()));
+        proj_crs->coordinateSystem().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -801,7 +809,7 @@ TEST(crs, EPSG_32761_projected_south_pole_north_east) {
     EXPECT_EQ(crs_from_proj->exportToPROJString(PROJStringFormatter::create()),
               proj_string);
     EXPECT_TRUE(crs_from_proj->coordinateSystem()->isEquivalentTo(
-        proj_crs->coordinateSystem()));
+        proj_crs->coordinateSystem().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -859,9 +867,9 @@ TEST(crs, geocentricCRS_as_WKT2) {
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
               expected);
 
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -979,12 +987,28 @@ TEST(crs, projectedCRS_derivingConversion) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, projectedCRS_shallowClone) {
-    auto crs = createProjected();
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
-    auto clone = nn_dynamic_pointer_cast<ProjectedCRS>(crs->shallowClone());
-    EXPECT_TRUE(clone->isEquivalentTo(crs));
-    EXPECT_EQ(clone->derivingConversion()->targetCRS().get(), clone.get());
+    {
+        auto crs = createProjected();
+        EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+        EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
+        auto clone = nn_dynamic_pointer_cast<ProjectedCRS>(crs->shallowClone());
+        EXPECT_TRUE(clone->isEquivalentTo(crs.get()));
+        EXPECT_EQ(clone->derivingConversion()->targetCRS().get(), clone.get());
+    }
+
+    {
+        ProjectedCRSPtr clone;
+        {
+            auto crs = ProjectedCRS::create(
+                PropertyMap(), createGeocentric(),
+                Conversion::createUTM(PropertyMap(), 31, true),
+                CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+            clone = nn_dynamic_pointer_cast<ProjectedCRS>(crs->shallowClone());
+        }
+        EXPECT_EQ(
+            clone->baseCRS()->exportToPROJString(PROJStringFormatter::create()),
+            "+proj=cart +ellps=WGS84");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1348,9 +1372,9 @@ TEST(crs, verticalCRS_as_WKT2) {
                     "            LENGTHUNIT[\"metre\",1]],\n"
                     "    ID[\"EPSG\",5701]]";
 
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
 
     EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()), expected);
 }
@@ -1439,8 +1463,8 @@ TEST(datum, vdatum_with_anchor) {
 
     EXPECT_EQ(vdatum->exportToWKT(WKTFormatter::create()), expected);
 
-    EXPECT_TRUE(vdatum->isEquivalentTo(vdatum));
-    EXPECT_FALSE(vdatum->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(vdatum->isEquivalentTo(vdatum.get()));
+    EXPECT_FALSE(vdatum->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -1508,20 +1532,21 @@ TEST(crs, compoundCRS_as_WKT2) {
 TEST(crs, compoundCRS_isEquivalentTo) {
 
     auto crs = createCompoundCRS();
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
     auto compoundCRSOfProjCRS =
         CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
                             std::vector<CRSNNPtr>{createProjected()});
     auto emptyCompoundCRS =
         CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
                             std::vector<CRSNNPtr>{});
-    EXPECT_FALSE(compoundCRSOfProjCRS->isEquivalentTo(emptyCompoundCRS));
+    EXPECT_FALSE(compoundCRSOfProjCRS->isEquivalentTo(emptyCompoundCRS.get()));
     auto compoundCRSOfGeogCRS =
         CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
                             std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326});
-    EXPECT_FALSE(compoundCRSOfProjCRS->isEquivalentTo(compoundCRSOfGeogCRS));
+    EXPECT_FALSE(
+        compoundCRSOfProjCRS->isEquivalentTo(compoundCRSOfGeogCRS.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -1603,8 +1628,7 @@ TEST(crs, compoundCRS_no_name_proided) {
     auto crs = CompoundCRS::create(
         PropertyMap(),
         std::vector<CRSNNPtr>{createProjected(), createVerticalCRS()});
-    EXPECT_EQ(*(crs->name()->description()),
-              "WGS 84 / UTM zone 31N + ODN height");
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N + ODN height");
 }
 
 // ---------------------------------------------------------------------------
@@ -1623,19 +1647,17 @@ TEST(crs, boundCRS_to_WKT2) {
     auto crs = BoundCRS::createFromTOWGS84(
         projcrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
 
-    EXPECT_EQ(*(crs->baseCRS()->name()->description()),
-              *(projcrs->name()->description()));
+    EXPECT_EQ(crs->baseCRS()->nameStr(), projcrs->nameStr());
 
-    EXPECT_EQ(*(crs->hubCRS()->name()->description()),
-              *(GeographicCRS::EPSG_4326->name()->description()));
+    EXPECT_EQ(crs->hubCRS()->nameStr(), GeographicCRS::EPSG_4326->nameStr());
 
     ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
-    EXPECT_EQ(*(crs->transformation()->sourceCRS()->name()->description()),
-              *(projcrs->baseCRS()->name()->description()));
+    EXPECT_EQ(crs->transformation()->sourceCRS()->nameStr(),
+              projcrs->baseCRS()->nameStr());
 
     ASSERT_TRUE(crs->transformation()->targetCRS() != nullptr);
-    EXPECT_EQ(*(crs->transformation()->targetCRS()->name()->description()),
-              *(GeographicCRS::EPSG_4326->name()->description()));
+    EXPECT_EQ(crs->transformation()->targetCRS()->nameStr(),
+              GeographicCRS::EPSG_4326->nameStr());
 
     auto values = crs->transformation()->parameterValues();
     ASSERT_EQ(values.size(), 7);
@@ -1643,8 +1665,7 @@ TEST(crs, boundCRS_to_WKT2) {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[0]);
         ASSERT_TRUE(opParamvalue);
-        const auto &paramName =
-            *(opParamvalue->parameter()->name()->description());
+        const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8605));
         EXPECT_EQ(paramName, "X-axis translation");
@@ -1657,8 +1678,7 @@ TEST(crs, boundCRS_to_WKT2) {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[1]);
         ASSERT_TRUE(opParamvalue);
-        const auto &paramName =
-            *(opParamvalue->parameter()->name()->description());
+        const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8606));
         EXPECT_EQ(paramName, "Y-axis translation");
@@ -1671,8 +1691,7 @@ TEST(crs, boundCRS_to_WKT2) {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[2]);
         ASSERT_TRUE(opParamvalue);
-        const auto &paramName =
-            *(opParamvalue->parameter()->name()->description());
+        const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8607));
         EXPECT_EQ(paramName, "Z-axis translation");
@@ -1685,8 +1704,7 @@ TEST(crs, boundCRS_to_WKT2) {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[3]);
         ASSERT_TRUE(opParamvalue);
-        const auto &paramName =
-            *(opParamvalue->parameter()->name()->description());
+        const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8608));
         EXPECT_EQ(paramName, "X-axis rotation");
@@ -1699,8 +1717,7 @@ TEST(crs, boundCRS_to_WKT2) {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[4]);
         ASSERT_TRUE(opParamvalue);
-        const auto &paramName =
-            *(opParamvalue->parameter()->name()->description());
+        const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8609));
         EXPECT_EQ(paramName, "Y-axis rotation");
@@ -1713,8 +1730,7 @@ TEST(crs, boundCRS_to_WKT2) {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[5]);
         ASSERT_TRUE(opParamvalue);
-        const auto &paramName =
-            *(opParamvalue->parameter()->name()->description());
+        const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8610));
         EXPECT_EQ(paramName, "Z-axis rotation");
@@ -1727,8 +1743,7 @@ TEST(crs, boundCRS_to_WKT2) {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[6]);
         ASSERT_TRUE(opParamvalue);
-        const auto &paramName =
-            *(opParamvalue->parameter()->name()->description());
+        const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8611));
         EXPECT_EQ(paramName, "Scale difference");
@@ -1768,9 +1783,9 @@ TEST(crs, boundCRS_to_WKT2) {
                   "\n", ""),
               replaceAll(replaceAll(expected, " ", ""), "\n", ""));
 
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -1803,7 +1818,7 @@ TEST(crs, boundCRS_crs_link) {
             baseCRS = boundCRS->baseCRS().as_nullable();
             EXPECT_TRUE(baseCRS.get() == baseCRSPtr);
         }
-        EXPECT_TRUE(baseCRS->isEquivalentTo(GeographicCRS::EPSG_4267));
+        EXPECT_TRUE(baseCRS->isEquivalentTo(GeographicCRS::EPSG_4267.get()));
         EXPECT_TRUE(baseCRS->canonicalBoundCRS() == nullptr);
     }
 
@@ -1815,12 +1830,12 @@ TEST(crs, boundCRS_crs_link) {
                 std::vector<double>{1, 2, 3, 4, 5, 6, 7});
             baseCRS = boundCRS->baseCRSWithCanonicalBoundCRS().as_nullable();
         }
-        EXPECT_TRUE(baseCRS->isEquivalentTo(GeographicCRS::EPSG_4267));
+        EXPECT_TRUE(baseCRS->isEquivalentTo(GeographicCRS::EPSG_4267.get()));
         EXPECT_TRUE(baseCRS->canonicalBoundCRS() != nullptr);
 
         EXPECT_TRUE(
             baseCRS->createBoundCRSToWGS84IfPossible(nullptr)->isEquivalentTo(
-                NN_CHECK_ASSERT(baseCRS->canonicalBoundCRS())));
+                baseCRS->canonicalBoundCRS().get()));
     }
 
     {
@@ -1841,7 +1856,7 @@ TEST(crs, boundCRS_crs_link) {
             EXPECT_EQ(oriBaseCRS.use_count(), 2);
             EXPECT_TRUE(!oriBaseCRS.expired());
             EXPECT_TRUE(boundCRSExterior->baseCRS()->isEquivalentTo(
-                GeographicCRS::EPSG_4267));
+                GeographicCRS::EPSG_4267.get()));
         }
         EXPECT_EQ(oriBaseCRS.use_count(), 0);
         EXPECT_TRUE(oriBaseCRS.expired());
@@ -1864,8 +1879,8 @@ TEST(crs, boundCRS_crs_link) {
             }
             EXPECT_EQ(oriBaseCRS.use_count(), 1);
             EXPECT_TRUE(!oriBaseCRS.expired());
-            EXPECT_TRUE(
-                boundCRSExterior->baseCRS()->isEquivalentTo(createProjected()));
+            EXPECT_TRUE(boundCRSExterior->baseCRS()->isEquivalentTo(
+                createProjected().get()));
         }
         EXPECT_EQ(oriBaseCRS.use_count(), 0);
         EXPECT_TRUE(oriBaseCRS.expired());
@@ -2142,7 +2157,7 @@ TEST(crs, extractVerticalCRS) {
     {
         auto vertcrs = createCompoundCRS()->extractVerticalCRS();
         ASSERT_TRUE(vertcrs != nullptr);
-        EXPECT_TRUE(vertcrs->isEquivalentTo(createVerticalCRS()));
+        EXPECT_TRUE(vertcrs->isEquivalentTo(createVerticalCRS().get()));
     }
 }
 
@@ -2210,9 +2225,9 @@ TEST(crs, derivedGeographicCRS_WKT2) {
         crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
         expected);
 
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -2388,9 +2403,9 @@ TEST(crs, derivedGeodeticCRS_WKT2) {
         crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
         expected);
 
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -2498,9 +2513,9 @@ TEST(crs, derivedProjectedCRS_WKT2_2018) {
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
               expected);
 
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -2566,9 +2581,9 @@ TEST(crs, dateTimeTemporalCRS_WKT2) {
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
 
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -2729,9 +2744,9 @@ TEST(crs, engineeringCRS_WKT2) {
                     "                ID[\"EPSG\",9001]]]]";
 
     auto crs = createEngineeringCRS();
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
 
     EXPECT_EQ(
         crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
@@ -2785,9 +2800,9 @@ TEST(crs, parametricCRS_WKT2) {
                     "        AXIS[\"pressure (hPa)\",up,\n"
                     "            PARAMETRICUNIT[\"HectoPascal\",100]]]";
     auto crs = createParametricCRS();
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
 
     EXPECT_EQ(
         crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
@@ -2834,9 +2849,9 @@ TEST(crs, DerivedVerticalCRS_WKT2) {
                     "                ID[\"EPSG\",9001]]]]";
 
     auto crs = createDerivedVerticalCRS();
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
 
     EXPECT_EQ(
         crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
@@ -2888,12 +2903,13 @@ TEST(crs, DerivedEngineeringCRS_WKT2) {
                     "                ID[\"EPSG\",9001]]]]";
 
     auto crs = createDerivedEngineeringCRS();
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
     EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)));
-    EXPECT_TRUE(crs->datum()->isEquivalentTo(createEngineeringCRS()->datum()));
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE).get()));
+    EXPECT_TRUE(
+        crs->datum()->isEquivalentTo(createEngineeringCRS()->datum().get()));
 
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
@@ -2941,11 +2957,13 @@ TEST(crs, DerivedParametricCRS_WKT2) {
                     "            PARAMETRICUNIT[\"HectoPascal\",100]]]";
 
     auto crs = createDerivedParametricCRS();
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
-    EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(createParametricCS()));
-    EXPECT_TRUE(crs->datum()->isEquivalentTo(createParametricCRS()->datum()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
+    EXPECT_TRUE(
+        crs->coordinateSystem()->isEquivalentTo(createParametricCS().get()));
+    EXPECT_TRUE(
+        crs->datum()->isEquivalentTo(createParametricCRS()->datum().get()));
 
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
@@ -2992,13 +3010,13 @@ TEST(crs, DeriveTemporalCRS_WKT2) {
                     "        AXIS[\"time (T)\",future]]";
 
     auto crs = createDerivedTemporalCRS();
-    EXPECT_TRUE(crs->isEquivalentTo(crs));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject()));
-    EXPECT_TRUE(
-        crs->coordinateSystem()->isEquivalentTo(createDateTimeTemporalCS()));
-    EXPECT_TRUE(
-        crs->datum()->isEquivalentTo(createDateTimeTemporalCRS()->datum()));
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
+    EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
+        createDateTimeTemporalCS().get()));
+    EXPECT_TRUE(crs->datum()->isEquivalentTo(
+        createDateTimeTemporalCRS()->datum().get()));
 
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
@@ -3136,7 +3154,7 @@ TEST(crs, crs_stripVerticalComponent) {
 
     {
         auto crs = GeographicCRS::EPSG_4326->stripVerticalComponent();
-        EXPECT_TRUE(crs->isEquivalentTo(GeographicCRS::EPSG_4326));
+        EXPECT_TRUE(crs->isEquivalentTo(GeographicCRS::EPSG_4326.get()));
     }
 
     {

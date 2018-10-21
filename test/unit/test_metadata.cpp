@@ -67,11 +67,11 @@ TEST(metadata, extent) {
         std::vector<VerticalExtentNNPtr>(), std::vector<TemporalExtentNNPtr>());
 
     auto world = Extent::createFromBBOX(-180, -90, 180, 90);
-    EXPECT_TRUE(world->isEquivalentTo(world));
+    EXPECT_TRUE(world->isEquivalentTo(world.get()));
     EXPECT_TRUE(world->contains(world));
 
     auto west_hemisphere = Extent::createFromBBOX(-180, -90, 0, 90);
-    EXPECT_TRUE(!world->isEquivalentTo(west_hemisphere));
+    EXPECT_TRUE(!world->isEquivalentTo(west_hemisphere.get()));
     EXPECT_TRUE(world->contains(west_hemisphere));
     EXPECT_TRUE(!west_hemisphere->contains(world));
 

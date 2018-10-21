@@ -594,6 +594,16 @@ const IdentifierNNPtr &IdentifiedObject::name() const { return d->name; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the name of the object.
+ *
+ * Return *(name()->description())
+ */
+const std::string &IdentifiedObject::nameStr() const {
+    return *(d->name->description());
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the identifier(s) of the object
  *
  * Generally, those will have Identifier::code() and Identifier::codeSpace()
@@ -834,13 +844,20 @@ void IdentifiedObject::formatRemarks(WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
-bool IdentifiedObject::_isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+bool IdentifiedObject::isEquivalentTo(
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherIdObj = util::nn_dynamic_pointer_cast<IdentifiedObject>(other);
+    auto otherIdObj = dynamic_cast<const IdentifiedObject *>(other);
     if (!otherIdObj)
         return false;
+    return isEquivalentTo(otherIdObj, criterion);
+}
 
+// ---------------------------------------------------------------------------
+
+bool IdentifiedObject::isEquivalentTo(
+    const IdentifiedObject *otherIdObj,
+    util::IComparable::Criterion criterion) const {
     if (criterion == util::IComparable::Criterion::STRICT) {
         if (!ci_equal(*(name()->description()),
                       *(otherIdObj->name()->description()))) {
@@ -974,9 +991,9 @@ std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
 // ---------------------------------------------------------------------------
 
 bool ObjectDomain::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherDomain = util::nn_dynamic_pointer_cast<ObjectDomain>(other);
+    auto otherDomain = dynamic_cast<const ObjectDomain *>(other);
     if (!otherDomain)
         return false;
     if (scope().has_value() != otherDomain->scope().has_value())
@@ -988,7 +1005,7 @@ bool ObjectDomain::isEquivalentTo(
         return false;
     return domainOfValidity().get() == nullptr ||
            domainOfValidity()->isEquivalentTo(
-               NN_NO_CHECK(otherDomain->domainOfValidity()), criterion);
+               otherDomain->domainOfValidity().get(), criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -1109,15 +1126,14 @@ void ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
-bool ObjectUsage::_isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
-    util::IComparable::Criterion criterion) const {
-    auto otherObjUsage = util::nn_dynamic_pointer_cast<ObjectUsage>(other);
+bool ObjectUsage::isEquivalentTo(const util::IComparable *other,
+                                 util::IComparable::Criterion criterion) const {
+    auto otherObjUsage = dynamic_cast<const ObjectUsage *>(other);
     if (!otherObjUsage)
         return false;
 
     // TODO: incomplete
-    return IdentifiedObject::_isEquivalentTo(other, criterion);
+    return IdentifiedObject::isEquivalentTo(other, criterion);
 }
 
 } // namespace common

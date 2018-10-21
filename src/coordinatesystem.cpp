@@ -363,18 +363,19 @@ std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
 // ---------------------------------------------------------------------------
 
 bool CoordinateSystemAxis::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherCSA = util::nn_dynamic_pointer_cast<CoordinateSystemAxis>(other);
+    auto otherCSA = dynamic_cast<const CoordinateSystemAxis *>(other);
     if (otherCSA == nullptr) {
         return false;
     }
     // For approximate comparison, only care about axis direction and unit.
-    if (!(direction() == otherCSA->direction() && unit() == otherCSA->unit())) {
+    if (!(*(d->direction) == *(otherCSA->d->direction) &&
+          d->unit == otherCSA->d->unit)) {
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
-        if (!IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        if (!IdentifiedObject::isEquivalentTo(other, criterion)) {
             return false;
         }
         if (abbreviation() != otherCSA->abbreviation()) {
@@ -490,11 +491,11 @@ std::string CoordinateSystem::exportToWKT(
 // ---------------------------------------------------------------------------
 
 bool CoordinateSystem::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherCS = util::nn_dynamic_pointer_cast<CoordinateSystem>(other);
+    auto otherCS = dynamic_cast<const CoordinateSystem *>(other);
     if (otherCS == nullptr ||
-        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::isEquivalentTo(other, criterion)) {
         return false;
     }
     const auto &list = axisList();
@@ -508,7 +509,7 @@ bool CoordinateSystem::isEquivalentTo(
         return false;
     }
     for (size_t i = 0; i < list.size(); i++) {
-        if (!list[i]->isEquivalentTo(otherList[i], criterion)) {
+        if (!list[i]->isEquivalentTo(otherList[i].get(), criterion)) {
             return false;
         }
     }

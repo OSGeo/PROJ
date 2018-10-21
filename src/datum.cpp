@@ -143,11 +143,11 @@ void Datum::setAnchor(const util::optional<std::string> &anchor) {
 
 // ---------------------------------------------------------------------------
 
-bool Datum::_isEquivalentTo(const util::BaseObjectNNPtr &other,
+bool Datum::_isEquivalentTo(const util::IComparable *other,
                             util::IComparable::Criterion criterion) const {
-    auto otherDatum = util::nn_dynamic_pointer_cast<Datum>(other);
+    auto otherDatum = dynamic_cast<const Datum *>(other);
     if (otherDatum == nullptr ||
-        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        !ObjectUsage::isEquivalentTo(other, criterion)) {
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
@@ -177,8 +177,8 @@ bool Datum::_isEquivalentTo(const util::BaseObjectNNPtr &other,
             return false;
         }
         if (conventionalRS() && otherDatum->conventionalRS() &&
-            conventionalRS()->_isEquivalentTo(
-                NN_NO_CHECK(otherDatum->conventionalRS()), criterion)) {
+            conventionalRS()->isEquivalentTo(otherDatum->conventionalRS().get(),
+                                             criterion)) {
             return false;
         }
     }
@@ -346,11 +346,11 @@ std::string PrimeMeridian::exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool PrimeMeridian::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherPM = util::nn_dynamic_pointer_cast<PrimeMeridian>(other);
+    auto otherPM = dynamic_cast<const PrimeMeridian *>(other);
     if (otherPM == nullptr ||
-        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::isEquivalentTo(other, criterion)) {
         return false;
     }
     return longitude() == otherPM->longitude();
@@ -774,11 +774,11 @@ EllipsoidNNPtr Ellipsoid::identify() const {
 
 // ---------------------------------------------------------------------------
 
-bool Ellipsoid::isEquivalentTo(const util::BaseObjectNNPtr &other,
+bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
                                util::IComparable::Criterion criterion) const {
-    auto otherEllipsoid = util::nn_dynamic_pointer_cast<Ellipsoid>(other);
+    auto otherEllipsoid = dynamic_cast<const Ellipsoid *>(other);
     if (otherEllipsoid == nullptr ||
-        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::isEquivalentTo(other, criterion)) {
         return false;
     }
     if (!semiMajorAxis().isEquivalentTo(otherEllipsoid->semiMajorAxis(),
@@ -1004,16 +1004,15 @@ std::string GeodeticReferenceFrame::exportToWKT(
 // ---------------------------------------------------------------------------
 
 bool GeodeticReferenceFrame::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherGRF =
-        util::nn_dynamic_pointer_cast<GeodeticReferenceFrame>(other);
-    if (otherGRF == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    auto otherGRF = dynamic_cast<const GeodeticReferenceFrame *>(other);
+    if (otherGRF == nullptr || !Datum::isEquivalentTo(other, criterion)) {
         return false;
     }
-    return primeMeridian()->isEquivalentTo(otherGRF->primeMeridian(),
+    return primeMeridian()->isEquivalentTo(otherGRF->primeMeridian().get(),
                                            criterion) &&
-           ellipsoid()->isEquivalentTo(otherGRF->ellipsoid(), criterion);
+           ellipsoid()->isEquivalentTo(otherGRF->ellipsoid().get(), criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -1084,10 +1083,9 @@ DynamicGeodeticReferenceFrame::deformationModelName() const {
 // ---------------------------------------------------------------------------
 
 bool DynamicGeodeticReferenceFrame::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherDGRF =
-        util::nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(other);
+    auto otherDGRF = dynamic_cast<const DynamicGeodeticReferenceFrame *>(other);
     if (otherDGRF == nullptr ||
         !GeodeticReferenceFrame::isEquivalentTo(other, criterion)) {
         return false;
@@ -1283,12 +1281,13 @@ DatumEnsembleNNPtr DatumEnsemble::create(
                 throw util::Exception(
                     "ensemble should have consistent datum types");
             }
-            if (!grfFirst->ellipsoid()->isEquivalentTo(grf->ellipsoid())) {
+            if (!grfFirst->ellipsoid()->isEquivalentTo(
+                    grf->ellipsoid().get())) {
                 throw util::Exception(
                     "ensemble should have datums with identical ellipsoid");
             }
             if (!grfFirst->primeMeridian()->isEquivalentTo(
-                    grf->primeMeridian())) {
+                    grf->primeMeridian().get())) {
                 throw util::Exception(
                     "ensemble should have datums with identical "
                     "prime meridian");
@@ -1434,11 +1433,10 @@ std::string VerticalReferenceFrame::exportToWKT(
 // ---------------------------------------------------------------------------
 
 bool VerticalReferenceFrame::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherVRF =
-        util::nn_dynamic_pointer_cast<VerticalReferenceFrame>(other);
-    if (otherVRF == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    auto otherVRF = dynamic_cast<const VerticalReferenceFrame *>(other);
+    if (otherVRF == nullptr || !Datum::isEquivalentTo(other, criterion)) {
         return false;
     }
     if ((realizationMethod().has_value() ^
@@ -1521,10 +1519,9 @@ DynamicVerticalReferenceFrame::deformationModelName() const {
 // ---------------------------------------------------------------------------
 
 bool DynamicVerticalReferenceFrame::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherDGRF =
-        util::nn_dynamic_pointer_cast<DynamicVerticalReferenceFrame>(other);
+    auto otherDGRF = dynamic_cast<const DynamicVerticalReferenceFrame *>(other);
     if (otherDGRF == nullptr ||
         !VerticalReferenceFrame::isEquivalentTo(other, criterion)) {
         return false;
@@ -1691,10 +1688,10 @@ std::string TemporalDatum::exportToWKT(
 // ---------------------------------------------------------------------------
 
 bool TemporalDatum::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherTD = util::nn_dynamic_pointer_cast<TemporalDatum>(other);
-    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    auto otherTD = dynamic_cast<const TemporalDatum *>(other);
+    if (otherTD == nullptr || !Datum::isEquivalentTo(other, criterion)) {
         return false;
     }
     return temporalOrigin().toString() ==
@@ -1763,10 +1760,10 @@ std::string EngineeringDatum::exportToWKT(
 // ---------------------------------------------------------------------------
 
 bool EngineeringDatum::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherTD = util::nn_dynamic_pointer_cast<EngineeringDatum>(other);
-    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    auto otherTD = dynamic_cast<const EngineeringDatum *>(other);
+    if (otherTD == nullptr || !Datum::isEquivalentTo(other, criterion)) {
         return false;
     }
     return true;
@@ -1830,10 +1827,10 @@ std::string ParametricDatum::exportToWKT(
 // ---------------------------------------------------------------------------
 
 bool ParametricDatum::isEquivalentTo(
-    const util::BaseObjectNNPtr &other,
+    const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
-    auto otherTD = util::nn_dynamic_pointer_cast<ParametricDatum>(other);
-    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    auto otherTD = dynamic_cast<const ParametricDatum *>(other);
+    if (otherTD == nullptr || !Datum::isEquivalentTo(other, criterion)) {
         return false;
     }
     return true;

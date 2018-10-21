@@ -213,9 +213,9 @@ GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
 
 // ---------------------------------------------------------------------------
 
-bool GeographicBoundingBox::isEquivalentTo(const util::BaseObjectNNPtr &other,
+bool GeographicBoundingBox::isEquivalentTo(const util::IComparable *other,
                                            util::IComparable::Criterion) const {
-    auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other.get());
+    auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other);
     if (!otherExtent)
         return false;
     return d->west_ == otherExtent->d->west_ &&
@@ -474,9 +474,9 @@ VerticalExtent::create(double minimumIn, double maximumIn,
 
 // ---------------------------------------------------------------------------
 
-bool VerticalExtent::isEquivalentTo(const util::BaseObjectNNPtr &other,
+bool VerticalExtent::isEquivalentTo(const util::IComparable *other,
                                     util::IComparable::Criterion) const {
-    auto otherExtent = dynamic_cast<const VerticalExtent *>(other.get());
+    auto otherExtent = dynamic_cast<const VerticalExtent *>(other);
     if (!otherExtent)
         return false;
     return d->minimum_ == otherExtent->d->minimum_ &&
@@ -557,9 +557,9 @@ TemporalExtentNNPtr TemporalExtent::create(const std::string &start,
 
 // ---------------------------------------------------------------------------
 
-bool TemporalExtent::isEquivalentTo(const util::BaseObjectNNPtr &other,
+bool TemporalExtent::isEquivalentTo(const util::IComparable *other,
                                     util::IComparable::Criterion) const {
-    auto otherExtent = dynamic_cast<const TemporalExtent *>(other.get());
+    auto otherExtent = dynamic_cast<const TemporalExtent *>(other);
     if (!otherExtent)
         return false;
     return start() == otherExtent->start() && stop() == otherExtent->stop();
@@ -699,9 +699,9 @@ Extent::createFromBBOX(double west, double south, double east, double north,
 
 // ---------------------------------------------------------------------------
 
-bool Extent::isEquivalentTo(const util::BaseObjectNNPtr &other,
+bool Extent::isEquivalentTo(const util::IComparable *other,
                             util::IComparable::Criterion criterion) const {
-    auto otherExtent = dynamic_cast<const Extent *>(other.get());
+    auto otherExtent = dynamic_cast<const Extent *>(other);
     bool ret =
         (otherExtent &&
          description().has_value() == otherExtent->description().has_value() &&
@@ -715,15 +715,15 @@ bool Extent::isEquivalentTo(const util::BaseObjectNNPtr &other,
     if (ret) {
         for (size_t i = 0; ret && i < d->geographicElements_.size(); ++i) {
             ret = d->geographicElements_[i]->isEquivalentTo(
-                otherExtent->d->geographicElements_[i], criterion);
+                otherExtent->d->geographicElements_[i].get(), criterion);
         }
         for (size_t i = 0; ret && i < d->verticalElements_.size(); ++i) {
             ret = d->verticalElements_[i]->isEquivalentTo(
-                otherExtent->d->verticalElements_[i], criterion);
+                otherExtent->d->verticalElements_[i].get(), criterion);
         }
         for (size_t i = 0; ret && i < d->temporalElements_.size(); ++i) {
             ret = d->temporalElements_[i]->isEquivalentTo(
-                otherExtent->d->temporalElements_[i], criterion);
+                otherExtent->d->temporalElements_[i].get(), criterion);
         }
     }
     return ret;

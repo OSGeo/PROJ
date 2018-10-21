@@ -831,10 +831,17 @@ struct AuthorityFactory::Private {
     std::weak_ptr<AuthorityFactory> thisFactory_{};
     std::weak_ptr<AuthorityFactory> parentFactory_{};
     std::map<std::string, AuthorityFactoryNNPtr> mapFactory_{};
-    lru11::Cache<std::string, common::UnitOfMeasurePtr> cacheUOM_{};
-    lru11::Cache<std::string, crs::CRSPtr> cacheCRS_{};
-    lru11::Cache<std::string, datum::GeodeticReferenceFramePtr>
-        cacheGeodeticDaum_{};
+    lru11::Cache<std::string, util::BaseObjectPtr> cacheUOM_{};
+    lru11::Cache<std::string, util::BaseObjectPtr> cacheCRS_{};
+    lru11::Cache<std::string, util::BaseObjectPtr> cacheGeodeticDatum_{};
+
+    static void
+    insertIntoCache(lru11::Cache<std::string, util::BaseObjectPtr> &cache,
+                    const std::string &code, const util::BaseObjectPtr &obj);
+
+    static void
+    getFromCache(lru11::Cache<std::string, util::BaseObjectPtr> &cache,
+                 const std::string &code, util::BaseObjectPtr &obj);
 };
 
 // ---------------------------------------------------------------------------
@@ -869,50 +876,66 @@ AuthorityFactory::Private::createFactory(const std::string &auth_name) {
 
 // ---------------------------------------------------------------------------
 
+void AuthorityFactory::Private::insertIntoCache(
+    lru11::Cache<std::string, util::BaseObjectPtr> &cache,
+    const std::string &code, const util::BaseObjectPtr &obj) {
+    cache.insert(code, obj);
+}
+
+// ---------------------------------------------------------------------------
+
+void AuthorityFactory::Private::getFromCache(
+    lru11::Cache<std::string, util::BaseObjectPtr> &cache,
+    const std::string &code, util::BaseObjectPtr &obj) {
+    cache.tryGet(code, obj);
+}
+
+// ---------------------------------------------------------------------------
+
 crs::CRSPtr
 AuthorityFactory::Private::getCRSFromCache(const std::string &code) {
-    crs::CRSPtr crs = nullptr;
-    cacheCRS_.tryGet(code, crs);
-    return crs;
+    util::BaseObjectPtr obj;
+    getFromCache(cacheCRS_, code, obj);
+    return std::static_pointer_cast<crs::CRS>(obj);
 }
 
 // ---------------------------------------------------------------------------
 
 void AuthorityFactory::Private::cache(const std::string &code,
                                       const crs::CRSNNPtr &crs) {
-    cacheCRS_.insert(code, crs.as_nullable());
+    insertIntoCache(cacheCRS_, code, crs.as_nullable());
 }
 
 // ---------------------------------------------------------------------------
 
 common::UnitOfMeasurePtr
 AuthorityFactory::Private::getUOMFromCache(const std::string &code) {
-    common::UnitOfMeasurePtr uom = nullptr;
-    cacheUOM_.tryGet(code, uom);
-    return uom;
+    util::BaseObjectPtr obj;
+    getFromCache(cacheUOM_, code, obj);
+    return std::static_pointer_cast<common::UnitOfMeasure>(obj);
 }
 
 // ---------------------------------------------------------------------------
 
 void AuthorityFactory::Private::cache(const std::string &code,
                                       const common::UnitOfMeasureNNPtr &uom) {
-    cacheUOM_.insert(code, uom.as_nullable());
+    insertIntoCache(cacheUOM_, code, uom.as_nullable());
 }
 
 // ---------------------------------------------------------------------------
 
 datum::GeodeticReferenceFramePtr
 AuthorityFactory::Private::getGeodeticDatumFromCache(const std::string &code) {
-    datum::GeodeticReferenceFramePtr datum = nullptr;
-    cacheGeodeticDaum_.tryGet(code, datum);
-    return datum;
+    util::BaseObjectPtr obj;
+    getFromCache(cacheGeodeticDatum_, code, obj);
+    return std::static_pointer_cast<datum::GeodeticReferenceFrame>(obj);
 }
 
 // ---------------------------------------------------------------------------
 
 void AuthorityFactory::Private::cache(
     const std::string &code, const datum::GeodeticReferenceFrameNNPtr &datum) {
-    cacheGeodeticDaum_.insert(code, datum.as_nullable());
+    insertIntoCache(cacheGeodeticDatum_, code, datum.as_nullable());
 }
 
 // ---------------------------------------------------------------------------

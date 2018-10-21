@@ -61,7 +61,7 @@ namespace datum {
  *
  * \remark Implements Datum from \ref ISO_19111_2018
  */
-class Datum : public common::ObjectUsage, public util::IComparable {
+class Datum : public common::ObjectUsage {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Datum() override;
@@ -74,7 +74,7 @@ class Datum : public common::ObjectUsage, public util::IComparable {
   protected:
     Datum();
 
-    bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
+    bool _isEquivalentTo(const util::IComparable *other,
                          util::IComparable::Criterion criterion =
                              util::IComparable::Criterion::STRICT) const;
 
@@ -116,8 +116,8 @@ using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
  *
  * \remark Implements DatumEnsemble from \ref ISO_19111_2018
  */
-class DatumEnsemble : public common::IdentifiedObject,
-                      public io::IWKTExportable {
+class DatumEnsemble final : public common::IdentifiedObject,
+                            public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DatumEnsemble() override;
@@ -167,10 +167,9 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
  *
  * \remark Implements PrimeMeridian from \ref ISO_19111_2018
  */
-class PrimeMeridian : public common::IdentifiedObject,
-                      public io::IWKTExportable,
-                      public io::IPROJStringExportable,
-                      public util::IComparable {
+class PrimeMeridian final : public common::IdentifiedObject,
+                            public io::IWKTExportable,
+                            public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PrimeMeridian() override;
@@ -194,7 +193,7 @@ class PrimeMeridian : public common::IdentifiedObject,
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -238,10 +237,9 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
  *
  * \remark Implements Ellipsoid from \ref ISO_19111_2018
  */
-class Ellipsoid : public common::IdentifiedObject,
-                  public io::IWKTExportable,
-                  public io::IPROJStringExportable,
-                  public util::IComparable {
+class Ellipsoid final : public common::IdentifiedObject,
+                        public io::IWKTExportable,
+                        public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Ellipsoid() override;
@@ -296,7 +294,7 @@ class Ellipsoid : public common::IdentifiedObject,
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -324,13 +322,13 @@ class Ellipsoid : public common::IdentifiedObject,
 
     INLINED_MAKE_SHARED
 
-  private:
-    PROJ_OPAQUE_PRIVATE_DATA
-    Ellipsoid &operator=(const Ellipsoid &other) = delete;
-
     static const EllipsoidNNPtr createCLARKE_1866();
     static const EllipsoidNNPtr createWGS84();
     static const EllipsoidNNPtr createGRS1980();
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    Ellipsoid &operator=(const Ellipsoid &other) = delete;
 
     bool lookForProjWellKnownEllps(std::string &projEllpsName,
                                    std::string &ellpsName) const;
@@ -387,7 +385,7 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -401,11 +399,12 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
                            const PrimeMeridianNNPtr &primeMeridianIn);
     INLINED_MAKE_SHARED
 
-  private:
-    PROJ_OPAQUE_PRIVATE_DATA
     static const GeodeticReferenceFrameNNPtr createEPSG_6267();
     static const GeodeticReferenceFrameNNPtr createEPSG_6269();
     static const GeodeticReferenceFrameNNPtr createEPSG_6326();
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
     GeodeticReferenceFrame(const GeodeticReferenceFrame &other) = delete;
     GeodeticReferenceFrame &
     operator=(const GeodeticReferenceFrame &other) = delete;
@@ -429,7 +428,7 @@ using DynamicGeodeticReferenceFrameNNPtr =
  *
  * \remark Implements DynamicGeodeticReferenceFrame from \ref ISO_19111_2018
  */
-class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
+class DynamicGeodeticReferenceFrame final : public GeodeticReferenceFrame {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DynamicGeodeticReferenceFrame() override;
@@ -447,7 +446,7 @@ class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
            const util::optional<std::string> &deformationModelNameIn);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -531,7 +530,7 @@ class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
                util::optional<RealizationMethod>());
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -566,7 +565,7 @@ using DynamicVerticalReferenceFrameNNPtr =
  *
  * \remark Implements DynamicVerticalReferenceFrame from \ref ISO_19111_2018
  */
-class DynamicVerticalReferenceFrame : public VerticalReferenceFrame {
+class DynamicVerticalReferenceFrame final : public VerticalReferenceFrame {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DynamicVerticalReferenceFrame() override;
@@ -584,7 +583,7 @@ class DynamicVerticalReferenceFrame : public VerticalReferenceFrame {
            const util::optional<std::string> &deformationModelNameIn);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -623,7 +622,7 @@ using TemporalDatumNNPtr = util::nn<TemporalDatumPtr>;
  *
  * \remark Implements TemporalDatum from \ref ISO_19111_2018
  */
-class TemporalDatum : public Datum, public io::IWKTExportable {
+class TemporalDatum final : public Datum, public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalDatum() override;
@@ -644,7 +643,7 @@ class TemporalDatum : public Datum, public io::IWKTExportable {
            const std::string &calendarIn);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -674,7 +673,7 @@ using EngineeringDatumNNPtr = util::nn<EngineeringDatumPtr>;
  *
  * \remark Implements EngineeringDatum from \ref ISO_19111_2018
  */
-class EngineeringDatum : public Datum, public io::IWKTExportable {
+class EngineeringDatum final : public Datum, public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~EngineeringDatum() override;
@@ -690,7 +689,7 @@ class EngineeringDatum : public Datum, public io::IWKTExportable {
                util::optional<std::string>());
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -716,7 +715,7 @@ using ParametricDatumNNPtr = util::nn<ParametricDatumPtr>;
  *
  * \remark Implements ParametricDatum from \ref ISO_19111_2018
  */
-class ParametricDatum : public Datum, public io::IWKTExportable {
+class ParametricDatum final : public Datum, public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParametricDatum() override;
@@ -732,7 +731,7 @@ class ParametricDatum : public Datum, public io::IWKTExportable {
                util::optional<std::string>());
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 

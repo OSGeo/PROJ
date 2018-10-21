@@ -56,8 +56,13 @@ using namespace osgeo::proj::operation;
 using namespace osgeo::proj::util;
 
 namespace {
-struct UnrelatedObject : public BaseObject {
+struct UnrelatedObject : public IComparable {
     UnrelatedObject() = default;
+
+    bool isEquivalentTo(const IComparable *, Criterion) const override {
+        assert(false);
+        return false;
+    }
 };
 
 static nn<std::shared_ptr<UnrelatedObject>> createUnrelatedObject() {
@@ -71,19 +76,19 @@ TEST(operation, method) {
 
     auto method = OperationMethod::create(
         PropertyMap(), std::vector<OperationParameterNNPtr>{});
-    EXPECT_TRUE(method->isEquivalentTo(method));
-    EXPECT_FALSE(method->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(method->isEquivalentTo(method.get()));
+    EXPECT_FALSE(method->isEquivalentTo(createUnrelatedObject().get()));
     auto otherMethod = OperationMethod::create(
         PropertyMap(),
         std::vector<OperationParameterNNPtr>{OperationParameter::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName"))});
-    EXPECT_TRUE(otherMethod->isEquivalentTo(otherMethod));
-    EXPECT_FALSE(method->isEquivalentTo(otherMethod));
+    EXPECT_TRUE(otherMethod->isEquivalentTo(otherMethod.get()));
+    EXPECT_FALSE(method->isEquivalentTo(otherMethod.get()));
     auto otherMethod2 = OperationMethod::create(
         PropertyMap(),
         std::vector<OperationParameterNNPtr>{OperationParameter::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName2"))});
-    EXPECT_FALSE(otherMethod->isEquivalentTo(otherMethod2));
+    EXPECT_FALSE(otherMethod->isEquivalentTo(otherMethod2.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -92,25 +97,25 @@ TEST(operation, ParameterValue) {
 
     auto valStr1 = ParameterValue::create("str1");
     auto valStr2 = ParameterValue::create("str2");
-    EXPECT_TRUE(valStr1->isEquivalentTo(valStr1));
-    EXPECT_FALSE(valStr1->isEquivalentTo(createUnrelatedObject()));
-    EXPECT_FALSE(valStr1->isEquivalentTo(valStr2));
+    EXPECT_TRUE(valStr1->isEquivalentTo(valStr1.get()));
+    EXPECT_FALSE(valStr1->isEquivalentTo(createUnrelatedObject().get()));
+    EXPECT_FALSE(valStr1->isEquivalentTo(valStr2.get()));
 
     auto valMeasure1 = ParameterValue::create(Angle(90.0));
     auto valMeasure2 = ParameterValue::create(Angle(89.0));
-    EXPECT_TRUE(valMeasure1->isEquivalentTo(valMeasure1));
-    EXPECT_FALSE(valMeasure1->isEquivalentTo(valStr1));
-    EXPECT_FALSE(valMeasure1->isEquivalentTo(valMeasure2));
+    EXPECT_TRUE(valMeasure1->isEquivalentTo(valMeasure1.get()));
+    EXPECT_FALSE(valMeasure1->isEquivalentTo(valStr1.get()));
+    EXPECT_FALSE(valMeasure1->isEquivalentTo(valMeasure2.get()));
 
     auto valInt1 = ParameterValue::create(1);
     auto valInt2 = ParameterValue::create(2);
-    EXPECT_TRUE(valInt1->isEquivalentTo(valInt1));
-    EXPECT_FALSE(valInt1->isEquivalentTo(valInt2));
+    EXPECT_TRUE(valInt1->isEquivalentTo(valInt1.get()));
+    EXPECT_FALSE(valInt1->isEquivalentTo(valInt2.get()));
 
     auto valTrue = ParameterValue::create(true);
     auto valFalse = ParameterValue::create(false);
-    EXPECT_TRUE(valTrue->isEquivalentTo(valTrue));
-    EXPECT_FALSE(valTrue->isEquivalentTo(valFalse));
+    EXPECT_TRUE(valTrue->isEquivalentTo(valTrue.get()));
+    EXPECT_FALSE(valTrue->isEquivalentTo(valFalse.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -121,9 +126,9 @@ TEST(operation, OperationParameter) {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName"));
     auto op2 = OperationParameter::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName2"));
-    EXPECT_TRUE(op1->isEquivalentTo(op1));
-    EXPECT_FALSE(op1->isEquivalentTo(createUnrelatedObject()));
-    EXPECT_FALSE(op1->isEquivalentTo(op2));
+    EXPECT_TRUE(op1->isEquivalentTo(op1.get()));
+    EXPECT_FALSE(op1->isEquivalentTo(createUnrelatedObject().get()));
+    EXPECT_FALSE(op1->isEquivalentTo(op2.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -137,12 +142,12 @@ TEST(operation, OperationParameterValue) {
     auto valStr1 = ParameterValue::create("str1");
     auto valStr2 = ParameterValue::create("str2");
     auto opv11 = OperationParameterValue::create(op1, valStr1);
-    EXPECT_TRUE(opv11->isEquivalentTo(opv11));
-    EXPECT_FALSE(opv11->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(opv11->isEquivalentTo(opv11.get()));
+    EXPECT_FALSE(opv11->isEquivalentTo(createUnrelatedObject().get()));
     auto opv12 = OperationParameterValue::create(op1, valStr2);
-    EXPECT_FALSE(opv11->isEquivalentTo(opv12));
+    EXPECT_FALSE(opv11->isEquivalentTo(opv12.get()));
     auto opv21 = OperationParameterValue::create(op2, valStr1);
-    EXPECT_FALSE(opv11->isEquivalentTo(opv12));
+    EXPECT_FALSE(opv11->isEquivalentTo(opv12.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -161,8 +166,8 @@ TEST(operation, SingleOperation) {
         std::vector<PositionalAccuracyNNPtr>{
             PositionalAccuracy::create("0.1")});
 
-    EXPECT_TRUE(sop1->isEquivalentTo(sop1));
-    EXPECT_FALSE(sop1->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(sop1->isEquivalentTo(sop1.get()));
+    EXPECT_FALSE(sop1->isEquivalentTo(createUnrelatedObject().get()));
 
     auto sop2 = Transformation::create(
         PropertyMap(), nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
@@ -175,7 +180,7 @@ TEST(operation, SingleOperation) {
             ParameterValue::createFilename("foo.bin")},
         std::vector<PositionalAccuracyNNPtr>{
             PositionalAccuracy::create("0.1")});
-    EXPECT_FALSE(sop1->isEquivalentTo(sop2));
+    EXPECT_FALSE(sop1->isEquivalentTo(sop2.get()));
 
     auto sop3 = Transformation::create(
         PropertyMap(), nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
@@ -192,7 +197,7 @@ TEST(operation, SingleOperation) {
             ParameterValue::createFilename("foo2.bin")},
         std::vector<PositionalAccuracyNNPtr>{
             PositionalAccuracy::create("0.1")});
-    EXPECT_FALSE(sop1->isEquivalentTo(sop3));
+    EXPECT_FALSE(sop1->isEquivalentTo(sop3.get()));
 
     auto sop4 = Transformation::create(
         PropertyMap(), nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
@@ -205,7 +210,7 @@ TEST(operation, SingleOperation) {
             ParameterValue::createFilename("foo2.bin")},
         std::vector<PositionalAccuracyNNPtr>{
             PositionalAccuracy::create("0.1")});
-    EXPECT_FALSE(sop1->isEquivalentTo(sop4));
+    EXPECT_FALSE(sop1->isEquivalentTo(sop4.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -281,8 +286,8 @@ TEST(operation, transformation_to_wkt) {
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
 
-    EXPECT_TRUE(transf->isEquivalentTo(transf));
-    EXPECT_FALSE(transf->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(transf->isEquivalentTo(transf.get()));
+    EXPECT_FALSE(transf->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -388,42 +393,42 @@ TEST(operation, concatenated_operation) {
                  InvalidOperation);
 
     auto inv = concat->inverse();
-    EXPECT_EQ(*(inv->name()->description()), "Inverse of name");
-    EXPECT_EQ(*(inv->sourceCRS()->name()->description()),
-              *(concat->targetCRS()->name()->description()));
-    EXPECT_EQ(*(inv->targetCRS()->name()->description()),
-              *(concat->sourceCRS()->name()->description()));
+    EXPECT_EQ(inv->nameStr(), "Inverse of name");
+    EXPECT_EQ(inv->sourceCRS()->nameStr(), concat->targetCRS()->nameStr());
+    EXPECT_EQ(inv->targetCRS()->nameStr(), concat->sourceCRS()->nameStr());
     auto inv_as_concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(inv);
     ASSERT_TRUE(inv_as_concat != nullptr);
 
     ASSERT_EQ(inv_as_concat->operations().size(), 2);
-    EXPECT_EQ(*(inv_as_concat->operations()[0]->name()->description()),
+    EXPECT_EQ(inv_as_concat->operations()[0]->nameStr(),
               "Inverse of transformationName");
-    EXPECT_EQ(*(inv_as_concat->operations()[1]->name()->description()),
+    EXPECT_EQ(inv_as_concat->operations()[1]->nameStr(),
               "Inverse of transformationName");
 
-    EXPECT_TRUE(concat->isEquivalentTo(concat));
-    EXPECT_FALSE(concat->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(concat->isEquivalentTo(concat.get()));
+    EXPECT_FALSE(concat->isEquivalentTo(createUnrelatedObject().get()));
     EXPECT_FALSE(
         ConcatenatedOperation::create(PropertyMap(),
                                       std::vector<CoordinateOperationNNPtr>{
                                           transf_1, transf_1->inverse()},
                                       std::vector<PositionalAccuracyNNPtr>())
             ->isEquivalentTo(ConcatenatedOperation::create(
-                PropertyMap(),
-                std::vector<CoordinateOperationNNPtr>{transf_1->inverse(),
-                                                      transf_1},
-                std::vector<PositionalAccuracyNNPtr>())));
+                                 PropertyMap(),
+                                 std::vector<CoordinateOperationNNPtr>{
+                                     transf_1->inverse(), transf_1},
+                                 std::vector<PositionalAccuracyNNPtr>())
+                                 .get()));
     EXPECT_FALSE(
         ConcatenatedOperation::create(PropertyMap(),
                                       std::vector<CoordinateOperationNNPtr>{
                                           transf_1, transf_1->inverse()},
                                       std::vector<PositionalAccuracyNNPtr>())
             ->isEquivalentTo(ConcatenatedOperation::create(
-                PropertyMap(),
-                std::vector<CoordinateOperationNNPtr>{
-                    transf_1, transf_1->inverse(), transf_1},
-                std::vector<PositionalAccuracyNNPtr>())));
+                                 PropertyMap(),
+                                 std::vector<CoordinateOperationNNPtr>{
+                                     transf_1, transf_1->inverse(), transf_1},
+                                 std::vector<PositionalAccuracyNNPtr>())
+                                 .get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -443,10 +448,10 @@ TEST(operation, transformation_createGeocentricTranslations) {
         nn_dynamic_pointer_cast<Transformation>(inv_transf);
     ASSERT_TRUE(inv_transf_as_transf != nullptr);
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf_as_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+    EXPECT_EQ(transf->sourceCRS()->nameStr(),
+              inv_transf_as_transf->targetCRS()->nameStr());
+    EXPECT_EQ(transf->targetCRS()->nameStr(),
+              inv_transf_as_transf->sourceCRS()->nameStr());
     auto expected_inv =
         std::vector<double>{-1.0, -2.0, -3.0, 0.0, 0.0, 0.0, 0.0};
     EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(), expected_inv);
@@ -566,10 +571,10 @@ TEST(operation, transformation_createPositionVector) {
     auto inv_transf = transf->inverse();
     ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 1);
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf->sourceCRS()->name()->description()));
+    EXPECT_EQ(transf->sourceCRS()->nameStr(),
+              inv_transf->targetCRS()->nameStr());
+    EXPECT_EQ(transf->targetCRS()->nameStr(),
+              inv_transf->sourceCRS()->nameStr());
 
 #ifdef USE_APPROXIMATE_HELMERT_INVERSE
     auto inv_transf_as_transf =
@@ -633,10 +638,10 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
     auto inv_transf = transf->inverse();
     ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 0);
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf->sourceCRS()->name()->description()));
+    EXPECT_EQ(transf->sourceCRS()->nameStr(),
+              inv_transf->targetCRS()->nameStr());
+    EXPECT_EQ(transf->targetCRS()->nameStr(),
+              inv_transf->sourceCRS()->nameStr());
 
 #ifdef USE_APPROXIMATE_HELMERT_INVERSE
     auto inv_transf_as_transf =
@@ -686,10 +691,10 @@ TEST(operation, transformation_createTimeDependentPositionVector) {
 
     auto inv_transf = transf->inverse();
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf->sourceCRS()->name()->description()));
+    EXPECT_EQ(transf->sourceCRS()->nameStr(),
+              inv_transf->targetCRS()->nameStr());
+    EXPECT_EQ(transf->targetCRS()->nameStr(),
+              inv_transf->sourceCRS()->nameStr());
 
     auto projString =
         inv_transf->exportToPROJString(PROJStringFormatter::create());
@@ -758,10 +763,10 @@ TEST(operation, transformation_createTimeDependentCoordinateFrameRotation) {
 
     auto inv_transf = transf->inverse();
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf->sourceCRS()->name()->description()));
+    EXPECT_EQ(transf->sourceCRS()->nameStr(),
+              inv_transf->targetCRS()->nameStr());
+    EXPECT_EQ(transf->targetCRS()->nameStr(),
+              inv_transf->sourceCRS()->nameStr());
 
     auto projString =
         inv_transf->exportToPROJString(PROJStringFormatter::create());
@@ -898,10 +903,10 @@ TEST(operation, transformation_createMolodensky) {
         nn_dynamic_pointer_cast<Transformation>(inv_transf);
     ASSERT_TRUE(inv_transf_as_transf != nullptr);
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf_as_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+    EXPECT_EQ(transf->sourceCRS()->nameStr(),
+              inv_transf_as_transf->targetCRS()->nameStr());
+    EXPECT_EQ(transf->targetCRS()->nameStr(),
+              inv_transf_as_transf->sourceCRS()->nameStr());
 
     auto projString =
         inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
@@ -933,10 +938,10 @@ TEST(operation, transformation_createAbridgedMolodensky) {
         nn_dynamic_pointer_cast<Transformation>(inv_transf);
     ASSERT_TRUE(inv_transf_as_transf != nullptr);
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf_as_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+    EXPECT_EQ(transf->sourceCRS()->nameStr(),
+              inv_transf_as_transf->targetCRS()->nameStr());
+    EXPECT_EQ(transf->targetCRS()->nameStr(),
+              inv_transf_as_transf->sourceCRS()->nameStr());
 
     auto projString =
         inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
@@ -3160,8 +3165,7 @@ TEST(operation, wkt1_import_polar_stereographic_ambiguous) {
     ASSERT_TRUE(crs != nullptr);
 
     auto conversion = crs->derivingConversion();
-    EXPECT_EQ(*(conversion->method()->name()->description()),
-              "Polar_Stereographic");
+    EXPECT_EQ(conversion->method()->nameStr(), "Polar_Stereographic");
 }
 
 // ---------------------------------------------------------------------------
@@ -3531,8 +3535,8 @@ TEST(operation, conversion_inverse) {
               "+proj=pipeline +step +inv +proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 "
               "+x_0=4 +y_0=5");
 
-    EXPECT_TRUE(inv->isEquivalentTo(inv));
-    EXPECT_FALSE(inv->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(inv->isEquivalentTo(inv.get()));
+    EXPECT_FALSE(inv->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -3670,7 +3674,7 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
             authFactory->createCoordinateReferenceSystem("4179"), ctxt);
         ASSERT_EQ(list.size(), 2);
         // Romania has a larger area than Poland (given our approx formula)
-        EXPECT_EQ(*list[0]->name()->description(),
+        EXPECT_EQ(list[0]->nameStr(),
                   "Inverse of Pulkovo 1942(58) to ETRS89 (4)"); // Romania - 3m
 
         EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
@@ -3949,8 +3953,10 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation) {
               CoordinateOperationFactory::create()
                   ->createOperation(dest, src)
                   ->exportToWKT(WKTFormatter::create()));
-    EXPECT_TRUE(op->inverse()->isEquivalentTo(NN_CHECK_ASSERT(
-        CoordinateOperationFactory::create()->createOperation(dest, src))));
+    EXPECT_TRUE(
+        op->inverse()->isEquivalentTo(CoordinateOperationFactory::create()
+                                          ->createOperation(dest, src)
+                                          .get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -3964,14 +3970,14 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation_context) {
         authFactory->createCoordinateReferenceSystem("4275"), // NTF
         ctxt);
     ASSERT_EQ(list.size(), 2);
-    EXPECT_EQ(*(list[0]->name()->description()), "NTF (Paris) to NTF (1)");
+    EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to NTF (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
               "+proj=longlat +ellps=clrk80ign +pm=paris +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
-    EXPECT_EQ(*(list[1]->name()->description()), "NTF (Paris) to NTF (2)");
+    EXPECT_EQ(list[1]->nameStr(), "NTF (Paris) to NTF (2)");
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
@@ -3991,7 +3997,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
         authFactory->createCoordinateReferenceSystem("4171"), // RGF93
         ctxt);
     ASSERT_EQ(list.size(), 3);
-    EXPECT_EQ(*(list[0]->name()->description()), "NTF (Paris) to RGF93 (2)");
+    EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to RGF93 (2)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
@@ -4016,7 +4022,7 @@ TEST(operation, geogCRS_to_geogCRS_context_same_grid_name) {
         authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
         ctxt);
     ASSERT_TRUE(!list.empty());
-    EXPECT_EQ(*(list[0]->name()->description()), "DHDN to ETRS89 (8)");
+    EXPECT_EQ(list[0]->nameStr(), "DHDN to ETRS89 (8)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
@@ -4035,7 +4041,7 @@ TEST(operation, geogCRS_to_geogCRS_geographic_offset_context) {
         authFactory->createCoordinateReferenceSystem("4121"), // NTF
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(*(list[0]->name()->description()), "Greek to GGRS87 (1)");
+    EXPECT_EQ(list[0]->nameStr(), "Greek to GGRS87 (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
@@ -4147,19 +4153,21 @@ TEST(operation, geogCRS_longlat_to_geogCS_latlong) {
     ASSERT_TRUE(op != nullptr);
     auto conv = std::dynamic_pointer_cast<Conversion>(op);
     ASSERT_TRUE(conv != nullptr);
-    EXPECT_TRUE(op->sourceCRS() && op->sourceCRS()->isEquivalentTo(sourceCRS));
-    EXPECT_TRUE(op->targetCRS() && op->targetCRS()->isEquivalentTo(targetCRS));
+    EXPECT_TRUE(op->sourceCRS() &&
+                op->sourceCRS()->isEquivalentTo(sourceCRS.get()));
+    EXPECT_TRUE(op->targetCRS() &&
+                op->targetCRS()->isEquivalentTo(targetCRS.get()));
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=axisswap +order=2,1");
     auto convInverse = nn_dynamic_pointer_cast<Conversion>(conv->inverse());
     ASSERT_TRUE(convInverse != nullptr);
     EXPECT_TRUE(convInverse->sourceCRS() &&
-                convInverse->sourceCRS()->isEquivalentTo(targetCRS));
+                convInverse->sourceCRS()->isEquivalentTo(targetCRS.get()));
     EXPECT_TRUE(convInverse->targetCRS() &&
-                convInverse->targetCRS()->isEquivalentTo(sourceCRS));
+                convInverse->targetCRS()->isEquivalentTo(sourceCRS.get()));
     EXPECT_EQ(conv->method()->exportToWKT(WKTFormatter::create()),
               convInverse->method()->exportToWKT(WKTFormatter::create()));
-    EXPECT_TRUE(conv->method()->isEquivalentTo(convInverse->method()));
+    EXPECT_TRUE(conv->method()->isEquivalentTo(convInverse->method().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -4220,7 +4228,7 @@ TEST(operation,
         ctxt);
     ASSERT_EQ(list.size(), 4);
     EXPECT_EQ(
-        *(list[0]->name()->description()),
+        list[0]->nameStr(),
         "NTF (Paris) to NTF (1) + Inverse of WGS 84 to NTF (3) + UTM zone 31N");
     ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "1");
@@ -4297,7 +4305,7 @@ TEST(operation, projCRS_to_projCRS_context_compatible_area) {
             "2171"), // Pulkovo 42 Poland I
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(*(list[0]->name()->description()),
+    EXPECT_EQ(list[0]->nameStr(),
               "Inverse of UTM zone 34N + Inverse of Pulkovo 1942(58) to WGS 84 "
               "(1) + Poland zone I");
     ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
@@ -4316,9 +4324,9 @@ TEST(operation, projCRS_to_projCRS_context_compatible_area_bis) {
         authFactory->createCoordinateReferenceSystem("32634"), // UTM 34
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(*(list[0]->name()->description()), "Inverse of Stereo 70 + "
-                                                 "Pulkovo 1942(58) to WGS 84 "
-                                                 "(19) + UTM zone 34N");
+    EXPECT_EQ(list[0]->nameStr(), "Inverse of Stereo 70 + "
+                                  "Pulkovo 1942(58) to WGS 84 "
+                                  "(19) + UTM zone 34N");
     ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "3");
 }
@@ -4335,7 +4343,7 @@ TEST(operation, projCRS_to_projCRS_context_one_incompatible_area) {
             "2171"), // Pulkovo 42 Poland I
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(*(list[0]->name()->description()),
+    EXPECT_EQ(list[0]->nameStr(),
               "Inverse of UTM zone 31N + Inverse of Pulkovo 1942(58) to WGS 84 "
               "(1) + Poland zone I");
     ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
@@ -4353,8 +4361,7 @@ TEST(operation, projCRS_to_projCRS_context_incompatible_areas) {
         authFactory->createCoordinateReferenceSystem("32633"), // UTM 33
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(*(list[0]->name()->description()),
-              "Inverse of UTM zone 31N + UTM zone 33N");
+    EXPECT_EQ(list[0]->nameStr(), "Inverse of UTM zone 31N + UTM zone 33N");
     ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "0");
 }
@@ -4842,7 +4849,7 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4979, compound);
     ASSERT_TRUE(opInverse != nullptr);
-    EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(NN_CHECK_ASSERT(op)));
+    EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(op.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -4875,7 +4882,7 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4979, compound);
     ASSERT_TRUE(opInverse != nullptr);
-    EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(NN_CHECK_ASSERT(op)));
+    EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(op.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -4893,7 +4900,7 @@ TEST(operation, compoundCRS_to_compoundCRS) {
     auto opRef = CoordinateOperationFactory::create()->createOperation(
         createUTM31_WGS84(), createUTM32_WGS84());
     ASSERT_TRUE(opRef != nullptr);
-    EXPECT_TRUE(op->isEquivalentTo(NN_CHECK_ASSERT(opRef)));
+    EXPECT_TRUE(op->isEquivalentTo(opRef.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -5145,7 +5152,7 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             crs, GeographicCRS::EPSG_4326);
         ASSERT_TRUE(op != nullptr);
-        EXPECT_TRUE(op->isEquivalentTo(boundCRS->transformation()));
+        EXPECT_TRUE(op->isEquivalentTo(boundCRS->transformation().get()));
         {
             auto wkt1 = op->exportToWKT(
                 WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
@@ -5158,7 +5165,8 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             GeographicCRS::EPSG_4326, crs);
         ASSERT_TRUE(op != nullptr);
-        EXPECT_TRUE(op->isEquivalentTo(boundCRS->transformation()->inverse()));
+        EXPECT_TRUE(
+            op->isEquivalentTo(boundCRS->transformation()->inverse().get()));
         {
             auto wkt1 = op->exportToWKT(
                 WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));

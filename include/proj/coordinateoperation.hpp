@@ -91,8 +91,7 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  */
 class CoordinateOperation : public common::ObjectUsage,
                             public io::IWKTExportable,
-                            public io::IPROJStringExportable,
-                            public util::IComparable {
+                            public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateOperation() override;
@@ -171,15 +170,14 @@ class CoordinateOperation : public common::ObjectUsage,
  *
  * \remark Implements GeneralOperationParameter from \ref ISO_19111_2018
  */
-class GeneralOperationParameter : public common::IdentifiedObject,
-                                  public util::IComparable {
+class GeneralOperationParameter : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeneralOperationParameter() override;
     //! @endcond
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
 
@@ -220,7 +218,7 @@ class OperationParameter : public GeneralOperationParameter {
     //! @endcond
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -261,7 +259,7 @@ class GeneralParameterValue : public util::BaseObject,
         const override = 0; // throw(io::FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
 
@@ -344,7 +342,7 @@ class ParameterValue : public util::BaseObject,
     PROJ_DLL bool booleanValue() const;
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -387,7 +385,7 @@ class OperationParameterValue : public GeneralParameterValue {
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -435,8 +433,7 @@ using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
  * \remark Implements OperationMethod from \ref ISO_19111_2018
  */
 class OperationMethod : public common::IdentifiedObject,
-                        public io::IWKTExportable,
-                        public util::IComparable {
+                        public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationMethod() override;
@@ -459,7 +456,7 @@ class OperationMethod : public common::IdentifiedObject,
            const std::vector<OperationParameterNNPtr> &parameters);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -523,7 +520,7 @@ class SingleOperation : virtual public CoordinateOperation {
             std::vector<metadata::PositionalAccuracyNNPtr>());
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -1502,7 +1499,7 @@ class ConcatenatedOperation : public CoordinateOperation {
     exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 

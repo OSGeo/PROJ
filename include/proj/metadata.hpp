@@ -105,7 +105,7 @@ class GeographicExtent : public util::BaseObject, public util::IComparable {
     // use
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
 
@@ -160,7 +160,7 @@ class GeographicBoundingBox : public GeographicExtent {
     create(double west, double south, double east, double north);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -206,7 +206,7 @@ class TemporalExtent : public util::BaseObject, public util::IComparable {
                                                const std::string &stop);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -251,7 +251,7 @@ class VerticalExtent : public util::BaseObject, public util::IComparable {
            const common::UnitOfMeasureNNPtr &unitIn);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -307,7 +307,7 @@ class Extent : public util::BaseObject, public util::IComparable {
                        util::optional<std::string>());
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 

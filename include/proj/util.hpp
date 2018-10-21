@@ -80,7 +80,9 @@ namespace proj {}
                                                                                \
   protected:                                                                   \
     Private *getPrivate() { return d.get(); }                                  \
-    const Private *getPrivate() const { return d.get(); }
+    const Private *getPrivate() const { return d.get(); }                      \
+                                                                               \
+  private:
 
 // To include in the protected/private section of a class definition,
 // to be able to call make_shared on a protected/private constructor
@@ -236,7 +238,7 @@ class BaseObject {
 class IComparable {
   public:
     //! @cond Doxygen_Suppress
-    virtual PROJ_DLL ~IComparable();
+    PROJ_DLL virtual ~IComparable();
     //! @endcond
 
     /** \brief Comparison criterion. */
@@ -253,7 +255,7 @@ class IComparable {
      * @return true if objects are equivalent.
      */
     PROJ_DLL virtual bool
-    isEquivalentTo(const BaseObjectNNPtr &other,
+    isEquivalentTo(const IComparable *other,
                    Criterion criterion = Criterion::STRICT) const = 0;
 };
 
@@ -261,7 +263,7 @@ class IComparable {
 
 /** \brief Encapsulate standard datatypes in an object.
  */
-class BoxedValue : public BaseObject {
+class BoxedValue final : public BaseObject {
   public:
     //! @cond Doxygen_Suppress
     /** Type of data stored in the BoxedValue. */
@@ -320,7 +322,7 @@ using ArrayOfBaseObjectNNPtr = util::nn<ArrayOfBaseObjectPtr>;
 
 /** \brief Array of BaseObject.
  */
-class ArrayOfBaseObject : public BaseObject {
+class ArrayOfBaseObject final : public BaseObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ArrayOfBaseObject() override;

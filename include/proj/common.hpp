@@ -270,7 +270,7 @@ using IdentifiedObjectNNPtr = util::nn<IdentifiedObjectPtr>;
  *
  * \remark Implements IdentifiedObject from \ref ISO_19111_2018
  */
-class IdentifiedObject : public util::BaseObject {
+class IdentifiedObject : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~IdentifiedObject() override;
@@ -288,6 +288,7 @@ class IdentifiedObject : public util::BaseObject {
 
     // in practice only name().description() is used
     PROJ_DLL const metadata::IdentifierNNPtr &name() const;
+    PROJ_DLL const std::string &nameStr() const;
     PROJ_DLL const std::vector<metadata::IdentifierNNPtr> &identifiers() const;
     PROJ_DLL const std::vector<util::GenericNameNNPtr> &aliases() const;
     PROJ_DLL const std::string &remarks() const;
@@ -306,9 +307,14 @@ class IdentifiedObject : public util::BaseObject {
         formatID(io::WKTFormatterNNPtr formatter) const;
     void formatRemarks(io::WKTFormatterNNPtr formatter) const;
 
-    bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
-                         util::IComparable::Criterion criterion =
-                             util::IComparable::Criterion::STRICT) const;
+    bool
+    isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+    bool isEquivalentTo(const IdentifiedObject *other,
+                        util::IComparable::Criterion criterion =
+                            util::IComparable::Criterion::STRICT) const;
     //! @endcond
 
   protected:
@@ -354,7 +360,7 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
            const metadata::ExtentPtr &extent);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -390,7 +396,7 @@ using ObjectUsageNNPtr = util::nn<ObjectUsagePtr>;
 class ObjectUsage : public IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL ~ObjectUsage();
+    PROJ_DLL ~ObjectUsage() override;
     //! @endcond
 
     PROJ_DLL const std::vector<ObjectDomainNNPtr> &domains() const;
@@ -400,6 +406,11 @@ class ObjectUsage : public IdentifiedObject {
 
     PROJ_DLL static const std::string OBJECT_DOMAIN_KEY;
 
+    bool
+    isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
   protected:
     ObjectUsage();
     ObjectUsage(const ObjectUsage &other);
@@ -408,10 +419,6 @@ class ObjectUsage : public IdentifiedObject {
 
     void _exportToWKT(io::WKTFormatterNNPtr formatter)
         const; // throw(io::FormattingException)
-
-    bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
-                         util::IComparable::Criterion criterion =
-                             util::IComparable::Criterion::STRICT) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

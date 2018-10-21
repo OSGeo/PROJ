@@ -109,7 +109,7 @@ class InverseCoordinateOperation : virtual public CoordinateOperation {
     exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
 
     bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -141,7 +141,7 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
     }
 
     bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override {
         return InverseCoordinateOperation::isEquivalentTo(other, criterion);
@@ -185,7 +185,7 @@ class InverseTransformation : public Transformation,
     }
 
     bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override {
         return InverseCoordinateOperation::isEquivalentTo(other, criterion);

@@ -231,15 +231,15 @@ TEST(factory, AuthorityFactory_createGeodeticDatum) {
     EXPECT_EQ(grf->identifiers()[0]->code(), "6326");
     EXPECT_EQ(*(grf->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(grf->name()->description()), "World Geodetic System 1984");
-    EXPECT_TRUE(
-        grf->ellipsoid()->isEquivalentTo(factory->createEllipsoid("7030")));
+    EXPECT_TRUE(grf->ellipsoid()->isEquivalentTo(
+        factory->createEllipsoid("7030").get()));
     EXPECT_TRUE(grf->primeMeridian()->isEquivalentTo(
-        factory->createPrimeMeridian("8901")));
+        factory->createPrimeMeridian("8901").get()));
     ASSERT_EQ(grf->domains().size(), 1);
     auto domain = grf->domains()[0];
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
-    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262")));
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -256,7 +256,7 @@ TEST(factory, AuthorityFactory_createVerticalDatum) {
     auto domain = vrf->domains()[0];
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
-    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262")));
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -265,9 +265,9 @@ TEST(factory, AuthorityFactory_createDatum) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createDatum("-1"), NoSuchAuthorityCodeException);
     EXPECT_TRUE(factory->createDatum("6326")->isEquivalentTo(
-        factory->createGeodeticDatum("6326")));
+        factory->createGeodeticDatum("6326").get()));
     EXPECT_TRUE(factory->createDatum("1027")->isEquivalentTo(
-        factory->createVerticalDatum("1027")));
+        factory->createVerticalDatum("1027").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -399,13 +399,14 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
     EXPECT_EQ(gcrs->identifiers()[0]->code(), "4326");
     EXPECT_EQ(*(gcrs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(gcrs->name()->description()), "WGS 84");
-    EXPECT_TRUE(gcrs->datum()->isEquivalentTo(factory->createDatum("6326")));
+    EXPECT_TRUE(
+        gcrs->datum()->isEquivalentTo(factory->createDatum("6326").get()));
     EXPECT_TRUE(gcrs->coordinateSystem()->isEquivalentTo(
-        factory->createCoordinateSystem("6422")));
+        factory->createCoordinateSystem("6422").get()));
     auto domain = crs->domains()[0];
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
-    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262")));
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=longlat +ellps=WGS84 +step "
@@ -424,9 +425,10 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic3D) {
     EXPECT_EQ(gcrs->identifiers()[0]->code(), "4979");
     EXPECT_EQ(*(gcrs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(gcrs->name()->description()), "WGS 84");
-    EXPECT_TRUE(gcrs->datum()->isEquivalentTo(factory->createDatum("6326")));
+    EXPECT_TRUE(
+        gcrs->datum()->isEquivalentTo(factory->createDatum("6326").get()));
     EXPECT_TRUE(gcrs->coordinateSystem()->isEquivalentTo(
-        factory->createCoordinateSystem("6423")));
+        factory->createCoordinateSystem("6423").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -439,9 +441,10 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geocentric) {
     EXPECT_EQ(crs->identifiers()[0]->code(), "4978");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
-    EXPECT_TRUE(crs->datum()->isEquivalentTo(factory->createDatum("6326")));
+    EXPECT_TRUE(
+        crs->datum()->isEquivalentTo(factory->createDatum("6326").get()));
     EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
-        factory->createCoordinateSystem("6500")));
+        factory->createCoordinateSystem("6500").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -456,14 +459,15 @@ TEST(factory, AuthorityFactory_createVerticalCRS) {
     EXPECT_EQ(crs->identifiers()[0]->code(), "3855");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "EGM2008 height");
-    EXPECT_TRUE(crs->datum()->isEquivalentTo(factory->createDatum("1027")));
+    EXPECT_TRUE(
+        crs->datum()->isEquivalentTo(factory->createDatum("1027").get()));
     EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
-        factory->createCoordinateSystem("6499")));
+        factory->createCoordinateSystem("6499").get()));
 
     auto domain = crs->domains()[0];
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
-    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262")));
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -528,17 +532,17 @@ TEST(factory, AuthorityFactory_createProjectedCRS) {
     EXPECT_EQ(crs->identifiers()[0]->code(), "32631");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84 / UTM zone 31N");
-    EXPECT_TRUE(
-        crs->baseCRS()->isEquivalentTo(factory->createGeodeticCRS("4326")));
+    EXPECT_TRUE(crs->baseCRS()->isEquivalentTo(
+        factory->createGeodeticCRS("4326").get()));
     EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
-        factory->createCoordinateSystem("4400")));
+        factory->createCoordinateSystem("4400").get()));
     EXPECT_TRUE(crs->derivingConversion()->isEquivalentTo(
-        factory->createConversion("16031")));
+        factory->createConversion("16031").get()));
 
     auto domain = crs->domains()[0];
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
-    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("2060")));
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("2060").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -609,15 +613,15 @@ TEST(factory, AuthorityFactory_createCompoundCRS) {
 
     auto components = crs->componentReferenceSystems();
     ASSERT_EQ(components.size(), 2);
-    EXPECT_TRUE(
-        components[0]->isEquivalentTo(factory->createProjectedCRS("3857")));
-    EXPECT_TRUE(
-        components[1]->isEquivalentTo(factory->createVerticalCRS("3855")));
+    EXPECT_TRUE(components[0]->isEquivalentTo(
+        factory->createProjectedCRS("3857").get()));
+    EXPECT_TRUE(components[1]->isEquivalentTo(
+        factory->createVerticalCRS("3855").get()));
 
     auto domain = crs->domains()[0];
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
-    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262")));
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -949,9 +953,9 @@ TEST(factory,
     auto operations = concatenated->operations();
     ASSERT_EQ(operations.size(), 2);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
-        factory->createCoordinateOperation("3895", false)));
+        factory->createCoordinateOperation("3895", false).get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
-        factory->createCoordinateOperation("1618", false)));
+        factory->createCoordinateOperation("1618", false).get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -966,11 +970,11 @@ TEST(
     auto operations = concatenated->operations();
     ASSERT_EQ(operations.size(), 3);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
-        factory->createCoordinateOperation("1313", false)));
+        factory->createCoordinateOperation("1313", false).get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
-        factory->createCoordinateOperation("1950", false)));
+        factory->createCoordinateOperation("1950", false).get()));
     EXPECT_TRUE(operations[2]->isEquivalentTo(
-        factory->createCoordinateOperation("1946", false)));
+        factory->createCoordinateOperation("1946", false).get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -985,9 +989,9 @@ TEST(
     auto operations = concatenated->operations();
     ASSERT_EQ(operations.size(), 2);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
-        factory->createCoordinateOperation("8364", false)->inverse()));
+        factory->createCoordinateOperation("8364", false)->inverse().get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
-        factory->createCoordinateOperation("8367", false)));
+        factory->createCoordinateOperation("8367", false).get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -1002,9 +1006,9 @@ TEST(
     auto operations = concatenated->operations();
     ASSERT_EQ(operations.size(), 2);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
-        factory->createCoordinateOperation("1763", false)));
+        factory->createCoordinateOperation("1763", false).get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
-        factory->createCoordinateOperation("15958", false)->inverse()));
+        factory->createCoordinateOperation("15958", false)->inverse().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -1019,9 +1023,9 @@ TEST(
     auto operations = concatenated->operations();
     ASSERT_EQ(operations.size(), 2);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
-        factory->createCoordinateOperation("7972", false)));
+        factory->createCoordinateOperation("7972", false).get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
-        factory->createCoordinateOperation("7969", false)));
+        factory->createCoordinateOperation("7969", false).get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -1655,7 +1659,8 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
         ASSERT_EQ(res.size(), 1);
         EXPECT_TRUE(res[0]->sourceCRS() != nullptr);
         EXPECT_TRUE(res[0]->targetCRS() != nullptr);
-        EXPECT_TRUE(res[0]->isEquivalentTo(factory->createConversion("16031")));
+        EXPECT_TRUE(
+            res[0]->isEquivalentTo(factory->createConversion("16031").get()));
     }
     {
         auto res =
@@ -1914,7 +1919,7 @@ TEST(factory, AuthorityFactory_EPSG_4326_approximate_equivalent_to_builtin) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(
         factory->createCoordinateReferenceSystem("4326"));
-    EXPECT_TRUE(crs->isEquivalentTo(GeographicCRS::EPSG_4326,
+    EXPECT_TRUE(crs->isEquivalentTo(GeographicCRS::EPSG_4326.get(),
                                     IComparable::Criterion::EQUIVALENT));
 }
 

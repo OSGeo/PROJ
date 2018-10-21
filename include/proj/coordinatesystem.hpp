@@ -164,9 +164,8 @@ using CoordinateSystemAxisNNPtr = util::nn<CoordinateSystemAxisPtr>;
  *
  * \remark Implements CoordinateSystemAxis from \ref ISO_19111_2018
  */
-class CoordinateSystemAxis : public common::IdentifiedObject,
-                             public io::IWKTExportable,
-                             public util::IComparable {
+class CoordinateSystemAxis final : public common::IdentifiedObject,
+                                   public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystemAxis() override;
@@ -190,7 +189,7 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -207,6 +206,7 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
     CoordinateSystemAxis &operator=(const CoordinateSystemAxis &other) = delete;
 
     CoordinateSystemAxis();
+    /* cppcheck-suppress unusedPrivateFunction */
     INLINED_MAKE_SHARED
 };
 
@@ -223,15 +223,13 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
  * \remark Implements CoordinateSystem from \ref ISO_19111_2018
  */
 class CoordinateSystem : public common::IdentifiedObject,
-                         public io::IWKTExportable,
-                         public util::IComparable {
+                         public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystem() override;
     //! @endcond
 
-    PROJ_DLL virtual const std::vector<CoordinateSystemAxisNNPtr> &
-    axisList() const;
+    PROJ_DLL const std::vector<CoordinateSystemAxisNNPtr> &axisList() const;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
@@ -241,7 +239,7 @@ class CoordinateSystem : public common::IdentifiedObject,
     //! @endcond
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -278,7 +276,7 @@ using SphericalCSNNPtr = util::nn<SphericalCSPtr>;
  *
  * \remark Implements SphericalCS from \ref ISO_19111_2018
  */
-class SphericalCS : public CoordinateSystem {
+class SphericalCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~SphericalCS() override;
@@ -321,7 +319,7 @@ using EllipsoidalCSNNPtr = util::nn<EllipsoidalCSPtr>;
  *
  * \remark Implements EllipsoidalCS from \ref ISO_19111_2018
  */
-class EllipsoidalCS : public CoordinateSystem {
+class EllipsoidalCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~EllipsoidalCS() override;
@@ -391,7 +389,7 @@ using VerticalCSNNPtr = util::nn<VerticalCSPtr>;
  *
  * \remark Implements VerticalCS from \ref ISO_19111_2018
  */
-class VerticalCS : public CoordinateSystem {
+class VerticalCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalCS() override;
@@ -434,7 +432,7 @@ using CartesianCSNNPtr = util::nn<CartesianCSPtr>;
  *
  * \remark Implements CartesianCS from \ref ISO_19111_2018
  */
-class CartesianCS : public CoordinateSystem {
+class CartesianCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CartesianCS() override;
@@ -482,7 +480,7 @@ using OrdinalCSNNPtr = util::nn<OrdinalCSPtr>;
  *
  * \remark Implements OrdinalCS from \ref ISO_19111_2018
  */
-class OrdinalCS : public CoordinateSystem {
+class OrdinalCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OrdinalCS() override;
@@ -518,7 +516,7 @@ using ParametricCSNNPtr = util::nn<ParametricCSPtr>;
  *
  * \remark Implements ParametricCS from \ref ISO_19111_2018
  */
-class ParametricCS : public CoordinateSystem {
+class ParametricCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParametricCS() override;
@@ -589,7 +587,7 @@ using DateTimeTemporalCSNNPtr = util::nn<DateTimeTemporalCSPtr>;
  *
  * \remark Implements DateTimeTemporalCS from \ref ISO_19111_2018
  */
-class DateTimeTemporalCS : public TemporalCS {
+class DateTimeTemporalCS final : public TemporalCS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DateTimeTemporalCS() override;
@@ -624,7 +622,7 @@ using TemporalCountCSNNPtr = util::nn<TemporalCountCSPtr>;
  *
  * \remark Implements TemporalCountCS from \ref ISO_19111_2018
  */
-class TemporalCountCS : public TemporalCS {
+class TemporalCountCS final : public TemporalCS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalCountCS() override;
@@ -659,7 +657,7 @@ using TemporalMeasureCSNNPtr = util::nn<TemporalMeasureCSPtr>;
  *
  * \remark Implements TemporalMeasureCS from \ref ISO_19111_2018
  */
-class TemporalMeasureCS : public TemporalCS {
+class TemporalMeasureCS final : public TemporalCS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalMeasureCS() override;

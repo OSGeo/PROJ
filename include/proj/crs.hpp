@@ -81,9 +81,7 @@ using CRSNNPtr = util::nn<CRSPtr>;
  *
  * \remark Implements CRS from \ref ISO_19111_2018
  */
-class CRS : public common::ObjectUsage,
-            public io::IWKTExportable,
-            public util::IComparable {
+class CRS : public common::ObjectUsage, public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CRS() override;
@@ -101,7 +99,7 @@ class CRS : public common::ObjectUsage,
     /** \brief Return a shallow clone of this object. */
     PROJ_DLL virtual CRSNNPtr shallowClone() const = 0;
 
-    PROJ_DLL BoundCRSPtr canonicalBoundCRS() const;
+    PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() const;
 
   protected:
     CRS();
@@ -144,7 +142,7 @@ class SingleCRS : public CRS {
               const cs::CoordinateSystemNNPtr &csIn);
     SingleCRS(const SingleCRS &other);
 
-    bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
+    bool _isEquivalentTo(const util::IComparable *other,
                          util::IComparable::Criterion criterion =
                              util::IComparable::Criterion::STRICT) const;
 
@@ -181,7 +179,7 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     PROJ_DLL ~GeodeticCRS() override;
     //! @endcond
 
-    PROJ_DLL const datum::GeodeticReferenceFramePtr datum() const;
+    PROJ_DLL const datum::GeodeticReferenceFramePtr &datum() const;
 
     PROJ_DLL const datum::PrimeMeridianNNPtr &primeMeridian() const;
     PROJ_DLL const datum::EllipsoidNNPtr &ellipsoid() const;
@@ -226,7 +224,7 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -256,10 +254,11 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     INLINED_MAKE_SHARED
 
     datum::GeodeticReferenceFrameNNPtr oneDatum() const;
+    static GeodeticCRSNNPtr createEPSG_4978();
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    static GeodeticCRSNNPtr createEPSG_4978();
+
     GeodeticCRS &operator=(const GeodeticCRS &other) = delete;
 };
 
@@ -280,7 +279,7 @@ class GeographicCRS : public GeodeticCRS {
     PROJ_DLL ~GeographicCRS() override;
     //! @endcond
 
-    PROJ_DLL const cs::EllipsoidalCSNNPtr coordinateSystem() const;
+    PROJ_DLL const cs::EllipsoidalCSNNPtr &coordinateSystem() const;
 
     // Non-standard
     PROJ_DLL static GeographicCRSNNPtr
@@ -322,14 +321,16 @@ class GeographicCRS : public GeodeticCRS {
     GeographicCRS(const GeographicCRS &other);
     INLINED_MAKE_SHARED
 
-  private:
-    PROJ_OPAQUE_PRIVATE_DATA
     static GeographicCRSNNPtr createEPSG_4267();
     static GeographicCRSNNPtr createEPSG_4269();
     static GeographicCRSNNPtr createEPSG_4326();
     static GeographicCRSNNPtr createOGC_CRS84();
     static GeographicCRSNNPtr createEPSG_4807();
     static GeographicCRSNNPtr createEPSG_4979();
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+
     GeographicCRS &operator=(const GeographicCRS &other) = delete;
 };
 
@@ -372,7 +373,7 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -431,7 +432,7 @@ class DerivedCRS : virtual public SingleCRS {
     PROJ_DLL const operation::ConversionNNPtr derivingConversion() const;
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     PROJ_PRIVATE :
@@ -478,14 +479,14 @@ using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
  *
  * \remark Implements ProjectedCRS from \ref ISO_19111_2018
  */
-class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
+class ProjectedCRS final : public DerivedCRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ProjectedCRS() override;
     //! @endcond
 
-    PROJ_DLL const GeodeticCRSNNPtr baseCRS() const;
-    PROJ_DLL const cs::CartesianCSNNPtr coordinateSystem() const;
+    PROJ_DLL const GeodeticCRSNNPtr &baseCRS() const;
+    PROJ_DLL const cs::CartesianCSNNPtr &coordinateSystem() const;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
@@ -501,7 +502,7 @@ class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
            const cs::CartesianCSNNPtr &csIn);
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -558,7 +559,7 @@ class TemporalCRS : virtual public SingleCRS {
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -613,7 +614,7 @@ class EngineeringCRS : virtual public SingleCRS {
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -667,7 +668,7 @@ class ParametricCRS : virtual public SingleCRS {
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -709,7 +710,7 @@ using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
  *
  * \remark Implements CompoundCRS from \ref ISO_19111_2018
  */
-class CompoundCRS : public CRS, public io::IPROJStringExportable {
+class CompoundCRS final : public CRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CompoundCRS() override;
@@ -725,7 +726,7 @@ class CompoundCRS : public CRS, public io::IPROJStringExportable {
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -773,7 +774,7 @@ class CompoundCRS : public CRS, public io::IPROJStringExportable {
  *
  * \remark Implements BoundCRS from \ref WKT2
  */
-class BoundCRS : public CRS, public io::IPROJStringExportable {
+class BoundCRS final : public CRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~BoundCRS() override;
@@ -793,7 +794,7 @@ class BoundCRS : public CRS, public io::IPROJStringExportable {
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -841,7 +842,7 @@ using DerivedGeodeticCRSNNPtr = util::nn<DerivedGeodeticCRSPtr>;
  *
  * \remark Implements DerivedGeodeticCRS from \ref ISO_19111_2018
  */
-class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
+class DerivedGeodeticCRS final : public GeodeticCRS, public DerivedCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedGeodeticCRS() override;
@@ -869,7 +870,7 @@ class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -907,7 +908,7 @@ using DerivedGeographicCRSNNPtr = util::nn<DerivedGeographicCRSPtr>;
  *
  * \remark Implements DerivedGeographicCRS from \ref ISO_19111_2018
  */
-class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
+class DerivedGeographicCRS final : public GeographicCRS, public DerivedCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedGeographicCRS() override;
@@ -929,7 +930,7 @@ class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -965,8 +966,8 @@ using DerivedProjectedCRSNNPtr = util::nn<DerivedProjectedCRSPtr>;
  *
  * \remark Implements DerivedProjectedCRS from \ref ISO_19111_2018
  */
-class DerivedProjectedCRS : public DerivedCRS,
-                            public io::IPROJStringExportable {
+class DerivedProjectedCRS final : public DerivedCRS,
+                                  public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedProjectedCRS() override;
@@ -988,7 +989,7 @@ class DerivedProjectedCRS : public DerivedCRS,
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -1021,7 +1022,7 @@ using DerivedVerticalCRSNNPtr = util::nn<DerivedVerticalCRSPtr>;
  *
  * \remark Implements DerivedVerticalCRS from \ref ISO_19111_2018
  */
-class DerivedVerticalCRS : public VerticalCRS, public DerivedCRS {
+class DerivedVerticalCRS final : public VerticalCRS, public DerivedCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedVerticalCRS() override;
@@ -1043,7 +1044,7 @@ class DerivedVerticalCRS : public VerticalCRS, public DerivedCRS {
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
@@ -1067,8 +1068,8 @@ class DerivedVerticalCRS : public VerticalCRS, public DerivedCRS {
 /** \brief Template representing a derived coordinate reference system.
  */
 template <class DerivedCRSTraits>
-class DerivedCRSTemplate : public DerivedCRSTraits::BaseType,
-                           public DerivedCRS {
+class DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
+                                 public DerivedCRS {
   protected:
     /** Base type */
     typedef typename DerivedCRSTraits::BaseType BaseType;
@@ -1115,7 +1116,7 @@ class DerivedCRSTemplate : public DerivedCRSTraits::BaseType,
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
-    isEquivalentTo(const util::BaseObjectNNPtr &other,
+    isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 

@@ -41,8 +41,13 @@ using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::util;
 
 namespace {
-struct UnrelatedObject : public BaseObject {
+struct UnrelatedObject : public IComparable {
     UnrelatedObject() = default;
+
+    bool isEquivalentTo(const IComparable *, Criterion) const override {
+        assert(false);
+        return false;
+    }
 };
 
 static nn<std::shared_ptr<UnrelatedObject>> createUnrelatedObject() {
@@ -68,8 +73,8 @@ TEST(datum, ellipsoid_from_sphere) {
     EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
               "+a=6378137 +b=6378137");
 
-    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid));
-    EXPECT_FALSE(ellipsoid->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid.get()));
+    EXPECT_FALSE(ellipsoid->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -103,12 +108,15 @@ TEST(datum, ellipsoid_from_inverse_flattening) {
     EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
               "+ellps=WGS84");
 
-    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid));
-    EXPECT_FALSE(ellipsoid->isEquivalentTo(Ellipsoid::createTwoAxis(
-        PropertyMap(), Length(6378137), Length(6356752.31424518))));
+    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid.get()));
+    EXPECT_FALSE(ellipsoid->isEquivalentTo(
+        Ellipsoid::createTwoAxis(PropertyMap(), Length(6378137),
+                                 Length(6356752.31424518))
+            .get()));
     EXPECT_TRUE(ellipsoid->isEquivalentTo(
         Ellipsoid::createTwoAxis(PropertyMap(), Length(6378137),
-                                 Length(6356752.31424518)),
+                                 Length(6356752.31424518))
+            .get(),
         IComparable::Criterion::EQUIVALENT));
 }
 
@@ -132,12 +140,15 @@ TEST(datum, ellipsoid_from_semi_minor_axis) {
     EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
               "+ellps=WGS84");
 
-    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid));
-    EXPECT_FALSE(ellipsoid->isEquivalentTo(Ellipsoid::createFlattenedSphere(
-        PropertyMap(), Length(6378137), Scale(298.257223563))));
+    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid.get()));
+    EXPECT_FALSE(ellipsoid->isEquivalentTo(
+        Ellipsoid::createFlattenedSphere(PropertyMap(), Length(6378137),
+                                         Scale(298.257223563))
+            .get()));
     EXPECT_TRUE(ellipsoid->isEquivalentTo(
         Ellipsoid::createFlattenedSphere(PropertyMap(), Length(6378137),
-                                         Scale(298.257223563)),
+                                         Scale(298.257223563))
+            .get(),
         IComparable::Criterion::EQUIVALENT));
 }
 
@@ -169,10 +180,10 @@ TEST(datum, prime_meridian_to_PROJString) {
             ->exportToPROJString(PROJStringFormatter::create()),
         "");
 
-    EXPECT_TRUE(
-        PrimeMeridian::GREENWICH->isEquivalentTo(PrimeMeridian::GREENWICH));
-    EXPECT_FALSE(
-        PrimeMeridian::GREENWICH->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(PrimeMeridian::GREENWICH->isEquivalentTo(
+        PrimeMeridian::GREENWICH.get()));
+    EXPECT_FALSE(PrimeMeridian::GREENWICH->isEquivalentTo(
+        createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -267,8 +278,8 @@ TEST(datum, temporal_datum_WKT2) {
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
 
-    EXPECT_TRUE(datum->isEquivalentTo(datum));
-    EXPECT_FALSE(datum->isEquivalentTo(createUnrelatedObject()));
+    EXPECT_TRUE(datum->isEquivalentTo(datum.get()));
+    EXPECT_FALSE(datum->isEquivalentTo(createUnrelatedObject().get()));
 }
 
 // ---------------------------------------------------------------------------
