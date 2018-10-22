@@ -662,10 +662,35 @@ bool WKTFormatter::isInverted() const { return d->inversionStack_.back(); }
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+static WKTNodePtr null_node{};
+
 struct WKTNode::Private {
     std::string value_{};
     std::vector<WKTNodeNNPtr> children_{};
+
+    explicit Private(const std::string &valueIn) : value_(valueIn) {}
+
+    // cppcheck-suppress functionStatic
+    const WKTNodePtr &lookForChild() const { return null_node; }
+
+    template <typename... Args>
+    const WKTNodePtr &lookForChild(const std::string &name, Args... args) const;
 };
+
+// ---------------------------------------------------------------------------
+
+template <typename... Args>
+const WKTNodePtr &WKTNode::Private::lookForChild(const std::string &name,
+                                                 Args... args) const {
+    for (const auto &child : children_) {
+        if (ci_equal(child->value(), name)) {
+            return child;
+        }
+    }
+    return lookForChild(args...);
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -675,9 +700,7 @@ struct WKTNode::Private {
  * @param valueIn the name of the node.
  */
 WKTNode::WKTNode(const std::string &valueIn)
-    : d(internal::make_unique<Private>()) {
-    d->value_ = valueIn;
-}
+    : d(internal::make_unique<Private>(valueIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -691,7 +714,9 @@ WKTNode::~WKTNode() = default;
  *
  * @param child child to add. This should not be a parent of this node.
  */
-void WKTNode::addChild(WKTNodeNNPtr child) { d->children_.push_back(child); }
+void WKTNode::addChild(const WKTNodeNNPtr &child) {
+    d->children_.push_back(child);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -701,8 +726,8 @@ void WKTNode::addChild(WKTNodeNNPtr child) { d->children_.push_back(child); }
  * @param occurrence occurrence index (starting at 0)
  * @return the child, or nullptr.
  */
-WKTNodePtr WKTNode::lookForChild(const std::string &childName,
-                                 int occurrence) const {
+const WKTNodePtr &WKTNode::lookForChild(const std::string &childName,
+                                        int occurrence) const {
     int occCount = 0;
     for (const auto &child : d->children_) {
         if (ci_equal(child->value(), childName)) {
@@ -712,7 +737,7 @@ WKTNodePtr WKTNode::lookForChild(const std::string &childName,
             occCount++;
         }
     }
-    return nullptr;
+    return null_node;
 }
 
 // ---------------------------------------------------------------------------
@@ -1075,12 +1100,46 @@ static double asDouble(const std::string &val) { return c_locale_stod(val); }
 
 // ---------------------------------------------------------------------------
 
+static void ThrowNotEnoughChildren(const std::string &nodeName) PROJ_NO_RETURN {
+    throw ParsingException("not enough children in " + nodeName + " node");
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+ThrowNotRequiredNumberOfChildren(const std::string &nodeName) PROJ_NO_RETURN {
+    throw ParsingException("not required number of children in " + nodeName +
+                           " node");
+}
+
+// ---------------------------------------------------------------------------
+
+static void ThrowMissing(const std::string &nodeName) PROJ_NO_RETURN {
+    throw ParsingException("missing " + nodeName + " node");
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+ThrowNotExpectedCSType(const std::string &expectedCSType) PROJ_NO_RETURN {
+    throw ParsingException("CS node is not of type " + expectedCSType);
+}
+
+// ---------------------------------------------------------------------------
+
+static ParsingException buildRethrow(const char *funcName,
+                                     const std::exception &e) {
+    return ParsingException(std::string(funcName) + ": " + e.what());
+}
+
+// ---------------------------------------------------------------------------
+
 IdentifierPtr WKTParser::Private::buildId(WKTNodeNNPtr node, bool tolerant) {
     if (node->children().size() >= 2) {
         auto codeSpace = stripQuotes(node->children()[0]->value());
         auto code = stripQuotes(node->children()[1]->value());
-        auto citationNode = node->lookForChild(WKTConstants::CITATION);
-        auto uriNode = node->lookForChild(WKTConstants::URI);
+        auto &citationNode = node->lookForChild(WKTConstants::CITATION);
+        auto &uriNode = node->lookForChild(WKTConstants::URI);
         PropertyMap propertiesId;
         propertiesId.set(Identifier::CODESPACE_KEY, codeSpace);
         bool authoritySet = false;
@@ -1108,13 +1167,12 @@ IdentifierPtr WKTParser::Private::buildId(WKTNodeNNPtr node, bool tolerant) {
         }
         return Identifier::create(code, propertiesId);
     } else if (strict_ || !tolerant) {
-        throw ParsingException("not enough children in " + node->value() +
-                               " node");
+        ThrowNotEnoughChildren(node->value());
     } else {
         warningList_.push_back("not enough children in " + node->value() +
                                " node");
-        return nullptr;
     }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -1140,14 +1198,13 @@ PropertyMap WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
         properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
     }
 
-    auto remarkNode = node->lookForChild(WKTConstants::REMARK);
+    auto &remarkNode = node->lookForChild(WKTConstants::REMARK);
     if (remarkNode) {
         if (remarkNode->children().size() == 1) {
             properties.set(IdentifiedObject::REMARKS_KEY,
                            stripQuotes(remarkNode->children()[0]->value()));
         } else {
-            throw ParsingException("not required number of children in " +
-                                   remarkNode->value() + " node");
+            ThrowNotRequiredNumberOfChildren(remarkNode->value());
         }
     }
 
@@ -1180,11 +1237,11 @@ PropertyMap WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
 ObjectDomainPtr
 WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
 
-    auto scopeNode = node->lookForChild(WKTConstants::SCOPE);
-    auto areaNode = node->lookForChild(WKTConstants::AREA);
-    auto bboxNode = node->lookForChild(WKTConstants::BBOX);
-    auto verticalExtentNode = node->lookForChild(WKTConstants::VERTICALEXTENT);
-    auto temporalExtentNode = node->lookForChild(WKTConstants::TIMEEXTENT);
+    auto &scopeNode = node->lookForChild(WKTConstants::SCOPE);
+    auto &areaNode = node->lookForChild(WKTConstants::AREA);
+    auto &bboxNode = node->lookForChild(WKTConstants::BBOX);
+    auto &verticalExtentNode = node->lookForChild(WKTConstants::VERTICALEXTENT);
+    auto &temporalExtentNode = node->lookForChild(WKTConstants::TIMEEXTENT);
     if (scopeNode || areaNode || bboxNode || verticalExtentNode ||
         temporalExtentNode) {
         optional<std::string> scope;
@@ -1201,9 +1258,7 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
                 if (areaNode->children().size() == 1) {
                     description = stripQuotes(areaNode->children()[0]->value());
                 } else {
-                    throw ParsingException(
-                        "not required number of children in " +
-                        areaNode->value() + " node");
+                    ThrowNotRequiredNumberOfChildren(areaNode->value());
                 }
             }
             if (bboxNode) {
@@ -1225,9 +1280,7 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
                                                bboxNode->value() + " node");
                     }
                 } else {
-                    throw ParsingException(
-                        "not required number of children in " +
-                        bboxNode->value() + " node");
+                    ThrowNotRequiredNumberOfChildren(bboxNode->value());
                 }
             }
 
@@ -1254,9 +1307,8 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
                     verticalExtent.emplace_back(VerticalExtent::create(
                         min, max, util::nn_make_shared<UnitOfMeasure>(unit)));
                 } else {
-                    throw ParsingException(
-                        "not required number of children in " +
-                        verticalExtentNode->value() + " node");
+                    ThrowNotRequiredNumberOfChildren(
+                        verticalExtentNode->value());
                 }
             }
 
@@ -1267,9 +1319,8 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
                         stripQuotes(
                             temporalExtentNode->children()[1]->value())));
                 } else {
-                    throw ParsingException(
-                        "not required number of children in " +
-                        temporalExtentNode->value() + " node");
+                    ThrowNotRequiredNumberOfChildren(
+                        temporalExtentNode->value());
                 }
             }
             extent = Extent::create(description, geogExtent, verticalExtent,
@@ -1289,16 +1340,13 @@ UnitOfMeasure WKTParser::Private::buildUnit(WKTNodeNNPtr node,
     const auto &children = node->children();
     if ((type != UnitOfMeasure::Type::TIME && children.size() < 2) ||
         (type == UnitOfMeasure::Type::TIME && children.size() < 1)) {
-        throw ParsingException("not enough children in " + node->value() +
-                               " node");
+        ThrowNotEnoughChildren(node->value());
     }
     try {
         std::string unitName(stripQuotes(children[0]->value()));
         PropertyMap properties(buildProperties(node));
-        auto idNode = node->lookForChild(WKTConstants::ID);
-        if (!idNode) {
-            idNode = node->lookForChild(WKTConstants::AUTHORITY);
-        }
+        auto &idNode = node->getPrivate()->lookForChild(
+            WKTConstants::ID, WKTConstants::AUTHORITY);
         if (idNode && idNode->children().size() < 2) {
             emitRecoverableAssertion("not enough children in " +
                                      idNode->value() + " node");
@@ -1333,7 +1381,7 @@ UnitOfMeasure WKTParser::Private::buildUnit(WKTNodeNNPtr node,
             hasValidNode ? stripQuotes(idNode->children()[1]->value())
                          : std::string());
     } catch (const std::exception &e) {
-        throw ParsingException(std::string("buildUnit: ") + e.what());
+        throw buildRethrow(__FUNCTION__, e);
     }
 }
 
@@ -1342,35 +1390,49 @@ UnitOfMeasure WKTParser::Private::buildUnit(WKTNodeNNPtr node,
 // node here is a parent node, not a UNIT/LENGTHUNIT/ANGLEUNIT/TIMEUNIT/... node
 UnitOfMeasure WKTParser::Private::buildUnitInSubNode(WKTNodeNNPtr node,
                                                      UnitOfMeasure::Type type) {
-    auto unitNode = node->lookForChild(WKTConstants::LENGTHUNIT);
-    if (unitNode) {
-        return buildUnit(NN_NO_CHECK(unitNode), UnitOfMeasure::Type::LINEAR);
+    {
+        auto &unitNode = node->lookForChild(WKTConstants::LENGTHUNIT);
+        if (unitNode) {
+            return buildUnit(NN_NO_CHECK(unitNode),
+                             UnitOfMeasure::Type::LINEAR);
+        }
     }
 
-    unitNode = node->lookForChild(WKTConstants::ANGLEUNIT);
-    if (unitNode) {
-        return buildUnit(NN_NO_CHECK(unitNode), UnitOfMeasure::Type::ANGULAR);
+    {
+        auto &unitNode = node->lookForChild(WKTConstants::ANGLEUNIT);
+        if (unitNode) {
+            return buildUnit(NN_NO_CHECK(unitNode),
+                             UnitOfMeasure::Type::ANGULAR);
+        }
     }
 
-    unitNode = node->lookForChild(WKTConstants::SCALEUNIT);
-    if (unitNode) {
-        return buildUnit(NN_NO_CHECK(unitNode), UnitOfMeasure::Type::SCALE);
+    {
+        auto &unitNode = node->lookForChild(WKTConstants::SCALEUNIT);
+        if (unitNode) {
+            return buildUnit(NN_NO_CHECK(unitNode), UnitOfMeasure::Type::SCALE);
+        }
     }
 
-    unitNode = node->lookForChild(WKTConstants::TIMEUNIT);
-    if (unitNode) {
-        return buildUnit(NN_NO_CHECK(unitNode), UnitOfMeasure::Type::TIME);
+    {
+        auto &unitNode = node->lookForChild(WKTConstants::TIMEUNIT);
+        if (unitNode) {
+            return buildUnit(NN_NO_CHECK(unitNode), UnitOfMeasure::Type::TIME);
+        }
     }
 
-    unitNode = node->lookForChild(WKTConstants::PARAMETRICUNIT);
-    if (unitNode) {
-        return buildUnit(NN_NO_CHECK(unitNode),
-                         UnitOfMeasure::Type::PARAMETRIC);
+    {
+        auto &unitNode = node->lookForChild(WKTConstants::PARAMETRICUNIT);
+        if (unitNode) {
+            return buildUnit(NN_NO_CHECK(unitNode),
+                             UnitOfMeasure::Type::PARAMETRIC);
+        }
     }
 
-    unitNode = node->lookForChild(WKTConstants::UNIT);
-    if (unitNode) {
-        return buildUnit(NN_NO_CHECK(unitNode), type);
+    {
+        auto &unitNode = node->lookForChild(WKTConstants::UNIT);
+        if (unitNode) {
+            return buildUnit(NN_NO_CHECK(unitNode), type);
+        }
     }
 
     return UnitOfMeasure::NONE;
@@ -1381,8 +1443,7 @@ UnitOfMeasure WKTParser::Private::buildUnitInSubNode(WKTNodeNNPtr node,
 EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
     const auto &children = node->children();
     if (children.size() < 3) {
-        throw ParsingException("not enough children in " + node->value() +
-                               " node");
+        ThrowNotEnoughChildren(node->value());
     }
     try {
         UnitOfMeasure unit =
@@ -1395,7 +1456,7 @@ EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
         return Ellipsoid::createFlattenedSphere(buildProperties(node),
                                                 semiMajorAxis, invFlattening);
     } catch (const std::exception &e) {
-        throw ParsingException(std::string("buildEllipsoid: ") + e.what());
+        throw buildRethrow(__FUNCTION__, e);
     }
 }
 
@@ -1405,8 +1466,7 @@ PrimeMeridianNNPtr WKTParser::Private::buildPrimeMeridian(
     WKTNodeNNPtr node, const UnitOfMeasure &defaultAngularUnit) {
     const auto &children = node->children();
     if (children.size() < 2) {
-        throw ParsingException("not enough children in " + node->value() +
-                               " node");
+        ThrowNotEnoughChildren(node->value());
     }
     auto name = stripQuotes(children[0]->value());
     UnitOfMeasure unit = buildUnitInSubNode(node, UnitOfMeasure::Type::ANGULAR);
@@ -1428,7 +1488,7 @@ PrimeMeridianNNPtr WKTParser::Private::buildPrimeMeridian(
         Angle angle(angleValue, unit);
         return PrimeMeridian::create(buildProperties(node), angle);
     } catch (const std::exception &e) {
-        throw ParsingException(std::string("buildPrimeMeridian: ") + e.what());
+        throw buildRethrow(__FUNCTION__, e);
     }
 }
 
@@ -1436,7 +1496,7 @@ PrimeMeridianNNPtr WKTParser::Private::buildPrimeMeridian(
 
 optional<std::string> WKTParser::Private::getAnchor(const WKTNodeNNPtr &node) {
 
-    auto anchorNode = node->lookForChild(WKTConstants::ANCHOR);
+    auto &anchorNode = node->lookForChild(WKTConstants::ANCHOR);
     optional<std::string> anchor;
     if (anchorNode && anchorNode->children().size() == 1) {
         anchor = stripQuotes(anchorNode->children()[0]->value());
@@ -1449,16 +1509,14 @@ optional<std::string> WKTParser::Private::getAnchor(const WKTNodeNNPtr &node) {
 GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     WKTNodeNNPtr node, PrimeMeridianNNPtr primeMeridian,
     WKTNodePtr dynamicNode) {
-    auto ellipsoidNode = node->lookForChild(WKTConstants::ELLIPSOID);
+    auto &ellipsoidNode = node->getPrivate()->lookForChild(
+        WKTConstants::ELLIPSOID, WKTConstants::SPHEROID);
     if (!ellipsoidNode) {
-        ellipsoidNode = node->lookForChild(WKTConstants::SPHEROID);
-    }
-    if (!ellipsoidNode) {
-        throw ParsingException("Missing ELLIPSOID node");
+        ThrowMissing(WKTConstants::ELLIPSOID);
     }
     auto ellipsoid = buildEllipsoid(NN_NO_CHECK(ellipsoidNode));
 
-    auto TOWGS84Node = node->lookForChild(WKTConstants::TOWGS84);
+    auto &TOWGS84Node = node->lookForChild(WKTConstants::TOWGS84);
     if (TOWGS84Node) {
         if (TOWGS84Node->children().size() == 7) {
             try {
@@ -1472,7 +1530,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             throw ParsingException("Invalid TOWGS84 node");
         }
     }
-    auto extensionNode = node->lookForChild(WKTConstants::EXTENSION);
+    auto &extensionNode = node->lookForChild(WKTConstants::EXTENSION);
     if (extensionNode && extensionNode->children().size() == 2 &&
         ci_equal(stripQuotes(extensionNode->children()[0]->value()),
                  "PROJ4_GRIDS")) {
@@ -1505,12 +1563,10 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
 DatumEnsembleNNPtr WKTParser::Private::buildDatumEnsemble(
     WKTNodeNNPtr node, PrimeMeridianPtr primeMeridian, bool expectEllipsoid) {
-    auto ellipsoidNode = node->lookForChild(WKTConstants::ELLIPSOID);
-    if (!ellipsoidNode) {
-        ellipsoidNode = node->lookForChild(WKTConstants::SPHEROID);
-    }
+    auto &ellipsoidNode = node->getPrivate()->lookForChild(
+        WKTConstants::ELLIPSOID, WKTConstants::SPHEROID);
     if (expectEllipsoid && !ellipsoidNode) {
-        throw ParsingException("Missing ELLIPSOID node");
+        ThrowMissing(WKTConstants::ELLIPSOID);
     }
 
     auto ellipsoid =
@@ -1536,9 +1592,9 @@ DatumEnsembleNNPtr WKTParser::Private::buildDatumEnsemble(
         }
     }
 
-    auto accuracyNode = node->lookForChild(WKTConstants::ENSEMBLEACCURACY);
+    auto &accuracyNode = node->lookForChild(WKTConstants::ENSEMBLEACCURACY);
     if (!accuracyNode || accuracyNode->children().empty()) {
-        throw ParsingException("Missing ENSEMBLEACCURACY node");
+        ThrowMissing(WKTConstants::ENSEMBLEACCURACY);
     }
     auto accuracy =
         PositionalAccuracy::create(accuracyNode->children()[0]->value());
@@ -1546,7 +1602,7 @@ DatumEnsembleNNPtr WKTParser::Private::buildDatumEnsemble(
     try {
         return DatumEnsemble::create(buildProperties(node), datums, accuracy);
     } catch (const util::Exception &e) {
-        throw ParsingException(std::string("buildDatumEnsemble: ") + e.what());
+        throw buildRethrow(__FUNCTION__, e);
     }
 }
 
@@ -1555,8 +1611,7 @@ DatumEnsembleNNPtr WKTParser::Private::buildDatumEnsemble(
 MeridianNNPtr WKTParser::Private::buildMeridian(const WKTNodeNNPtr &node) {
     const auto &children = node->children();
     if (children.size() < 2) {
-        throw ParsingException("not enough children in " + node->value() +
-                               " node");
+        ThrowNotEnoughChildren(node->value());
     }
     UnitOfMeasure unit = buildUnitInSubNode(node, UnitOfMeasure::Type::ANGULAR);
     try {
@@ -1564,7 +1619,7 @@ MeridianNNPtr WKTParser::Private::buildMeridian(const WKTNodeNNPtr &node) {
         Angle angle(angleValue, unit);
         return Meridian::create(angle);
     } catch (const std::exception &e) {
-        throw ParsingException(std::string("buildMeridian: ") + e.what());
+        throw buildRethrow(__FUNCTION__, e);
     }
 }
 
@@ -1575,16 +1630,14 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
                               bool isGeocentric, int expectedOrderNum) {
     const auto &children = node->children();
     if (children.size() < 2) {
-        throw ParsingException("not enough children in " + node->value() +
-                               " node");
+        ThrowNotEnoughChildren(node->value());
     }
 
-    auto orderNode = node->lookForChild(WKTConstants::ORDER);
+    auto &orderNode = node->lookForChild(WKTConstants::ORDER);
     if (orderNode) {
         const auto &orderNodeChildren = orderNode->children();
         if (orderNodeChildren.size() != 1) {
-            throw ParsingException("not enough children in " +
-                                   orderNode->value() + " node");
+            ThrowNotEnoughChildren(orderNode->value());
         }
         int orderNum;
         try {
@@ -1679,7 +1732,7 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
     }
 
     MeridianPtr meridian;
-    auto meridianNode = node->lookForChild(WKTConstants::MERIDIAN);
+    auto &meridianNode = node->lookForChild(WKTConstants::MERIDIAN);
     if (meridianNode) {
         meridian = buildMeridian(NN_NO_CHECK(meridianNode)).as_nullable();
     }
@@ -1703,8 +1756,7 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
     if (node) {
         const auto &children = node->children();
         if (children.size() < 2) {
-            throw ParsingException("not enough children in " + node->value() +
-                                   " node");
+            ThrowNotEnoughChildren(node->value());
         }
         csType = children[0]->value();
         try {
@@ -1957,26 +2009,21 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
 
 GeodeticCRSNNPtr
 WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
-    auto datumNode = node->lookForChild(WKTConstants::DATUM);
-    if (!datumNode) {
-        datumNode = node->lookForChild(WKTConstants::GEODETICDATUM);
-        if (!datumNode) {
-            datumNode = node->lookForChild(WKTConstants::TRF);
-        }
-    }
-    auto ensembleNode = node->lookForChild(WKTConstants::ENSEMBLE);
+    auto &datumNode = node->getPrivate()->lookForChild(
+        WKTConstants::DATUM, WKTConstants::GEODETICDATUM, WKTConstants::TRF);
+    auto &ensembleNode = node->lookForChild(WKTConstants::ENSEMBLE);
     if (!datumNode && !ensembleNode) {
         throw ParsingException("Missing DATUM or ENSEMBLE node");
     }
 
-    auto dynamicNode = node->lookForChild(WKTConstants::DYNAMIC);
+    auto &dynamicNode = node->lookForChild(WKTConstants::DYNAMIC);
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::GEOGCS) &&
         !ci_equal(node->value(), WKTConstants::GEOCCS) &&
         !ci_equal(node->value(), WKTConstants::BASEGEODCRS) &&
         !ci_equal(node->value(), WKTConstants::BASEGEOGCRS)) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
 
     auto primeMeridianNode = node->lookForChild(WKTConstants::PRIMEM);
@@ -2070,27 +2117,25 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
 
 CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
 
-    auto baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEODCRS);
-    if (!baseGeodCRSNode) {
-        baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEOGCRS);
-    }
+    auto &baseGeodCRSNode = node->getPrivate()->lookForChild(
+        WKTConstants::BASEGEODCRS, WKTConstants::BASEGEOGCRS);
     assert(baseGeodCRSNode !=
            nullptr); // given the constraints enforced on calling code path
 
     auto baseGeodCRS = buildGeodeticCRS(NN_NO_CHECK(baseGeodCRSNode));
 
-    auto derivingConversionNode =
+    auto &derivingConversionNode =
         node->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (!derivingConversionNode) {
-        throw ParsingException("Missing DERIVINGCONVERSION node");
+        ThrowMissing(WKTConstants::DERIVINGCONVERSION);
     }
     auto derivingConversion =
         buildConversion(NN_NO_CHECK(derivingConversionNode),
                         UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
 
@@ -2157,8 +2202,7 @@ void WKTParser::Private::consumeParameters(
     for (const auto &childNode : node->children()) {
         if (ci_equal(childNode->value(), WKTConstants::PARAMETER)) {
             if (childNode->children().size() < 2) {
-                throw ParsingException("not enough children in " +
-                                       childNode->value() + " node");
+                ThrowNotEnoughChildren(childNode->value());
             }
             parameters.push_back(
                 OperationParameter::create(buildProperties(childNode)));
@@ -2209,8 +2253,7 @@ void WKTParser::Private::consumeParameters(
             }
         } else if (ci_equal(childNode->value(), WKTConstants::PARAMETERFILE)) {
             if (childNode->children().size() < 2) {
-                throw ParsingException("not enough children in " +
-                                       childNode->value() + " node");
+                ThrowNotEnoughChildren(childNode->value());
             }
             parameters.push_back(
                 OperationParameter::create(buildProperties(childNode)));
@@ -2227,16 +2270,13 @@ ConversionNNPtr
 WKTParser::Private::buildConversion(WKTNodeNNPtr node,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit) {
-    auto methodNode = node->lookForChild(WKTConstants::METHOD);
+    auto &methodNode = node->getPrivate()->lookForChild(
+        WKTConstants::METHOD, WKTConstants::PROJECTION);
     if (!methodNode) {
-        methodNode = node->lookForChild(WKTConstants::PROJECTION);
-        if (!methodNode) {
-            throw ParsingException("Missing METHOD node");
-        }
+        ThrowMissing(WKTConstants::METHOD);
     }
     if (methodNode->children().empty()) {
-        throw ParsingException("not enough children in " +
-                               WKTConstants::METHOD + " node");
+        ThrowNotEnoughChildren(WKTConstants::METHOD);
     }
 
     std::vector<OperationParameterNNPtr> parameters;
@@ -2253,34 +2293,33 @@ WKTParser::Private::buildConversion(WKTNodeNNPtr node,
 
 CoordinateOperationNNPtr
 WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
-    auto methodNode = node->lookForChild(WKTConstants::METHOD);
+    auto &methodNode = node->lookForChild(WKTConstants::METHOD);
     if (!methodNode) {
-        throw ParsingException("Missing METHOD node");
+        ThrowMissing(WKTConstants::METHOD);
     }
     if (methodNode->children().empty()) {
-        throw ParsingException("not enough children in " +
-                               WKTConstants::METHOD + " node");
+        ThrowNotEnoughChildren(WKTConstants::METHOD);
     }
 
-    auto sourceCRSNode = node->lookForChild(WKTConstants::SOURCECRS);
+    auto &sourceCRSNode = node->lookForChild(WKTConstants::SOURCECRS);
     if (!sourceCRSNode || sourceCRSNode->children().size() != 1) {
-        throw ParsingException("Missing SOURCECRS node");
+        ThrowMissing(WKTConstants::SOURCECRS);
     }
     auto sourceCRS = buildCRS(sourceCRSNode->children()[0]);
     if (!sourceCRS) {
         throw ParsingException("Invalid content in SOURCECRS node");
     }
 
-    auto targetCRSNode = node->lookForChild(WKTConstants::TARGETCRS);
+    auto &targetCRSNode = node->lookForChild(WKTConstants::TARGETCRS);
     if (!targetCRSNode || targetCRSNode->children().size() != 1) {
-        throw ParsingException("Missing TARGETCRS node");
+        ThrowMissing(WKTConstants::TARGETCRS);
     }
     auto targetCRS = buildCRS(targetCRSNode->children()[0]);
     if (!targetCRS) {
         throw ParsingException("Invalid content in TARGETCRS node");
     }
 
-    auto interpolationCRSNode =
+    auto &interpolationCRSNode =
         node->lookForChild(WKTConstants::INTERPOLATIONCRS);
     CRSPtr interpolationCRS;
     if (interpolationCRSNode && interpolationCRSNode->children().size() == 1) {
@@ -2295,7 +2334,7 @@ WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
                       defaultAngularUnit);
 
     std::vector<PositionalAccuracyNNPtr> accuracies;
-    auto accuracyNode = node->lookForChild(WKTConstants::OPERATIONACCURACY);
+    auto &accuracyNode = node->lookForChild(WKTConstants::OPERATIONACCURACY);
     if (accuracyNode && accuracyNode->children().size() == 1) {
         accuracies.push_back(PositionalAccuracy::create(
             stripQuotes(accuracyNode->children()[0]->value())));
@@ -2341,13 +2380,12 @@ WKTParser::Private::buildConcatenatedOperation(const WKTNodeNNPtr &node) {
 bool WKTParser::Private::hasWebMercPROJ4String(
     const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode) {
     if (projectionNode->children().empty()) {
-        throw ParsingException("not enough children in " +
-                               WKTConstants::PROJECTION + " node");
+        ThrowNotEnoughChildren(WKTConstants::PROJECTION);
     }
     const std::string wkt1ProjectionName =
         stripQuotes(projectionNode->children()[0]->value());
 
-    auto extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
+    auto &extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
 
     if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
                                                "Mercator_1SP") &&
@@ -2390,8 +2428,7 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit) {
     if (projectionNode->children().empty()) {
-        throw ParsingException("not enough children in " +
-                               WKTConstants::PROJECTION + " node");
+        ThrowNotEnoughChildren(WKTConstants::PROJECTION);
     }
     const std::string wkt1ProjectionName =
         stripQuotes(projectionNode->children()[0]->value());
@@ -2400,7 +2437,7 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
     std::vector<ParameterValueNNPtr> values;
     bool tryToIdentifyWKT1Method = true;
 
-    auto extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
+    auto &extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
 
     if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
                                                "Mercator_1SP") &&
@@ -2505,8 +2542,7 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
     for (const auto &childNode : projCRSNode->children()) {
         if (ci_equal(childNode->value(), WKTConstants::PARAMETER)) {
             if (childNode->children().size() < 2) {
-                throw ParsingException("not enough children in " +
-                                       WKTConstants::PARAMETER + " node");
+                ThrowNotEnoughChildren(WKTConstants::PARAMETER);
             }
             PropertyMap propertiesParameter;
             const std::string wkt1ParameterName(
@@ -2550,10 +2586,10 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
 ProjectedCRSNNPtr
 WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 
-    auto conversionNode = node->lookForChild(WKTConstants::CONVERSION);
-    auto projectionNode = node->lookForChild(WKTConstants::PROJECTION);
+    auto &conversionNode = node->lookForChild(WKTConstants::CONVERSION);
+    auto &projectionNode = node->lookForChild(WKTConstants::PROJECTION);
     if (!conversionNode && !projectionNode) {
-        throw ParsingException("Missing CONVERSION node");
+        ThrowMissing(WKTConstants::CONVERSION);
     }
     if (!conversionNode &&
         hasWebMercPROJ4String(node, NN_NO_CHECK(projectionNode))) {
@@ -2567,16 +2603,12 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
     }
 
-    auto baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEODCRS);
+    auto &baseGeodCRSNode = node->getPrivate()->lookForChild(
+        WKTConstants::BASEGEODCRS, WKTConstants::BASEGEOGCRS,
+        WKTConstants::GEOGCS);
     if (!baseGeodCRSNode) {
-        baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEOGCRS);
-        if (!baseGeodCRSNode) {
-            baseGeodCRSNode = node->lookForChild(WKTConstants::GEOGCS);
-            if (!baseGeodCRSNode) {
-                throw ParsingException(
-                    "Missing BASEGEODCRS / BASEGEOGCRS / GEOGCS node");
-            }
-        }
+        throw ParsingException(
+            "Missing BASEGEODCRS / BASEGEOGCRS / GEOGCS node");
     }
     auto baseGeodCRS = buildGeodeticCRS(NN_NO_CHECK(baseGeodCRSNode));
 
@@ -2589,15 +2621,15 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
                           : buildProjection(node, NN_NO_CHECK(projectionNode),
                                             linearUnit, angularUnit);
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::PROJCS) &&
         !ci_equal(node->value(), WKTConstants::BASEPROJCRS)) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
     if (!cartesianCS) {
-        throw ParsingException("CS node is not of type Cartesian");
+        ThrowNotExpectedCSType("Cartesian");
     }
 
     return ProjectedCRS::create(buildProperties(node), baseGeodCRS, conversion,
@@ -2609,19 +2641,17 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 void WKTParser::Private::parseDynamic(WKTNodePtr dynamicNode,
                                       double &frameReferenceEpoch,
                                       util::optional<std::string> &modelName) {
-    auto frameEpochNode = dynamicNode->lookForChild(WKTConstants::FRAMEEPOCH);
+    auto &frameEpochNode = dynamicNode->lookForChild(WKTConstants::FRAMEEPOCH);
     if (!frameEpochNode || frameEpochNode->children().empty()) {
-        throw ParsingException("Missing FRAMEEPOCH node");
+        ThrowMissing(WKTConstants::FRAMEEPOCH);
     }
     try {
         frameReferenceEpoch = asDouble(frameEpochNode->children()[0]->value());
     } catch (const std::exception &) {
         throw ParsingException("Invalid FRAMEEPOCH node");
     }
-    auto modelNode = dynamicNode->lookForChild(WKTConstants::MODEL);
-    if (!modelNode) {
-        modelNode = dynamicNode->lookForChild(WKTConstants::VELOCITYGRID);
-    }
+    auto &modelNode = dynamicNode->getPrivate()->lookForChild(
+        WKTConstants::MODEL, WKTConstants::VELOCITYGRID);
     if (modelNode && modelNode->children().size() == 1) {
         modelName = stripQuotes(modelNode->children()[0]->value());
     }
@@ -2653,13 +2683,13 @@ WKTParser::Private::buildVerticalReferenceFrame(const WKTNodeNNPtr &node,
 
 TemporalDatumNNPtr
 WKTParser::Private::buildTemporalDatum(const WKTNodeNNPtr &node) {
-    auto calendarNode = node->lookForChild(WKTConstants::CALENDAR);
+    auto &calendarNode = node->lookForChild(WKTConstants::CALENDAR);
     std::string calendar = TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN;
     if (calendarNode && calendarNode->children().size() == 1) {
         calendar = stripQuotes(calendarNode->children()[0]->value());
     }
 
-    auto timeOriginNode = node->lookForChild(WKTConstants::TIMEORIGIN);
+    auto &timeOriginNode = node->lookForChild(WKTConstants::TIMEORIGIN);
     std::string originStr;
     if (timeOriginNode && timeOriginNode->children().size() == 1) {
         originStr = stripQuotes(timeOriginNode->children()[0]->value());
@@ -2685,23 +2715,15 @@ WKTParser::Private::buildParametricDatum(const WKTNodeNNPtr &node) {
 // ---------------------------------------------------------------------------
 
 CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
-    auto datumNode = node->lookForChild(WKTConstants::VDATUM);
-    if (!datumNode) {
-        datumNode = node->lookForChild(WKTConstants::VERT_DATUM);
-        if (!datumNode) {
-            datumNode = node->lookForChild(WKTConstants::VERTICALDATUM);
-            if (!datumNode) {
-                datumNode = node->lookForChild(WKTConstants::VRF);
-            }
-        }
-    }
-
-    auto ensembleNode = node->lookForChild(WKTConstants::ENSEMBLE);
+    auto &datumNode = node->getPrivate()->lookForChild(
+        WKTConstants::VDATUM, WKTConstants::VERT_DATUM,
+        WKTConstants::VERTICALDATUM, WKTConstants::VRF);
+    auto &ensembleNode = node->lookForChild(WKTConstants::ENSEMBLE);
     if (!datumNode && !ensembleNode) {
         throw ParsingException("Missing VDATUM or ENSEMBLE node");
     }
 
-    auto dynamicNode = node->lookForChild(WKTConstants::DYNAMIC);
+    auto &dynamicNode = node->lookForChild(WKTConstants::DYNAMIC);
     auto datum =
         datumNode
             ? buildVerticalReferenceFrame(NN_NO_CHECK(datumNode), dynamicNode)
@@ -2713,22 +2735,22 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                   .as_nullable()
             : nullptr;
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::VERT_CS) &&
         !ci_equal(node->value(), WKTConstants::BASEVERTCRS)) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(cs);
     if (!verticalCS) {
-        throw ParsingException("CS node is not of type vertical");
+        ThrowNotExpectedCSType("vertical");
     }
 
     auto crs = nn_static_pointer_cast<CRS>(VerticalCRS::create(
         buildProperties(node), datum, datumEnsemble, NN_NO_CHECK(verticalCS)));
 
     if (datumNode) {
-        auto extensionNode = datumNode->lookForChild(WKTConstants::EXTENSION);
+        auto &extensionNode = datumNode->lookForChild(WKTConstants::EXTENSION);
         if (extensionNode && extensionNode->children().size() == 2 &&
             ci_equal(stripQuotes(extensionNode->children()[0]->value()),
                      "PROJ4_GRIDS")) {
@@ -2757,25 +2779,25 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
 DerivedVerticalCRSNNPtr
 WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
 
-    auto baseVertCRSNode = node->lookForChild(WKTConstants::BASEVERTCRS);
+    auto &baseVertCRSNode = node->lookForChild(WKTConstants::BASEVERTCRS);
     assert(baseVertCRSNode !=
            nullptr); // given the constraints enforced on calling code path
 
     auto baseVertCRS_tmp = buildVerticalCRS(NN_NO_CHECK(baseVertCRSNode));
     auto baseVertCRS = NN_NO_CHECK(baseVertCRS_tmp->extractVerticalCRS());
 
-    auto derivingConversionNode =
+    auto &derivingConversionNode =
         node->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (!derivingConversionNode) {
-        throw ParsingException("Missing DERIVINGCONVERSION node");
+        ThrowMissing(WKTConstants::DERIVINGCONVERSION);
     }
     auto derivingConversion =
         buildConversion(NN_NO_CHECK(derivingConversionNode),
                         UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
 
@@ -2807,33 +2829,32 @@ WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
 // ---------------------------------------------------------------------------
 
 BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
-    auto abridgedNode =
+    auto &abridgedNode =
         node->lookForChild(WKTConstants::ABRIDGEDTRANSFORMATION);
     if (!abridgedNode) {
-        throw ParsingException("Missing ABRIDGEDTRANSFORMATION node");
+        ThrowNotEnoughChildren(WKTConstants::ABRIDGEDTRANSFORMATION);
     }
 
-    auto methodNode = abridgedNode->lookForChild(WKTConstants::METHOD);
+    auto &methodNode = abridgedNode->lookForChild(WKTConstants::METHOD);
     if (!methodNode) {
-        throw ParsingException("Missing METHOD node");
+        ThrowMissing(WKTConstants::METHOD);
     }
     if (methodNode->children().empty()) {
-        throw ParsingException("not enough children in " +
-                               WKTConstants::METHOD + " node");
+        ThrowNotEnoughChildren(WKTConstants::METHOD);
     }
 
-    auto sourceCRSNode = node->lookForChild(WKTConstants::SOURCECRS);
+    auto &sourceCRSNode = node->lookForChild(WKTConstants::SOURCECRS);
     if (!sourceCRSNode || sourceCRSNode->children().size() != 1) {
-        throw ParsingException("Missing SOURCECRS node");
+        ThrowNotEnoughChildren(WKTConstants::SOURCECRS);
     }
     auto sourceCRS = buildCRS(sourceCRSNode->children()[0]);
     if (!sourceCRS) {
         throw ParsingException("Invalid content in SOURCECRS node");
     }
 
-    auto targetCRSNode = node->lookForChild(WKTConstants::TARGETCRS);
+    auto &targetCRSNode = node->lookForChild(WKTConstants::TARGETCRS);
     if (!targetCRSNode || targetCRSNode->children().size() != 1) {
-        throw ParsingException("Missing TARGETCRS node");
+        ThrowNotEnoughChildren(WKTConstants::TARGETCRS);
     }
     auto targetCRS = buildCRS(targetCRSNode->children()[0]);
     if (!targetCRS) {
@@ -2848,7 +2869,7 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
                       defaultLinearUnit, defaultAngularUnit);
 
     CRSPtr sourceTransformationCRS;
-    if (std::dynamic_pointer_cast<GeographicCRS>(targetCRS)) {
+    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
         sourceTransformationCRS = sourceCRS->extractGeographicCRS();
         if (!sourceTransformationCRS) {
             throw ParsingException("Cannot find GeographicCRS in sourceCRS");
@@ -2871,23 +2892,21 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
 
 TemporalCRSNNPtr
 WKTParser::Private::buildTemporalCRS(const WKTNodeNNPtr &node) {
-    auto datumNode = node->lookForChild(WKTConstants::TDATUM);
+    auto &datumNode = node->getPrivate()->lookForChild(WKTConstants::TDATUM,
+                                                       WKTConstants::TIMEDATUM);
     if (!datumNode) {
-        datumNode = node->lookForChild(WKTConstants::TIMEDATUM);
-        if (!datumNode) {
-            throw ParsingException("Missing TDATUM / TIMEDATUM node");
-        }
+        throw ParsingException("Missing TDATUM / TIMEDATUM node");
     }
     auto datum = buildTemporalDatum(NN_NO_CHECK(datumNode));
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::BASETIMECRS)) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
     if (!temporalCS) {
-        throw ParsingException("CS node is not of type temporal");
+        ThrowNotExpectedCSType("temporal");
     }
 
     return TemporalCRS::create(buildProperties(node), datum,
@@ -2899,29 +2918,29 @@ WKTParser::Private::buildTemporalCRS(const WKTNodeNNPtr &node) {
 DerivedTemporalCRSNNPtr
 WKTParser::Private::buildDerivedTemporalCRS(const WKTNodeNNPtr &node) {
 
-    auto baseCRSNode = node->lookForChild(WKTConstants::BASETIMECRS);
+    auto &baseCRSNode = node->lookForChild(WKTConstants::BASETIMECRS);
     assert(baseCRSNode !=
            nullptr); // given the constraints enforced on calling code path
 
     auto baseCRS = buildTemporalCRS(NN_NO_CHECK(baseCRSNode));
 
-    auto derivingConversionNode =
+    auto &derivingConversionNode =
         node->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (!derivingConversionNode) {
-        throw ParsingException("Missing DERIVINGCONVERSION node");
+        ThrowNotEnoughChildren(WKTConstants::DERIVINGCONVERSION);
     }
     auto derivingConversion =
         buildConversion(NN_NO_CHECK(derivingConversionNode),
                         UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
     if (!temporalCS) {
-        throw ParsingException("CS node is not of type temporal");
+        ThrowNotExpectedCSType("temporal");
     }
 
     return DerivedTemporalCRS::create(buildProperties(node), baseCRS,
@@ -2933,18 +2952,16 @@ WKTParser::Private::buildDerivedTemporalCRS(const WKTNodeNNPtr &node) {
 
 EngineeringCRSNNPtr
 WKTParser::Private::buildEngineeringCRS(const WKTNodeNNPtr &node) {
-    auto datumNode = node->lookForChild(WKTConstants::EDATUM);
+    auto &datumNode = node->getPrivate()->lookForChild(
+        WKTConstants::EDATUM, WKTConstants::ENGINEERINGDATUM);
     if (!datumNode) {
-        datumNode = node->lookForChild(WKTConstants::ENGINEERINGDATUM);
-        if (!datumNode) {
-            throw ParsingException("Missing EDATUM / ENGINEERINGDATUM node");
-        }
+        throw ParsingException("Missing EDATUM / ENGINEERINGDATUM node");
     }
     auto datum = buildEngineeringDatum(NN_NO_CHECK(datumNode));
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::BASEENGCRS)) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
 
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
@@ -2955,7 +2972,7 @@ WKTParser::Private::buildEngineeringCRS(const WKTNodeNNPtr &node) {
 
 EngineeringCRSNNPtr
 WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
-    auto datumNode = node->lookForChild(WKTConstants::LOCAL_DATUM);
+    auto &datumNode = node->lookForChild(WKTConstants::LOCAL_DATUM);
     auto cs = buildCS(nullptr, node, UnitOfMeasure::NONE);
     if (!datumNode) {
         // In theory OGC 01-009 mandates LOCAL_DATUM, but GDAL has a
@@ -2973,24 +2990,24 @@ WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
 DerivedEngineeringCRSNNPtr
 WKTParser::Private::buildDerivedEngineeringCRS(const WKTNodeNNPtr &node) {
 
-    auto baseEngCRSNode = node->lookForChild(WKTConstants::BASEENGCRS);
+    auto &baseEngCRSNode = node->lookForChild(WKTConstants::BASEENGCRS);
     assert(baseEngCRSNode !=
            nullptr); // given the constraints enforced on calling code path
 
     auto baseEngCRS = buildEngineeringCRS(NN_NO_CHECK(baseEngCRSNode));
 
-    auto derivingConversionNode =
+    auto &derivingConversionNode =
         node->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (!derivingConversionNode) {
-        throw ParsingException("Missing DERIVINGCONVERSION node");
+        ThrowNotEnoughChildren(WKTConstants::DERIVINGCONVERSION);
     }
     auto derivingConversion =
         buildConversion(NN_NO_CHECK(derivingConversionNode),
                         UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
 
@@ -3002,23 +3019,21 @@ WKTParser::Private::buildDerivedEngineeringCRS(const WKTNodeNNPtr &node) {
 
 ParametricCRSNNPtr
 WKTParser::Private::buildParametricCRS(const WKTNodeNNPtr &node) {
-    auto datumNode = node->lookForChild(WKTConstants::PDATUM);
+    auto datumNode = node->getPrivate()->lookForChild(
+        WKTConstants::PDATUM, WKTConstants::PARAMETRICDATUM);
     if (!datumNode) {
-        datumNode = node->lookForChild(WKTConstants::PARAMETRICDATUM);
-        if (!datumNode) {
-            throw ParsingException("Missing PDATUM / PARAMETRICDATUM node");
-        }
+        throw ParsingException("Missing PDATUM / PARAMETRICDATUM node");
     }
     auto datum = buildParametricDatum(NN_NO_CHECK(datumNode));
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::BASEPARAMCRS)) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
     if (!parametricCS) {
-        throw ParsingException("CS node is not of type parametric");
+        ThrowNotExpectedCSType("parametric");
     }
 
     return ParametricCRS::create(buildProperties(node), datum,
@@ -3030,29 +3045,29 @@ WKTParser::Private::buildParametricCRS(const WKTNodeNNPtr &node) {
 DerivedParametricCRSNNPtr
 WKTParser::Private::buildDerivedParametricCRS(const WKTNodeNNPtr &node) {
 
-    auto baseParamCRSNode = node->lookForChild(WKTConstants::BASEPARAMCRS);
+    auto &baseParamCRSNode = node->lookForChild(WKTConstants::BASEPARAMCRS);
     assert(baseParamCRSNode !=
            nullptr); // given the constraints enforced on calling code path
 
     auto baseParamCRS = buildParametricCRS(NN_NO_CHECK(baseParamCRSNode));
 
-    auto derivingConversionNode =
+    auto &derivingConversionNode =
         node->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (!derivingConversionNode) {
-        throw ParsingException("Missing DERIVINGCONVERSION node");
+        ThrowNotEnoughChildren(WKTConstants::DERIVINGCONVERSION);
     }
     auto derivingConversion =
         buildConversion(NN_NO_CHECK(derivingConversionNode),
                         UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
     if (!parametricCS) {
-        throw ParsingException("CS node is not of type parametric");
+        ThrowNotExpectedCSType("parametric");
     }
 
     return DerivedParametricCRS::create(buildProperties(node), baseParamCRS,
@@ -3064,15 +3079,15 @@ WKTParser::Private::buildDerivedParametricCRS(const WKTNodeNNPtr &node) {
 
 DerivedProjectedCRSNNPtr
 WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
-    auto baseProjCRSNode = node->lookForChild(WKTConstants::BASEPROJCRS);
+    auto &baseProjCRSNode = node->lookForChild(WKTConstants::BASEPROJCRS);
     if (!baseProjCRSNode) {
-        throw ParsingException("Missing BASEPROJCRS node");
+        ThrowNotEnoughChildren(WKTConstants::BASEPROJCRS);
     }
     auto baseProjCRS = buildProjectedCRS(NN_NO_CHECK(baseProjCRSNode));
 
-    auto conversionNode = node->lookForChild(WKTConstants::DERIVINGCONVERSION);
+    auto &conversionNode = node->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (!conversionNode) {
-        throw ParsingException("Missing DERIVINGCONVERSION node");
+        ThrowNotEnoughChildren(WKTConstants::DERIVINGCONVERSION);
     }
 
     auto linearUnit = buildUnitInSubNode(node);
@@ -3082,9 +3097,9 @@ WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
     auto conversion =
         buildConversion(NN_NO_CHECK(conversionNode), linearUnit, angularUnit);
 
-    auto csNode = node->lookForChild(WKTConstants::CS);
+    auto &csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::PROJCS)) {
-        throw ParsingException("Missing CS node");
+        ThrowMissing(WKTConstants::CS);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     return DerivedProjectedCRS::create(buildProperties(node), baseProjCRS,
@@ -3108,8 +3123,8 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     const std::string &name(node->value());
 
     if (isGeodeticCRS(name)) {
-        if (node->lookForChild(WKTConstants::BASEGEOGCRS) ||
-            node->lookForChild(WKTConstants::BASEGEODCRS)) {
+        if (node->getPrivate()->lookForChild(WKTConstants::BASEGEOGCRS,
+                                             WKTConstants::BASEGEODCRS)) {
             return buildDerivedGeodeticCRS(node);
         } else {
             return util::nn_static_pointer_cast<CRS>(buildGeodeticCRS(node));
@@ -5265,36 +5280,37 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         }
         std::vector<OperationParameterNNPtr> parameters;
         std::vector<ParameterValueNNPtr> values;
-        for (const auto &param : mapping->params) {
-            auto paramValue = !param.proj_names.empty()
-                                  ? getParamValue(step, param.proj_names[0])
+        for (int i = 0; mapping->params[i] != nullptr; i++) {
+            const auto *param = mapping->params[i];
+            std::string proj_name(param->proj_names ? param->proj_names[0]
+                                                    : "");
+            auto paramValue = !proj_name.empty()
+                                  ? getParamValue(step, proj_name)
                                   : std::string();
             // k and k_0 may be used indifferently
-            if (paramValue.empty() && param.proj_names[0] == "k") {
+            if (paramValue.empty() && proj_name == "k") {
                 paramValue = getParamValue(step, "k_0");
-            } else if (paramValue.empty() && param.proj_names[0] == "k_0") {
+            } else if (paramValue.empty() && proj_name == "k_0") {
                 paramValue = getParamValue(step, "k");
             }
             double value = 0;
             if (!paramValue.empty()) {
                 bool hasError = false;
-                if (param.unit_type == UnitOfMeasure::Type::ANGULAR) {
+                if (param->unit_type == UnitOfMeasure::Type::ANGULAR) {
                     value = getAngularValue(paramValue, &hasError);
                 } else {
                     value = getNumericValue(paramValue, &hasError);
                 }
                 if (hasError) {
-                    throw ParsingException("invalid value for " +
-                                           param.proj_names[0]);
+                    throw ParsingException("invalid value for " + proj_name);
                 }
 
-            } else if (param.unit_type == UnitOfMeasure::Type::SCALE) {
+            } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
                 value = 1;
             } else {
                 // For omerc, if gamma is missing, the default value is
                 // alpha
-                if (step.name == "omerc" && !param.proj_names.empty() &&
-                    param.proj_names[0] == "gamma") {
+                if (step.name == "omerc" && proj_name == "gamma") {
                     paramValue = getParamValue(step, "alpha");
                     if (!paramValue.empty()) {
                         value = getAngularValue(paramValue);
@@ -5304,9 +5320,9 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
             PropertyMap propertiesParameter;
             propertiesParameter.set(IdentifiedObject::NAME_KEY,
-                                    param.wkt2_name);
-            if (param.epsg_code) {
-                propertiesParameter.set(Identifier::CODE_KEY, param.epsg_code);
+                                    param->wkt2_name);
+            if (param->epsg_code) {
+                propertiesParameter.set(Identifier::CODE_KEY, param->epsg_code);
                 propertiesParameter.set(Identifier::CODESPACE_KEY,
                                         Identifier::EPSG);
             }
@@ -5316,13 +5332,14 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             // and
             // linear parameters always in metre.
             values.push_back(ParameterValue::create(Measure(
-                value, param.unit_type == UnitOfMeasure::Type::ANGULAR
-                           ? UnitOfMeasure::DEGREE
-                           : param.unit_type == UnitOfMeasure::Type::LINEAR
-                                 ? UnitOfMeasure::METRE
-                                 : param.unit_type == UnitOfMeasure::Type::SCALE
-                                       ? UnitOfMeasure::SCALE_UNITY
-                                       : UnitOfMeasure::NONE)));
+                value,
+                param->unit_type == UnitOfMeasure::Type::ANGULAR
+                    ? UnitOfMeasure::DEGREE
+                    : param->unit_type == UnitOfMeasure::Type::LINEAR
+                          ? UnitOfMeasure::METRE
+                          : param->unit_type == UnitOfMeasure::Type::SCALE
+                                ? UnitOfMeasure::SCALE_UNITY
+                                : UnitOfMeasure::NONE)));
         }
 
         conv = Conversion::create(

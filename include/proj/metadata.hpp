@@ -370,6 +370,8 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
     PROJ_DLL const util::optional<std::string> &description() const;
     PROJ_DLL const util::optional<std::string> &uri() const;
 
+    PROJ_DLL static bool isEquivalentName(const char *a, const std::string &b);
+
     PROJ_DLL static bool isEquivalentName(const std::string &a,
                                           const std::string &b);
 

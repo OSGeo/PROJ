@@ -55,19 +55,19 @@ struct VectorOfString : public std::vector<std::string> {
 };
 
 struct ParamMapping {
-    const std::string wkt2_name;
+    const char *wkt2_name;
     const int epsg_code;
-    const std::string wkt1_name;
+    const char *wkt1_name;
     const common::UnitOfMeasure::Type unit_type;
-    const VectorOfString proj_names;
+    const char *const *proj_names;
 };
 
 struct MethodMapping {
-    const std::string wkt2_name;
+    const char *wkt2_name;
     const int epsg_code;
-    const std::string wkt1_name;
-    const VectorOfString proj_names;
-    const std::vector<ParamMapping> params;
+    const char *wkt1_name;
+    const char *const *proj_names;
+    const ParamMapping *const *params;
 };
 
 const MethodMapping *getMapping(int epsg_code);

@@ -532,9 +532,9 @@ class WKTNode {
     PROJ_DLL const std::string &value() const;
     PROJ_DLL const std::vector<WKTNodeNNPtr> &children() const;
 
-    PROJ_DLL void addChild(WKTNodeNNPtr child);
-    PROJ_DLL WKTNodePtr lookForChild(const std::string &childName,
-                                     int occurrence = 0) const;
+    PROJ_DLL void addChild(const WKTNodeNNPtr &child);
+    PROJ_DLL const WKTNodePtr &lookForChild(const std::string &childName,
+                                            int occurrence = 0) const;
     PROJ_DLL int countChildrenOfName(const std::string &childName) const;
 
     PROJ_DLL std::string toString() const;
@@ -548,6 +548,7 @@ class WKTNode {
                                    size_t &indexEnd); // throw(ParsingException)
 
   private:
+    friend class WKTParser;
     PROJ_OPAQUE_PRIVATE_DATA
 };
 

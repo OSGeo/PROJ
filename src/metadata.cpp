@@ -953,7 +953,7 @@ void Identifier::setProperties(
             } else {
                 if (auto citation =
                         dynamic_cast<const Citation *>(oIter->second.get())) {
-                    d->authority_ = Citation(*citation);
+                    d->authority_ = *citation;
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
                                                     AUTHORITY_KEY);
@@ -1019,10 +1019,11 @@ void Identifier::setProperties(
 void Identifier::_exportToWKT(WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     const std::string &l_code = code();
-    if (codeSpace() && !codeSpace()->empty() && !l_code.empty()) {
+    const std::string &l_codeSpace = *codeSpace();
+    if (!l_codeSpace.empty() && !l_code.empty()) {
         if (isWKT2) {
             formatter->startNode(WKTConstants::ID, false);
-            formatter->addQuotedString(*(codeSpace()));
+            formatter->addQuotedString(l_codeSpace);
             try {
                 (void)std::stoi(l_code);
                 formatter->add(l_code);
@@ -1038,8 +1039,8 @@ void Identifier::_exportToWKT(WKTFormatter *formatter) const {
                     formatter->addQuotedString(l_version);
                 }
             }
-            if (authority().has_value() && authority()->title().has_value() &&
-                *(authority()->title()) != *(codeSpace())) {
+            if (authority().has_value() &&
+                *(authority()->title()) != l_codeSpace) {
                 formatter->startNode(WKTConstants::CITATION, false);
                 formatter->addQuotedString(*(authority()->title()));
                 formatter->endNode();
@@ -1052,7 +1053,7 @@ void Identifier::_exportToWKT(WKTFormatter *formatter) const {
             formatter->endNode();
         } else {
             formatter->startNode(WKTConstants::AUTHORITY, false);
-            formatter->addQuotedString(*(codeSpace()));
+            formatter->addQuotedString(l_codeSpace);
             formatter->addQuotedString(l_code);
             formatter->endNode();
         }
@@ -1064,13 +1065,31 @@ void Identifier::_exportToWKT(WKTFormatter *formatter) const {
 
 //! @cond Doxygen_Suppress
 std::string Identifier::canonicalizeName(const std::string &str) {
-    std::string res(tolower(str));
-    for (auto c : std::vector<std::string>{" ", "_", "-", "/", "(", ")"}) {
-        res = replaceAll(res, c, "");
+    std::string res;
+    res.resize(str.size());
+    size_t iInsert = 0;
+    for (const char ch : str) {
+        if (!(ch == ' ' || ch == '_' || ch == '-' || ch == '/' || ch == '(' ||
+              ch == ')')) {
+            res[iInsert] = static_cast<char>(::tolower(static_cast<int>(ch)));
+            iInsert++;
+        }
     }
+    res.resize(iInsert);
     return res;
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns whether two names are considered equivalent.
+ *
+ * Two names are equivalent by removing any space, underscore, dash, slash,
+ * { or } character from them, and comparing ina case insensitive way.
+ */
+bool Identifier::isEquivalentName(const char *a, const std::string &b) {
+    return isEquivalentName(std::string(a), b);
+}
 
 // ---------------------------------------------------------------------------
 

@@ -94,20 +94,45 @@ InvalidOperationEmptyIntersection::~InvalidOperationEmptyIntersection() =
 
 // ---------------------------------------------------------------------------
 
-using PairOfString = std::pair<std::string, std::string>;
+static std::string createEntryEqParam(const std::string &a,
+                                      const std::string &b) {
+    return a < b ? a + b : b + a;
+}
 
-static std::set<PairOfString> buildSetEquivalentParameters() {
+static std::set<std::string> buildSetEquivalentParameters() {
 
-    std::set<PairOfString> set;
+    std::set<std::string> set;
+
+    const char *const listOfEquivalentParameterNames[][5] = {
+        {"latitude_of_point_1", "Latitude_Of_1st_Point", nullptr},
+        {"longitude_of_point_1", "Longitude_Of_1st_Point", nullptr},
+        {"latitude_of_point_2", "Latitude_Of_2nd_Point", nullptr},
+        {"longitude_of_point_2", "Longitude_Of_2nd_Point", nullptr},
+
+        {EPSG_NAME_PARAMETER_FALSE_EASTING,
+         EPSG_NAME_PARAMETER_EASTING_FALSE_ORIGIN,
+         EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE, nullptr},
+
+        {EPSG_NAME_PARAMETER_FALSE_NORTHING,
+         EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN,
+         EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE, nullptr},
+
+        {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+         EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN,
+         EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE, nullptr},
+
+        {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+         EPSG_NAME_PARAMETER_LONGITUDE_FALSE_ORIGIN,
+         EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+         EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN, nullptr},
+    };
+
     for (const auto &paramList : listOfEquivalentParameterNames) {
-        for (size_t i = 0; i < paramList.size(); i++) {
+        for (size_t i = 0; paramList[i]; i++) {
             auto a = metadata::Identifier::canonicalizeName(paramList[i]);
-            for (size_t j = i + 1; j < paramList.size(); j++) {
+            for (size_t j = i + 1; paramList[j]; j++) {
                 auto b = metadata::Identifier::canonicalizeName(paramList[j]);
-                if (a < b)
-                    set.insert(PairOfString(a, b));
-                else
-                    set.insert(PairOfString(b, a));
+                set.insert(createEntryEqParam(a, b));
             }
         }
     }
@@ -117,14 +142,12 @@ static std::set<PairOfString> buildSetEquivalentParameters() {
 static bool areEquivalentParameters(const std::string &a,
                                     const std::string &b) {
 
-    static const std::set<PairOfString> setEquivalentParameters =
+    static const std::set<std::string> setEquivalentParameters =
         buildSetEquivalentParameters();
 
     auto a_can = metadata::Identifier::canonicalizeName(a);
     auto b_can = metadata::Identifier::canonicalizeName(b);
-    return setEquivalentParameters.find((a_can < b_can)
-                                            ? PairOfString(a_can, b_can)
-                                            : PairOfString(b_can, a_can)) !=
+    return setEquivalentParameters.find(createEntryEqParam(a_can, b_can)) !=
            setEquivalentParameters.end();
 }
 
@@ -158,13 +181,13 @@ const MethodMapping *getMapping(const OperationMethod *method) {
 
 const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
     // Unusual for a WKT1 projection name, but mentionned in OGC 12-063r5 C.4.2
-    if (tolower(wkt1_name).find(tolower("UTM zone")) == 0) {
+    if (ci_starts_with(wkt1_name, "UTM zone")) {
         return getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
     }
 
     for (const auto &mapping : methodMappings) {
-        if (metadata::Identifier::isEquivalentName(mapping.wkt1_name,
-                                                   wkt1_name)) {
+        if (mapping.wkt1_name && metadata::Identifier::isEquivalentName(
+                                     mapping.wkt1_name, wkt1_name)) {
             return &mapping;
         }
     }
@@ -189,7 +212,7 @@ std::vector<const MethodMapping *>
 getMappingsFromPROJName(const std::string &projName) {
     std::vector<const MethodMapping *> res;
     for (const auto &mapping : methodMappings) {
-        if (!mapping.proj_names.empty() && mapping.proj_names[0] == projName) {
+        if (mapping.proj_names && mapping.proj_names[0] == projName) {
             res.push_back(&mapping);
         }
     }
@@ -204,12 +227,13 @@ const ParamMapping *getMapping(const MethodMapping *mapping,
     const std::string &name = *(param_name->description());
     const std::string &code = param_name->code();
     const int epsg_code = !code.empty() ? ::atoi(code.c_str()) : 0;
-    for (const auto &paramMapping : mapping->params) {
-        if (metadata::Identifier::isEquivalentName(paramMapping.wkt2_name,
+    for (int i = 0; mapping->params[i] != nullptr; ++i) {
+        const auto *paramMapping = mapping->params[i];
+        if (metadata::Identifier::isEquivalentName(paramMapping->wkt2_name,
                                                    name) ||
-            (epsg_code != 0 && paramMapping.epsg_code == epsg_code) ||
-            areEquivalentParameters(paramMapping.wkt2_name, name)) {
-            return &paramMapping;
+            (epsg_code != 0 && paramMapping->epsg_code == epsg_code) ||
+            areEquivalentParameters(paramMapping->wkt2_name, name)) {
+            return paramMapping;
         }
     }
     return nullptr;
@@ -219,11 +243,13 @@ const ParamMapping *getMapping(const MethodMapping *mapping,
 
 const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
                                        const std::string &wkt1_name) {
-    for (const auto &paramMapping : mapping->params) {
-        if (metadata::Identifier::isEquivalentName(paramMapping.wkt1_name,
-                                                   wkt1_name) ||
-            areEquivalentParameters(paramMapping.wkt1_name, wkt1_name)) {
-            return &paramMapping;
+    for (int i = 0; mapping->params[i] != nullptr; ++i) {
+        const auto *paramMapping = mapping->params[i];
+        if (paramMapping->wkt1_name &&
+            (metadata::Identifier::isEquivalentName(paramMapping->wkt1_name,
+                                                    wkt1_name) ||
+             areEquivalentParameters(paramMapping->wkt1_name, wkt1_name))) {
+            return paramMapping;
         }
     }
     return nullptr;
@@ -684,11 +710,12 @@ void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
         if (mapping == nullptr) {
             l_name = replaceAll(l_name, " ", "_");
         } else {
-            l_name = mapping->wkt1_name;
-            if (l_name.empty()) {
+            if (mapping->wkt1_name == nullptr) {
                 throw io::FormattingException(
-                    "Unsupported conversion method: " + mapping->wkt2_name);
+                    std::string("Unsupported conversion method: ") +
+                    mapping->wkt2_name);
             }
+            l_name = mapping->wkt1_name;
         }
     }
     formatter->addQuotedString(l_name);
@@ -831,7 +858,7 @@ void OperationParameterValue::_exportToWKT(io::WKTFormatter *formatter,
                                            const MethodMapping *mapping) const {
     const ParamMapping *paramMapping =
         mapping ? getMapping(mapping, this) : nullptr;
-    if (paramMapping && paramMapping->wkt1_name.empty()) {
+    if (paramMapping && paramMapping->wkt1_name == nullptr) {
         return;
     }
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
@@ -1614,14 +1641,15 @@ createConversion(const util::PropertyMap &properties,
                  const std::vector<ParameterValueNNPtr> &values) {
 
     std::vector<OperationParameterNNPtr> parameters;
-    for (const auto &param : mapping->params) {
+    for (int i = 0; mapping->params[i] != nullptr; i++) {
+        const auto *param = mapping->params[i];
         auto paramProperties = util::PropertyMap().set(
-            common::IdentifiedObject::NAME_KEY, param.wkt2_name);
-        if (param.epsg_code != 0) {
+            common::IdentifiedObject::NAME_KEY, param->wkt2_name);
+        if (param->epsg_code != 0) {
             paramProperties
                 .set(metadata::Identifier::CODESPACE_KEY,
                      metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY, param.epsg_code);
+                .set(metadata::Identifier::CODE_KEY, param->epsg_code);
         }
         auto parameter = OperationParameter::create(paramProperties);
         parameters.push_back(parameter);
@@ -4171,7 +4199,7 @@ void Conversion::_exportToPROJString(
                     EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR)) {
         if (!createPROJ4WebMercator(this, formatter)) {
             throw io::FormattingException(
-                "Cannot export " +
+                std::string("Cannot export ") +
                 EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR +
                 " as PROJ.4 string outside of a ProjectedCRS context");
         }
@@ -4232,9 +4260,9 @@ void Conversion::_exportToPROJString(
         if (!mapping && methodEPSGCode) {
             mapping = getMapping(methodEPSGCode);
         }
-        if (mapping && !mapping->proj_names[0].empty()) {
+        if (mapping && mapping->proj_names) {
             formatter->addStep(useETMerc ? "etmerc" : mapping->proj_names[0]);
-            for (size_t i = 1; i < mapping->proj_names.size(); ++i) {
+            for (size_t i = 1; mapping->proj_names[i] != nullptr; ++i) {
                 if (internal::starts_with(mapping->proj_names[i], "axis=")) {
                     bAxisSpecFound = true;
                 }
@@ -4255,26 +4283,25 @@ void Conversion::_exportToPROJString(
                                     (latitudeStdParallel >= 0) ? 90.0 : -90.0);
             }
 
-            for (const auto &param : mapping->params) {
-                for (const auto &proj_name : param.proj_names) {
-                    if (proj_name.empty()) {
-                        // Case of Krovak COLATITUDE_CONE_AXIS and
-                        // LATITUDE_PSEUDO_STANDARD_PARALLEL
-                        continue;
-                    }
-                    if (param.unit_type ==
+            for (int i = 0; mapping->params[i] != nullptr; i++) {
+                const auto *param = mapping->params[i];
+                for (int j = 0;
+                     param->proj_names && param->proj_names[j] != nullptr;
+                     j++) {
+                    if (param->unit_type ==
                         common::UnitOfMeasure::Type::ANGULAR) {
                         formatter->addParam(
-                            proj_name,
-                            parameterValueMeasure(param.wkt2_name,
-                                                  param.epsg_code)
+                            param->proj_names[j],
+                            parameterValueMeasure(param->wkt2_name,
+                                                  param->epsg_code)
                                 .convertToUnit(common::UnitOfMeasure::DEGREE)
                                 .value());
                     } else {
                         formatter->addParam(
-                            proj_name, parameterValueMeasure(param.wkt2_name,
-                                                             param.epsg_code)
-                                           .getSIValue());
+                            param->proj_names[j],
+                            parameterValueMeasure(param->wkt2_name,
+                                                  param->epsg_code)
+                                .getSIValue());
                     }
                 }
             }
