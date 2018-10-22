@@ -247,7 +247,6 @@ class CoordinateSystem : public common::IdentifiedObject,
                        util::IComparable::Criterion::STRICT) const override;
 
   protected:
-    CoordinateSystem();
     explicit CoordinateSystem(
         const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
 
@@ -294,7 +293,6 @@ class SphericalCS final : public CoordinateSystem {
            const CoordinateSystemAxisNNPtr &axis3);
 
   protected:
-    SphericalCS();
     explicit SphericalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
@@ -361,7 +359,6 @@ class EllipsoidalCS final : public CoordinateSystem {
     AxisOrder axisOrder() const;
 
   protected:
-    EllipsoidalCS();
     explicit EllipsoidalCS(
         const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
@@ -402,7 +399,6 @@ class VerticalCS final : public CoordinateSystem {
     createGravityRelatedHeight(const common::UnitOfMeasure &unit);
 
   protected:
-    VerticalCS();
     explicit VerticalCS(const CoordinateSystemAxisNNPtr &axisIn);
     INLINED_MAKE_SHARED
 
@@ -450,7 +446,6 @@ class CartesianCS final : public CoordinateSystem {
     createGeocentric(const common::UnitOfMeasure &unit);
 
   protected:
-    CartesianCS();
     explicit CartesianCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
@@ -488,7 +483,6 @@ class OrdinalCS final : public CoordinateSystem {
            const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
 
   protected:
-    OrdinalCS();
     explicit OrdinalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
@@ -522,7 +516,6 @@ class ParametricCS final : public CoordinateSystem {
            const CoordinateSystemAxisNNPtr &axisIn);
 
   protected:
-    ParametricCS();
     explicit ParametricCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 

@@ -57,11 +57,36 @@ namespace datum {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+static util::PropertyMap createMapNameEPSGCode(const char *name, int code) {
+    return util::PropertyMap()
+        .set(common::IdentifiedObject::NAME_KEY, name)
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
+        .set(metadata::Identifier::CODE_KEY, code);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct Datum::Private {
     util::optional<std::string> anchorDefinition{};
     util::optional<common::DateTime> publicationDate{};
     common::IdentifiedObjectPtr conventionalRS{};
+
+    // cppcheck-suppress functionStatic
+    void exportAnchorDefinition(io::WKTFormatter *formatter) const;
 };
+
+// ---------------------------------------------------------------------------
+
+void Datum::Private::exportAnchorDefinition(io::WKTFormatter *formatter) const {
+    if (anchorDefinition) {
+        formatter->startNode(io::WKTConstants::ANCHOR, false);
+        formatter->addQuotedString(*anchorDefinition);
+        formatter->endNode();
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -245,22 +270,13 @@ PrimeMeridianNNPtr PrimeMeridian::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 const PrimeMeridianNNPtr PrimeMeridian::createGREENWICH() {
-    return create(util::PropertyMap()
-                      .set(metadata::Identifier::CODESPACE_KEY,
-                           metadata::Identifier::EPSG)
-                      .set(metadata::Identifier::CODE_KEY, 8901)
-                      .set(common::IdentifiedObject::NAME_KEY, "Greenwich"),
-                  common::Angle(0));
+    return create(createMapNameEPSGCode("Greenwich", 8901), common::Angle(0));
 }
 
 // ---------------------------------------------------------------------------
 
 const PrimeMeridianNNPtr PrimeMeridian::createPARIS() {
-    return create(util::PropertyMap()
-                      .set(metadata::Identifier::CODESPACE_KEY,
-                           metadata::Identifier::EPSG)
-                      .set(metadata::Identifier::CODE_KEY, 8903)
-                      .set(common::IdentifiedObject::NAME_KEY, "Paris"),
+    return create(createMapNameEPSGCode("Paris", 8903),
                   common::Angle(2.5969213, common::UnitOfMeasure::GRAD));
 }
 
@@ -271,29 +287,28 @@ void PrimeMeridian::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    std::string l_name = name()->description().has_value()
-                             ? *(name()->description())
-                             : "Greenwich";
+    std::string l_name =
+        name()->description().has_value() ? nameStr() : "Greenwich";
     if (!(isWKT2 && formatter->primeMeridianOmittedIfGreenwich() &&
           l_name == "Greenwich")) {
         formatter->startNode(io::WKTConstants::PRIMEM, !identifiers().empty());
         formatter->addQuotedString(l_name);
+        const auto &l_long = longitude();
         if (formatter->primeMeridianInDegree()) {
-            formatter->add(longitude()
-                               .convertToUnit(common::UnitOfMeasure::DEGREE)
-                               .value());
+            formatter->add(
+                l_long.convertToUnit(common::UnitOfMeasure::DEGREE).value());
         } else {
-            formatter->add(longitude().value());
+            formatter->add(l_long.value());
         }
+        const auto &unit = l_long.unit();
         if (isWKT2) {
             if (!(formatter
                       ->primeMeridianOrParameterUnitOmittedIfSameAsAxis() &&
-                  longitude().unit() == *(formatter->axisAngularUnit()))) {
-                longitude().unit()._exportToWKT(formatter,
-                                                io::WKTConstants::ANGLEUNIT);
+                  unit == *(formatter->axisAngularUnit()))) {
+                unit._exportToWKT(formatter, io::WKTConstants::ANGLEUNIT);
             }
         } else if (!formatter->primeMeridianInDegree()) {
-            longitude().unit()._exportToWKT(formatter);
+            unit._exportToWKT(formatter);
         }
         if (formatter->outputId()) {
             formatID(formatter);
@@ -621,36 +636,23 @@ EllipsoidNNPtr Ellipsoid::createTwoAxis(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 const EllipsoidNNPtr Ellipsoid::createCLARKE_1866() {
-    util::PropertyMap propertiesEllps;
-    propertiesEllps
-        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
-        .set(metadata::Identifier::CODE_KEY, 7008)
-        .set(common::IdentifiedObject::NAME_KEY, "Clarke 1866");
-    return createTwoAxis(propertiesEllps, common::Length(6378206.4),
-                         common::Length(6356583.8));
+    return createTwoAxis(createMapNameEPSGCode("Clarke 1866", 7008),
+                         common::Length(6378206.4), common::Length(6356583.8));
 }
 
 // ---------------------------------------------------------------------------
 
 const EllipsoidNNPtr Ellipsoid::createWGS84() {
-    util::PropertyMap propertiesEllps;
-    propertiesEllps
-        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
-        .set(metadata::Identifier::CODE_KEY, 7030)
-        .set(common::IdentifiedObject::NAME_KEY, "WGS 84");
-    return createFlattenedSphere(propertiesEllps, common::Length(6378137),
+    return createFlattenedSphere(createMapNameEPSGCode("WGS 84", 7030),
+                                 common::Length(6378137),
                                  common::Scale(298.257223563));
 }
 
 // ---------------------------------------------------------------------------
 
 const EllipsoidNNPtr Ellipsoid::createGRS1980() {
-    util::PropertyMap propertiesEllps;
-    propertiesEllps
-        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
-        .set(metadata::Identifier::CODE_KEY, 7019)
-        .set(common::IdentifiedObject::NAME_KEY, "GRS 1980");
-    return createFlattenedSphere(propertiesEllps, common::Length(6378137),
+    return createFlattenedSphere(createMapNameEPSGCode("GRS 1980", 7019),
+                                 common::Length(6378137),
                                  common::Scale(298.257222101));
 }
 
@@ -675,8 +677,7 @@ void Ellipsoid::_exportToWKT(
         if (isWKT2) {
             formatter->add(semiMajor.value());
         } else {
-            formatter->add(
-                semiMajor.convertToUnit(common::UnitOfMeasure::METRE).value());
+            formatter->add(semiMajor.getSIValue());
         }
         formatter->add(computeInverseFlattening().value());
         const auto &unit = semiMajor.unit();
@@ -762,8 +763,7 @@ EllipsoidNNPtr Ellipsoid::identify() const {
     newEllipsoid->assignSelf(
         util::nn_static_pointer_cast<util::BaseObject>(newEllipsoid));
 
-    if (name()->description()->empty() ||
-        *(name()->description()) == "unknown") {
+    if (name()->description()->empty() || nameStr() == "unknown") {
         std::string projEllpsName;
         std::string ellpsName;
         if (lookForProjWellKnownEllps(projEllpsName, ellpsName)) {
@@ -922,40 +922,25 @@ GeodeticReferenceFrame::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6267() {
-    util::PropertyMap propertiesDatum;
-    propertiesDatum
-        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
-        .set(metadata::Identifier::CODE_KEY, 6267)
-        .set(common::IdentifiedObject::NAME_KEY, "North American Datum 1927");
-
-    return create(propertiesDatum, Ellipsoid::CLARKE_1866,
-                  util::optional<std::string>(), PrimeMeridian::GREENWICH);
+    return create(createMapNameEPSGCode("North American Datum 1927", 6267),
+                  Ellipsoid::CLARKE_1866, util::optional<std::string>(),
+                  PrimeMeridian::GREENWICH);
 }
 
 // ---------------------------------------------------------------------------
 
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6269() {
-    util::PropertyMap propertiesDatum;
-    propertiesDatum
-        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
-        .set(metadata::Identifier::CODE_KEY, 6269)
-        .set(common::IdentifiedObject::NAME_KEY, "North American Datum 1983");
-
-    return create(propertiesDatum, Ellipsoid::GRS1980,
-                  util::optional<std::string>(), PrimeMeridian::GREENWICH);
+    return create(createMapNameEPSGCode("North American Datum 1983", 6269),
+                  Ellipsoid::GRS1980, util::optional<std::string>(),
+                  PrimeMeridian::GREENWICH);
 }
 
 // ---------------------------------------------------------------------------
 
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6326() {
-    util::PropertyMap propertiesDatum;
-    propertiesDatum
-        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
-        .set(metadata::Identifier::CODE_KEY, 6326)
-        .set(common::IdentifiedObject::NAME_KEY, "World Geodetic System 1984");
-
-    return create(propertiesDatum, Ellipsoid::WGS84,
-                  util::optional<std::string>(), PrimeMeridian::GREENWICH);
+    return create(createMapNameEPSGCode("World Geodetic System 1984", 6326),
+                  Ellipsoid::WGS84, util::optional<std::string>(),
+                  PrimeMeridian::GREENWICH);
 }
 
 // ---------------------------------------------------------------------------
@@ -980,11 +965,7 @@ void GeodeticReferenceFrame::_exportToWKT(
 
     ellipsoid()->_exportToWKT(formatter);
     if (isWKT2) {
-        if (anchorDefinition()) {
-            formatter->startNode(io::WKTConstants::ANCHOR, false);
-            formatter->addQuotedString(*anchorDefinition());
-            formatter->endNode();
-        }
+        Datum::getPrivate()->exportAnchorDefinition(formatter);
     } else {
         const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
         if (TOWGS84Params.size() == 7) {
@@ -1236,15 +1217,22 @@ void DatumEnsemble::_exportToWKT(
     assert(!l_datums.empty());
 
     formatter->startNode(io::WKTConstants::ENSEMBLE, false);
-    formatter->addQuotedString(name()->description().has_value()
-                                   ? *(name()->description())
-                                   : "unnamed");
+    const auto &l_name = nameStr();
+    if (!l_name.empty()) {
+        formatter->addQuotedString(l_name);
+    } else {
+        formatter->addQuotedString("unnamed");
+    }
+
     for (const auto &datum : l_datums) {
         formatter->startNode(io::WKTConstants::MEMBER,
                              !datum->identifiers().empty());
-        formatter->addQuotedString(datum->name()->description().has_value()
-                                       ? *(datum->name()->description())
-                                       : "unnamed");
+        const auto &l_datum_name = datum->nameStr();
+        if (!l_datum_name.empty()) {
+            formatter->addQuotedString(l_datum_name);
+        } else {
+            formatter->addQuotedString("unnamed");
+        }
         if (formatter->outputId()) {
             datum->formatID(formatter);
         }
@@ -1283,12 +1271,11 @@ DatumEnsembleNNPtr DatumEnsemble::create(
     if (datumsIn.size() < 2) {
         throw util::Exception("ensemble should have at least 2 datums");
     }
-    auto grfFirst = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
-        datumsIn[0].as_nullable());
-    if (grfFirst) {
+    if (auto grfFirst =
+            dynamic_cast<const GeodeticReferenceFrame *>(datumsIn[0].get())) {
         for (size_t i = 1; i < datumsIn.size(); i++) {
-            auto grf = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
-                datumsIn[i].as_nullable());
+            auto grf =
+                dynamic_cast<const GeodeticReferenceFrame *>(datumsIn[i].get());
             if (!grf) {
                 throw util::Exception(
                     "ensemble should have consistent datum types");
@@ -1305,17 +1292,11 @@ DatumEnsembleNNPtr DatumEnsemble::create(
                     "prime meridian");
             }
         }
-    } else {
-        auto vrfFirst = std::dynamic_pointer_cast<VerticalReferenceFrame>(
-            datumsIn[0].as_nullable());
-        if (vrfFirst) {
-            for (size_t i = 1; i < datumsIn.size(); i++) {
-                auto vrf = std::dynamic_pointer_cast<VerticalReferenceFrame>(
-                    datumsIn[i].as_nullable());
-                if (!vrf) {
-                    throw util::Exception(
-                        "ensemble should have consistent datum types");
-                }
+    } else if (dynamic_cast<VerticalReferenceFrame *>(datumsIn[0].get())) {
+        for (size_t i = 1; i < datumsIn.size(); i++) {
+            if (!dynamic_cast<VerticalReferenceFrame *>(datumsIn[i].get())) {
+                throw util::Exception(
+                    "ensemble should have consistent datum types");
             }
         }
     }
@@ -1355,8 +1336,7 @@ struct VerticalReferenceFrame::Private {
 VerticalReferenceFrame::VerticalReferenceFrame(
     const util::optional<RealizationMethod> &realizationMethodIn)
     : d(internal::make_unique<Private>()) {
-    if (realizationMethodIn.has_value() &&
-        !realizationMethodIn->toString().empty()) {
+    if (!realizationMethodIn->toString().empty()) {
         d->realizationMethod_ = *realizationMethodIn;
     }
 }
@@ -1407,39 +1387,31 @@ void VerticalReferenceFrame::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (isWKT2) {
-        formatter->startNode(io::WKTConstants::VDATUM, !identifiers().empty());
-        formatter->addQuotedString(name()->description().has_value()
-                                       ? *(name()->description())
-                                       : "unnamed");
-        if (anchorDefinition()) {
-            formatter->startNode(io::WKTConstants::ANCHOR, false);
-            formatter->addQuotedString(*anchorDefinition());
-            formatter->endNode();
-        }
-        if (formatter->outputId()) {
-            formatID(formatter);
-        }
-        formatter->endNode();
+    formatter->startNode(isWKT2 ? io::WKTConstants::VDATUM
+                                : io::WKTConstants::VERT_DATUM,
+                         !identifiers().empty());
+    const auto &l_name = nameStr();
+    if (!l_name.empty()) {
+        formatter->addQuotedString(l_name);
     } else {
-        formatter->startNode(io::WKTConstants::VERT_DATUM,
-                             !identifiers().empty());
-        formatter->addQuotedString(name()->description().has_value()
-                                       ? *(name()->description())
-                                       : "unnamed");
+        formatter->addQuotedString("unnamed");
+    }
+    if (isWKT2) {
+        Datum::getPrivate()->exportAnchorDefinition(formatter);
+    } else {
         formatter->add(2005); // CS_VD_GeoidModelDerived from OGC 01-009
-        std::string extension = formatter->getVDatumExtension();
+        const auto &extension = formatter->getVDatumExtension();
         if (!extension.empty()) {
             formatter->startNode(io::WKTConstants::EXTENSION, false);
             formatter->addQuotedString("PROJ4_GRIDS");
             formatter->addQuotedString(extension);
             formatter->endNode();
         }
-        if (formatter->outputId()) {
-            formatID(formatter);
-        }
-        formatter->endNode();
     }
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+    formatter->endNode();
 }
 //! @endcond
 
@@ -1559,8 +1531,7 @@ void DynamicVerticalReferenceFrame::_exportToWKT(
                            .convertToUnit(common::UnitOfMeasure::YEAR)
                            .value());
         formatter->endNode();
-        if (deformationModelName().has_value() &&
-            !deformationModelName()->empty()) {
+        if (!deformationModelName()->empty()) {
             formatter->startNode(io::WKTConstants::MODEL, false);
             formatter->addQuotedString(*deformationModelName());
             formatter->endNode();
@@ -1679,7 +1650,7 @@ void TemporalDatum::_exportToWKT(
             "TemporalDatum can only be exported to WKT2");
     }
     formatter->startNode(io::WKTConstants::TDATUM, !identifiers().empty());
-    formatter->addQuotedString(*(name()->description()));
+    formatter->addQuotedString(nameStr());
     if (formatter->use2018Keywords()) {
         formatter->startNode(io::WKTConstants::CALENDAR, false);
         formatter->addQuotedString(calendar());
@@ -1759,12 +1730,10 @@ void EngineeringDatum::_exportToWKT(
     formatter->startNode(isWKT2 ? io::WKTConstants::EDATUM
                                 : io::WKTConstants::LOCAL_DATUM,
                          !identifiers().empty());
-    formatter->addQuotedString(*(name()->description()));
-    if (isWKT2 && anchorDefinition()) {
-        formatter->startNode(io::WKTConstants::ANCHOR, false);
-        formatter->addQuotedString(*anchorDefinition());
-        formatter->endNode();
-    } else if (!isWKT2) {
+    formatter->addQuotedString(nameStr());
+    if (isWKT2) {
+        Datum::getPrivate()->exportAnchorDefinition(formatter);
+    } else {
         // Somewhat picked up arbitrarily from OGC 01-009:
         // CS_LD_Max (Attribute) : 32767
         // Highest possible value for local datum types.
@@ -1832,12 +1801,8 @@ void ParametricDatum::_exportToWKT(
             "ParametricDatum can only be exported to WKT2");
     }
     formatter->startNode(io::WKTConstants::PDATUM, !identifiers().empty());
-    formatter->addQuotedString(*(name()->description()));
-    if (anchorDefinition()) {
-        formatter->startNode(io::WKTConstants::ANCHOR, false);
-        formatter->addQuotedString(*anchorDefinition());
-        formatter->endNode();
-    }
+    formatter->addQuotedString(nameStr());
+    Datum::getPrivate()->exportAnchorDefinition(formatter);
     formatter->endNode();
 }
 //! @endcond

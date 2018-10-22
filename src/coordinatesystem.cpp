@@ -392,21 +392,18 @@ bool CoordinateSystemAxis::isEquivalentTo(
 
 //! @cond Doxygen_Suppress
 struct CoordinateSystem::Private {
-    std::vector<CoordinateSystemAxisNNPtr> axis{};
+    std::vector<CoordinateSystemAxisNNPtr> axisList{};
+
+    explicit Private(const std::vector<CoordinateSystemAxisNNPtr> &axisListIn)
+        : axisList(axisListIn) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-CoordinateSystem::CoordinateSystem() : d(internal::make_unique<Private>()) {}
-
-// ---------------------------------------------------------------------------
-
 CoordinateSystem::CoordinateSystem(
     const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
-    : CoordinateSystem() {
-    d->axis = axisIn;
-}
+    : d(internal::make_unique<Private>(axisIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -429,7 +426,7 @@ CoordinateSystem::~CoordinateSystem() = default;
  */
 const std::vector<CoordinateSystemAxisNNPtr> &
 CoordinateSystem::axisList() const {
-    return d->axis;
+    return d->axisList;
 }
 
 // ---------------------------------------------------------------------------
@@ -440,10 +437,11 @@ void CoordinateSystem::_exportToWKT(
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
+    const auto &l_axisList = axisList();
     if (isWKT2) {
         formatter->startNode(io::WKTConstants::CS, !identifiers().empty());
         formatter->add(getWKT2Type(formatter->use2018Keywords()));
-        formatter->add(axisList().size());
+        formatter->add(l_axisList.size());
         formatter->endNode();
         formatter->startNode(std::string(),
                              false); // anonymous indentation level
@@ -452,11 +450,12 @@ void CoordinateSystem::_exportToWKT(
     common::UnitOfMeasure unit = common::UnitOfMeasure::NONE;
     bool bAllSameUnit = true;
     bool bFirstUnit = true;
-    for (auto &axis : axisList()) {
+    for (const auto &axis : l_axisList) {
+        const auto &l_unit = axis->unit();
         if (bFirstUnit) {
-            unit = axis->unit();
+            unit = l_unit;
             bFirstUnit = false;
-        } else if (unit != axis->unit()) {
+        } else if (unit != l_unit) {
             bAllSameUnit = false;
         }
     }
@@ -465,19 +464,18 @@ void CoordinateSystem::_exportToWKT(
         isWKT2 && (!bAllSameUnit || !formatter->outputCSUnitOnlyOnceIfSame()));
 
     int order = 1;
-    bool disableAbbrev =
-        (axisList().size() == 3 &&
-         *(axisList()[0]->name()->description()) == AxisName::Latitude &&
-         *(axisList()[1]->name()->description()) == AxisName::Longitude &&
-         *(axisList()[2]->name()->description()) ==
-             AxisName::Ellipsoidal_height);
+    const bool disableAbbrev =
+        (l_axisList.size() == 3 &&
+         l_axisList[0]->nameStr() == AxisName::Latitude &&
+         l_axisList[1]->nameStr() == AxisName::Longitude &&
+         l_axisList[2]->nameStr() == AxisName::Ellipsoidal_height);
 
-    for (auto &axis : axisList()) {
-        int axisOrder = (isWKT2 && axisList().size() > 1) ? order : 0;
+    for (auto &axis : l_axisList) {
+        int axisOrder = (isWKT2 && l_axisList.size() > 1) ? order : 0;
         axis->_exportToWKT(formatter, axisOrder, disableAbbrev);
         order++;
     }
-    if (isWKT2 && !axisList().empty() && bAllSameUnit &&
+    if (isWKT2 && !l_axisList.empty() && bAllSameUnit &&
         formatter->outputCSUnitOnlyOnceIfSame()) {
         unit._exportToWKT(formatter);
     }
@@ -518,10 +516,6 @@ bool CoordinateSystem::isEquivalentTo(
 
 // ---------------------------------------------------------------------------
 
-SphericalCS::SphericalCS() = default;
-
-// ---------------------------------------------------------------------------
-
 //! @cond Doxygen_Suppress
 SphericalCS::~SphericalCS() = default;
 //! @endcond
@@ -556,10 +550,6 @@ SphericalCSNNPtr SphericalCS::create(const util::PropertyMap &properties,
     cs->setProperties(properties);
     return cs;
 }
-
-// ---------------------------------------------------------------------------
-
-EllipsoidalCS::EllipsoidalCS() = default;
 
 // ---------------------------------------------------------------------------
 
@@ -698,30 +688,26 @@ EllipsoidalCS::createLongitudeLatitude(const common::UnitOfMeasure &unit) {
 
 /** \brief Return the axis order in an enumerated way. */
 EllipsoidalCS::AxisOrder EllipsoidalCS::axisOrder() const {
-    auto l_axisList = axisList();
-    if (l_axisList.size() >= 2) {
-        if (l_axisList[0]->direction() == AxisDirection::NORTH &&
-            l_axisList[1]->direction() == AxisDirection::EAST) {
-            if (l_axisList.size() == 2) {
-                return AxisOrder::LAT_NORTH_LONG_EAST;
-            } else if (l_axisList[2]->direction() == AxisDirection::UP) {
-                return AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP;
-            }
-        } else if (l_axisList[0]->direction() == AxisDirection::EAST &&
-                   l_axisList[1]->direction() == AxisDirection::NORTH) {
-            if (l_axisList.size() == 2) {
-                return AxisOrder::LONG_EAST_LAT_NORTH;
-            } else if (l_axisList[2]->direction() == AxisDirection::UP) {
-                return AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP;
-            }
+    const auto &l_axisList = CoordinateSystem::getPrivate()->axisList;
+    const auto &dir0 = l_axisList[0]->direction();
+    const auto &dir1 = l_axisList[1]->direction();
+    if (&dir0 == &AxisDirection::NORTH && &dir1 == &AxisDirection::EAST) {
+        if (l_axisList.size() == 2) {
+            return AxisOrder::LAT_NORTH_LONG_EAST;
+        } else if (&l_axisList[2]->direction() == &AxisDirection::UP) {
+            return AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP;
+        }
+    } else if (&dir0 == &AxisDirection::EAST &&
+               &dir1 == &AxisDirection::NORTH) {
+        if (l_axisList.size() == 2) {
+            return AxisOrder::LONG_EAST_LAT_NORTH;
+        } else if (&l_axisList[2]->direction() == &AxisDirection::UP) {
+            return AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP;
         }
     }
+
     return AxisOrder::OTHER;
 }
-
-// ---------------------------------------------------------------------------
-
-VerticalCS::VerticalCS() = default;
 
 // ---------------------------------------------------------------------------
 
@@ -772,10 +758,6 @@ VerticalCS::createGravityRelatedHeight(const common::UnitOfMeasure &unit) {
         "H", AxisDirection::UP, unit)));
     return cs;
 }
-
-// ---------------------------------------------------------------------------
-
-CartesianCS::CartesianCS() = default;
 
 // ---------------------------------------------------------------------------
 
@@ -883,10 +865,6 @@ CartesianCS::createGeocentric(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
-OrdinalCS::OrdinalCS() = default;
-
-// ---------------------------------------------------------------------------
-
 //! @cond Doxygen_Suppress
 OrdinalCS::~OrdinalCS() = default;
 //! @endcond
@@ -917,10 +895,6 @@ OrdinalCS::create(const util::PropertyMap &properties,
     cs->setProperties(properties);
     return cs;
 }
-
-// ---------------------------------------------------------------------------
-
-ParametricCS::ParametricCS() = default;
 
 // ---------------------------------------------------------------------------
 
