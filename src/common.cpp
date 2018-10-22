@@ -106,6 +106,14 @@ UnitOfMeasure &UnitOfMeasure::operator=(const UnitOfMeasure &other) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+UnitOfMeasureNNPtr UnitOfMeasure::create(const UnitOfMeasure &other) {
+    return util::nn_make_shared<UnitOfMeasure>(other);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the name of the unit of measure. */
 const std::string &UnitOfMeasure::name() const { return d->name_; }
 
@@ -147,8 +155,8 @@ const std::string &UnitOfMeasure::code() const { return d->code_; }
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-std::string UnitOfMeasure::exportToWKT(
-    WKTFormatterNNPtr formatter,
+void UnitOfMeasure::_exportToWKT(
+    WKTFormatter *formatter,
     const std::string &unitType) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
@@ -201,7 +209,6 @@ std::string UnitOfMeasure::exportToWKT(
         }
     }
     formatter->endNode();
-    return formatter->toString();
 }
 //! @endcond
 
@@ -822,10 +829,10 @@ void IdentifiedObject::setProperties(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-void IdentifiedObject::formatID(WKTFormatterNNPtr formatter) const {
+void IdentifiedObject::formatID(WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     for (const auto &id : identifiers()) {
-        id->exportToWKT(formatter);
+        id->_exportToWKT(formatter);
         if (!isWKT2) {
             break;
         }
@@ -834,7 +841,7 @@ void IdentifiedObject::formatID(WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
-void IdentifiedObject::formatRemarks(WKTFormatterNNPtr formatter) const {
+void IdentifiedObject::formatRemarks(WKTFormatter *formatter) const {
     if (!remarks().empty()) {
         formatter->startNode(WKTConstants::REMARK, false);
         formatter->addQuotedString(remarks());
@@ -932,7 +939,7 @@ ObjectDomainNNPtr ObjectDomain::create(const optional<std::string> &scopeIn,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
+void ObjectDomain::_exportToWKT(WKTFormatter *formatter) const {
     if (d->scope_.has_value()) {
         formatter->startNode(WKTConstants::SCOPE, false);
         formatter->addQuotedString(*(d->scope_));
@@ -965,7 +972,7 @@ std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
             formatter->startNode(WKTConstants::VERTICALEXTENT, false);
             formatter->add(extent->minimumValue());
             formatter->add(extent->maximumValue());
-            extent->unit()->exportToWKT(formatter);
+            extent->unit()->_exportToWKT(formatter);
             formatter->endNode();
         }
         if (d->domainOfValidity_->temporalElements().size() == 1) {
@@ -984,7 +991,6 @@ std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
             formatter->endNode();
         }
     }
-    return formatter->toString();
 }
 //! @endcond
 
@@ -1100,7 +1106,7 @@ void ObjectUsage::setProperties(
 
 // ---------------------------------------------------------------------------
 
-void ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
+void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     if (isWKT2 && formatter->outputId()) {
         auto l_domains = domains();
@@ -1108,11 +1114,11 @@ void ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
             if (formatter->use2018Keywords()) {
                 for (const auto &domain : l_domains) {
                     formatter->startNode(WKTConstants::USAGE, false);
-                    domain->exportToWKT(formatter);
+                    domain->_exportToWKT(formatter);
                     formatter->endNode();
                 }
             } else {
-                l_domains[0]->exportToWKT(formatter);
+                l_domains[0]->_exportToWKT(formatter);
             }
         }
     }

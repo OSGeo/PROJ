@@ -132,8 +132,10 @@ class DatumEnsemble final : public common::IdentifiedObject,
         const std::vector<DatumNNPtr> &datumsIn,
         const metadata::PositionalAccuracyNNPtr &accuracy); // throw(Exception)
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+                        //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -185,12 +187,10 @@ class PrimeMeridian final : public common::IdentifiedObject,
     PROJ_DLL static const PrimeMeridianNNPtr GREENWICH;
     PROJ_DLL static const PrimeMeridianNNPtr PARIS;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -199,9 +199,12 @@ class PrimeMeridian final : public common::IdentifiedObject,
 
     PROJ_PRIVATE :
 
-        //! @cond Doxygen_Suppress
-        static std::string
-        getPROJStringWellKnownName(const common::Angle &angle);
+        void
+        _exportToPROJString(io::PROJStringFormatter *formatter)
+            const override; // throw(FormattingException)
+
+    //! @cond Doxygen_Suppress
+    static std::string getPROJStringWellKnownName(const common::Angle &angle);
     //! @endcond
 
   protected:
@@ -286,17 +289,18 @@ class Ellipsoid final : public common::IdentifiedObject,
     PROJ_DLL static const EllipsoidNNPtr WGS84;
     PROJ_DLL static const EllipsoidNNPtr GRS1980;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_PRIVATE : void _exportToPROJString(io::PROJStringFormatter *formatter)
+                       const override; // throw(FormattingException)
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -381,8 +385,10 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
         EPSG_6269; // North American Datum 1983
     PROJ_DLL static const GeodeticReferenceFrameNNPtr EPSG_6326; // WGS 84
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -450,8 +456,10 @@ class DynamicGeodeticReferenceFrame final : public GeodeticReferenceFrame {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+                        //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -518,8 +526,10 @@ class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
 
     PROJ_DLL const util::optional<RealizationMethod> &realizationMethod() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     // non-standard
     PROJ_DLL static VerticalReferenceFrameNNPtr
@@ -587,8 +597,10 @@ class DynamicVerticalReferenceFrame final : public VerticalReferenceFrame {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+                        //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -631,8 +643,10 @@ class TemporalDatum final : public Datum, public io::IWKTExportable {
     PROJ_DLL const common::DateTime &temporalOrigin() const;
     PROJ_DLL const std::string &calendar() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     PROJ_DLL static const std::string CALENDAR_PROLEPTIC_GREGORIAN;
 
@@ -679,8 +693,10 @@ class EngineeringDatum final : public Datum, public io::IWKTExportable {
     PROJ_DLL ~EngineeringDatum() override;
     //! @endcond
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     // non-standard
     PROJ_DLL static EngineeringDatumNNPtr
@@ -721,8 +737,10 @@ class ParametricDatum final : public Datum, public io::IWKTExportable {
     PROJ_DLL ~ParametricDatum() override;
     //! @endcond
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     // non-standard
     PROJ_DLL static ParametricDatumNNPtr

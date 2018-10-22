@@ -132,7 +132,7 @@ class SingleCRS : public CRS {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         void
-        exportDatumOrDatumEnsembleToWkt(io::WKTFormatterNNPtr formatter)
+        exportDatumOrDatumEnsembleToWkt(io::WKTFormatter *formatter)
             const; // throw(io::FormattingException)
                    //! @endcond
 
@@ -216,13 +216,6 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
            const datum::DatumEnsemblePtr &datumEnsemble,
            const cs::CartesianCSNNPtr &cs);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
-
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
@@ -235,9 +228,17 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         void
-        addDatumInfoToPROJString(io::PROJStringFormatterNNPtr formatter) const;
+        addDatumInfoToPROJString(io::PROJStringFormatter *formatter) const;
+
     void addGeocentricUnitConversionIntoPROJString(
-        io::PROJStringFormatterNNPtr formatter) const;
+        io::PROJStringFormatter *formatter) const;
+
+    void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
     //! @endcond
 
   protected:
@@ -253,7 +254,6 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     GeodeticCRS(const GeodeticCRS &other);
     INLINED_MAKE_SHARED
 
-    datum::GeodeticReferenceFrameNNPtr oneDatum() const;
     static GeodeticCRSNNPtr createEPSG_4978();
 
   private:
@@ -292,10 +292,6 @@ class GeographicCRS : public GeodeticCRS {
            const datum::DatumEnsemblePtr &datumEnsemble,
            const cs::EllipsoidalCSNNPtr &cs);
 
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
-
     PROJ_DLL bool is2DPartOf3D(const GeographicCRSNNPtr &other) const;
 
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4267; // NAD27
@@ -311,7 +307,11 @@ class GeographicCRS : public GeodeticCRS {
         //! @cond Doxygen_Suppress
         void
         addAngularUnitConvertAndAxisSwap(
-            io::PROJStringFormatterNNPtr formatter) const;
+            io::PROJStringFormatter *formatter) const;
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
     //! @endcond
 
   protected:
@@ -365,13 +365,6 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     PROJ_DLL const std::vector<operation::PointMotionOperationNNPtr> &
     velocityModel() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
-
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
@@ -393,7 +386,11 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         void
-        addLinearUnitConvert(io::PROJStringFormatterNNPtr formatter) const;
+        addLinearUnitConvert(io::PROJStringFormatter *formatter) const;
+
+    void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
     //! @endcond
 
   protected:
@@ -401,6 +398,10 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::VerticalCSNNPtr &csIn);
     VerticalCRS(const VerticalCRS &other);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
     INLINED_MAKE_SHARED
 
   private:
@@ -449,6 +450,13 @@ class DerivedCRS : virtual public SingleCRS {
 
     void setDerivingConversionCRS();
 
+    void baseExportToPROJString(
+        io::PROJStringFormatter *formatter) const; // throw(FormattingException)
+
+    void baseExportToWKT(
+        io::WKTFormatter *&formatter, const std::string &keyword,
+        const std::string &baseKeyword) const; // throw(FormattingException)
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     DerivedCRS &operator=(const DerivedCRS &other) = delete;
@@ -488,13 +496,6 @@ class ProjectedCRS final : public DerivedCRS, public io::IPROJStringExportable {
     PROJ_DLL const GeodeticCRSNNPtr &baseCRS() const;
     PROJ_DLL const cs::CartesianCSNNPtr &coordinateSystem() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
-
     PROJ_DLL static ProjectedCRSNNPtr
     create(const util::PropertyMap &properties,
            const GeodeticCRSNNPtr &baseCRSIn,
@@ -511,8 +512,12 @@ class ProjectedCRS final : public DerivedCRS, public io::IPROJStringExportable {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         void
-        addUnitConvertAndAxisSwap(io::PROJStringFormatterNNPtr formatter,
+        addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                                   bool axisSpecFound) const;
+
+    void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
     //! @endcond
 
   protected:
@@ -520,6 +525,10 @@ class ProjectedCRS final : public DerivedCRS, public io::IPROJStringExportable {
                  const operation::ConversionNNPtr &derivingConversionIn,
                  const cs::CartesianCSNNPtr &csIn);
     ProjectedCRS(const ProjectedCRS &other);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
     INLINED_MAKE_SHARED
 
   private:
@@ -555,8 +564,10 @@ class TemporalCRS : virtual public SingleCRS {
            const datum::TemporalDatumNNPtr &datumIn,
            const cs::TemporalCSNNPtr &csIn);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -610,8 +621,10 @@ class EngineeringCRS : virtual public SingleCRS {
            const datum::EngineeringDatumNNPtr &datumIn,
            const cs::CoordinateSystemNNPtr &csIn);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -664,8 +677,10 @@ class ParametricCRS : virtual public SingleCRS {
            const datum::ParametricDatumNNPtr &datumIn,
            const cs::ParametricCSNNPtr &csIn);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -704,9 +719,6 @@ using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
  * \note As a departure to \ref ISO_19111_2018, we allow to build a CompoundCRS
  * from CRS objects, whereas ISO19111:2018 restricts the components to
  * SingleCRS.
- * Thus nesting of CompoundCRS is possible. That said,
- * componentReferenceSystems()
- * will return a flattened view of the components.
  *
  * \remark Implements CompoundCRS from \ref ISO_19111_2018
  */
@@ -716,14 +728,12 @@ class CompoundCRS final : public CRS, public io::IPROJStringExportable {
     PROJ_DLL ~CompoundCRS() override;
     //! @endcond
 
-    PROJ_DLL std::vector<CRSNNPtr> componentReferenceSystems() const;
+    PROJ_DLL const std::vector<CRSNNPtr> &componentReferenceSystems() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -740,6 +750,10 @@ class CompoundCRS final : public CRS, public io::IPROJStringExportable {
     // relaxed: standard say SingleCRSNNPtr
     explicit CompoundCRS(const std::vector<CRSNNPtr> &components);
     CompoundCRS(const CompoundCRS &other);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
     INLINED_MAKE_SHARED
 
   private:
@@ -786,12 +800,10 @@ class BoundCRS final : public CRS, public io::IPROJStringExportable {
     PROJ_DLL const CRSNNPtr &hubCRS() const;
     PROJ_DLL const operation::TransformationNNPtr &transformation() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -816,6 +828,9 @@ class BoundCRS final : public CRS, public io::IPROJStringExportable {
              const operation::TransformationNNPtr &transformationIn);
     BoundCRS(const BoundCRS &other);
     INLINED_MAKE_SHARED
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     BoundCRSNNPtr shallowCloneAsBoundCRS() const;
     bool isTOWGS84Compatible() const;
@@ -862,12 +877,10 @@ class DerivedGeodeticCRS final : public GeodeticCRS, public DerivedCRS {
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::SphericalCSNNPtr &csIn);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -884,6 +897,10 @@ class DerivedGeodeticCRS final : public GeodeticCRS, public DerivedCRS {
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const cs::SphericalCSNNPtr &csIn);
     DerivedGeodeticCRS(const DerivedGeodeticCRS &other);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
     INLINED_MAKE_SHARED
 
   private:
@@ -922,12 +939,10 @@ class DerivedGeographicCRS final : public GeographicCRS, public DerivedCRS {
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::EllipsoidalCSNNPtr &csIn);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -941,6 +956,9 @@ class DerivedGeographicCRS final : public GeographicCRS, public DerivedCRS {
                          const operation::ConversionNNPtr &derivingConversionIn,
                          const cs::EllipsoidalCSNNPtr &csIn);
     DerivedGeographicCRS(const DerivedGeographicCRS &other);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
 
@@ -981,12 +999,10 @@ class DerivedProjectedCRS final : public DerivedCRS,
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::CoordinateSystemNNPtr &csIn);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -1000,6 +1016,9 @@ class DerivedProjectedCRS final : public DerivedCRS,
                         const operation::ConversionNNPtr &derivingConversionIn,
                         const cs::CoordinateSystemNNPtr &csIn);
     DerivedProjectedCRS(const DerivedProjectedCRS &other);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
 
@@ -1036,12 +1055,10 @@ class DerivedVerticalCRS final : public VerticalCRS, public DerivedCRS {
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::VerticalCSNNPtr &csIn);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -1055,6 +1072,9 @@ class DerivedVerticalCRS final : public VerticalCRS, public DerivedCRS {
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const cs::VerticalCSNNPtr &csIn);
     DerivedVerticalCRS(const DerivedVerticalCRS &other);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
 
@@ -1112,7 +1132,7 @@ class DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
            const CSNNPtr &csIn);
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
@@ -1144,9 +1164,9 @@ struct DerivedEngineeringCRSTraits {
     typedef cs::CoordinateSystem CSType;
     // old x86_64-w64-mingw32-g++ has issues with static variables. use method
     // instead
-    inline static const std::string CRSName();
-    inline static const std::string WKTKeyword();
-    inline static const std::string WKTBaseKeyword();
+    inline static const std::string &CRSName();
+    inline static const std::string &WKTKeyword();
+    inline static const std::string &WKTBaseKeyword();
     static const bool wkt2_2018_only = true;
 };
 //! @endcond
@@ -1182,9 +1202,9 @@ struct DerivedParametricCRSTraits {
     typedef cs::ParametricCS CSType;
     // old x86_64-w64-mingw32-g++ has issues with static variables. use method
     // instead
-    inline static const std::string CRSName();
-    inline static const std::string WKTKeyword();
-    inline static const std::string WKTBaseKeyword();
+    inline static const std::string &CRSName();
+    inline static const std::string &WKTKeyword();
+    inline static const std::string &WKTBaseKeyword();
     static const bool wkt2_2018_only = false;
 };
 //! @endcond
@@ -1219,9 +1239,9 @@ struct DerivedTemporalCRSTraits {
     typedef cs::TemporalCS CSType;
     // old x86_64-w64-mingw32-g++ has issues with static variables. use method
     // instead
-    inline static const std::string CRSName();
-    inline static const std::string WKTKeyword();
-    inline static const std::string WKTBaseKeyword();
+    inline static const std::string &CRSName();
+    inline static const std::string &WKTKeyword();
+    inline static const std::string &WKTBaseKeyword();
     static const bool wkt2_2018_only = false;
 };
 //! @endcond

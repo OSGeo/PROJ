@@ -266,8 +266,9 @@ const PrimeMeridianNNPtr PrimeMeridian::createPARIS() {
 
 // ---------------------------------------------------------------------------
 
-std::string PrimeMeridian::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void PrimeMeridian::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     std::string l_name = name()->description().has_value()
@@ -288,19 +289,19 @@ std::string PrimeMeridian::exportToWKT(
             if (!(formatter
                       ->primeMeridianOrParameterUnitOmittedIfSameAsAxis() &&
                   longitude().unit() == *(formatter->axisAngularUnit()))) {
-                longitude().unit().exportToWKT(formatter,
-                                               io::WKTConstants::ANGLEUNIT);
+                longitude().unit()._exportToWKT(formatter,
+                                                io::WKTConstants::ANGLEUNIT);
             }
         } else if (!formatter->primeMeridianInDegree()) {
-            longitude().unit().exportToWKT(formatter);
+            longitude().unit()._exportToWKT(formatter);
         }
         if (formatter->outputId()) {
             formatID(formatter);
         }
         formatter->endNode();
     }
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -325,8 +326,8 @@ PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
 
 // ---------------------------------------------------------------------------
 
-std::string PrimeMeridian::exportToPROJString(
-    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+void PrimeMeridian::_exportToPROJString(
+    io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
     if (longitude().getSIValue() != 0) {
         std::string projPMName(getPROJStringWellKnownName(longitude()));
@@ -340,7 +341,6 @@ std::string PrimeMeridian::exportToPROJString(
             formatter->addParam("pm", valDeg);
         }
     }
-    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -656,38 +656,42 @@ const EllipsoidNNPtr Ellipsoid::createGRS1980() {
 
 // ---------------------------------------------------------------------------
 
-std::string Ellipsoid::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void Ellipsoid::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? io::WKTConstants::ELLIPSOID
                                 : io::WKTConstants::SPHEROID,
                          !identifiers().empty());
     {
-        formatter->addQuotedString(name()->description().has_value()
-                                       ? *(name()->description())
-                                       : "unnamed");
-        if (isWKT2) {
-            formatter->add(semiMajorAxis().value());
+        const auto &l_name = nameStr();
+        if (l_name.empty()) {
+            formatter->addQuotedString("unnamed");
         } else {
-            formatter->add(semiMajorAxis()
-                               .convertToUnit(common::UnitOfMeasure::METRE)
-                               .value());
+            formatter->addQuotedString(l_name);
+        }
+        const auto &semiMajor = semiMajorAxis();
+        if (isWKT2) {
+            formatter->add(semiMajor.value());
+        } else {
+            formatter->add(
+                semiMajor.convertToUnit(common::UnitOfMeasure::METRE).value());
         }
         formatter->add(computeInverseFlattening().value());
+        const auto &unit = semiMajor.unit();
         if (isWKT2 &&
             !(formatter->ellipsoidUnitOmittedIfMetre() &&
-              semiMajorAxis().unit() == common::UnitOfMeasure::METRE)) {
-            semiMajorAxis().unit().exportToWKT(formatter,
-                                               io::WKTConstants::LENGTHUNIT);
+              unit == common::UnitOfMeasure::METRE)) {
+            unit._exportToWKT(formatter, io::WKTConstants::LENGTHUNIT);
         }
         if (formatter->outputId()) {
             formatID(formatter);
         }
     }
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -724,8 +728,8 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
 
 // ---------------------------------------------------------------------------
 
-std::string Ellipsoid::exportToPROJString(
-    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+void Ellipsoid::_exportToPROJString(
+    io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
     const double a = semiMajorAxis().getSIValue();
     const double b = computeSemiMinorAxis().getSIValue();
@@ -735,7 +739,7 @@ std::string Ellipsoid::exportToPROJString(
     std::string ellpsName;
     if (lookForProjWellKnownEllps(projEllpsName, ellpsName)) {
         formatter->addParam("ellps", projEllpsName);
-        return formatter->toString();
+        return;
     }
 
     formatter->addParam("a", a);
@@ -744,7 +748,6 @@ std::string Ellipsoid::exportToPROJString(
     } else {
         formatter->addParam("b", b);
     }
-    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -786,26 +789,29 @@ bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
-        if ((semiMinorAxis().has_value() ^
-             otherEllipsoid->semiMinorAxis().has_value())) {
+        const auto &l_semiMinorAxis = semiMinorAxis();
+        const auto &l_other_semiMinorAxis = otherEllipsoid->semiMinorAxis();
+        if ((l_semiMinorAxis.has_value() ^ l_other_semiMinorAxis.has_value())) {
             return false;
         }
-        if (semiMinorAxis().has_value() &&
-            otherEllipsoid->semiMinorAxis().has_value()) {
-            if (!semiMinorAxis()->isEquivalentTo(
-                    *(otherEllipsoid->semiMinorAxis()), criterion)) {
+        if (l_semiMinorAxis.has_value() && l_other_semiMinorAxis.has_value()) {
+            if (!l_semiMinorAxis->isEquivalentTo(*l_other_semiMinorAxis,
+                                                 criterion)) {
                 return false;
             }
         }
 
-        if ((inverseFlattening().has_value() ^
-             otherEllipsoid->inverseFlattening().has_value())) {
+        const auto &l_inverseFlattening = inverseFlattening();
+        const auto &l_other_sinverseFlattening =
+            otherEllipsoid->inverseFlattening();
+        if ((l_inverseFlattening.has_value() ^
+             l_other_sinverseFlattening.has_value())) {
             return false;
         }
-        if (inverseFlattening().has_value() &&
-            otherEllipsoid->inverseFlattening().has_value()) {
-            if (!inverseFlattening()->isEquivalentTo(
-                    *(otherEllipsoid->inverseFlattening()), criterion)) {
+        if (l_inverseFlattening.has_value() &&
+            l_other_sinverseFlattening.has_value()) {
+            if (!l_inverseFlattening->isEquivalentTo(
+                    *l_other_sinverseFlattening, criterion)) {
                 return false;
             }
         }
@@ -816,14 +822,14 @@ bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
         }
     }
 
-    if ((semiMedianAxis().has_value() ^
-         otherEllipsoid->semiMedianAxis().has_value())) {
+    const auto &l_semiMedianAxis = semiMedianAxis();
+    const auto &l_other_semiMedianAxis = otherEllipsoid->semiMedianAxis();
+    if ((l_semiMedianAxis.has_value() ^ l_other_semiMedianAxis.has_value())) {
         return false;
     }
-    if (semiMedianAxis().has_value() &&
-        otherEllipsoid->semiMedianAxis().has_value()) {
-        if (!semiMedianAxis()->isEquivalentTo(
-                *(otherEllipsoid->semiMedianAxis()), criterion)) {
+    if (l_semiMedianAxis.has_value() && l_other_semiMedianAxis.has_value()) {
+        if (!l_semiMedianAxis->isEquivalentTo(*l_other_semiMedianAxis,
+                                              criterion)) {
             return false;
         }
     }
@@ -954,13 +960,16 @@ const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6326() {
 
 // ---------------------------------------------------------------------------
 
-std::string GeodeticReferenceFrame::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void GeodeticReferenceFrame::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(io::WKTConstants::DATUM, !identifiers().empty());
-    auto l_name = name()->description().has_value() ? *(name()->description())
-                                                    : "unnamed";
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        l_name = "unnamed";
+    }
     if (!isWKT2) {
         l_name = replaceAll(l_name, " ", "_");
         if (l_name == "World_Geodetic_System_1984") {
@@ -969,7 +978,7 @@ std::string GeodeticReferenceFrame::exportToWKT(
     }
     formatter->addQuotedString(l_name);
 
-    ellipsoid()->exportToWKT(formatter);
+    ellipsoid()->_exportToWKT(formatter);
     if (isWKT2) {
         if (anchorDefinition()) {
             formatter->startNode(io::WKTConstants::ANCHOR, false);
@@ -998,8 +1007,8 @@ std::string GeodeticReferenceFrame::exportToWKT(
     }
     // the PRIMEM is exported as a child of the CRS
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1098,8 +1107,9 @@ bool DynamicGeodeticReferenceFrame::isEquivalentTo(
 
 // ---------------------------------------------------------------------------
 
-std::string DynamicGeodeticReferenceFrame::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void DynamicGeodeticReferenceFrame::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (isWKT2 && formatter->use2018Keywords()) {
@@ -1117,8 +1127,9 @@ std::string DynamicGeodeticReferenceFrame::exportToWKT(
         }
         formatter->endNode();
     }
-    return GeodeticReferenceFrame::exportToWKT(formatter);
+    GeodeticReferenceFrame::_exportToWKT(formatter);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1211,8 +1222,9 @@ DatumEnsemble::positionalAccuracy() const {
 
 // ---------------------------------------------------------------------------
 
-std::string DatumEnsemble::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void DatumEnsemble::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2 || !formatter->use2018Keywords()) {
@@ -1242,15 +1254,15 @@ std::string DatumEnsemble::exportToWKT(
     auto grfFirst = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
         l_datums[0].as_nullable());
     if (grfFirst) {
-        grfFirst->ellipsoid()->exportToWKT(formatter);
+        grfFirst->ellipsoid()->_exportToWKT(formatter);
     }
 
     formatter->startNode(io::WKTConstants::ENSEMBLEACCURACY, false);
     formatter->add(positionalAccuracy()->value());
     formatter->endNode();
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1390,8 +1402,9 @@ VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
 
 // ---------------------------------------------------------------------------
 
-std::string VerticalReferenceFrame::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void VerticalReferenceFrame::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (isWKT2) {
@@ -1427,8 +1440,8 @@ std::string VerticalReferenceFrame::exportToWKT(
         }
         formatter->endNode();
     }
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1534,8 +1547,9 @@ bool DynamicVerticalReferenceFrame::isEquivalentTo(
 
 // ---------------------------------------------------------------------------
 
-std::string DynamicVerticalReferenceFrame::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void DynamicVerticalReferenceFrame::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (isWKT2 && formatter->use2018Keywords()) {
@@ -1553,8 +1567,9 @@ std::string DynamicVerticalReferenceFrame::exportToWKT(
         }
         formatter->endNode();
     }
-    return VerticalReferenceFrame::exportToWKT(formatter);
+    VerticalReferenceFrame::_exportToWKT(formatter);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1654,8 +1669,9 @@ TemporalDatum::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string TemporalDatum::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void TemporalDatum::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
@@ -1682,8 +1698,8 @@ std::string TemporalDatum::exportToWKT(
     }
 
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1735,8 +1751,9 @@ EngineeringDatum::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string EngineeringDatum::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void EngineeringDatum::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? io::WKTConstants::EDATUM
@@ -1754,8 +1771,8 @@ std::string EngineeringDatum::exportToWKT(
         formatter->add(32767);
     }
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1805,8 +1822,9 @@ ParametricDatum::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string ParametricDatum::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void ParametricDatum::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
@@ -1821,8 +1839,8 @@ std::string ParametricDatum::exportToWKT(
         formatter->endNode();
     }
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

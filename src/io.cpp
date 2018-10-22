@@ -81,6 +81,14 @@ namespace io {
 
 //! @cond Doxygen_Suppress
 IWKTExportable::~IWKTExportable() = default;
+
+// ---------------------------------------------------------------------------
+
+std::string IWKTExportable::exportToWKT(WKTFormatter *formatter) const {
+    _exportToWKT(formatter);
+    return formatter->toString();
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -144,7 +152,7 @@ struct WKTFormatter::Private {
  * @return new formatter.
  */
 WKTFormatterNNPtr WKTFormatter::create(Convention convention) {
-    return WKTFormatter::nn_make_shared<WKTFormatter>(convention);
+    return NN_NO_CHECK(WKTFormatter::make_unique<WKTFormatter>(convention));
 }
 
 // ---------------------------------------------------------------------------
@@ -158,9 +166,8 @@ WKTFormatterNNPtr WKTFormatter::create(Convention convention) {
  * @param other source formatter.
  * @return new formatter.
  */
-WKTFormatterNNPtr WKTFormatter::create(WKTFormatterNNPtr other) {
-    auto f = WKTFormatter::nn_make_shared<WKTFormatter>(
-        other->d->params_.convention_);
+WKTFormatterNNPtr WKTFormatter::create(const WKTFormatterNNPtr &other) {
+    auto f = create(other->d->params_.convention_);
     f->d->params_ = other->d->params_;
     return f;
 }
@@ -394,6 +401,10 @@ void WKTFormatter::Private::startNewChild() {
 }
 
 // ---------------------------------------------------------------------------
+
+void WKTFormatter::addQuotedString(const char *str) {
+    addQuotedString(std::string(str));
+}
 
 void WKTFormatter::addQuotedString(const std::string &str) {
     d->startNewChild();
@@ -2008,7 +2019,7 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
                ci_equal(node->value(), WKTConstants::BASEGEOGCRS)) {
         // This is a WKT2-2018 GeographicCRS. An ellipsoidal CS is expected
         throw ParsingException("ellipsoidal CS expected, but found " +
-                               cs->getWKT2Type(WKTFormatter::create()));
+                               cs->getWKT2Type(true));
     }
 
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
@@ -2037,8 +2048,7 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
         }
     }
 
-    throw ParsingException("unhandled CS type: " +
-                           cs->getWKT2Type(WKTFormatter::create()));
+    throw ParsingException("unhandled CS type: " + cs->getWKT2Type(true));
 }
 
 // ---------------------------------------------------------------------------
@@ -2077,7 +2087,7 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
     } else if (ci_equal(node->value(), WKTConstants::GEOGCRS)) {
         // This is a WKT2-2018 GeographicCRS. An ellipsoidal CS is expected
         throw ParsingException("ellipsoidal CS expected, but found " +
-                               cs->getWKT2Type(WKTFormatter::create()));
+                               cs->getWKT2Type(true));
     }
 
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
@@ -2098,8 +2108,7 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
                                           NN_NO_CHECK(sphericalCS));
     }
 
-    throw ParsingException("unhandled CS type: " +
-                           cs->getWKT2Type(WKTFormatter::create()));
+    throw ParsingException("unhandled CS type: " + cs->getWKT2Type(true));
 }
 
 // ---------------------------------------------------------------------------
@@ -2758,7 +2767,7 @@ WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
     auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(cs);
     if (!verticalCS) {
         throw ParsingException("vertical CS expected, but found " +
-                               cs->getWKT2Type(WKTFormatter::create()));
+                               cs->getWKT2Type(true));
     }
 
     return DerivedVerticalCRS::create(buildProperties(node), baseVertCRS,
@@ -3341,6 +3350,18 @@ FormattingException::~FormattingException() = default;
 
 // ---------------------------------------------------------------------------
 
+void FormattingException::Throw(const char *msg) {
+    throw FormattingException(msg);
+}
+
+// ---------------------------------------------------------------------------
+
+void FormattingException::Throw(const std::string &msg) {
+    throw FormattingException(msg);
+}
+
+// ---------------------------------------------------------------------------
+
 ParsingException::ParsingException(const char *message) : Exception(message) {}
 
 // ---------------------------------------------------------------------------
@@ -3359,6 +3380,14 @@ ParsingException::~ParsingException() = default;
 // ---------------------------------------------------------------------------
 
 IPROJStringExportable::~IPROJStringExportable() = default;
+
+// ---------------------------------------------------------------------------
+
+std::string IPROJStringExportable::exportToPROJString(
+    PROJStringFormatter *formatter) const {
+    _exportToPROJString(formatter);
+    return formatter->toString();
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -3385,7 +3414,6 @@ struct PROJStringFormatter::Private {
     std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
     bool omitProjLongLatIfPossible_ = false;
     bool omitZUnitConversion_ = false;
-    int level_ = 0;
     DatabaseContextPtr dbContext_{};
     bool useETMercForTMerc_ = false;
 
@@ -3431,8 +3459,8 @@ PROJStringFormatter::~PROJStringFormatter() = default;
 PROJStringFormatterNNPtr
 PROJStringFormatter::create(Convention conventionIn,
                             DatabaseContextPtr dbContext) {
-    return PROJStringFormatter::nn_make_shared<PROJStringFormatter>(
-        conventionIn, dbContext);
+    return NN_NO_CHECK(PROJStringFormatter::make_unique<PROJStringFormatter>(
+        conventionIn, dbContext));
 }
 
 // ---------------------------------------------------------------------------
@@ -3459,9 +3487,6 @@ static std::string toStr(double d) {
 /** \brief Returns the PROJ string. */
 const std::string &PROJStringFormatter::toString() const {
     d->result_.clear();
-    if (d->level_) {
-        return d->result_;
-    }
 
     for (size_t i = 0; i < d->steps_.size(); ++i) {
         // Remove no-op helmert
@@ -3472,6 +3497,59 @@ const std::string &PROJStringFormatter::toString() const {
             d->steps_[i].paramValues[2] == "z=0") {
             d->steps_.erase(d->steps_.begin() + i, d->steps_.begin() + i + 1);
             --i;
+            continue;
+        }
+    }
+
+    for (auto &step : d->steps_) {
+        if (!step.inverted) {
+            continue;
+        }
+
+        // axisswap order=2,1 is its own inverse
+        if (step.name == "axisswap" && step.paramValues.size() == 1 &&
+            step.paramValues[0] == "order=2,1") {
+            step.inverted = false;
+            continue;
+        }
+
+        // handle unitconvert inverse
+        if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
+            starts_with(step.paramValues[0], "xy_in=") &&
+            starts_with(step.paramValues[1], "xy_out=")) {
+            auto xy_in = step.paramValues[0].substr(strlen("xy_in="));
+            auto xy_out = step.paramValues[1].substr(strlen("xy_out="));
+            step.paramValues[0] = "xy_in=" + xy_out;
+            step.paramValues[1] = "xy_out=" + xy_in;
+            step.inverted = false;
+            continue;
+        }
+
+        if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
+            starts_with(step.paramValues[0], "z_in=") &&
+            starts_with(step.paramValues[1], "z_out=")) {
+            auto z_in = step.paramValues[0].substr(strlen("z_in="));
+            auto z_out = step.paramValues[1].substr(strlen("z_out="));
+            step.paramValues[0] = "z_in=" + z_out;
+            step.paramValues[1] = "z_out=" + z_in;
+            step.inverted = false;
+            continue;
+        }
+
+        if (step.name == "unitconvert" && step.paramValues.size() == 4 &&
+            starts_with(step.paramValues[0], "xy_in=") &&
+            starts_with(step.paramValues[1], "z_in=") &&
+            starts_with(step.paramValues[2], "xy_out=") &&
+            starts_with(step.paramValues[3], "z_out=")) {
+            auto xy_in = step.paramValues[0].substr(strlen("xy_in="));
+            auto z_in = step.paramValues[1].substr(strlen("z_in="));
+            auto xy_out = step.paramValues[2].substr(strlen("xy_out="));
+            auto z_out = step.paramValues[3].substr(strlen("z_out="));
+            step.paramValues[0] = "xy_in=" + xy_out;
+            step.paramValues[1] = "z_in=" + z_out;
+            step.paramValues[2] = "xy_out=" + xy_in;
+            step.paramValues[3] = "z_out=" + z_in;
+            step.inverted = false;
             continue;
         }
     }
@@ -3800,14 +3878,6 @@ const std::string &PROJStringFormatter::toString() const {
         }
     } while (changeDone);
 
-    for (auto &step : d->steps_) {
-        // axisswap order=2,1 is its own inverse
-        if (step.name == "axisswap" && step.paramValues.size() == 1 &&
-            step.paramValues[0] == "order=2,1") {
-            step.inverted = false;
-        }
-    }
-
     if (d->steps_.size() > 1 ||
         (d->steps_.size() == 1 && d->steps_[0].inverted)) {
         d->appendToResult("+proj=pipeline");
@@ -3817,45 +3887,6 @@ const std::string &PROJStringFormatter::toString() const {
             d->appendToResult("+step");
         }
         if (step.inverted) {
-            if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
-                starts_with(step.paramValues[0], "xy_in=") &&
-                starts_with(step.paramValues[1], "xy_out=")) {
-                d->appendToResult("+proj=" + step.name);
-                d->appendToResult(
-                    "+xy_in=" + step.paramValues[1].substr(strlen("xy_out=")));
-                d->appendToResult("+xy_out=" +
-                                  step.paramValues[0].substr(strlen("xy_in=")));
-                continue;
-            }
-
-            if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
-                starts_with(step.paramValues[0], "z_in=") &&
-                starts_with(step.paramValues[1], "z_out=")) {
-                d->appendToResult("+proj=" + step.name);
-                d->appendToResult("+z_in=" +
-                                  step.paramValues[1].substr(strlen("z_out=")));
-                d->appendToResult("+z_out=" +
-                                  step.paramValues[0].substr(strlen("z_in=")));
-                continue;
-            }
-
-            if (step.name == "unitconvert" && step.paramValues.size() == 4 &&
-                starts_with(step.paramValues[0], "xy_in=") &&
-                starts_with(step.paramValues[1], "z_in=") &&
-                starts_with(step.paramValues[2], "xy_out=") &&
-                starts_with(step.paramValues[3], "z_out=")) {
-                d->appendToResult("+proj=" + step.name);
-                d->appendToResult(
-                    "+xy_in=" + step.paramValues[2].substr(strlen("xy_out=")));
-                d->appendToResult("+z_in=" +
-                                  step.paramValues[3].substr(strlen("z_out=")));
-                d->appendToResult("+xy_out=" +
-                                  step.paramValues[0].substr(strlen("xy_in=")));
-                d->appendToResult("+z_out=" +
-                                  step.paramValues[1].substr(strlen("z_in=")));
-                continue;
-            }
-
             d->appendToResult("+inv");
         }
         if (!step.name.empty()) {
@@ -3880,41 +3911,6 @@ PROJStringFormatter::Convention PROJStringFormatter::convention() const {
 
 bool PROJStringFormatter::getUseETMercForTMerc() const {
     return d->useETMercForTMerc_;
-}
-
-// ---------------------------------------------------------------------------
-
-void PROJStringFormatter::enter() { ++d->level_; }
-
-// ---------------------------------------------------------------------------
-
-void PROJStringFormatter::leave() {
-    assert(d->level_ > 0);
-    --d->level_;
-}
-
-// ---------------------------------------------------------------------------
-
-PROJStringFormatter::Scope::Scope(const PROJStringFormatterNNPtr &formatter)
-    : formatter_(formatter) {
-    formatter_->enter();
-}
-
-// ---------------------------------------------------------------------------
-
-PROJStringFormatter::Scope::~Scope() {
-    if (formatter_) {
-        formatter_->leave();
-    }
-}
-// ---------------------------------------------------------------------------
-
-std::string PROJStringFormatter::Scope::toString() {
-    assert(formatter_);
-    formatter_->leave();
-    auto ret = formatter_->toString();
-    formatter_ = nullptr;
-    return ret;
 }
 
 // ---------------------------------------------------------------------------
@@ -4079,7 +4075,7 @@ void PROJStringFormatter::addParam(const std::string &paramName, double val) {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::addParam(const std::string &paramName,
+void PROJStringFormatter::addParam(const char *paramName,
                                    const std::vector<double> &vals) {
     std::string paramValue;
     for (size_t i = 0; i < vals.size(); ++i) {
@@ -4094,6 +4090,11 @@ void PROJStringFormatter::addParam(const std::string &paramName,
 // ---------------------------------------------------------------------------
 
 void PROJStringFormatter::addParam(const char *paramName, const char *val) {
+    addParam(std::string(paramName), val);
+}
+
+void PROJStringFormatter::addParam(const char *paramName,
+                                   const std::string &val) {
     addParam(std::string(paramName), val);
 }
 

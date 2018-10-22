@@ -105,8 +105,8 @@ class InverseCoordinateOperation : virtual public CoordinateOperation {
 
     ~InverseCoordinateOperation() override;
 
-    std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     bool
     isEquivalentTo(const util::IComparable *other,
@@ -131,13 +131,13 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
 
     ~InverseConversion() override;
 
-    std::string exportToWKT(io::WKTFormatterNNPtr formatter) const override {
-        return Conversion::exportToWKT(formatter);
+    void _exportToWKT(io::WKTFormatter *formatter) const override {
+        Conversion::_exportToWKT(formatter);
     }
 
-    std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override {
-        return InverseCoordinateOperation::exportToPROJString(formatter);
+    void
+    _exportToPROJString(io::PROJStringFormatter *formatter) const override {
+        InverseCoordinateOperation::_exportToPROJString(formatter);
     }
 
     bool
@@ -177,11 +177,11 @@ class InverseTransformation : public Transformation,
 
     ~InverseTransformation() override;
 
-    std::string exportToWKT(io::WKTFormatterNNPtr formatter) const override;
+    void _exportToWKT(io::WKTFormatter *formatter) const override;
 
-    std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override {
-        return InverseCoordinateOperation::exportToPROJString(formatter);
+    void
+    _exportToPROJString(io::PROJStringFormatter *formatter) const override {
+        return InverseCoordinateOperation::_exportToPROJString(formatter);
     }
 
     bool
@@ -223,11 +223,8 @@ class PROJBasedOperation : public SingleOperation {
   public:
     ~PROJBasedOperation() override;
 
-    std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
 
     CoordinateOperationNNPtr inverse() const override;
 
@@ -248,6 +245,10 @@ class PROJBasedOperation : public SingleOperation {
   protected:
     PROJBasedOperation(const OperationMethodNNPtr &methodIn,
                        const std::vector<GeneralParameterValueNNPtr> &values);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
     INLINED_MAKE_SHARED
 
   private:

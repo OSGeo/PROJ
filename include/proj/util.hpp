@@ -98,6 +98,14 @@ namespace proj {}
             std::shared_ptr<T>(new T(std::forward<Args>(args)...)));           \
     }
 
+// To include in the protected/private section of a class definition,
+// to be able to call make_unique on a protected/private constructor
+#define INLINED_MAKE_UNIQUE                                                    \
+    template <typename T, typename... Args>                                    \
+    static std::unique_ptr<T> make_unique(Args &&... args) {                   \
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));         \
+    }
+
 #ifdef DOXYGEN_ENABLED
 #define PROJ_FRIEND(mytype)
 #define PROJ_FRIEND_OPTIONAL(mytype)
@@ -108,6 +116,18 @@ namespace proj {}
 
 #ifndef PROJ_PRIVATE
 #define PROJ_PRIVATE public
+#endif
+
+#if defined(__GNU_C__)
+#define PROJ_NO_INLINE __attribute__((noinline))
+#else
+#define PROJ_NO_INLINE
+#endif
+
+#if defined(__GNU_C__)
+#define PROJ_NO_RETURN __attribute__((noreturn))
+#else
+#define PROJ_NO_RETURN
 #endif
 
 //! @endcond
@@ -137,12 +157,6 @@ template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 #define NN_NO_CHECK(p)                                                         \
     ::dropbox::oxygen::nn<typename std::remove_reference<decltype(p)>::type>(  \
         dropbox::oxygen::i_promise_i_checked_for_null, (p))
-
-#if defined(__GNU_C__)
-#define PROJ_NO_INLINE __attribute__((noinline))
-#else
-#define PROJ_NO_INLINE
-#endif
 
 //! @endcond
 

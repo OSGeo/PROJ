@@ -198,7 +198,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 std::cout << projStringExportable->exportToPROJString(
                                  PROJStringFormatter::create(
                                      PROJStringFormatter::Convention::PROJ_5,
-                                     dbContext))
+                                     dbContext)
+                                     .get())
                           << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
@@ -230,7 +231,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 std::cout << objToExport->exportToPROJString(
                                  PROJStringFormatter::create(
                                      PROJStringFormatter::Convention::PROJ_4,
-                                     dbContext))
+                                     dbContext)
+                                     .get())
                           << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
@@ -251,7 +253,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << "WKT2_2015 string: " << std::endl;
                 }
                 auto wkt = wktExportable->exportToWKT(
-                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2015));
+                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2015)
+                        .get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
                 }
@@ -272,7 +275,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << "WKT2_2018 string: " << std::endl;
                 }
                 auto wkt = wktExportable->exportToWKT(
-                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                        .get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
                 }
@@ -304,7 +308,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 }
 
                 auto wkt = objToExport->exportToWKT(
-                    WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+                    WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
+                        .get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
                 }
@@ -384,7 +389,7 @@ static void outputOperations(
 
             std::cout << ", ";
 
-            auto name = *(op->name()->description());
+            auto name = op->nameStr();
             if (!name.empty()) {
                 std::cout << name;
             } else {

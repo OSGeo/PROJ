@@ -102,18 +102,19 @@ MeridianNNPtr Meridian::create(const common::Angle &longitudeIn) {
 
 // ---------------------------------------------------------------------------
 
-std::string Meridian::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void Meridian::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     formatter->startNode(io::WKTConstants::MERIDIAN, !identifiers().empty());
     formatter->add(longitude().value());
-    longitude().unit().exportToWKT(formatter, io::WKTConstants::ANGLEUNIT);
+    longitude().unit()._exportToWKT(formatter, io::WKTConstants::ANGLEUNIT);
     if (formatter->outputId()) {
         formatID(formatter);
     }
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -259,12 +260,14 @@ CoordinateSystemAxisNNPtr CoordinateSystemAxis::create(
 
 // ---------------------------------------------------------------------------
 
-std::string CoordinateSystemAxis::exportToWKT(
+//! @cond Doxygen_Suppress
+void CoordinateSystemAxis::_exportToWKT(
     // cppcheck-suppress passedByValue
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
-    return exportToWKT(formatter, 0, false);
+    _exportToWKT(formatter, 0, false);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -282,9 +285,8 @@ std::string CoordinateSystemAxis::normalizeAxisName(const std::string &str) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
-                                              int order,
-                                              bool disableAbbrev) const {
+void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
+                                        bool disableAbbrev) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(io::WKTConstants::AXIS, !identifiers().empty());
     std::string axisName = *(name()->description());
@@ -341,7 +343,7 @@ std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
     formatter->addQuotedString(axisDesignation);
     formatter->add(dir);
     if (meridian()) {
-        meridian()->exportToWKT(formatter);
+        meridian()->_exportToWKT(formatter);
     }
     if (formatter->outputAxisOrder() && order > 0) {
         formatter->startNode(io::WKTConstants::ORDER, false);
@@ -350,13 +352,12 @@ std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
     }
     if (formatter->outputUnit() &&
         unit().type() != common::UnitOfMeasure::Type::NONE) {
-        unit().exportToWKT(formatter);
+        unit()._exportToWKT(formatter);
     }
     if (formatter->outputId()) {
         formatID(formatter);
     }
     formatter->endNode();
-    return formatter->toString();
 }
 //! @endcond
 
@@ -433,14 +434,15 @@ CoordinateSystem::axisList() const {
 
 // ---------------------------------------------------------------------------
 
-std::string CoordinateSystem::exportToWKT(
-    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+//! @cond Doxygen_Suppress
+void CoordinateSystem::_exportToWKT(
+    io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
     if (isWKT2) {
         formatter->startNode(io::WKTConstants::CS, !identifiers().empty());
-        formatter->add(getWKT2Type(formatter));
+        formatter->add(getWKT2Type(formatter->use2018Keywords()));
         formatter->add(axisList().size());
         formatter->endNode();
         formatter->startNode(std::string(),
@@ -472,12 +474,12 @@ std::string CoordinateSystem::exportToWKT(
 
     for (auto &axis : axisList()) {
         int axisOrder = (isWKT2 && axisList().size() > 1) ? order : 0;
-        axis->exportToWKT(formatter, axisOrder, disableAbbrev);
+        axis->_exportToWKT(formatter, axisOrder, disableAbbrev);
         order++;
     }
     if (isWKT2 && !axisList().empty() && bAllSameUnit &&
         formatter->outputCSUnitOnlyOnceIfSame()) {
-        unit.exportToWKT(formatter);
+        unit._exportToWKT(formatter);
     }
 
     formatter->popOutputUnit();
@@ -485,8 +487,8 @@ std::string CoordinateSystem::exportToWKT(
     if (isWKT2) {
         formatter->endNode();
     }
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -503,9 +505,7 @@ bool CoordinateSystem::isEquivalentTo(
     if (list.size() != otherList.size()) {
         return false;
     }
-    auto formatter =
-        io::WKTFormatter::create(io::WKTFormatter::Convention::WKT2_2018);
-    if (getWKT2Type(formatter) != otherCS->getWKT2Type(formatter)) {
+    if (getWKT2Type(true) != otherCS->getWKT2Type(true)) {
         return false;
     }
     for (size_t i = 0; i < list.size(); i++) {
@@ -1045,9 +1045,8 @@ DateTimeTemporalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string
-DateTimeTemporalCS::getWKT2Type(io::WKTFormatterNNPtr formatter) const {
-    return formatter->use2018Keywords() ? "TemporalDateTime" : "temporal";
+std::string DateTimeTemporalCS::getWKT2Type(bool use2018Keywords) const {
+    return use2018Keywords ? "TemporalDateTime" : "temporal";
 }
 
 // ---------------------------------------------------------------------------
@@ -1079,9 +1078,8 @@ TemporalCountCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string
-TemporalCountCS::getWKT2Type(io::WKTFormatterNNPtr formatter) const {
-    return formatter->use2018Keywords() ? "TemporalCount" : "temporal";
+std::string TemporalCountCS::getWKT2Type(bool use2018Keywords) const {
+    return use2018Keywords ? "TemporalCount" : "temporal";
 }
 
 // ---------------------------------------------------------------------------
@@ -1113,9 +1111,8 @@ TemporalMeasureCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string
-TemporalMeasureCS::getWKT2Type(io::WKTFormatterNNPtr formatter) const {
-    return formatter->use2018Keywords() ? "TemporalMeasure" : "temporal";
+std::string TemporalMeasureCS::getWKT2Type(bool use2018Keywords) const {
+    return use2018Keywords ? "TemporalMeasure" : "temporal";
 }
 
 } // namespace cs

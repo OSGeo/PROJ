@@ -243,21 +243,22 @@ TEST(operation, transformation_to_wkt) {
     {
         auto formatter = WKTFormatter::create();
         formatter->setOutputId(false);
-        src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter);
+        src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter.get());
     }
 
     std::string dst_wkt;
     {
         auto formatter = WKTFormatter::create();
         formatter->setOutputId(false);
-        dst_wkt = GeographicCRS::EPSG_4807->exportToWKT(formatter);
+        dst_wkt = GeographicCRS::EPSG_4807->exportToWKT(formatter.get());
     }
 
     std::string interpolation_wkt;
     {
         auto formatter = WKTFormatter::create();
         formatter->setOutputId(false);
-        interpolation_wkt = GeographicCRS::EPSG_4979->exportToWKT(formatter);
+        interpolation_wkt =
+            GeographicCRS::EPSG_4979->exportToWKT(formatter.get());
     }
 
     auto expected =
@@ -277,14 +278,16 @@ TEST(operation, transformation_to_wkt) {
         "    ID[\"codeSpaceTransformation\",\"codeTransformation\"],\n"
         "    REMARK[\"my remarks\"]]";
 
-    EXPECT_EQ(replaceAll(replaceAll(transf->exportToWKT(WKTFormatter::create()),
-                                    " ", ""),
-                         "\n", ""),
-              replaceAll(replaceAll(expected, " ", ""), "\n", ""));
+    EXPECT_EQ(
+        replaceAll(replaceAll(transf->exportToWKT(WKTFormatter::create().get()),
+                              " ", ""),
+                   "\n", ""),
+        replaceAll(replaceAll(expected, " ", ""), "\n", ""));
 
-    EXPECT_THROW(transf->exportToWKT(
-                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-                 FormattingException);
+    EXPECT_THROW(
+        transf->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
 
     EXPECT_TRUE(transf->isEquivalentTo(transf.get()));
     EXPECT_FALSE(transf->isEquivalentTo(createUnrelatedObject().get()));
@@ -338,7 +341,7 @@ TEST(operation, concatenated_operation) {
         auto formatter =
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
         formatter->setOutputId(false);
-        src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter);
+        src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter.get());
     }
 
     std::string dst_wkt;
@@ -346,7 +349,7 @@ TEST(operation, concatenated_operation) {
         auto formatter =
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
         formatter->setOutputId(false);
-        dst_wkt = GeographicCRS::EPSG_4979->exportToWKT(formatter);
+        dst_wkt = GeographicCRS::EPSG_4979->exportToWKT(formatter.get());
     }
 
     std::string step1_wkt;
@@ -354,7 +357,7 @@ TEST(operation, concatenated_operation) {
         auto formatter =
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
         formatter->setOutputId(false);
-        step1_wkt = transf_1->exportToWKT(formatter);
+        step1_wkt = transf_1->exportToWKT(formatter.get());
     }
 
     std::string step2_wkt;
@@ -362,7 +365,7 @@ TEST(operation, concatenated_operation) {
         auto formatter =
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
         formatter->setOutputId(false);
-        step2_wkt = transf_2->exportToWKT(formatter);
+        step2_wkt = transf_2->exportToWKT(formatter.get());
     }
 
     auto expected = "CONCATENATEDOPERATION[\"name\",\n"
@@ -377,13 +380,15 @@ TEST(operation, concatenated_operation) {
                                 "    ID[\"codeSpace\",\"code\"],\n"
                                 "    REMARK[\"my remarks\"]]";
 
-    EXPECT_EQ(replaceAll(replaceAll(concat->exportToWKT(WKTFormatter::create(
-                                        WKTFormatter::Convention::WKT2_2018)),
+    EXPECT_EQ(replaceAll(replaceAll(concat->exportToWKT(
+                                        WKTFormatter::create(
+                                            WKTFormatter::Convention::WKT2_2018)
+                                            .get()),
                                     " ", ""),
                          "\n", ""),
               replaceAll(replaceAll(expected, " ", ""), "\n", ""));
 
-    EXPECT_THROW(concat->exportToWKT(WKTFormatter::create()),
+    EXPECT_THROW(concat->exportToWKT(WKTFormatter::create().get()),
                  FormattingException);
 
     EXPECT_THROW(ConcatenatedOperation::create(
@@ -456,7 +461,7 @@ TEST(operation, transformation_createGeocentricTranslations) {
         std::vector<double>{-1.0, -2.0, -3.0, 0.0, 0.0, 0.0, 0.0};
     EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(), expected_inv);
 
-    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=GRS80 +step +proj=helmert +x=1 +y=2 +z=3 +step +inv "
@@ -498,7 +503,7 @@ TEST(operation,
         PropertyMap(), createGeocentric(), createGeocentricKM(), 1.0, 2.0, 3.0,
         std::vector<PositionalAccuracyNNPtr>());
 
-    EXPECT_EQ(transf1->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(transf1->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=helmert +x=1 +y=2 +z=3 +step "
               "+proj=unitconvert +xy_in=m +z_in=m +xy_out=km +z_out=km");
 
@@ -506,7 +511,7 @@ TEST(operation,
         PropertyMap(), createGeocentricKM(), createGeocentric(), 1.0, 2.0, 3.0,
         std::vector<PositionalAccuracyNNPtr>());
 
-    EXPECT_EQ(transf2->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(transf2->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=km +z_in=km "
               "+xy_out=m +z_out=m +step +proj=helmert +x=1 +y=2 +z=3");
 
@@ -514,7 +519,7 @@ TEST(operation,
         PropertyMap(), createGeocentricKM(), createGeocentricKM(), 1.0, 2.0,
         3.0, std::vector<PositionalAccuracyNNPtr>());
 
-    EXPECT_EQ(transf3->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(transf3->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=km +z_in=km "
               "+xy_out=m +z_out=m +step +proj=helmert +x=1 +y=2 +z=3 +step "
               "+proj=unitconvert +xy_in=m +z_in=m +xy_out=km +z_out=km");
@@ -528,9 +533,9 @@ TEST(operation, transformation_createGeocentricTranslations_null) {
         PropertyMap(), createGeocentric(), createGeocentric(), 0.0, 0.0, 0.0,
         std::vector<PositionalAccuracyNNPtr>());
 
-    EXPECT_EQ(
-        transf->inverse()->exportToPROJString(PROJStringFormatter::create()),
-        "");
+    EXPECT_EQ(transf->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "");
 }
 
 // ---------------------------------------------------------------------------
@@ -541,9 +546,9 @@ TEST(operation, transformation_createGeocentricTranslations_neg_zero) {
         PropertyMap(), createGeocentric(), createGeocentric(), 1.0, -0.0, 0.0,
         std::vector<PositionalAccuracyNNPtr>());
 
-    EXPECT_EQ(
-        transf->inverse()->exportToPROJString(PROJStringFormatter::create()),
-        "+proj=helmert +x=-1 +y=0 +z=0");
+    EXPECT_EQ(transf->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=helmert +x=-1 +y=0 +z=0");
 }
 
 // ---------------------------------------------------------------------------
@@ -559,7 +564,7 @@ TEST(operation, transformation_createPositionVector) {
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     EXPECT_EQ(transf->getTOWGS84Parameters(), expected);
 
-    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=GRS80 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
@@ -581,16 +586,17 @@ TEST(operation, transformation_createPositionVector) {
         nn_dynamic_pointer_cast<Transformation>(inv_transf);
     ASSERT_TRUE(inv_transf_as_transf != nullptr);
 #else
-    EXPECT_EQ(inv_transf->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=WGS84 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
-              "+ry=5 +rz=6 +s=7 +convention=position_vector +step +inv "
-              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(
+        inv_transf->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+        "+ellps=WGS84 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
+        "+ry=5 +rz=6 +s=7 +convention=position_vector +step +inv "
+        "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+        "+xy_out=deg +step +proj=axisswap +order=2,1");
 
     // In WKT, use approximate formula
-    auto wkt = inv_transf->exportToWKT(WKTFormatter::create());
+    auto wkt = inv_transf->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(
         wkt.find("Transformation from WGS 84 to NAD83 (approx. inversion)") !=
         std::string::npos)
@@ -626,7 +632,7 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     EXPECT_EQ(params, expected);
 
-    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=GRS80 +step +proj=helmert +x=1 +y=2 +z=3 +rx=-4 +ry=-5 "
@@ -648,16 +654,17 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
         nn_dynamic_pointer_cast<Transformation>(inv_transf);
     ASSERT_TRUE(inv_transf_as_transf != nullptr);
 #else
-    EXPECT_EQ(inv_transf->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=WGS84 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=-4 "
-              "+ry=-5 +rz=-6 +s=7 +convention=coordinate_frame +step +inv "
-              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(
+        inv_transf->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+        "+ellps=WGS84 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=-4 "
+        "+ry=-5 +rz=-6 +s=7 +convention=coordinate_frame +step +inv "
+        "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+        "+xy_out=deg +step +proj=axisswap +order=2,1");
 
     // In WKT, use approximate formula
-    auto wkt = inv_transf->exportToWKT(WKTFormatter::create());
+    auto wkt = inv_transf->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(
         wkt.find("Transformation from WGS 84 to NAD83 (approx. inversion)") !=
         std::string::npos)
@@ -697,7 +704,7 @@ TEST(operation, transformation_createTimeDependentPositionVector) {
               inv_transf->sourceCRS()->nameStr());
 
     auto projString =
-        inv_transf->exportToPROJString(PROJStringFormatter::create());
+        inv_transf->exportToPROJString(PROJStringFormatter::create().get());
     EXPECT_TRUE(projString.find("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
                                 "+rz=6 +s=7 +dx=0.1 +dy=0.2 +dz=0.3 +drx=0.4 "
                                 "+dry=0.5 +drz=0.6 +ds=0.7 +t_epoch=2018.5 "
@@ -706,7 +713,7 @@ TEST(operation, transformation_createTimeDependentPositionVector) {
         << projString;
 
     // In WKT, use approximate formula
-    auto wkt = inv_transf->exportToWKT(WKTFormatter::create());
+    auto wkt = inv_transf->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(
         wkt.find("Transformation from WGS 84 to NAD83 (approx. inversion)") !=
         std::string::npos)
@@ -769,7 +776,7 @@ TEST(operation, transformation_createTimeDependentCoordinateFrameRotation) {
               inv_transf->sourceCRS()->nameStr());
 
     auto projString =
-        inv_transf->exportToPROJString(PROJStringFormatter::create());
+        inv_transf->exportToPROJString(PROJStringFormatter::create().get());
     EXPECT_TRUE(projString.find("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
                                 "+rz=6 +s=7 +dx=0.1 +dy=0.2 +dz=0.3 +drx=0.4 "
                                 "+dry=0.5 +drz=0.6 +ds=0.7 +t_epoch=2018.5 "
@@ -778,7 +785,7 @@ TEST(operation, transformation_createTimeDependentCoordinateFrameRotation) {
         << projString;
 
     // In WKT, use approximate formula
-    auto wkt = inv_transf->exportToWKT(WKTFormatter::create());
+    auto wkt = inv_transf->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(
         wkt.find("Transformation from WGS 84 to NAD83 (approx. inversion)") !=
         std::string::npos)
@@ -841,7 +848,8 @@ TEST(operation, transformation_successive_helmert_noop) {
         std::vector<CoordinateOperationNNPtr>{transf_1, transf_2},
         std::vector<PositionalAccuracyNNPtr>{});
 
-    EXPECT_EQ(concat->exportToPROJString(PROJStringFormatter::create()), "");
+    EXPECT_EQ(concat->exportToPROJString(PROJStringFormatter::create().get()),
+              "");
 }
 
 // ---------------------------------------------------------------------------
@@ -861,7 +869,8 @@ TEST(operation, transformation_successive_helmert_non_trivial_1) {
         std::vector<CoordinateOperationNNPtr>{transf_1, transf_2},
         std::vector<PositionalAccuracyNNPtr>{});
 
-    EXPECT_NE(concat->exportToPROJString(PROJStringFormatter::create()), "");
+    EXPECT_NE(concat->exportToPROJString(PROJStringFormatter::create().get()),
+              "");
 }
 
 // ---------------------------------------------------------------------------
@@ -881,7 +890,8 @@ TEST(operation, transformation_successive_helmert_non_trivial_2) {
         std::vector<CoordinateOperationNNPtr>{transf_1, transf_2},
         std::vector<PositionalAccuracyNNPtr>{});
 
-    EXPECT_NE(concat->exportToPROJString(PROJStringFormatter::create()), "");
+    EXPECT_NE(concat->exportToPROJString(PROJStringFormatter::create().get()),
+              "");
 }
 
 // ---------------------------------------------------------------------------
@@ -892,7 +902,7 @@ TEST(operation, transformation_createMolodensky) {
         PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
         2.0, 3.0, 4.0, 5.0, std::vector<PositionalAccuracyNNPtr>());
 
-    auto wkt = transf->exportToWKT(WKTFormatter::create());
+    auto wkt = transf->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(replaceAll(replaceAll(wkt, " ", ""), "\n", "")
                     .find("METHOD[\"Molodensky\",ID[\"EPSG\",9604]]") !=
                 std::string::npos)
@@ -908,8 +918,8 @@ TEST(operation, transformation_createMolodensky) {
     EXPECT_EQ(transf->targetCRS()->nameStr(),
               inv_transf_as_transf->sourceCRS()->nameStr());
 
-    auto projString =
-        inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
+    auto projString = inv_transf_as_transf->exportToPROJString(
+        PROJStringFormatter::create().get());
     EXPECT_EQ(projString, "+proj=pipeline +step +proj=axisswap +order=2,1 "
                           "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                           "+step +proj=molodensky +ellps=GRS80 +dx=-1 +dy=-2 "
@@ -926,7 +936,7 @@ TEST(operation, transformation_createAbridgedMolodensky) {
         PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
         2.0, 3.0, 4.0, 5.0, std::vector<PositionalAccuracyNNPtr>());
 
-    auto wkt = transf->exportToWKT(WKTFormatter::create());
+    auto wkt = transf->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(replaceAll(replaceAll(wkt, " ", ""), "\n", "")
                     .find(replaceAll(
                         "METHOD[\"Abridged Molodensky\",ID[\"EPSG\",9605]]",
@@ -943,8 +953,8 @@ TEST(operation, transformation_createAbridgedMolodensky) {
     EXPECT_EQ(transf->targetCRS()->nameStr(),
               inv_transf_as_transf->sourceCRS()->nameStr());
 
-    auto projString =
-        inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
+    auto projString = inv_transf_as_transf->exportToPROJString(
+        PROJStringFormatter::create().get());
     EXPECT_EQ(projString, "+proj=pipeline +step +proj=axisswap +order=2,1 "
                           "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                           "+step +proj=molodensky +ellps=GRS80 +dx=-1 +dy=-2 "
@@ -976,7 +986,7 @@ TEST(operation, transformation_inverse) {
     auto inv = transf->inverse();
     EXPECT_EQ(inv->inverse(), transf);
     EXPECT_EQ(
-        inv->exportToWKT(WKTFormatter::create()),
+        inv->exportToWKT(WKTFormatter::create().get()),
         "COORDINATEOPERATION[\"Inverse of my transformation\",\n"
         "    SOURCECRS[\n"
         "        GEODCRS[\"NAD83\",\n"
@@ -1012,7 +1022,7 @@ TEST(operation, transformation_inverse) {
         "    OPERATIONACCURACY[0.1],\n"
         "    ID[\"INVERSE(my codeSpace)\",\"my code\"]]");
 
-    EXPECT_THROW(inv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_THROW(inv->exportToPROJString(PROJStringFormatter::create().get()),
                  FormattingException);
 }
 
@@ -1034,10 +1044,10 @@ TEST(operation, transformation_createTOWGS84) {
 
 TEST(operation, utm_export) {
     auto conv = Conversion::createUTM(PropertyMap(), 1, false);
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=utm +zone=1 +south");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"UTM zone 1S\",\n"
               "    METHOD[\"Transverse Mercator\",\n"
               "        ID[\"EPSG\",9807]],\n"
@@ -1058,14 +1068,15 @@ TEST(operation, utm_export) {
               "        ID[\"EPSG\",8807]],\n"
               "    ID[\"EPSG\",17001]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Transverse_Mercator\"],\n"
-              "PARAMETER[\"latitude_of_origin\",0],\n"
-              "PARAMETER[\"central_meridian\",-177],\n"
-              "PARAMETER[\"scale_factor\",0.9996],\n"
-              "PARAMETER[\"false_easting\",500000],\n"
-              "PARAMETER[\"false_northing\",10000000]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Transverse_Mercator\"],\n"
+        "PARAMETER[\"latitude_of_origin\",0],\n"
+        "PARAMETER[\"central_meridian\",-177],\n"
+        "PARAMETER[\"scale_factor\",0.9996],\n"
+        "PARAMETER[\"false_easting\",500000],\n"
+        "PARAMETER[\"false_northing\",10000000]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1073,17 +1084,17 @@ TEST(operation, utm_export) {
 TEST(operation, tmerc_export) {
     auto conv = Conversion::createTransverseMercator(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
     {
         auto formatter = PROJStringFormatter::create();
         formatter->setUseETMercForTMerc(true);
-        EXPECT_EQ(conv->exportToPROJString(formatter),
+        EXPECT_EQ(conv->exportToPROJString(formatter.get()),
                   "+proj=etmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
     }
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Transverse Mercator\",\n"
               "    METHOD[\"Transverse Mercator\",\n"
               "        ID[\"EPSG\",9807]],\n"
@@ -1103,14 +1114,15 @@ TEST(operation, tmerc_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Transverse_Mercator\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"scale_factor\",3],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Transverse_Mercator\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"scale_factor\",3],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1118,10 +1130,10 @@ TEST(operation, tmerc_export) {
 TEST(operation, gstmerc_export) {
     auto conv = Conversion::createGaussSchreiberTransverseMercator(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=gstmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Gauss Schreiber Transverse Mercator\",\n"
               "    METHOD[\"Gauss Schreiber Transverse Mercator\"],\n"
               "    PARAMETER[\"Latitude of natural origin\",1,\n"
@@ -1140,14 +1152,15 @@ TEST(operation, gstmerc_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Gauss_Schreiber_Transverse_Mercator\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"scale_factor\",3],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Gauss_Schreiber_Transverse_Mercator\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"scale_factor\",3],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1156,10 +1169,10 @@ TEST(operation, tmerc_south_oriented_export) {
     auto conv = Conversion::createTransverseMercatorSouthOriented(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=tmerc +axis=wsu +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Transverse Mercator (South Orientated)\",\n"
               "    METHOD[\"Transverse Mercator (South Orientated)\",\n"
               "        ID[\"EPSG\",9808]],\n"
@@ -1179,14 +1192,15 @@ TEST(operation, tmerc_south_oriented_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Transverse_Mercator_South_Orientated\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"scale_factor\",3],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Transverse_Mercator_South_Orientated\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"scale_factor\",3],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 
     auto wkt = "PROJCRS[\"Hartebeesthoek94 / Lo29\","
                "  BASEGEODCRS[\"Hartebeesthoek94\","
@@ -1212,7 +1226,7 @@ TEST(operation, tmerc_south_oriented_export) {
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=tmerc "
               "+axis=wsu +lat_0=0 +lon_0=29 +k_0=1 +x_0=0 +y_0=0 +ellps=WGS84");
@@ -1224,12 +1238,12 @@ TEST(operation, tped_export) {
     auto conv = Conversion::createTwoPointEquidistant(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
         Length(6));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=tpeqd +lat_1=1 +lon_1=2 +lat_2=3 +lon_2=4 +x_0=5 +y_0=6");
 
     auto formatter = WKTFormatter::create();
     formatter->simulCurNodeHasId();
-    EXPECT_EQ(conv->exportToWKT(formatter),
+    EXPECT_EQ(conv->exportToWKT(formatter.get()),
               "CONVERSION[\"Two Point Equidistant\",\n"
               "    METHOD[\"Two Point Equidistant\"],\n"
               "    PARAMETER[\"Latitude of first point\",1,\n"
@@ -1247,15 +1261,16 @@ TEST(operation, tped_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Two_Point_Equidistant\"],\n"
-              "PARAMETER[\"Latitude_Of_1st_Point\",1],\n"
-              "PARAMETER[\"Longitude_Of_1st_Point\",2],\n"
-              "PARAMETER[\"Latitude_Of_2nd_Point\",3],\n"
-              "PARAMETER[\"Longitude_Of_2nd_Point\",4],\n"
-              "PARAMETER[\"false_easting\",5],\n"
-              "PARAMETER[\"false_northing\",6]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Two_Point_Equidistant\"],\n"
+        "PARAMETER[\"Latitude_Of_1st_Point\",1],\n"
+        "PARAMETER[\"Longitude_Of_1st_Point\",2],\n"
+        "PARAMETER[\"Latitude_Of_2nd_Point\",3],\n"
+        "PARAMETER[\"Longitude_Of_2nd_Point\",4],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1263,10 +1278,10 @@ TEST(operation, tped_export) {
 TEST(operation, tmg_export) {
     auto conv = Conversion::createTunisiaMappingGrid(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
-    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create().get()),
                  FormattingException);
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Tunisia Mapping Grid\",\n"
               "    METHOD[\"Tunisia Mapping Grid\",\n"
               "        ID[\"EPSG\",9816]],\n"
@@ -1283,13 +1298,14 @@ TEST(operation, tmg_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Tunisia_Mapping_Grid\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Tunisia_Mapping_Grid\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1299,10 +1315,10 @@ TEST(operation, aea_export) {
                                                   Angle(2), Angle(3), Angle(4),
                                                   Length(5), Length(6));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=aea +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Albers Equal Area\",\n"
               "    METHOD[\"Albers Equal Area\",\n"
               "        ID[\"EPSG\",9822]],\n"
@@ -1325,15 +1341,16 @@ TEST(operation, aea_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Albers_Conic_Equal_Area\"],\n"
-              "PARAMETER[\"latitude_of_center\",1],\n"
-              "PARAMETER[\"longitude_of_center\",2],\n"
-              "PARAMETER[\"standard_parallel_1\",3],\n"
-              "PARAMETER[\"standard_parallel_2\",4],\n"
-              "PARAMETER[\"false_easting\",5],\n"
-              "PARAMETER[\"false_northing\",6]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Albers_Conic_Equal_Area\"],\n"
+        "PARAMETER[\"latitude_of_center\",1],\n"
+        "PARAMETER[\"longitude_of_center\",2],\n"
+        "PARAMETER[\"standard_parallel_1\",3],\n"
+        "PARAMETER[\"standard_parallel_2\",4],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1342,10 +1359,10 @@ TEST(operation, azimuthal_equidistant_export) {
     auto conv = Conversion::createAzimuthalEquidistant(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=aeqd +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Modified Azimuthal Equidistant\",\n"
               "    METHOD[\"Modified Azimuthal Equidistant\",\n"
               "        ID[\"EPSG\",9832]],\n"
@@ -1362,13 +1379,14 @@ TEST(operation, azimuthal_equidistant_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Azimuthal_Equidistant\"],\n"
-              "PARAMETER[\"latitude_of_center\",1],\n"
-              "PARAMETER[\"longitude_of_center\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Azimuthal_Equidistant\"],\n"
+        "PARAMETER[\"latitude_of_center\",1],\n"
+        "PARAMETER[\"longitude_of_center\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1377,10 +1395,10 @@ TEST(operation, guam_projection_export) {
     auto conv = Conversion::createGuamProjection(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=aeqd +guam +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Guam Projection\",\n"
               "    METHOD[\"Guam Projection\",\n"
               "        ID[\"EPSG\",9831]],\n"
@@ -1397,9 +1415,10 @@ TEST(operation, guam_projection_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_THROW(conv->exportToWKT(
-                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-                 FormattingException);
+    EXPECT_THROW(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -1408,10 +1427,10 @@ TEST(operation, bonne_export) {
     auto conv = Conversion::createBonne(PropertyMap(), Angle(1), Angle(2),
                                         Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=bonne +lat_1=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Bonne\",\n"
               "    METHOD[\"Bonne\",\n"
               "        ID[\"EPSG\",9827]],\n"
@@ -1428,13 +1447,14 @@ TEST(operation, bonne_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Bonne\"],\n"
-              "PARAMETER[\"standard_parallel_1\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Bonne\"],\n"
+        "PARAMETER[\"standard_parallel_1\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 
     auto obj = WKTParser().createFromWKT(
         "PROJCS[\"unnamed\","
@@ -1451,7 +1471,7 @@ TEST(operation, bonne_export) {
         "UNIT[\"metre\",1]]");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=bonne +lat_1=1 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
 }
@@ -1462,10 +1482,10 @@ TEST(operation, lambert_cylindrical_equal_area_spherical_export) {
     auto conv = Conversion::createLambertCylindricalEqualAreaSpherical(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=cea +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Lambert Cylindrical Equal Area (Spherical)\",\n"
               "    METHOD[\"Lambert Cylindrical Equal Area (Spherical)\",\n"
               "        ID[\"EPSG\",9834]],\n"
@@ -1482,13 +1502,14 @@ TEST(operation, lambert_cylindrical_equal_area_spherical_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Cylindrical_Equal_Area\"],\n"
-              "PARAMETER[\"standard_parallel_1\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Cylindrical_Equal_Area\"],\n"
+        "PARAMETER[\"standard_parallel_1\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1497,10 +1518,10 @@ TEST(operation, lambert_cylindrical_equal_area_export) {
     auto conv = Conversion::createLambertCylindricalEqualArea(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=cea +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Lambert Cylindrical Equal Area\",\n"
               "    METHOD[\"Lambert Cylindrical Equal Area\",\n"
               "        ID[\"EPSG\",9835]],\n"
@@ -1517,13 +1538,14 @@ TEST(operation, lambert_cylindrical_equal_area_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Cylindrical_Equal_Area\"],\n"
-              "PARAMETER[\"standard_parallel_1\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Cylindrical_Equal_Area\"],\n"
+        "PARAMETER[\"standard_parallel_1\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1531,10 +1553,10 @@ TEST(operation, lambert_cylindrical_equal_area_export) {
 TEST(operation, lcc1sp_export) {
     auto conv = Conversion::createLambertConicConformal_1SP(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=lcc +lat_1=1 +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Lambert Conic Conformal (1SP)\",\n"
               "    METHOD[\"Lambert Conic Conformal (1SP)\",\n"
               "        ID[\"EPSG\",9801]],\n"
@@ -1554,14 +1576,15 @@ TEST(operation, lcc1sp_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Lambert_Conformal_Conic_1SP\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"scale_factor\",3],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Lambert_Conformal_Conic_1SP\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"scale_factor\",3],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1570,10 +1593,10 @@ TEST(operation, lcc2sp_export) {
     auto conv = Conversion::createLambertConicConformal_2SP(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
         Length(6));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Lambert Conic Conformal (2SP)\",\n"
               "    METHOD[\"Lambert Conic Conformal (2SP)\",\n"
               "        ID[\"EPSG\",9802]],\n"
@@ -1596,15 +1619,16 @@ TEST(operation, lcc2sp_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Lambert_Conformal_Conic_2SP\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"standard_parallel_1\",3],\n"
-              "PARAMETER[\"standard_parallel_2\",4],\n"
-              "PARAMETER[\"false_easting\",5],\n"
-              "PARAMETER[\"false_northing\",6]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Lambert_Conformal_Conic_2SP\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"standard_parallel_1\",3],\n"
+        "PARAMETER[\"standard_parallel_2\",4],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1614,10 +1638,10 @@ TEST(operation, lcc2sp_michigan_export) {
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
         Length(6), Scale(7));
     EXPECT_EQ(
-        conv->exportToPROJString(PROJStringFormatter::create()),
+        conv->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6 +k_0=7");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Lambert Conic Conformal (2SP Michigan)\",\n"
               "    METHOD[\"Lambert Conic Conformal (2SP Michigan)\",\n"
               "        ID[\"EPSG\",1051]],\n"
@@ -1643,9 +1667,10 @@ TEST(operation, lcc2sp_michigan_export) {
               "        SCALEUNIT[\"unity\",1],\n"
               "        ID[\"EPSG\",1038]]]");
 
-    EXPECT_THROW(conv->exportToWKT(
-                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-                 FormattingException);
+    EXPECT_THROW(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -1654,10 +1679,10 @@ TEST(operation, lcc2sp_belgium_export) {
     auto conv = Conversion::createLambertConicConformal_2SP_Belgium(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
         Length(6));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Lambert Conic Conformal (2SP Belgium)\",\n"
               "    METHOD[\"Lambert Conic Conformal (2SP Belgium)\",\n"
               "        ID[\"EPSG\",9803]],\n"
@@ -1680,15 +1705,16 @@ TEST(operation, lcc2sp_belgium_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Lambert_Conformal_Conic_2SP_Belgium\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"standard_parallel_1\",3],\n"
-              "PARAMETER[\"standard_parallel_2\",4],\n"
-              "PARAMETER[\"false_easting\",5],\n"
-              "PARAMETER[\"false_northing\",6]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Lambert_Conformal_Conic_2SP_Belgium\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"standard_parallel_1\",3],\n"
+        "PARAMETER[\"standard_parallel_2\",4],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1697,10 +1723,10 @@ TEST(operation, cassini_soldner_export) {
     auto conv = Conversion::createCassiniSoldner(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=cass +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Cassini-Soldner\",\n"
               "    METHOD[\"Cassini-Soldner\",\n"
               "        ID[\"EPSG\",9806]],\n"
@@ -1717,13 +1743,14 @@ TEST(operation, cassini_soldner_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Cassini_Soldner\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Cassini_Soldner\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1733,10 +1760,10 @@ TEST(operation, equidistant_conic_export) {
                                                    Angle(2), Angle(3), Angle(4),
                                                    Length(5), Length(6));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=eqdc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Equidistant Conic\",\n"
               "    METHOD[\"Equidistant Conic\"],\n"
               "    PARAMETER[\"Latitude of natural origin\",1,\n"
@@ -1758,15 +1785,16 @@ TEST(operation, equidistant_conic_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Equidistant_Conic\"],\n"
-              "PARAMETER[\"latitude_of_center\",1],\n"
-              "PARAMETER[\"longitude_of_center\",2],\n"
-              "PARAMETER[\"standard_parallel_1\",3],\n"
-              "PARAMETER[\"standard_parallel_2\",4],\n"
-              "PARAMETER[\"false_easting\",5],\n"
-              "PARAMETER[\"false_northing\",6]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Equidistant_Conic\"],\n"
+        "PARAMETER[\"latitude_of_center\",1],\n"
+        "PARAMETER[\"longitude_of_center\",2],\n"
+        "PARAMETER[\"standard_parallel_1\",3],\n"
+        "PARAMETER[\"standard_parallel_2\",4],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1800,10 +1828,10 @@ TEST(operation, eckert_export) {
                                                       PropertyMap(), Angle(1),
                                                       Length(2), Length(3));
 
-        EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=eck" + numbers[i] + " +lon_0=1 +x_0=2 +y_0=3");
 
-        EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+        EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
                   "CONVERSION[\"Eckert " + latinNumbers[i] +
                       "\",\n"
                       "    METHOD[\"Eckert " +
@@ -1819,8 +1847,9 @@ TEST(operation, eckert_export) {
                       "        LENGTHUNIT[\"metre\",1],\n"
                       "        ID[\"EPSG\",8807]]]");
 
-        EXPECT_EQ(conv->exportToWKT(WKTFormatter::create(
-                      WKTFormatter::Convention::WKT1_GDAL)),
+        EXPECT_EQ(conv->exportToWKT(
+                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
+                          .get()),
                   "PROJECTION[\"Eckert_" + latinNumbers[i] +
                       "\"],\n"
                       "PARAMETER[\"central_meridian\",1],\n"
@@ -1835,10 +1864,10 @@ TEST(operation, createEquidistantCylindrical) {
     auto conv = Conversion::createEquidistantCylindrical(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=eqc +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Equidistant Cylindrical\",\n"
               "    METHOD[\"Equidistant Cylindrical\",\n"
               "        ID[\"EPSG\",1028]],\n"
@@ -1855,13 +1884,14 @@ TEST(operation, createEquidistantCylindrical) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Equirectangular\"],\n"
-              "PARAMETER[\"standard_parallel_1\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Equirectangular\"],\n"
+        "PARAMETER[\"standard_parallel_1\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1870,10 +1900,10 @@ TEST(operation, createEquidistantCylindricalSpherical) {
     auto conv = Conversion::createEquidistantCylindricalSpherical(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=eqc +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Equidistant Cylindrical (Spherical)\",\n"
               "    METHOD[\"Equidistant Cylindrical (Spherical)\",\n"
               "        ID[\"EPSG\",1029]],\n"
@@ -1890,13 +1920,14 @@ TEST(operation, createEquidistantCylindricalSpherical) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Equirectangular\"],\n"
-              "PARAMETER[\"standard_parallel_1\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Equirectangular\"],\n"
+        "PARAMETER[\"standard_parallel_1\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1906,10 +1937,10 @@ TEST(operation, gall_export) {
     auto conv =
         Conversion::createGall(PropertyMap(), Angle(1), Length(2), Length(3));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=gall +lon_0=1 +x_0=2 +y_0=3");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Gall\",\n"
               "    METHOD[\"Gall\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -1922,12 +1953,13 @@ TEST(operation, gall_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Gall_Stereographic\"],\n"
-              "PARAMETER[\"central_meridian\",1],\n"
-              "PARAMETER[\"false_easting\",2],\n"
-              "PARAMETER[\"false_northing\",3]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Gall_Stereographic\"],\n"
+        "PARAMETER[\"central_meridian\",1],\n"
+        "PARAMETER[\"false_easting\",2],\n"
+        "PARAMETER[\"false_northing\",3]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1937,10 +1969,10 @@ TEST(operation, goode_homolosine_export) {
     auto conv = Conversion::createGoodeHomolosine(PropertyMap(), Angle(1),
                                                   Length(2), Length(3));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=goode +lon_0=1 +x_0=2 +y_0=3");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Goode Homolosine\",\n"
               "    METHOD[\"Goode Homolosine\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -1953,12 +1985,13 @@ TEST(operation, goode_homolosine_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Goode_Homolosine\"],\n"
-              "PARAMETER[\"central_meridian\",1],\n"
-              "PARAMETER[\"false_easting\",2],\n"
-              "PARAMETER[\"false_northing\",3]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Goode_Homolosine\"],\n"
+        "PARAMETER[\"central_meridian\",1],\n"
+        "PARAMETER[\"false_easting\",2],\n"
+        "PARAMETER[\"false_northing\",3]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1968,10 +2001,10 @@ TEST(operation, interrupted_goode_homolosine_export) {
     auto conv = Conversion::createInterruptedGoodeHomolosine(
         PropertyMap(), Angle(1), Length(2), Length(3));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=igh +lon_0=1 +x_0=2 +y_0=3");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Interrupted Goode Homolosine\",\n"
               "    METHOD[\"Interrupted Goode Homolosine\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -1984,12 +2017,13 @@ TEST(operation, interrupted_goode_homolosine_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Interrupted_Goode_Homolosine\"],\n"
-              "PARAMETER[\"central_meridian\",1],\n"
-              "PARAMETER[\"false_easting\",2],\n"
-              "PARAMETER[\"false_northing\",3]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Interrupted_Goode_Homolosine\"],\n"
+        "PARAMETER[\"central_meridian\",1],\n"
+        "PARAMETER[\"false_easting\",2],\n"
+        "PARAMETER[\"false_northing\",3]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1999,10 +2033,10 @@ TEST(operation, geostationary_satellite_sweep_x_export) {
     auto conv = Conversion::createGeostationarySatelliteSweepX(
         PropertyMap(), Angle(1), Length(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=geos +sweep=x +lon_0=1 +h=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Geostationary Satellite (Sweep X)\",\n"
               "    METHOD[\"Geostationary Satellite (Sweep X)\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -2018,9 +2052,10 @@ TEST(operation, geostationary_satellite_sweep_x_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_THROW(conv->exportToWKT(
-                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-                 FormattingException);
+    EXPECT_THROW(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -2030,10 +2065,10 @@ TEST(operation, geostationary_satellite_sweep_y_export) {
     auto conv = Conversion::createGeostationarySatelliteSweepY(
         PropertyMap(), Angle(1), Length(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=geos +lon_0=1 +h=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Geostationary Satellite (Sweep Y)\",\n"
               "    METHOD[\"Geostationary Satellite (Sweep Y)\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -2049,13 +2084,14 @@ TEST(operation, geostationary_satellite_sweep_y_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Geostationary_Satellite\"],\n"
-              "PARAMETER[\"central_meridian\",1],\n"
-              "PARAMETER[\"satellite_height\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Geostationary_Satellite\"],\n"
+        "PARAMETER[\"central_meridian\",1],\n"
+        "PARAMETER[\"satellite_height\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2063,10 +2099,10 @@ TEST(operation, geostationary_satellite_sweep_y_export) {
 TEST(operation, gnomonic_export) {
     auto conv = Conversion::createGnomonic(PropertyMap(), Angle(1), Angle(2),
                                            Length(4), Length(5));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=gnom +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Gnomonic\",\n"
               "    METHOD[\"Gnomonic\"],\n"
               "    PARAMETER[\"Latitude of natural origin\",1,\n"
@@ -2082,13 +2118,14 @@ TEST(operation, gnomonic_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Gnomonic\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Gnomonic\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2097,11 +2134,11 @@ TEST(operation, hotine_oblique_mercator_variant_A_export) {
     auto conv = Conversion::createHotineObliqueMercatorVariantA(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Scale(5),
         Length(6), Length(7));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=omerc +no_uoff +lat_0=1 +lonc=2 +alpha=3 +gamma=4 +k=5 "
               "+x_0=6 +y_0=7");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Hotine Oblique Mercator (variant A)\",\n"
               "    METHOD[\"Hotine Oblique Mercator (variant A)\",\n"
               "        ID[\"EPSG\",9812]],\n"
@@ -2127,16 +2164,17 @@ TEST(operation, hotine_oblique_mercator_variant_A_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Hotine_Oblique_Mercator\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"azimuth\",3],\n"
-              "PARAMETER[\"rectified_grid_angle\",4],\n"
-              "PARAMETER[\"scale_factor\",5],\n"
-              "PARAMETER[\"false_easting\",6],\n"
-              "PARAMETER[\"false_northing\",7]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Hotine_Oblique_Mercator\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"azimuth\",3],\n"
+        "PARAMETER[\"rectified_grid_angle\",4],\n"
+        "PARAMETER[\"scale_factor\",5],\n"
+        "PARAMETER[\"false_easting\",6],\n"
+        "PARAMETER[\"false_northing\",7]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2145,7 +2183,7 @@ TEST(operation, hotine_oblique_mercator_variant_A_export_swiss_mercator) {
     auto conv = Conversion::createHotineObliqueMercatorVariantA(
         PropertyMap(), Angle(1), Angle(2), Angle(90), Angle(90), Scale(5),
         Length(6), Length(7));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=somerc +lat_0=1 +lon_0=2 +k_0=5 "
               "+x_0=6 +y_0=7");
 }
@@ -2156,11 +2194,11 @@ TEST(operation, hotine_oblique_mercator_variant_B_export) {
     auto conv = Conversion::createHotineObliqueMercatorVariantB(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Scale(5),
         Length(6), Length(7));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=omerc +lat_0=1 +lonc=2 +alpha=3 +gamma=4 +k=5 "
               "+x_0=6 +y_0=7");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Hotine Oblique Mercator (variant B)\",\n"
               "    METHOD[\"Hotine Oblique Mercator (variant B)\",\n"
               "        ID[\"EPSG\",9815]],\n"
@@ -2186,16 +2224,17 @@ TEST(operation, hotine_oblique_mercator_variant_B_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8817]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Hotine_Oblique_Mercator_Azimuth_Center\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"azimuth\",3],\n"
-              "PARAMETER[\"rectified_grid_angle\",4],\n"
-              "PARAMETER[\"scale_factor\",5],\n"
-              "PARAMETER[\"false_easting\",6],\n"
-              "PARAMETER[\"false_northing\",7]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Hotine_Oblique_Mercator_Azimuth_Center\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"azimuth\",3],\n"
+        "PARAMETER[\"rectified_grid_angle\",4],\n"
+        "PARAMETER[\"scale_factor\",5],\n"
+        "PARAMETER[\"false_easting\",6],\n"
+        "PARAMETER[\"false_northing\",7]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2204,7 +2243,7 @@ TEST(operation, hotine_oblique_mercator_variant_B_export_swiss_mercator) {
     auto conv = Conversion::createHotineObliqueMercatorVariantB(
         PropertyMap(), Angle(1), Angle(2), Angle(90), Angle(90), Scale(5),
         Length(6), Length(7));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=somerc +lat_0=1 +lon_0=2 +k_0=5 "
               "+x_0=6 +y_0=7");
 }
@@ -2215,14 +2254,14 @@ TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
     auto conv = Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Angle(5),
         Scale(6), Length(7), Length(8));
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=omerc +lat_0=1 +lat_1=2 +lon_1=3 +lat_2=4 +lon_2=5 +k=6 "
               "+x_0=7 +y_0=8");
 
     auto formatter = WKTFormatter::create();
     formatter->simulCurNodeHasId();
     EXPECT_EQ(
-        conv->exportToWKT(formatter),
+        conv->exportToWKT(formatter.get()),
         "CONVERSION[\"Hotine Oblique Mercator Two Point Natural Origin\",\n"
         "    METHOD[\"Hotine Oblique Mercator Two Point Natural Origin\"],\n"
         "    PARAMETER[\"Latitude of projection centre\",1,\n"
@@ -2248,7 +2287,7 @@ TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
 
     EXPECT_EQ(
         conv->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         "PROJECTION[\"Hotine_Oblique_Mercator_Two_Point_Natural_Origin\"],\n"
         "PARAMETER[\"latitude_of_origin\",1],\n"
         "PARAMETER[\"latitude_of_point_1\",2],\n"
@@ -2266,10 +2305,10 @@ TEST(operation, imw_polyconic_export) {
     auto conv = Conversion::createInternationalMapWorldPolyconic(
         PropertyMap(), Angle(1), Angle(3), Angle(4), Length(5), Length(6));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=imw_p +lon_0=1 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"International Map of the World Polyconic\",\n"
               "    METHOD[\"International Map of the World Polyconic\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -2288,14 +2327,15 @@ TEST(operation, imw_polyconic_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"International_Map_of_the_World_Polyconic\"],\n"
-              "PARAMETER[\"central_meridian\",1],\n"
-              "PARAMETER[\"standard_parallel_1\",3],\n"
-              "PARAMETER[\"standard_parallel_2\",4],\n"
-              "PARAMETER[\"false_easting\",5],\n"
-              "PARAMETER[\"false_northing\",6]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"International_Map_of_the_World_Polyconic\"],\n"
+        "PARAMETER[\"central_meridian\",1],\n"
+        "PARAMETER[\"standard_parallel_1\",3],\n"
+        "PARAMETER[\"standard_parallel_2\",4],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2305,11 +2345,11 @@ TEST(operation, krovak_north_oriented_export) {
         PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.28813972222222),
         Angle(78.5), Scale(0.9999), Length(5), Length(6));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=krovak +lat_0=49.5 +lon_0=42.5 +k=0.9999 +x_0=5 +y_0=6");
 
     EXPECT_EQ(
-        conv->exportToWKT(WKTFormatter::create()),
+        conv->exportToWKT(WKTFormatter::create().get()),
         "CONVERSION[\"Krovak (North Orientated)\",\n"
         "    METHOD[\"Krovak (North Orientated)\",\n"
         "        ID[\"EPSG\",1041]],\n"
@@ -2335,16 +2375,17 @@ TEST(operation, krovak_north_oriented_export) {
         "        LENGTHUNIT[\"metre\",1],\n"
         "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Krovak\"],\n"
-              "PARAMETER[\"latitude_of_center\",49.5],\n"
-              "PARAMETER[\"longitude_of_center\",42.5],\n"
-              "PARAMETER[\"azimuth\",30.2881397222222],\n"
-              "PARAMETER[\"pseudo_standard_parallel_1\",78.5],\n"
-              "PARAMETER[\"scale_factor\",0.9999],\n"
-              "PARAMETER[\"false_easting\",5],\n"
-              "PARAMETER[\"false_northing\",6]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Krovak\"],\n"
+        "PARAMETER[\"latitude_of_center\",49.5],\n"
+        "PARAMETER[\"longitude_of_center\",42.5],\n"
+        "PARAMETER[\"azimuth\",30.2881397222222],\n"
+        "PARAMETER[\"pseudo_standard_parallel_1\",78.5],\n"
+        "PARAMETER[\"scale_factor\",0.9999],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2354,12 +2395,12 @@ TEST(operation, krovak_export) {
         PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.28813972222222),
         Angle(78.5), Scale(0.9999), Length(5), Length(6));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=krovak +axis=swu +lat_0=49.5 +lon_0=42.5 +k=0.9999 +x_0=5 "
               "+y_0=6");
 
     EXPECT_EQ(
-        conv->exportToWKT(WKTFormatter::create()),
+        conv->exportToWKT(WKTFormatter::create().get()),
         "CONVERSION[\"Krovak\",\n"
         "    METHOD[\"Krovak\",\n"
         "        ID[\"EPSG\",9819]],\n"
@@ -2385,9 +2426,10 @@ TEST(operation, krovak_export) {
         "        LENGTHUNIT[\"metre\",1],\n"
         "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_THROW(conv->exportToWKT(
-                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-                 FormattingException);
+    EXPECT_THROW(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -2396,10 +2438,10 @@ TEST(operation, lambert_azimuthal_equal_area_export) {
     auto conv = Conversion::createLambertAzimuthalEqualArea(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=laea +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Lambert Azimuthal Equal Area\",\n"
               "    METHOD[\"Lambert Azimuthal Equal Area\",\n"
               "        ID[\"EPSG\",9820]],\n"
@@ -2416,13 +2458,14 @@ TEST(operation, lambert_azimuthal_equal_area_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],\n"
-              "PARAMETER[\"latitude_of_center\",1],\n"
-              "PARAMETER[\"longitude_of_center\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],\n"
+        "PARAMETER[\"latitude_of_center\",1],\n"
+        "PARAMETER[\"longitude_of_center\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2431,10 +2474,10 @@ TEST(operation, miller_cylindrical_export) {
     auto conv = Conversion::createMillerCylindrical(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=mill +R_A +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Miller Cylindrical\",\n"
               "    METHOD[\"Miller Cylindrical\"],\n"
               "    PARAMETER[\"Latitude of natural origin\",1,\n"
@@ -2450,13 +2493,14 @@ TEST(operation, miller_cylindrical_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Miller_Cylindrical\"],\n"
-              "PARAMETER[\"latitude_of_center\",1],\n"
-              "PARAMETER[\"longitude_of_center\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Miller_Cylindrical\"],\n"
+        "PARAMETER[\"latitude_of_center\",1],\n"
+        "PARAMETER[\"longitude_of_center\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2465,10 +2509,10 @@ TEST(operation, mercator_variant_A_export) {
     auto conv = Conversion::createMercatorVariantA(
         PropertyMap(), Angle(0), Angle(1), Scale(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=merc +lon_0=1 +k=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Mercator (variant A)\",\n"
               "    METHOD[\"Mercator (variant A)\",\n"
               "        ID[\"EPSG\",9804]],\n"
@@ -2488,13 +2532,14 @@ TEST(operation, mercator_variant_A_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Mercator_1SP\"],\n"
-              "PARAMETER[\"central_meridian\",1],\n"
-              "PARAMETER[\"scale_factor\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Mercator_1SP\"],\n"
+        "PARAMETER[\"central_meridian\",1],\n"
+        "PARAMETER[\"scale_factor\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2503,7 +2548,7 @@ TEST(operation, mercator_variant_A_export_latitude_origin_non_zero) {
     auto conv = Conversion::createMercatorVariantA(
         PropertyMap(), Angle(10), Angle(1), Scale(2), Length(3), Length(4));
 
-    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create().get()),
                  FormattingException);
 }
 
@@ -2531,8 +2576,8 @@ TEST(operation, wkt1_import_mercator_variant_A) {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(0),
         Angle(1), Scale(2), Length(3), Length(4));
 
-    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create()),
-              convRef->exportToWKT(WKTFormatter::create()));
+    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create().get()),
+              convRef->exportToWKT(WKTFormatter::create().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -2541,10 +2586,10 @@ TEST(operation, mercator_variant_B_export) {
     auto conv = Conversion::createMercatorVariantB(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=merc +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Mercator (variant B)\",\n"
               "    METHOD[\"Mercator (variant B)\",\n"
               "        ID[\"EPSG\",9805]],\n"
@@ -2561,13 +2606,14 @@ TEST(operation, mercator_variant_B_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Mercator_2SP\"],\n"
-              "PARAMETER[\"standard_parallel_1\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Mercator_2SP\"],\n"
+        "PARAMETER[\"standard_parallel_1\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2576,14 +2622,16 @@ TEST(operation, webmerc_export) {
     auto conv = Conversion::createPopularVisualisationPseudoMercator(
         PropertyMap(), Angle(0), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=webmerc +lat_0=0 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create(
-                     PROJStringFormatter::Convention::PROJ_4)),
-                 FormattingException);
+    EXPECT_THROW(
+        conv->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        FormattingException);
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Popular Visualisation Pseudo Mercator\",\n"
               "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
               "        ID[\"EPSG\",1024]],\n"
@@ -2605,45 +2653,50 @@ TEST(operation, webmerc_export) {
         GeographicCRS::EPSG_4326, conv,
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
-    EXPECT_EQ(projCRS->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJCS[\"Pseudo-Mercator\",\n"
-              "    GEOGCS[\"WGS 84\",\n"
-              "        DATUM[\"WGS_1984\",\n"
-              "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
-              "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
-              "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
-              "        PRIMEM[\"Greenwich\",0,\n"
-              "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
-              "        UNIT[\"degree\",0.0174532925199433,\n"
-              "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
-              "        AXIS[\"Latitude\",NORTH],\n"
-              "        AXIS[\"Longitude\",EAST],\n"
-              "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
-              "    PROJECTION[\"Mercator_1SP\"],\n"
-              "    PARAMETER[\"central_meridian\",2],\n"
-              "    PARAMETER[\"scale_factor\",1],\n"
-              "    PARAMETER[\"false_easting\",3],\n"
-              "    PARAMETER[\"false_northing\",4],\n"
-              "    UNIT[\"metre\",1,\n"
-              "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
-              "    AXIS[\"Easting\",EAST],\n"
-              "    AXIS[\"Northing\",NORTH],\n"
-              "    EXTENSION[\"PROJ4\",\"+proj=merc "
-              "+a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 "
-              "+x_0=3 +y_0=4 +k=1 +units=m "
-              "+nadgrids=@null +wktext +no_defs\"]]");
+    EXPECT_EQ(
+        projCRS->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJCS[\"Pseudo-Mercator\",\n"
+        "    GEOGCS[\"WGS 84\",\n"
+        "        DATUM[\"WGS_1984\",\n"
+        "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+        "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+        "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AXIS[\"Latitude\",NORTH],\n"
+        "        AXIS[\"Longitude\",EAST],\n"
+        "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+        "    PROJECTION[\"Mercator_1SP\"],\n"
+        "    PARAMETER[\"central_meridian\",2],\n"
+        "    PARAMETER[\"scale_factor\",1],\n"
+        "    PARAMETER[\"false_easting\",3],\n"
+        "    PARAMETER[\"false_northing\",4],\n"
+        "    UNIT[\"metre\",1,\n"
+        "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "    AXIS[\"Easting\",EAST],\n"
+        "    AXIS[\"Northing\",NORTH],\n"
+        "    EXTENSION[\"PROJ4\",\"+proj=merc "
+        "+a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 "
+        "+x_0=3 +y_0=4 +k=1 +units=m "
+        "+nadgrids=@null +wktext +no_defs\"]]");
 
-    EXPECT_EQ(projCRS->exportToPROJString(PROJStringFormatter::create(
-                  PROJStringFormatter::Convention::PROJ_5)),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
-              "+lat_0=0 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
+    EXPECT_EQ(
+        projCRS->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5)
+                .get()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
+        "+lat_0=0 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
 
-    EXPECT_EQ(projCRS->exportToPROJString(PROJStringFormatter::create(
-                  PROJStringFormatter::Convention::PROJ_4)),
-              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 +x_0=3 "
-              "+y_0=4 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+    EXPECT_EQ(
+        projCRS->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 +x_0=3 "
+        "+y_0=4 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -2658,14 +2711,14 @@ TEST(operation, webmerc_import_from_GDAL_wkt1) {
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
     auto wkt1 = projCRS->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
     auto obj = WKTParser().createFromWKT(wkt1);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
     auto convGot = crs->derivingConversion();
 
-    EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"unnamed\",\n"
               "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
               "        ID[\"EPSG\",1024]],\n"
@@ -2717,20 +2770,22 @@ TEST(operation, webmerc_import_from_GDAL_wkt1_EPSG_3785_deprecated) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
               "+lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
               "+ellps=WGS84");
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
-                  PROJStringFormatter::Convention::PROJ_4)),
-              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
-              "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+        "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
 
     auto convGot = crs->derivingConversion();
 
-    EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"unnamed\",\n"
               "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
               "        ID[\"EPSG\",1024]],\n"
@@ -2789,23 +2844,26 @@ TEST(operation, webmerc_import_from_WKT2_EPSG_3785_deprecated) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
               "+ellps=WGS84");
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
-                  PROJStringFormatter::Convention::PROJ_4)),
-              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
-              "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
-
-    EXPECT_EQ(crs->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2015)),
-              wkt2);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+        "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2015).get()),
+        wkt2);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         "PROJCS[\"Popular Visualisation CRS / Mercator\",\n"
         "    GEOGCS[\"Popular Visualisation CRS\",\n"
         "        DATUM[\"Popular_Visualisation_Datum\",\n"
@@ -2835,10 +2893,10 @@ TEST(operation, mollweide_export) {
     auto conv = Conversion::createMollweide(PropertyMap(), Angle(1), Length(2),
                                             Length(3));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=moll +lon_0=1 +x_0=2 +y_0=3");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Mollweide\",\n"
               "    METHOD[\"Mollweide\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -2851,12 +2909,13 @@ TEST(operation, mollweide_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Mollweide\"],\n"
-              "PARAMETER[\"central_meridian\",1],\n"
-              "PARAMETER[\"false_easting\",2],\n"
-              "PARAMETER[\"false_northing\",3]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Mollweide\"],\n"
+        "PARAMETER[\"central_meridian\",1],\n"
+        "PARAMETER[\"false_easting\",2],\n"
+        "PARAMETER[\"false_northing\",3]");
 }
 // ---------------------------------------------------------------------------
 
@@ -2864,10 +2923,10 @@ TEST(operation, nzmg_export) {
     auto conv = Conversion::createNewZealandMappingGrid(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=nzmg +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"New Zealand Map Grid\",\n"
               "    METHOD[\"New Zealand Map Grid\",\n"
               "        ID[\"EPSG\",9811]],\n"
@@ -2884,13 +2943,14 @@ TEST(operation, nzmg_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"New_Zealand_Map_Grid\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"New_Zealand_Map_Grid\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2899,10 +2959,10 @@ TEST(operation, oblique_stereographic_export) {
     auto conv = Conversion::createObliqueStereographic(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=sterea +lat_0=1 +lon_0=2 +k=3 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Oblique Stereographic\",\n"
               "    METHOD[\"Oblique Stereographic\",\n"
               "        ID[\"EPSG\",9809]],\n"
@@ -2922,14 +2982,15 @@ TEST(operation, oblique_stereographic_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Oblique_Stereographic\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"scale_factor\",3],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Oblique_Stereographic\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"scale_factor\",3],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2938,10 +2999,10 @@ TEST(operation, orthographic_export) {
     auto conv = Conversion::createOrthographic(PropertyMap(), Angle(1),
                                                Angle(2), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=ortho +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Orthographic\",\n"
               "    METHOD[\"Orthographic\",\n"
               "        ID[\"EPSG\",9840]],\n"
@@ -2958,13 +3019,14 @@ TEST(operation, orthographic_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Orthographic\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Orthographic\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2973,10 +3035,10 @@ TEST(operation, american_polyconic_export) {
     auto conv = Conversion::createAmericanPolyconic(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=poly +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"American Polyconic\",\n"
               "    METHOD[\"American Polyconic\",\n"
               "        ID[\"EPSG\",9818]],\n"
@@ -2993,13 +3055,14 @@ TEST(operation, american_polyconic_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Polyconic\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Polyconic\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3008,10 +3071,10 @@ TEST(operation, polar_stereographic_variant_A_export) {
     auto conv = Conversion::createPolarStereographicVariantA(
         PropertyMap(), Angle(90), Angle(2), Scale(3), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=stere +lat_0=90 +lon_0=2 +k=3 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Polar Stereographic (variant A)\",\n"
               "    METHOD[\"Polar Stereographic (variant A)\",\n"
               "        ID[\"EPSG\",9810]],\n"
@@ -3031,14 +3094,15 @@ TEST(operation, polar_stereographic_variant_A_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Polar_Stereographic\"],\n"
-              "PARAMETER[\"latitude_of_origin\",90],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"scale_factor\",3],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Polar_Stereographic\"],\n"
+        "PARAMETER[\"latitude_of_origin\",90],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"scale_factor\",3],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3047,10 +3111,10 @@ TEST(operation, polar_stereographic_variant_B_export_positive_lat) {
     auto conv = Conversion::createPolarStereographicVariantB(
         PropertyMap(), Angle(70), Angle(2), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=2 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Polar Stereographic (variant B)\",\n"
               "    METHOD[\"Polar Stereographic (variant B)\",\n"
               "        ID[\"EPSG\",9829]],\n"
@@ -3067,13 +3131,14 @@ TEST(operation, polar_stereographic_variant_B_export_positive_lat) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Polar_Stereographic\"],\n"
-              "PARAMETER[\"latitude_of_origin\",70],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Polar_Stereographic\"],\n"
+        "PARAMETER[\"latitude_of_origin\",70],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3082,7 +3147,7 @@ TEST(operation, polar_stereographic_variant_B_export_negative_lat) {
     auto conv = Conversion::createPolarStereographicVariantB(
         PropertyMap(), Angle(-70), Angle(2), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=stere +lat_0=-90 +lat_ts=-70 +lon_0=2 +x_0=4 +y_0=5");
 }
 
@@ -3111,8 +3176,8 @@ TEST(operation, wkt1_import_polar_stereographic_variantA) {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(-90),
         Angle(2), Scale(3), Length(4), Length(5));
 
-    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create()),
-              convRef->exportToWKT(WKTFormatter::create()));
+    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create().get()),
+              convRef->exportToWKT(WKTFormatter::create().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -3140,8 +3205,8 @@ TEST(operation, wkt1_import_polar_stereographic_variantB) {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(-70),
         Angle(2), Length(4), Length(5));
 
-    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create()),
-              convRef->exportToWKT(WKTFormatter::create()));
+    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create().get()),
+              convRef->exportToWKT(WKTFormatter::create().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -3197,10 +3262,11 @@ TEST(operation, wkt1_import_equivalent_parameters) {
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Angle(5),
         Scale(6), Length(7), Length(8));
 
-    EXPECT_EQ(conversion->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              convRef->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)));
+    EXPECT_EQ(
+        conversion->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        convRef->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -3210,10 +3276,10 @@ TEST(operation, robinson_export) {
     auto conv = Conversion::createRobinson(PropertyMap(), Angle(1), Length(2),
                                            Length(3));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=robin +lon_0=1 +x_0=2 +y_0=3");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Robinson\",\n"
               "    METHOD[\"Robinson\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -3226,12 +3292,13 @@ TEST(operation, robinson_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Robinson\"],\n"
-              "PARAMETER[\"longitude_of_center\",1],\n"
-              "PARAMETER[\"false_easting\",2],\n"
-              "PARAMETER[\"false_northing\",3]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Robinson\"],\n"
+        "PARAMETER[\"longitude_of_center\",1],\n"
+        "PARAMETER[\"false_easting\",2],\n"
+        "PARAMETER[\"false_northing\",3]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3241,10 +3308,10 @@ TEST(operation, sinusoidal_export) {
     auto conv = Conversion::createSinusoidal(PropertyMap(), Angle(1), Length(2),
                                              Length(3));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=sinu +lon_0=1 +x_0=2 +y_0=3");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Sinusoidal\",\n"
               "    METHOD[\"Sinusoidal\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -3257,12 +3324,13 @@ TEST(operation, sinusoidal_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Sinusoidal\"],\n"
-              "PARAMETER[\"longitude_of_center\",1],\n"
-              "PARAMETER[\"false_easting\",2],\n"
-              "PARAMETER[\"false_northing\",3]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Sinusoidal\"],\n"
+        "PARAMETER[\"longitude_of_center\",1],\n"
+        "PARAMETER[\"false_easting\",2],\n"
+        "PARAMETER[\"false_northing\",3]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3271,10 +3339,10 @@ TEST(operation, stereographic_export) {
     auto conv = Conversion::createStereographic(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=stere +lat_0=1 +lon_0=2 +k=3 +x_0=4 +y_0=5");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Stereographic\",\n"
               "    METHOD[\"Stereographic\"],\n"
               "    PARAMETER[\"Latitude of natural origin\",1,\n"
@@ -3293,14 +3361,15 @@ TEST(operation, stereographic_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Stereographic\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"scale_factor\",3],\n"
-              "PARAMETER[\"false_easting\",4],\n"
-              "PARAMETER[\"false_northing\",5]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Stereographic\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"scale_factor\",3],\n"
+        "PARAMETER[\"false_easting\",4],\n"
+        "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3310,10 +3379,10 @@ TEST(operation, vandergrinten_export) {
     auto conv = Conversion::createVanDerGrinten(PropertyMap(), Angle(1),
                                                 Length(2), Length(3));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=vandg +R_A +lon_0=1 +x_0=2 +y_0=3");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"VanDerGrinten\",\n"
               "    METHOD[\"VanDerGrinten\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
@@ -3326,12 +3395,13 @@ TEST(operation, vandergrinten_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"VanDerGrinten\"],\n"
-              "PARAMETER[\"central_meridian\",1],\n"
-              "PARAMETER[\"false_easting\",2],\n"
-              "PARAMETER[\"false_northing\",3]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"VanDerGrinten\"],\n"
+        "PARAMETER[\"central_meridian\",1],\n"
+        "PARAMETER[\"false_easting\",2],\n"
+        "PARAMETER[\"false_northing\",3]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3369,12 +3439,12 @@ TEST(operation, wagner_export) {
                                                       PropertyMap(), Angle(1),
                                                       Length(2), Length(3));
 
-        EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=wag" + numbers[i] + " +lon_0=1 +x_0=2 +y_0=3");
 
         auto formatter = WKTFormatter::create();
         formatter->simulCurNodeHasId();
-        EXPECT_EQ(conv->exportToWKT(formatter),
+        EXPECT_EQ(conv->exportToWKT(formatter.get()),
                   "CONVERSION[\"Wagner " + latinNumbers[i] +
                       "\",\n"
                       "    METHOD[\"Wagner " +
@@ -3390,8 +3460,9 @@ TEST(operation, wagner_export) {
                       "        LENGTHUNIT[\"metre\",1],\n"
                       "        ID[\"EPSG\",8807]]]");
 
-        EXPECT_EQ(conv->exportToWKT(WKTFormatter::create(
-                      WKTFormatter::Convention::WKT1_GDAL)),
+        EXPECT_EQ(conv->exportToWKT(
+                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
+                          .get()),
                   "PROJECTION[\"Wagner_" + latinNumbers[i] +
                       "\"],\n"
                       "PARAMETER[\"central_meridian\",1],\n"
@@ -3407,12 +3478,12 @@ TEST(operation, wagnerIII_export) {
     auto conv = Conversion::createWagnerIII(PropertyMap(), Angle(1), Angle(2),
                                             Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=wag3 +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
 
     auto formatter = WKTFormatter::create();
     formatter->simulCurNodeHasId();
-    EXPECT_EQ(conv->exportToWKT(formatter),
+    EXPECT_EQ(conv->exportToWKT(formatter.get()),
               "CONVERSION[\"Wagner III\",\n"
               "    METHOD[\"Wagner III\"],\n"
               "    PARAMETER[\"Latitude of true scale\",1,\n"
@@ -3427,13 +3498,14 @@ TEST(operation, wagnerIII_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Wagner_III\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Wagner_III\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3443,10 +3515,10 @@ TEST(operation, qsc_export) {
     auto conv = Conversion::createQuadrilateralizedSphericalCube(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=qsc +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Quadrilateralized Spherical Cube\",\n"
               "    METHOD[\"Quadrilateralized Spherical Cube\"],\n"
               "    PARAMETER[\"Latitude of natural origin\",1,\n"
@@ -3462,13 +3534,14 @@ TEST(operation, qsc_export) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Quadrilateralized_Spherical_Cube\"],\n"
-              "PARAMETER[\"latitude_of_origin\",1],\n"
-              "PARAMETER[\"central_meridian\",2],\n"
-              "PARAMETER[\"false_easting\",3],\n"
-              "PARAMETER[\"false_northing\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Quadrilateralized_Spherical_Cube\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"false_easting\",3],\n"
+        "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3478,12 +3551,12 @@ TEST(operation, sch_export) {
     auto conv = Conversion::createSphericalCrossTrackHeight(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Length(4));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=sch +plat_0=1 +plon_0=2 +phdg_0=3 +h_0=4");
 
     auto formatter = WKTFormatter::create();
     formatter->simulCurNodeHasId();
-    EXPECT_EQ(conv->exportToWKT(formatter),
+    EXPECT_EQ(conv->exportToWKT(formatter.get()),
               "CONVERSION[\"Spherical Cross-Track Height\",\n"
               "    METHOD[\"Spherical Cross-Track Height\"],\n"
               "    PARAMETER[\"Peg point latitude\",1,\n"
@@ -3495,13 +3568,14 @@ TEST(operation, sch_export) {
               "    PARAMETER[\"Peg point height\",4,\n"
               "        LENGTHUNIT[\"metre\",1]]]");
 
-    EXPECT_EQ(conv->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-              "PROJECTION[\"Spherical_Cross_Track_Height\"],\n"
-              "PARAMETER[\"peg_point_latitude\",1],\n"
-              "PARAMETER[\"peg_point_longitude\",2],\n"
-              "PARAMETER[\"peg_point_heading\",3],\n"
-              "PARAMETER[\"peg_point_height\",4]");
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Spherical_Cross_Track_Height\"],\n"
+        "PARAMETER[\"peg_point_latitude\",1],\n"
+        "PARAMETER[\"peg_point_longitude\",2],\n"
+        "PARAMETER[\"peg_point_heading\",3],\n"
+        "PARAMETER[\"peg_point_height\",4]");
 }
 
 // ---------------------------------------------------------------------------
@@ -3511,7 +3585,7 @@ TEST(operation, conversion_inverse) {
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
     auto inv = conv->inverse();
     EXPECT_EQ(inv->inverse(), conv);
-    EXPECT_EQ(inv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(inv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Inverse of Transverse Mercator\",\n"
               "    METHOD[\"Inverse of Transverse Mercator\",\n"
               "        ID[\"INVERSE(EPSG)\",9807]],\n"
@@ -3531,7 +3605,7 @@ TEST(operation, conversion_inverse) {
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_EQ(inv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(inv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 "
               "+x_0=4 +y_0=5");
 
@@ -3546,10 +3620,10 @@ TEST(operation, eqearth_export) {
     auto conv = Conversion::createEqualEarth(PropertyMap(), Angle(1), Length(2),
                                              Length(3));
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=eqearth +lon_0=1 +x_0=2 +y_0=3");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Equal Earth\",\n"
               "    METHOD[\"Equal Earth\",\n"
               "        ID[\"EPSG\",1078]],\n"
@@ -3570,33 +3644,33 @@ TEST(operation, PROJ_based) {
     auto conv = SingleOperation::createPROJBased(PropertyMap(), "+proj=merc",
                                                  nullptr, nullptr);
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=merc");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"PROJ-based coordinate operation\",\n"
               "    METHOD[\"PROJ-based operation method\"],\n"
               "    PARAMETER[\"PROJ string\",\"+proj=merc\"]]");
 
-    EXPECT_EQ(
-        conv->inverse()->exportToPROJString(PROJStringFormatter::create()),
-        "+proj=pipeline +step +inv +proj=merc");
+    EXPECT_EQ(conv->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=merc");
 
     auto str = "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
                "+step +proj=axisswap +order=2,1 +step +proj=longlat "
                "+ellps=clrk80ign +pm=paris +step +proj=axisswap +order=2,1";
     EXPECT_EQ(
         SingleOperation::createPROJBased(PropertyMap(), str, nullptr, nullptr)
-            ->exportToPROJString(PROJStringFormatter::create()),
+            ->exportToPROJString(PROJStringFormatter::create().get()),
         str);
 
     EXPECT_THROW(SingleOperation::createPROJBased(PropertyMap(), "+inv",
                                                   nullptr, nullptr)
-                     ->exportToPROJString(PROJStringFormatter::create()),
+                     ->exportToPROJString(PROJStringFormatter::create().get()),
                  FormattingException);
     EXPECT_THROW(
         SingleOperation::createPROJBased(PropertyMap(), "foo", nullptr, nullptr)
-            ->exportToPROJString(PROJStringFormatter::create()),
+            ->exportToPROJString(PROJStringFormatter::create().get()),
         FormattingException);
 }
 
@@ -3606,19 +3680,22 @@ TEST(operation, PROJ_based_empty) {
     auto conv =
         SingleOperation::createPROJBased(PropertyMap(), "", nullptr, nullptr);
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()), "");
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
+              "");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"PROJ-based coordinate operation\",\n"
               "    METHOD[\"PROJ-based operation method\"],\n"
               "    PARAMETER[\"PROJ string\",\"\"]]");
 
-    EXPECT_THROW(conv->exportToWKT(
-                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-                 FormattingException);
+    EXPECT_THROW(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
 
-    EXPECT_EQ(
-        conv->inverse()->exportToPROJString(PROJStringFormatter::create()), "");
+    EXPECT_EQ(conv->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "");
 }
 
 // ---------------------------------------------------------------------------
@@ -3629,7 +3706,7 @@ TEST(operation, geogCRS_to_geogCRS) {
         GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(
-        op->exportToPROJString(PROJStringFormatter::create()),
+        op->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
         "+ellps=clrk80ign +pm=paris +step +proj=unitconvert +xy_in=rad "
@@ -3657,14 +3734,15 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
         EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
 
-        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
-                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-                  "+ellps=krass +step +proj=helmert +x=2.3287 +y=-147.0425 "
-                  "+z=-92.0802 +rx=0.3092483 +ry=-0.32482185 +rz=-0.49729934 "
-                  "+s=5.68906266 +convention=coordinate_frame +step +inv "
-                  "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
-                  "+xy_out=deg +step +proj=axisswap +order=2,1");
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+            "+ellps=krass +step +proj=helmert +x=2.3287 +y=-147.0425 "
+            "+z=-92.0802 +rx=0.3092483 +ry=-0.32482185 +rz=-0.49729934 "
+            "+s=5.68906266 +convention=coordinate_frame +step +inv "
+            "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+            "+xy_out=deg +step +proj=axisswap +order=2,1");
     }
 
     // Reverse case
@@ -3677,14 +3755,15 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
         EXPECT_EQ(list[0]->nameStr(),
                   "Inverse of Pulkovo 1942(58) to ETRS89 (4)"); // Romania - 3m
 
-        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
-                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-                  "+ellps=GRS80 +step +inv +proj=helmert +x=2.3287 "
-                  "+y=-147.0425 +z=-92.0802 +rx=0.3092483 +ry=-0.32482185 "
-                  "+rz=-0.49729934 +s=5.68906266 +convention=coordinate_frame "
-                  "+step +inv +proj=cart +ellps=krass +step +proj=unitconvert "
-                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+            "+ellps=GRS80 +step +inv +proj=helmert +x=2.3287 "
+            "+y=-147.0425 +z=-92.0802 +rx=0.3092483 +ry=-0.32482185 "
+            "+rz=-0.49729934 +s=5.68906266 +convention=coordinate_frame "
+            "+step +inv +proj=cart +ellps=krass +step +proj=unitconvert "
+            "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
     }
 }
 
@@ -3755,8 +3834,9 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
             authFactory->createCoordinateReferenceSystem("4179"),
             authFactory->createCoordinateReferenceSystem("4258"), ctxt);
         ASSERT_EQ(list.size(), 1);
-        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
-                  "");
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "");
     }
 }
 
@@ -3771,7 +3851,8 @@ TEST(operation, geogCRS_to_geogCRS_context_incompatible_area) {
         authFactory->createCoordinateReferenceSystem("4258"), // ETRS 89
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()), "");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "");
 }
 
 // ---------------------------------------------------------------------------
@@ -3788,19 +3869,24 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
         ASSERT_EQ(list.size(), 3);
-        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
-                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-                  "+ellps=clrk80ign +step +proj=helmert +x=-168 +y=-60 +z=320 "
-                  "+step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert "
-                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
-        EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create(
-                      PROJStringFormatter::Convention::PROJ_5,
-                      authFactory->databaseContext())),
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+            "+ellps=clrk80ign +step +proj=helmert +x=-168 +y=-60 +z=320 "
+            "+step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert "
+            "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+        EXPECT_EQ(list[1]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
                   "");
-        EXPECT_EQ(list[2]->exportToPROJString(PROJStringFormatter::create(
-                      PROJStringFormatter::Convention::PROJ_5,
-                      authFactory->databaseContext())),
+        EXPECT_EQ(list[2]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
                   "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
                   "+proj=unitconvert +xy_in=deg +xy_out=rad +step "
                   "+proj=hgridshift +grids=ntf_r93.gsb +step +proj=unitconvert "
@@ -3814,11 +3900,12 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
         ASSERT_EQ(list.size(), 2);
-        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
-                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step "
-                  "+proj=hgridshift +grids=ntf_r93.gsb +step +proj=unitconvert "
-                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+            "+proj=unitconvert +xy_in=deg +xy_out=rad +step "
+            "+proj=hgridshift +grids=ntf_r93.gsb +step +proj=unitconvert "
+            "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
     }
     {
         auto ctxt =
@@ -3828,11 +3915,12 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             ctxt);
         ASSERT_EQ(list.size(), 2);
-        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
-                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
-                  "+proj=hgridshift +grids=ntf_r93.gsb +step +proj=unitconvert "
-                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
+            "+proj=hgridshift +grids=ntf_r93.gsb +step +proj=unitconvert "
+            "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
     }
 }
 
@@ -3853,17 +3941,17 @@ TEST(operation, geogCRS_to_geogCRS_context_ntv1_ntv2_ctable2) {
         authFactory->createCoordinateReferenceSystem("4269"), // NAD83
         ctxt);
     ASSERT_EQ(list.size(), 6);
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
               "+grids=ntv1_can.dat +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
-    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
               "+grids=ntv2_0.gsb +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
-    EXPECT_EQ(list[2]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[2]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
               "+grids=conus +step +proj=unitconvert +xy_in=rad +xy_out=deg "
@@ -3885,9 +3973,11 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
         ASSERT_EQ(list.size(), 2);
-        EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create(
-                      PROJStringFormatter::Convention::PROJ_5,
-                      authFactory->databaseContext())),
+        EXPECT_EQ(list[1]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
                   "+proj=vgridshift +grids=egm08_25.gtx");
     }
     {
@@ -3899,8 +3989,9 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
         ASSERT_EQ(list.size(), 2);
-        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
-                  "+proj=vgridshift +grids=egm08_25.gtx");
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=vgridshift +grids=egm08_25.gtx");
     }
     {
         auto ctxt =
@@ -3912,7 +4003,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             ctxt);
         ASSERT_EQ(list.size(), 2);
         EXPECT_EQ(
-            list[0]->exportToPROJString(PROJStringFormatter::create()),
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +inv +proj=vgridshift +grids=egm08_25.gtx");
     }
 }
@@ -3924,7 +4015,7 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()), "");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
 }
 
 // ---------------------------------------------------------------------------
@@ -3944,15 +4035,15 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(src, dest);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=longlat "
               "+ellps=WGS84 +pm=paris +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
-    EXPECT_EQ(op->inverse()->exportToWKT(WKTFormatter::create()),
+    EXPECT_EQ(op->inverse()->exportToWKT(WKTFormatter::create().get()),
               CoordinateOperationFactory::create()
                   ->createOperation(dest, src)
-                  ->exportToWKT(WKTFormatter::create()));
+                  ->exportToWKT(WKTFormatter::create().get()));
     EXPECT_TRUE(
         op->inverse()->isEquivalentTo(CoordinateOperationFactory::create()
                                           ->createOperation(dest, src)
@@ -3971,14 +4062,14 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation_context) {
         ctxt);
     ASSERT_EQ(list.size(), 2);
     EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to NTF (1)");
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
               "+proj=longlat +ellps=clrk80ign +pm=paris +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
     EXPECT_EQ(list[1]->nameStr(), "NTF (Paris) to NTF (2)");
-    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
               "+proj=longlat +ellps=clrk80ign +pm=2.33720833333333 +step "
@@ -3998,7 +4089,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
         ctxt);
     ASSERT_EQ(list.size(), 3);
     EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to RGF93 (2)");
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
               "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=hgridshift "
@@ -4023,7 +4114,7 @@ TEST(operation, geogCRS_to_geogCRS_context_same_grid_name) {
         ctxt);
     ASSERT_TRUE(!list.empty());
     EXPECT_EQ(list[0]->nameStr(), "DHDN to ETRS89 (8)");
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
               "+grids=BETA2007.gsb +step +proj=unitconvert +xy_in=rad "
@@ -4042,7 +4133,7 @@ TEST(operation, geogCRS_to_geogCRS_geographic_offset_context) {
         ctxt);
     ASSERT_EQ(list.size(), 1);
     EXPECT_EQ(list[0]->nameStr(), "Greek to GGRS87 (1)");
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
               "+dlat=-5.86 +dlon=0.28 +step +proj=unitconvert +xy_in=rad "
@@ -4067,7 +4158,7 @@ TEST(operation, geogCRS_to_geogCRS_3D) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(geogcrs_m), NN_CHECK_ASSERT(geogcrs_ft));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=unitconvert +z_in=m +z_out=ft");
     }
 
@@ -4075,7 +4166,7 @@ TEST(operation, geogCRS_to_geogCRS_3D) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(geogcrs_ft), NN_CHECK_ASSERT(geogcrs_m));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=unitconvert +z_in=ft +z_out=m");
     }
 
@@ -4089,7 +4180,7 @@ TEST(operation, geogCRS_to_geogCRS_3D) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(geogcrs_m_with_pm), NN_CHECK_ASSERT(geogcrs_ft));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=pipeline +step +proj=unitconvert +xy_in=deg +z_in=m "
                   "+xy_out=rad +z_out=m +step +inv +proj=longlat +ellps=WGS84 "
                   "+pm=paris +step +proj=unitconvert +xy_in=rad +z_in=m "
@@ -4104,7 +4195,7 @@ TEST(operation, geocentricCRS_to_geogCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         createGeocentric(), GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
@@ -4136,7 +4227,7 @@ TEST(operation, geogCRS_to_projCRS) {
         GeographicCRS::EPSG_4326, createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_TRUE(std::dynamic_pointer_cast<Conversion>(op) != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
               "+zone=31 +ellps=WGS84");
@@ -4157,7 +4248,7 @@ TEST(operation, geogCRS_longlat_to_geogCS_latlong) {
                 op->sourceCRS()->isEquivalentTo(sourceCRS.get()));
     EXPECT_TRUE(op->targetCRS() &&
                 op->targetCRS()->isEquivalentTo(targetCRS.get()));
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=axisswap +order=2,1");
     auto convInverse = nn_dynamic_pointer_cast<Conversion>(conv->inverse());
     ASSERT_TRUE(convInverse != nullptr);
@@ -4165,8 +4256,8 @@ TEST(operation, geogCRS_longlat_to_geogCS_latlong) {
                 convInverse->sourceCRS()->isEquivalentTo(targetCRS.get()));
     EXPECT_TRUE(convInverse->targetCRS() &&
                 convInverse->targetCRS()->isEquivalentTo(sourceCRS.get()));
-    EXPECT_EQ(conv->method()->exportToWKT(WKTFormatter::create()),
-              convInverse->method()->exportToWKT(WKTFormatter::create()));
+    EXPECT_EQ(conv->method()->exportToWKT(WKTFormatter::create().get()),
+              convInverse->method()->exportToWKT(WKTFormatter::create().get()));
     EXPECT_TRUE(conv->method()->isEquivalentTo(convInverse->method().get()));
 }
 
@@ -4184,7 +4275,7 @@ TEST(operation, geogCRS_longlat_to_geogCS_latlong_database) {
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=axisswap +order=2,1");
 }
 
@@ -4195,7 +4286,7 @@ TEST(operation, geogCRS_longlat_to_projCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::OGC_CRS84, createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=utm +zone=31 +ellps=WGS84");
 }
@@ -4208,7 +4299,7 @@ TEST(operation, geogCRS_different_from_baseCRS_to_projCRS) {
         GeographicCRS::EPSG_4807, createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(
-        op->exportToPROJString(PROJStringFormatter::create()),
+        op->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
         "+ellps=clrk80ign +pm=paris +step +proj=utm +zone=31 "
@@ -4232,7 +4323,7 @@ TEST(operation,
         "NTF (Paris) to NTF (1) + Inverse of WGS 84 to NTF (3) + UTM zone 31N");
     ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "1");
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
               "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=hgridshift "
@@ -4246,7 +4337,7 @@ TEST(operation, geocentricCRS_to_projCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         createGeocentric(), createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "
               "+proj=utm +zone=31 +ellps=WGS84");
 }
@@ -4258,7 +4349,7 @@ TEST(operation, projCRS_to_geogCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         createUTM31_WGS84(), GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
@@ -4271,7 +4362,7 @@ TEST(operation, projCRS_to_projCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         createUTM31_WGS84(), createUTM32_WGS84());
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
               "+proj=utm +zone=32 +ellps=WGS84");
 }
@@ -4288,7 +4379,7 @@ TEST(operation, projCRS_to_projCRS_different_baseCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         createUTM31_WGS84(), utm32);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
               "+proj=utm +zone=32 +ellps=clrk80ign +pm=paris");
 }
@@ -4380,7 +4471,7 @@ TEST(operation, projCRS_to_projCRS_north_pole_inverted_axis) {
             ->createCoordinateReferenceSystem("5041"),
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=axisswap +order=2,1");
 }
 
@@ -4398,7 +4489,7 @@ TEST(operation, projCRS_to_projCRS_south_pole_inverted_axis) {
             ->createCoordinateReferenceSystem("5042"),
         ctxt);
     ASSERT_EQ(list.size(), 1);
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=axisswap +order=2,1");
 }
 
@@ -4411,7 +4502,7 @@ TEST(operation, boundCRS_of_geogCRS_to_geogCRS) {
         boundCRS, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(
-        op->exportToPROJString(PROJStringFormatter::create()),
+        op->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
         "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
@@ -4429,11 +4520,11 @@ TEST(operation, boundCRS_of_geogCRS_to_unrelated_geogCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         boundCRS, GeographicCRS::EPSG_4269);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               CoordinateOperationFactory::create()
                   ->createOperation(GeographicCRS::EPSG_4807,
                                     GeographicCRS::EPSG_4269)
-                  ->exportToPROJString(PROJStringFormatter::create()));
+                  ->exportToPROJString(PROJStringFormatter::create().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -4448,7 +4539,7 @@ TEST(operation, boundCRS_of_projCRS_to_geogCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         boundCRS, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
               "+pm=paris "
               "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
@@ -4471,7 +4562,7 @@ TEST(operation, boundCRS_of_geogCRS_to_projCRS) {
         CoordinateOperationFactory::create()->createOperation(boundCRS, utm31);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(
-        op->exportToPROJString(PROJStringFormatter::create()),
+        op->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
         "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
@@ -4489,7 +4580,7 @@ TEST(operation, geogCRS_to_boundCRS_of_geogCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, boundCRS);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
@@ -4517,7 +4608,7 @@ TEST(operation, boundCRS_to_boundCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(boundCRS1,
                                                                     boundCRS2);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
               "+pm=paris "
               "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
@@ -4538,7 +4629,7 @@ TEST(operation, boundCRS_to_boundCRS_noop_for_TOWGS84) {
                                                                     boundCRS2);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(
-        op->exportToPROJString(PROJStringFormatter::create()),
+        op->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
         "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
@@ -4559,10 +4650,10 @@ TEST(operation, boundCRS_to_boundCRS_unralated_hub) {
     auto op = CoordinateOperationFactory::create()->createOperation(boundCRS1,
                                                                     boundCRS2);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               CoordinateOperationFactory::create()
                   ->createOperation(boundCRS1->baseCRS(), boundCRS2->baseCRS())
-                  ->exportToPROJString(PROJStringFormatter::create()));
+                  ->exportToPROJString(PROJStringFormatter::create().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -4592,11 +4683,11 @@ TEST(operation, compoundCRS_to_geogCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         compound, GeographicCRS::EPSG_4807);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               CoordinateOperationFactory::create()
                   ->createOperation(GeographicCRS::EPSG_4326,
                                     GeographicCRS::EPSG_4807)
-                  ->exportToPROJString(PROJStringFormatter::create()));
+                  ->exportToPROJString(PROJStringFormatter::create().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -4614,7 +4705,7 @@ static BoundCRSNNPtr createBoundVerticalCRS() {
 
 TEST(operation, transformation_height_to_PROJ_string) {
     auto transf = createBoundVerticalCRS()->transformation();
-    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=vgridshift +grids=egm08_25.gtx");
 
     auto grids = transf->gridsNeeded(DatabaseContext::create());
@@ -4644,11 +4735,12 @@ TEST(operation, transformation_ntv2_to_PROJ_string) {
     auto transformation = Transformation::createNTv2(
         PropertyMap(), GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
         "foo.gsb", std::vector<PositionalAccuracyNNPtr>());
-    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=grad +xy_out=rad +step "
-              "+proj=hgridshift +grids=foo.gsb +step +proj=unitconvert "
-              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(
+        transformation->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=grad +xy_out=rad +step "
+        "+proj=hgridshift +grids=foo.gsb +step +proj=unitconvert "
+        "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -4666,9 +4758,9 @@ TEST(operation, transformation_VERTCON_to_PROJ_string) {
     auto vtransformation = Transformation::createVERTCON(
         PropertyMap(), verticalCRS1, verticalCRS2, "bla.gtx",
         std::vector<PositionalAccuracyNNPtr>());
-    EXPECT_EQ(
-        vtransformation->exportToPROJString(PROJStringFormatter::create()),
-        "+proj=vgridshift +grids=bla.gtx +multiplier=0.001");
+    EXPECT_EQ(vtransformation->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=vgridshift +grids=bla.gtx +multiplier=0.001");
 }
 
 // ---------------------------------------------------------------------------
@@ -4687,13 +4779,14 @@ TEST(operation, transformation_longitude_rotation_to_PROJ_string) {
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto transformation = Transformation::createLongitudeRotation(
         PropertyMap(), src, dest, Angle(10));
-    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
-              "+proj=longlat +ellps=WGS84 +pm=10 +step +proj=unitconvert "
-              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(
+        transformation->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
+        "+proj=longlat +ellps=WGS84 +pm=10 +step +proj=unitconvert "
+        "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
     EXPECT_EQ(transformation->inverse()->exportToPROJString(
-                  PROJStringFormatter::create()),
+                  PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
               "+proj=longlat +ellps=WGS84 +pm=-10 +step +proj=unitconvert "
@@ -4707,13 +4800,14 @@ TEST(operation, transformation_Geographic2D_offsets_to_PROJ_string) {
     auto transformation = Transformation::createGeographic2DOffsets(
         PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326,
         Angle(0.5), Angle(-1), {});
-    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
-              "+dlat=1800 +dlon=-3600 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(
+        transformation->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
+        "+dlat=1800 +dlon=-3600 +step +proj=unitconvert +xy_in=rad "
+        "+xy_out=deg +step +proj=axisswap +order=2,1");
     EXPECT_EQ(transformation->inverse()->exportToPROJString(
-                  PROJStringFormatter::create()),
+                  PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
               "+dlat=-1800 +dlon=3600 +step +proj=unitconvert +xy_in=rad "
@@ -4727,13 +4821,14 @@ TEST(operation, transformation_Geographic3D_offsets_to_PROJ_string) {
     auto transformation = Transformation::createGeographic3DOffsets(
         PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326,
         Angle(0.5), Angle(-1), Length(2), {});
-    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
-              "+dlat=1800 +dlon=-3600 +dh=2 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(
+        transformation->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
+        "+dlat=1800 +dlon=-3600 +dh=2 +step +proj=unitconvert +xy_in=rad "
+        "+xy_out=deg +step +proj=axisswap +order=2,1");
     EXPECT_EQ(transformation->inverse()->exportToPROJString(
-                  PROJStringFormatter::create()),
+                  PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
               "+dlat=-1800 +dlon=3600 +dh=-2 +step +proj=unitconvert "
@@ -4750,13 +4845,14 @@ TEST(operation,
         CompoundCRS::create(PropertyMap(),
                             {GeographicCRS::EPSG_4326, createVerticalCRS()}),
         GeographicCRS::EPSG_4326, Angle(0.5), Angle(-1), Length(2), {});
-    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
-              "+dlat=1800 +dlon=-3600 +dh=2 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg +step +proj=axisswap +order=2,1");
+    EXPECT_EQ(
+        transformation->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
+        "+dlat=1800 +dlon=-3600 +dh=2 +step +proj=unitconvert +xy_in=rad "
+        "+xy_out=deg +step +proj=axisswap +order=2,1");
     EXPECT_EQ(transformation->inverse()->exportToPROJString(
-                  PROJStringFormatter::create()),
+                  PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=geogoffset "
               "+dlat=-1800 +dlon=3600 +dh=-2 +step +proj=unitconvert "
@@ -4769,10 +4865,11 @@ TEST(operation, transformation_vertical_offset_to_PROJ_string) {
 
     auto transformation = Transformation::createVerticalOffset(
         PropertyMap(), createVerticalCRS(), createVerticalCRS(), Length(1), {});
-    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=geogoffset +dh=1");
+    EXPECT_EQ(
+        transformation->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=geogoffset +dh=1");
     EXPECT_EQ(transformation->inverse()->exportToPROJString(
-                  PROJStringFormatter::create()),
+                  PROJStringFormatter::create().get()),
               "+proj=geogoffset +dh=-1");
 }
 
@@ -4786,7 +4883,7 @@ TEST(operation, compoundCRS_with_boundVerticalCRS_to_geogCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         compound, GeographicCRS::EPSG_4979);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift "
               "+grids=egm08_25.gtx +step +proj=unitconvert +xy_in=rad "
@@ -4810,7 +4907,7 @@ TEST(operation, compoundCRS_with_boundGeogCRS_to_geogCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         compound, GeographicCRS::EPSG_4979);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
@@ -4833,7 +4930,7 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
     ASSERT_TRUE(op != nullptr);
     // Not completely sure the order of horizontal and vertical operations
     // makes sense
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
               "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=cart "
@@ -4870,7 +4967,7 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
     ASSERT_TRUE(op != nullptr);
     // Not completely sure the order of horizontal and vertical operations
     // makes sense
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
               "+pm=paris +step +proj=cart +ellps=clrk80ign +step +proj=helmert "
               "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
@@ -4936,7 +5033,7 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
     auto op = CoordinateOperationFactory::create()->createOperation(compound1,
                                                                     compound2);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 "
               "+x_0=4 +y_0=5 +ellps=WGS84 +step "
               "+proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step "
@@ -4945,7 +5042,7 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
     {
         auto formatter = PROJStringFormatter::create();
         formatter->setUseETMercForTMerc(true);
-        EXPECT_EQ(op->exportToPROJString(formatter),
+        EXPECT_EQ(op->exportToPROJString(formatter.get()),
                   "+proj=pipeline +step +inv +proj=etmerc +lat_0=1 +lon_0=2 "
                   "+k_0=3 +x_0=4 +y_0=5 +ellps=WGS84 +step "
                   "+proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step "
@@ -4955,7 +5052,7 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
     {
         auto formatter = PROJStringFormatter::create();
         formatter->setUseETMercForTMerc(true);
-        EXPECT_EQ(op->inverse()->exportToPROJString(formatter),
+        EXPECT_EQ(op->inverse()->exportToPROJString(formatter.get()),
                   "+proj=pipeline +step +inv +proj=utm +zone=32 +ellps=WGS84 "
                   "+step +inv +proj=vgridshift +grids=bla.gtx "
                   "+multiplier=0.001 +step +proj=etmerc +lat_0=1 +lon_0=2 "
@@ -4968,8 +5065,8 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
     {
         auto formatter = PROJStringFormatter::create();
         auto formatter2 = PROJStringFormatter::create();
-        EXPECT_EQ(opInverse->inverse()->exportToPROJString(formatter),
-                  op->exportToPROJString(formatter2));
+        EXPECT_EQ(opInverse->inverse()->exportToPROJString(formatter.get()),
+                  op->exportToPROJString(formatter2.get()));
     }
 }
 
@@ -4995,29 +5092,29 @@ TEST(operation, vertCRS_to_vertCRS) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(vertcrs_m), NN_CHECK_ASSERT(vertcrs_ft));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=unitconvert +z_in=m +z_out=ft");
     }
     {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(vertcrs_m), NN_CHECK_ASSERT(vertcrs_ft));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(
-            op->inverse()->exportToPROJString(PROJStringFormatter::create()),
-            "+proj=unitconvert +z_in=ft +z_out=m");
+        EXPECT_EQ(op->inverse()->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=unitconvert +z_in=ft +z_out=m");
     }
     {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(vertcrs_ft), NN_CHECK_ASSERT(vertcrs_m));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=unitconvert +z_in=ft +z_out=m");
     }
     {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(vertcrs_ft), NN_CHECK_ASSERT(vertcrs_us_ft));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=affine +s33=0.999998");
     }
 }
@@ -5040,7 +5137,7 @@ TEST(operation, compoundCRS_to_geogCRS_3D) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(compoundcrs_ft), NN_CHECK_ASSERT(geogcrs_m));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=pipeline +step +inv +proj=merc +lon_0=0 +k=1 +x_0=0 "
                   "+y_0=0 +ellps=WGS84 +step +proj=unitconvert +xy_in=rad "
                   "+z_in=ft +xy_out=deg +z_out=m");
@@ -5050,7 +5147,7 @@ TEST(operation, compoundCRS_to_geogCRS_3D) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(geogcrs_m), NN_CHECK_ASSERT(compoundcrs_ft));
         ASSERT_TRUE(op != nullptr);
-        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=pipeline +step +proj=unitconvert +xy_in=deg +z_in=m "
                   "+xy_out=rad +z_out=ft +step +proj=merc +lon_0=0 +k=1 +x_0=0 "
                   "+y_0=0 +ellps=WGS84");
@@ -5071,14 +5168,14 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
         ctxt);
     ASSERT_EQ(list.size(), 2);
 
-    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=lcc +lat_1=49.5 +lat_0=49.5 "
               "+lon_0=0 +k_0=0.99987734 +x_0=600000 +y_0=200000 "
               "+ellps=clrk80ign +pm=paris +step +proj=hgridshift "
               "+grids=ntf_r93.gsb +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
 
-    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=lcc +lat_1=49.5 +lat_0=49.5 "
               "+lon_0=0 +k_0=0.99987734 +x_0=600000 +y_0=200000 "
               "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
@@ -5095,17 +5192,17 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
         ctxt);
     ASSERT_GE(list2.size(), 3U);
 
-    EXPECT_EQ(
-        replaceAll(list2[0]->exportToPROJString(PROJStringFormatter::create()),
-                   "0.999877341", "0.99987734"),
-        list[0]->exportToPROJString(PROJStringFormatter::create()));
+    EXPECT_EQ(replaceAll(list2[0]->exportToPROJString(
+                             PROJStringFormatter::create().get()),
+                         "0.999877341", "0.99987734"),
+              list[0]->exportToPROJString(PROJStringFormatter::create().get()));
 
     // The second entry in list2 (list2[1]) uses the
     // weird +pm=2.33720833333333 from "NTF (Paris) to NTF (2)"
-    EXPECT_EQ(
-        replaceAll(list2[2]->exportToPROJString(PROJStringFormatter::create()),
-                   "0.999877341", "0.99987734"),
-        list[1]->exportToPROJString(PROJStringFormatter::create()));
+    EXPECT_EQ(replaceAll(list2[2]->exportToPROJString(
+                             PROJStringFormatter::create().get()),
+                         "0.999877341", "0.99987734"),
+              list[1]->exportToPROJString(PROJStringFormatter::create().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -5155,9 +5252,11 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
         EXPECT_TRUE(op->isEquivalentTo(boundCRS->transformation().get()));
         {
             auto wkt1 = op->exportToWKT(
-                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                    .get());
             auto wkt2 = boundCRS->transformation()->exportToWKT(
-                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                    .get());
             EXPECT_EQ(wkt1, wkt2);
         }
     }
@@ -5169,9 +5268,11 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
             op->isEquivalentTo(boundCRS->transformation()->inverse().get()));
         {
             auto wkt1 = op->exportToWKT(
-                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                    .get());
             auto wkt2 = boundCRS->transformation()->inverse()->exportToWKT(
-                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                    .get());
             EXPECT_EQ(wkt1, wkt2);
         }
     }

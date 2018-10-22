@@ -253,10 +253,10 @@ class GeneralParameterValue : public util::BaseObject,
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeneralParameterValue() override;
-    //! @endcond
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override = 0; // throw(io::FormattingException)
+    void _exportToWKT(io::WKTFormatter *formatter) const override =
+        0; // throw(io::FormattingException)
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -270,8 +270,8 @@ class GeneralParameterValue : public util::BaseObject,
 
     friend class Conversion;
     friend class SingleOperation;
-    virtual std::string _exportToWKT(io::WKTFormatterNNPtr formatter,
-                                     const MethodMapping *mapping)
+    virtual void _exportToWKT(io::WKTFormatter *formatter,
+                              const MethodMapping *mapping)
         const = 0; // throw(io::FormattingException)
                    //! @endcond
 
@@ -320,9 +320,10 @@ class ParameterValue : public util::BaseObject,
     };
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParameterValue() override;
-    //! @endcond
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     PROJ_DLL static ParameterValueNNPtr
     create(const common::Measure &measureIn);
@@ -381,9 +382,6 @@ class OperationParameterValue : public GeneralParameterValue {
     PROJ_DLL const OperationParameterNNPtr &parameter() const;
     PROJ_DLL const ParameterValueNNPtr &parameterValue() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
@@ -398,6 +396,10 @@ class OperationParameterValue : public GeneralParameterValue {
         static bool
         convertFromAbridged(const std::string &paramName, double &val,
                             common::UnitOfMeasure &unit, int &paramEPSGCode);
+
+    void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
     //! @endcond
 
   protected:
@@ -406,8 +408,8 @@ class OperationParameterValue : public GeneralParameterValue {
     OperationParameterValue(const OperationParameterValue &other);
     INLINED_MAKE_SHARED
 
-    std::string _exportToWKT(io::WKTFormatterNNPtr formatter,
-                             const MethodMapping *mapping)
+    void _exportToWKT(io::WKTFormatter *formatter,
+                      const MethodMapping *mapping)
         const override; // throw(io::FormattingException)
 
   private:
@@ -444,8 +446,10 @@ class OperationMethod : public common::IdentifiedObject,
     PROJ_DLL const std::vector<GeneralOperationParameterNNPtr> &
     parameters() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+    //! @endcond
 
     PROJ_DLL static OperationMethodNNPtr
     create(const util::PropertyMap &properties,
@@ -534,11 +538,9 @@ class SingleOperation : virtual public CoordinateOperation {
     void
     setParameterValues(const std::vector<GeneralParameterValueNNPtr> &values);
 
-    std::string
-    exportTransformationToWKT(io::WKTFormatterNNPtr formatter) const;
+    void exportTransformationToWKT(io::WKTFormatter *formatter) const;
 
-    bool
-    exportToPROJStringGeneric(io::PROJStringFormatterNNPtr formatter) const;
+    bool exportToPROJStringGeneric(io::PROJStringFormatter *formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -768,12 +770,10 @@ class Conversion : public SingleOperation {
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
-        const override; // throw(FormattingException)
+    //! @endcond
 
     PROJ_DLL bool isUTM(int &zone, bool &north) const;
 
@@ -1218,6 +1218,9 @@ class Conversion : public SingleOperation {
 
     PROJ_DLL static ConversionNNPtr createAxisOrderReversal(bool is3D);
 
+    PROJ_PRIVATE : void _exportToPROJString(io::PROJStringFormatter *formatter)
+                       const override; // throw(FormattingException)
+
   protected:
     Conversion(const OperationMethodNNPtr &methodIn,
                const std::vector<GeneralParameterValueNNPtr> &values);
@@ -1225,7 +1228,7 @@ class Conversion : public SingleOperation {
     INLINED_MAKE_SHARED
 
     PROJ_FRIEND(crs::ProjectedCRS);
-    void addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const;
+    void addWKTExtensionNode(io::WKTFormatter *formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1273,12 +1276,6 @@ class Transformation : public SingleOperation {
     PROJ_DLL const crs::CRSNNPtr &targetCRS() const;
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
-
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
 
     PROJ_DLL std::vector<double>
     getTOWGS84Parameters() const; // throw(io::FormattingException)
@@ -1417,8 +1414,14 @@ class Transformation : public SingleOperation {
         //! @cond Doxygen_Suppress
         std::string
         getNTv2Filename() const;
+
     std::string getHeightToGeographic3DFilename() const;
+
     bool isLongitudeRotation() const;
+
+    void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
     //! @endcond
 
   protected:
@@ -1429,6 +1432,9 @@ class Transformation : public SingleOperation {
         const std::vector<GeneralParameterValueNNPtr> &values,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
     INLINED_MAKE_SHARED
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     TransformationNNPtr inverseAsTransformation() const;
 
@@ -1492,11 +1498,10 @@ class ConcatenatedOperation : public CoordinateOperation {
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL std::string
-    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -1519,6 +1524,10 @@ class ConcatenatedOperation : public CoordinateOperation {
   protected:
     explicit ConcatenatedOperation(
         const std::vector<CoordinateOperationNNPtr> &operationsIn);
+
+    void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
     INLINED_MAKE_SHARED
 
   private:

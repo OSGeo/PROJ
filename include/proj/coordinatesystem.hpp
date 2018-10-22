@@ -135,8 +135,10 @@ class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
     // non-standard
     PROJ_DLL static MeridianNNPtr create(const common::Angle &longitudeIn);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+                        //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -185,17 +187,17 @@ class CoordinateSystemAxis final : public common::IdentifiedObject,
            const common::UnitOfMeasure &unitIn,
            const MeridianPtr &meridianIn = nullptr);
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
     //! @cond Doxygen_Suppress
-    std::string exportToWKT(io::WKTFormatterNNPtr formatter, int order,
-                            bool disableAbbrev) const;
+    void _exportToWKT(io::WKTFormatter *formatter, int order,
+                      bool disableAbbrev) const;
+
+    void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
 
     static std::string normalizeAxisName(const std::string &str);
     //! @endcond
@@ -231,11 +233,12 @@ class CoordinateSystem : public common::IdentifiedObject,
 
     PROJ_DLL const std::vector<CoordinateSystemAxisNNPtr> &axisList() const;
 
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+    //! @cond Doxygen_Suppress
+
+    void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL virtual std::string getWKT2Type(io::WKTFormatterNNPtr) const = 0;
+    PROJ_DLL virtual std::string getWKT2Type(bool) const = 0;
     //! @endcond
 
     PROJ_DLL bool
@@ -295,9 +298,7 @@ class SphericalCS final : public CoordinateSystem {
     explicit SphericalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
-        return "spherical";
-    }
+    std::string getWKT2Type(bool) const override { return "spherical"; }
 
   private:
     SphericalCS(const SphericalCS &other) = delete;
@@ -365,9 +366,7 @@ class EllipsoidalCS final : public CoordinateSystem {
         const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
-        return "ellipsoidal";
-    }
+    std::string getWKT2Type(bool) const override { return "ellipsoidal"; }
 
   protected:
     EllipsoidalCS(const EllipsoidalCS &other) = delete;
@@ -407,9 +406,7 @@ class VerticalCS final : public CoordinateSystem {
     explicit VerticalCS(const CoordinateSystemAxisNNPtr &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
-        return "vertical";
-    }
+    std::string getWKT2Type(bool) const override { return "vertical"; }
 
   private:
     VerticalCS(const VerticalCS &other) = delete;
@@ -457,7 +454,7 @@ class CartesianCS final : public CoordinateSystem {
     explicit CartesianCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
+    std::string getWKT2Type(bool) const override {
         return "Cartesian"; // uppercase is intended
     }
 
@@ -495,9 +492,7 @@ class OrdinalCS final : public CoordinateSystem {
     explicit OrdinalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
-        return "ordinal";
-    }
+    std::string getWKT2Type(bool) const override { return "ordinal"; }
 
   private:
     OrdinalCS(const OrdinalCS &other) = delete;
@@ -531,9 +526,7 @@ class ParametricCS final : public CoordinateSystem {
     explicit ParametricCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
-        return "parametric";
-    }
+    std::string getWKT2Type(bool) const override { return "parametric"; }
 
   private:
     ParametricCS(const ParametricCS &other) = delete;
@@ -564,7 +557,7 @@ class TemporalCS : public CoordinateSystem {
     explicit TemporalCS(const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr formatter) const override = 0;
+    std::string getWKT2Type(bool use2018Keywords) const override = 0;
 
   private:
     TemporalCS(const TemporalCS &other) = delete;
@@ -601,7 +594,7 @@ class DateTimeTemporalCS final : public TemporalCS {
     explicit DateTimeTemporalCS(const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr formatter) const override;
+    std::string getWKT2Type(bool use2018Keywords) const override;
 
   private:
     DateTimeTemporalCS(const DateTimeTemporalCS &other) = delete;
@@ -636,7 +629,7 @@ class TemporalCountCS final : public TemporalCS {
     explicit TemporalCountCS(const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr formatter) const override;
+    std::string getWKT2Type(bool use2018Keywords) const override;
 
   private:
     TemporalCountCS(const TemporalCountCS &other) = delete;
@@ -671,7 +664,7 @@ class TemporalMeasureCS final : public TemporalCS {
     explicit TemporalMeasureCS(const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(io::WKTFormatterNNPtr formatter) const override;
+    std::string getWKT2Type(bool use2018Keywords) const override;
 
   private:
     TemporalMeasureCS(const TemporalMeasureCS &other) = delete;

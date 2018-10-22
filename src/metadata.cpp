@@ -1015,7 +1015,8 @@ void Identifier::setProperties(
 
 // ---------------------------------------------------------------------------
 
-std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
+//! @cond Doxygen_Suppress
+void Identifier::_exportToWKT(WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     const std::string &l_code = code();
     if (codeSpace() && !codeSpace()->empty() && !l_code.empty()) {
@@ -1056,8 +1057,8 @@ std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
             formatter->endNode();
         }
     }
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

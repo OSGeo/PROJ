@@ -551,7 +551,7 @@ void CoordinateOperation::setAccuracies(
 bool CoordinateOperation::isPROJInstanciable(
     const io::DatabaseContextPtr &databaseContext) const {
     try {
-        exportToPROJString(io::PROJStringFormatter::create());
+        exportToPROJString(io::PROJStringFormatter::create().get());
     } catch (const std::exception &) {
         return false;
     }
@@ -672,8 +672,8 @@ OperationMethodNNPtr OperationMethod::create(
 
 // ---------------------------------------------------------------------------
 
-std::string
-OperationMethod::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+//! @cond Doxygen_Suppress
+void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? io::WKTConstants::METHOD
                                 : io::WKTConstants::PROJECTION,
@@ -696,8 +696,8 @@ OperationMethod::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         formatID(formatter);
     }
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -820,19 +820,20 @@ const ParameterValueNNPtr &OperationParameterValue::parameterValue() const {
 
 // ---------------------------------------------------------------------------
 
-std::string OperationParameterValue::exportToWKT(
+//! @cond Doxygen_Suppress
+void OperationParameterValue::_exportToWKT(
     // cppcheck-suppress passedByValue
-    io::WKTFormatterNNPtr formatter) const {
-    return _exportToWKT(formatter, nullptr);
+    io::WKTFormatter *formatter) const {
+    _exportToWKT(formatter, nullptr);
 }
 
-std::string
-OperationParameterValue::_exportToWKT(io::WKTFormatterNNPtr formatter,
-                                      const MethodMapping *mapping) const {
+void OperationParameterValue::_exportToWKT(io::WKTFormatter *formatter,
+                                           const MethodMapping *mapping) const {
     const ParamMapping *paramMapping =
         mapping ? getMapping(mapping, this) : nullptr;
-    if (paramMapping && paramMapping->wkt1_name.empty())
-        return std::string();
+    if (paramMapping && paramMapping->wkt1_name.empty()) {
+        return;
+    }
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (isWKT2 && parameterValue()->type() == ParameterValue::Type::FILENAME) {
         formatter->startNode(io::WKTConstants::PARAMETERFILE,
@@ -846,13 +847,13 @@ OperationParameterValue::_exportToWKT(io::WKTFormatterNNPtr formatter,
     } else {
         formatter->addQuotedString(parameter()->nameStr());
     }
-    parameterValue()->exportToWKT(formatter);
+    parameterValue()->_exportToWKT(formatter);
     if (formatter->outputId()) {
         parameter()->formatID(formatter);
     }
     formatter->endNode();
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1361,7 +1362,8 @@ bool ParameterValue::booleanValue() const { return d->booleanValue_; }
 
 // ---------------------------------------------------------------------------
 
-std::string ParameterValue::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+//! @cond Doxygen_Suppress
+void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
     if (formatter->abridgedTransformation() && type() == Type::MEASURE) {
@@ -1403,7 +1405,7 @@ std::string ParameterValue::exportToWKT(io::WKTFormatterNNPtr formatter) const {
                 (unit != common::UnitOfMeasure::SCALE_UNITY &&
                  unit != *(formatter->axisLinearUnit()) &&
                  unit != *(formatter->axisAngularUnit()))) {
-                unit.exportToWKT(formatter);
+                unit._exportToWKT(formatter);
             }
         }
     } else if (type() == Type::STRING || type() == Type::FILENAME) {
@@ -1413,8 +1415,8 @@ std::string ParameterValue::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     } else {
         throw io::FormattingException("boolean parameter value not handled");
     }
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -3729,7 +3731,8 @@ CoordinateOperationNNPtr Conversion::inverse() const {
 
 // ---------------------------------------------------------------------------
 
-std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+//! @cond Doxygen_Suppress
+void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (isWKT2) {
         formatter->startNode(formatter->useDerivingConversion()
@@ -3810,7 +3813,7 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     }
 
     if (!bAlreadyWritten) {
-        method()->exportToWKT(formatter);
+        method()->_exportToWKT(formatter);
 
         const MethodMapping *mapping =
             !isWKT2 ? getMapping(method().get()) : nullptr;
@@ -3829,14 +3832,14 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         formatter->popOutputId();
         formatter->leave();
     }
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 static bool createPROJ4WebMercator(const Conversion *conv,
-                                   io::PROJStringFormatterNNPtr formatter) {
+                                   io::PROJStringFormatter *formatter) {
     const double centralMeridian =
         conv->parameterValueMeasure(
                 EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
@@ -3859,7 +3862,7 @@ static bool createPROJ4WebMercator(const Conversion *conv,
     if (!geogCRS) {
         return false;
     }
-    io::PROJStringFormatter::Scope scope(formatter);
+
     formatter->addStep("merc");
     const double a = geogCRS->ellipsoid()->semiMajorAxis().getSIValue();
     formatter->addParam("a", a);
@@ -3880,13 +3883,12 @@ static bool createPROJ4WebMercator(const Conversion *conv,
 
 static bool
 createPROJExtensionFromCustomProj(const Conversion *conv,
-                                  io::PROJStringFormatterNNPtr formatter,
+                                  io::PROJStringFormatter *formatter,
                                   bool forExtensionNode) {
     const auto &methodName = conv->method()->nameStr();
     assert(starts_with(methodName, "PROJ "));
     auto tokens = split(methodName, ' ');
 
-    io::PROJStringFormatter::Scope scope(formatter);
     formatter->addStep(tokens[1]);
 
     if (forExtensionNode) {
@@ -3935,7 +3937,7 @@ createPROJExtensionFromCustomProj(const Conversion *conv,
 
 // ---------------------------------------------------------------------------
 
-void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
+void Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
         const auto &methodName = method()->nameStr();
@@ -3948,7 +3950,7 @@ void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
 
             auto projFormatter = io::PROJStringFormatter::create(
                 io::PROJStringFormatter::Convention::PROJ_4);
-            if (createPROJ4WebMercator(this, projFormatter)) {
+            if (createPROJ4WebMercator(this, projFormatter.get())) {
                 formatter->startNode(io::WKTConstants::EXTENSION, false);
                 formatter->addQuotedString("PROJ4");
                 formatter->addQuotedString(projFormatter->toString());
@@ -3957,7 +3959,8 @@ void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
         } else if (starts_with(methodName, "PROJ ")) {
             auto projFormatter = io::PROJStringFormatter::create(
                 io::PROJStringFormatter::Convention::PROJ_4);
-            if (createPROJExtensionFromCustomProj(this, projFormatter, true)) {
+            if (createPROJExtensionFromCustomProj(this, projFormatter.get(),
+                                                  true)) {
                 formatter->startNode(io::WKTConstants::EXTENSION, false);
                 formatter->addQuotedString("PROJ4");
                 formatter->addQuotedString(projFormatter->toString());
@@ -3969,11 +3972,9 @@ void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
-std::string Conversion::exportToPROJString(
-    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+void Conversion::_exportToPROJString(
+    io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
-    io::PROJStringFormatter::Scope scope(formatter);
-
     const auto &methodName = method()->nameStr();
     const int methodEPSGCode = method()->getEPSGCode();
     const bool isZUnitConversion =
@@ -3997,7 +3998,7 @@ std::string Conversion::exportToPROJString(
         if (geogCRS) {
             formatter->setOmitProjLongLatIfPossible(true);
             formatter->startInversion();
-            geogCRS->exportToPROJString(formatter);
+            geogCRS->_exportToPROJString(formatter);
             formatter->stopInversion();
             formatter->setOmitProjLongLatIfPossible(false);
         }
@@ -4187,7 +4188,7 @@ std::string Conversion::exportToPROJString(
         } else {
             formatter->addStep("webmerc");
             if (l_sourceCRS) {
-                datum::Ellipsoid::WGS84->exportToPROJString(formatter);
+                datum::Ellipsoid::WGS84->_exportToPROJString(formatter);
             }
         }
         bConversionDone = true;
@@ -4295,8 +4296,8 @@ std::string Conversion::exportToPROJString(
                     io::PROJStringFormatter::Convention::PROJ_4) {
                     targetGeogCRS->addDatumInfoToPROJString(formatter);
                 } else {
-                    targetGeogCRS->ellipsoid()->exportToPROJString(formatter);
-                    targetGeogCRS->primeMeridian()->exportToPROJString(
+                    targetGeogCRS->ellipsoid()->_exportToPROJString(formatter);
+                    targetGeogCRS->primeMeridian()->_exportToPROJString(
                         formatter);
                 }
             }
@@ -4315,13 +4316,11 @@ std::string Conversion::exportToPROJString(
                 io::PROJStringFormatter::Convention::PROJ_5) {
                 auto geogCRS = derivedGeographicCRS->baseCRS();
                 formatter->setOmitProjLongLatIfPossible(true);
-                geogCRS->exportToPROJString(formatter);
+                geogCRS->_exportToPROJString(formatter);
                 formatter->setOmitProjLongLatIfPossible(false);
             }
         }
     }
-
-    return scope.toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -6210,16 +6209,15 @@ InverseTransformation::create(const TransformationNNPtr &forward) {
 
 // ---------------------------------------------------------------------------
 
-std::string
-InverseTransformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+void InverseTransformation::_exportToWKT(io::WKTFormatter *formatter) const {
 
     auto approxInverse = createApproximateInverseIfPossible(
         util::nn_dynamic_pointer_cast<Transformation>(forwardOperation_).get());
     if (approxInverse) {
-        return approxInverse->exportToWKT(formatter);
+        approxInverse->_exportToWKT(formatter);
+    } else {
+        Transformation::_exportToWKT(formatter);
     }
-
-    return Transformation::exportToWKT(formatter);
 }
 
 //! @endcond
@@ -6227,23 +6225,25 @@ InverseTransformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
-    return exportTransformationToWKT(formatter);
+void Transformation::_exportToWKT(io::WKTFormatter *formatter) const {
+    exportTransformationToWKT(formatter);
 }
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-std::string SingleOperation::exportTransformationToWKT(
-    io::WKTFormatterNNPtr formatter) const {
+void SingleOperation::exportTransformationToWKT(
+    io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
         throw io::FormattingException(
             "Transformation can only be exported to WKT2");
     }
 
-    assert(sourceCRS());
-    assert(targetCRS());
+    auto l_sourceCRS = sourceCRS();
+    assert(l_sourceCRS);
+    auto l_targetCRS = targetCRS();
+    assert(l_targetCRS);
 
     if (formatter->abridgedTransformation()) {
         formatter->startNode(io::WKTConstants::ABRIDGEDTRANSFORMATION,
@@ -6257,15 +6257,15 @@ std::string SingleOperation::exportTransformationToWKT(
 
     if (!formatter->abridgedTransformation()) {
         formatter->startNode(io::WKTConstants::SOURCECRS, false);
-        sourceCRS()->exportToWKT(formatter);
+        l_sourceCRS->_exportToWKT(formatter);
         formatter->endNode();
 
         formatter->startNode(io::WKTConstants::TARGETCRS, false);
-        targetCRS()->exportToWKT(formatter);
+        l_targetCRS->_exportToWKT(formatter);
         formatter->endNode();
     }
 
-    method()->exportToWKT(formatter);
+    method()->_exportToWKT(formatter);
 
     const MethodMapping *mapping =
         !isWKT2 ? getMapping(method().get()) : nullptr;
@@ -6276,7 +6276,7 @@ std::string SingleOperation::exportTransformationToWKT(
     if (!formatter->abridgedTransformation()) {
         if (interpolationCRS()) {
             formatter->startNode(io::WKTConstants::INTERPOLATIONCRS, false);
-            interpolationCRS()->exportToWKT(formatter);
+            interpolationCRS()->_exportToWKT(formatter);
             formatter->endNode();
         }
 
@@ -6287,10 +6287,8 @@ std::string SingleOperation::exportTransformationToWKT(
         }
     }
 
-    ObjectUsage::_exportToWKT(formatter);
+    ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
-
-    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -6728,8 +6726,8 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
 
 // ---------------------------------------------------------------------------
 
-std::string Transformation::exportToPROJString(
-    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+void Transformation::_exportToPROJString(
+    io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
     if (formatter->convention() ==
         io::PROJStringFormatter::Convention::PROJ_4) {
@@ -6801,17 +6799,15 @@ std::string Transformation::exportToPROJString(
                                          EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
                        .getSIValue();
 
-        io::PROJStringFormatter::Scope scope(formatter);
-
         auto sourceCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
         if (sourceCRSGeog) {
             formatter->startInversion();
-            sourceCRSGeog->exportToPROJString(formatter);
+            sourceCRSGeog->_exportToPROJString(formatter);
             formatter->stopInversion();
 
             formatter->addStep("cart");
-            sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
+            sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
         } else {
             auto sourceCRSGeod =
                 dynamic_cast<const crs::GeodeticCRS *>(sourceCRS().get());
@@ -6926,9 +6922,9 @@ std::string Transformation::exportToPROJString(
         if (targetCRSGeog) {
             formatter->addStep("cart");
             formatter->setCurrentStepInverted(true);
-            targetCRSGeog->ellipsoid()->exportToPROJString(formatter);
+            targetCRSGeog->ellipsoid()->_exportToPROJString(formatter);
 
-            targetCRSGeog->exportToPROJString(formatter);
+            targetCRSGeog->_exportToPROJString(formatter);
         } else {
             auto targetCRSGeod =
                 dynamic_cast<const crs::GeodeticCRS *>(targetCRS().get());
@@ -6939,8 +6935,7 @@ std::string Transformation::exportToPROJString(
             }
             targetCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
         }
-
-        return scope.toString();
+        return;
     }
 
     if (ci_find(methodName, "Molodensky") != std::string::npos ||
@@ -6978,14 +6973,12 @@ std::string Transformation::exportToPROJString(
                 "Can apply Molodensky only to GeographicCRS");
         }
 
-        io::PROJStringFormatter::Scope scope(formatter);
-
         formatter->startInversion();
-        sourceCRSGeog->exportToPROJString(formatter);
+        sourceCRSGeog->_exportToPROJString(formatter);
         formatter->stopInversion();
 
         formatter->addStep("molodensky");
-        sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
+        sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
         formatter->addParam("dx", x);
         formatter->addParam("dy", y);
         formatter->addParam("dz", z);
@@ -6997,9 +6990,9 @@ std::string Transformation::exportToPROJString(
             formatter->addParam("abridged");
         }
 
-        targetCRSGeog->exportToPROJString(formatter);
+        targetCRSGeog->_exportToPROJString(formatter);
 
-        return scope.toString();
+        return;
     }
 
     if (ci_equal(methodName, EPSG_NAME_METHOD_GEOGRAPHIC2D_OFFSETS) ||
@@ -7029,8 +7022,6 @@ std::string Transformation::exportToPROJString(
                 "Can apply Geographic 2D offsets only to GeographicCRS");
         }
 
-        io::PROJStringFormatter::Scope scope(formatter);
-
         formatter->startInversion();
         sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
@@ -7043,7 +7034,7 @@ std::string Transformation::exportToPROJString(
 
         targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
 
-        return scope.toString();
+        return;
     }
 
     if (ci_equal(methodName, EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSETS) ||
@@ -7077,8 +7068,6 @@ std::string Transformation::exportToPROJString(
                 "Can apply Geographic 3D offsets only to GeographicCRS");
         }
 
-        io::PROJStringFormatter::Scope scope(formatter);
-
         formatter->startInversion();
         sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
@@ -7092,7 +7081,7 @@ std::string Transformation::exportToPROJString(
 
         targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
 
-        return scope.toString();
+        return;
     }
 
     if (ci_equal(methodName,
@@ -7143,8 +7132,6 @@ std::string Transformation::exportToPROJString(
             }
         }
 
-        io::PROJStringFormatter::Scope scope(formatter);
-
         formatter->startInversion();
         sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
@@ -7158,7 +7145,7 @@ std::string Transformation::exportToPROJString(
 
         targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
 
-        return scope.toString();
+        return;
     }
 
     if (ci_equal(methodName, EPSG_NAME_METHOD_VERTICAL_OFFSET) ||
@@ -7183,8 +7170,6 @@ std::string Transformation::exportToPROJString(
                                   EPSG_CODE_PARAMETER_VERTICAL_OFFSET)
                 .getSIValue();
 
-        io::PROJStringFormatter::Scope scope(formatter);
-
         formatter->startInversion();
         sourceCRSVert->addLinearUnitConvert(formatter);
         formatter->stopInversion();
@@ -7194,7 +7179,7 @@ std::string Transformation::exportToPROJString(
 
         targetCRSVert->addLinearUnitConvert(formatter);
 
-        return scope.toString();
+        return;
     }
 
     // Substitute grid names with PROJ friendly names.
@@ -7205,7 +7190,8 @@ std::string Transformation::exportToPROJString(
             shared_from_this().as_nullable()));
 
         if (alternate != self) {
-            return alternate->exportToPROJString(formatter);
+            alternate->_exportToPROJString(formatter);
+            return;
         }
     }
 
@@ -7231,8 +7217,6 @@ std::string Transformation::exportToPROJString(
                                           " only to GeographicCRS");
         }
 
-        io::PROJStringFormatter::Scope scope(formatter);
-
         formatter->startInversion();
         sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
@@ -7248,12 +7232,11 @@ std::string Transformation::exportToPROJString(
 
         targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
 
-        return scope.toString();
+        return;
     }
 
     auto heightFilename = _getHeightToGeographic3DFilename(this, true);
     if (!heightFilename.empty()) {
-        io::PROJStringFormatter::Scope scope(formatter);
         if (starts_with(methodName, INVERSE_OF)) {
             formatter->startInversion();
         }
@@ -7262,7 +7245,7 @@ std::string Transformation::exportToPROJString(
         if (starts_with(methodName, INVERSE_OF)) {
             formatter->stopInversion();
         }
-        return scope.toString();
+        return;
     }
 
     if (isGeographic3DToGravityRelatedHeight(method(), true)) {
@@ -7272,7 +7255,6 @@ std::string Transformation::exportToPROJString(
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             auto filename = fileParameter->valueFile();
-            io::PROJStringFormatter::Scope scope(formatter);
             if (starts_with(methodName, INVERSE_OF)) {
                 formatter->startInversion();
             }
@@ -7281,7 +7263,7 @@ std::string Transformation::exportToPROJString(
             if (starts_with(methodName, INVERSE_OF)) {
                 formatter->stopInversion();
             }
-            return scope.toString();
+            return;
         }
     }
 
@@ -7292,14 +7274,13 @@ std::string Transformation::exportToPROJString(
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
-            io::PROJStringFormatter::Scope scope(formatter);
             formatter->addStep("vgridshift");
             // The vertcon grids go from NGVD 29 to NAVD 88, with units
             // in millimeter (see
             // https://github.com/OSGeo/proj.4/issues/1071)
             formatter->addParam("grids", fileParameter->valueFile());
             formatter->addParam("multiplier", 0.001);
-            return scope.toString();
+            return;
         }
     }
 
@@ -7332,8 +7313,6 @@ std::string Transformation::exportToPROJString(
                                           "ellipsoid");
         }
 
-        io::PROJStringFormatter::Scope scope(formatter);
-
         formatter->startInversion();
         sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
@@ -7348,7 +7327,7 @@ std::string Transformation::exportToPROJString(
             if (!projPMName.empty()) {
                 done = true;
                 formatter->addStep("longlat");
-                sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
+                sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
                 formatter->addParam("pm", projPMName);
             }
         }
@@ -7357,16 +7336,16 @@ std::string Transformation::exportToPROJString(
             // operation.
             formatter->startInversion();
             formatter->addStep("longlat");
-            sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
+            sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
             datum::PrimeMeridian::create(util::PropertyMap(),
                                          common::Angle(offsetDeg))
-                ->exportToPROJString(formatter);
+                ->_exportToPROJString(formatter);
             formatter->stopInversion();
         }
 
         targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
 
-        return scope.toString();
+        return;
     }
 
     if (ci_equal(methodName, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
@@ -7387,15 +7366,14 @@ std::string Transformation::exportToPROJString(
             bool isTargetGeographic = targetCRSGeog != nullptr;
             if ((isSrcGeocentric && isTargetGeographic) ||
                 (isSrcGeographic && isTargetGeocentric)) {
-                io::PROJStringFormatter::Scope scope(formatter);
 
                 formatter->startInversion();
-                sourceCRSGeod->exportToPROJString(formatter);
+                sourceCRSGeod->_exportToPROJString(formatter);
                 formatter->stopInversion();
 
-                targetCRSGeod->exportToPROJString(formatter);
+                targetCRSGeod->_exportToPROJString(formatter);
 
-                return scope.toString();
+                return;
             }
         }
 
@@ -7404,11 +7382,8 @@ std::string Transformation::exportToPROJString(
                                       "conversion");
     }
 
-    {
-        io::PROJStringFormatter::Scope scope(formatter);
-        if (exportToPROJStringGeneric(formatter)) {
-            return scope.toString();
-        }
+    if (exportToPROJStringGeneric(formatter)) {
+        return;
     }
 
     throw io::FormattingException("Unimplemented");
@@ -7417,7 +7392,7 @@ std::string Transformation::exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool SingleOperation::exportToPROJStringGeneric(
-    io::PROJStringFormatterNNPtr formatter) const {
+    io::PROJStringFormatter *formatter) const {
     auto methodName = method()->nameStr();
     const int methodEPSGCode = method()->getEPSGCode();
 
@@ -7682,8 +7657,8 @@ CoordinateOperationNNPtr ConcatenatedOperation::inverse() const {
 
 // ---------------------------------------------------------------------------
 
-std::string
-ConcatenatedOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+//! @cond Doxygen_Suppress
+void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2 || !formatter->use2018Keywords()) {
         throw io::FormattingException(
@@ -7695,35 +7670,32 @@ ConcatenatedOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     formatter->addQuotedString(nameStr());
 
     formatter->startNode(io::WKTConstants::SOURCECRS, false);
-    sourceCRS()->exportToWKT(formatter);
+    sourceCRS()->_exportToWKT(formatter);
     formatter->endNode();
 
     formatter->startNode(io::WKTConstants::TARGETCRS, false);
-    targetCRS()->exportToWKT(formatter);
+    targetCRS()->_exportToWKT(formatter);
     formatter->endNode();
 
     for (const auto &operation : operations()) {
         formatter->startNode(io::WKTConstants::STEP, false);
-        operation->exportToWKT(formatter);
+        operation->_exportToWKT(formatter);
         formatter->endNode();
     }
 
-    ObjectUsage::_exportToWKT(formatter);
+    ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
-
-    return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
-std::string ConcatenatedOperation::exportToPROJString(
-    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+void ConcatenatedOperation::_exportToPROJString(
+    io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
-    io::PROJStringFormatter::Scope scope(formatter);
     for (const auto &operation : operations()) {
-        operation->exportToPROJString(formatter);
+        operation->_exportToPROJString(formatter);
     }
-    return scope.toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -8601,7 +8573,7 @@ struct FilterAndSort {
         for (const auto &op : res) {
             auto formatter = io::PROJStringFormatter::create();
             try {
-                std::string key(op->exportToPROJString(formatter));
+                std::string key(op->exportToPROJString(formatter.get()));
                 bool dummy = false;
                 std::ostringstream buffer;
                 buffer.imbue(std::locale::classic());
@@ -8794,18 +8766,15 @@ createGeodToGeodPROJBased(const crs::GeodeticCRSNNPtr &geodSrc,
         crs::GeodeticCRSPtr geodSrc{};
         crs::GeodeticCRSPtr geodDst{};
 
-        // cppcheck-suppress functionStatic
-        std::string exportToPROJString(
-            io::PROJStringFormatterNNPtr formatter) const override {
-
-            io::PROJStringFormatter::Scope scope(formatter);
+        void
+            // cppcheck-suppress functionStatic
+            _exportToPROJString(
+                io::PROJStringFormatter *formatter) const override {
 
             formatter->startInversion();
-            geodSrc->exportToPROJString(formatter);
+            geodSrc->_exportToPROJString(formatter);
             formatter->stopInversion();
-            geodDst->exportToPROJString(formatter);
-
-            return scope.toString();
+            geodDst->_exportToPROJString(formatter);
         }
     };
 
@@ -8835,27 +8804,24 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
         CoordinateOperationPtr verticalTransform{};
         crs::GeographicCRSPtr geogDst{};
 
-        // cppcheck-suppress functionStatic
-        std::string exportToPROJString(
-            io::PROJStringFormatterNNPtr formatter) const override {
-
-            io::PROJStringFormatter::Scope scope(formatter);
+        void
+            // cppcheck-suppress functionStatic
+            _exportToPROJString(
+                io::PROJStringFormatter *formatter) const override {
 
             formatter->setOmitZUnitConversion(true);
-            horizTransform->exportToPROJString(formatter);
+            horizTransform->_exportToPROJString(formatter);
 
             formatter->startInversion();
             geogDst->addAngularUnitConvertAndAxisSwap(formatter);
             formatter->stopInversion();
             formatter->setOmitZUnitConversion(false);
 
-            verticalTransform->exportToPROJString(formatter);
+            verticalTransform->_exportToPROJString(formatter);
 
             formatter->setOmitZUnitConversion(true);
             geogDst->addAngularUnitConvertAndAxisSwap(formatter);
             formatter->setOmitZUnitConversion(false);
-
-            return scope.toString();
         }
     };
 
@@ -8906,15 +8872,14 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
         CoordinateOperationPtr opGeogCRStoDstCRS{};
         crs::GeographicCRSPtr interpolationGeogCRS{};
 
-        // cppcheck-suppress functionStatic
-        std::string exportToPROJString(
-            io::PROJStringFormatterNNPtr formatter) const override {
-
-            io::PROJStringFormatter::Scope scope(formatter);
+        void
+            // cppcheck-suppress functionStatic
+            _exportToPROJString(
+                io::PROJStringFormatter *formatter) const override {
 
             formatter->setOmitZUnitConversion(true);
 
-            opSrcCRSToGeogCRS->exportToPROJString(formatter);
+            opSrcCRSToGeogCRS->_exportToPROJString(formatter);
 
             formatter->startInversion();
             interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(formatter);
@@ -8922,17 +8887,15 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
 
             formatter->setOmitZUnitConversion(false);
 
-            verticalTransform->exportToPROJString(formatter);
+            verticalTransform->_exportToPROJString(formatter);
 
             formatter->setOmitZUnitConversion(true);
 
             interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(formatter);
 
-            opGeogCRStoDstCRS->exportToPROJString(formatter);
+            opGeogCRStoDstCRS->_exportToPROJString(formatter);
 
             formatter->setOmitZUnitConversion(false);
-
-            return scope.toString();
         }
     };
 
@@ -9658,13 +9621,11 @@ CoordinateOperationNNPtr InverseCoordinateOperation::inverse() const {
 
 // ---------------------------------------------------------------------------
 
-std::string InverseCoordinateOperation::exportToPROJString(
-    io::PROJStringFormatterNNPtr formatter) const {
-    io::PROJStringFormatter::Scope scope(formatter);
+void InverseCoordinateOperation::_exportToPROJString(
+    io::PROJStringFormatter *formatter) const {
     formatter->startInversion();
-    forwardOperation_->exportToPROJString(formatter);
+    forwardOperation_->_exportToPROJString(formatter);
     formatter->stopInversion();
-    return scope.toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -9743,7 +9704,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     if (inverse) {
         formatter->startInversion();
     }
-    projExportable->exportToPROJString(formatter);
+    projExportable->_exportToPROJString(formatter.get());
     if (inverse) {
         formatter->stopInversion();
     }
@@ -9796,11 +9757,11 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
 
 // ---------------------------------------------------------------------------
 
-std::string
-PROJBasedOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+void PROJBasedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
 
     if (sourceCRS() && targetCRS()) {
-        return exportTransformationToWKT(formatter);
+        exportTransformationToWKT(formatter);
+        return;
     }
 
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
@@ -9811,29 +9772,27 @@ PROJBasedOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
     formatter->startNode(io::WKTConstants::CONVERSION, false);
     formatter->addQuotedString(nameStr());
-    method()->exportToWKT(formatter);
+    method()->_exportToWKT(formatter);
 
     for (const auto &paramValue : parameterValues()) {
-        paramValue->exportToWKT(formatter);
+        paramValue->_exportToWKT(formatter);
     }
     formatter->endNode();
-
-    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------
 
-std::string PROJBasedOperation::exportToPROJString(
-    io::PROJStringFormatterNNPtr formatter) const {
+void PROJBasedOperation::_exportToPROJString(
+    io::PROJStringFormatter *formatter) const {
     if (projStringExportable_) {
         if (inverse_) {
             formatter->startInversion();
         }
-        projStringExportable_->exportToPROJString(formatter);
+        projStringExportable_->_exportToPROJString(formatter);
         if (inverse_) {
             formatter->stopInversion();
         }
-        return formatter->toString();
+        return;
     }
 
     try {
@@ -9844,7 +9803,6 @@ std::string PROJBasedOperation::exportToPROJString(
             std::string("PROJBasedOperation::exportToPROJString() failed: ") +
             e.what());
     }
-    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -9856,7 +9814,7 @@ PROJBasedOperation::gridsNeeded(io::DatabaseContextPtr databaseContext) const {
     try {
         auto formatterOut = io::PROJStringFormatter::create();
         auto formatter = io::PROJStringFormatter::create();
-        formatter->ingestPROJString(exportToPROJString(formatterOut));
+        formatter->ingestPROJString(exportToPROJString(formatterOut.get()));
         for (const auto &shortName : formatter->getUsedGridNames()) {
             CoordinateOperation::GridDescription desc;
             desc.shortName = shortName;

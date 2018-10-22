@@ -1772,8 +1772,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             return crsRet;
         }
         throw FactoryException("unsupported (type, CS type) for geodeticCRS: " +
-                               type + ", " +
-                               cs->getWKT2Type(WKTFormatter::create()));
+                               type + ", " + cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
         throw FactoryException("cannot build geodeticCRS " + code + ": " +
                                ex.what());
@@ -1831,7 +1830,7 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
                                             NN_NO_CHECK(verticalCS));
         }
         throw FactoryException("unsupported CS type for verticalCRS: " +
-                               cs->getWKT2Type(WKTFormatter::create()));
+                               cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
         throw FactoryException("cannot build verticalCRS " + code + ": " +
                                ex.what());
@@ -2035,7 +2034,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                                              NN_NO_CHECK(cartesianCS));
         }
         throw FactoryException("unsupported CS type for projectedCRS: " +
-                               cs->getWKT2Type(WKTFormatter::create()));
+                               cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
         throw FactoryException("cannot build projectedCRS " + code + ": " +
                                ex.what());

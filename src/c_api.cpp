@@ -579,7 +579,8 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
         break;
     }
     try {
-        auto wkt = wktExportable->exportToWKT(WKTFormatter::create(convention));
+        auto wkt =
+            wktExportable->exportToWKT(WKTFormatter::create(convention).get());
         obj->mapWKTString[type] = wkt;
         return obj->mapWKTString[type].c_str();
     } catch (const std::exception &e) {
@@ -640,7 +641,7 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
                 formatter->setUseETMercForTMerc(true);
             }
         }
-        auto wkt = exportable->exportToPROJString(formatter);
+        auto wkt = exportable->exportToPROJString(formatter.get());
         obj->mapPROJString[type] = wkt;
         return obj->mapPROJString[type].c_str();
     } catch (const std::exception &e) {

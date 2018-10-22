@@ -373,13 +373,14 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
     PROJ_DLL static bool isEquivalentName(const std::string &a,
                                           const std::string &b);
 
-    std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override; // throw(io::FormattingException)
-
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         static std::string
         canonicalizeName(const std::string &str);
+
+    void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
     //! @endcond
 
   protected:

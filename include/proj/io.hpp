@@ -130,9 +130,9 @@ using DatabaseContextNNPtr = util::nn<DatabaseContextPtr>;
 // ---------------------------------------------------------------------------
 
 class WKTFormatter;
-/** WKTFormatter shared pointer. */
-using WKTFormatterPtr = std::shared_ptr<WKTFormatter>;
-/** WKTFormatter non-null shared pointer. */
+/** WKTFormatter unique pointer. */
+using WKTFormatterPtr = std::unique_ptr<WKTFormatter>;
+/** Non-null WKTFormatter unique pointer. */
 using WKTFormatterNNPtr = util::nn<WKTFormatterPtr>;
 
 /** \brief Formatter to WKT strings.
@@ -194,7 +194,7 @@ class WKTFormatter {
 
     PROJ_DLL static WKTFormatterNNPtr
     create(Convention convention = Convention::WKT2);
-    PROJ_DLL static WKTFormatterNNPtr create(WKTFormatterNNPtr other);
+    PROJ_DLL static WKTFormatterNNPtr create(const WKTFormatterNNPtr &other);
     //! @cond Doxygen_Suppress
     PROJ_DLL ~WKTFormatter();
     //! @endcond
@@ -219,6 +219,7 @@ class WKTFormatter {
 
     PROJ_DLL WKTFormatter &simulCurNodeHasId();
 
+    void addQuotedString(const char *str);
     void addQuotedString(const std::string &str);
     void add(const std::string &str);
     void add(int number);
@@ -279,7 +280,7 @@ class WKTFormatter {
     explicit WKTFormatter(Convention convention);
     WKTFormatter(const WKTFormatter &other) = delete;
 
-    INLINED_MAKE_SHARED
+    INLINED_MAKE_UNIQUE
     //! @endcond
 
   private:
@@ -289,9 +290,9 @@ class WKTFormatter {
 // ---------------------------------------------------------------------------
 
 class PROJStringFormatter;
-/** PROJStringFormatter shared pointer. */
-using PROJStringFormatterPtr = std::shared_ptr<PROJStringFormatter>;
-/** PROJStringFormatter non-null shared pointer. */
+/** PROJStringFormatter unique pointer. */
+using PROJStringFormatterPtr = std::unique_ptr<PROJStringFormatter>;
+/** Non-null PROJStringFormatter unique pointer. */
 using PROJStringFormatterNNPtr = util::nn<PROJStringFormatterPtr>;
 
 /** \brief Formatter to PROJ strings.
@@ -324,17 +325,8 @@ class PROJStringFormatter {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
 
-        class Scope {
-      public:
-        explicit Scope(const PROJStringFormatterNNPtr &formatter);
-        ~Scope();
-        std::string toString();
-
-      private:
-        PROJStringFormatterPtr formatter_;
-    };
-
-    PROJ_DLL void startInversion();
+        PROJ_DLL void
+        startInversion();
     PROJ_DLL void stopInversion();
     bool isInverted() const;
     bool getUseETMercForTMerc() const;
@@ -351,10 +343,11 @@ class PROJStringFormatter {
     PROJ_DLL void addParam(const char *paramName, int val);
     PROJ_DLL void addParam(const std::string &paramName, int val);
     PROJ_DLL void addParam(const char *paramName, const char *val);
+    PROJ_DLL void addParam(const char *paramName, const std::string &val);
     PROJ_DLL void addParam(const std::string &paramName, const char *val);
     PROJ_DLL void addParam(const std::string &paramName,
                            const std::string &val);
-    PROJ_DLL void addParam(const std::string &paramName,
+    PROJ_DLL void addParam(const char *paramName,
                            const std::vector<double> &vals);
 
     std::set<std::string> getUsedGridNames() const;
@@ -386,14 +379,11 @@ class PROJStringFormatter {
                                  const DatabaseContextPtr &dbContext);
     PROJStringFormatter(const PROJStringFormatter &other) = delete;
 
-    INLINED_MAKE_SHARED
+    INLINED_MAKE_UNIQUE
     //! @endcond
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-
-    void enter();
-    void leave();
 };
 
 // ---------------------------------------------------------------------------
@@ -407,6 +397,9 @@ class FormattingException : public util::Exception {
     PROJ_DLL explicit FormattingException(const std::string &message);
     PROJ_DLL FormattingException(const FormattingException &other);
     PROJ_DLL virtual ~FormattingException() override;
+
+    static void Throw(const char *msg) PROJ_NO_RETURN;
+    static void Throw(const std::string &msg) PROJ_NO_RETURN;
     //! @endcond
 };
 
@@ -427,15 +420,23 @@ class ParsingException : public util::Exception {
 // ---------------------------------------------------------------------------
 
 /** \brief Interface for an object that can be exported to WKT. */
-class PROJ_DLL IWKTExportable {
+class IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
-    virtual ~IWKTExportable();
+    PROJ_DLL virtual ~IWKTExportable();
     //! @endcond
 
     /** Builds a WKT representation. May throw a FormattingException */
-    virtual std::string exportToWKT(
-        WKTFormatterNNPtr formatter) const = 0; // throw(FormattingException)
+    PROJ_DLL std::string
+    exportToWKT(WKTFormatter *formatter) const; // throw(FormattingException)
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        virtual void
+        _exportToWKT(
+            WKTFormatter *formatter) const = 0; // throw(FormattingException)
+    //! @endcond
 };
 
 // ---------------------------------------------------------------------------
@@ -447,10 +448,10 @@ using IPROJStringExportablePtr = std::shared_ptr<IPROJStringExportable>;
 using IPROJStringExportableNNPtr = util::nn<IPROJStringExportablePtr>;
 
 /** \brief Interface for an object that can be exported to a PROJ string. */
-class PROJ_DLL IPROJStringExportable {
+class IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
-    virtual ~IPROJStringExportable();
+    PROJ_DLL virtual ~IPROJStringExportable();
     //! @endcond
 
     /** \brief Builds a PROJ string representation.
@@ -499,8 +500,16 @@ class PROJ_DLL IPROJStringExportable {
      * @param formatter PROJ string formatter.
      * @return a PROJ string.
      * @throw FormattingException */
-    virtual std::string exportToPROJString(PROJStringFormatterNNPtr formatter)
-        const = 0; // throw(FormattingException)
+    PROJ_DLL std::string exportToPROJString(
+        PROJStringFormatter *formatter) const; // throw(FormattingException)
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        virtual void
+        _exportToPROJString(PROJStringFormatter *formatter)
+            const = 0; // throw(FormattingException)
+    //! @endcond
 };
 
 // ---------------------------------------------------------------------------

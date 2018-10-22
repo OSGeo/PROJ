@@ -146,7 +146,7 @@ TEST_F(CApi, proj_obj_create_from_user_input) {
     {
         auto obj = proj_obj_create_from_user_input(
             m_ctxt,
-            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create())
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
                 .c_str());
         ObjectKeeper keeper(obj);
         EXPECT_NE(obj, nullptr);
@@ -165,7 +165,8 @@ TEST_F(CApi, proj_obj_create_from_wkt) {
     EXPECT_EQ(proj_obj_create_from_wkt(m_ctxt, "invalid"), nullptr);
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
-        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()).c_str());
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+            .c_str());
     ObjectKeeper keeper(obj);
     EXPECT_NE(obj, nullptr);
 }
@@ -185,7 +186,8 @@ TEST_F(CApi, proj_obj_create_from_proj_string) {
 TEST_F(CApi, proj_obj_as_wkt) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
-        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()).c_str());
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+            .c_str());
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -232,7 +234,8 @@ TEST_F(CApi, proj_obj_as_wkt) {
 
 TEST_F(CApi, proj_obj_as_wkt_incompatible_WKT1) {
     auto obj = proj_obj_create_from_wkt(
-        m_ctxt, createBoundCRS()->exportToWKT(WKTFormatter::create()).c_str());
+        m_ctxt,
+        createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str());
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -245,7 +248,8 @@ TEST_F(CApi, proj_obj_as_wkt_incompatible_WKT1) {
 TEST_F(CApi, proj_obj_as_proj_string) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
-        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()).c_str());
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+            .c_str());
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -269,7 +273,8 @@ TEST_F(CApi, proj_obj_as_proj_string) {
 
 TEST_F(CApi, proj_obj_as_proj_string_incompatible_WKT1) {
     auto obj = proj_obj_create_from_wkt(
-        m_ctxt, createBoundCRS()->exportToWKT(WKTFormatter::create()).c_str());
+        m_ctxt,
+        createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str());
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -317,7 +322,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84_on_invalid_type) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt, createProjectedCRS()
                     ->derivingConversion()
-                    ->exportToWKT(WKTFormatter::create())
+                    ->exportToWKT(WKTFormatter::create().get())
                     .c_str());
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
@@ -331,7 +336,8 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84_on_invalid_type) {
 TEST_F(CApi, proj_obj_get_name) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
-        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()).c_str());
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+            .c_str());
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
     auto name = proj_obj_get_name(obj);
@@ -345,7 +351,8 @@ TEST_F(CApi, proj_obj_get_name) {
 TEST_F(CApi, proj_obj_get_id_auth_name) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
-        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()).c_str());
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+            .c_str());
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
     auto auth = proj_obj_get_id_auth_name(obj, 0);
@@ -361,7 +368,8 @@ TEST_F(CApi, proj_obj_get_id_auth_name) {
 TEST_F(CApi, proj_obj_get_id_code) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
-        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()).c_str());
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+            .c_str());
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
     auto code = proj_obj_get_id_code(obj, 0);
@@ -378,7 +386,7 @@ TEST_F(CApi, proj_obj_get_type) {
     {
         auto obj = proj_obj_create_from_wkt(
             m_ctxt,
-            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create())
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
                 .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
@@ -387,7 +395,7 @@ TEST_F(CApi, proj_obj_get_type) {
     {
         auto obj = proj_obj_create_from_wkt(
             m_ctxt, GeographicCRS::EPSG_4326->datum()
-                        ->exportToWKT(WKTFormatter::create())
+                        ->exportToWKT(WKTFormatter::create().get())
                         .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
@@ -396,7 +404,7 @@ TEST_F(CApi, proj_obj_get_type) {
     {
         auto obj = proj_obj_create_from_wkt(
             m_ctxt, GeographicCRS::EPSG_4326->ellipsoid()
-                        ->exportToWKT(WKTFormatter::create())
+                        ->exportToWKT(WKTFormatter::create().get())
                         .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
@@ -404,16 +412,18 @@ TEST_F(CApi, proj_obj_get_type) {
     }
     {
         auto obj = proj_obj_create_from_wkt(
-            m_ctxt,
-            createProjectedCRS()->exportToWKT(WKTFormatter::create()).c_str());
+            m_ctxt, createProjectedCRS()
+                        ->exportToWKT(WKTFormatter::create().get())
+                        .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_PROJECTED_CRS);
     }
     {
         auto obj = proj_obj_create_from_wkt(
-            m_ctxt,
-            createVerticalCRS()->exportToWKT(WKTFormatter::create()).c_str());
+            m_ctxt, createVerticalCRS()
+                        ->exportToWKT(WKTFormatter::create().get())
+                        .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_VERTICAL_CRS);
@@ -422,7 +432,7 @@ TEST_F(CApi, proj_obj_get_type) {
         auto obj = proj_obj_create_from_wkt(
             m_ctxt, createVerticalCRS()
                         ->datum()
-                        ->exportToWKT(WKTFormatter::create())
+                        ->exportToWKT(WKTFormatter::create().get())
                         .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
@@ -432,7 +442,7 @@ TEST_F(CApi, proj_obj_get_type) {
         auto obj = proj_obj_create_from_wkt(
             m_ctxt, createProjectedCRS()
                         ->derivingConversion()
-                        ->exportToWKT(WKTFormatter::create())
+                        ->exportToWKT(WKTFormatter::create().get())
                         .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
@@ -440,8 +450,9 @@ TEST_F(CApi, proj_obj_get_type) {
     }
     {
         auto obj = proj_obj_create_from_wkt(
-            m_ctxt,
-            createBoundCRS()->exportToWKT(WKTFormatter::create()).c_str());
+            m_ctxt, createBoundCRS()
+                        ->exportToWKT(WKTFormatter::create().get())
+                        .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_BOUND_CRS);
@@ -450,7 +461,7 @@ TEST_F(CApi, proj_obj_get_type) {
         auto obj = proj_obj_create_from_wkt(
             m_ctxt, createBoundCRS()
                         ->transformation()
-                        ->exportToWKT(WKTFormatter::create())
+                        ->exportToWKT(WKTFormatter::create().get())
                         .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
@@ -518,10 +529,11 @@ TEST_F(CApi, proj_obj_create_from_database) {
 
 TEST_F(CApi, proj_crs) {
     auto crs = proj_obj_create_from_wkt(
-        m_ctxt, createProjectedCRS()
-                    ->exportToWKT(WKTFormatter::create(
-                        WKTFormatter::Convention::WKT1_GDAL))
-                    .c_str());
+        m_ctxt,
+        createProjectedCRS()
+            ->exportToWKT(
+                WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get())
+            .c_str());
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
     EXPECT_TRUE(proj_obj_is_crs(crs));
@@ -578,10 +590,11 @@ TEST_F(CApi, proj_crs) {
 
 TEST_F(CApi, proj_obj_get_prime_meridian) {
     auto crs = proj_obj_create_from_wkt(
-        m_ctxt, createProjectedCRS()
-                    ->exportToWKT(WKTFormatter::create(
-                        WKTFormatter::Convention::WKT1_GDAL))
-                    .c_str());
+        m_ctxt,
+        createProjectedCRS()
+            ->exportToWKT(
+                WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get())
+            .c_str());
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
@@ -619,7 +632,7 @@ TEST_F(CApi, proj_obj_get_prime_meridian) {
 TEST_F(CApi, proj_crs_compound) {
     auto crs = proj_obj_create_from_wkt(
         m_ctxt,
-        createCompoundCRS()->exportToWKT(WKTFormatter::create()).c_str());
+        createCompoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str());
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
     EXPECT_EQ(proj_obj_get_type(crs), PJ_OBJ_TYPE_COMPOUND_CRS);
@@ -643,7 +656,8 @@ TEST_F(CApi, proj_crs_compound) {
 
 TEST_F(CApi, proj_obj_get_source_target_crs_bound_crs) {
     auto crs = proj_obj_create_from_wkt(
-        m_ctxt, createBoundCRS()->exportToWKT(WKTFormatter::create()).c_str());
+        m_ctxt,
+        createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str());
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
@@ -664,7 +678,7 @@ TEST_F(CApi, proj_obj_get_source_target_crs_transformation) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt, createBoundCRS()
                     ->transformation()
-                    ->exportToWKT(WKTFormatter::create())
+                    ->exportToWKT(WKTFormatter::create().get())
                     .c_str());
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
@@ -782,8 +796,9 @@ TEST_F(CApi, proj_get_codes_from_database) {
 
 TEST_F(CApi, conversion) {
     auto crs = proj_obj_create_from_wkt(
-        m_ctxt,
-        createProjectedCRS()->exportToWKT(WKTFormatter::create()).c_str());
+        m_ctxt, createProjectedCRS()
+                    ->exportToWKT(WKTFormatter::create().get())
+                    .c_str());
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
@@ -851,7 +866,8 @@ TEST_F(CApi, conversion) {
 
 TEST_F(CApi, transformation_from_boundCRS) {
     auto crs = proj_obj_create_from_wkt(
-        m_ctxt, createBoundCRS()->exportToWKT(WKTFormatter::create()).c_str());
+        m_ctxt,
+        createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str());
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 

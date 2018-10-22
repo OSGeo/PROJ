@@ -47,6 +47,12 @@ namespace common {
 
 // ---------------------------------------------------------------------------
 
+class UnitOfMeasure;
+/** Shared pointer of UnitOfMeasure. */
+using UnitOfMeasurePtr = std::shared_ptr<UnitOfMeasure>;
+/** Non-null shared pointer of UnitOfMeasure. */
+using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
+
 /** \brief Unit of measure. */
 class UnitOfMeasure : public util::BaseObject {
   public:
@@ -77,6 +83,7 @@ class UnitOfMeasure : public util::BaseObject {
     PROJ_DLL UnitOfMeasure(const UnitOfMeasure &other);
     PROJ_DLL ~UnitOfMeasure() override;
     PROJ_DLL UnitOfMeasure &operator=(const UnitOfMeasure &other);
+    static UnitOfMeasureNNPtr create(const UnitOfMeasure &other);
     //! @endcond
 
     PROJ_DLL const std::string &name() const;
@@ -90,12 +97,11 @@ class UnitOfMeasure : public util::BaseObject {
     PROJ_DLL bool operator!=(const UnitOfMeasure &other) const;
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL std::string
-    exportToWKT(io::WKTFormatterNNPtr formatter,
-                const std::string &unitType =
-                    std::string()) const; // throw(io::FormattingException)
+    void _exportToWKT(io::WKTFormatter *formatter,
+                      const std::string &unitType = std::string())
+        const; // throw(io::FormattingException)
 
-    PROJ_DLL std::string exportToPROJString() const;
+    std::string exportToPROJString() const;
     //! @endcond
 
     PROJ_DLL static const UnitOfMeasure NONE;
@@ -120,11 +126,6 @@ class UnitOfMeasure : public util::BaseObject {
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };
-
-/** Shared pointer of UnitOfMeasure. */
-using UnitOfMeasurePtr = std::shared_ptr<UnitOfMeasure>;
-/** Non-null shared pointer of UnitOfMeasure. */
-using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
 
 // ---------------------------------------------------------------------------
 
@@ -304,8 +305,8 @@ class IdentifiedObject : public util::BaseObject, public util::IComparable {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         void
-        formatID(io::WKTFormatterNNPtr formatter) const;
-    void formatRemarks(io::WKTFormatterNNPtr formatter) const;
+        formatID(io::WKTFormatter *formatter) const;
+    void formatRemarks(io::WKTFormatter *formatter) const;
 
     bool
     isEquivalentTo(const util::IComparable *other,
@@ -366,8 +367,8 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        std::string
-        exportToWKT(io::WKTFormatterNNPtr formatter)
+        void
+        _exportToWKT(io::WKTFormatter *formatter)
             const; // throw(io::FormattingException)
                    //! @endcond
 
@@ -417,8 +418,8 @@ class ObjectUsage : public IdentifiedObject {
     void setProperties(const util::PropertyMap
                            &properties); // throw(InvalidValueTypeException)
 
-    void _exportToWKT(io::WKTFormatterNNPtr formatter)
-        const; // throw(io::FormattingException)
+    void baseExportToWKT(
+        io::WKTFormatter *formatter) const; // throw(io::FormattingException)
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

@@ -376,7 +376,7 @@ TEST(metadata, id) {
     EXPECT_TRUE(id->uri().has_value());
     EXPECT_EQ(*(id->uri()), "urn:ogc:def:crs:EPSG::4946");
 
-    auto got_wkt = id->exportToWKT(WKTFormatter::create());
+    auto got_wkt = id->exportToWKT(WKTFormatter::create().get());
     EXPECT_EQ(got_wkt, in_wkt);
 }
 

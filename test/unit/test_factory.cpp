@@ -408,7 +408,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
     ASSERT_TRUE(extent != nullptr);
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=longlat +ellps=WGS84 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
@@ -650,7 +650,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_3) {
     EXPECT_THROW(factory->createCoordinateOperation("-1", false),
                  NoSuchAuthorityCodeException);
     auto op = factory->createCoordinateOperation("1113", false);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
               "+proj=longlat +a=6378249.145 +rf=293.4663077 +step +proj=cart "
@@ -665,7 +665,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_3) {
 TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto op = factory->createCoordinateOperation("7676", false);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=bessel +step +proj=helmert +x=577.88891 +y=165.22205 "
@@ -685,7 +685,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8) {
                     "        ID[\"EPSG\",1049]],\n";
 
     auto wkt = op->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
     EXPECT_TRUE(wkt.find(expected) != std::string::npos) << wkt;
 }
 
@@ -789,9 +789,10 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15) {
         "        BBOX[-47.2,109.23,-8.88,163.2]],\n"
         "    ID[\"EPSG\",6276]]";
 
-    EXPECT_EQ(op->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
-              expected);
+    EXPECT_EQ(
+        op->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+        expected);
 }
 
 // ---------------------------------------------------------------------------
@@ -841,9 +842,10 @@ TEST(
         "        AREA[\"New Caledonia - Grande Terre - Noumea\"],\n"
         "        BBOX[-22.37,166.35,-22.19,166.54]],\n"
         "    ID[\"EPSG\",1295]]";
-    EXPECT_EQ(op->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
-              expected);
+    EXPECT_EQ(
+        op->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+        expected);
 }
 
 // ---------------------------------------------------------------------------
@@ -858,7 +860,7 @@ TEST(
         "    PARAMETERFILE[\"Longitude difference file\",\"alaska.los\"],\n";
 
     auto wkt = op->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
     EXPECT_TRUE(wkt.find(expected) != std::string::npos) << wkt;
 }
 
@@ -911,9 +913,10 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
         "        BBOX[47.73,12.09,51.06,22.56]],\n"
         "    ID[\"EPSG\",1884]]";
 
-    EXPECT_EQ(op->exportToWKT(
-                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
-              expected);
+    EXPECT_EQ(
+        op->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+        expected);
 }
 
 // ---------------------------------------------------------------------------
@@ -922,7 +925,7 @@ TEST(factory, AuthorityFactory_test_uom_9110) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     // This tests conversion from unit of measure EPSG:9110 DDD.MMSSsss
     auto crs = factory->createProjectedCRS("2172");
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=sterea "
               "+lat_0=53.0019444444444 +lon_0=21.5027777777778 +k=0.9998 "
@@ -936,7 +939,7 @@ TEST(factory, AuthorityFactory_affine_parametric_transform) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto op = factory->createCoordinateOperation("10087", false);
     // Do not do axis unit change
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=affine +xoff=82357.457 +s11=0.304794369 "
               "+s12=1.5417425e-05 +yoff=28091.324 +s21=-1.5417425e-05 "
               "+s22=0.304794369");
@@ -2122,7 +2125,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(
-            crs->exportToPROJString(PROJStringFormatter::create()),
+            crs->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
             "+step +proj=mbt_s +unused_flag +ellps=WGS84");
         EXPECT_TRUE(crs->canonicalBoundCRS() == nullptr);
@@ -2133,7 +2136,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(
-            crs->exportToPROJString(PROJStringFormatter::create()),
+            crs->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
             "+step +proj=mbt_s +unused_flag +ellps=WGS84");
         EXPECT_TRUE(crs->canonicalBoundCRS() != nullptr);
