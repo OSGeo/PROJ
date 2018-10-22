@@ -27,6 +27,7 @@ make install
 make dist-all
 find /tmp/proj_autoconf_install
 #make check
+test/unit/test_cpp_api.exe
 cd ..
 # Now with grids
 wget http://download.osgeo.org/proj/proj-datumgrid-1.5.zip

@@ -440,17 +440,32 @@ void WKTFormatter::add(size_t number) {
 
 // ---------------------------------------------------------------------------
 
+#ifdef __MINGW32__
+static std::string normalizeSerializedString(const std::string &in) {
+    // mingw will output 1e-0xy instead of 1e-xy. Fix that
+    auto pos = in.find("e-0");
+    if (pos == std::string::npos) {
+        return in;
+    }
+    if (pos + 4 < in.size() && isdigit(in[pos + 3]) && isdigit(in[pos + 4])) {
+        return in.substr(0, pos + 2) + in.substr(pos + 3);
+    }
+    return in;
+}
+#else
+static std::string normalizeSerializedString(const std::string &in) {
+    return in;
+}
+#endif
+
+// ---------------------------------------------------------------------------
+
 void WKTFormatter::add(double number, int precision) {
     d->startNewChild();
     std::ostringstream buffer;
     buffer.imbue(std::locale::classic());
     buffer << std::setprecision(precision) << number;
-    std::string numberStr = buffer.str();
-    d->result_ += numberStr;
-    /*if( numberStr.find('.') == std::string::npos )
-    {
-        d->result_ += ".0";
-    }*/
+    d->result_ += normalizeSerializedString(buffer.str());
 }
 
 // ---------------------------------------------------------------------------
@@ -4060,7 +4075,7 @@ static std::string formatToString(double val) {
         val = std::round(val * 10) / 10;
     }
     buffer << std::setprecision(15) << val;
-    return buffer.str();
+    return normalizeSerializedString(buffer.str());
 }
 
 // ---------------------------------------------------------------------------
