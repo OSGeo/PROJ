@@ -168,52 +168,53 @@ template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 template <class T> class optional {
   public:
     //! @cond Doxygen_Suppress
-    optional() : hasVal_(false) {}
-    explicit optional(const T &val) : hasVal_(true), val_(val) {}
-    explicit optional(T &&val) : hasVal_(true), val_(std::forward<T>(val)) {}
+    inline optional() : hasVal_(false) {}
+    inline explicit optional(const T &val) : hasVal_(true), val_(val) {}
+    inline explicit optional(T &&val)
+        : hasVal_(true), val_(std::forward<T>(val)) {}
 
-    optional(const optional &other) = default;
-    optional(optional &&other) PROJ_NOEXCEPT
+    inline optional(const optional &other) = default;
+    inline optional(optional &&other) PROJ_NOEXCEPT
         : hasVal_(other.hasVal_),
           // cppcheck-suppress functionStatic
           val_(std::forward<T>(other.val_)) {
         other.hasVal_ = false;
     }
 
-    optional &operator=(const T &val) {
+    inline optional &operator=(const T &val) {
         hasVal_ = true;
         val_ = val;
         return *this;
     }
-    optional &operator=(T &&val) noexcept {
+    inline optional &operator=(T &&val) noexcept {
         hasVal_ = true;
         val_ = std::forward<T>(val);
         return *this;
     }
-    optional &operator=(const optional &other) = default;
-    optional &operator=(optional &&other) noexcept {
+    inline optional &operator=(const optional &other) = default;
+    inline optional &operator=(optional &&other) noexcept {
         hasVal_ = other.hasVal_;
         val_ = std::forward<T>(other.val_);
         other.hasVal_ = false;
         return *this;
     }
 
-    PROJ_DLL T *operator->() { return &val_; }
-    PROJ_DLL T &operator*() { return val_; }
+    inline T *operator->() { return &val_; }
+    inline T &operator*() { return val_; }
 
     //! @endcond
 
     /** Returns a pointer to the contained value. */
-    PROJ_DLL const T *operator->() const { return &val_; }
+    inline const T *operator->() const { return &val_; }
 
     /** Returns a reference to the contained value. */
-    PROJ_DLL const T &operator*() const { return val_; }
+    inline const T &operator*() const { return val_; }
 
     /** Return whether the optional has a value */
-    PROJ_DLL explicit operator bool() const noexcept { return hasVal_; }
+    inline explicit operator bool() const noexcept { return hasVal_; }
 
     /** Return whether the optional has a value */
-    PROJ_DLL bool has_value() const noexcept { return hasVal_; }
+    inline bool has_value() const noexcept { return hasVal_; }
 
   private:
     bool hasVal_;

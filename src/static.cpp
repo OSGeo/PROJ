@@ -635,17 +635,4 @@ const GeographicCRSNNPtr
 
 // ---------------------------------------------------------------------------
 
-// Make sure to instanciate all used instances of optional
-
-namespace util {
-template class optional<std::string>;
-template class optional<double>;
-template class optional<Citation>;
-template class optional<Identifier>;
-template class optional<common::DataEpoch>;
-template class optional<common::IdentifiedObject>;
-template class optional<common::Scale>;
-template class optional<common::Length>;
-} // namespace util
-
 NS_PROJ_END
