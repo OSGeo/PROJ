@@ -71,7 +71,7 @@ class Citation : public util::BaseObject {
     PROJ_DLL ~Citation();
     //! @endcond
 
-    PROJ_DLL const util::optional<std::string> &title() const;
+    PROJ_DLL const util::optional<std::string> &title() PROJ_CONST_DECL;
 
   protected:
     PROJ_FRIEND_OPTIONAL(Citation);
@@ -151,10 +151,10 @@ class GeographicBoundingBox : public GeographicExtent {
     PROJ_DLL ~GeographicBoundingBox() override;
     //! @endcond
 
-    PROJ_DLL double westBoundLongitude() const;
-    PROJ_DLL double southBoundLatitude() const;
-    PROJ_DLL double eastBoundLongitude() const;
-    PROJ_DLL double northBoundLatitude() const;
+    PROJ_DLL double westBoundLongitude() PROJ_CONST_DECL;
+    PROJ_DLL double southBoundLatitude() PROJ_CONST_DECL;
+    PROJ_DLL double eastBoundLongitude() PROJ_CONST_DECL;
+    PROJ_DLL double northBoundLatitude() PROJ_CONST_DECL;
 
     PROJ_DLL static GeographicBoundingBoxNNPtr
     create(double west, double south, double east, double north);
@@ -199,8 +199,8 @@ class TemporalExtent : public util::BaseObject, public util::IComparable {
     PROJ_DLL ~TemporalExtent() override;
     //! @endcond
 
-    PROJ_DLL const std::string &start() const;
-    PROJ_DLL const std::string &stop() const;
+    PROJ_DLL const std::string &start() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &stop() PROJ_CONST_DECL;
 
     PROJ_DLL static TemporalExtentNNPtr create(const std::string &start,
                                                const std::string &stop);
@@ -242,9 +242,9 @@ class VerticalExtent : public util::BaseObject, public util::IComparable {
     PROJ_DLL ~VerticalExtent() override;
     //! @endcond
 
-    PROJ_DLL double minimumValue() const;
-    PROJ_DLL double maximumValue() const;
-    PROJ_DLL common::UnitOfMeasureNNPtr &unit() const;
+    PROJ_DLL double minimumValue() PROJ_CONST_DECL;
+    PROJ_DLL double maximumValue() PROJ_CONST_DECL;
+    PROJ_DLL common::UnitOfMeasureNNPtr &unit() PROJ_CONST_DECL;
 
     PROJ_DLL static VerticalExtentNNPtr
     create(double minimumValue, double maximumValue,
@@ -289,11 +289,13 @@ class Extent : public util::BaseObject, public util::IComparable {
     PROJ_DLL ~Extent() override;
     //! @endcond
 
-    PROJ_DLL const util::optional<std::string> &description() const;
+    PROJ_DLL const util::optional<std::string> &description() PROJ_CONST_DECL;
     PROJ_DLL const std::vector<GeographicExtentNNPtr> &
-    geographicElements() const;
-    PROJ_DLL const std::vector<TemporalExtentNNPtr> &temporalElements() const;
-    PROJ_DLL const std::vector<VerticalExtentNNPtr> &verticalElements() const;
+    geographicElements() PROJ_CONST_DECL;
+    PROJ_DLL const std::vector<TemporalExtentNNPtr> &
+    temporalElements() PROJ_CONST_DECL;
+    PROJ_DLL const std::vector<VerticalExtentNNPtr> &
+    verticalElements() PROJ_CONST_DECL;
 
     PROJ_DLL static ExtentNNPtr
     create(const util::optional<std::string> &descriptionIn,
@@ -363,12 +365,12 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
     PROJ_DLL static const std::string EPSG;
     PROJ_DLL static const std::string OGC;
 
-    PROJ_DLL const util::optional<Citation> &authority() const;
-    PROJ_DLL const std::string &code() const;
-    PROJ_DLL const util::optional<std::string> &codeSpace() const;
-    PROJ_DLL const util::optional<std::string> &version() const;
-    PROJ_DLL const util::optional<std::string> &description() const;
-    PROJ_DLL const util::optional<std::string> &uri() const;
+    PROJ_DLL const util::optional<Citation> &authority() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &code() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<std::string> &codeSpace() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<std::string> &version() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<std::string> &description() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<std::string> &uri() PROJ_CONST_DECL;
 
     PROJ_DLL static bool isEquivalentName(const char *a, const std::string &b);
 
@@ -386,17 +388,14 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
     //! @endcond
 
   protected:
-    explicit Identifier(const std::string &codeIn = std::string());
+    explicit Identifier(const std::string &codeIn,
+                        const util::PropertyMap &properties);
 
     PROJ_FRIEND_OPTIONAL(Identifier);
     INLINED_MAKE_SHARED
-    Identifier &operator=(const Identifier &other);
+    Identifier &operator=(const Identifier &other) = delete;
 
     PROJ_FRIEND(common::IdentifiedObject);
-
-    // Non-standard
-    void setProperties(const util::PropertyMap
-                           &properties); // throw(InvalidValueTypeException)
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -422,7 +421,7 @@ class PositionalAccuracy : public util::BaseObject {
     PROJ_DLL ~PositionalAccuracy() override;
     //! @endcond
 
-    PROJ_DLL const std::string &value() const;
+    PROJ_DLL const std::string &value() PROJ_CONST_DECL;
 
     PROJ_DLL static PositionalAccuracyNNPtr create(const std::string &valueIn);
 

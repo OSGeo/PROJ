@@ -86,7 +86,9 @@ Meridian::~Meridian() = default;
  *
  * @return the longitude.
  */
-const common::Angle &Meridian::longitude() const { return d->longitude_; }
+const common::Angle &Meridian::longitude() PROJ_CONST_DEFN {
+    return d->longitude_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -158,7 +160,7 @@ CoordinateSystemAxis::~CoordinateSystemAxis() = default;
  *
  * @return the abbreviation.
  */
-const std::string &CoordinateSystemAxis::abbreviation() const {
+const std::string &CoordinateSystemAxis::abbreviation() PROJ_CONST_DEFN {
     return d->abbreviation;
 }
 
@@ -179,7 +181,7 @@ const std::string &CoordinateSystemAxis::abbreviation() const {
  *
  * @return the direction.
  */
-const AxisDirection &CoordinateSystemAxis::direction() const {
+const AxisDirection &CoordinateSystemAxis::direction() PROJ_CONST_DEFN {
     return *(d->direction);
 }
 
@@ -193,7 +195,7 @@ const AxisDirection &CoordinateSystemAxis::direction() const {
  *
  * @return the axis unit.
  */
-const common::UnitOfMeasure &CoordinateSystemAxis::unit() const {
+const common::UnitOfMeasure &CoordinateSystemAxis::unit() PROJ_CONST_DEFN {
     return d->unit;
 }
 
@@ -204,7 +206,8 @@ const common::UnitOfMeasure &CoordinateSystemAxis::unit() const {
  *
  * @return the minimum value, or empty.
  */
-const util::optional<double> &CoordinateSystemAxis::minimumValue() const {
+const util::optional<double> &
+CoordinateSystemAxis::minimumValue() PROJ_CONST_DEFN {
     return d->minimumValue;
 }
 
@@ -215,7 +218,8 @@ const util::optional<double> &CoordinateSystemAxis::minimumValue() const {
  *
  * @return the maximum value, or empty.
  */
-const util::optional<double> &CoordinateSystemAxis::maximumValue() const {
+const util::optional<double> &
+CoordinateSystemAxis::maximumValue() PROJ_CONST_DEFN {
     return d->maximumValue;
 }
 
@@ -227,7 +231,7 @@ const util::optional<double> &CoordinateSystemAxis::maximumValue() const {
  *
  * @return the meridian, or null.
  */
-const MeridianPtr &CoordinateSystemAxis::meridian() const {
+const MeridianPtr &CoordinateSystemAxis::meridian() PROJ_CONST_DEFN {
     return d->meridian;
 }
 
@@ -425,7 +429,7 @@ CoordinateSystem::~CoordinateSystem() = default;
  * @return the axes.
  */
 const std::vector<CoordinateSystemAxisNNPtr> &
-CoordinateSystem::axisList() const {
+CoordinateSystem::axisList() PROJ_CONST_DEFN {
     return d->axisList;
 }
 

@@ -2471,7 +2471,8 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
                     auto unit = guessUnitForParameter(wkt1ParameterName,
                                                       defaultLinearUnit,
                                                       defaultAngularUnit);
-                    mapParameters[wkt1ParameterName] = Measure(val, unit);
+                    mapParameters.insert(std::pair<std::string, Measure>(
+                        wkt1ParameterName, Measure(val, unit)));
                 } catch (const std::exception &) {
                 }
             }
@@ -2479,9 +2480,10 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
 
         Measure latitudeOfOrigin = mapParameters["latitude_of_origin"];
         Measure centralMeridian = mapParameters["central_meridian"];
-        Measure scaleFactor = mapParameters["scale_factor"];
-        if (scaleFactor.unit() == UnitOfMeasure::NONE)
-            scaleFactor = Measure(1.0, UnitOfMeasure::SCALE_UNITY);
+        Measure scaleFactorFromMap = mapParameters["scale_factor"];
+        Measure scaleFactor((scaleFactorFromMap.unit() == UnitOfMeasure::NONE)
+                                ? Measure(1.0, UnitOfMeasure::SCALE_UNITY)
+                                : scaleFactorFromMap);
         Measure falseEasting = mapParameters["false_easting"];
         Measure falseNorthing = mapParameters["false_northing"];
         if (latitudeOfOrigin.unit() != UnitOfMeasure::NONE &&
@@ -4231,6 +4233,9 @@ DatabaseContextPtr PROJStringFormatter::databaseContext() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+static const std::string emptyString{};
+
 struct PROJStringParser::Private {
     DatabaseContextPtr dbContext_{};
     std::vector<std::string> warningList_{};
@@ -4243,11 +4248,38 @@ struct PROJStringParser::Private {
     std::vector<Step> steps_{};
     std::vector<std::pair<std::string, std::string>> globalParamValues_{};
 
+    template <class T>
     // cppcheck-suppress functionStatic
-    bool hasParamValue(const Step &step, const std::string &key);
+    bool hasParamValue(const Step &step, const T key) {
+        for (const auto &pair : globalParamValues_) {
+            if (ci_equal(pair.first, key)) {
+                return true;
+            }
+        }
+        for (const auto &pair : step.paramValues) {
+            if (ci_equal(pair.first, key)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    template <class T>
     // cppcheck-suppress functionStatic
-    std::string getParamValue(const Step &step, const std::string &key);
+    const std::string &
+    getParamValue(const PROJStringParser::Private::Step &step, const T key) {
+        for (const auto &pair : globalParamValues_) {
+            if (ci_equal(pair.first, key)) {
+                return pair.second;
+            }
+        }
+        for (const auto &pair : step.paramValues) {
+            if (ci_equal(pair.first, key)) {
+                return pair.second;
+            }
+        }
+        return emptyString;
+    }
 
     std::string guessBodyName(double a);
 
@@ -4312,38 +4344,6 @@ std::vector<std::string> PROJStringParser::warningList() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-
-bool PROJStringParser::Private::hasParamValue(
-    const PROJStringParser::Private::Step &step, const std::string &key) {
-    for (const auto &pair : globalParamValues_) {
-        if (ci_equal(pair.first, key)) {
-            return true;
-        }
-    }
-    for (const auto &pair : step.paramValues) {
-        if (ci_equal(pair.first, key)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// ---------------------------------------------------------------------------
-
-std::string PROJStringParser::Private::getParamValue(
-    const PROJStringParser::Private::Step &step, const std::string &key) {
-    for (const auto &pair : globalParamValues_) {
-        if (ci_equal(pair.first, key)) {
-            return pair.second;
-        }
-    }
-    for (const auto &pair : step.paramValues) {
-        if (ci_equal(pair.first, key)) {
-            return pair.second;
-        }
-    }
-    return std::string();
-}
 
 // ---------------------------------------------------------------------------
 
@@ -4427,7 +4427,7 @@ UnitOfMeasure PROJStringParser::Private::buildUnit(
     const std::string &unitsParamName, const std::string &toMeterParamName) {
     UnitOfMeasure unit = UnitOfMeasure::METRE;
     const LinearUnitDesc *unitsMatch = nullptr;
-    auto projUnits = getParamValue(step, unitsParamName);
+    const auto &projUnits = getParamValue(step, unitsParamName);
     if (!projUnits.empty()) {
         unitsMatch = getLinearUnits(projUnits);
         if (unitsMatch == nullptr) {
@@ -4436,7 +4436,7 @@ UnitOfMeasure PROJStringParser::Private::buildUnit(
         }
     }
 
-    auto toMeter = getParamValue(step, toMeterParamName);
+    const auto &toMeter = getParamValue(step, toMeterParamName);
     if (!toMeter.empty()) {
         double to_meter_value;
         try {
@@ -4525,17 +4525,22 @@ static bool isProjectedStep(const std::string &name) {
 
 // ---------------------------------------------------------------------------
 
+static PropertyMap createMapWithUnknownName() {
+    return PropertyMap().set(common::IdentifiedObject::NAME_KEY, "unknown");
+}
+
+// ---------------------------------------------------------------------------
+
 PrimeMeridianNNPtr PROJStringParser::Private::buildPrimeMeridian(
     const PROJStringParser::Private::Step &step) {
 
     PrimeMeridianNNPtr pm = PrimeMeridian::GREENWICH;
-    auto pmStr = getParamValue(step, "pm");
+    const auto &pmStr = getParamValue(step, "pm");
     if (!pmStr.empty()) {
         try {
             double pmValue = c_locale_stod(pmStr);
-            pm = PrimeMeridian::create(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                Angle(pmValue));
+            pm = PrimeMeridian::create(createMapWithUnknownName(),
+                                       Angle(pmValue));
         } catch (const std::invalid_argument &) {
             bool found = false;
             if (pmStr == "paris") {
@@ -4590,23 +4595,23 @@ std::string PROJStringParser::Private::guessBodyName(double a) {
 GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
     const PROJStringParser::Private::Step &step, const std::string &title) {
 
-    auto ellpsStr = getParamValue(step, "ellps");
-    auto datumStr = getParamValue(step, "datum");
-    auto aStr = getParamValue(step, "a");
-    auto bStr = getParamValue(step, "b");
-    auto rfStr = getParamValue(step, "rf");
-    auto RStr = getParamValue(step, "R");
-    GeodeticReferenceFramePtr datum = nullptr;
+    const auto &ellpsStr = getParamValue(step, "ellps");
+    const auto &datumStr = getParamValue(step, "datum");
+    const auto &aStr = getParamValue(step, "a");
+    const auto &bStr = getParamValue(step, "b");
+    const auto &rfStr = getParamValue(step, "rf");
+    const auto &RStr = getParamValue(step, "R");
+    auto optionalString = util::optional<std::string>();
 
     PrimeMeridianNNPtr pm(buildPrimeMeridian(step));
 
     if (!datumStr.empty()) {
         if (datumStr == "WGS84") {
-            datum = GeodeticReferenceFrame::EPSG_6326;
+            return GeodeticReferenceFrame::EPSG_6326;
         } else if (datumStr == "NAD83") {
-            datum = GeodeticReferenceFrame::EPSG_6269;
+            return GeodeticReferenceFrame::EPSG_6269;
         } else if (datumStr == "NAD27") {
-            datum = GeodeticReferenceFrame::EPSG_6267;
+            return GeodeticReferenceFrame::EPSG_6267;
         } else {
 
             for (const auto &datumDesc : datumDescs) {
@@ -4620,40 +4625,32 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                             .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
                             .set(Identifier::CODE_KEY, datumDesc.ellipsoidCode),
                         Length(datumDesc.a), Scale(datumDesc.rf));
-                    datum =
-                        GeodeticReferenceFrame::create(
-                            PropertyMap()
-                                .set(IdentifiedObject::NAME_KEY,
-                                     datumDesc.datumName)
-                                .set(Identifier::CODESPACE_KEY,
-                                     Identifier::EPSG)
-                                .set(Identifier::CODE_KEY, datumDesc.datumCode),
-                            ellipsoid, util::optional<std::string>(), pm)
-                            .as_nullable();
-                    break;
+                    return GeodeticReferenceFrame::create(
+                        PropertyMap()
+                            .set(IdentifiedObject::NAME_KEY,
+                                 datumDesc.datumName)
+                            .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
+                            .set(Identifier::CODE_KEY, datumDesc.datumCode),
+                        ellipsoid, optionalString, pm);
                 }
             }
         }
-        if (!datum) {
-            throw ParsingException("unknown datum " + datumStr);
-        }
-    } else if (!ellpsStr.empty()) {
+        throw ParsingException("unknown datum " + datumStr);
+    }
+
+    else if (!ellpsStr.empty()) {
         if (ellpsStr == "WGS84") {
-            datum = GeodeticReferenceFrame::create(
-                        PropertyMap().set(
-                            IdentifiedObject::NAME_KEY,
-                            title.empty() ? "Unknown based on WGS84 ellipsoid"
-                                          : title),
-                        Ellipsoid::WGS84, util::optional<std::string>(), pm)
-                        .as_nullable();
+            return GeodeticReferenceFrame::create(
+                PropertyMap().set(
+                    IdentifiedObject::NAME_KEY,
+                    title.empty() ? "Unknown based on WGS84 ellipsoid" : title),
+                Ellipsoid::WGS84, optionalString, pm);
         } else if (ellpsStr == "GRS80") {
-            datum = GeodeticReferenceFrame::create(
-                        PropertyMap().set(
-                            IdentifiedObject::NAME_KEY,
-                            title.empty() ? "Unknown based on GRS80 ellipsoid"
-                                          : title),
-                        Ellipsoid::GRS1980, util::optional<std::string>(), pm)
-                        .as_nullable();
+            return GeodeticReferenceFrame::create(
+                PropertyMap().set(
+                    IdentifiedObject::NAME_KEY,
+                    title.empty() ? "Unknown based on GRS80 ellipsoid" : title),
+                Ellipsoid::GRS1980, optionalString, pm);
         } else {
             auto proj_ellps = proj_list_ellps();
             for (int i = 0; proj_ellps[i].id != nullptr; i++) {
@@ -4682,22 +4679,17 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                                 Length(a_iter), Scale(rf_iter))
                                 .as_nullable();
                     }
-                    datum = GeodeticReferenceFrame::create(
-                                PropertyMap().set(
-                                    IdentifiedObject::NAME_KEY,
-                                    title.empty()
-                                        ? std::string("Unknown based on ") +
-                                              proj_ellps[i].name + " ellipsoid"
-                                        : title),
-                                NN_NO_CHECK(ellipsoid),
-                                util::optional<std::string>(), pm)
-                                .as_nullable();
-                    break;
+                    return GeodeticReferenceFrame::create(
+                        PropertyMap().set(
+                            IdentifiedObject::NAME_KEY,
+                            title.empty()
+                                ? std::string("Unknown based on ") +
+                                      proj_ellps[i].name + " ellipsoid"
+                                : title),
+                        NN_NO_CHECK(ellipsoid), optionalString, pm);
                 }
             }
-            if (!datum) {
-                throw ParsingException("unknown ellipsoid " + ellpsStr);
-            }
+            throw ParsingException("unknown ellipsoid " + ellpsStr);
         }
     }
 
@@ -4715,15 +4707,13 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
             throw ParsingException("Invalid b value");
         }
         auto ellipsoid =
-            Ellipsoid::createTwoAxis(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                Length(a), Length(b), guessBodyName(a))
+            Ellipsoid::createTwoAxis(createMapWithUnknownName(), Length(a),
+                                     Length(b), guessBodyName(a))
                 ->identify();
-        datum = GeodeticReferenceFrame::create(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                      title.empty() ? "unknown" : title),
-                    ellipsoid, util::optional<std::string>(), pm)
-                    .as_nullable();
+        return GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              title.empty() ? "unknown" : title),
+            ellipsoid, optionalString, pm);
     }
 
     else if (!aStr.empty() && !rfStr.empty()) {
@@ -4739,16 +4729,14 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
         } catch (const std::invalid_argument &) {
             throw ParsingException("Invalid rf value");
         }
-        auto ellipsoid =
-            Ellipsoid::createFlattenedSphere(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                Length(a), Scale(rf), guessBodyName(a))
-                ->identify();
-        datum = GeodeticReferenceFrame::create(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                      title.empty() ? "unknown" : title),
-                    ellipsoid, util::optional<std::string>(), pm)
-                    .as_nullable();
+        auto ellipsoid = Ellipsoid::createFlattenedSphere(
+                             createMapWithUnknownName(), Length(a), Scale(rf),
+                             guessBodyName(a))
+                             ->identify();
+        return GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              title.empty() ? "unknown" : title),
+            ellipsoid, optionalString, pm);
     }
 
     else if (!RStr.empty()) {
@@ -4758,14 +4746,12 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
         } catch (const std::invalid_argument &) {
             throw ParsingException("Invalid Rvalue");
         }
-        auto ellipsoid = Ellipsoid::createSphere(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), Length(R),
-            guessBodyName(R));
-        datum = GeodeticReferenceFrame::create(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                      title.empty() ? "unknown" : title),
-                    ellipsoid, util::optional<std::string>(), pm)
-                    .as_nullable();
+        auto ellipsoid = Ellipsoid::createSphere(createMapWithUnknownName(),
+                                                 Length(R), guessBodyName(R));
+        return GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              title.empty() ? "unknown" : title),
+            ellipsoid, optionalString, pm);
     }
 
     if (!aStr.empty() && bStr.empty() && rfStr.empty()) {
@@ -4780,19 +4766,14 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
         throw ParsingException("rf found, but a missing");
     }
 
-    if (!datum) {
-        if (pm->isEquivalentTo(PrimeMeridian::GREENWICH.get())) {
-            datum = GeodeticReferenceFrame::EPSG_6326;
-        } else {
-            datum = GeodeticReferenceFrame::create(
-                        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                          "Unknown based on WGS84 ellipsoid"),
-                        Ellipsoid::WGS84, util::optional<std::string>(), pm)
-                        .as_nullable();
-        }
+    if (pm->isEquivalentTo(PrimeMeridian::GREENWICH.get())) {
+        return GeodeticReferenceFrame::EPSG_6326;
+    } else {
+        return GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "Unknown based on WGS84 ellipsoid"),
+            Ellipsoid::WGS84, optionalString, pm);
     }
-
-    return NN_NO_CHECK(datum);
 }
 
 // ---------------------------------------------------------------------------
@@ -4869,7 +4850,7 @@ PROJStringParser::Private::processAxisSwap(const Step &step,
 
     std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
 
-    auto axisStr = getParamValue(step, "axis");
+    const auto &axisStr = getParamValue(step, "axis");
     if (!axisStr.empty()) {
         if (axisStr.size() == 3) {
             for (int i = 0; i < 2; i++) {
@@ -4885,12 +4866,14 @@ PROJStringParser::Private::processAxisSwap(const Step &step,
                     throw ParsingException("Unhandled axis=" + axisStr);
                 }
             }
+        } else {
+            throw ParsingException("Unhandled axis=" + axisStr);
         }
     } else if (iAxisSwap >= 0) {
-        auto stepAxisSwap = steps_[iAxisSwap];
-        auto orderStr = getParamValue(stepAxisSwap, "order");
+        const auto &stepAxisSwap = steps_[iAxisSwap];
+        const auto &orderStr = getParamValue(stepAxisSwap, "order");
         auto orderTab = split(orderStr, ',');
-        if (orderTab.size() < 2) {
+        if (orderTab.size() != 2) {
             throw ParsingException("Unhandled order=" + orderStr);
         }
         if (stepAxisSwap.inverted) {
@@ -4924,22 +4907,22 @@ EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
 
     UnitOfMeasure angularUnit = UnitOfMeasure::DEGREE;
     if (iUnitConvert >= 0) {
-        auto stepUnitConvert = steps_[iUnitConvert];
-        auto xy_in = getParamValue(stepUnitConvert, "xy_in");
-        auto xy_out = getParamValue(stepUnitConvert, "xy_out");
+        const auto &stepUnitConvert = steps_[iUnitConvert];
+        const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
+        const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
         if (stepUnitConvert.inverted) {
             std::swap(xy_in, xy_out);
         }
         if (iUnitConvert < iStep) {
             std::swap(xy_in, xy_out);
         }
-        if (xy_in.empty() || xy_out.empty() || xy_in != "rad" ||
-            (xy_out != "rad" && xy_out != "deg" && xy_out != "grad")) {
+        if (xy_in->empty() || xy_out->empty() || *xy_in != "rad" ||
+            (*xy_out != "rad" && *xy_out != "deg" && *xy_out != "grad")) {
             throw ParsingException("unhandled values for xy_in and/or xy_out");
         }
-        if (xy_out == "rad") {
+        if (*xy_out == "rad") {
             angularUnit = UnitOfMeasure::RADIAN;
-        } else if (xy_out == "grad") {
+        } else if (*xy_out == "grad") {
             angularUnit = UnitOfMeasure::GRAD;
         }
     }
@@ -4967,8 +4950,8 @@ GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
     int iStep, int iUnitConvert, int iAxisSwap, bool ignoreVUnits) {
     const auto &step = steps_[iStep];
 
-    auto title = isGeodeticStep(step.name) ? getParamValue(step, "title")
-                                           : std::string();
+    const auto &title =
+        isGeodeticStep(step.name) ? getParamValue(step, "title") : emptyString;
 
     auto datum = buildDatum(step, title);
 
@@ -4989,36 +4972,36 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
 
-    auto title = getParamValue(step, "title");
+    const auto &title = getParamValue(step, "title");
 
     auto datum = buildDatum(step, title);
 
     UnitOfMeasure unit = UnitOfMeasure::METRE;
     if (iUnitConvert >= 0) {
-        auto stepUnitConvert = steps_[iUnitConvert];
-        auto xy_in = getParamValue(stepUnitConvert, "xy_in");
-        auto xy_out = getParamValue(stepUnitConvert, "xy_out");
-        auto z_in = getParamValue(stepUnitConvert, "z_in");
-        auto z_out = getParamValue(stepUnitConvert, "z_out");
+        const auto &stepUnitConvert = steps_[iUnitConvert];
+        const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
+        const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
+        const std::string *z_in = &getParamValue(stepUnitConvert, "z_in");
+        const std::string *z_out = &getParamValue(stepUnitConvert, "z_out");
         if (stepUnitConvert.inverted) {
             std::swap(xy_in, xy_out);
             std::swap(z_in, z_out);
         }
-        if (xy_in.empty() || xy_out.empty() || xy_in != "m" || z_in != "m" ||
-            xy_out != z_out) {
+        if (xy_in->empty() || xy_out->empty() || *xy_in != "m" ||
+            *z_in != "m" || *xy_out != *z_out) {
             throw ParsingException(
                 "unhandled values for xy_in, z_in, xy_out or z_out");
         }
 
         const LinearUnitDesc *unitsMatch = nullptr;
         try {
-            double to_meter_value = c_locale_stod(xy_out);
+            double to_meter_value = c_locale_stod(*xy_out);
             unitsMatch = getLinearUnits(to_meter_value);
             if (unitsMatch == nullptr) {
                 unit = _buildUnit(to_meter_value);
             }
         } catch (const std::invalid_argument &) {
-            unitsMatch = getLinearUnits(xy_out);
+            unitsMatch = getLinearUnits(*xy_out);
             if (!unitsMatch) {
                 throw ParsingException(
                     "unhandled values for xy_in, z_in, xy_out or z_out");
@@ -5040,7 +5023,7 @@ CRSNNPtr
 PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
                                                            CRSNNPtr crs) {
     const auto &step = steps_[iStep];
-    auto towgs84 = getParamValue(step, "towgs84");
+    const auto &towgs84 = getParamValue(step, "towgs84");
     if (!towgs84.empty()) {
         std::vector<double> towgs84Values;
         for (const auto &str : split(towgs84, ',')) {
@@ -5053,21 +5036,21 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
         crs = BoundCRS::createFromTOWGS84(crs, towgs84Values);
     }
 
-    auto nadgrids = getParamValue(step, "nadgrids");
+    const auto &nadgrids = getParamValue(step, "nadgrids");
     if (!nadgrids.empty()) {
         crs = BoundCRS::createFromNadgrids(crs, nadgrids);
     }
 
-    auto geoidgrids = getParamValue(step, "geoidgrids");
+    const auto &geoidgrids = getParamValue(step, "geoidgrids");
     if (!geoidgrids.empty()) {
-        auto vdatum = VerticalReferenceFrame::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"));
+        auto vdatum =
+            VerticalReferenceFrame::create(createMapWithUnknownName());
 
         const UnitOfMeasure unit = buildUnit(step, "vunits", "vto_meter");
 
-        auto vcrs = VerticalCRS::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), vdatum,
-            VerticalCS::createGravityRelatedHeight(unit));
+        auto vcrs =
+            VerticalCRS::create(createMapWithUnknownName(), vdatum,
+                                VerticalCS::createGravityRelatedHeight(unit));
 
         auto transformation =
             Transformation::createGravityRelatedHeightToGeographic3D(
@@ -5078,9 +5061,8 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
         auto boundvcrs =
             BoundCRS::create(vcrs, GeographicCRS::EPSG_4979, transformation);
 
-        crs = CompoundCRS::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-            std::vector<CRSNNPtr>{crs, boundvcrs});
+        crs = CompoundCRS::create(createMapWithUnknownName(),
+                                  std::vector<CRSNNPtr>{crs, boundvcrs});
     }
 
     return crs;
@@ -5130,7 +5112,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
 
-    auto title = getParamValue(step, "title");
+    const auto &title = getParamValue(step, "title");
 
     if (!buildPrimeMeridian(step)->isEquivalentTo(
             geogCRS->primeMeridian().get())) {
@@ -5151,10 +5133,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         // TODO: we loose the link to the proj etmerc method here. Add some
         // property to Conversion to keep it ?
     } else if (step.name == "lcc") {
-        auto lat_0 = getParamValue(step, "lat_0");
-        auto lat_1 = getParamValue(step, "lat_1");
-        auto lat_2 = getParamValue(step, "lat_2");
-        auto k_0 = getParamValue(step, "k_0");
+        const auto &lat_0 = getParamValue(step, "lat_0");
+        const auto &lat_1 = getParamValue(step, "lat_1");
+        const auto &lat_2 = getParamValue(step, "lat_2");
+        const auto &k_0 = getParamValue(step, "k_0");
         if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
             getAngularValue(lat_0) == getAngularValue(lat_1)) {
             constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP = 9801;
@@ -5176,14 +5158,14 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         constexpr int EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA = 9835;
         mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
     } else if (step.name == "geos" && getParamValue(step, "sweep") == "x") {
-        static const std::string
-            PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X(
+        static const char
+            *PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X(
                 "Geostationary Satellite (Sweep X)");
         mapping =
             getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X);
     } else if (step.name == "geos") {
-        static const std::string
-            PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y(
+        static const char
+            *PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y(
                 "Geostationary Satellite (Sweep Y)");
         mapping =
             getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y);
@@ -5197,7 +5179,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                    hasParamValue(step, "lon_1") &&
                    hasParamValue(step, "lat_2") &&
                    hasParamValue(step, "lon_2")) {
-            static const std::string
+            static const char *
                 PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN(
                     "Hotine Oblique Mercator Two Point Natural Origin");
             mapping = getMapping(
@@ -5258,13 +5240,15 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A);
             }
         } else {
-            static const std::string PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC(
+            static const char *PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC(
                 "Stereographic");
             mapping = getMapping(PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC);
         }
     }
 
     ConversionPtr conv;
+
+    auto mapWithUnknownName = createMapWithUnknownName();
 
     if (step.name == "utm") {
         const int zone = std::atoi(getParamValue(step, "zone").c_str());
@@ -5282,24 +5266,23 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         std::vector<ParameterValueNNPtr> values;
         for (int i = 0; mapping->params[i] != nullptr; i++) {
             const auto *param = mapping->params[i];
-            std::string proj_name(param->proj_names ? param->proj_names[0]
-                                                    : "");
-            auto paramValue = !proj_name.empty()
-                                  ? getParamValue(step, proj_name)
-                                  : std::string();
+            std::string proj_name(param->proj_name ? param->proj_name : "");
+            const std::string *paramValue =
+                !proj_name.empty() ? &getParamValue(step, proj_name)
+                                   : &emptyString;
             // k and k_0 may be used indifferently
-            if (paramValue.empty() && proj_name == "k") {
-                paramValue = getParamValue(step, "k_0");
-            } else if (paramValue.empty() && proj_name == "k_0") {
-                paramValue = getParamValue(step, "k");
+            if (paramValue->empty() && proj_name == "k") {
+                paramValue = &getParamValue(step, "k_0");
+            } else if (paramValue->empty() && proj_name == "k_0") {
+                paramValue = &getParamValue(step, "k");
             }
             double value = 0;
-            if (!paramValue.empty()) {
+            if (!paramValue->empty()) {
                 bool hasError = false;
                 if (param->unit_type == UnitOfMeasure::Type::ANGULAR) {
-                    value = getAngularValue(paramValue, &hasError);
+                    value = getAngularValue(*paramValue, &hasError);
                 } else {
-                    value = getNumericValue(paramValue, &hasError);
+                    value = getNumericValue(*paramValue, &hasError);
                 }
                 if (hasError) {
                     throw ParsingException("invalid value for " + proj_name);
@@ -5311,9 +5294,9 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 // For omerc, if gamma is missing, the default value is
                 // alpha
                 if (step.name == "omerc" && proj_name == "gamma") {
-                    paramValue = getParamValue(step, "alpha");
-                    if (!paramValue.empty()) {
-                        value = getAngularValue(paramValue);
+                    paramValue = &getParamValue(step, "alpha");
+                    if (!paramValue->empty()) {
+                        value = getAngularValue(*paramValue);
                     }
                 }
             }
@@ -5342,9 +5325,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                                 : UnitOfMeasure::NONE)));
         }
 
-        conv = Conversion::create(
-                   PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                   methodMap, parameters, values)
+        conv = Conversion::create(mapWithUnknownName, methodMap, parameters,
+                                  values)
                    .as_nullable();
     } else {
         std::vector<OperationParameterNNPtr> parameters;
@@ -5388,7 +5370,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             }
         }
         conv = Conversion::create(
-                   PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                   mapWithUnknownName,
                    PropertyMap().set(IdentifiedObject::NAME_KEY, methodName),
                    parameters, values)
                    .as_nullable();
@@ -5403,25 +5385,25 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     UnitOfMeasure unit = buildUnit(step, "units", "to_meter");
     if (iUnitConvert >= 0) {
-        auto stepUnitConvert = steps_[iUnitConvert];
-        auto xy_in = getParamValue(stepUnitConvert, "xy_in");
-        auto xy_out = getParamValue(stepUnitConvert, "xy_out");
+        const auto &stepUnitConvert = steps_[iUnitConvert];
+        const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
+        const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
         if (stepUnitConvert.inverted) {
             std::swap(xy_in, xy_out);
         }
-        if (xy_in.empty() || xy_out.empty() || xy_in != "m") {
+        if (xy_in->empty() || xy_out->empty() || *xy_in != "m") {
             throw ParsingException("unhandled values for xy_in and/or xy_out");
         }
 
         const LinearUnitDesc *unitsMatch = nullptr;
         try {
-            double to_meter_value = c_locale_stod(xy_out);
+            double to_meter_value = c_locale_stod(*xy_out);
             unitsMatch = getLinearUnits(to_meter_value);
             if (unitsMatch == nullptr) {
                 unit = _buildUnit(to_meter_value);
             }
         } catch (const std::invalid_argument &) {
-            unitsMatch = getLinearUnits(xy_out);
+            unitsMatch = getLinearUnits(*xy_out);
             if (!unitsMatch) {
                 throw ParsingException(
                     "unhandled values for xy_in and/or xy_out");
@@ -5440,21 +5422,18 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                           title.empty() ? "unknown" : title),
         geogCRS, NN_NO_CHECK(conv), cs);
 
-    if (getParamValue(step, "geoidgrids").empty() &&
-        (!getParamValue(step, "vunits").empty() ||
-         !getParamValue(step, "vto_meter").empty())) {
-        auto vdatum = VerticalReferenceFrame::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"));
+    if (!hasParamValue(step, "geoidgrids") &&
+        (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter"))) {
+        auto vdatum = VerticalReferenceFrame::create(mapWithUnknownName);
 
         const UnitOfMeasure vunit = buildUnit(step, "vunits", "vto_meter");
 
-        auto vcrs = VerticalCRS::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), vdatum,
-            VerticalCS::createGravityRelatedHeight(vunit));
+        auto vcrs =
+            VerticalCRS::create(mapWithUnknownName, vdatum,
+                                VerticalCS::createGravityRelatedHeight(vunit));
 
-        crs = CompoundCRS::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-            std::vector<CRSNNPtr>{crs, vcrs});
+        crs = CompoundCRS::create(mapWithUnknownName,
+                                  std::vector<CRSNNPtr>{crs, vcrs});
     }
 
     return crs;
@@ -5468,20 +5447,21 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     auto &step = steps_[iStep];
     auto datum = buildDatum(step, std::string());
     auto cs = CartesianCS::createGeocentric(UnitOfMeasure::METRE);
+
+    auto mapWithUnknownName = createMapWithUnknownName();
+
     auto sourceCRS =
         iFirstGeogStep >= 0
-            ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                 iFirstAxisSwap, true)
-            : GeodeticCRS::create(
-                  PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                  datum, cs);
+            ? util::nn_static_pointer_cast<crs::CRS>(buildGeographicCRS(
+                  iFirstGeogStep, iFirstUnitConvert, iFirstAxisSwap, true))
+            : util::nn_static_pointer_cast<crs::CRS>(
+                  GeodeticCRS::create(mapWithUnknownName, datum, cs));
     auto targetCRS =
         iSecondGeogStep >= 0
-            ? buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
-                                 iSecondAxisSwap, true)
-            : GeodeticCRS::create(
-                  PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                  datum, cs);
+            ? util::nn_static_pointer_cast<crs::CRS>(buildGeographicCRS(
+                  iSecondGeogStep, iSecondUnitConvert, iSecondAxisSwap, true))
+            : util::nn_static_pointer_cast<crs::CRS>(
+                  GeodeticCRS::create(mapWithUnknownName, datum, cs));
 
     double x = 0;
     double y = 0;
@@ -5505,10 +5485,10 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
 
     struct Params {
         double *pValue;
-        std::string name;
+        const char *name;
         bool *pPresent;
     };
-    const std::vector<Params> params = {
+    const Params knownParams[] = {
         {&x, "x", nullptr},
         {&y, "y", nullptr},
         {&z, "z", nullptr},
@@ -5526,10 +5506,6 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
         {&t_epoch, "t_epoch", &timeDependent},
         {nullptr, "exact", nullptr},
     };
-    std::map<std::string, const Params *> mapParams;
-    for (auto &&param : params) {
-        mapParams[param.name] = &param;
-    }
 
     for (const auto &param : step.paramValues) {
         if (param.first == "datum" || param.first == "ellps" ||
@@ -5546,15 +5522,22 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
             } else {
                 throw ParsingException("unsupported convention");
             }
-        } else if (mapParams.find(param.first) == mapParams.end()) {
-            throw ParsingException("unsupported keyword for Helmert: " +
-                                   param.first);
         } else {
-            const auto *paramDef = mapParams[param.first];
-            if (paramDef->pValue)
-                *(paramDef->pValue) = getNumericValue(param.second);
-            if (paramDef->pPresent)
-                *(paramDef->pPresent) = true;
+            bool found = false;
+            for (auto &&knownParam : knownParams) {
+                if (param.first == knownParam.name) {
+                    found = true;
+                    if (knownParam.pValue)
+                        *(knownParam.pValue) = getNumericValue(param.second);
+                    if (knownParam.pPresent)
+                        *(knownParam.pPresent) = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw ParsingException("unsupported keyword for Helmert: " +
+                                       param.first);
+            }
         }
     }
 
@@ -5563,59 +5546,45 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
         throw ParsingException("missing convention");
     }
 
-    CoordinateOperationPtr transf;
-    if (!rotationTerms) {
-        transf = std::static_pointer_cast<CoordinateOperation>(
-            Transformation::createGeocentricTranslations(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        "unknown"),
-                sourceCRS, targetCRS, x, y, z,
-                std::vector<PositionalAccuracyNNPtr>())
-                .as_nullable());
-    } else if (positionVectorConvention) {
-        if (timeDependent) {
-            transf = std::static_pointer_cast<CoordinateOperation>(
-                Transformation::createTimeDependentPositionVector(
-                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                            "unknown"),
-                    sourceCRS, targetCRS, x, y, z, rx, ry, rz, s, dx, dy, dz,
-                    drx, dry, drz, ds, t_epoch,
-                    std::vector<PositionalAccuracyNNPtr>())
-                    .as_nullable());
+    std::vector<metadata::PositionalAccuracyNNPtr> emptyAccuracies;
+
+    auto transf = ([&]() {
+        if (!rotationTerms) {
+            return Transformation::createGeocentricTranslations(
+                mapWithUnknownName, sourceCRS, targetCRS, x, y, z,
+                emptyAccuracies);
+        } else if (positionVectorConvention) {
+            if (timeDependent) {
+                return Transformation::createTimeDependentPositionVector(
+                    mapWithUnknownName, sourceCRS, targetCRS, x, y, z, rx, ry,
+                    rz, s, dx, dy, dz, drx, dry, drz, ds, t_epoch,
+                    emptyAccuracies);
+            } else {
+                return Transformation::createPositionVector(
+                    mapWithUnknownName, sourceCRS, targetCRS, x, y, z, rx, ry,
+                    rz, s, emptyAccuracies);
+            }
         } else {
-            transf = std::static_pointer_cast<CoordinateOperation>(
-                Transformation::createPositionVector(
-                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                            "unknown"),
-                    sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
-                    std::vector<PositionalAccuracyNNPtr>())
-                    .as_nullable());
+            if (timeDependent) {
+                return Transformation::
+                    createTimeDependentCoordinateFrameRotation(
+                        mapWithUnknownName, sourceCRS, targetCRS, x, y, z, rx,
+                        ry, rz, s, dx, dy, dz, drx, dry, drz, ds, t_epoch,
+                        emptyAccuracies);
+            } else {
+                return Transformation::createCoordinateFrameRotation(
+                    mapWithUnknownName, sourceCRS, targetCRS, x, y, z, rx, ry,
+                    rz, s, emptyAccuracies);
+            }
         }
-    } else {
-        if (timeDependent) {
-            transf = std::static_pointer_cast<CoordinateOperation>(
-                Transformation::createTimeDependentCoordinateFrameRotation(
-                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                            "unknown"),
-                    sourceCRS, targetCRS, x, y, z, rx, ry, rz, s, dx, dy, dz,
-                    drx, dry, drz, ds, t_epoch,
-                    std::vector<PositionalAccuracyNNPtr>())
-                    .as_nullable());
-        } else {
-            transf = std::static_pointer_cast<CoordinateOperation>(
-                Transformation::createCoordinateFrameRotation(
-                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                            "unknown"),
-                    sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
-                    std::vector<PositionalAccuracyNNPtr>())
-                    .as_nullable());
-        }
-    }
+    })();
 
     if (step.inverted) {
-        transf = transf->inverse().as_nullable();
+        return util::nn_static_pointer_cast<CoordinateOperation>(
+            transf->inverse());
+    } else {
+        return util::nn_static_pointer_cast<CoordinateOperation>(transf);
     }
-    return NN_NO_CHECK(transf);
 }
 
 // ---------------------------------------------------------------------------
@@ -5625,11 +5594,6 @@ PROJStringParser::Private::buildMolodenskyTransformation(
     int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
     int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
     auto &step = steps_[iStep];
-    auto datum = buildDatum(step, std::string());
-    auto sourceCRS = iFirstGeogStep >= 0
-                         ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                              iFirstAxisSwap, true)
-                         : buildGeographicCRS(iStep, -1, -1, true);
 
     double dx = 0;
     double dy = 0;
@@ -5639,16 +5603,12 @@ PROJStringParser::Private::buildMolodenskyTransformation(
 
     struct Params {
         double *pValue;
-        std::string name;
+        const char *name;
     };
-    const std::vector<Params> params = {
+    const Params knownParams[] = {
         {&dx, "dx"}, {&dy, "dy"}, {&dz, "dz"}, {&da, "da"}, {&df, "df"},
     };
     bool abridged = false;
-    std::map<std::string, const Params *> mapParams;
-    for (auto &&param : params) {
-        mapParams[param.name] = &param;
-    }
 
     for (const auto &param : step.paramValues) {
         if (param.first == "datum" || param.first == "ellps" ||
@@ -5656,73 +5616,75 @@ PROJStringParser::Private::buildMolodenskyTransformation(
             continue;
         } else if (param.first == "abridged") {
             abridged = true;
-        } else if (mapParams.find(param.first) == mapParams.end()) {
-            throw ParsingException("unsupported keyword for Helmert: " +
-                                   param.first);
         } else {
-            const auto *paramDef = mapParams[param.first];
-            if (paramDef->pValue)
-                *(paramDef->pValue) = getNumericValue(param.second);
+            bool found = false;
+            for (auto &&knownParam : knownParams) {
+                if (param.first == knownParam.name) {
+                    found = true;
+                    if (knownParam.pValue)
+                        *(knownParam.pValue) = getNumericValue(param.second);
+                    break;
+                }
+            }
+            if (!found) {
+                throw ParsingException("unsupported keyword for Molodensky: " +
+                                       param.first);
+            }
         }
     }
 
-    const double a =
-        sourceCRS->datum()->ellipsoid()->semiMajorAxis().getSIValue();
-    const double rf = sourceCRS->datum()
-                          ->ellipsoid()
-                          ->computeInverseFlattening()
-                          .getSIValue();
+    auto datum = buildDatum(step, std::string());
+    auto sourceCRS = iFirstGeogStep >= 0
+                         ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
+                                              iFirstAxisSwap, true)
+                         : buildGeographicCRS(iStep, -1, -1, true);
+
+    const auto &ellps = sourceCRS->ellipsoid();
+    const double a = ellps->semiMajorAxis().getSIValue();
+    const double rf = ellps->computeInverseFlattening().getSIValue();
     const double target_a = a + da;
     const double target_rf = 1.0 / (1.0 / rf + df);
+
+    auto mapWithUnknownName = createMapWithUnknownName();
+
     auto target_ellipsoid =
-        Ellipsoid::createFlattenedSphere(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-            Length(target_a), Scale(target_rf))
+        Ellipsoid::createFlattenedSphere(mapWithUnknownName, Length(target_a),
+                                         Scale(target_rf))
             ->identify();
     auto target_datum = GeodeticReferenceFrame::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-        target_ellipsoid, util::optional<std::string>(),
+        mapWithUnknownName, target_ellipsoid, util::optional<std::string>(),
         PrimeMeridian::GREENWICH);
 
-    CoordinateSystemAxisNNPtr east = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
-        AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE);
-    CoordinateSystemAxisNNPtr north = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
-        AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::DEGREE);
-
-    auto targetCRS =
+    auto targetCRS = util::nn_static_pointer_cast<crs::CRS>(
         iSecondGeogStep >= 0
             ? buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
                                  iSecondAxisSwap, true)
-            : GeographicCRS::create(
-                  PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                  target_datum,
-                  EllipsoidalCS::create(PropertyMap(), east, north));
+            : GeographicCRS::create(mapWithUnknownName, target_datum,
+                                    EllipsoidalCS::createLongitudeLatitude(
+                                        UnitOfMeasure::DEGREE)));
 
-    CoordinateOperationPtr transf;
-    if (abridged) {
-        transf = std::static_pointer_cast<CoordinateOperation>(
-            Transformation::createAbridgedMolodensky(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        "unknown"),
-                sourceCRS, targetCRS, dx, dy, dz, da, df,
-                std::vector<PositionalAccuracyNNPtr>())
-                .as_nullable());
-    } else {
-        transf = std::static_pointer_cast<CoordinateOperation>(
-            Transformation::createMolodensky(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        "unknown"),
-                sourceCRS, targetCRS, dx, dy, dz, da, df,
-                std::vector<PositionalAccuracyNNPtr>())
-                .as_nullable());
-    }
+    auto sourceCRS_as_CRS = util::nn_static_pointer_cast<crs::CRS>(sourceCRS);
+
+    std::vector<metadata::PositionalAccuracyNNPtr> emptyAccuracies;
+
+    auto transf = ([&]() {
+        if (abridged) {
+            return Transformation::createAbridgedMolodensky(
+                mapWithUnknownName, sourceCRS_as_CRS, targetCRS, dx, dy, dz, da,
+                df, emptyAccuracies);
+        } else {
+            return Transformation::createMolodensky(
+                mapWithUnknownName, sourceCRS_as_CRS, targetCRS, dx, dy, dz, da,
+                df, emptyAccuracies);
+        }
+    })();
 
     if (step.inverted) {
-        transf = transf->inverse().as_nullable();
+        return util::nn_static_pointer_cast<CoordinateOperation>(
+            transf->inverse());
+    } else {
+        return util::nn_static_pointer_cast<CoordinateOperation>(transf);
     }
-    return NN_NO_CHECK(transf);
 }
 
 //! @endcond
@@ -5831,12 +5793,12 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     std::pair<std::string, std::string>("vto_meter",
                                                         vto_meter));
             }
-            auto vdatum = VerticalReferenceFrame::create(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"));
+            auto vdatum =
+                VerticalReferenceFrame::create(createMapWithUnknownName());
             auto vcrs = VerticalCRS::create(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                vdatum, VerticalCS::createGravityRelatedHeight(
-                            d->buildUnit(fakeStep, "vunits", "vto_meter")));
+                createMapWithUnknownName(), vdatum,
+                VerticalCS::createGravityRelatedHeight(
+                    d->buildUnit(fakeStep, "vunits", "vto_meter")));
             return vcrs;
         }
 

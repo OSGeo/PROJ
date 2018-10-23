@@ -43,35 +43,26 @@ NS_PROJ_START
 
 namespace operation {
 
-/* Just std::vector<std::string> but with a friendly initializer in case w
- * have just a single string (which is most of cases) */
-struct VectorOfString : public std::vector<std::string> {
-    // cppcheck-suppress noExplicitConstructor
-    VectorOfString(const char *str) : std::vector<std::string>{str} {}
-
-    // cppcheck-suppress noExplicitConstructor
-    VectorOfString(std::initializer_list<std::string> l)
-        : std::vector<std::string>{l} {}
-};
-
 struct ParamMapping {
     const char *wkt2_name;
     const int epsg_code;
     const char *wkt1_name;
     const common::UnitOfMeasure::Type unit_type;
-    const char *const *proj_names;
+    const char *proj_name;
 };
 
 struct MethodMapping {
     const char *wkt2_name;
     const int epsg_code;
     const char *wkt1_name;
-    const char *const *proj_names;
+    const char *proj_name_main;
+    const char *proj_name_aux;
     const ParamMapping *const *params;
 };
 
 const MethodMapping *getMapping(int epsg_code);
 const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name);
+const MethodMapping *getMapping(const char *wkt2_name);
 const MethodMapping *getMapping(const std::string &wkt2_name);
 const MethodMapping *getMapping(const OperationMethod *method);
 std::vector<const MethodMapping *>

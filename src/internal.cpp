@@ -84,6 +84,21 @@ bool ci_equal(const std::string &a, const std::string &b) {
 #endif
 }
 
+/**
+ * Case-insensitive equality test
+ */
+bool ci_equal(const std::string &a, const char *b) {
+    const auto size = a.size();
+    if (size != strlen(b)) {
+        return false;
+    }
+#ifdef _MSC_VER
+    return _strnicmp(a.c_str(), b, size) == 0;
+#else
+    return strncasecmp(a.c_str(), b, size) == 0;
+#endif
+}
+
 // ---------------------------------------------------------------------------
 
 /**

@@ -193,6 +193,11 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
     }
     return nullptr;
 }
+// ---------------------------------------------------------------------------
+
+const MethodMapping *getMapping(const char *wkt2_name) {
+    return getMapping(std::string(wkt2_name));
+}
 
 // ---------------------------------------------------------------------------
 
@@ -212,7 +217,7 @@ std::vector<const MethodMapping *>
 getMappingsFromPROJName(const std::string &projName) {
     std::vector<const MethodMapping *> res;
     for (const auto &mapping : methodMappings) {
-        if (mapping.proj_names && mapping.proj_names[0] == projName) {
+        if (mapping.proj_name_main && projName == mapping.proj_name_main) {
             res.push_back(&mapping);
         }
     }
@@ -4260,19 +4265,17 @@ void Conversion::_exportToPROJString(
         if (!mapping && methodEPSGCode) {
             mapping = getMapping(methodEPSGCode);
         }
-        if (mapping && mapping->proj_names) {
-            formatter->addStep(useETMerc ? "etmerc" : mapping->proj_names[0]);
-            for (size_t i = 1; mapping->proj_names[i] != nullptr; ++i) {
-                if (internal::starts_with(mapping->proj_names[i], "axis=")) {
+        if (mapping && mapping->proj_name_main) {
+            formatter->addStep(useETMerc ? "etmerc" : mapping->proj_name_main);
+            if (mapping->proj_name_aux) {
+                if (internal::starts_with(mapping->proj_name_aux, "axis=")) {
                     bAxisSpecFound = true;
                 }
-                formatter->addParam(mapping->proj_names[i]);
+                formatter->addParam(mapping->proj_name_aux);
             }
 
-            if (ci_equal(methodName,
-                         EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) ||
-                methodEPSGCode ==
-                    EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
+            if (mapping->epsg_code ==
+                EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
                 double latitudeStdParallel =
                     parameterValueMeasure(
                         EPSG_NAME_PARAMETER_LATITUDE_STD_PARALLEL,
@@ -4285,24 +4288,30 @@ void Conversion::_exportToPROJString(
 
             for (int i = 0; mapping->params[i] != nullptr; i++) {
                 const auto *param = mapping->params[i];
-                for (int j = 0;
-                     param->proj_names && param->proj_names[j] != nullptr;
-                     j++) {
-                    if (param->unit_type ==
-                        common::UnitOfMeasure::Type::ANGULAR) {
-                        formatter->addParam(
-                            param->proj_names[j],
-                            parameterValueMeasure(param->wkt2_name,
-                                                  param->epsg_code)
-                                .convertToUnit(common::UnitOfMeasure::DEGREE)
-                                .value());
-                    } else {
-                        formatter->addParam(
-                            param->proj_names[j],
-                            parameterValueMeasure(param->wkt2_name,
-                                                  param->epsg_code)
-                                .getSIValue());
-                    }
+                if (!param->proj_name) {
+                    continue;
+                }
+                auto value =
+                    parameterValueMeasure(param->wkt2_name, param->epsg_code);
+                if (mapping->epsg_code ==
+                        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP &&
+                    strcmp(param->proj_name, "lat_1") == 0) {
+                    formatter->addParam(
+                        param->proj_name,
+                        value.convertToUnit(common::UnitOfMeasure::DEGREE)
+                            .value());
+                    formatter->addParam(
+                        "lat_0",
+                        value.convertToUnit(common::UnitOfMeasure::DEGREE)
+                            .value());
+                } else if (param->unit_type ==
+                           common::UnitOfMeasure::Type::ANGULAR) {
+                    formatter->addParam(
+                        param->proj_name,
+                        value.convertToUnit(common::UnitOfMeasure::DEGREE)
+                            .value());
+                } else {
+                    formatter->addParam(param->proj_name, value.getSIValue());
                 }
             }
 

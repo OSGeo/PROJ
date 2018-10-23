@@ -739,7 +739,7 @@ class AuthorityFactory {
         const std::string &sourceCRSCode,
         const std::string &targetCRSCode) const;
 
-    PROJ_DLL const std::string &getAuthority() const;
+    PROJ_DLL const std::string &getAuthority() PROJ_CONST_DECL;
 
     /** Object type. */
     enum class ObjectType {

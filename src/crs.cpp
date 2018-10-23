@@ -91,7 +91,7 @@ CRS::~CRS() = default;
  *
  * @return a BoundCRSPtr, that might be null.
  */
-const BoundCRSPtr &CRS::canonicalBoundCRS() const {
+const BoundCRSPtr &CRS::canonicalBoundCRS() PROJ_CONST_DEFN {
     return d->canonicalBoundCRS_;
 }
 
@@ -376,7 +376,7 @@ SingleCRS::~SingleCRS() = default;
  *
  * @return a Datum that might be null.
  */
-const datum::DatumPtr &SingleCRS::datum() const { return d->datum; }
+const datum::DatumPtr &SingleCRS::datum() PROJ_CONST_DEFN { return d->datum; }
 
 // ---------------------------------------------------------------------------
 
@@ -386,7 +386,7 @@ const datum::DatumPtr &SingleCRS::datum() const { return d->datum; }
  *
  * @return a DatumEnsemble that might be null.
  */
-const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() const {
+const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() PROJ_CONST_DEFN {
     return d->datumEnsemble;
 }
 
@@ -398,7 +398,7 @@ const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() const {
  *
  * @return a CoordinateSystem that might be null.
  */
-const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() const {
+const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() PROJ_CONST_DEFN {
     return d->coordinateSystem;
 }
 
@@ -534,7 +534,7 @@ CRSNNPtr GeodeticCRS::shallowClone() const {
  * @return a GeodeticReferenceFrame or null (in which case datumEnsemble()
  * should return a non-null pointer.)
  */
-const datum::GeodeticReferenceFramePtr &GeodeticCRS::datum() const {
+const datum::GeodeticReferenceFramePtr &GeodeticCRS::datum() PROJ_CONST_DEFN {
     return d->datum_;
 }
 
@@ -556,7 +556,7 @@ static datum::GeodeticReferenceFrame *oneDatum(const GeodeticCRS *crs) {
  *
  * @return the PrimeMeridian.
  */
-const datum::PrimeMeridianNNPtr &GeodeticCRS::primeMeridian() const {
+const datum::PrimeMeridianNNPtr &GeodeticCRS::primeMeridian() PROJ_CONST_DEFN {
     if (d->datum_) {
         return d->datum_->primeMeridian();
     }
@@ -570,7 +570,7 @@ const datum::PrimeMeridianNNPtr &GeodeticCRS::primeMeridian() const {
  *
  * @return the PrimeMeridian.
  */
-const datum::EllipsoidNNPtr &GeodeticCRS::ellipsoid() const {
+const datum::EllipsoidNNPtr &GeodeticCRS::ellipsoid() PROJ_CONST_DEFN {
     if (d->datum_) {
         return d->datum_->ellipsoid();
     }
@@ -584,7 +584,7 @@ const datum::EllipsoidNNPtr &GeodeticCRS::ellipsoid() const {
  * @return a velocity model. might be null.
  */
 const std::vector<operation::PointMotionOperationNNPtr> &
-GeodeticCRS::velocityModel() const {
+GeodeticCRS::velocityModel() PROJ_CONST_DEFN {
     return d->velocityModel;
 }
 
@@ -599,7 +599,7 @@ GeodeticCRS::velocityModel() const {
  *
  * @return true if the CRS is a geocentric CRS.
  */
-bool GeodeticCRS::isGeocentric() const {
+bool GeodeticCRS::isGeocentric() PROJ_CONST_DEFN {
     const auto &cs = coordinateSystem();
     const auto &axisList = cs->axisList();
     return axisList.size() == 3 &&
@@ -908,7 +908,8 @@ CRSNNPtr GeographicCRS::shallowClone() const {
  *
  * @return a EllipsoidalCS.
  */
-const cs::EllipsoidalCSNNPtr &GeographicCRS::coordinateSystem() const {
+const cs::EllipsoidalCSNNPtr &
+GeographicCRS::coordinateSystem() PROJ_CONST_DEFN {
     return d->coordinateSystem_;
 }
 
@@ -964,7 +965,8 @@ GeographicCRS::create(const util::PropertyMap &properties,
 /** \brief Return whether the current GeographicCRS is the 2D part of the
  * other 3D GeographicCRS.
  */
-bool GeographicCRS::is2DPartOf3D(const GeographicCRSNNPtr &other) const {
+bool GeographicCRS::is2DPartOf3D(const GeographicCRSNNPtr &other)
+    PROJ_CONST_DEFN {
     const auto &axis = d->coordinateSystem_->axisList();
     const auto &otherAxis = other->d->coordinateSystem_->axisList();
     if (!(axis.size() == 2 && otherAxis.size() == 3)) {
@@ -1228,7 +1230,7 @@ const datum::VerticalReferenceFramePtr VerticalCRS::datum() const {
  * @return a geoid model. might be null
  */
 const std::vector<operation::TransformationNNPtr> &
-VerticalCRS::geoidModel() const {
+VerticalCRS::geoidModel() PROJ_CONST_DEFN {
     return d->geoidModel;
 }
 
@@ -1239,7 +1241,7 @@ VerticalCRS::geoidModel() const {
  * @return a velocity model. might be null.
  */
 const std::vector<operation::PointMotionOperationNNPtr> &
-VerticalCRS::velocityModel() const {
+VerticalCRS::velocityModel() PROJ_CONST_DEFN {
     return d->velocityModel;
 }
 
@@ -1442,7 +1444,9 @@ DerivedCRS::~DerivedCRS() = default;
  *
  * @return the base CRS.
  */
-const SingleCRSNNPtr &DerivedCRS::baseCRS() const { return d->baseCRS_; }
+const SingleCRSNNPtr &DerivedCRS::baseCRS() PROJ_CONST_DEFN {
+    return d->baseCRS_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1457,7 +1461,8 @@ const operation::ConversionNNPtr DerivedCRS::derivingConversion() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-const operation::ConversionNNPtr &DerivedCRS::derivingConversionRef() const {
+const operation::ConversionNNPtr &
+DerivedCRS::derivingConversionRef() PROJ_CONST_DEFN {
     return d->derivingConversion_;
 }
 //! @endcond
@@ -1570,7 +1575,9 @@ CRSNNPtr ProjectedCRS::shallowClone() const {
  *
  * @return the base CRS.
  */
-const GeodeticCRSNNPtr &ProjectedCRS::baseCRS() const { return d->baseCRS(); }
+const GeodeticCRSNNPtr &ProjectedCRS::baseCRS() PROJ_CONST_DEFN {
+    return d->baseCRS();
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1578,7 +1585,7 @@ const GeodeticCRSNNPtr &ProjectedCRS::baseCRS() const { return d->baseCRS(); }
  *
  * @return a CartesianCS
  */
-const cs::CartesianCSNNPtr &ProjectedCRS::coordinateSystem() const {
+const cs::CartesianCSNNPtr &ProjectedCRS::coordinateSystem() PROJ_CONST_DEFN {
     return d->coordinateSystem();
 }
 
@@ -1858,7 +1865,8 @@ CRSNNPtr CompoundCRS::shallowClone() const {
  *
  * @return the components.
  */
-const std::vector<CRSNNPtr> &CompoundCRS::componentReferenceSystems() const {
+const std::vector<CRSNNPtr> &
+CompoundCRS::componentReferenceSystems() PROJ_CONST_DEFN {
     return d->components_;
 }
 
@@ -1961,10 +1969,21 @@ struct BoundCRS::Private {
     operation::TransformationNNPtr transformation_;
 
     Private(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
-            const operation::TransformationNNPtr &transformationIn)
-        : baseCRS_(baseCRSIn), hubCRS_(hubCRSIn),
-          transformation_(transformationIn) {}
+            const operation::TransformationNNPtr &transformationIn);
+
+    inline const CRSNNPtr &baseCRS() const { return baseCRS_; }
+    inline const CRSNNPtr &hubCRS() const { return hubCRS_; }
+    inline const operation::TransformationNNPtr &transformation() const {
+        return transformation_;
+    }
 };
+
+BoundCRS::Private::Private(
+    const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
+    const operation::TransformationNNPtr &transformationIn)
+    : baseCRS_(baseCRSIn), hubCRS_(hubCRSIn),
+      transformation_(transformationIn) {}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -1977,7 +1996,9 @@ BoundCRS::BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
 // ---------------------------------------------------------------------------
 
 BoundCRS::BoundCRS(const BoundCRS &other)
-    : CRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    : CRS(other),
+      d(internal::make_unique<Private>(other.d->baseCRS(), other.d->hubCRS(),
+                                       other.d->transformation())) {}
 
 // ---------------------------------------------------------------------------
 
@@ -2005,7 +2026,7 @@ CRSNNPtr BoundCRS::shallowClone() const { return shallowCloneAsBoundCRS(); }
  *
  * @return the base CRS.
  */
-const CRSNNPtr &BoundCRS::baseCRS() const { return d->baseCRS_; }
+const CRSNNPtr &BoundCRS::baseCRS() PROJ_CONST_DEFN { return d->baseCRS_; }
 
 // ---------------------------------------------------------------------------
 
@@ -2042,7 +2063,7 @@ CRSNNPtr BoundCRS::baseCRSWithCanonicalBoundCRS() const {
  *
  * @return the hub CRS.
  */
-const CRSNNPtr &BoundCRS::hubCRS() const { return d->hubCRS_; }
+const CRSNNPtr &BoundCRS::hubCRS() PROJ_CONST_DEFN { return d->hubCRS_; }
 
 // ---------------------------------------------------------------------------
 
@@ -2050,7 +2071,8 @@ const CRSNNPtr &BoundCRS::hubCRS() const { return d->hubCRS_; }
  *
  * @return transformation.
  */
-const operation::TransformationNNPtr &BoundCRS::transformation() const {
+const operation::TransformationNNPtr &
+BoundCRS::transformation() PROJ_CONST_DEFN {
     return d->transformation_;
 }
 
@@ -2123,15 +2145,15 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
 // ---------------------------------------------------------------------------
 
 bool BoundCRS::isTOWGS84Compatible() const {
-    return dynamic_cast<GeodeticCRS *>(hubCRS().get()) != nullptr &&
-           ci_equal(hubCRS()->nameStr(), "WGS 84");
+    return dynamic_cast<GeodeticCRS *>(d->hubCRS().get()) != nullptr &&
+           ci_equal(d->hubCRS()->nameStr(), "WGS 84");
 }
 
 // ---------------------------------------------------------------------------
 
 std::string BoundCRS::getHDatumPROJ4GRIDS() const {
-    if (ci_equal(hubCRS()->nameStr(), "WGS 84")) {
-        return transformation()->getNTv2Filename();
+    if (ci_equal(d->hubCRS()->nameStr(), "WGS 84")) {
+        return d->transformation()->getNTv2Filename();
     }
     return std::string();
 }
@@ -2139,9 +2161,9 @@ std::string BoundCRS::getHDatumPROJ4GRIDS() const {
 // ---------------------------------------------------------------------------
 
 std::string BoundCRS::getVDatumPROJ4GRIDS() const {
-    if (dynamic_cast<VerticalCRS *>(baseCRS().get()) &&
-        ci_equal(hubCRS()->nameStr(), "WGS 84")) {
-        return transformation()->getHeightToGeographic3DFilename();
+    if (dynamic_cast<VerticalCRS *>(d->baseCRS().get()) &&
+        ci_equal(d->hubCRS()->nameStr(), "WGS 84")) {
+        return d->transformation()->getHeightToGeographic3DFilename();
     }
     return std::string();
 }
@@ -2154,13 +2176,13 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (isWKT2) {
         formatter->startNode(io::WKTConstants::BOUNDCRS, false);
         formatter->startNode(io::WKTConstants::SOURCECRS, false);
-        baseCRS()->_exportToWKT(formatter);
+        d->baseCRS()->_exportToWKT(formatter);
         formatter->endNode();
         formatter->startNode(io::WKTConstants::TARGETCRS, false);
-        hubCRS()->_exportToWKT(formatter);
+        d->hubCRS()->_exportToWKT(formatter);
         formatter->endNode();
         formatter->setAbridgedTransformation(true);
-        transformation()->_exportToWKT(formatter);
+        d->transformation()->_exportToWKT(formatter);
         formatter->setAbridgedTransformation(false);
         formatter->endNode();
     } else {
@@ -2168,7 +2190,7 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         auto vdatumProj4GridName = getVDatumPROJ4GRIDS();
         if (!vdatumProj4GridName.empty()) {
             formatter->setVDatumExtension(vdatumProj4GridName);
-            baseCRS()->_exportToWKT(formatter);
+            d->baseCRS()->_exportToWKT(formatter);
             formatter->setVDatumExtension(std::string());
             return;
         }
@@ -2176,7 +2198,7 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         auto hdatumProj4GridName = getHDatumPROJ4GRIDS();
         if (!hdatumProj4GridName.empty()) {
             formatter->setHDatumExtension(hdatumProj4GridName);
-            baseCRS()->_exportToWKT(formatter);
+            d->baseCRS()->_exportToWKT(formatter);
             formatter->setHDatumExtension(std::string());
             return;
         }
@@ -2185,9 +2207,9 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             io::FormattingException::Throw(
                 "Cannot export BoundCRS with non-WGS 84 hub CRS in WKT1");
         }
-        auto params = transformation()->getTOWGS84Parameters();
+        auto params = d->transformation()->getTOWGS84Parameters();
         formatter->setTOWGS84Parameters(params);
-        baseCRS()->_exportToWKT(formatter);
+        d->baseCRS()->_exportToWKT(formatter);
         formatter->setTOWGS84Parameters(std::vector<double>());
     }
 }
@@ -2206,7 +2228,7 @@ void BoundCRS::_exportToPROJString(
     }
 
     auto crs_exportable =
-        dynamic_cast<const io::IPROJStringExportable *>(baseCRS().get());
+        dynamic_cast<const io::IPROJStringExportable *>(d->baseCRS().get());
     if (!crs_exportable) {
         io::FormattingException::Throw(
             "baseCRS of BoundCRS cannot be exported as a PROJ string");
@@ -2243,11 +2265,12 @@ bool BoundCRS::isEquivalentTo(const util::IComparable *other,
         !ObjectUsage::isEquivalentTo(other, criterion)) {
         return false;
     }
-    return baseCRS()->isEquivalentTo(otherBoundCRS->baseCRS().get(),
-                                     criterion) &&
-           hubCRS()->isEquivalentTo(otherBoundCRS->hubCRS().get(), criterion) &&
-           transformation()->isEquivalentTo(
-               otherBoundCRS->transformation().get(), criterion);
+    return d->baseCRS()->isEquivalentTo(otherBoundCRS->d->baseCRS().get(),
+                                        criterion) &&
+           d->hubCRS()->isEquivalentTo(otherBoundCRS->d->hubCRS().get(),
+                                       criterion) &&
+           d->transformation()->isEquivalentTo(
+               otherBoundCRS->d->transformation().get(), criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -2270,8 +2293,7 @@ DerivedGeodeticCRS::DerivedGeodeticCRS(
     const cs::CartesianCSNNPtr &csIn)
     : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       GeodeticCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
-      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
-      d(internal::make_unique<Private>()) {}
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -2281,14 +2303,12 @@ DerivedGeodeticCRS::DerivedGeodeticCRS(
     const cs::SphericalCSNNPtr &csIn)
     : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       GeodeticCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
-      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
-      d(internal::make_unique<Private>()) {}
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 DerivedGeodeticCRS::DerivedGeodeticCRS(const DerivedGeodeticCRS &other)
-    : SingleCRS(other), GeodeticCRS(other), DerivedCRS(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), GeodeticCRS(other), DerivedCRS(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -2438,14 +2458,12 @@ DerivedGeographicCRS::DerivedGeographicCRS(
     const cs::EllipsoidalCSNNPtr &csIn)
     : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       GeographicCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
-      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
-      d(internal::make_unique<Private>()) {}
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 DerivedGeographicCRS::DerivedGeographicCRS(const DerivedGeographicCRS &other)
-    : SingleCRS(other), GeographicCRS(other), DerivedCRS(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), GeographicCRS(other), DerivedCRS(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -2565,14 +2583,12 @@ DerivedProjectedCRS::DerivedProjectedCRS(
     const operation::ConversionNNPtr &derivingConversionIn,
     const cs::CoordinateSystemNNPtr &csIn)
     : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
-      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
-      d(internal::make_unique<Private>()) {}
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 DerivedProjectedCRS::DerivedProjectedCRS(const DerivedProjectedCRS &other)
-    : SingleCRS(other), DerivedCRS(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), DerivedCRS(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -2708,13 +2724,12 @@ TemporalCRS::~TemporalCRS() = default;
 
 TemporalCRS::TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
                          const cs::TemporalCSNNPtr &csIn)
-    : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
-      d(internal::make_unique<Private>()) {}
+    : SingleCRS(datumIn.as_nullable(), nullptr, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 TemporalCRS::TemporalCRS(const TemporalCRS &other)
-    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -2808,13 +2823,12 @@ EngineeringCRS::~EngineeringCRS() = default;
 
 EngineeringCRS::EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
                                const cs::CoordinateSystemNNPtr &csIn)
-    : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
-      d(internal::make_unique<Private>()) {}
+    : SingleCRS(datumIn.as_nullable(), nullptr, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 EngineeringCRS::EngineeringCRS(const EngineeringCRS &other)
-    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -2899,13 +2913,12 @@ ParametricCRS::~ParametricCRS() = default;
 
 ParametricCRS::ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
                              const cs::ParametricCSNNPtr &csIn)
-    : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
-      d(internal::make_unique<Private>()) {}
+    : SingleCRS(datumIn.as_nullable(), nullptr, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 ParametricCRS::ParametricCRS(const ParametricCRS &other)
-    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -3006,14 +3019,12 @@ DerivedVerticalCRS::DerivedVerticalCRS(
     const cs::VerticalCSNNPtr &csIn)
     : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       VerticalCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
-      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
-      d(internal::make_unique<Private>()) {}
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 DerivedVerticalCRS::DerivedVerticalCRS(const DerivedVerticalCRS &other)
-    : SingleCRS(other), VerticalCRS(other), DerivedCRS(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), VerticalCRS(other), DerivedCRS(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -3114,16 +3125,14 @@ DerivedCRSTemplate<DerivedCRSTraits>::DerivedCRSTemplate(
     const operation::ConversionNNPtr &derivingConversionIn, const CSNNPtr &csIn)
     : SingleCRS(baseCRSIn->datum().as_nullable(), nullptr, csIn),
       BaseType(baseCRSIn->datum(), csIn),
-      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
-      d(internal::make_unique<Private>()) {}
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 template <class DerivedCRSTraits>
 DerivedCRSTemplate<DerivedCRSTraits>::DerivedCRSTemplate(
     const DerivedCRSTemplate &other)
-    : SingleCRS(other), BaseType(other), DerivedCRS(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : SingleCRS(other), BaseType(other), DerivedCRS(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 

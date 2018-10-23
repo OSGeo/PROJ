@@ -391,9 +391,9 @@ TEST(wkt_parse, wkt1_EPSG_4807_grad_mess) {
 
     auto datum = crs->datum();
     auto primem = datum->primeMeridian();
-    ASSERT_EQ(primem->longitude().unit(), UnitOfMeasure::GRAD);
+    EXPECT_EQ(primem->longitude().unit(), UnitOfMeasure::GRAD);
     // Check that we have corrected the value that was in degree into grad.
-    ASSERT_EQ(primem->longitude().value(), 2.5969213);
+    EXPECT_EQ(primem->longitude().value(), 2.5969213);
 }
 
 // ---------------------------------------------------------------------------

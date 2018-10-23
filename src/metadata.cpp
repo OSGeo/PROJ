@@ -96,7 +96,9 @@ Citation &Citation::operator=(const Citation &other) {
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the name by which the cited resource is known. */
-const optional<std::string> &Citation::title() const { return d->title; }
+const optional<std::string> &Citation::title() PROJ_CONST_DEFN {
+    return d->title;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -155,7 +157,9 @@ GeographicBoundingBox::~GeographicBoundingBox() = default;
  * If eastBoundLongitude < westBoundLongitude(), then the bounding box crosses
  * the anti-meridian.
  */
-double GeographicBoundingBox::westBoundLongitude() const { return d->west_; }
+double GeographicBoundingBox::westBoundLongitude() PROJ_CONST_DEFN {
+    return d->west_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -164,7 +168,9 @@ double GeographicBoundingBox::westBoundLongitude() const { return d->west_; }
  *
  * The unit is degrees.
  */
-double GeographicBoundingBox::southBoundLatitude() const { return d->south_; }
+double GeographicBoundingBox::southBoundLatitude() PROJ_CONST_DEFN {
+    return d->south_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -176,7 +182,9 @@ double GeographicBoundingBox::southBoundLatitude() const { return d->south_; }
  * If eastBoundLongitude < westBoundLongitude(), then the bounding box crosses
  * the anti-meridian.
  */
-double GeographicBoundingBox::eastBoundLongitude() const { return d->east_; }
+double GeographicBoundingBox::eastBoundLongitude() PROJ_CONST_DEFN {
+    return d->east_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -185,7 +193,9 @@ double GeographicBoundingBox::eastBoundLongitude() const { return d->east_; }
  *
  * The unit is degrees.
  */
-double GeographicBoundingBox::northBoundLatitude() const { return d->north_; }
+double GeographicBoundingBox::northBoundLatitude() PROJ_CONST_DEFN {
+    return d->north_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -442,19 +452,21 @@ VerticalExtent::~VerticalExtent() = default;
 
 /** \brief Returns the minimum of the vertical extent.
  */
-double VerticalExtent::minimumValue() const { return d->minimum_; }
+double VerticalExtent::minimumValue() PROJ_CONST_DEFN { return d->minimum_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the maximum of the vertical extent.
  */
-double VerticalExtent::maximumValue() const { return d->maximum_; }
+double VerticalExtent::maximumValue() PROJ_CONST_DEFN { return d->maximum_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the unit of the vertical extent.
  */
-common::UnitOfMeasureNNPtr &VerticalExtent::unit() const { return d->unit_; }
+common::UnitOfMeasureNNPtr &VerticalExtent::unit() PROJ_CONST_DEFN {
+    return d->unit_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -534,13 +546,13 @@ TemporalExtent::~TemporalExtent() = default;
 
 /** \brief Returns the start of the temporal extent.
  */
-const std::string &TemporalExtent::start() const { return d->start_; }
+const std::string &TemporalExtent::start() PROJ_CONST_DEFN { return d->start_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the end of the temporal extent.
  */
-const std::string &TemporalExtent::stop() const { return d->stop_; }
+const std::string &TemporalExtent::stop() PROJ_CONST_DEFN { return d->stop_; }
 
 // ---------------------------------------------------------------------------
 
@@ -613,7 +625,7 @@ Extent::~Extent() = default;
  *
  * @return the description, or empty.
  */
-const optional<std::string> &Extent::description() const {
+const optional<std::string> &Extent::description() PROJ_CONST_DEFN {
     return d->description_;
 }
 
@@ -623,7 +635,8 @@ const optional<std::string> &Extent::description() const {
  *
  * @return the geographic element(s), or empty.
  */
-const std::vector<GeographicExtentNNPtr> &Extent::geographicElements() const {
+const std::vector<GeographicExtentNNPtr> &
+Extent::geographicElements() PROJ_CONST_DEFN {
     return d->geographicElements_;
 }
 
@@ -633,7 +646,8 @@ const std::vector<GeographicExtentNNPtr> &Extent::geographicElements() const {
  *
  * @return the vertical element(s), or empty.
  */
-const std::vector<VerticalExtentNNPtr> &Extent::verticalElements() const {
+const std::vector<VerticalExtentNNPtr> &
+Extent::verticalElements() PROJ_CONST_DEFN {
     return d->verticalElements_;
 }
 
@@ -643,7 +657,8 @@ const std::vector<VerticalExtentNNPtr> &Extent::verticalElements() const {
  *
  * @return the temporal element(s), or empty.
  */
-const std::vector<TemporalExtentNNPtr> &Extent::temporalElements() const {
+const std::vector<TemporalExtentNNPtr> &
+Extent::temporalElements() PROJ_CONST_DEFN {
     return d->temporalElements_;
 }
 
@@ -795,8 +810,7 @@ ExtentPtr Extent::intersection(const ExtentNNPtr &other) const {
         if (contains(other)) {
             return other.as_nullable();
         }
-        auto self = NN_NO_CHECK(
-            util::nn_dynamic_pointer_cast<Extent>(shared_from_this()));
+        auto self = util::nn_static_pointer_cast<Extent>(shared_from_this());
         if (other->contains(self)) {
             return self.as_nullable();
         }
@@ -823,15 +837,102 @@ struct Identifier::Private {
     optional<std::string> version_{};
     optional<std::string> description_{};
     optional<std::string> uri_{};
+
+    Private(const std::string &codeIn, const PropertyMap &properties)
+        : code_(codeIn) {
+        setProperties(properties);
+    }
+
+  private:
+    // cppcheck-suppress functionStatic
+    void setProperties(const PropertyMap &properties);
 };
+
+// ---------------------------------------------------------------------------
+
+void Identifier::Private::setProperties(
+    const PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    {
+        auto oIter = properties.find(AUTHORITY_KEY);
+        if (oIter != properties.end()) {
+            if (auto genVal =
+                    dynamic_cast<const BoxedValue *>(oIter->second.get())) {
+                if (genVal->type() == BoxedValue::Type::STRING) {
+                    authority_ = Citation(genVal->stringValue());
+                } else {
+                    throw InvalidValueTypeException("Invalid value type for " +
+                                                    AUTHORITY_KEY);
+                }
+            } else {
+                if (auto citation =
+                        dynamic_cast<const Citation *>(oIter->second.get())) {
+                    authority_ = *citation;
+                } else {
+                    throw InvalidValueTypeException("Invalid value type for " +
+                                                    AUTHORITY_KEY);
+                }
+            }
+        }
+    }
+
+    {
+        auto oIter = properties.find(CODE_KEY);
+        if (oIter != properties.end()) {
+            if (auto genVal =
+                    dynamic_cast<const BoxedValue *>(oIter->second.get())) {
+                if (genVal->type() == BoxedValue::Type::INTEGER) {
+                    std::ostringstream buffer;
+                    buffer << genVal->integerValue();
+                    code_ = buffer.str();
+                } else if (genVal->type() == BoxedValue::Type::STRING) {
+                    code_ = genVal->stringValue();
+                } else {
+                    throw InvalidValueTypeException("Invalid value type for " +
+                                                    CODE_KEY);
+                }
+            } else {
+                throw InvalidValueTypeException("Invalid value type for " +
+                                                CODE_KEY);
+            }
+        }
+    }
+
+    {
+        std::string temp;
+        if (properties.getStringValue(CODESPACE_KEY, temp)) {
+            codeSpace_ = temp;
+        }
+    }
+
+    {
+        std::string temp;
+        if (properties.getStringValue(VERSION_KEY, temp)) {
+            version_ = temp;
+        }
+    }
+
+    {
+        std::string temp;
+        if (properties.getStringValue(DESCRIPTION_KEY, temp)) {
+            description_ = temp;
+        }
+    }
+
+    {
+        std::string temp;
+        if (properties.getStringValue(URI_KEY, temp)) {
+            uri_ = temp;
+        }
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-Identifier::Identifier(const std::string &codeIn)
-    : d(internal::make_unique<Private>()) {
-    d->code_ = codeIn;
-}
+Identifier::Identifier(const std::string &codeIn, const PropertyMap &properties)
+    : d(internal::make_unique<Private>(codeIn, properties)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -855,18 +956,7 @@ Identifier::~Identifier() = default;
  */
 IdentifierNNPtr Identifier::create(const std::string &codeIn,
                                    const PropertyMap &properties) {
-    auto id(Identifier::nn_make_shared<Identifier>(codeIn));
-    id->setProperties(properties);
-    return id;
-}
-
-// ---------------------------------------------------------------------------
-
-Identifier &Identifier::operator=(const Identifier &other) {
-    if (this != &other) {
-        *d = *other.d;
-    }
-    return *this;
+    return Identifier::nn_make_shared<Identifier>(codeIn, properties);
 }
 
 // ---------------------------------------------------------------------------
@@ -876,7 +966,7 @@ Identifier &Identifier::operator=(const Identifier &other) {
  *
  * @return the citation for the authority, or empty.
  */
-const optional<Citation> &Identifier::authority() const {
+const optional<Citation> &Identifier::authority() PROJ_CONST_DEFN {
     return d->authority_;
 }
 
@@ -889,7 +979,7 @@ const optional<Citation> &Identifier::authority() const {
  *
  * @return the code.
  */
-const std::string &Identifier::code() const { return d->code_; }
+const std::string &Identifier::code() PROJ_CONST_DEFN { return d->code_; }
 
 // ---------------------------------------------------------------------------
 
@@ -900,7 +990,7 @@ const std::string &Identifier::code() const { return d->code_; }
  *
  * @return the authority codespace, or empty.
  */
-const optional<std::string> &Identifier::codeSpace() const {
+const optional<std::string> &Identifier::codeSpace() PROJ_CONST_DEFN {
     return d->codeSpace_;
 }
 
@@ -913,7 +1003,9 @@ const optional<std::string> &Identifier::codeSpace() const {
  *
  * @return the version or empty.
  */
-const optional<std::string> &Identifier::version() const { return d->version_; }
+const optional<std::string> &Identifier::version() PROJ_CONST_DEFN {
+    return d->version_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -922,7 +1014,7 @@ const optional<std::string> &Identifier::version() const { return d->version_; }
  *
  * @return the description or empty.
  */
-const optional<std::string> &Identifier::description() const {
+const optional<std::string> &Identifier::description() PROJ_CONST_DEFN {
     return d->description_;
 }
 
@@ -932,85 +1024,8 @@ const optional<std::string> &Identifier::description() const {
  *
  * @return the URI or empty.
  */
-const optional<std::string> &Identifier::uri() const { return d->uri_; }
-
-// ---------------------------------------------------------------------------
-
-void Identifier::setProperties(
-    const PropertyMap &properties) // throw(InvalidValueTypeException)
-{
-    {
-        auto oIter = properties.find(AUTHORITY_KEY);
-        if (oIter != properties.end()) {
-            if (auto genVal =
-                    dynamic_cast<const BoxedValue *>(oIter->second.get())) {
-                if (genVal->type() == BoxedValue::Type::STRING) {
-                    d->authority_ = Citation(genVal->stringValue());
-                } else {
-                    throw InvalidValueTypeException("Invalid value type for " +
-                                                    AUTHORITY_KEY);
-                }
-            } else {
-                if (auto citation =
-                        dynamic_cast<const Citation *>(oIter->second.get())) {
-                    d->authority_ = *citation;
-                } else {
-                    throw InvalidValueTypeException("Invalid value type for " +
-                                                    AUTHORITY_KEY);
-                }
-            }
-        }
-    }
-
-    {
-        auto oIter = properties.find(CODE_KEY);
-        if (oIter != properties.end()) {
-            if (auto genVal =
-                    dynamic_cast<const BoxedValue *>(oIter->second.get())) {
-                if (genVal->type() == BoxedValue::Type::INTEGER) {
-                    std::ostringstream buffer;
-                    buffer << genVal->integerValue();
-                    d->code_ = buffer.str();
-                } else if (genVal->type() == BoxedValue::Type::STRING) {
-                    d->code_ = genVal->stringValue();
-                } else {
-                    throw InvalidValueTypeException("Invalid value type for " +
-                                                    CODE_KEY);
-                }
-            } else {
-                throw InvalidValueTypeException("Invalid value type for " +
-                                                CODE_KEY);
-            }
-        }
-    }
-
-    {
-        std::string temp;
-        if (properties.getStringValue(CODESPACE_KEY, temp)) {
-            d->codeSpace_ = temp;
-        }
-    }
-
-    {
-        std::string temp;
-        if (properties.getStringValue(VERSION_KEY, temp)) {
-            d->version_ = temp;
-        }
-    }
-
-    {
-        std::string temp;
-        if (properties.getStringValue(DESCRIPTION_KEY, temp)) {
-            d->description_ = temp;
-        }
-    }
-
-    {
-        std::string temp;
-        if (properties.getStringValue(URI_KEY, temp)) {
-            d->uri_ = temp;
-        }
-    }
+const optional<std::string> &Identifier::uri() PROJ_CONST_DEFN {
+    return d->uri_;
 }
 
 // ---------------------------------------------------------------------------
@@ -1127,7 +1142,9 @@ PositionalAccuracy::~PositionalAccuracy() = default;
 
 /** \brief Return the value of the positional accuracy.
  */
-const std::string &PositionalAccuracy::value() const { return d->value_; }
+const std::string &PositionalAccuracy::value() PROJ_CONST_DEFN {
+    return d->value_;
+}
 
 // ---------------------------------------------------------------------------
 

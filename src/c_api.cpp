@@ -93,18 +93,25 @@ struct PJ_OBJ {
     BaseObjectNNPtr obj;
 
     // cached results
-    std::map<PJ_WKT_TYPE, std::string> mapWKTString{};
-    std::map<PJ_PROJ_STRING_TYPE, std::string> mapPROJString{};
+    std::string mapWKTString[PJ_WKT_TYPE_LAST + 1]{};
+    std::string mapPROJString[PJ_PROJ_STRING_TYPE_LAST + 1]{};
     bool gridsNeededAsked = false;
     std::vector<CoordinateOperation::GridDescription> gridsNeeded{};
 
     explicit PJ_OBJ(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn)
         : ctx(ctxIn), obj(objIn) {}
+    static PJ_OBJ *create(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn);
 
     PJ_OBJ(const PJ_OBJ &) = delete;
     PJ_OBJ &operator=(const PJ_OBJ &) = delete;
     //! @endcond
 };
+
+//! @cond Doxygen_Suppress
+PJ_OBJ *PJ_OBJ::create(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn) {
+    return new PJ_OBJ(ctxIn, objIn);
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -124,7 +131,7 @@ struct projCppContext {
     static std::vector<std::string> toVector(const char *const *auxDbPaths) {
         std::vector<std::string> res;
         for (auto iter = auxDbPaths; iter && *iter; ++iter) {
-            res.emplace_back(*iter);
+            res.emplace_back(std::string(*iter));
         }
         return res;
     }
@@ -240,7 +247,7 @@ PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text) {
     assert(text);
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        return new PJ_OBJ(ctx, createFromUserInput(text, dbContext));
+        return PJ_OBJ::create(ctx, createFromUserInput(text, dbContext));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -265,7 +272,7 @@ PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt) {
     SANITIZE_CTX(ctx);
     assert(wkt);
     try {
-        return new PJ_OBJ(ctx, WKTParser().createFromWKT(wkt));
+        return PJ_OBJ::create(ctx, WKTParser().createFromWKT(wkt));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -291,8 +298,8 @@ PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
     SANITIZE_CTX(ctx);
     assert(proj_string);
     try {
-        return new PJ_OBJ(ctx,
-                          PROJStringParser().createFromPROJString(proj_string));
+        return PJ_OBJ::create(
+            ctx, PROJStringParser().createFromPROJString(proj_string));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -348,7 +355,7 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                       .as_nullable();
             break;
         }
-        return new PJ_OBJ(ctx, NN_NO_CHECK(obj));
+        return PJ_OBJ::create(ctx, NN_NO_CHECK(obj));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -493,7 +500,7 @@ const char *proj_obj_get_id_auth_name(PJ_OBJ *obj, int index) {
         return nullptr;
     }
     const auto &ids = identifiable->identifiers();
-    if (index < 0 || static_cast<size_t>(index) >= ids.size()) {
+    if (static_cast<size_t>(index) >= ids.size()) {
         return nullptr;
     }
     const auto &codeSpace = ids[index]->codeSpace();
@@ -524,7 +531,7 @@ const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
         return nullptr;
     }
     const auto &ids = identifiable->identifiers();
-    if (index < 0 || static_cast<size_t>(index) >= ids.size()) {
+    if (static_cast<size_t>(index) >= ids.size()) {
         return nullptr;
     }
     return ids[index]->code().c_str();
@@ -550,9 +557,10 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
                             const char *const *options) {
     assert(obj);
     (void)options;
-    auto iter = obj->mapWKTString.find(type);
-    if (iter != obj->mapWKTString.end()) {
-        return iter->second.c_str();
+    assert(type >= 0 &&
+           type < sizeof(obj->mapWKTString) / sizeof(obj->mapWKTString[0]));
+    if (!obj->mapWKTString[type].empty()) {
+        return obj->mapWKTString[type].c_str();
     }
     auto wktExportable = dynamic_cast<const IWKTExportable *>(obj->obj.get());
     if (!wktExportable) {
@@ -612,9 +620,13 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
 const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
                                     const char *const *options) {
     assert(obj);
-    auto iter = obj->mapPROJString.find(type);
-    if (iter != obj->mapPROJString.end()) {
-        return iter->second.c_str();
+#ifndef __clang__
+    // clang 5 rightly raises a "always true" warning
+    assert(type >= 0 &&
+           type < sizeof(obj->mapPROJString) / sizeof(obj->mapPROJString[0]));
+#endif
+    if (!obj->mapPROJString[type].empty()) {
+        return obj->mapPROJString[type].c_str();
     }
     auto exportable =
         dynamic_cast<const IPROJStringExportable *>(obj->obj.get());
@@ -683,7 +695,7 @@ PJ_OBJ *proj_obj_crs_get_geodetic_crs(PJ_OBJ *crs) {
     if (!geodCRS) {
         return nullptr;
     }
-    return new PJ_OBJ(crs->ctx, NN_NO_CHECK(geodCRS));
+    return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(geodCRS));
 }
 
 // ---------------------------------------------------------------------------
@@ -707,11 +719,11 @@ PJ_OBJ *proj_obj_crs_get_sub_crs(PJ_OBJ *crs, int index) {
         proj_log_error(crs->ctx, __FUNCTION__, "Object is not a CompoundCRS");
         return nullptr;
     }
-    auto components = l_crs->componentReferenceSystems();
-    if (index < 0 || static_cast<size_t>(index) >= components.size()) {
+    const auto &components = l_crs->componentReferenceSystems();
+    if (static_cast<size_t>(index) >= components.size()) {
         return nullptr;
     }
-    return new PJ_OBJ(crs->ctx, components[index]);
+    return PJ_OBJ::create(crs->ctx, components[index]);
 }
 
 // ---------------------------------------------------------------------------
@@ -738,8 +750,8 @@ PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ *crs) {
         return nullptr;
     }
     auto dbContext = getDBcontextNoException(crs->ctx, __FUNCTION__);
-    return new PJ_OBJ(crs->ctx,
-                      l_crs->createBoundCRSToWGS84IfPossible(dbContext));
+    return PJ_OBJ::create(crs->ctx,
+                          l_crs->createBoundCRSToWGS84IfPossible(dbContext));
 }
 
 // ---------------------------------------------------------------------------
@@ -758,14 +770,13 @@ PJ_OBJ *proj_obj_get_ellipsoid(PJ_OBJ *obj) {
     auto ptr = obj->obj.get();
     if (dynamic_cast<const CRS *>(ptr)) {
         auto geodCRS = extractGeodeticCRS(obj, __FUNCTION__);
-        if (!geodCRS) {
-            return nullptr;
+        if (geodCRS) {
+            return PJ_OBJ::create(obj->ctx, geodCRS->ellipsoid());
         }
-        return new PJ_OBJ(obj->ctx, geodCRS->ellipsoid());
     } else {
         auto datum = dynamic_cast<const GeodeticReferenceFrame *>(ptr);
         if (datum) {
-            return new PJ_OBJ(obj->ctx, datum->ellipsoid());
+            return PJ_OBJ::create(obj->ctx, datum->ellipsoid());
         }
     }
     proj_log_error(obj->ctx, __FUNCTION__,
@@ -792,12 +803,12 @@ PJ_OBJ *proj_obj_crs_get_horizontal_datum(PJ_OBJ *crs) {
     }
     auto datum = geodCRS->datum();
     if (datum) {
-        return new PJ_OBJ(crs->ctx, NN_NO_CHECK(datum));
+        return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(datum));
     }
 
     auto datumEnsemble = geodCRS->datumEnsemble();
     if (datumEnsemble) {
-        return new PJ_OBJ(crs->ctx, NN_NO_CHECK(datumEnsemble));
+        return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(datumEnsemble));
     }
     proj_log_error(crs->ctx, __FUNCTION__, "CRS has no datum");
     return nullptr;
@@ -866,12 +877,12 @@ PJ_OBJ *proj_obj_get_prime_meridian(PJ_OBJ *obj) {
     if (dynamic_cast<CRS *>(ptr)) {
         auto geodCRS = extractGeodeticCRS(obj, __FUNCTION__);
         if (geodCRS) {
-            return new PJ_OBJ(obj->ctx, geodCRS->primeMeridian());
+            return PJ_OBJ::create(obj->ctx, geodCRS->primeMeridian());
         }
     } else {
         auto datum = dynamic_cast<const GeodeticReferenceFrame *>(ptr);
         if (datum) {
-            return new PJ_OBJ(obj->ctx, datum->primeMeridian());
+            return PJ_OBJ::create(obj->ctx, datum->primeMeridian());
         }
     }
     proj_log_error(obj->ctx, __FUNCTION__,
@@ -935,13 +946,13 @@ PJ_OBJ *proj_obj_get_source_crs(PJ_OBJ *obj) {
     auto ptr = obj->obj.get();
     auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
-        return new PJ_OBJ(obj->ctx, boundCRS->baseCRS());
+        return PJ_OBJ::create(obj->ctx, boundCRS->baseCRS());
     }
     auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
         auto sourceCRS = co->sourceCRS();
         if (sourceCRS) {
-            return new PJ_OBJ(obj->ctx, NN_NO_CHECK(sourceCRS));
+            return PJ_OBJ::create(obj->ctx, NN_NO_CHECK(sourceCRS));
         }
         return nullptr;
     }
@@ -968,13 +979,13 @@ PJ_OBJ *proj_obj_get_target_crs(PJ_OBJ *obj) {
     auto ptr = obj->obj.get();
     auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
-        return new PJ_OBJ(obj->ctx, boundCRS->hubCRS());
+        return PJ_OBJ::create(obj->ctx, boundCRS->hubCRS());
     }
     auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
         auto targetCRS = co->targetCRS();
         if (targetCRS) {
-            return new PJ_OBJ(obj->ctx, NN_NO_CHECK(targetCRS));
+            return PJ_OBJ::create(obj->ctx, NN_NO_CHECK(targetCRS));
         }
         return nullptr;
     }
@@ -1195,7 +1206,7 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_OBJ *crs, const char **pMethodName,
             *pMethodCode = nullptr;
         }
     }
-    return new PJ_OBJ(crs->ctx, NN_NO_CHECK(co));
+    return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(co));
 }
 
 // ---------------------------------------------------------------------------
@@ -1316,7 +1327,7 @@ int proj_coordoperation_get_param(PJ_OBJ *coordoperation, int index,
     }
     const auto &parameters = op->method()->parameters();
     const auto &values = op->parameterValues();
-    if (index < 0 || static_cast<size_t>(index) >= parameters.size() ||
+    if (static_cast<size_t>(index) >= parameters.size() ||
         static_cast<size_t>(index) >= values.size()) {
         proj_log_error(coordoperation->ctx, __FUNCTION__, "Invalid index");
         return false;
@@ -1854,7 +1865,7 @@ PJ_OBJ *proj_operation_result_get(PJ_OPERATION_RESULT *result, int index) {
         proj_log_error(result->ctx, __FUNCTION__, "Invalid index");
         return nullptr;
     }
-    return new PJ_OBJ(result->ctx, result->ops[index]);
+    return PJ_OBJ::create(result->ctx, result->ops[index]);
 }
 
 // ---------------------------------------------------------------------------

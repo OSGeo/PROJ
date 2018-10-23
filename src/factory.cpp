@@ -794,9 +794,9 @@ struct AuthorityFactory::Private {
             const std::string &authorityName)
         : context_(contextIn), authority_(authorityName) {}
 
-    const std::string &authority() const { return authority_; }
+    inline const std::string &authority() PROJ_CONST_DEFN { return authority_; }
 
-    DatabaseContextNNPtr context() const { return context_; }
+    inline DatabaseContextNNPtr context() PROJ_CONST_DEFN { return context_; }
 
     // cppcheck-suppress functionStatic
     void setThis(AuthorityFactoryNNPtr factory) {
@@ -824,6 +824,27 @@ struct AuthorityFactory::Private {
 
     bool rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op,
                                   bool discardIfMissingGrid);
+
+    UnitOfMeasure createUnitOfMeasure(const std::string &auth_name,
+                                      const std::string &code);
+
+    util::PropertyMap createProperties(const std::string &code,
+                                       const std::string &name, bool deprecated,
+                                       const metadata::ExtentPtr &extent);
+
+    util::PropertyMap createProperties(const std::string &code,
+                                       const std::string &name, bool deprecated,
+                                       const std::string &area_of_use_auth_name,
+                                       const std::string &area_of_use_code);
+
+    SQLResultSet
+    run(const std::string &sql,
+        const std::vector<SQLValues> &parameters = std::vector<SQLValues>());
+
+    SQLResultSet runWithCodeParam(const std::string &sql,
+                                  const std::string &code);
+
+    SQLResultSet runWithCodeParam(const char *sql, const std::string &code);
 
   private:
     DatabaseContextNNPtr context_;
@@ -872,6 +893,69 @@ AuthorityFactory::Private::createFactory(const std::string &auth_name) {
         return newFactory;
     }
     return iter->second;
+}
+
+// ---------------------------------------------------------------------------
+
+SQLResultSet
+AuthorityFactory::Private::run(const std::string &sql,
+                               const std::vector<SQLValues> &parameters) {
+    return context()->getPrivate()->run(sql, parameters);
+}
+
+// ---------------------------------------------------------------------------
+
+SQLResultSet
+AuthorityFactory::Private::runWithCodeParam(const std::string &sql,
+                                            const std::string &code) {
+    return run(sql, {authority(), code});
+}
+
+// ---------------------------------------------------------------------------
+
+SQLResultSet
+AuthorityFactory::Private::runWithCodeParam(const char *sql,
+                                            const std::string &code) {
+    return runWithCodeParam(std::string(sql), code);
+}
+
+// ---------------------------------------------------------------------------
+
+UnitOfMeasure
+AuthorityFactory::Private::createUnitOfMeasure(const std::string &auth_name,
+                                               const std::string &code) {
+    return *(createFactory(auth_name)->createUnitOfMeasure(code));
+}
+
+// ---------------------------------------------------------------------------
+
+util::PropertyMap AuthorityFactory::Private::createProperties(
+    const std::string &code, const std::string &name, bool deprecated,
+    const metadata::ExtentPtr &extent) {
+    auto props = util::PropertyMap()
+                     .set(metadata::Identifier::CODESPACE_KEY, authority())
+                     .set(metadata::Identifier::CODE_KEY, code)
+                     .set(common::IdentifiedObject::NAME_KEY, name)
+                     .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
+    if (extent) {
+        props.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                  NN_NO_CHECK(extent));
+    }
+    return props;
+}
+
+// ---------------------------------------------------------------------------
+
+util::PropertyMap AuthorityFactory::Private::createProperties(
+    const std::string &code, const std::string &name, bool deprecated,
+    const std::string &area_of_use_auth_name,
+    const std::string &area_of_use_code) {
+    return createProperties(code, name, deprecated,
+                            area_of_use_auth_name.empty()
+                                ? nullptr
+                                : createFactory(area_of_use_auth_name)
+                                      ->createExtent(area_of_use_code)
+                                      .as_nullable());
 }
 
 // ---------------------------------------------------------------------------
@@ -1020,9 +1104,9 @@ DatabaseContextNNPtr AuthorityFactory::databaseContext() const {
 util::BaseObjectNNPtr
 AuthorityFactory::createObject(const std::string &code) const {
 
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT table_name FROM object_view WHERE auth_name = ? AND code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("not found", getAuthority(), code);
     }
@@ -1095,6 +1179,17 @@ AuthorityFactory::createObject(const std::string &code) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static FactoryException buildFactoryException(const char *type,
+                                              const std::string &code,
+                                              const std::exception &ex) {
+    return FactoryException(std::string("cannot build ") + type + " " + code +
+                            ": " + ex.what());
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns a metadata::Extent from the specified code.
  *
  * @param code Object code allocated by authority.
@@ -1107,7 +1202,7 @@ metadata::ExtentNNPtr
 AuthorityFactory::createExtent(const std::string &code) const {
     auto sql = "SELECT name, south_lat, north_lat, west_lon, east_lon, "
                "deprecated FROM area WHERE auth_name = ? AND code = ?";
-    auto res = d->context()->getPrivate()->run(sql, {getAuthority(), code});
+    auto res = d->runWithCodeParam(sql, code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("area not found", getAuthority(),
                                            code);
@@ -1129,7 +1224,7 @@ AuthorityFactory::createExtent(const std::string &code) const {
             std::vector<metadata::TemporalExtentNNPtr>());
 
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build area " + code + ": " + ex.what());
+        throw buildFactoryException("area", code, ex);
     }
 }
 
@@ -1151,10 +1246,10 @@ AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
             return NN_NO_CHECK(uom);
         }
     }
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT name, conv_factor, type, deprecated FROM unit_of_measure WHERE "
         "auth_name = ? AND code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("unit of measure not found",
                                            getAuthority(), code);
@@ -1193,8 +1288,7 @@ AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
         d->cache(code, uom);
         return uom;
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build unit of measure " + code + ": " +
-                               ex.what());
+        throw buildFactoryException("unit of measure", code, ex);
     }
 }
 
@@ -1238,11 +1332,11 @@ static void normalizeMeasure(const std::string &uom_code,
 
 datum::PrimeMeridianNNPtr
 AuthorityFactory::createPrimeMeridian(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT name, longitude, uom_auth_name, uom_code, deprecated FROM "
         "prime_meridian WHERE "
         "auth_name = ? AND code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("prime meridian not found",
                                            getAuthority(), code);
@@ -1260,19 +1354,12 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
         normalizeMeasure(uom_code, longitude, normalized_uom_code,
                          normalized_value);
 
-        auto uom = d->createFactory(uom_auth_name)
-                       ->createUnitOfMeasure(normalized_uom_code);
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
+        auto uom = d->createUnitOfMeasure(uom_auth_name, normalized_uom_code);
+        auto props = d->createProperties(code, name, deprecated, nullptr);
         return datum::PrimeMeridian::create(
-            props, common::Angle(normalized_value, *uom));
+            props, common::Angle(normalized_value, uom));
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build prime meridian " + code + ": " +
-                               ex.what());
+        throw buildFactoryException("prime meridian", code, ex);
     }
 }
 
@@ -1289,10 +1376,10 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
 std::string
 AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
                                                 double tolerance) const {
-    auto res = d->context()->getPrivate()->run(
-        "SELECT name, (ABS(semi_major_axis - ?) / semi_major_axis ) "
-        "AS rel_error FROM celestial_body WHERE rel_error <= ?",
-        {semi_major_axis, tolerance});
+    auto res =
+        d->run("SELECT name, (ABS(semi_major_axis - ?) / semi_major_axis ) "
+               "AS rel_error FROM celestial_body WHERE rel_error <= ?",
+               {semi_major_axis, tolerance});
     if (res.empty()) {
         throw FactoryException("no match found");
     }
@@ -1314,7 +1401,7 @@ AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
 
 datum::EllipsoidNNPtr
 AuthorityFactory::createEllipsoid(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT ellipsoid.name, ellipsoid.semi_major_axis, "
         "ellipsoid.uom_auth_name, ellipsoid.uom_code, "
         "ellipsoid.inv_flattening, ellipsoid.semi_minor_axis, "
@@ -1323,7 +1410,7 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
         "ON ellipsoid.celestial_body_auth_name = celestial_body.auth_name AND "
         "ellipsoid.celestial_body_code = celestial_body.code WHERE "
         "ellipsoid.auth_name = ? AND ellipsoid.code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("ellipsoid not found",
                                            getAuthority(), code);
@@ -1339,29 +1426,22 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
         const auto &semi_minor_axis_str = row[5];
         const auto &body = row[6];
         const bool deprecated = row[7] == "1";
-        auto uom =
-            d->createFactory(uom_auth_name)->createUnitOfMeasure(uom_code);
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
+        auto uom = d->createUnitOfMeasure(uom_auth_name, uom_code);
+        auto props = d->createProperties(code, name, deprecated, nullptr);
         if (!inv_flattening_str.empty()) {
             return datum::Ellipsoid::createFlattenedSphere(
-                props, common::Length(semi_major_axis, *uom),
+                props, common::Length(semi_major_axis, uom),
                 common::Scale(c_locale_stod(inv_flattening_str)), body);
         } else if (semi_major_axis_str == semi_minor_axis_str) {
             return datum::Ellipsoid::createSphere(
-                props, common::Length(semi_major_axis, *uom), body);
+                props, common::Length(semi_major_axis, uom), body);
         } else {
             return datum::Ellipsoid::createTwoAxis(
-                props, common::Length(semi_major_axis, *uom),
-                common::Length(c_locale_stod(semi_minor_axis_str), *uom), body);
+                props, common::Length(semi_major_axis, uom),
+                common::Length(c_locale_stod(semi_minor_axis_str), uom), body);
         }
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build ellipsoid " + code + ": " +
-                               ex.what());
+        throw buildFactoryException("elllipsoid", code, ex);
     }
 }
 
@@ -1383,12 +1463,12 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
             return NN_NO_CHECK(datum);
         }
     }
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT name, ellipsoid_auth_name, ellipsoid_code, "
         "prime_meridian_auth_name, prime_meridian_code, area_of_use_auth_name, "
         "area_of_use_code, deprecated FROM geodetic_datum WHERE "
         "auth_name = ? AND code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("geodetic datum not found",
                                            getAuthority(), code);
@@ -1407,23 +1487,15 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
                              ->createEllipsoid(ellipsoid_code);
         auto pm = d->createFactory(prime_meridian_auth_name)
                       ->createPrimeMeridian(prime_meridian_code);
-        auto extent = d->createFactory(area_of_use_auth_name)
-                          ->createExtent(area_of_use_code);
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+        auto props = d->createProperties(
+            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
         auto anchor = util::optional<std::string>();
         auto datum =
             datum::GeodeticReferenceFrame::create(props, ellipsoid, anchor, pm);
         d->cache(code, datum);
         return datum;
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build geodetic reference frame " + code +
-                               ": " + ex.what());
+        throw buildFactoryException("geodetic reference frame", code, ex);
     }
 }
 
@@ -1439,10 +1511,10 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
 
 datum::VerticalReferenceFrameNNPtr
 AuthorityFactory::createVerticalDatum(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT name, area_of_use_auth_name, area_of_use_code, deprecated FROM "
         "vertical_datum WHERE auth_name = ? AND code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("vertical datum not found",
                                            getAuthority(), code);
@@ -1453,20 +1525,12 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
         const auto &area_of_use_auth_name = row[1];
         const auto &area_of_use_code = row[2];
         const bool deprecated = row[3] == "1";
-        auto extent = d->createFactory(area_of_use_auth_name)
-                          ->createExtent(area_of_use_code);
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+        auto props = d->createProperties(
+            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
         auto anchor = util::optional<std::string>();
         return datum::VerticalReferenceFrame::create(props, anchor);
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build vertical reference frame " + code +
-                               ": " + ex.what());
+        throw buildFactoryException("vertical reference frame", code, ex);
     }
 }
 
@@ -1481,12 +1545,12 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
  */
 
 datum::DatumNNPtr AuthorityFactory::createDatum(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
-        "SELECT 'geodetic_datum' FROM geodetic_datum WHERE "
-        "auth_name = ? AND code = ? "
-        "UNION ALL SELECT 'vertical_datum' FROM vertical_datum WHERE "
-        "auth_name = ? AND code = ?",
-        {getAuthority(), code, getAuthority(), code});
+    auto res =
+        d->run("SELECT 'geodetic_datum' FROM geodetic_datum WHERE "
+               "auth_name = ? AND code = ? "
+               "UNION ALL SELECT 'vertical_datum' FROM vertical_datum WHERE "
+               "auth_name = ? AND code = ?",
+               {getAuthority(), code, getAuthority(), code});
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("datum not found", getAuthority(),
                                            code);
@@ -1530,7 +1594,7 @@ static cs::MeridianPtr createMeridian(const std::string &val) {
 
 cs::CoordinateSystemNNPtr
 AuthorityFactory::createCoordinateSystem(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT axis.name, abbrev, orientation, uom_auth_name, uom_code, "
         "cs.type FROM "
         "axis LEFT JOIN coordinate_system cs ON "
@@ -1538,7 +1602,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         "axis.coordinate_system_code = cs.code WHERE "
         "coordinate_system_auth_name = ? AND coordinate_system_code = ? ORDER "
         "BY coordinate_system_order",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("coordinate system not found",
                                            getAuthority(), code);
@@ -1552,8 +1616,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         const auto &orientation = row[2];
         const auto &uom_auth_name = row[3];
         const auto &uom_code = row[4];
-        auto uom =
-            d->createFactory(uom_auth_name)->createUnitOfMeasure(uom_code);
+        auto uom = d->createUnitOfMeasure(uom_auth_name, uom_code);
         auto props =
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name);
         const cs::AxisDirection *direction =
@@ -1584,7 +1647,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
             }
         }
         axisList.emplace_back(cs::CoordinateSystemAxis::create(
-            props, abbrev, *direction, *uom, meridian));
+            props, abbrev, *direction, uom, meridian));
     }
     auto props = util::PropertyMap()
                      .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
@@ -1690,7 +1753,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
     if (geographicOnly) {
         sql += " AND type in ('geographic 2D', 'geographic 3D')";
     }
-    auto res = d->context()->getPrivate()->run(sql, {getAuthority(), code});
+    auto res = d->runWithCodeParam(sql, code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("geodeticCRS not found",
                                            getAuthority(), code);
@@ -1708,21 +1771,8 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         const auto &text_definition = row[8];
         const bool deprecated = row[9] == "1";
 
-        auto extent = area_of_use_auth_name.empty()
-                          ? nullptr
-                          : d->createFactory(area_of_use_auth_name)
-                                ->createExtent(area_of_use_code)
-                                .as_nullable();
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
-        if (extent) {
-            props.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                      NN_NO_CHECK(extent));
-        }
+        auto props = d->createProperties(
+            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
 
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(d->context());
@@ -1774,8 +1824,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         throw FactoryException("unsupported (type, CS type) for geodeticCRS: " +
                                type + ", " + cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build geodeticCRS " + code + ": " +
-                               ex.what());
+        throw buildFactoryException("geodeticCRS", code, ex);
     }
 }
 
@@ -1791,12 +1840,12 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
 
 crs::VerticalCRSNNPtr
 AuthorityFactory::createVerticalCRS(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT name, coordinate_system_auth_name, "
         "coordinate_system_code, datum_auth_name, datum_code, "
         "area_of_use_auth_name, area_of_use_code, deprecated FROM "
         "vertical_crs WHERE auth_name = ? AND code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("verticalCRS not found",
                                            getAuthority(), code);
@@ -1815,15 +1864,10 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
             d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
         auto datum =
             d->createFactory(datum_auth_name)->createVerticalDatum(datum_code);
-        auto extent = d->createFactory(area_of_use_auth_name)
-                          ->createExtent(area_of_use_code);
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+
+        auto props = d->createProperties(
+            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
+
         auto verticalCS = util::nn_dynamic_pointer_cast<cs::VerticalCS>(cs);
         if (verticalCS) {
             return crs::VerticalCRS::create(props, datum,
@@ -1832,8 +1876,7 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
         throw FactoryException("unsupported CS type for verticalCRS: " +
                                cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build verticalCRS " + code + ": " +
-                               ex.what());
+        throw buildFactoryException("verticalCRS", code, ex);
     }
 }
 
@@ -1864,8 +1907,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
     }
     buffer << ", deprecated FROM conversion WHERE auth_name = ? AND code = ?";
 
-    auto res =
-        d->context()->getPrivate()->run(buffer.str(), {getAuthority(), code});
+    auto res = d->runWithCodeParam(buffer.str(), code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("conversion not found",
                                            getAuthority(), code);
@@ -1901,23 +1943,15 @@ AuthorityFactory::createConversion(const std::string &code) const {
             double normalized_value(c_locale_stod(param_value));
             normalizeMeasure(param_uom_code, param_value, normalized_uom_code,
                              normalized_value);
-            auto uom = d->createFactory(param_uom_auth_name)
-                           ->createUnitOfMeasure(normalized_uom_code);
+            auto uom = d->createUnitOfMeasure(param_uom_auth_name,
+                                              normalized_uom_code);
             values.emplace_back(operation::ParameterValue::create(
-                common::Measure(normalized_value, *uom)));
+                common::Measure(normalized_value, uom)));
         }
         const bool deprecated = row[base_param_idx + N_MAX_PARAMS * 6] == "1";
 
-        auto extent = d->createFactory(area_of_use_auth_name)
-                          ->createExtent(area_of_use_code);
-
-        auto propConversion =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+        auto propConversion = d->createProperties(
+            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
 
         auto propMethod = util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY, method_name);
@@ -1930,8 +1964,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
         return operation::Conversion::create(propConversion, propMethod,
                                              parameters, values);
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build conversion " + code + ": " +
-                               ex.what());
+        throw buildFactoryException("conversion", code, ex);
     }
 }
 
@@ -1947,13 +1980,13 @@ AuthorityFactory::createConversion(const std::string &code) const {
 
 crs::ProjectedCRSNNPtr
 AuthorityFactory::createProjectedCRS(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT name, coordinate_system_auth_name, "
         "coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, "
         "conversion_auth_name, conversion_code, "
         "area_of_use_auth_name, area_of_use_code, text_definition, "
         "deprecated FROM projected_crs WHERE auth_name = ? AND code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("projectedCRS not found",
                                            getAuthority(), code);
@@ -1972,21 +2005,8 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         const auto &text_definition = row[9];
         const bool deprecated = row[10] == "1";
 
-        auto extent = area_of_use_auth_name.empty()
-                          ? nullptr
-                          : d->createFactory(area_of_use_auth_name)
-                                ->createExtent(area_of_use_code)
-                                .as_nullable();
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
-        if (extent) {
-            props.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                      NN_NO_CHECK(extent));
-        }
+        auto props = d->createProperties(
+            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
 
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(d->context());
@@ -2036,8 +2056,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         throw FactoryException("unsupported CS type for projectedCRS: " +
                                cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build projectedCRS " + code + ": " +
-                               ex.what());
+        throw buildFactoryException("projectedCRS", code, ex);
     }
 }
 
@@ -2053,12 +2072,12 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
 
 crs::CompoundCRSNNPtr
 AuthorityFactory::createCompoundCRS(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
+    auto res = d->runWithCodeParam(
         "SELECT name, horiz_crs_auth_name, horiz_crs_code, "
         "vertical_crs_auth_name, vertical_crs_code, "
         "area_of_use_auth_name, area_of_use_code, deprecated FROM "
         "compound_crs WHERE auth_name = ? AND code = ?",
-        {getAuthority(), code});
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("compoundCRS not found",
                                            getAuthority(), code);
@@ -2079,20 +2098,13 @@ AuthorityFactory::createCompoundCRS(const std::string &code) const {
                 ->createCoordinateReferenceSystem(horiz_crs_code, false);
         auto vertCRS = d->createFactory(vertical_crs_auth_name)
                            ->createVerticalCRS(vertical_crs_code);
-        auto extent = d->createFactory(area_of_use_auth_name)
-                          ->createExtent(area_of_use_code);
-        auto props =
-            util::PropertyMap()
-                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                .set(metadata::Identifier::CODE_KEY, code)
-                .set(common::IdentifiedObject::NAME_KEY, name)
-                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+
+        auto props = d->createProperties(
+            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
         return crs::CompoundCRS::create(
             props, std::vector<crs::CRSNNPtr>{horizCRS, vertCRS});
     } catch (const std::exception &ex) {
-        throw FactoryException("cannot build compoundCRS " + code + ": " +
-                               ex.what());
+        throw buildFactoryException("compoundCRS", code, ex);
     }
 }
 
@@ -2118,9 +2130,8 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
     if (crs) {
         return NN_NO_CHECK(crs);
     }
-    auto res = d->context()->getPrivate()->run(
-        "SELECT type FROM crs WHERE auth_name = ? AND code = ?",
-        {getAuthority(), code});
+    auto res = d->runWithCodeParam(
+        "SELECT type FROM crs WHERE auth_name = ? AND code = ?", code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("crs not found", getAuthority(),
                                            code);
@@ -2141,6 +2152,39 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
     }
     throw FactoryException("unhandled CRS type: " + type);
 }
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+static util::PropertyMap createMapNameEPSGCode(const std::string &name,
+                                               int code) {
+    return util::PropertyMap()
+        .set(common::IdentifiedObject::NAME_KEY, name)
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
+        .set(metadata::Identifier::CODE_KEY, code);
+}
+
+// ---------------------------------------------------------------------------
+
+static operation::OperationParameterNNPtr
+createOpParamNameEPSGCode(const std::string &name, int code) {
+    return operation::OperationParameter::create(
+        createMapNameEPSGCode(name, code));
+}
+
+static operation::ParameterValueNNPtr createLength(const std::string &value,
+                                                   const UnitOfMeasure &uom) {
+    return operation::ParameterValue::create(
+        common::Length(c_locale_stod(value), uom));
+}
+
+static operation::ParameterValueNNPtr createAngle(const std::string &value,
+                                                  const UnitOfMeasure &uom) {
+    return operation::ParameterValue::create(
+        common::Angle(c_locale_stod(value), uom));
+}
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -2162,10 +2206,9 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
     const std::string &code, bool allowConcatenated,
     bool usePROJAlternativeGridNames) const {
-    auto res =
-        d->context()->getPrivate()->run("SELECT type FROM coordinate_operation "
-                                        "WHERE auth_name = ? AND code = ?",
-                                        {getAuthority(), code});
+    auto res = d->runWithCodeParam("SELECT type FROM coordinate_operation "
+                                   "WHERE auth_name = ? AND code = ?",
+                                   code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("coordinate operation not found",
                                            getAuthority(), code);
@@ -2179,7 +2222,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 
 #include "proj/internal/helmert_constants.hpp"
 
-        res = d->context()->getPrivate()->run(
+        res = d->runWithCodeParam(
             "SELECT name, method_auth_name, method_code, method_name, "
             "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
             "target_crs_code, area_of_use_auth_name, area_of_use_code, "
@@ -2194,7 +2237,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             "rate_scale_difference_uom_code, epoch, epoch_uom_auth_name, "
             "epoch_uom_code, deprecated FROM "
             "helmert_transformation WHERE auth_name = ? AND code = ?",
-            {getAuthority(), code});
+            code);
         if (res.empty()) {
             // shouldn't happen if foreign keys are OK
             throw NoSuchAuthorityCodeException(
@@ -2251,39 +2294,38 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const bool deprecated = deprecated_str == "1";
             assert(idx == row.size());
 
-            auto uom_translation =
-                *d->createFactory(translation_uom_auth_name)
-                     ->createUnitOfMeasure(translation_uom_code);
+            auto uom_translation = d->createUnitOfMeasure(
+                translation_uom_auth_name, translation_uom_code);
             auto uom_rotation =
                 rotation_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *d->createFactory(rotation_uom_auth_name)
-                           ->createUnitOfMeasure(rotation_uom_code);
+                    : d->createUnitOfMeasure(rotation_uom_auth_name,
+                                             rotation_uom_code);
             auto uom_scale_difference =
                 scale_difference_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *d->createFactory(scale_difference_uom_auth_name)
-                           ->createUnitOfMeasure(scale_difference_uom_code);
+                    : d->createUnitOfMeasure(scale_difference_uom_auth_name,
+                                             scale_difference_uom_code);
             auto uom_rate_translation =
                 rate_translation_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *d->createFactory(rate_translation_uom_auth_name)
-                           ->createUnitOfMeasure(rate_translation_uom_code);
+                    : d->createUnitOfMeasure(rate_translation_uom_auth_name,
+                                             rate_translation_uom_code);
             auto uom_rate_rotation =
                 rate_rotation_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *d->createFactory(rate_rotation_uom_auth_name)
-                           ->createUnitOfMeasure(rate_rotation_uom_code);
+                    : d->createUnitOfMeasure(rate_rotation_uom_auth_name,
+                                             rate_rotation_uom_code);
             auto uom_rate_scale_difference =
                 rate_scale_difference_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *d->createFactory(rate_scale_difference_uom_auth_name)
-                           ->createUnitOfMeasure(
-                               rate_scale_difference_uom_code);
+                    : d->createUnitOfMeasure(
+                          rate_scale_difference_uom_auth_name,
+                          rate_scale_difference_uom_code);
             auto uom_epoch = epoch_uom_auth_name.empty()
                                  ? common::UnitOfMeasure::NONE
-                                 : *d->createFactory(epoch_uom_auth_name)
-                                        ->createUnitOfMeasure(epoch_uom_code);
+                                 : d->createUnitOfMeasure(epoch_uom_auth_name,
+                                                          epoch_uom_code);
 
             auto sourceCRS =
                 d->createFactory(source_crs_auth_name)
@@ -2291,182 +2333,93 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             auto targetCRS =
                 d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code);
-            auto extent = d->createFactory(area_of_use_auth_name)
-                              ->createExtent(area_of_use_code);
 
             std::vector<operation::OperationParameterNNPtr> parameters;
             std::vector<operation::ParameterValueNNPtr> values;
 
-            parameters.emplace_back(operation::OperationParameter::create(
-                util::PropertyMap()
-                    .set(common::IdentifiedObject::NAME_KEY,
-                         EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
-                    .set(metadata::Identifier::CODESPACE_KEY,
-                         metadata::Identifier::EPSG)
-                    .set(metadata::Identifier::CODE_KEY,
-                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)));
-            values.emplace_back(operation::ParameterValue::create(
-                common::Length(c_locale_stod(tx), uom_translation)));
+            parameters.emplace_back(createOpParamNameEPSGCode(
+                EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION));
+            values.emplace_back(createLength(tx, uom_translation));
 
-            parameters.emplace_back(operation::OperationParameter::create(
-                util::PropertyMap()
-                    .set(common::IdentifiedObject::NAME_KEY,
-                         EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
-                    .set(metadata::Identifier::CODESPACE_KEY,
-                         metadata::Identifier::EPSG)
-                    .set(metadata::Identifier::CODE_KEY,
-                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)));
-            values.emplace_back(operation::ParameterValue::create(
-                common::Length(c_locale_stod(ty), uom_translation)));
+            parameters.emplace_back(createOpParamNameEPSGCode(
+                EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION));
+            values.emplace_back(createLength(ty, uom_translation));
 
-            parameters.emplace_back(operation::OperationParameter::create(
-                util::PropertyMap()
-                    .set(common::IdentifiedObject::NAME_KEY,
-                         EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
-                    .set(metadata::Identifier::CODESPACE_KEY,
-                         metadata::Identifier::EPSG)
-                    .set(metadata::Identifier::CODE_KEY,
-                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)));
-            values.emplace_back(operation::ParameterValue::create(
-                common::Length(c_locale_stod(tz), uom_translation)));
+            parameters.emplace_back(createOpParamNameEPSGCode(
+                EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION));
+            values.emplace_back(createLength(tz, uom_translation));
 
             if (uom_rotation != common::UnitOfMeasure::NONE) {
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_X_AXIS_ROTATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_X_AXIS_ROTATION)));
-                values.emplace_back(operation::ParameterValue::create(
-                    common::Angle(c_locale_stod(rx), uom_rotation)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
+                    EPSG_CODE_PARAMETER_X_AXIS_ROTATION));
+                values.emplace_back(createAngle(rx, uom_rotation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_Y_AXIS_ROTATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)));
-                values.emplace_back(operation::ParameterValue::create(
-                    common::Angle(c_locale_stod(ry), uom_rotation)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
+                    EPSG_CODE_PARAMETER_Y_AXIS_ROTATION));
+                values.emplace_back(createAngle(ry, uom_rotation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_Z_AXIS_ROTATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)));
-                values.emplace_back(operation::ParameterValue::create(
-                    common::Angle(c_locale_stod(rz), uom_rotation)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
+                    EPSG_CODE_PARAMETER_Z_AXIS_ROTATION));
+                values.emplace_back(createAngle(rz, uom_rotation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_SCALE_DIFFERENCE)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
+                    EPSG_CODE_PARAMETER_SCALE_DIFFERENCE));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Scale(c_locale_stod(scale_difference),
                                   uom_scale_difference)));
             }
 
             if (uom_rate_translation != common::UnitOfMeasure::NONE) {
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION,
+                    EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION));
                 values.emplace_back(
-                    operation::ParameterValue::create(common::Length(
-                        c_locale_stod(rate_tx), uom_rate_translation)));
+                    createLength(rate_tx, uom_rate_translation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION,
+                    EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION));
                 values.emplace_back(
-                    operation::ParameterValue::create(common::Length(
-                        c_locale_stod(rate_ty), uom_rate_translation)));
+                    createLength(rate_ty, uom_rate_translation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION,
+                    EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION));
                 values.emplace_back(
-                    operation::ParameterValue::create(common::Length(
-                        c_locale_stod(rate_tz), uom_rate_translation)));
+                    createLength(rate_tz, uom_rate_translation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION)));
-                values.emplace_back(operation::ParameterValue::create(
-                    common::Angle(c_locale_stod(rate_rx), uom_rate_rotation)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION,
+                    EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION));
+                values.emplace_back(createAngle(rate_rx, uom_rate_rotation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION)));
-                values.emplace_back(operation::ParameterValue::create(
-                    common::Angle(c_locale_stod(rate_ry), uom_rate_rotation)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION,
+                    EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION));
+                values.emplace_back(createAngle(rate_ry, uom_rate_rotation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION)));
-                values.emplace_back(operation::ParameterValue::create(
-                    common::Angle(c_locale_stod(rate_rz), uom_rate_rotation)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION,
+                    EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION));
+                values.emplace_back(createAngle(rate_rz, uom_rate_rotation));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE,
+                    EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Scale(c_locale_stod(rate_scale_difference),
                                   uom_rate_scale_difference)));
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_REFERENCE_EPOCH)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(metadata::Identifier::CODE_KEY,
-                             EPSG_CODE_PARAMETER_REFERENCE_EPOCH)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_REFERENCE_EPOCH,
+                    EPSG_CODE_PARAMETER_REFERENCE_EPOCH));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Measure(c_locale_stod(epoch), uom_epoch)));
             } else if (uom_epoch != common::UnitOfMeasure::NONE) {
@@ -2476,26 +2429,16 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     EPSG_NAME_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH(
                         "Transformation reference epoch");
 
-                parameters.emplace_back(operation::OperationParameter::create(
-                    util::PropertyMap()
-                        .set(common::IdentifiedObject::NAME_KEY,
-                             EPSG_NAME_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH)
-                        .set(metadata::Identifier::CODESPACE_KEY,
-                             metadata::Identifier::EPSG)
-                        .set(
-                            metadata::Identifier::CODE_KEY,
-                            EPSG_CODE_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH)));
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH,
+                    EPSG_CODE_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Measure(c_locale_stod(epoch), uom_epoch)));
             }
 
             auto props =
-                util::PropertyMap()
-                    .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                    .set(metadata::Identifier::CODE_KEY, code)
-                    .set(common::IdentifiedObject::NAME_KEY, name)
-                    .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+                d->createProperties(code, name, deprecated,
+                                    area_of_use_auth_name, area_of_use_code);
 
             auto propsMethod =
                 util::PropertyMap()
@@ -2513,13 +2456,12 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 values, accuracies);
 
         } catch (const std::exception &ex) {
-            throw FactoryException("cannot build transformation " + code +
-                                   ": " + ex.what());
+            throw buildFactoryException("transformation", code, ex);
         }
     }
 
     if (type == "grid_transformation") {
-        res = d->context()->getPrivate()->run(
+        res = d->runWithCodeParam(
             "SELECT name, method_auth_name, method_code, method_name, "
             "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
             "target_crs_code, area_of_use_auth_name, area_of_use_code, "
@@ -2530,7 +2472,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             "interpolation_crs_auth_name, interpolation_crs_code, deprecated "
             "FROM "
             "grid_transformation WHERE auth_name = ? AND code = ?",
-            {getAuthority(), code});
+            code);
         if (res.empty()) {
             // shouldn't happen if foreign keys are OK
             throw NoSuchAuthorityCodeException("grid_transformation not found",
@@ -2578,8 +2520,6 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                           ->createCoordinateReferenceSystem(
                               interpolation_crs_code)
                           .as_nullable();
-            auto extent = d->createFactory(area_of_use_auth_name)
-                              ->createExtent(area_of_use_code);
 
             std::vector<operation::OperationParameterNNPtr> parameters;
             std::vector<operation::ParameterValueNNPtr> values;
@@ -2606,13 +2546,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             }
 
             auto props =
-                util::PropertyMap()
-                    .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                    .set(metadata::Identifier::CODE_KEY, code)
-                    .set(common::IdentifiedObject::NAME_KEY, name)
-                    .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
-
+                d->createProperties(code, name, deprecated,
+                                    area_of_use_auth_name, area_of_use_code);
             auto propsMethod =
                 util::PropertyMap()
                     .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
@@ -2633,8 +2568,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             return transf;
 
         } catch (const std::exception &ex) {
-            throw FactoryException("cannot build transformation " + code +
-                                   ": " + ex.what());
+            throw buildFactoryException("transformation", code, ex);
         }
     }
 
@@ -2658,8 +2592,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
         buffer << ", deprecated FROM other_transformation WHERE auth_name = ? "
                   "AND code = ?";
 
-        res = d->context()->getPrivate()->run(buffer.str(),
-                                              {getAuthority(), code});
+        res = d->runWithCodeParam(buffer.str(), code);
         if (res.empty()) {
             // shouldn't happen if foreign keys are OK
             throw NoSuchAuthorityCodeException("other_transformation not found",
@@ -2704,10 +2637,10 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 double normalized_value(c_locale_stod(param_value));
                 normalizeMeasure(param_uom_code, param_value,
                                  normalized_uom_code, normalized_value);
-                auto uom = d->createFactory(param_uom_auth_name)
-                               ->createUnitOfMeasure(normalized_uom_code);
+                auto uom = d->createUnitOfMeasure(param_uom_auth_name,
+                                                  normalized_uom_code);
                 values.emplace_back(operation::ParameterValue::create(
-                    common::Measure(normalized_value, *uom)));
+                    common::Measure(normalized_value, uom)));
             }
             idx = base_param_idx + 6 * N_MAX_PARAMS;
 
@@ -2722,16 +2655,9 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code);
 
-            auto extent = d->createFactory(area_of_use_auth_name)
-                              ->createExtent(area_of_use_code);
-
             auto props =
-                util::PropertyMap()
-                    .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                    .set(metadata::Identifier::CODE_KEY, code)
-                    .set(common::IdentifiedObject::NAME_KEY, name)
-                    .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+                d->createProperties(code, name, deprecated,
+                                    area_of_use_auth_name, area_of_use_code);
 
             auto propsMethod =
                 util::PropertyMap()
@@ -2758,20 +2684,19 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 values, accuracies);
 
         } catch (const std::exception &ex) {
-            throw FactoryException("cannot build transformation " + code +
-                                   ": " + ex.what());
+            throw buildFactoryException("transformation", code, ex);
         }
     }
 
     if (allowConcatenated && type == "concatenated_operation") {
-        res = d->context()->getPrivate()->run(
+        res = d->runWithCodeParam(
             "SELECT name, source_crs_auth_name, source_crs_code, "
             "target_crs_auth_name, target_crs_code, "
             "area_of_use_auth_name, area_of_use_code, accuracy, "
             "step1_auth_name, step1_code, step2_auth_name, step2_code, "
             "step3_auth_name, step3_code, deprecated FROM "
             "concatenated_operation WHERE auth_name = ? AND code = ?",
-            {getAuthority(), code});
+            code);
         if (res.empty()) {
             // shouldn't happen if foreign keys are OK
             throw NoSuchAuthorityCodeException(
@@ -2932,16 +2857,9 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     " doest not match target CRS of concatenated operation");
             }
 
-            auto extent = d->createFactory(area_of_use_auth_name)
-                              ->createExtent(area_of_use_code);
-
             auto props =
-                util::PropertyMap()
-                    .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
-                    .set(metadata::Identifier::CODE_KEY, code)
-                    .set(common::IdentifiedObject::NAME_KEY, name)
-                    .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
-                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+                d->createProperties(code, name, deprecated,
+                                    area_of_use_auth_name, area_of_use_code);
 
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
             if (!accuracy.empty()) {
@@ -2979,8 +2897,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                                                             accuracies);
 
         } catch (const std::exception &ex) {
-            throw FactoryException("cannot build transformation " + code +
-                                   ": " + ex.what());
+            throw buildFactoryException("transformation", code, ex);
         }
     }
 
@@ -3060,7 +2977,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         sql += " AND conversion_auth_name = ?";
         params.emplace_back(getAuthority());
     }
-    auto res = d->context()->getPrivate()->run(sql, params);
+    auto res = d->run(sql, params);
     if (!res.empty()) {
         auto targetCRS = d->createFactory(targetCRSAuthName)
                              ->createProjectedCRS(targetCRSCode);
@@ -3084,7 +3001,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     sql += " ORDER BY pseudo_area_from_swne(south_lat, west_lon, north_lat, "
            "east_lon) DESC, "
            "(CASE WHEN accuracy is NULL THEN 1 ELSE 0 END), accuracy";
-    res = d->context()->getPrivate()->run(sql, params);
+    res = d->run(sql, params);
     for (const auto &row : res) {
         const auto &auth_name = row[0];
         const auto &code = row[1];
@@ -3251,8 +3168,8 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         params.emplace_back(pair.first);
         params.emplace_back(pair.second);
     }
-    auto res = d->context()->getPrivate()->run(
-        sql + additionalWhere + intermediateWhere + orderBy, params);
+    auto res =
+        d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
 
     for (const auto &row : res) {
         const auto &auth_name1 = row[0];
@@ -3289,8 +3206,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "target", "target");
-    res = d->context()->getPrivate()->run(
-        sql + additionalWhere + intermediateWhere + orderBy, params);
+    res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
     for (const auto &row : res) {
         const auto &auth_name1 = row[0];
         const auto &code1 = row[1];
@@ -3326,8 +3242,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
           "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ";
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "source", "source");
-    res = d->context()->getPrivate()->run(
-        sql + additionalWhere + intermediateWhere + orderBy, params);
+    res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
     for (const auto &row : res) {
         const auto &auth_name1 = row[0];
         const auto &code1 = row[1];
@@ -3363,8 +3278,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "source", "target");
-    res = d->context()->getPrivate()->run(
-        sql + additionalWhere + intermediateWhere + orderBy, params);
+    res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
     for (const auto &row : res) {
         const auto &auth_name1 = row[0];
         const auto &code1 = row[1];
@@ -3407,7 +3321,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 /** \brief Returns the authority name associated to this factory.
  * @return name.
  */
-const std::string &AuthorityFactory::getAuthority() const {
+const std::string &AuthorityFactory::getAuthority() PROJ_CONST_DEFN {
     return d->authority();
 }
 
@@ -3481,7 +3395,7 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
         sql += " AND deprecated != 1";
     }
 
-    auto res = d->context()->getPrivate()->run(sql, {getAuthority()});
+    auto res = d->run(sql, {getAuthority()});
     std::set<std::string> set;
     for (const auto &row : res) {
         set.insert(row[0]);
@@ -3505,7 +3419,7 @@ std::string
 AuthorityFactory::getDescriptionText(const std::string &code) const {
     auto sql = "SELECT name FROM object_view WHERE auth_name = ? AND code = "
                "? ORDER BY table_name";
-    auto res = d->context()->getPrivate()->run(sql, {getAuthority(), code});
+    auto res = d->runWithCodeParam(sql, code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("object not found", getAuthority(),
                                            code);

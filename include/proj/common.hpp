@@ -53,7 +53,10 @@ using UnitOfMeasurePtr = std::shared_ptr<UnitOfMeasure>;
 /** Non-null shared pointer of UnitOfMeasure. */
 using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
 
-/** \brief Unit of measure. */
+/** \brief Unit of measure.
+ *
+ * This is a mutable object.
+ */
 class UnitOfMeasure : public util::BaseObject {
   public:
     /** \brief Type of unit of measure. */
@@ -86,15 +89,15 @@ class UnitOfMeasure : public util::BaseObject {
     static UnitOfMeasureNNPtr create(const UnitOfMeasure &other);
     //! @endcond
 
-    PROJ_DLL const std::string &name() const;
-    PROJ_DLL double conversionToSI() const;
-    PROJ_DLL Type type() const;
+    PROJ_DLL const std::string &name() PROJ_PURE_DECL;
+    PROJ_DLL double conversionToSI() PROJ_PURE_DECL;
+    PROJ_DLL Type type() PROJ_PURE_DECL;
 
-    PROJ_DLL const std::string &codeSpace() const;
-    PROJ_DLL const std::string &code() const;
+    PROJ_DLL const std::string &codeSpace() PROJ_PURE_DECL;
+    PROJ_DLL const std::string &code() PROJ_PURE_DECL;
 
-    PROJ_DLL bool operator==(const UnitOfMeasure &other) const;
-    PROJ_DLL bool operator!=(const UnitOfMeasure &other) const;
+    PROJ_DLL bool operator==(const UnitOfMeasure &other) PROJ_PURE_DECL;
+    PROJ_DLL bool operator!=(const UnitOfMeasure &other) PROJ_PURE_DECL;
 
     //! @cond Doxygen_Suppress
     void _exportToWKT(io::WKTFormatter *formatter,
@@ -138,16 +141,16 @@ class Measure : public util::BaseObject {
     //! @cond Doxygen_Suppress
     PROJ_DLL Measure(const Measure &other);
     PROJ_DLL ~Measure();
-    PROJ_DLL Measure &operator=(const Measure &other);
     //! @endcond
 
-    PROJ_DLL const UnitOfMeasure &unit() const;
-    PROJ_DLL double getSIValue() const;
-    PROJ_DLL double value() const;
+    PROJ_DLL const UnitOfMeasure &unit() PROJ_CONST_DECL;
+    PROJ_DLL double getSIValue() PROJ_CONST_DECL;
+    PROJ_DLL double value() PROJ_CONST_DECL;
 
-    PROJ_DLL Measure convertToUnit(const UnitOfMeasure &otherUnit) const;
+    PROJ_DLL Measure convertToUnit(const UnitOfMeasure &otherUnit)
+        PROJ_CONST_DECL;
 
-    PROJ_DLL bool operator==(const Measure &other) const;
+    PROJ_DLL bool operator==(const Measure &other) PROJ_CONST_DECL;
 
     PROJ_DLL bool
     isEquivalentTo(const Measure &other,
@@ -156,6 +159,7 @@ class Measure : public util::BaseObject {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    Measure &operator=(const Measure &) = delete;
 };
 
 /** Shared pointer of Measure. */
@@ -178,7 +182,7 @@ class Scale : public Measure {
 
   protected:
     PROJ_FRIEND_OPTIONAL(Scale);
-    Scale &operator=(const Scale &);
+    Scale &operator=(const Scale &) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -198,7 +202,7 @@ class Angle : public Measure {
 
   protected:
     PROJ_FRIEND_OPTIONAL(Angle);
-    Angle &operator=(const Angle &);
+    Angle &operator=(const Angle &) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -218,7 +222,7 @@ class Length : public Measure {
 
   protected:
     PROJ_FRIEND_OPTIONAL(Length);
-    Length &operator=(const Length &);
+    Length &operator=(const Length &) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -288,19 +292,21 @@ class IdentifiedObject : public util::BaseObject, public util::IComparable {
     PROJ_DLL static const std::string DEPRECATED_KEY;
 
     // in practice only name().description() is used
-    PROJ_DLL const metadata::IdentifierNNPtr &name() const;
-    PROJ_DLL const std::string &nameStr() const;
-    PROJ_DLL const std::vector<metadata::IdentifierNNPtr> &identifiers() const;
-    PROJ_DLL const std::vector<util::GenericNameNNPtr> &aliases() const;
-    PROJ_DLL const std::string &remarks() const;
+    PROJ_DLL const metadata::IdentifierNNPtr &name() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &nameStr() PROJ_CONST_DECL;
+    PROJ_DLL const std::vector<metadata::IdentifierNNPtr> &
+    identifiers() PROJ_CONST_DECL;
+    PROJ_DLL const std::vector<util::GenericNameNNPtr> &
+    aliases() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &remarks() PROJ_CONST_DECL;
 
     // from Apache SIS AbstractIdentifiedObject
-    PROJ_DLL bool isDeprecated() const;
+    PROJ_DLL bool isDeprecated() PROJ_CONST_DECL;
 
     // Non-standard
-    PROJ_DLL std::string alias() const;
-    PROJ_DLL int getEPSGCode() const;
-    PROJ_DLL bool isEPSG(int code) const;
+    PROJ_DLL std::string alias() PROJ_CONST_DECL;
+    PROJ_DLL int getEPSGCode() PROJ_CONST_DECL;
+    PROJ_DLL bool isEPSG(int code) PROJ_CONST_DECL;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
@@ -313,9 +319,10 @@ class IdentifiedObject : public util::BaseObject, public util::IComparable {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
-    bool isEquivalentTo(const IdentifiedObject *other,
-                        util::IComparable::Criterion criterion =
-                            util::IComparable::Criterion::STRICT) const;
+    bool
+    isEquivalentTo(const IdentifiedObject *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) PROJ_CONST_DECL;
     //! @endcond
 
   protected:
@@ -323,13 +330,13 @@ class IdentifiedObject : public util::BaseObject, public util::IComparable {
     INLINED_MAKE_SHARED
     IdentifiedObject();
     IdentifiedObject(const IdentifiedObject &other);
-    IdentifiedObject &operator=(const IdentifiedObject &other);
 
     void setProperties(const util::PropertyMap
                            &properties); // throw(InvalidValueTypeException)
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    IdentifiedObject &operator=(const IdentifiedObject &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -353,8 +360,8 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
     // In ISO_19111:2018, scope and domain are compulsory, but in WKT2:2015,
     // they
     // are not necessarily both specified
-    PROJ_DLL const util::optional<std::string> &scope() const;
-    PROJ_DLL const metadata::ExtentPtr &domainOfValidity() const;
+    PROJ_DLL const util::optional<std::string> &scope() PROJ_CONST_DECL;
+    PROJ_DLL const metadata::ExtentPtr &domainOfValidity() PROJ_CONST_DECL;
 
     PROJ_DLL static ObjectDomainNNPtr
     create(const util::optional<std::string> &scopeIn,
@@ -373,7 +380,11 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
                    //! @endcond
 
   protected:
-    ObjectDomain();
+    //! @cond Doxygen_Suppress
+    ObjectDomain(const util::optional<std::string> &scopeIn,
+                 const metadata::ExtentPtr &extent);
+    //! @endcond
+
     ObjectDomain(const ObjectDomain &other);
     INLINED_MAKE_SHARED
 
@@ -400,7 +411,7 @@ class ObjectUsage : public IdentifiedObject {
     PROJ_DLL ~ObjectUsage() override;
     //! @endcond
 
-    PROJ_DLL const std::vector<ObjectDomainNNPtr> &domains() const;
+    PROJ_DLL const std::vector<ObjectDomainNNPtr> &domains() PROJ_CONST_DECL;
 
     PROJ_DLL static const std::string SCOPE_KEY;
     PROJ_DLL static const std::string DOMAIN_OF_VALIDITY_KEY;

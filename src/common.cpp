@@ -115,7 +115,7 @@ UnitOfMeasureNNPtr UnitOfMeasure::create(const UnitOfMeasure &other) {
 // ---------------------------------------------------------------------------
 
 /** \brief Return the name of the unit of measure. */
-const std::string &UnitOfMeasure::name() const { return d->name_; }
+const std::string &UnitOfMeasure::name() PROJ_PURE_DEFN { return d->name_; }
 
 // ---------------------------------------------------------------------------
 
@@ -126,13 +126,13 @@ const std::string &UnitOfMeasure::name() const { return d->name_; }
  *
  * @return the conversion factor, or 0 if no conversion exists.
  */
-double UnitOfMeasure::conversionToSI() const { return d->toSI_; }
+double UnitOfMeasure::conversionToSI() PROJ_PURE_DEFN { return d->toSI_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Return the type of the unit of measure.
  */
-UnitOfMeasure::Type UnitOfMeasure::type() const { return d->type_; }
+UnitOfMeasure::Type UnitOfMeasure::type() PROJ_PURE_DEFN { return d->type_; }
 
 // ---------------------------------------------------------------------------
 
@@ -142,7 +142,9 @@ UnitOfMeasure::Type UnitOfMeasure::type() const { return d->type_; }
  *
  * @return the code space, or empty string.
  */
-const std::string &UnitOfMeasure::codeSpace() const { return d->codeSpace_; }
+const std::string &UnitOfMeasure::codeSpace() PROJ_PURE_DEFN {
+    return d->codeSpace_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -150,7 +152,7 @@ const std::string &UnitOfMeasure::codeSpace() const { return d->codeSpace_; }
  *
  * @return the code, or empty string.
  */
-const std::string &UnitOfMeasure::code() const { return d->code_; }
+const std::string &UnitOfMeasure::code() PROJ_PURE_DEFN { return d->code_; }
 
 // ---------------------------------------------------------------------------
 
@@ -218,7 +220,7 @@ void UnitOfMeasure::_exportToWKT(
  *
  * The comparison is based on the name.
  */
-bool UnitOfMeasure::operator==(const UnitOfMeasure &other) const {
+bool UnitOfMeasure::operator==(const UnitOfMeasure &other) PROJ_PURE_DEFN {
     return name() == other.name();
 }
 
@@ -228,7 +230,7 @@ bool UnitOfMeasure::operator==(const UnitOfMeasure &other) const {
  *
  * The comparison is based on the name.
  */
-bool UnitOfMeasure::operator!=(const UnitOfMeasure &other) const {
+bool UnitOfMeasure::operator!=(const UnitOfMeasure &other) PROJ_PURE_DEFN {
     return name() != other.name();
 }
 
@@ -289,20 +291,9 @@ Measure::~Measure() = default;
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
-Measure &Measure::operator=(const Measure &other) {
-    if (this != &other) {
-        *d = *(other.d);
-    }
-    return *this;
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
 /** \brief Return the unit of the Measure.
  */
-const UnitOfMeasure &Measure::unit() const { return d->unit_; }
+const UnitOfMeasure &Measure::unit() PROJ_CONST_DEFN { return d->unit_; }
 
 // ---------------------------------------------------------------------------
 
@@ -310,7 +301,7 @@ const UnitOfMeasure &Measure::unit() const { return d->unit_; }
  * corresponding
  * unit of the International System.
  */
-double Measure::getSIValue() const {
+double Measure::getSIValue() PROJ_CONST_DEFN {
     return d->value_ * d->unit_.conversionToSI();
 }
 
@@ -318,14 +309,14 @@ double Measure::getSIValue() const {
 
 /** \brief Return the value of the measure, expressed in the unit()
  */
-double Measure::value() const { return d->value_; }
+double Measure::value() PROJ_CONST_DEFN { return d->value_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Return a new Measure equivalent to the this object, but whose value
  * has been converted ot the provided unit.
  */
-Measure Measure::convertToUnit(const UnitOfMeasure &otherUnit) const {
+Measure Measure::convertToUnit(const UnitOfMeasure &otherUnit) PROJ_CONST_DEFN {
     return Measure(getSIValue() / otherUnit.conversionToSI(), otherUnit);
 }
 
@@ -335,7 +326,7 @@ Measure Measure::convertToUnit(const UnitOfMeasure &otherUnit) const {
  *
  * The comparison is done both on the value and the unit.
  */
-bool Measure::operator==(const Measure &other) const {
+bool Measure::operator==(const Measure &other) PROJ_CONST_DEFN {
     return d->value_ == other.d->value_ && d->unit_ == other.d->unit_;
 }
 
@@ -386,10 +377,6 @@ Scale::~Scale() = default;
 
 // ---------------------------------------------------------------------------
 
-Scale &Scale::operator=(const Scale &) = default;
-
-// ---------------------------------------------------------------------------
-
 /** \brief Instanciate a Angle.
  *
  * @param valueIn value
@@ -432,10 +419,6 @@ Angle::~Angle() = default;
 
 // ---------------------------------------------------------------------------
 
-Angle &Angle::operator=(const Angle &) = default;
-
-// ---------------------------------------------------------------------------
-
 /** \brief Instanciate a Length.
  *
  * @param valueIn value
@@ -475,10 +458,6 @@ Length Length::convertToUnit(const UnitOfMeasure &otherUnit) const {
 //! @cond Doxygen_Suppress
 Length::~Length() = default;
 //! @endcond
-
-// ---------------------------------------------------------------------------
-
-Length &Length::operator=(const Length &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -563,15 +542,6 @@ IdentifiedObject::IdentifiedObject(const IdentifiedObject &other)
 
 // ---------------------------------------------------------------------------
 
-IdentifiedObject &IdentifiedObject::operator=(const IdentifiedObject &other) {
-    if (this != &other) {
-        *d = *(other.d);
-    }
-    return *this;
-}
-
-// ---------------------------------------------------------------------------
-
 //! @cond Doxygen_Suppress
 IdentifiedObject::~IdentifiedObject() = default;
 //! @endcond
@@ -597,7 +567,9 @@ IdentifiedObjectNNPtr IdentifiedObject::create(
  * Generally, the only interesting field of the name will be
  * name()->description().
  */
-const IdentifierNNPtr &IdentifiedObject::name() const { return d->name; }
+const IdentifierNNPtr &IdentifiedObject::name() PROJ_CONST_DEFN {
+    return d->name;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -605,7 +577,7 @@ const IdentifierNNPtr &IdentifiedObject::name() const { return d->name; }
  *
  * Return *(name()->description())
  */
-const std::string &IdentifiedObject::nameStr() const {
+const std::string &IdentifiedObject::nameStr() PROJ_CONST_DEFN {
     return *(d->name->description());
 }
 
@@ -616,7 +588,8 @@ const std::string &IdentifiedObject::nameStr() const {
  * Generally, those will have Identifier::code() and Identifier::codeSpace()
  * filled.
  */
-const std::vector<IdentifierNNPtr> &IdentifiedObject::identifiers() const {
+const std::vector<IdentifierNNPtr> &
+IdentifiedObject::identifiers() PROJ_CONST_DEFN {
     return d->identifiers;
 }
 
@@ -624,7 +597,8 @@ const std::vector<IdentifierNNPtr> &IdentifiedObject::identifiers() const {
 
 /** \brief Return the alias(es) of the object.
  */
-const std::vector<GenericNameNNPtr> &IdentifiedObject::aliases() const {
+const std::vector<GenericNameNNPtr> &
+IdentifiedObject::aliases() PROJ_CONST_DEFN {
     return d->aliases;
 }
 
@@ -634,7 +608,7 @@ const std::vector<GenericNameNNPtr> &IdentifiedObject::aliases() const {
  *
  * Shortcut for aliases()[0]->toFullyQualifiedName()->toString()
  */
-std::string IdentifiedObject::alias() const {
+std::string IdentifiedObject::alias() PROJ_CONST_DEFN {
     if (d->aliases.empty())
         return std::string();
     return d->aliases[0]->toFullyQualifiedName()->toString();
@@ -645,7 +619,7 @@ std::string IdentifiedObject::alias() const {
 /** \brief Return the EPSG code.
  * @return code, or 0 if not found
  */
-int IdentifiedObject::getEPSGCode() const {
+int IdentifiedObject::getEPSGCode() PROJ_CONST_DEFN {
     for (const auto &id : identifiers()) {
         if (ci_equal(*(id->codeSpace()), metadata::Identifier::EPSG)) {
             return ::atoi(id->code().c_str());
@@ -658,13 +632,17 @@ int IdentifiedObject::getEPSGCode() const {
 
 /** \brief Return whether the object has a identifiers() in the EPSG code space.
  */
-bool IdentifiedObject::isEPSG(int code) const { return getEPSGCode() == code; }
+bool IdentifiedObject::isEPSG(int code) PROJ_CONST_DEFN {
+    return getEPSGCode() == code;
+}
 
 // ---------------------------------------------------------------------------
 
 /** \brief Return the remarks.
  */
-const std::string &IdentifiedObject::remarks() const { return d->remarks; }
+const std::string &IdentifiedObject::remarks() PROJ_CONST_DEFN {
+    return d->remarks;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -672,7 +650,9 @@ const std::string &IdentifiedObject::remarks() const { return d->remarks; }
  *
  * \remark Extension of \ref ISO_19111_2018
  */
-bool IdentifiedObject::isDeprecated() const { return d->isDeprecated; }
+bool IdentifiedObject::isDeprecated() PROJ_CONST_DEFN {
+    return d->isDeprecated;
+}
 
 // ---------------------------------------------------------------------------
 //! @cond Doxygen_Suppress
@@ -687,9 +667,9 @@ void IdentifiedObject::Private::setName(
     if (auto genVal =
             util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
         if (genVal->type() == BoxedValue::Type::STRING) {
-            name = Identifier::create();
-            name->setProperties(PropertyMap().set(Identifier::DESCRIPTION_KEY,
-                                                  genVal->stringValue()));
+            name = Identifier::create(
+                std::string(), PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                                                 genVal->stringValue()));
         } else {
             throw InvalidValueTypeException("Invalid value type for " +
                                             NAME_KEY);
@@ -715,9 +695,8 @@ void IdentifiedObject::Private::setIdentifiers(
 
         oIter = properties.find(Identifier::CODE_KEY);
         if (oIter != properties.end()) {
-            auto identifier = Identifier::create();
-            identifier->setProperties(properties);
-            identifiers.push_back(identifier);
+            identifiers.push_back(
+                Identifier::create(std::string(), properties));
         }
         return;
     }
@@ -862,19 +841,17 @@ bool IdentifiedObject::isEquivalentTo(
 
 // ---------------------------------------------------------------------------
 
-bool IdentifiedObject::isEquivalentTo(
-    const IdentifiedObject *otherIdObj,
-    util::IComparable::Criterion criterion) const {
+bool IdentifiedObject::isEquivalentTo(const IdentifiedObject *otherIdObj,
+                                      util::IComparable::Criterion criterion)
+    PROJ_CONST_DEFN {
     if (criterion == util::IComparable::Criterion::STRICT) {
-        if (!ci_equal(*(name()->description()),
-                      *(otherIdObj->name()->description()))) {
+        if (!ci_equal(nameStr(), otherIdObj->nameStr())) {
             return false;
         }
         // TODO test id etc
     } else {
-        if (!metadata::Identifier::isEquivalentName(
-                *(name()->description()),
-                *(otherIdObj->name()->description()))) {
+        if (!metadata::Identifier::isEquivalentName(nameStr(),
+                                                    otherIdObj->nameStr())) {
             return false;
         }
     }
@@ -888,12 +865,19 @@ bool IdentifiedObject::isEquivalentTo(
 struct ObjectDomain::Private {
     optional<std::string> scope_{};
     ExtentPtr domainOfValidity_{};
+
+    Private(const optional<std::string> &scopeIn, const ExtentPtr &extent)
+        : scope_(scopeIn), domainOfValidity_(extent) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-ObjectDomain::ObjectDomain() : d(internal::make_unique<Private>()) {}
+//! @cond Doxygen_Suppress
+ObjectDomain::ObjectDomain(const optional<std::string> &scopeIn,
+                           const ExtentPtr &extent)
+    : d(internal::make_unique<Private>(scopeIn, extent)) {}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -912,7 +896,9 @@ ObjectDomain::~ObjectDomain() = default;
  *
  * @return the scope, or empty.
  */
-const optional<std::string> &ObjectDomain::scope() const { return d->scope_; }
+const optional<std::string> &ObjectDomain::scope() PROJ_CONST_DEFN {
+    return d->scope_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -920,7 +906,7 @@ const optional<std::string> &ObjectDomain::scope() const { return d->scope_; }
  *
  * @return the domain of validity, or nullptr.
  */
-const ExtentPtr &ObjectDomain::domainOfValidity() const {
+const ExtentPtr &ObjectDomain::domainOfValidity() PROJ_CONST_DEFN {
     return d->domainOfValidity_;
 }
 
@@ -930,10 +916,7 @@ const ExtentPtr &ObjectDomain::domainOfValidity() const {
  */
 ObjectDomainNNPtr ObjectDomain::create(const optional<std::string> &scopeIn,
                                        const ExtentPtr &extent) {
-    auto objectDomain = ObjectDomain::nn_make_shared<ObjectDomain>();
-    objectDomain->d->scope_ = scopeIn;
-    objectDomain->d->domainOfValidity_ = extent;
-    return objectDomain;
+    return ObjectDomain::nn_make_shared<ObjectDomain>(scopeIn, extent);
 }
 
 // ---------------------------------------------------------------------------
@@ -1041,7 +1024,7 @@ ObjectUsage::~ObjectUsage() = default;
 
 /** \brief Return the domains of the object.
  */
-const std::vector<ObjectDomainNNPtr> &ObjectUsage::domains() const {
+const std::vector<ObjectDomainNNPtr> &ObjectUsage::domains() PROJ_CONST_DEFN {
     return d->domains_;
 }
 

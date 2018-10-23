@@ -99,7 +99,7 @@ class CRS : public common::ObjectUsage, public io::IWKTExportable {
     /** \brief Return a shallow clone of this object. */
     PROJ_DLL virtual CRSNNPtr shallowClone() const = 0;
 
-    PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() const;
+    PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() PROJ_CONST_DECL;
 
   protected:
     CRS();
@@ -125,9 +125,10 @@ class SingleCRS : public CRS {
     PROJ_DLL ~SingleCRS() override;
     //! @endcond
 
-    PROJ_DLL const datum::DatumPtr &datum() const;
-    PROJ_DLL const datum::DatumEnsemblePtr &datumEnsemble() const;
-    PROJ_DLL const cs::CoordinateSystemNNPtr &coordinateSystem() const;
+    PROJ_DLL const datum::DatumPtr &datum() PROJ_CONST_DECL;
+    PROJ_DLL const datum::DatumEnsemblePtr &datumEnsemble() PROJ_CONST_DECL;
+    PROJ_DLL const cs::CoordinateSystemNNPtr &
+    coordinateSystem() PROJ_CONST_DECL;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
@@ -179,20 +180,20 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     PROJ_DLL ~GeodeticCRS() override;
     //! @endcond
 
-    PROJ_DLL const datum::GeodeticReferenceFramePtr &datum() const;
+    PROJ_DLL const datum::GeodeticReferenceFramePtr &datum() PROJ_CONST_DECL;
 
-    PROJ_DLL const datum::PrimeMeridianNNPtr &primeMeridian() const;
-    PROJ_DLL const datum::EllipsoidNNPtr &ellipsoid() const;
+    PROJ_DLL const datum::PrimeMeridianNNPtr &primeMeridian() PROJ_CONST_DECL;
+    PROJ_DLL const datum::EllipsoidNNPtr &ellipsoid() PROJ_CONST_DECL;
 
     // coordinateSystem() returns either a EllipsoidalCS, SphericalCS or
     // CartesianCS
 
     PROJ_DLL const std::vector<operation::PointMotionOperationNNPtr> &
-    velocityModel() const;
+    velocityModel() PROJ_CONST_DECL;
 
     // Non-standard
 
-    PROJ_DLL bool isGeocentric() const;
+    PROJ_DLL bool isGeocentric() PROJ_CONST_DECL;
 
     PROJ_DLL static GeodeticCRSNNPtr
     create(const util::PropertyMap &properties,
@@ -279,7 +280,7 @@ class GeographicCRS : public GeodeticCRS {
     PROJ_DLL ~GeographicCRS() override;
     //! @endcond
 
-    PROJ_DLL const cs::EllipsoidalCSNNPtr &coordinateSystem() const;
+    PROJ_DLL const cs::EllipsoidalCSNNPtr &coordinateSystem() PROJ_CONST_DECL;
 
     // Non-standard
     PROJ_DLL static GeographicCRSNNPtr
@@ -292,7 +293,7 @@ class GeographicCRS : public GeodeticCRS {
            const datum::DatumEnsemblePtr &datumEnsemble,
            const cs::EllipsoidalCSNNPtr &cs);
 
-    PROJ_DLL bool is2DPartOf3D(const GeographicCRSNNPtr &other) const;
+    PROJ_DLL bool is2DPartOf3D(const GeographicCRSNNPtr &other) PROJ_CONST_DECL;
 
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4267; // NAD27
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4269; // NAD83
@@ -361,9 +362,9 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     PROJ_DLL const datum::VerticalReferenceFramePtr datum() const;
     PROJ_DLL const cs::VerticalCSNNPtr coordinateSystem() const;
     PROJ_DLL const std::vector<operation::TransformationNNPtr> &
-    geoidModel() const;
+    geoidModel() PROJ_CONST_DECL;
     PROJ_DLL const std::vector<operation::PointMotionOperationNNPtr> &
-    velocityModel() const;
+    velocityModel() PROJ_CONST_DECL;
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -429,7 +430,7 @@ class DerivedCRS : virtual public SingleCRS {
     PROJ_DLL ~DerivedCRS() override;
     //! @endcond
 
-    PROJ_DLL const SingleCRSNNPtr &baseCRS() const;
+    PROJ_DLL const SingleCRSNNPtr &baseCRS() PROJ_CONST_DECL;
     PROJ_DLL const operation::ConversionNNPtr derivingConversion() const;
 
     PROJ_DLL bool
@@ -439,7 +440,7 @@ class DerivedCRS : virtual public SingleCRS {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         const operation::ConversionNNPtr &
-        derivingConversionRef() const;
+        derivingConversionRef() PROJ_CONST_DECL;
     //! @endcond
 
   protected:
@@ -493,8 +494,8 @@ class ProjectedCRS final : public DerivedCRS, public io::IPROJStringExportable {
     PROJ_DLL ~ProjectedCRS() override;
     //! @endcond
 
-    PROJ_DLL const GeodeticCRSNNPtr &baseCRS() const;
-    PROJ_DLL const cs::CartesianCSNNPtr &coordinateSystem() const;
+    PROJ_DLL const GeodeticCRSNNPtr &baseCRS() PROJ_CONST_DECL;
+    PROJ_DLL const cs::CartesianCSNNPtr &coordinateSystem() PROJ_CONST_DECL;
 
     PROJ_DLL static ProjectedCRSNNPtr
     create(const util::PropertyMap &properties,
@@ -728,7 +729,8 @@ class CompoundCRS final : public CRS, public io::IPROJStringExportable {
     PROJ_DLL ~CompoundCRS() override;
     //! @endcond
 
-    PROJ_DLL const std::vector<CRSNNPtr> &componentReferenceSystems() const;
+    PROJ_DLL const std::vector<CRSNNPtr> &
+    componentReferenceSystems() PROJ_CONST_DECL;
 
     //! @cond Doxygen_Suppress
     void _exportToWKT(io::WKTFormatter *formatter)
@@ -794,11 +796,12 @@ class BoundCRS final : public CRS, public io::IPROJStringExportable {
     PROJ_DLL ~BoundCRS() override;
     //! @endcond
 
-    PROJ_DLL const CRSNNPtr &baseCRS() const;
+    PROJ_DLL const CRSNNPtr &baseCRS() PROJ_CONST_DECL;
     PROJ_DLL CRSNNPtr baseCRSWithCanonicalBoundCRS() const;
 
-    PROJ_DLL const CRSNNPtr &hubCRS() const;
-    PROJ_DLL const operation::TransformationNNPtr &transformation() const;
+    PROJ_DLL const CRSNNPtr &hubCRS() PROJ_CONST_DECL;
+    PROJ_DLL const operation::TransformationNNPtr &
+    transformation() PROJ_CONST_DECL;
 
     //! @cond Doxygen_Suppress
     void _exportToWKT(io::WKTFormatter *formatter)

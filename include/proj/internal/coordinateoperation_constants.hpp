@@ -36,12 +36,12 @@
 #include "coordinateoperation_internal.hpp"
 #include <string>
 
+//! @cond Doxygen_Suppress
+
 // ---------------------------------------------------------------------------
 
 NS_PROJ_START
 namespace operation {
-
-//! @cond Doxygen_Suppress
 
 static const char *EPSG_NAME_METHOD_TRANSVERSE_MERCATOR("Transverse Mercator");
 constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR = 9807;
@@ -547,21 +547,32 @@ static const char *EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_3D(
 
 // ---------------------------------------------------------------------------
 
-static const char *const lat_0[] = {"lat_0", nullptr};
-static const char *const lat_1[] = {"lat_1", nullptr};
-static const char *const lat_2[] = {"lat_2", nullptr};
-static const char *const lat_ts[] = {"lat_ts", nullptr};
-static const char *const lon_0[] = {"lon_0", nullptr};
-static const char *const lon_1[] = {"lon_1", nullptr};
-static const char *const lon_2[] = {"lon_2", nullptr};
-static const char *const lonc[] = {"lonc", nullptr};
-static const char *const alpha[] = {"alpha", nullptr};
-static const char *const gamma[] = {"gamma", nullptr};
-static const char *const k_0[] = {"k_0", nullptr};
-static const char *const k[] = {"k", nullptr};
-static const char *const x_0[] = {"x_0", nullptr};
-static const char *const y_0[] = {"y_0", nullptr};
-static const char *const h[] = {"h", nullptr};
+} // namespace operation
+NS_PROJ_END
+
+// ---------------------------------------------------------------------------
+
+// anonymous namespace
+namespace {
+
+using namespace ::NS_PROJ;
+using namespace ::NS_PROJ::operation;
+
+static const char *lat_0 = "lat_0";
+static const char *lat_1 = "lat_1";
+static const char *lat_2 = "lat_2";
+static const char *lat_ts = "lat_ts";
+static const char *lon_0 = "lon_0";
+static const char *lon_1 = "lon_1";
+static const char *lon_2 = "lon_2";
+static const char *lonc = "lonc";
+static const char *alpha = "alpha";
+static const char *gamma = "gamma";
+static const char *k_0 = "k_0";
+static const char *k = "k";
+static const char *x_0 = "x_0";
+static const char *y_0 = "y_0";
+static const char *h = "h";
 
 static const ParamMapping paramLatitudeNatOrigin = {
     EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
@@ -663,18 +674,6 @@ static const ParamMapping *const paramsAEA[] = {
     &paramFalseEastingOrigin,
     &paramFalseNorthingOrigin,
     nullptr};
-
-static const char *const lat_1_lat_0[] = {"lat_1", "lat_0", nullptr};
-
-static const ParamMapping paramLatLCC1SP = {
-    EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
-    EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, WKT1_LATITUDE_OF_ORIGIN,
-    common::UnitOfMeasure::Type::ANGULAR, lat_1_lat_0};
-
-static const ParamMapping *const paramsLCC1SP[] = {
-    &paramLatLCC1SP,    &paramLongitudeNatOrigin, &paramScaleFactor,
-    &paramFalseEasting, &paramFalseNorthing,      nullptr,
-};
 
 static const ParamMapping *const paramsLCC2SP[] = {
     &paramLatitudeFalseOrigin,
@@ -937,26 +936,21 @@ static const ParamMapping *const paramsWag3[] = {
     &paramLatTrueScaleWag3, &paramLongitudeNatOrigin, &paramFalseEasting,
     &paramFalseNorthing, nullptr};
 
-static const char *const plat_0[] = {"plat_0", nullptr};
-static const char *const plon_0[] = {"plon_0", nullptr};
-static const char *const phdg_0[] = {"phdg_0", nullptr};
-static const char *const h_0[] = {"h_0", nullptr};
-
 static const ParamMapping paramPegLat = {
     "Peg point latitude", 0, "peg_point_latitude",
-    common::UnitOfMeasure::Type::ANGULAR, plat_0};
+    common::UnitOfMeasure::Type::ANGULAR, "plat_0"};
 
 static const ParamMapping paramPegLon = {
     "Peg point longitude", 0, "peg_point_longitude",
-    common::UnitOfMeasure::Type::ANGULAR, plon_0};
+    common::UnitOfMeasure::Type::ANGULAR, "plon_0"};
 
 static const ParamMapping paramPegHeading = {
     "Peg point heading", 0, "peg_point_heading",
-    common::UnitOfMeasure::Type::ANGULAR, phdg_0};
+    common::UnitOfMeasure::Type::ANGULAR, "phdg_0"};
 
 static const ParamMapping paramPegHeight = {
     "Peg point height", 0, "peg_point_height",
-    common::UnitOfMeasure::Type::LINEAR, h_0};
+    common::UnitOfMeasure::Type::LINEAR, "h_0"};
 
 static const ParamMapping *const paramsSch[] = {
     &paramPegLat, &paramPegLon, &paramPegHeading, &paramPegHeight, nullptr};
@@ -980,323 +974,271 @@ static const ParamMapping *const paramsLoxim[] = {
     &paramLatLoxim, &paramLongitudeNatOrigin, &paramFalseEasting,
     &paramFalseNorthing, nullptr};
 
-static const char *const projNamesTM[] = {"tmerc", nullptr};
-static const char *const projNamesTMSO[] = {"tmerc", "axis=wsu", nullptr};
-static const char *const projNamesTPEQD[] = {"tpeqd", nullptr};
-static const char *const projNamesAEA[] = {"aea", nullptr};
-static const char *const projNamesLCC[] = {"lcc", nullptr};
-static const char *const projNamesAEQD[] = {"aeqd", nullptr};
-static const char *const projNamesGUAM[] = {"aeqd", "guam", nullptr};
-static const char *const projNamesBonne[] = {"bonne", nullptr};
-static const char *const projNamesCEA[] = {"cea", nullptr};
-static const char *const projNamesCass[] = {"cass", nullptr};
-static const char *const projNamesEQDC[] = {"eqdc", nullptr};
-static const char *const projNamesEck1[] = {"eck1", nullptr};
-static const char *const projNamesEck2[] = {"eck2", nullptr};
-static const char *const projNamesEck3[] = {"eck3", nullptr};
-static const char *const projNamesEck4[] = {"eck4", nullptr};
-static const char *const projNamesEck5[] = {"eck5", nullptr};
-static const char *const projNamesEck6[] = {"eck6", nullptr};
-static const char *const projNamesEqc[] = {"eqc", nullptr};
-static const char *const projNamesGall[] = {"gall", nullptr};
-static const char *const projNamesGoode[] = {"goode", nullptr};
-static const char *const projNamesIgh[] = {"igh", nullptr};
-static const char *const projNamesGeosX[] = {"geos", "sweep=x", nullptr};
-static const char *const projNamesGeosY[] = {"geos", nullptr};
-static const char *const projNames_gstmerc[] = {"gstmerc", nullptr};
-static const char *const projNames_gnom[] = {"gnom", nullptr};
-static const char *const projNames_hom_variant_A[] = {"omerc", "no_uoff",
-                                                      nullptr};
-static const char *const projNames_omerc[] = {"omerc", nullptr};
-static const char *const projNames_imw_p[] = {"imw_p", nullptr};
-static const char *const projNames_krovak[] = {"krovak", nullptr};
-static const char *const projNames_krovak_swu[] = {"krovak", "axis=swu",
-                                                   nullptr};
-static const char *const projNames_laea[] = {"laea", nullptr};
-static const char *const projNames_miller[] = {"mill", "R_A", nullptr};
-static const char *const projNames_merc[] = {"merc", nullptr};
-static const char *const projNames_webmerc[] = {"webmerc", nullptr};
-static const char *const projNames_moll[] = {"moll", nullptr};
-static const char *const projNames_nzmg[] = {"nzmg", nullptr};
-static const char *const projNames_sterea[] = {"sterea", nullptr};
-static const char *const projNames_ortho[] = {"ortho", nullptr};
-static const char *const projNames_poly[] = {"poly", nullptr};
-static const char *const projNames_stere[] = {"stere", nullptr};
-static const char *const projNames_robin[] = {"robin", nullptr};
-static const char *const projNames_sinu[] = {"sinu", nullptr};
-static const char *const projNames_vandg[] = {"vandg", "R_A", nullptr};
-static const char *const projNames_wag1[] = {"wag1", nullptr};
-static const char *const projNames_wag2[] = {"wag2", nullptr};
-static const char *const projNames_wag3[] = {"wag3", nullptr};
-static const char *const projNames_wag4[] = {"wag4", nullptr};
-static const char *const projNames_wag5[] = {"wag5", nullptr};
-static const char *const projNames_wag6[] = {"wag6", nullptr};
-static const char *const projNames_wag7[] = {"wag7", nullptr};
-static const char *const projNames_qsc[] = {"qsc", nullptr};
-static const char *const projNames_sch[] = {"sch", nullptr};
-static const char *const projNames_aitoff[] = {"aitoff", nullptr};
-static const char *const projNames_wink1[] = {"wink1", nullptr};
-static const char *const projNames_wink2[] = {"wink2", nullptr};
-static const char *const projNames_wintri[] = {"wintri", nullptr};
-static const char *const projNames_crast[] = {"crast", nullptr};
-static const char *const projNames_loxim[] = {"loxim", nullptr};
-static const char *const projNames_qua_aut[] = {"qua_aut", nullptr};
-static const char *const projNames_eqearth[] = {"eqearth", nullptr};
-
 static const MethodMapping methodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
-     "Transverse_Mercator", projNamesTM, paramsNatOriginScale},
+     "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScale},
 
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
      EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
-     "Transverse_Mercator_South_Orientated", projNamesTMSO,
+     "Transverse_Mercator_South_Orientated", "tmerc", "axis=wsu",
      paramsNatOriginScale},
 
     {PROJ_WKT2_NAME_METHOD_TWO_POINT_EQUIDISTANT, 0, "Two_Point_Equidistant",
-     projNamesTPEQD, paramsTPEQD},
+     "tpeqd", nullptr, paramsTPEQD},
 
     {EPSG_NAME_METHOD_TUNISIA_MAPPING_GRID,
-     EPSG_CODE_METHOD_TUNISIA_MAPPING_GRID, "Tunisia_Mapping_Grid",
+     EPSG_CODE_METHOD_TUNISIA_MAPPING_GRID, "Tunisia_Mapping_Grid", nullptr,
      nullptr, // no proj equivalent
      paramsTMG},
 
     {EPSG_NAME_METHOD_ALBERS_EQUAL_AREA, EPSG_CODE_METHOD_ALBERS_EQUAL_AREA,
-     "Albers_Conic_Equal_Area", projNamesAEA, paramsAEA},
+     "Albers_Conic_Equal_Area", "aea", nullptr, paramsAEA},
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
      EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
-     "Lambert_Conformal_Conic_1SP", projNamesLCC, paramsLCC1SP},
+     "Lambert_Conformal_Conic_1SP", "lcc", nullptr,
+     []() {
+         static const ParamMapping paramLatLCC1SP = {
+             EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+             EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+             WKT1_LATITUDE_OF_ORIGIN, common::UnitOfMeasure::Type::ANGULAR,
+             lat_1};
+
+         static const ParamMapping *const x[] = {
+             &paramLatLCC1SP,    &paramLongitudeNatOrigin, &paramScaleFactor,
+             &paramFalseEasting, &paramFalseNorthing,      nullptr,
+         };
+         return x;
+     }()},
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP,
      EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP,
-     "Lambert_Conformal_Conic_2SP", projNamesLCC, paramsLCC2SP},
+     "Lambert_Conformal_Conic_2SP", "lcc", nullptr, paramsLCC2SP},
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN,
      EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN,
      nullptr, // no mapping to WKT1_GDAL
-     projNamesLCC, paramsLCC2SPMichigan},
+     "lcc", nullptr, paramsLCC2SPMichigan},
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM,
      EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM,
-     "Lambert_Conformal_Conic_2SP_Belgium",
-     projNamesLCC, // FIXME: this is what is done in GDAL, but the formula of
-                   // LCC 2SP
+     "Lambert_Conformal_Conic_2SP_Belgium", "lcc",
+     nullptr, // FIXME: this is what is done in GDAL, but the formula of
+              // LCC 2SP
      // Belgium in the EPSG 7.2 guidance is difference from the regular
      // LCC 2SP
      paramsLCC2SP},
 
     {EPSG_NAME_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT,
      EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT, "Azimuthal_Equidistant",
-     projNamesAEQD, paramsAEQD},
+     "aeqd", nullptr, paramsAEQD},
 
     {EPSG_NAME_METHOD_GUAM_PROJECTION, EPSG_CODE_METHOD_GUAM_PROJECTION,
      nullptr, // no mapping to GDAL WKT1
-     projNamesGUAM, paramsNatOrigin},
+     "aeqd", "guam", paramsNatOrigin},
 
-    {EPSG_NAME_METHOD_BONNE, EPSG_CODE_METHOD_BONNE, "Bonne", projNamesBonne,
+    {EPSG_NAME_METHOD_BONNE, EPSG_CODE_METHOD_BONNE, "Bonne", "bonne", nullptr,
      paramsBonne},
 
     {EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
      EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
-     "Cylindrical_Equal_Area", projNamesCEA, paramsCEA},
+     "Cylindrical_Equal_Area", "cea", nullptr, paramsCEA},
 
     {EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA,
      EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA, "Cylindrical_Equal_Area",
-     projNamesCEA, paramsCEA},
+     "cea", nullptr, paramsCEA},
 
     {EPSG_NAME_METHOD_CASSINI_SOLDNER, EPSG_CODE_METHOD_CASSINI_SOLDNER,
-     "Cassini_Soldner", projNamesCass, paramsNatOrigin},
+     "Cassini_Soldner", "cass", nullptr, paramsNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC, 0, "Equidistant_Conic",
-     projNamesEQDC, paramsEQDC},
+    {PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC, 0, "Equidistant_Conic", "eqdc",
+     nullptr, paramsEQDC},
 
-    {PROJ_WKT2_NAME_METHOD_ECKERT_I, 0, "Eckert_I", projNamesEck1,
+    {PROJ_WKT2_NAME_METHOD_ECKERT_I, 0, "Eckert_I", "eck1", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_ECKERT_II, 0, "Eckert_II", projNamesEck2,
+    {PROJ_WKT2_NAME_METHOD_ECKERT_II, 0, "Eckert_II", "eck2", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_ECKERT_III, 0, "Eckert_III", projNamesEck3,
+    {PROJ_WKT2_NAME_METHOD_ECKERT_III, 0, "Eckert_III", "eck3", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_ECKERT_IV, 0, "Eckert_IV", projNamesEck4,
+    {PROJ_WKT2_NAME_METHOD_ECKERT_IV, 0, "Eckert_IV", "eck4", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_ECKERT_V, 0, "Eckert_V", projNamesEck5,
+    {PROJ_WKT2_NAME_METHOD_ECKERT_V, 0, "Eckert_V", "eck5", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_ECKERT_VI, 0, "Eckert_VI", projNamesEck6,
+    {PROJ_WKT2_NAME_METHOD_ECKERT_VI, 0, "Eckert_VI", "eck6", nullptr,
      paramsLonNatOrigin},
 
     {EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL,
-     EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL, "Equirectangular", projNamesEqc,
-     paramsEqc},
+     EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL, "Equirectangular", "eqc",
+     nullptr, paramsEqc},
 
     {EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL,
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL, "Equirectangular",
-     projNamesEqc, paramsEqc},
+     "eqc", nullptr, paramsEqc},
 
-    {PROJ_WKT2_NAME_METHOD_GALL, 0, "Gall_Stereographic", projNamesGall,
+    {PROJ_WKT2_NAME_METHOD_GALL, 0, "Gall_Stereographic", "gall", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE, 0, "Goode_Homolosine",
-     projNamesGoode, paramsLonNatOrigin},
+    {PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE, 0, "Goode_Homolosine", "goode",
+     nullptr, paramsLonNatOrigin},
 
     {PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE, 0,
-     "Interrupted_Goode_Homolosine", projNamesIgh, paramsLonNatOrigin},
+     "Interrupted_Goode_Homolosine", "igh", nullptr, paramsLonNatOrigin},
 
     // No WKT1 representation fr sweep=x
-    {PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X, 0, nullptr,
-     projNamesGeosX, paramsGeos},
+    {PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X, 0, nullptr, "geos",
+     "sweep=x", paramsGeos},
 
     {PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y, 0,
-     "Geostationary_Satellite", projNamesGeosY, paramsGeos},
+     "Geostationary_Satellite", "geos", nullptr, paramsGeos},
 
     {PROJ_WKT2_NAME_METHOD_GAUSS_SCHREIBER_TRANSVERSE_MERCATOR, 0,
-     "Gauss_Schreiber_Transverse_Mercator", projNames_gstmerc,
+     "Gauss_Schreiber_Transverse_Mercator", "gstmerc", nullptr,
      paramsNatOriginScale},
 
-    {PROJ_WKT2_NAME_METHOD_GNOMONIC, 0, "Gnomonic", projNames_gnom,
+    {PROJ_WKT2_NAME_METHOD_GNOMONIC, 0, "Gnomonic", "gnom", nullptr,
      paramsNatOrigin},
 
     {EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A,
      EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A,
-     "Hotine_Oblique_Mercator", projNames_hom_variant_A, paramsHomVariantA},
+     "Hotine_Oblique_Mercator", "omerc", "no_uoff", paramsHomVariantA},
 
     {EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B,
      EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B,
-     "Hotine_Oblique_Mercator_Azimuth_Center", projNames_omerc,
+     "Hotine_Oblique_Mercator_Azimuth_Center", "omerc", nullptr,
      paramsHomVariantB},
 
     {PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN, 0,
-     "Hotine_Oblique_Mercator_Two_Point_Natural_Origin", projNames_omerc,
+     "Hotine_Oblique_Mercator_Two_Point_Natural_Origin", "omerc", nullptr,
      paramsHomTwoPoint},
 
     {PROJ_WKT2_NAME_INTERNATIONAL_MAP_WORLD_POLYCONIC, 0,
-     "International_Map_of_the_World_Polyconic", projNames_imw_p, paramsIMWP},
+     "International_Map_of_the_World_Polyconic", "imw_p", nullptr, paramsIMWP},
 
     {EPSG_NAME_METHOD_KROVAK_NORTH_ORIENTED,
-     EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED, "Krovak", projNames_krovak,
+     EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED, "Krovak", "krovak", nullptr,
      krovakParameters},
 
-    {EPSG_NAME_METHOD_KROVAK, EPSG_CODE_METHOD_KROVAK, nullptr,
-     projNames_krovak_swu, krovakParameters},
+    {EPSG_NAME_METHOD_KROVAK, EPSG_CODE_METHOD_KROVAK, nullptr, "krovak",
+     "axis=swu", krovakParameters},
 
     {EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
      EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
-     "Lambert_Azimuthal_Equal_Area", projNames_laea, paramsLaea},
+     "Lambert_Azimuthal_Equal_Area", "laea", nullptr, paramsLaea},
 
-    {PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL, 0, "Miller_Cylindrical",
-     projNames_miller, paramsMiller},
+    {PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL, 0, "Miller_Cylindrical", "mill",
+     "R_A", paramsMiller},
 
     {EPSG_NAME_METHOD_MERCATOR_VARIANT_A, EPSG_CODE_METHOD_MERCATOR_VARIANT_A,
-     "Mercator_1SP", projNames_merc, paramsMerc1SP},
+     "Mercator_1SP", "merc", nullptr, paramsMerc1SP},
 
     {EPSG_NAME_METHOD_MERCATOR_VARIANT_B, EPSG_CODE_METHOD_MERCATOR_VARIANT_B,
-     "Mercator_2SP", projNames_merc, paramsMerc2SP},
+     "Mercator_2SP", "merc", nullptr, paramsMerc2SP},
 
     {EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR,
      EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR,
      "Popular_Visualisation_Pseudo_Mercator", // particular case actually
                                               // handled manually
-     projNames_webmerc, paramsNatOrigin},
+     "webmerc", nullptr, paramsNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_MOLLWEIDE, 0, "Mollweide", projNames_moll,
+    {PROJ_WKT2_NAME_METHOD_MOLLWEIDE, 0, "Mollweide", "moll", nullptr,
      paramsLonNatOrigin},
 
     {EPSG_NAME_METHOD_NZMG, EPSG_CODE_METHOD_NZMG, "New_Zealand_Map_Grid",
-     projNames_nzmg, paramsNatOrigin},
+     "nzmg", nullptr, paramsNatOrigin},
 
     {
         EPSG_NAME_METHOD_OBLIQUE_STEREOGRAPHIC,
         EPSG_CODE_METHOD_OBLIQUE_STEREOGRAPHIC, "Oblique_Stereographic",
-        projNames_sterea, paramsObliqueStereo,
+        "sterea", nullptr, paramsObliqueStereo,
     },
 
     {EPSG_NAME_METHOD_ORTHOGRAPHIC, EPSG_CODE_METHOD_ORTHOGRAPHIC,
-     "Orthographic", projNames_ortho, paramsNatOrigin},
+     "Orthographic", "ortho", nullptr, paramsNatOrigin},
 
     {EPSG_NAME_METHOD_AMERICAN_POLYCONIC, EPSG_CODE_METHOD_AMERICAN_POLYCONIC,
-     "Polyconic", projNames_poly, paramsNatOrigin},
+     "Polyconic", "poly", nullptr, paramsNatOrigin},
 
     {EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A,
      EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A, "Polar_Stereographic",
-     projNames_stere, paramsObliqueStereo},
+     "stere", nullptr, paramsObliqueStereo},
 
     {EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B,
      EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B, "Polar_Stereographic",
-     projNames_stere, paramsPolarStereo},
+     "stere", nullptr, paramsPolarStereo},
 
-    {PROJ_WKT2_NAME_METHOD_ROBINSON, 0, "Robinson", projNames_robin,
+    {PROJ_WKT2_NAME_METHOD_ROBINSON, 0, "Robinson", "robin", nullptr,
      paramsLonNatOriginLongitudeCentre},
 
-    {PROJ_WKT2_NAME_METHOD_SINUSOIDAL, 0, "Sinusoidal", projNames_sinu,
+    {PROJ_WKT2_NAME_METHOD_SINUSOIDAL, 0, "Sinusoidal", "sinu", nullptr,
      paramsLonNatOriginLongitudeCentre},
 
-    {PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC, 0, "Stereographic", projNames_stere,
+    {PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC, 0, "Stereographic", "stere", nullptr,
      paramsObliqueStereo},
 
-    {PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN, 0, "VanDerGrinten", projNames_vandg,
+    {PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN, 0, "VanDerGrinten", "vandg", "R_A",
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_WAGNER_I, 0, "Wagner_I", projNames_wag1,
+    {PROJ_WKT2_NAME_METHOD_WAGNER_I, 0, "Wagner_I", "wag1", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_WAGNER_II, 0, "Wagner_II", projNames_wag2,
+    {PROJ_WKT2_NAME_METHOD_WAGNER_II, 0, "Wagner_II", "wag2", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_WAGNER_III, 0, "Wagner_III", projNames_wag3,
+    {PROJ_WKT2_NAME_METHOD_WAGNER_III, 0, "Wagner_III", "wag3", nullptr,
      paramsWag3},
 
-    {PROJ_WKT2_NAME_METHOD_WAGNER_IV, 0, "Wagner_IV", projNames_wag4,
+    {PROJ_WKT2_NAME_METHOD_WAGNER_IV, 0, "Wagner_IV", "wag4", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_WAGNER_V, 0, "Wagner_V", projNames_wag5,
+    {PROJ_WKT2_NAME_METHOD_WAGNER_V, 0, "Wagner_V", "wag5", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_WAGNER_VI, 0, "Wagner_VI", projNames_wag6,
+    {PROJ_WKT2_NAME_METHOD_WAGNER_VI, 0, "Wagner_VI", "wag6", nullptr,
      paramsLonNatOrigin},
 
-    {PROJ_WKT2_NAME_METHOD_WAGNER_VII, 0, "Wagner_VII", projNames_wag7,
+    {PROJ_WKT2_NAME_METHOD_WAGNER_VII, 0, "Wagner_VII", "wag7", nullptr,
      paramsLonNatOrigin},
 
     {PROJ_WKT2_NAME_METHOD_QUADRILATERALIZED_SPHERICAL_CUBE, 0,
-     "Quadrilateralized_Spherical_Cube", projNames_qsc, paramsNatOrigin},
+     "Quadrilateralized_Spherical_Cube", "qsc", nullptr, paramsNatOrigin},
 
     {PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT, 0,
-     "Spherical_Cross_Track_Height", projNames_sch, paramsSch},
+     "Spherical_Cross_Track_Height", "sch", nullptr, paramsSch},
 
     // The following methods have just the WKT <--> PROJ string mapping, but
     // no setter. Similarly to GDAL
 
-    {"Aitoff", 0, "Aitoff", projNames_aitoff, paramsNatOrigin},
+    {"Aitoff", 0, "Aitoff", "aitoff", nullptr, paramsNatOrigin},
 
-    {"Winkel I", 0, "Winkel_I", projNames_wink1, paramsWink1},
+    {"Winkel I", 0, "Winkel_I", "wink1", nullptr, paramsWink1},
 
-    {"Winkel II", 0, "Winkel_II", projNames_wink2, paramsWink2},
+    {"Winkel II", 0, "Winkel_II", "wink2", nullptr, paramsWink2},
 
-    {"Winkel Tripel", 0, "Winkel_Tripel", projNames_wintri, paramsWink2},
+    {"Winkel Tripel", 0, "Winkel_Tripel", "wintri", nullptr, paramsWink2},
 
-    {"Craster Parabolic", 0, "Craster_Parabolic", projNames_crast,
+    {"Craster Parabolic", 0, "Craster_Parabolic", "crast", nullptr,
      paramsNatOrigin},
 
-    {"Loximuthal", 0, "Loximuthal", projNames_loxim, paramsLoxim},
+    {"Loximuthal", 0, "Loximuthal", "loxim", nullptr, paramsLoxim},
 
-    {"Quartic Authalic", 0, "Quartic_Authalic", projNames_qua_aut,
+    {"Quartic Authalic", 0, "Quartic_Authalic", "qua_aut", nullptr,
      paramsNatOrigin},
 
     {EPSG_NAME_METHOD_EQUAL_EARTH, EPSG_CODE_METHOD_EQUAL_EARTH, nullptr,
-     projNames_eqearth, paramsLonNatOrigin},
+     "eqearth", nullptr, paramsLonNatOrigin},
 
 };
+
+// end of anonymous namespace
+}
 
 // ---------------------------------------------------------------------------
 
 //! @endcond
-
-// ---------------------------------------------------------------------------
-
-} // namespace operation
-NS_PROJ_END
 
 #endif // COORDINATEOPERATION_CONSTANTS_HH_INCLUDED

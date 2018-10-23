@@ -249,7 +249,9 @@ PrimeMeridian::~PrimeMeridian() = default;
  *
  * @return the longitude of the prime meridian.
  */
-const common::Angle &PrimeMeridian::longitude() const { return d->longitude_; }
+const common::Angle &PrimeMeridian::longitude() PROJ_CONST_DEFN {
+    return d->longitude_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -445,7 +447,7 @@ Ellipsoid::Ellipsoid(const Ellipsoid &other)
  *
  * @return the semi-major axis.
  */
-const common::Length &Ellipsoid::semiMajorAxis() const {
+const common::Length &Ellipsoid::semiMajorAxis() PROJ_CONST_DEFN {
     return d->semiMajorAxis_;
 }
 
@@ -461,7 +463,8 @@ const common::Length &Ellipsoid::semiMajorAxis() const {
  *
  * @return the inverse flattening value of the ellipsoid, or empty.
  */
-const util::optional<common::Scale> &Ellipsoid::inverseFlattening() const {
+const util::optional<common::Scale> &
+Ellipsoid::inverseFlattening() PROJ_CONST_DEFN {
     return d->inverseFlattening_;
 }
 
@@ -477,7 +480,8 @@ const util::optional<common::Scale> &Ellipsoid::inverseFlattening() const {
  *
  * @return the semi-minor axis of the ellipsoid, or empty.
  */
-const util::optional<common::Length> &Ellipsoid::semiMinorAxis() const {
+const util::optional<common::Length> &
+Ellipsoid::semiMinorAxis() PROJ_CONST_DEFN {
     return d->semiMinorAxis_;
 }
 
@@ -492,7 +496,7 @@ const util::optional<common::Length> &Ellipsoid::semiMinorAxis() const {
  *
  * @return true if the ellipsoid is spherical.
  */
-bool Ellipsoid::isSphere() const {
+bool Ellipsoid::isSphere() PROJ_CONST_DEFN {
     if (inverseFlattening().has_value()) {
         return inverseFlattening()->value() == 0;
     }
@@ -512,7 +516,8 @@ bool Ellipsoid::isSphere() const {
  *
  * @return the semi-median axis of the ellipsoid, or empty.
  */
-const util::optional<common::Length> &Ellipsoid::semiMedianAxis() const {
+const util::optional<common::Length> &
+Ellipsoid::semiMedianAxis() PROJ_CONST_DEFN {
     return d->semiMedianAxis_;
 }
 
@@ -567,7 +572,7 @@ common::Length Ellipsoid::computeSemiMinorAxis() const {
 /** \brief Return the name of the celestial body on which the ellipsoid refers
  * to.
  */
-const std::string &Ellipsoid::celestialBody() const {
+const std::string &Ellipsoid::celestialBody() PROJ_CONST_DEFN {
     return d->celestialBody_;
 }
 
@@ -876,7 +881,8 @@ GeodeticReferenceFrame::~GeodeticReferenceFrame() = default;
  *
  * @return the PrimeMeridian.
  */
-const PrimeMeridianNNPtr &GeodeticReferenceFrame::primeMeridian() const {
+const PrimeMeridianNNPtr &
+GeodeticReferenceFrame::primeMeridian() PROJ_CONST_DEFN {
     return d->primeMeridian_;
 }
 
@@ -892,7 +898,7 @@ const PrimeMeridianNNPtr &GeodeticReferenceFrame::primeMeridian() const {
  *
  * @return the Ellipsoid.
  */
-const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() const {
+const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() PROJ_CONST_DEFN {
     return d->ellipsoid_;
 }
 // ---------------------------------------------------------------------------
@@ -1011,6 +1017,9 @@ bool GeodeticReferenceFrame::isEquivalentTo(
 struct DynamicGeodeticReferenceFrame::Private {
     common::Measure frameReferenceEpoch{};
     util::optional<std::string> deformationModelName{};
+
+    explicit Private(const common::Measure &frameReferenceEpochIn)
+        : frameReferenceEpoch(frameReferenceEpochIn) {}
 };
 //! @endcond
 
@@ -1022,8 +1031,7 @@ DynamicGeodeticReferenceFrame::DynamicGeodeticReferenceFrame(
     const common::Measure &frameReferenceEpochIn,
     const util::optional<std::string> &deformationModelNameIn)
     : GeodeticReferenceFrame(ellipsoidIn, primeMeridianIn),
-      d(internal::make_unique<Private>()) {
-    d->frameReferenceEpoch = frameReferenceEpochIn;
+      d(internal::make_unique<Private>(frameReferenceEpochIn)) {
     d->deformationModelName = deformationModelNameIn;
 }
 
@@ -1443,6 +1451,9 @@ bool VerticalReferenceFrame::isEquivalentTo(
 struct DynamicVerticalReferenceFrame::Private {
     common::Measure frameReferenceEpoch{};
     util::optional<std::string> deformationModelName{};
+
+    explicit Private(const common::Measure &frameReferenceEpochIn)
+        : frameReferenceEpoch(frameReferenceEpochIn) {}
 };
 //! @endcond
 
@@ -1453,8 +1464,7 @@ DynamicVerticalReferenceFrame::DynamicVerticalReferenceFrame(
     const common::Measure &frameReferenceEpochIn,
     const util::optional<std::string> &deformationModelNameIn)
     : VerticalReferenceFrame(realizationMethodIn),
-      d(internal::make_unique<Private>()) {
-    d->frameReferenceEpoch = frameReferenceEpochIn;
+      d(internal::make_unique<Private>(frameReferenceEpochIn)) {
     d->deformationModelName = deformationModelNameIn;
 }
 

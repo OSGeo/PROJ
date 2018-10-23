@@ -120,15 +120,24 @@ namespace proj {}
 
 #if defined(__GNU_C__)
 #define PROJ_NO_INLINE __attribute__((noinline))
-#else
-#define PROJ_NO_INLINE
-#endif
-
-#if defined(__GNU_C__)
 #define PROJ_NO_RETURN __attribute__((noreturn))
+// Applies to a function that has no side effect, and its return will not
+// change if the arguments are the same. But is return may change
+// if the object state changes. So this is for getters of mutable objects.
+#define PROJ_PURE_DECL const noexcept __attribute__((pure))
+// Applies to a function that has no side effect, and its return will not
+// change if the arguments are the same, and their pointed value must not
+// be modified. So this is for getters of immutable objets. This is stronger
+// than PROJ_PURE_DECL.
+#define PROJ_CONST_DECL const noexcept __attribute__((const))
 #else
 #define PROJ_NO_RETURN
+#define PROJ_NO_INLINE
+#define PROJ_PURE_DECL const noexcept
+#define PROJ_CONST_DECL const noexcept
 #endif
+#define PROJ_PURE_DEFN const noexcept
+#define PROJ_CONST_DEFN const noexcept
 
 //! @endcond
 
