@@ -69,34 +69,34 @@ std::string replaceAll(const std::string &str, const std::string &before,
 
 // ---------------------------------------------------------------------------
 
-/**
- * Case-insensitive equality test
- */
-bool ci_equal(const std::string &a, const std::string &b) {
-    const auto size = a.size();
-    if (size != b.size()) {
-        return false;
-    }
+inline static bool EQUALN(const char *a, const char *b, size_t size) {
 #ifdef _MSC_VER
-    return _strnicmp(a.c_str(), b.c_str(), size) == 0;
+    return _strnicmp(a, b, size) == 0;
 #else
-    return strncasecmp(a.c_str(), b.c_str(), size) == 0;
+    return strncasecmp(a, b, size) == 0;
 #endif
 }
 
 /**
  * Case-insensitive equality test
  */
-bool ci_equal(const std::string &a, const char *b) {
+bool ci_equal(const std::string &a, const std::string &b) noexcept {
+    const auto size = a.size();
+    if (size != b.size()) {
+        return false;
+    }
+    return EQUALN(a.c_str(), b.c_str(), size);
+}
+
+/**
+ * Case-insensitive equality test
+ */
+bool ci_equal(const std::string &a, const char *b) noexcept {
     const auto size = a.size();
     if (size != strlen(b)) {
         return false;
     }
-#ifdef _MSC_VER
-    return _strnicmp(a.c_str(), b, size) == 0;
-#else
-    return strncasecmp(a.c_str(), b, size) == 0;
-#endif
+    return EQUALN(a.c_str(), b, size);
 }
 
 // ---------------------------------------------------------------------------
@@ -141,59 +141,66 @@ std::string stripQuotes(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
-size_t ci_find(const std::string &str, const char *needle) {
-    auto lowerStr = tolower(str);
-    auto lowerNeedle = tolower(needle);
-    return lowerStr.find(lowerNeedle);
+size_t ci_find(const std::string &str, const char *needle) noexcept {
+    const size_t needleSize = strlen(needle);
+    for (size_t i = 0; i + needleSize <= str.size(); i++) {
+        if (EQUALN(str.c_str() + i, needle, needleSize)) {
+            return i;
+        }
+    }
+    return std::string::npos;
 }
 
 // ---------------------------------------------------------------------------
 
 size_t ci_find(const std::string &str, const std::string &needle,
-               size_t startPos) {
-    if (startPos >= str.size()) {
-        return std::string::npos;
+               size_t startPos) noexcept {
+    const size_t needleSize = needle.size();
+    for (size_t i = startPos; i + needleSize <= str.size(); i++) {
+        if (EQUALN(str.c_str() + i, needle.c_str(), needleSize)) {
+            return i;
+        }
     }
-    auto lowerStr = tolower(str.substr(startPos));
-    auto lowerNeedle = tolower(needle);
-    return lowerStr.find(lowerNeedle);
+    return std::string::npos;
 }
 
 // ---------------------------------------------------------------------------
 
-bool starts_with(const std::string &str, const std::string &prefix) {
+bool starts_with(const std::string &str, const std::string &prefix) noexcept {
     if (str.size() < prefix.size()) {
         return false;
     }
-    return str.substr(0, prefix.size()) == prefix;
+    return std::memcmp(str.c_str(), prefix.c_str(), prefix.size()) == 0;
 }
 
 // ---------------------------------------------------------------------------
 
-bool starts_with(const std::string &str, const char *prefix) {
+bool starts_with(const std::string &str, const char *prefix) noexcept {
     const size_t prefixSize = std::strlen(prefix);
     if (str.size() < prefixSize) {
         return false;
     }
-    return std::strncmp(str.c_str(), prefix, prefixSize) == 0;
+    return std::memcmp(str.c_str(), prefix, prefixSize) == 0;
 }
 
 // ---------------------------------------------------------------------------
 
-bool ci_starts_with(const std::string &str, const std::string &prefix) {
+bool ci_starts_with(const std::string &str,
+                    const std::string &prefix) noexcept {
     if (str.size() < prefix.size()) {
         return false;
     }
-    return ci_equal(str.substr(0, prefix.size()), prefix);
+    return EQUALN(str.c_str(), prefix.c_str(), prefix.size());
 }
 
 // ---------------------------------------------------------------------------
 
-bool ends_with(const std::string &str, const std::string &suffix) {
+bool ends_with(const std::string &str, const std::string &suffix) noexcept {
     if (str.size() < suffix.size()) {
         return false;
     }
-    return str.substr(str.size() - suffix.size()) == suffix;
+    return std::memcmp(str.c_str() + str.size() - suffix.size(), suffix.c_str(),
+                       suffix.size()) == 0;
 }
 
 // ---------------------------------------------------------------------------

@@ -429,6 +429,9 @@ class PropertyMap {
 
     // throw(InvalidValueTypeException)
     bool getStringValue(const std::string &key, std::string &outVal) const;
+
+    static PropertyMap createAndSetName(const char *name);
+    static PropertyMap createAndSetName(const std::string &name);
     //! @endcond
 
   private:

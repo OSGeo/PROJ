@@ -1140,6 +1140,8 @@ struct WKTParser::Private {
 
     BoundCRSNNPtr buildBoundCRS(const WKTNodeNNPtr &node);
 
+    TemporalCSNNPtr buildTemporalCS(const WKTNodeNNPtr &parentNode);
+
     TemporalCRSNNPtr buildTemporalCRS(const WKTNodeNNPtr &node);
 
     DerivedTemporalCRSNNPtr buildDerivedTemporalCRS(const WKTNodeNNPtr &node);
@@ -1151,6 +1153,8 @@ struct WKTParser::Private {
 
     DerivedEngineeringCRSNNPtr
     buildDerivedEngineeringCRS(const WKTNodeNNPtr &node);
+
+    ParametricCSNNPtr buildParametricCS(const WKTNodeNNPtr &parentNode);
 
     ParametricCRSNNPtr buildParametricCRS(const WKTNodeNNPtr &node);
 
@@ -1888,6 +1892,19 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
 
 static const PropertyMap emptyPropertyMap{};
 
+static void ThrowParsingException(const std::string &msg) PROJ_NO_RETURN {
+    throw ParsingException(msg);
+}
+
+static void ThrowParsingExceptionMissingUNIT() PROJ_NO_RETURN {
+    throw ParsingException("buildCS: missing UNIT");
+}
+
+static ParsingException
+buildParsingExceptionInvalidAxisCount(const std::string &csType) {
+    return ParsingException("buildCS: invalid CS axis count for " + csType);
+}
+
 CoordinateSystemNNPtr
 WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                             const WKTNodeNNPtr &parentNode,
@@ -1906,40 +1923,40 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         try {
             axisCount = std::stoi(children[1]->GP()->value());
         } catch (const std::exception &) {
-            throw ParsingException(
+            ThrowParsingException(
                 std::string("buildCS: invalid CS axis count: ") +
                 children[1]->GP()->value());
         }
     } else {
-        if (ci_equal(parentNode->GP()->value(), WKTConstants::GEOCCS)) {
-            csType = "Cartesian";
+        const char *csTypeCStr = "";
+        const auto &parentNodeName = parentNode->GP()->value();
+        if (ci_equal(parentNodeName, WKTConstants::GEOCCS)) {
+            csTypeCStr = "Cartesian";
             isGeocentric = true;
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    throw ParsingException("buildCS: missing UNIT");
+                    ThrowParsingExceptionMissingUNIT();
                 }
                 return CartesianCS::createGeocentric(unit);
             }
-        } else if (ci_equal(parentNode->GP()->value(), WKTConstants::GEOGCS)) {
-            csType = "Ellipsoidal";
+        } else if (ci_equal(parentNodeName, WKTConstants::GEOGCS)) {
+            csTypeCStr = "Ellipsoidal";
             if (axisCount == 0) {
                 // Missing axis with GEOGCS ? Presumably Long/Lat order
                 // implied
                 auto unit = buildUnitInSubNode(parentNode,
                                                UnitOfMeasure::Type::ANGULAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    throw ParsingException("buildCS: missing UNIT");
+                    ThrowParsingExceptionMissingUNIT();
                 }
                 // WKT1 --> long/lat
                 return EllipsoidalCS::createLongitudeLatitude(unit);
             }
-        } else if (ci_equal(parentNode->GP()->value(),
-                            WKTConstants::BASEGEODCRS) ||
-                   ci_equal(parentNode->GP()->value(),
-                            WKTConstants::BASEGEOGCRS)) {
-            csType = "Ellipsoidal";
+        } else if (ci_equal(parentNodeName, WKTConstants::BASEGEODCRS) ||
+                   ci_equal(parentNodeName, WKTConstants::BASEGEOGCRS)) {
+            csTypeCStr = "Ellipsoidal";
             if (axisCount == 0) {
                 auto unit = buildUnitInSubNode(parentNode,
                                                UnitOfMeasure::Type::ANGULAR);
@@ -1949,44 +1966,38 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 // WKT2 --> presumably lat/long
                 return EllipsoidalCS::createLatitudeLongitude(unit);
             }
-        } else if (ci_equal(parentNode->GP()->value(), WKTConstants::PROJCS) ||
-                   ci_equal(parentNode->GP()->value(),
-                            WKTConstants::BASEPROJCRS) ||
-                   ci_equal(parentNode->GP()->value(),
-                            WKTConstants::BASEENGCRS)) {
-            csType = "Cartesian";
+        } else if (ci_equal(parentNodeName, WKTConstants::PROJCS) ||
+                   ci_equal(parentNodeName, WKTConstants::BASEPROJCRS) ||
+                   ci_equal(parentNodeName, WKTConstants::BASEENGCRS)) {
+            csTypeCStr = "Cartesian";
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    if (ci_equal(parentNode->GP()->value(),
-                                 WKTConstants::PROJCS)) {
-                        throw ParsingException("buildCS: missing UNIT");
+                    if (ci_equal(parentNodeName, WKTConstants::PROJCS)) {
+                        ThrowParsingExceptionMissingUNIT();
                     } else {
                         unit = UnitOfMeasure::METRE;
                     }
                 }
                 return CartesianCS::createEastingNorthing(unit);
             }
-        } else if (ci_equal(parentNode->GP()->value(), WKTConstants::VERT_CS) ||
-                   ci_equal(parentNode->GP()->value(),
-                            WKTConstants::BASEVERTCRS)) {
-            csType = "vertical";
+        } else if (ci_equal(parentNodeName, WKTConstants::VERT_CS) ||
+                   ci_equal(parentNodeName, WKTConstants::BASEVERTCRS)) {
+            csTypeCStr = "vertical";
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    if (ci_equal(parentNode->GP()->value(),
-                                 WKTConstants::VERT_CS)) {
-                        throw ParsingException("buildCS: missing UNIT");
+                    if (ci_equal(parentNodeName, WKTConstants::VERT_CS)) {
+                        ThrowParsingExceptionMissingUNIT();
                     } else {
                         unit = UnitOfMeasure::METRE;
                     }
                 }
                 return VerticalCS::createGravityRelatedHeight(unit);
             }
-        } else if (ci_equal(parentNode->GP()->value(),
-                            WKTConstants::LOCAL_CS)) {
+        } else if (ci_equal(parentNodeName, WKTConstants::LOCAL_CS)) {
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
@@ -1995,16 +2006,15 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 }
                 return CartesianCS::createEastingNorthing(unit);
             } else if (axisCount == 1) {
-                csType = "vertical";
+                csTypeCStr = "vertical";
             } else if (axisCount == 2) {
-                csType = "Cartesian";
+                csTypeCStr = "Cartesian";
             } else {
                 throw ParsingException(
                     "buildCS: unexpected AXIS count for LOCAL_CS");
             }
-        } else if (ci_equal(parentNode->GP()->value(),
-                            WKTConstants::BASEPARAMCRS)) {
-            csType = "parametric";
+        } else if (ci_equal(parentNodeName, WKTConstants::BASEPARAMCRS)) {
+            csTypeCStr = "parametric";
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
@@ -2019,9 +2029,8 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                                           "unknown parametric"),
                         std::string(), AxisDirection::UNSPECIFIED, unit));
             }
-        } else if (ci_equal(parentNode->GP()->value(),
-                            WKTConstants::BASETIMECRS)) {
-            csType = "temporal";
+        } else if (ci_equal(parentNodeName, WKTConstants::BASETIMECRS)) {
+            csTypeCStr = "temporal";
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::TIME);
@@ -2040,12 +2049,13 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
             // Shouldn't happen normally
             throw ParsingException(
                 std::string("buildCS: unexpected parent node: ") +
-                parentNode->GP()->value());
+                parentNodeName);
         }
+        csType = csTypeCStr;
     }
 
     if (axisCount != 1 && axisCount != 2 && axisCount != 3) {
-        throw ParsingException(std::string("buildCS: invalid CS axis count"));
+        throw buildParsingExceptionInvalidAxisCount(csType);
     }
     if (numberOfAxis != axisCount) {
         throw ParsingException("buildCS: declared number of axis by CS node "
@@ -2085,9 +2095,6 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         } else if (axisCount == 3) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1],
                                          axisList[2]);
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else if (ci_equal(csType, "Cartesian")) {
         if (axisCount == 2) {
@@ -2095,33 +2102,21 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         } else if (axisCount == 3) {
             return CartesianCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else if (ci_equal(csType, "vertical")) {
         if (axisCount == 1) {
             return VerticalCS::create(csMap, axisList[0]);
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else if (ci_equal(csType, "spherical")) {
         if (axisCount == 3) {
             return SphericalCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else if (ci_equal(csType, "ordinal")) { // WKT2-2018
         return OrdinalCS::create(csMap, axisList);
     } else if (ci_equal(csType, "parametric")) {
         if (axisCount == 1) {
             return ParametricCS::create(csMap, axisList[0]);
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else if (ci_equal(csType, "temporal")) { // WKT2-2015
         if (axisCount == 1) {
@@ -2129,34 +2124,23 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 csMap,
                 axisList[0]); // FIXME: there are 3 possible subtypes of
                               // TemporalCS
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else if (ci_equal(csType, "TemporalDateTime")) { // WKT2-2018
         if (axisCount == 1) {
             return DateTimeTemporalCS::create(csMap, axisList[0]);
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else if (ci_equal(csType, "TemporalCount")) { // WKT2-2018
         if (axisCount == 1) {
             return TemporalCountCS::create(csMap, axisList[0]);
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else if (ci_equal(csType, "TemporalMeasure")) { // WKT2-2018
         if (axisCount == 1) {
             return TemporalMeasureCS::create(csMap, axisList[0]);
-        } else {
-            throw ParsingException("buildCS: invalid CS axis count for " +
-                                   csType);
         }
     } else {
         throw ParsingException(std::string("unhandled CS type: ") + csType);
     }
+    throw buildParsingExceptionInvalidAxisCount(csType);
 }
 
 // ---------------------------------------------------------------------------
@@ -3057,6 +3041,24 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+TemporalCSNNPtr
+WKTParser::Private::buildTemporalCS(const WKTNodeNNPtr &parentNode) {
+
+    auto &csNode = parentNode->GP()->lookForChild(WKTConstants::CS);
+    if (isNull(csNode) &&
+        !ci_equal(parentNode->GP()->value(), WKTConstants::BASETIMECRS)) {
+        ThrowMissing(WKTConstants::CS);
+    }
+    auto cs = buildCS(csNode, parentNode, UnitOfMeasure::NONE);
+    auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
+    if (!temporalCS) {
+        ThrowNotExpectedCSType("temporal");
+    }
+    return NN_NO_CHECK(temporalCS);
+}
+
+// ---------------------------------------------------------------------------
+
 TemporalCRSNNPtr
 WKTParser::Private::buildTemporalCRS(const WKTNodeNNPtr &node) {
     auto &datumNode =
@@ -3064,21 +3066,10 @@ WKTParser::Private::buildTemporalCRS(const WKTNodeNNPtr &node) {
     if (isNull(datumNode)) {
         throw ParsingException("Missing TDATUM / TIMEDATUM node");
     }
-    auto datum = buildTemporalDatum(datumNode);
 
-    auto &csNode = node->GP()->lookForChild(WKTConstants::CS);
-    if (isNull(csNode) &&
-        !ci_equal(node->GP()->value(), WKTConstants::BASETIMECRS)) {
-        ThrowMissing(WKTConstants::CS);
-    }
-    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
-    auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
-    if (!temporalCS) {
-        ThrowNotExpectedCSType("temporal");
-    }
-
-    return TemporalCRS::create(buildProperties(node), datum,
-                               NN_NO_CHECK(temporalCS));
+    return TemporalCRS::create(buildProperties(node),
+                               buildTemporalDatum(datumNode),
+                               buildTemporalCS(node));
 }
 
 // ---------------------------------------------------------------------------
@@ -3090,29 +3081,17 @@ WKTParser::Private::buildDerivedTemporalCRS(const WKTNodeNNPtr &node) {
     // given the constraints enforced on calling code path
     assert(!isNull(baseCRSNode));
 
-    auto baseCRS = buildTemporalCRS(baseCRSNode);
-
     auto &derivingConversionNode =
         node->GP()->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (isNull(derivingConversionNode)) {
         ThrowNotEnoughChildren(WKTConstants::DERIVINGCONVERSION);
     }
-    auto derivingConversion = buildConversion(
-        derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto &csNode = node->GP()->lookForChild(WKTConstants::CS);
-    if (isNull(csNode)) {
-        ThrowMissing(WKTConstants::CS);
-    }
-    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
-    auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
-    if (!temporalCS) {
-        ThrowNotExpectedCSType("temporal");
-    }
-
-    return DerivedTemporalCRS::create(buildProperties(node), baseCRS,
-                                      derivingConversion,
-                                      NN_NO_CHECK(temporalCS));
+    return DerivedTemporalCRS::create(
+        buildProperties(node), buildTemporalCRS(baseCRSNode),
+        buildConversion(derivingConversionNode, UnitOfMeasure::NONE,
+                        UnitOfMeasure::NONE),
+        buildTemporalCS(node));
 }
 
 // ---------------------------------------------------------------------------
@@ -3124,7 +3103,6 @@ WKTParser::Private::buildEngineeringCRS(const WKTNodeNNPtr &node) {
     if (isNull(datumNode)) {
         throw ParsingException("Missing EDATUM / ENGINEERINGDATUM node");
     }
-    auto datum = buildEngineeringDatum(datumNode);
 
     auto &csNode = node->GP()->lookForChild(WKTConstants::CS);
     if (isNull(csNode) &&
@@ -3133,7 +3111,8 @@ WKTParser::Private::buildEngineeringCRS(const WKTNodeNNPtr &node) {
     }
 
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
-    return EngineeringCRS::create(buildProperties(node), datum, cs);
+    return EngineeringCRS::create(buildProperties(node),
+                                  buildEngineeringDatum(datumNode), cs);
 }
 
 // ---------------------------------------------------------------------------
@@ -3183,6 +3162,24 @@ WKTParser::Private::buildDerivedEngineeringCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+ParametricCSNNPtr
+WKTParser::Private::buildParametricCS(const WKTNodeNNPtr &parentNode) {
+
+    auto &csNode = parentNode->GP()->lookForChild(WKTConstants::CS);
+    if (isNull(csNode) &&
+        !ci_equal(parentNode->GP()->value(), WKTConstants::BASEPARAMCRS)) {
+        ThrowMissing(WKTConstants::CS);
+    }
+    auto cs = buildCS(csNode, parentNode, UnitOfMeasure::NONE);
+    auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
+    if (!parametricCS) {
+        ThrowNotExpectedCSType("parametric");
+    }
+    return NN_NO_CHECK(parametricCS);
+}
+
+// ---------------------------------------------------------------------------
+
 ParametricCRSNNPtr
 WKTParser::Private::buildParametricCRS(const WKTNodeNNPtr &node) {
     auto &datumNode = node->GP()->lookForChild(WKTConstants::PDATUM,
@@ -3190,21 +3187,10 @@ WKTParser::Private::buildParametricCRS(const WKTNodeNNPtr &node) {
     if (isNull(datumNode)) {
         throw ParsingException("Missing PDATUM / PARAMETRICDATUM node");
     }
-    auto datum = buildParametricDatum(datumNode);
 
-    auto &csNode = node->GP()->lookForChild(WKTConstants::CS);
-    if (isNull(csNode) &&
-        !ci_equal(node->GP()->value(), WKTConstants::BASEPARAMCRS)) {
-        ThrowMissing(WKTConstants::CS);
-    }
-    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
-    auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
-    if (!parametricCS) {
-        ThrowNotExpectedCSType("parametric");
-    }
-
-    return ParametricCRS::create(buildProperties(node), datum,
-                                 NN_NO_CHECK(parametricCS));
+    return ParametricCRS::create(buildProperties(node),
+                                 buildParametricDatum(datumNode),
+                                 buildParametricCS(node));
 }
 
 // ---------------------------------------------------------------------------
@@ -3217,29 +3203,17 @@ WKTParser::Private::buildDerivedParametricCRS(const WKTNodeNNPtr &node) {
     // given the constraints enforced on calling code path
     assert(!isNull(baseParamCRSNode));
 
-    auto baseParamCRS = buildParametricCRS(baseParamCRSNode);
-
     auto &derivingConversionNode =
         node->GP()->lookForChild(WKTConstants::DERIVINGCONVERSION);
     if (isNull(derivingConversionNode)) {
         ThrowNotEnoughChildren(WKTConstants::DERIVINGCONVERSION);
     }
-    auto derivingConversion = buildConversion(
-        derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto &csNode = node->GP()->lookForChild(WKTConstants::CS);
-    if (isNull(csNode)) {
-        ThrowMissing(WKTConstants::CS);
-    }
-    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
-    auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
-    if (!parametricCS) {
-        ThrowNotExpectedCSType("parametric");
-    }
-
-    return DerivedParametricCRS::create(buildProperties(node), baseParamCRS,
-                                        derivingConversion,
-                                        NN_NO_CHECK(parametricCS));
+    return DerivedParametricCRS::create(
+        buildProperties(node), buildParametricCRS(baseParamCRSNode),
+        buildConversion(derivingConversionNode, UnitOfMeasure::NONE,
+                        UnitOfMeasure::NONE),
+        buildParametricCS(node));
 }
 
 // ---------------------------------------------------------------------------
@@ -4767,9 +4741,10 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
     const auto &bStr = getParamValue(step, "b");
     const auto &rfStr = getParamValue(step, "rf");
     const auto &RStr = getParamValue(step, "R");
-    auto optionalString = util::optional<std::string>();
+    const util::optional<std::string> optionalEmptyString{};
 
     PrimeMeridianNNPtr pm(buildPrimeMeridian(step));
+    PropertyMap grfMap;
 
     if (!datumStr.empty()) {
         if (datumStr == "WGS84") {
@@ -4785,19 +4760,19 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                     (void)datumDesc.gcsName; // to please cppcheck
                     (void)datumDesc.gcsCode; // to please cppcheck
                     auto ellipsoid = Ellipsoid::createFlattenedSphere(
-                        PropertyMap()
+                        grfMap
                             .set(IdentifiedObject::NAME_KEY,
                                  datumDesc.ellipsoidName)
                             .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
                             .set(Identifier::CODE_KEY, datumDesc.ellipsoidCode),
                         Length(datumDesc.a), Scale(datumDesc.rf));
                     return GeodeticReferenceFrame::create(
-                        PropertyMap()
+                        grfMap
                             .set(IdentifiedObject::NAME_KEY,
                                  datumDesc.datumName)
                             .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
                             .set(Identifier::CODE_KEY, datumDesc.datumCode),
-                        ellipsoid, optionalString, pm);
+                        ellipsoid, optionalEmptyString, pm);
                 }
             }
         }
@@ -4807,16 +4782,16 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
     else if (!ellpsStr.empty()) {
         if (ellpsStr == "WGS84") {
             return GeodeticReferenceFrame::create(
-                PropertyMap().set(
-                    IdentifiedObject::NAME_KEY,
-                    title.empty() ? "Unknown based on WGS84 ellipsoid" : title),
-                Ellipsoid::WGS84, optionalString, pm);
+                grfMap.set(IdentifiedObject::NAME_KEY,
+                           title.empty() ? "Unknown based on WGS84 ellipsoid"
+                                         : title.c_str()),
+                Ellipsoid::WGS84, optionalEmptyString, pm);
         } else if (ellpsStr == "GRS80") {
             return GeodeticReferenceFrame::create(
-                PropertyMap().set(
-                    IdentifiedObject::NAME_KEY,
-                    title.empty() ? "Unknown based on GRS80 ellipsoid" : title),
-                Ellipsoid::GRS1980, optionalString, pm);
+                grfMap.set(IdentifiedObject::NAME_KEY,
+                           title.empty() ? "Unknown based on GRS80 ellipsoid"
+                                         : title.c_str()),
+                Ellipsoid::GRS1980, optionalEmptyString, pm);
         } else {
             auto proj_ellps = proj_list_ellps();
             for (int i = 0; proj_ellps[i].id != nullptr; i++) {
@@ -4825,34 +4800,32 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                     const double a_iter =
                         c_locale_stod(proj_ellps[i].major + 2);
                     EllipsoidPtr ellipsoid;
+                    PropertyMap ellpsMap;
                     if (strncmp(proj_ellps[i].ell, "b=", 2) == 0) {
                         const double b_iter =
                             c_locale_stod(proj_ellps[i].ell + 2);
-                        ellipsoid =
-                            Ellipsoid::createTwoAxis(
-                                PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                                  proj_ellps[i].name),
-                                Length(a_iter), Length(b_iter))
-                                .as_nullable();
+                        ellipsoid = Ellipsoid::createTwoAxis(
+                                        ellpsMap.set(IdentifiedObject::NAME_KEY,
+                                                     proj_ellps[i].name),
+                                        Length(a_iter), Length(b_iter))
+                                        .as_nullable();
                     } else {
                         assert(strncmp(proj_ellps[i].ell, "rf=", 3) == 0);
                         const double rf_iter =
                             c_locale_stod(proj_ellps[i].ell + 3);
-                        ellipsoid =
-                            Ellipsoid::createFlattenedSphere(
-                                PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                                  proj_ellps[i].name),
-                                Length(a_iter), Scale(rf_iter))
-                                .as_nullable();
+                        ellipsoid = Ellipsoid::createFlattenedSphere(
+                                        ellpsMap.set(IdentifiedObject::NAME_KEY,
+                                                     proj_ellps[i].name),
+                                        Length(a_iter), Scale(rf_iter))
+                                        .as_nullable();
                     }
                     return GeodeticReferenceFrame::create(
-                        PropertyMap().set(
-                            IdentifiedObject::NAME_KEY,
-                            title.empty()
-                                ? std::string("Unknown based on ") +
-                                      proj_ellps[i].name + " ellipsoid"
-                                : title),
-                        NN_NO_CHECK(ellipsoid), optionalString, pm);
+                        grfMap.set(IdentifiedObject::NAME_KEY,
+                                   title.empty()
+                                       ? std::string("Unknown based on ") +
+                                             proj_ellps[i].name + " ellipsoid"
+                                       : title),
+                        NN_NO_CHECK(ellipsoid), optionalEmptyString, pm);
                 }
             }
             throw ParsingException("unknown ellipsoid " + ellpsStr);
@@ -4877,9 +4850,9 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                                      Length(b), guessBodyName(a))
                 ->identify();
         return GeodeticReferenceFrame::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              title.empty() ? "unknown" : title),
-            ellipsoid, optionalString, pm);
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       title.empty() ? "unknown" : title.c_str()),
+            ellipsoid, optionalEmptyString, pm);
     }
 
     else if (!aStr.empty() && !rfStr.empty()) {
@@ -4900,9 +4873,9 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
                              guessBodyName(a))
                              ->identify();
         return GeodeticReferenceFrame::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              title.empty() ? "unknown" : title),
-            ellipsoid, optionalString, pm);
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       title.empty() ? "unknown" : title.c_str()),
+            ellipsoid, optionalEmptyString, pm);
     }
 
     else if (!RStr.empty()) {
@@ -4910,14 +4883,14 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
         try {
             R = c_locale_stod(RStr);
         } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid Rvalue");
+            throw ParsingException("Invalid R value");
         }
         auto ellipsoid = Ellipsoid::createSphere(createMapWithUnknownName(),
                                                  Length(R), guessBodyName(R));
         return GeodeticReferenceFrame::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              title.empty() ? "unknown" : title),
-            ellipsoid, optionalString, pm);
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       title.empty() ? "unknown" : title.c_str()),
+            ellipsoid, optionalEmptyString, pm);
     }
 
     if (!aStr.empty() && bStr.empty() && rfStr.empty()) {
@@ -4936,13 +4909,24 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
         return GeodeticReferenceFrame::EPSG_6326;
     } else {
         return GeodeticReferenceFrame::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              "Unknown based on WGS84 ellipsoid"),
-            Ellipsoid::WGS84, optionalString, pm);
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       "Unknown based on WGS84 ellipsoid"),
+            Ellipsoid::WGS84, optionalEmptyString, pm);
     }
 }
 
 // ---------------------------------------------------------------------------
+
+static const MeridianPtr nullMeridian{};
+
+static CoordinateSystemAxisNNPtr
+createAxis(const std::string &name, const std::string &abbreviation,
+           const AxisDirection &direction, const common::UnitOfMeasure &unit,
+           const MeridianPtr &meridian = nullMeridian) {
+    return CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, name), abbreviation,
+        direction, unit, meridian);
+}
 
 std::vector<CoordinateSystemAxisNNPtr>
 PROJStringParser::Private::processAxisSwap(const Step &step,
@@ -4951,68 +4935,53 @@ PROJStringParser::Private::processAxisSwap(const Step &step,
     assert(iAxisSwap < 0 || ci_equal(steps_[iAxisSwap].name, "axisswap"));
 
     const bool isGeographic = unit.type() == UnitOfMeasure::Type::ANGULAR;
-    CoordinateSystemAxisNNPtr east =
-        isGeographic
-            ? CoordinateSystemAxis::create(
-                  PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Longitude),
-                  AxisAbbreviation::lon, AxisDirection::EAST, unit)
-            : CoordinateSystemAxis::create(
-                  PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Easting),
-                  AxisAbbreviation::E, (axisType == AxisType::NORTH_POLE)
-                                           ? AxisDirection::SOUTH
-                                           : (axisType == AxisType::SOUTH_POLE)
-                                                 ? AxisDirection::NORTH
-                                                 : AxisDirection::EAST,
-                  unit, (axisType == AxisType::NORTH_POLE ||
-                         axisType == AxisType::SOUTH_POLE)
-                            ? Meridian::create(Angle(90, UnitOfMeasure::DEGREE))
-                                  .as_nullable()
-                            : nullptr);
+    const auto &eastName =
+        isGeographic ? AxisName::Longitude : AxisName::Easting;
+    const auto &eastAbbev =
+        isGeographic ? AxisAbbreviation::lon : AxisAbbreviation::E;
+    const auto &eastDir = isGeographic
+                              ? AxisDirection::EAST
+                              : (axisType == AxisType::NORTH_POLE)
+                                    ? AxisDirection::SOUTH
+                                    : (axisType == AxisType::SOUTH_POLE)
+                                          ? AxisDirection::NORTH
+                                          : AxisDirection::EAST;
+    CoordinateSystemAxisNNPtr east = createAxis(
+        eastName, eastAbbev, eastDir, unit,
+        (!isGeographic &&
+         (axisType == AxisType::NORTH_POLE || axisType == AxisType::SOUTH_POLE))
+            ? Meridian::create(Angle(90, UnitOfMeasure::DEGREE)).as_nullable()
+            : nullMeridian);
 
-    CoordinateSystemAxisNNPtr north =
-        isGeographic
-            ? CoordinateSystemAxis::create(
-                  PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Latitude),
-                  AxisAbbreviation::lat, AxisDirection::NORTH, unit)
-            : CoordinateSystemAxis::create(
-                  PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Northing),
-                  AxisAbbreviation::N, (axisType == AxisType::NORTH_POLE)
-                                           ? AxisDirection::SOUTH
-                                           : (axisType == AxisType::SOUTH_POLE)
-                                                 ? AxisDirection::NORTH
-                                                 : AxisDirection::NORTH,
-                  unit,
-                  axisType == AxisType::NORTH_POLE
-                      ? Meridian::create(Angle(180, UnitOfMeasure::DEGREE))
-                            .as_nullable()
-                      : axisType == AxisType::SOUTH_POLE
-                            ? Meridian::create(Angle(0, UnitOfMeasure::DEGREE))
-                                  .as_nullable()
-                            : nullptr);
+    const auto &northName =
+        isGeographic ? AxisName::Latitude : AxisName::Northing;
+    const auto &northAbbev =
+        isGeographic ? AxisAbbreviation::lat : AxisAbbreviation::N;
+    const auto &northDir = isGeographic
+                               ? AxisDirection::NORTH
+                               : (axisType == AxisType::NORTH_POLE)
+                                     ? AxisDirection::SOUTH
+                                     : (axisType == AxisType::SOUTH_POLE)
+                                           ? AxisDirection::NORTH
+                                           : AxisDirection::NORTH;
+    CoordinateSystemAxisNNPtr north = createAxis(
+        northName, northAbbev, northDir, unit,
+        (!isGeographic && axisType == AxisType::NORTH_POLE)
+            ? Meridian::create(Angle(180, UnitOfMeasure::DEGREE)).as_nullable()
+            : (!isGeographic && axisType == AxisType::SOUTH_POLE)
+                  ? Meridian::create(Angle(0, UnitOfMeasure::DEGREE))
+                        .as_nullable()
+                  : nullMeridian);
 
     CoordinateSystemAxisNNPtr west =
-        isGeographic ? CoordinateSystemAxis::create(
-                           PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                             AxisName::Longitude),
-                           AxisAbbreviation::lon, AxisDirection::WEST, unit)
-                     : CoordinateSystemAxis::create(
-                           PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                             AxisName::Westing),
-                           std::string(), AxisDirection::WEST, unit);
+        createAxis(isGeographic ? AxisName::Longitude : AxisName::Westing,
+                   isGeographic ? AxisAbbreviation::lon : std::string(),
+                   AxisDirection::WEST, unit);
 
     CoordinateSystemAxisNNPtr south =
-        isGeographic ? CoordinateSystemAxis::create(
-                           PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                             AxisName::Latitude),
-                           AxisAbbreviation::lat, AxisDirection::SOUTH, unit)
-                     : CoordinateSystemAxis::create(
-                           PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                             AxisName::Southing),
-                           std::string(), AxisDirection::SOUTH, unit);
+        createAxis(isGeographic ? AxisName::Latitude : AxisName::Southing,
+                   isGeographic ? AxisAbbreviation::lat : std::string(),
+                   AxisDirection::SOUTH, unit);
 
     std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
 
@@ -5101,14 +5070,11 @@ EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
         AxisAbbreviation::h, AxisDirection::UP,
         buildUnit(step, "vunits", "vto_meter"));
 
-    auto cs =
-        (!ignoreVUnits && getParamValue(step, "geoidgrids").empty() &&
-         (!getParamValue(step, "vunits").empty() ||
-          !getParamValue(step, "vto_meter").empty()))
+    return
+        (!ignoreVUnits && !hasParamValue(step, "geoidgrids") &&
+         (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter")))
             ? EllipsoidalCS::create(emptyPropertyMap, axis[0], axis[1], up)
             : EllipsoidalCS::create(emptyPropertyMap, axis[0], axis[1]);
-
-    return cs;
 }
 
 // ---------------------------------------------------------------------------

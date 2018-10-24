@@ -841,6 +841,7 @@ bool IdentifiedObject::isEquivalentTo(const IdentifiedObject *otherIdObj,
     }
     return true;
 }
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
