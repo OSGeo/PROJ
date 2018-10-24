@@ -39,8 +39,6 @@
 #include <string>
 #include <vector>
 
-#include "nn.hpp"
-
 #ifndef NS_PROJ
 /** osgeo namespace */
 namespace osgeo {
@@ -61,6 +59,8 @@ namespace proj {}
 #endif
 #endif
 
+#include "nn.hpp"
+
 /* To allow customizing the base namespace of PROJ */
 #ifndef NS_PROJ
 #define NS_PROJ osgeo::proj
@@ -79,8 +79,8 @@ namespace proj {}
     std::unique_ptr<Private> d;                                                \
                                                                                \
   protected:                                                                   \
-    Private *getPrivate() { return d.get(); }                                  \
-    const Private *getPrivate() const { return d.get(); }                      \
+    Private *getPrivate() noexcept { return d.get(); }                         \
+    const Private *getPrivate() const noexcept { return d.get(); }             \
                                                                                \
   private:
 
@@ -164,7 +164,8 @@ using ::dropbox::oxygen::nn_static_pointer_cast;
 template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 
 #define NN_NO_CHECK(p)                                                         \
-    ::dropbox::oxygen::nn<typename std::remove_reference<decltype(p)>::type>(  \
+    ::dropbox::oxygen::nn<typename std::remove_const<                          \
+        typename std::remove_reference<decltype(p)>::type>::type>(             \
         dropbox::oxygen::i_promise_i_checked_for_null, (p))
 
 //! @endcond
@@ -237,6 +238,13 @@ class BaseObject;
 using BaseObjectPtr = std::shared_ptr<BaseObject>;
 /** Non-null shared pointer of BaseObject. */
 using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
+#if 0
+struct BaseObjectNNPtr: public util::nn<BaseObjectPtr> {
+    template<class T> BaseObjectNNPtr(const util::nn<std::shared_ptr<T>>& x): util::nn<BaseObjectPtr>(x) {}
+    template<class T> BaseObjectNNPtr(util::nn<std::shared_ptr<T>>&& x): util::nn<BaseObjectPtr>(NN_NO_CHECK(std::move(x.as_nullable()))) {}
+    ~BaseObjectNNPtr();
+};
+#endif
 
 /** \brief Class that can be derived from, to emulate Java's Object behaviour.
  */
@@ -246,10 +254,15 @@ class BaseObject {
     virtual PROJ_DLL ~BaseObject();
     //! @endcond
 
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_DLL BaseObjectNNPtr
+        shared_from_this() const;
+    //! @endcond
+
   protected:
     PROJ_DLL BaseObject();
     PROJ_DLL void assignSelf(const BaseObjectNNPtr &self);
-    PROJ_DLL BaseObjectNNPtr shared_from_this() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -388,7 +401,22 @@ class PropertyMap {
     PROJ_DLL PropertyMap &set(const std::string &key,
                               const BaseObjectNNPtr &val);
 
-    PROJ_DLL PropertyMap &set(const std::string &key, const BoxedValue &val);
+    //! @cond Doxygen_Suppress
+    template <class T>
+    inline PropertyMap &set(const std::string &key,
+                            const nn_shared_ptr<T> &val) {
+        return set(key, nn_static_pointer_cast<BaseObject>(val));
+    }
+    //! @endcond
+
+    // needed to avoid the bool constructor to be taken !
+    PROJ_DLL PropertyMap &set(const std::string &key, const char *val);
+
+    PROJ_DLL PropertyMap &set(const std::string &key, const std::string &val);
+
+    PROJ_DLL PropertyMap &set(const std::string &key, int val);
+
+    PROJ_DLL PropertyMap &set(const std::string &key, bool val);
 
     PROJ_DLL PropertyMap &set(const std::string &key,
                               const std::vector<std::string> &array);
@@ -405,6 +433,8 @@ class PropertyMap {
 
   private:
     PropertyMap &operator=(const PropertyMap &) = delete;
+
+    PropertyMap &set(const std::string &key, const BoxedValue &val);
 
     PROJ_OPAQUE_PRIVATE_DATA
 };

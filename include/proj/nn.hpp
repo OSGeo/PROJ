@@ -125,6 +125,7 @@ public:
   nn &operator=(std::nullptr_t) = delete; // nullptr is not allowed here
   nn(PtrType) = delete;            // must use NN_CHECK_ASSERT or NN_CHECK_THROW
   nn &operator=(PtrType) = delete; // must use NN_CHECK_ASSERT or NN_CHECK_THROW
+  //PROJ_DLL ~nn();
 
   // Semi-private constructor for use by NN_CHECK_ macros.
   explicit nn(i_promise_i_checked_for_null_t, const PtrType &arg) : ptr(arg) {

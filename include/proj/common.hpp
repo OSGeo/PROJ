@@ -147,8 +147,8 @@ class Measure : public util::BaseObject {
     PROJ_DLL double getSIValue() PROJ_CONST_DECL;
     PROJ_DLL double value() PROJ_CONST_DECL;
 
-    PROJ_DLL Measure convertToUnit(const UnitOfMeasure &otherUnit)
-        PROJ_CONST_DECL;
+    PROJ_DLL double
+    convertToUnit(const UnitOfMeasure &otherUnit) PROJ_CONST_DECL;
 
     PROJ_DLL bool operator==(const Measure &other) PROJ_CONST_DECL;
 
@@ -161,11 +161,6 @@ class Measure : public util::BaseObject {
     PROJ_OPAQUE_PRIVATE_DATA
     Measure &operator=(const Measure &) = delete;
 };
-
-/** Shared pointer of Measure. */
-using MeasurePtr = std::shared_ptr<Measure>;
-/** Non-null shared pointer of Measure. */
-using MeasureNNPtr = util::nn<MeasurePtr>;
 
 // ---------------------------------------------------------------------------
 
@@ -198,8 +193,6 @@ class Angle : public Measure {
     PROJ_DLL ~Angle() override;
     //! @endcond
 
-    PROJ_DLL Angle convertToUnit(const UnitOfMeasure &otherUnit) const;
-
   protected:
     PROJ_FRIEND_OPTIONAL(Angle);
     Angle &operator=(const Angle &) = delete;
@@ -217,8 +210,6 @@ class Length : public Measure {
     PROJ_DLL Length(const Length &other);
     PROJ_DLL ~Length() override;
     //! @endcond
-
-    PROJ_DLL Length convertToUnit(const UnitOfMeasure &otherUnit) const;
 
   protected:
     PROJ_FRIEND_OPTIONAL(Length);

@@ -515,9 +515,9 @@ class IPROJStringExportable {
 // ---------------------------------------------------------------------------
 
 class WKTNode;
-/** Shared pointer of WKTNode. */
-using WKTNodePtr = std::shared_ptr<WKTNode>;
-/** Non-null shared pointer of WKTNode. */
+/** Unique pointer of WKTNode. */
+using WKTNodePtr = std::unique_ptr<WKTNode>;
+/** Non-null unique pointer of WKTNode. */
 using WKTNodeNNPtr = util::nn<WKTNodePtr>;
 
 /** \brief Node in the tree-splitted WKT representation.
@@ -532,10 +532,11 @@ class WKTNode {
     PROJ_DLL const std::string &value() const;
     PROJ_DLL const std::vector<WKTNodeNNPtr> &children() const;
 
-    PROJ_DLL void addChild(const WKTNodeNNPtr &child);
+    PROJ_DLL void addChild(WKTNodeNNPtr &&child);
     PROJ_DLL const WKTNodePtr &lookForChild(const std::string &childName,
-                                            int occurrence = 0) const;
-    PROJ_DLL int countChildrenOfName(const std::string &childName) const;
+                                            int occurrence = 0) const noexcept;
+    PROJ_DLL int countChildrenOfName(const std::string &childName) const
+        noexcept;
 
     PROJ_DLL std::string toString() const;
 

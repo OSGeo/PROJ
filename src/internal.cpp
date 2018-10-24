@@ -141,6 +141,14 @@ std::string stripQuotes(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
+size_t ci_find(const std::string &str, const char *needle) {
+    auto lowerStr = tolower(str);
+    auto lowerNeedle = tolower(needle);
+    return lowerStr.find(lowerNeedle);
+}
+
+// ---------------------------------------------------------------------------
+
 size_t ci_find(const std::string &str, const std::string &needle,
                size_t startPos) {
     if (startPos >= str.size()) {

@@ -51,6 +51,15 @@ using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::util;
 
+#if 0
+namespace dropbox{ namespace oxygen {
+template<> nn<NS_PROJ::common::IdentifiedObjectPtr>::~nn() = default;
+template<> nn<NS_PROJ::common::ObjectDomainPtr>::~nn() = default;
+template<> nn<NS_PROJ::common::ObjectUsagePtr>::~nn() = default;
+template<> nn<NS_PROJ::common::UnitOfMeasurePtr>::~nn() = default;
+}}
+#endif
+
 NS_PROJ_START
 namespace common {
 
@@ -313,11 +322,10 @@ double Measure::value() PROJ_CONST_DEFN { return d->value_; }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return a new Measure equivalent to the this object, but whose value
- * has been converted ot the provided unit.
+/** \brief Return the value of this measure expressed into the provided unit.
  */
-Measure Measure::convertToUnit(const UnitOfMeasure &otherUnit) PROJ_CONST_DEFN {
-    return Measure(getSIValue() / otherUnit.conversionToSI(), otherUnit);
+double Measure::convertToUnit(const UnitOfMeasure &otherUnit) PROJ_CONST_DEFN {
+    return getSIValue() / otherUnit.conversionToSI();
 }
 
 // ---------------------------------------------------------------------------
@@ -401,18 +409,6 @@ Angle::Angle(const Angle &) = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return a new Angle equivalent to the this object, but whose value
- * has been converted ot the provided unit.
- *
- * @param otherUnit target unit. Constraint: otherUnit.type() ==
- * UnitOfMeasure::Type::ANGULAR
- */
-Angle Angle::convertToUnit(const UnitOfMeasure &otherUnit) const {
-    return Angle(Measure::convertToUnit(otherUnit).value(), otherUnit);
-}
-
-// ---------------------------------------------------------------------------
-
 //! @cond Doxygen_Suppress
 Angle::~Angle() = default;
 //! @endcond
@@ -440,18 +436,6 @@ Length::Length(double valueIn, const UnitOfMeasure &unitIn)
 //! @cond Doxygen_Suppress
 Length::Length(const Length &) = default;
 //! @endcond
-
-// ---------------------------------------------------------------------------
-
-/** \brief Return a new Length equivalent to the this object, but whose value
- * has been converted ot the provided unit.
- *
- * @param otherUnit target unit. Constraint: otherUnit.type() ==
- * UnitOfMeasure::Type::LINEAR
- */
-Length Length::convertToUnit(const UnitOfMeasure &otherUnit) const {
-    return Length(Measure::convertToUnit(otherUnit).value(), otherUnit);
-}
 
 // ---------------------------------------------------------------------------
 

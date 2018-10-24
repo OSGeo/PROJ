@@ -150,7 +150,7 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
     // 'osgeo::proj::operation::SingleOperation::osgeo::proj::operation::SingleOperation::gridsNeeded'
     // via dominance
     std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextPtr databaseContext) const override {
+    gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override {
         return SingleOperation::gridsNeeded(databaseContext);
     }
 #endif
@@ -192,7 +192,7 @@ class InverseTransformation : public Transformation,
     // 'osgeo::proj::operation::SingleOperation::osgeo::proj::operation::SingleOperation::gridsNeeded'
     // via dominance
     std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextPtr databaseContext) const override {
+    gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override {
         return SingleOperation::gridsNeeded(databaseContext);
     }
 #endif
@@ -231,7 +231,7 @@ class PROJBasedOperation : public SingleOperation {
            const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextPtr databaseContext) const override;
+    gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
   protected:
     PROJBasedOperation(const OperationMethodNNPtr &methodIn,

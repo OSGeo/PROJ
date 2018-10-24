@@ -48,6 +48,24 @@
 
 using namespace NS_PROJ::internal;
 
+#if 0
+namespace dropbox{ namespace oxygen {
+template<> nn<NS_PROJ::cs::MeridianPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::CoordinateSystemAxisPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::CoordinateSystemPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::SphericalCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::EllipsoidalCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::CartesianCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::TemporalCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::TemporalCountCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::TemporalMeasureCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::DateTimeTemporalCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::VerticalCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::ParametricCSPtr>::~nn() = default;
+template<> nn<NS_PROJ::cs::OrdinalCSPtr>::~nn() = default;
+}}
+#endif
+
 NS_PROJ_START
 namespace cs {
 
@@ -615,6 +633,24 @@ EllipsoidalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+CoordinateSystemAxisNNPtr
+CoordinateSystemAxis::createLAT_NORTH(const common::UnitOfMeasure &unit) {
+    return create(
+        util::PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
+        AxisAbbreviation::lat, AxisDirection::NORTH, unit);
+}
+
+CoordinateSystemAxisNNPtr
+CoordinateSystemAxis::createLONG_EAST(const common::UnitOfMeasure &unit) {
+    return create(util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          AxisName::Longitude),
+                  AxisAbbreviation::lon, AxisDirection::EAST, unit);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a EllipsoidalCS with a Latitude (first) and Longitude
  * (second) axis.
  *
@@ -623,17 +659,9 @@ EllipsoidalCS::create(const util::PropertyMap &properties,
  */
 EllipsoidalCSNNPtr
 EllipsoidalCS::createLatitudeLongitude(const common::UnitOfMeasure &unit) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Latitude),
-            AxisAbbreviation::lat, AxisDirection::NORTH, unit),
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Longitude),
-            AxisAbbreviation::lon, AxisDirection::EAST, unit)};
-    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
-    return cs;
+    return EllipsoidalCS::create(util::PropertyMap(),
+                                 CoordinateSystemAxis::createLAT_NORTH(unit),
+                                 CoordinateSystemAxis::createLONG_EAST(unit));
 }
 
 // ---------------------------------------------------------------------------
@@ -648,21 +676,13 @@ EllipsoidalCS::createLatitudeLongitude(const common::UnitOfMeasure &unit) {
 EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
     const common::UnitOfMeasure &angularUnit,
     const common::UnitOfMeasure &linearUnit) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Latitude),
-            AxisAbbreviation::lat, AxisDirection::NORTH, angularUnit),
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Longitude),
-            AxisAbbreviation::lon, AxisDirection::EAST, angularUnit),
+    return EllipsoidalCS::create(
+        util::PropertyMap(), CoordinateSystemAxis::createLAT_NORTH(angularUnit),
+        CoordinateSystemAxis::createLONG_EAST(angularUnit),
         CoordinateSystemAxis::create(
             util::PropertyMap().set(IdentifiedObject::NAME_KEY,
                                     AxisName::Ellipsoidal_height),
-            AxisAbbreviation::h, AxisDirection::UP, linearUnit)};
-    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
-    return cs;
+            AxisAbbreviation::h, AxisDirection::UP, linearUnit));
 }
 
 // ---------------------------------------------------------------------------
@@ -675,17 +695,9 @@ EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
  */
 EllipsoidalCSNNPtr
 EllipsoidalCS::createLongitudeLatitude(const common::UnitOfMeasure &unit) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Longitude),
-            AxisAbbreviation::lon, AxisDirection::EAST, unit),
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Latitude),
-            AxisAbbreviation::lat, AxisDirection::NORTH, unit)};
-    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
-    return cs;
+    return EllipsoidalCS::create(util::PropertyMap(),
+                                 CoordinateSystemAxis::createLONG_EAST(unit),
+                                 CoordinateSystemAxis::createLAT_NORTH(unit));
 }
 
 // ---------------------------------------------------------------------------
@@ -828,17 +840,15 @@ CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
  */
 CartesianCSNNPtr
 CartesianCS::createEastingNorthing(const common::UnitOfMeasure &unit) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Easting),
-            AxisAbbreviation::E, AxisDirection::EAST, unit),
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Northing),
-            AxisAbbreviation::N, AxisDirection::NORTH, unit)};
-    auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
-    return cs;
+    return create(util::PropertyMap(),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Easting),
+                      AxisAbbreviation::E, AxisDirection::EAST, unit),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Northing),
+                      AxisAbbreviation::N, AxisDirection::NORTH, unit));
 }
 
 // ---------------------------------------------------------------------------
@@ -850,21 +860,19 @@ CartesianCS::createEastingNorthing(const common::UnitOfMeasure &unit) {
  */
 CartesianCSNNPtr
 CartesianCS::createGeocentric(const common::UnitOfMeasure &unit) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Geocentric_X),
-            AxisAbbreviation::X, AxisDirection::GEOCENTRIC_X, unit),
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Geocentric_Y),
-            AxisAbbreviation::Y, AxisDirection::GEOCENTRIC_Y, unit),
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Geocentric_Z),
-            AxisAbbreviation::Z, AxisDirection::GEOCENTRIC_Z, unit)};
-    auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
-    return cs;
+    return create(util::PropertyMap(),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Geocentric_X),
+                      AxisAbbreviation::X, AxisDirection::GEOCENTRIC_X, unit),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Geocentric_Y),
+                      AxisAbbreviation::Y, AxisDirection::GEOCENTRIC_Y, unit),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Geocentric_Z),
+                      AxisAbbreviation::Z, AxisDirection::GEOCENTRIC_Z, unit));
 }
 
 // ---------------------------------------------------------------------------

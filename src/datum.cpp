@@ -51,6 +51,22 @@
 
 using namespace NS_PROJ::internal;
 
+#if 0
+namespace dropbox{ namespace oxygen {
+template<> nn<NS_PROJ::datum::DatumPtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::DatumEnsemblePtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::PrimeMeridianPtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::EllipsoidPtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::GeodeticReferenceFramePtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::DynamicGeodeticReferenceFramePtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::VerticalReferenceFramePtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::DynamicVerticalReferenceFramePtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::EngineeringDatumPtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::TemporalDatumPtr>::~nn() = default;
+template<> nn<NS_PROJ::datum::ParametricDatumPtr>::~nn() = default;
+}}
+#endif
+
 NS_PROJ_START
 namespace datum {
 
@@ -297,8 +313,7 @@ void PrimeMeridian::_exportToWKT(
         formatter->addQuotedString(l_name);
         const auto &l_long = longitude();
         if (formatter->primeMeridianInDegree()) {
-            formatter->add(
-                l_long.convertToUnit(common::UnitOfMeasure::DEGREE).value());
+            formatter->add(l_long.convertToUnit(common::UnitOfMeasure::DEGREE));
         } else {
             formatter->add(l_long.value());
         }
@@ -352,9 +367,7 @@ void PrimeMeridian::_exportToPROJString(
             formatter->addParam("pm", projPMName);
         } else {
             const double valDeg =
-                longitude()
-                    .convertToUnit(common::UnitOfMeasure::DEGREE)
-                    .value();
+                longitude().convertToUnit(common::UnitOfMeasure::DEGREE);
             formatter->addParam("pm", valDeg);
         }
     }
@@ -1104,9 +1117,8 @@ void DynamicGeodeticReferenceFrame::_exportToWKT(
     if (isWKT2 && formatter->use2018Keywords()) {
         formatter->startNode(io::WKTConstants::DYNAMIC, false);
         formatter->startNode(io::WKTConstants::FRAMEEPOCH, false);
-        formatter->add(frameReferenceEpoch()
-                           .convertToUnit(common::UnitOfMeasure::YEAR)
-                           .value());
+        formatter->add(
+            frameReferenceEpoch().convertToUnit(common::UnitOfMeasure::YEAR));
         formatter->endNode();
         if (deformationModelName().has_value() &&
             !deformationModelName()->empty()) {
@@ -1537,9 +1549,8 @@ void DynamicVerticalReferenceFrame::_exportToWKT(
     if (isWKT2 && formatter->use2018Keywords()) {
         formatter->startNode(io::WKTConstants::DYNAMIC, false);
         formatter->startNode(io::WKTConstants::FRAMEEPOCH, false);
-        formatter->add(frameReferenceEpoch()
-                           .convertToUnit(common::UnitOfMeasure::YEAR)
-                           .value());
+        formatter->add(
+            frameReferenceEpoch().convertToUnit(common::UnitOfMeasure::YEAR));
         formatter->endNode();
         if (!deformationModelName()->empty()) {
             formatter->startNode(io::WKTConstants::MODEL, false);

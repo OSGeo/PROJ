@@ -101,6 +101,12 @@ class CRS : public common::ObjectUsage, public io::IWKTExportable {
 
     PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() PROJ_CONST_DECL;
 
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        const GeodeticCRS *
+        extractGeodeticCRSRaw() const;
+    //! @endcond
+
   protected:
     CRS();
     CRS(const CRS &other);

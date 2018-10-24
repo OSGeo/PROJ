@@ -41,6 +41,17 @@
 
 using namespace NS_PROJ::internal;
 
+#if 0
+namespace dropbox{ namespace oxygen {
+template<> nn<NS_PROJ::util::BaseObjectPtr>::~nn() = default;
+template<> nn<NS_PROJ::util::BoxedValuePtr>::~nn() = default;
+template<> nn<NS_PROJ::util::ArrayOfBaseObjectPtr>::~nn() = default;
+template<> nn<NS_PROJ::util::LocalNamePtr>::~nn() = default;
+template<> nn<NS_PROJ::util::GenericNamePtr>::~nn() = default;
+template<> nn<NS_PROJ::util::NameSpacePtr>::~nn() = default;
+}}
+#endif
+
 NS_PROJ_START
 namespace util {
 
@@ -64,6 +75,8 @@ BaseObject::BaseObject() : d(internal::make_unique<Private>()) {}
 BaseObject::~BaseObject() = default;
 //! @endcond
 
+// BaseObjectNNPtr::~BaseObjectNNPtr() = default;
+
 // ---------------------------------------------------------------------------
 
 /** Keep a reference to ourselves as an internal weak pointer. So that
@@ -76,12 +89,14 @@ void BaseObject::assignSelf(const BaseObjectNNPtr &self) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 BaseObjectNNPtr BaseObject::shared_from_this() const {
     // This assertion checks that in all code paths where we create a
     // shared pointer, we took care of assigning it to self_, by calling
     // assignSelf();
     return NN_CHECK_ASSERT(d->self_.lock());
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -288,6 +303,34 @@ PropertyMap &PropertyMap::set(const std::string &key, const BoxedValue &val) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set a string as the value of a key. */
+PropertyMap &PropertyMap::set(const std::string &key, const std::string &val) {
+    return set(key, BoxedValue(val));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set a string as the value of a key. */
+PropertyMap &PropertyMap::set(const std::string &key, const char *val) {
+    return set(key, BoxedValue(val));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set a integer as the value of a key. */
+PropertyMap &PropertyMap::set(const std::string &key, int val) {
+    return set(key, BoxedValue(val));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set a boolean as the value of a key. */
+PropertyMap &PropertyMap::set(const std::string &key, bool val) {
+    return set(key, BoxedValue(val));
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Set a vector of strings as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key,
                               const std::vector<std::string> &arrayIn) {
@@ -295,13 +338,7 @@ PropertyMap &PropertyMap::set(const std::string &key,
     for (const auto &str : arrayIn) {
         array->add(util::nn_make_shared<BoxedValue>(str));
     }
-    auto iter = d->map_.find(key);
-    if (iter != d->map_.end()) {
-        iter->second = array;
-    } else {
-        d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(key, array));
-    }
-    return *this;
+    return set(key, array);
 }
 
 // ---------------------------------------------------------------------------

@@ -557,19 +557,13 @@ TEST(factory, AuthorityFactory_createProjectedCRS_south_pole) {
     ASSERT_EQ(csList.size(), 2);
     EXPECT_TRUE(csList[0]->meridian() != nullptr);
     EXPECT_EQ(csList[0]->direction(), AxisDirection::NORTH);
-    EXPECT_EQ(csList[0]
-                  ->meridian()
-                  ->longitude()
-                  .convertToUnit(UnitOfMeasure::DEGREE)
-                  .value(),
-              0);
+    EXPECT_EQ(
+        csList[0]->meridian()->longitude().convertToUnit(UnitOfMeasure::DEGREE),
+        0);
     EXPECT_EQ(csList[1]->direction(), AxisDirection::NORTH);
-    EXPECT_EQ(csList[1]
-                  ->meridian()
-                  ->longitude()
-                  .convertToUnit(UnitOfMeasure::DEGREE)
-                  .value(),
-              90);
+    EXPECT_EQ(
+        csList[1]->meridian()->longitude().convertToUnit(UnitOfMeasure::DEGREE),
+        90);
 }
 
 // ---------------------------------------------------------------------------
@@ -582,19 +576,13 @@ TEST(factory, AuthorityFactory_createProjectedCRS_north_pole) {
     ASSERT_EQ(csList.size(), 2);
     EXPECT_TRUE(csList[0]->meridian() != nullptr);
     EXPECT_EQ(csList[0]->direction(), AxisDirection::SOUTH);
-    EXPECT_EQ(csList[0]
-                  ->meridian()
-                  ->longitude()
-                  .convertToUnit(UnitOfMeasure::DEGREE)
-                  .value(),
-              180);
+    EXPECT_EQ(
+        csList[0]->meridian()->longitude().convertToUnit(UnitOfMeasure::DEGREE),
+        180);
     EXPECT_EQ(csList[1]->direction(), AxisDirection::SOUTH);
-    EXPECT_EQ(csList[1]
-                  ->meridian()
-                  ->longitude()
-                  .convertToUnit(UnitOfMeasure::DEGREE)
-                  .value(),
-              90);
+    EXPECT_EQ(
+        csList[1]->meridian()->longitude().convertToUnit(UnitOfMeasure::DEGREE),
+        90);
 }
 
 // ---------------------------------------------------------------------------

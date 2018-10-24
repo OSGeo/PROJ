@@ -54,6 +54,30 @@
 
 using namespace NS_PROJ::internal;
 
+#if 0
+namespace dropbox{ namespace oxygen {
+template<> nn<NS_PROJ::crs::CRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::SingleCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::GeodeticCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::GeographicCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::DerivedCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::ProjectedCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::VerticalCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::CompoundCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::TemporalCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::EngineeringCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::ParametricCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::BoundCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::DerivedGeodeticCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::DerivedGeographicCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::DerivedProjectedCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::DerivedVerticalCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::DerivedTemporalCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::DerivedEngineeringCRSPtr>::~nn() = default;
+template<> nn<NS_PROJ::crs::DerivedParametricCRSPtr>::~nn() = default;
+}}
+#endif
+
 NS_PROJ_START
 
 namespace crs {
@@ -106,19 +130,30 @@ const BoundCRSPtr &CRS::canonicalBoundCRS() PROJ_CONST_DEFN {
  * @return a GeodeticCRSPtr, that might be null.
  */
 GeodeticCRSPtr CRS::extractGeodeticCRS() const {
+    auto raw = extractGeodeticCRSRaw();
+    if (raw) {
+        return std::dynamic_pointer_cast<GeodeticCRS>(
+            raw->shared_from_this().as_nullable());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+const GeodeticCRS *CRS::extractGeodeticCRSRaw() const {
     auto geodCRS = dynamic_cast<const GeodeticCRS *>(this);
     if (geodCRS) {
-        return std::dynamic_pointer_cast<GeodeticCRS>(
-            shared_from_this().as_nullable());
+        return geodCRS;
     }
     auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
     if (projCRS) {
-        return projCRS->baseCRS()->extractGeodeticCRS();
+        return projCRS->baseCRS()->extractGeodeticCRSRaw();
     }
     auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
     if (compoundCRS) {
         for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
-            auto retGeogCRS = subCrs->extractGeodeticCRS();
+            auto retGeogCRS = subCrs->extractGeodeticCRSRaw();
             if (retGeogCRS) {
                 return retGeogCRS;
             }
@@ -126,10 +161,11 @@ GeodeticCRSPtr CRS::extractGeodeticCRS() const {
     }
     auto boundCRS = dynamic_cast<const BoundCRS *>(this);
     if (boundCRS) {
-        return boundCRS->baseCRS()->extractGeodeticCRS();
+        return boundCRS->baseCRS()->extractGeodeticCRSRaw();
     }
     return nullptr;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -142,7 +178,12 @@ GeodeticCRSPtr CRS::extractGeodeticCRS() const {
  * @return a GeographicCRSPtr, that might be null.
  */
 GeographicCRSPtr CRS::extractGeographicCRS() const {
-    return std::dynamic_pointer_cast<GeographicCRS>(extractGeodeticCRS());
+    auto raw = extractGeodeticCRSRaw();
+    if (raw) {
+        return std::dynamic_pointer_cast<GeographicCRS>(
+            raw->shared_from_this().as_nullable());
+    }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------

@@ -99,6 +99,8 @@ PROJ_DLL std::string replaceAll(const std::string &str,
                                 const std::string &before,
                                 const std::string &after);
 
+size_t ci_find(const std::string &osStr, const char *needle);
+
 size_t ci_find(const std::string &osStr, const std::string &needle,
                size_t startPos = 0);
 

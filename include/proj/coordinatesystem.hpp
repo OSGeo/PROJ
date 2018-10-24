@@ -200,6 +200,12 @@ class CoordinateSystemAxis final : public common::IdentifiedObject,
         const override; // throw(io::FormattingException)
 
     static std::string normalizeAxisName(const std::string &str);
+
+    static CoordinateSystemAxisNNPtr
+    createLAT_NORTH(const common::UnitOfMeasure &unit);
+    static CoordinateSystemAxisNNPtr
+    createLONG_EAST(const common::UnitOfMeasure &unit);
+
     //! @endcond
 
   private:

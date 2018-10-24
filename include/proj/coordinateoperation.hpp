@@ -138,7 +138,7 @@ class CoordinateOperation : public common::ObjectUsage,
 
     /** \brief Return grids needed by an operation. */
     PROJ_DLL virtual std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextPtr databaseContext) const = 0;
+    gridsNeeded(const io::DatabaseContextPtr &databaseContext) const = 0;
 
     PROJ_DLL bool
     isPROJInstanciable(const io::DatabaseContextPtr &databaseContext) const;
@@ -211,7 +211,7 @@ using OperationParameterNNPtr = util::nn<OperationParameterPtr>;
  *
  * \remark Implements OperationParameter from \ref ISO_19111_2018
  */
-class OperationParameter : public GeneralOperationParameter {
+class OperationParameter final : public GeneralOperationParameter {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationParameter() override;
@@ -301,9 +301,9 @@ using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
  *
  * \remark Implements ParameterValue from \ref ISO_19111_2018
  */
-class ParameterValue : public util::BaseObject,
-                       public io::IWKTExportable,
-                       public util::IComparable {
+class ParameterValue final : public util::BaseObject,
+                             public io::IWKTExportable,
+                             public util::IComparable {
   public:
     /** Type of the value. */
     enum class Type {
@@ -335,12 +335,12 @@ class ParameterValue : public util::BaseObject,
     PROJ_DLL static ParameterValueNNPtr
     createFilename(const std::string &stringValueIn);
 
-    PROJ_DLL const Type &type() const;
-    PROJ_DLL const common::Measure &value() const;
-    PROJ_DLL const std::string &stringValue() const;
-    PROJ_DLL const std::string &valueFile() const;
-    PROJ_DLL int integerValue() const;
-    PROJ_DLL bool booleanValue() const;
+    PROJ_DLL const Type &type() PROJ_CONST_DECL;
+    PROJ_DLL const common::Measure &value() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &stringValue() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &valueFile() PROJ_CONST_DECL;
+    PROJ_DLL int integerValue() PROJ_CONST_DECL;
+    PROJ_DLL bool booleanValue() PROJ_CONST_DECL;
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -373,14 +373,14 @@ using OperationParameterValueNNPtr = util::nn<OperationParameterValuePtr>;
  *
  * \remark Implements OperationParameterValue from \ref ISO_19111_2018
  */
-class OperationParameterValue : public GeneralParameterValue {
+class OperationParameterValue final : public GeneralParameterValue {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationParameterValue() override;
     //! @endcond
 
-    PROJ_DLL const OperationParameterNNPtr &parameter() const;
-    PROJ_DLL const ParameterValueNNPtr &parameterValue() const;
+    PROJ_DLL const OperationParameterNNPtr &parameter() PROJ_CONST_DECL;
+    PROJ_DLL const ParameterValueNNPtr &parameterValue() PROJ_CONST_DECL;
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
@@ -395,7 +395,8 @@ class OperationParameterValue : public GeneralParameterValue {
         //! @cond Doxygen_Suppress
         static bool
         convertFromAbridged(const std::string &paramName, double &val,
-                            common::UnitOfMeasure &unit, int &paramEPSGCode);
+                            const common::UnitOfMeasure *&unit,
+                            int &paramEPSGCode);
 
     void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
@@ -441,10 +442,11 @@ class OperationMethod : public common::IdentifiedObject,
     PROJ_DLL ~OperationMethod() override;
     //! @endcond
 
-    PROJ_DLL const util::optional<std::string> &formula() const;
-    PROJ_DLL const util::optional<metadata::Citation> &formulaCitation() const;
+    PROJ_DLL const util::optional<std::string> &formula() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<metadata::Citation> &
+    formulaCitation() PROJ_CONST_DECL;
     PROJ_DLL const std::vector<GeneralOperationParameterNNPtr> &
-    parameters() const;
+    parameters() PROJ_CONST_DECL;
 
     //! @cond Doxygen_Suppress
     void _exportToWKT(io::WKTFormatter *formatter)
@@ -509,13 +511,15 @@ class SingleOperation : virtual public CoordinateOperation {
     //! @endcond
 
     PROJ_DLL const std::vector<GeneralParameterValueNNPtr> &
-    parameterValues() const;
-    PROJ_DLL const OperationMethodNNPtr &method() const;
+    parameterValues() PROJ_CONST_DECL;
+    PROJ_DLL const OperationMethodNNPtr &method() PROJ_CONST_DECL;
 
-    PROJ_DLL ParameterValuePtr parameterValue(const std::string &paramName,
-                                              int epsg_code = 0) const;
-    PROJ_DLL common::Measure parameterValueMeasure(const std::string &paramName,
-                                                   int epsg_code = 0) const;
+    PROJ_DLL const ParameterValuePtr &
+    parameterValue(const std::string &paramName, int epsg_code = 0) const
+        noexcept;
+    PROJ_DLL const common::Measure &
+    parameterValueMeasure(const std::string &paramName, int epsg_code = 0) const
+        noexcept;
 
     PROJ_DLL static SingleOperationNNPtr createPROJBased(
         const util::PropertyMap &properties, const std::string &PROJString,
@@ -529,7 +533,22 @@ class SingleOperation : virtual public CoordinateOperation {
                        util::IComparable::Criterion::STRICT) const override;
 
     PROJ_DLL std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextPtr databaseContext) const override;
+    gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        double
+        parameterValueNumeric(const std::string &paramName, int epsg_code,
+                              const common::UnitOfMeasure &targetUnit) const
+        noexcept;
+    double parameterValueNumeric(const char *paramName, int epsg_code,
+                                 const common::UnitOfMeasure &targetUnit) const
+        noexcept;
+    double parameterValueNumericAsSI(const std::string &paramName,
+                                     int epsg_code) const noexcept;
+    double parameterValueNumericAsSI(const char *paramName, int epsg_code) const
+        noexcept;
+    //! @endcond
 
   protected:
     explicit SingleOperation(const OperationMethodNNPtr &methodIn);
@@ -1239,8 +1258,7 @@ class Conversion : public SingleOperation {
            const std::vector<ParameterValueNNPtr> &values);
 
     static ConversionNNPtr
-    create(const util::PropertyMap &properties,
-           const std::string &method_wkt2_name,
+    create(const util::PropertyMap &properties, const char *method_wkt2_name,
            const std::vector<ParameterValueNNPtr> &values);
 };
 
@@ -1272,8 +1290,8 @@ class Transformation : public SingleOperation {
     PROJ_DLL ~Transformation() override;
     //! @endcond
 
-    PROJ_DLL const crs::CRSNNPtr &sourceCRS() const;
-    PROJ_DLL const crs::CRSNNPtr &targetCRS() const;
+    PROJ_DLL const crs::CRSNNPtr &sourceCRS() PROJ_CONST_DECL;
+    PROJ_DLL const crs::CRSNNPtr &targetCRS() PROJ_CONST_DECL;
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
@@ -1412,10 +1430,10 @@ class Transformation : public SingleOperation {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        std::string
+        const std::string &
         getNTv2Filename() const;
 
-    std::string getHeightToGeographic3DFilename() const;
+    const std::string &getHeightToGeographic3DFilename() const;
 
     bool isLongitudeRotation() const;
 
@@ -1488,7 +1506,7 @@ using ConcatenatedOperationNNPtr = util::nn<ConcatenatedOperationPtr>;
  *
  * \remark Implements ConcatenatedOperation from \ref ISO_19111_2018
  */
-class ConcatenatedOperation : public CoordinateOperation {
+class ConcatenatedOperation final : public CoordinateOperation {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ConcatenatedOperation() override;
@@ -1519,7 +1537,7 @@ class ConcatenatedOperation : public CoordinateOperation {
         bool checkExtent); // throw InvalidOperation
 
     PROJ_DLL std::set<GridDescription>
-    gridsNeeded(io::DatabaseContextPtr databaseContext) const override;
+    gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
   protected:
     explicit ConcatenatedOperation(
@@ -1539,10 +1557,10 @@ class ConcatenatedOperation : public CoordinateOperation {
 // ---------------------------------------------------------------------------
 
 class CoordinateOperationContext;
-/** Shared pointer of CoordinateOperationContext */
+/** Unique pointer of CoordinateOperationContext */
 using CoordinateOperationContextPtr =
-    std::shared_ptr<CoordinateOperationContext>;
-/** Non-null shared pointer of CoordinateOperationContext */
+    std::unique_ptr<CoordinateOperationContext>;
+/** Non-null unique pointer of CoordinateOperationContext */
 using CoordinateOperationContextNNPtr = util::nn<CoordinateOperationContextPtr>;
 
 /** \brief Context in which a coordinate operation is to be used.
@@ -1643,7 +1661,7 @@ class CoordinateOperationContext {
 
   protected:
     CoordinateOperationContext();
-    INLINED_MAKE_SHARED
+    INLINED_MAKE_UNIQUE
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1652,10 +1670,10 @@ class CoordinateOperationContext {
 // ---------------------------------------------------------------------------
 
 class CoordinateOperationFactory;
-/** Shared pointer of CoordinateOperationFactory */
+/** Unique pointer of CoordinateOperationFactory */
 using CoordinateOperationFactoryPtr =
-    std::shared_ptr<CoordinateOperationFactory>;
-/** Non-null shared pointer of CoordinateOperationFactory */
+    std::unique_ptr<CoordinateOperationFactory>;
+/** Non-null unique pointer of CoordinateOperationFactory */
 using CoordinateOperationFactoryNNPtr = util::nn<CoordinateOperationFactoryPtr>;
 
 /** \brief Creates coordinate operations. This factory is capable to find
@@ -1678,13 +1696,13 @@ class CoordinateOperationFactory {
     PROJ_DLL std::vector<CoordinateOperationNNPtr>
     createOperations(const crs::CRSNNPtr &sourceCRS,
                      const crs::CRSNNPtr &targetCRS,
-                     CoordinateOperationContextNNPtr context) const;
+                     const CoordinateOperationContextNNPtr &context) const;
 
     PROJ_DLL static CoordinateOperationFactoryNNPtr create();
 
   protected:
     CoordinateOperationFactory();
-    INLINED_MAKE_SHARED
+    INLINED_MAKE_UNIQUE
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

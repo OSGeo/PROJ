@@ -777,8 +777,8 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     if (res.empty()) {
         return false;
     }
-    packageName = res[0][0];
-    url = res[0][1].empty() ? res[0][2] : res[0][1];
+    packageName = std::move(res[0][0]);
+    url = res[0][1].empty() ? std::move(res[0][2]) : std::move(res[0][1]);
     openLicense = (res[0][3].empty() ? res[0][4] : res[0][3]) == "1";
     directDownload = (res[0][5].empty() ? res[0][6] : res[0][5]) == "1";
     return true;
@@ -938,8 +938,9 @@ util::PropertyMap AuthorityFactory::Private::createProperties(
                      .set(common::IdentifiedObject::NAME_KEY, name)
                      .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
     if (extent) {
-        props.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                  NN_NO_CHECK(extent));
+        props.set(
+            common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+            NN_NO_CHECK(std::static_pointer_cast<util::BaseObject>(extent)));
     }
     return props;
 }

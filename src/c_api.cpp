@@ -664,14 +664,14 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
 
 // ---------------------------------------------------------------------------
 
-static GeodeticCRSPtr extractGeodeticCRS(PJ_OBJ *crs, const char *fname) {
+static const GeodeticCRS *extractGeodeticCRS(PJ_OBJ *crs, const char *fname) {
     assert(crs);
     auto l_crs = dynamic_cast<const CRS *>(crs->obj.get());
     if (!l_crs) {
         proj_log_error(crs->ctx, fname, "Object is not a CRS");
         return nullptr;
     }
-    auto geodCRS = l_crs->extractGeodeticCRS();
+    auto geodCRS = l_crs->extractGeodeticCRSRaw();
     if (!geodCRS) {
         proj_log_error(crs->ctx, fname, "CRS has no geodetic CRS");
     }
@@ -695,7 +695,7 @@ PJ_OBJ *proj_obj_crs_get_geodetic_crs(PJ_OBJ *crs) {
     if (!geodCRS) {
         return nullptr;
     }
-    return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(geodCRS));
+    return PJ_OBJ::create(crs->ctx, geodCRS->shared_from_this());
 }
 
 // ---------------------------------------------------------------------------
@@ -1509,9 +1509,8 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
     CoordinateOperationContextNNPtr operationContext;
 
     explicit PJ_OPERATION_FACTORY_CONTEXT(
-        PJ_CONTEXT *ctxIn,
-        const CoordinateOperationContextNNPtr &operationContextIn)
-        : ctx(ctxIn), operationContext(operationContextIn) {}
+        PJ_CONTEXT *ctxIn, CoordinateOperationContextNNPtr &&operationContextIn)
+        : ctx(ctxIn), operationContext(std::move(operationContextIn)) {}
 
     PJ_OPERATION_FACTORY_CONTEXT(const PJ_OPERATION_FACTORY_CONTEXT &) = delete;
     PJ_OPERATION_FACTORY_CONTEXT &
@@ -1543,11 +1542,13 @@ proj_create_operation_factory_context(PJ_CONTEXT *ctx) {
                 AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
             auto operationContext =
                 CoordinateOperationContext::create(authFactory, nullptr, 0.0);
-            return new PJ_OPERATION_FACTORY_CONTEXT(ctx, operationContext);
+            return new PJ_OPERATION_FACTORY_CONTEXT(
+                ctx, std::move(operationContext));
         } else {
             auto operationContext =
                 CoordinateOperationContext::create(nullptr, nullptr, 0.0);
-            return new PJ_OPERATION_FACTORY_CONTEXT(ctx, operationContext);
+            return new PJ_OPERATION_FACTORY_CONTEXT(
+                ctx, std::move(operationContext));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());

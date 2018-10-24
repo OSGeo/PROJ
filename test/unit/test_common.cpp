@@ -53,18 +53,15 @@ TEST(common, unit_of_measure) {
     EXPECT_EQ(UnitOfMeasure::RADIAN.type(), UnitOfMeasure::Type::ANGULAR);
 
     EXPECT_EQ(Length(2.0, UnitOfMeasure("km", 1000.0))
-                  .convertToUnit(UnitOfMeasure::METRE)
-                  .value(),
+                  .convertToUnit(UnitOfMeasure::METRE),
               2000.0);
 
-    EXPECT_EQ(Angle(2.0, UnitOfMeasure::DEGREE)
-                  .convertToUnit(UnitOfMeasure::RADIAN)
-                  .value(),
-              2 * 0.017453292519943295);
+    EXPECT_EQ(
+        Angle(2.0, UnitOfMeasure::DEGREE).convertToUnit(UnitOfMeasure::RADIAN),
+        2 * 0.017453292519943295);
 
     EXPECT_EQ(Angle(2.5969213, UnitOfMeasure::GRAD)
-                  .convertToUnit(UnitOfMeasure::DEGREE)
-                  .value(),
+                  .convertToUnit(UnitOfMeasure::DEGREE),
               2.5969213 / 100.0 * 90.0);
 }
 

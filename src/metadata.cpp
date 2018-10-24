@@ -48,6 +48,19 @@ using namespace NS_PROJ::internal;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::util;
 
+#if 0
+namespace dropbox{ namespace oxygen {
+template<> nn<std::shared_ptr<NS_PROJ::metadata::Citation>>::~nn() = default;
+template<> nn<NS_PROJ::metadata::ExtentPtr>::~nn() = default;
+template<> nn<NS_PROJ::metadata::GeographicBoundingBoxPtr>::~nn() = default;
+template<> nn<NS_PROJ::metadata::GeographicExtentPtr>::~nn() = default;
+template<> nn<NS_PROJ::metadata::VerticalExtentPtr>::~nn() = default;
+template<> nn<NS_PROJ::metadata::TemporalExtentPtr>::~nn() = default;
+template<> nn<NS_PROJ::metadata::IdentifierPtr>::~nn() = default;
+template<> nn<NS_PROJ::metadata::PositionalAccuracyPtr>::~nn() = default;
+}}
+#endif
+
 NS_PROJ_START
 namespace metadata {
 
