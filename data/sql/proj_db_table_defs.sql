@@ -252,12 +252,6 @@ FOR EACH ROW BEGIN
         WHERE (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 1;
 END;
 
-CREATE TABLE coordinate_operation(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('conversion', 'grid_transformation', 'helmert_transformation', 'other_transformation', 'concatenated_operation')),
-    CONSTRAINT pk_coordinate_operation PRIMARY KEY (auth_name, code)
-);
 
 CREATE TABLE conversion(
     auth_name TEXT NOT NULL,
@@ -324,7 +318,7 @@ CREATE TABLE conversion(
 
     CONSTRAINT pk_conversion PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_conversion_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
-    CONSTRAINT fk_conversion_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
+    --CONSTRAINT fk_conversion_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_conversion_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_conversion_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_conversion_param3_uom FOREIGN KEY (param3_uom_auth_name, param3_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -337,8 +331,10 @@ CREATE TABLE conversion(
 CREATE TRIGGER conversion_insert_trigger
 BEFORE INSERT ON conversion
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on conversion violates constraint: coordinate_operation.type must be equal to ''conversion''')
-        WHERE (SELECT type FROM coordinate_operation WHERE coordinate_operation.auth_name = NEW.auth_name AND coordinate_operation.code = NEW.code) != 'conversion';
+
+    SELECT RAISE(ABORT, 'insert on conversion violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
+
     SELECT RAISE(ABORT, 'insert on conversion violates constraint: method should be known')
         WHERE ((CASE WHEN NEW.method_auth_name is NULL THEN '' ELSE NEW.method_auth_name END) || '_' || (CASE WHEN NEW.method_code is NULL THEN '' ELSE NEW.method_code END) || '_' || NEW.method_name) NOT IN (
             'EPSG_1024_Popular Visualisation Pseudo Mercator',
@@ -543,7 +539,7 @@ CREATE TABLE helmert_transformation(
     CONSTRAINT fk_helmert_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_helmert_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_helmert_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
-    CONSTRAINT fk_helmert_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
+    --CONSTRAINT fk_helmert_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_helmert_translation_uom FOREIGN KEY (translation_uom_auth_name, translation_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_helmert_rotation_uom FOREIGN KEY (rotation_uom_auth_name, rotation_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_helmert_scale_difference_uom FOREIGN KEY (scale_difference_uom_auth_name, scale_difference_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -556,8 +552,9 @@ CREATE TABLE helmert_transformation(
 CREATE TRIGGER helmert_transformation_insert_trigger
 BEFORE INSERT ON helmert_transformation
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: coordinate_operation.type must be equal to ''helmert_transformation''')
-        WHERE (SELECT type FROM coordinate_operation WHERE coordinate_operation.auth_name = NEW.auth_name AND coordinate_operation.code = NEW.code) != 'helmert_transformation';
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
+
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: translation_uom.type must be ''length''')
         WHERE (SELECT type FROM unit_of_measure WHERE unit_of_measure.auth_name = NEW.translation_uom_auth_name AND unit_of_measure.code = NEW.translation_uom_code) != 'length';
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: rotation_uom.type must be ''angle''')
@@ -609,7 +606,7 @@ CREATE TABLE grid_transformation(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_grid_transformation PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_grid_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
+    --CONSTRAINT fk_grid_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     --CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code),
@@ -619,8 +616,8 @@ CREATE TABLE grid_transformation(
 CREATE TRIGGER grid_transformation_insert_trigger
 BEFORE INSERT ON grid_transformation
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: coordinate_operation.type must be equal to ''grid_transformation''')
-        WHERE (SELECT type FROM coordinate_operation WHERE coordinate_operation.auth_name = NEW.auth_name AND coordinate_operation.code = NEW.code) != 'grid_transformation';
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
 
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: source_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
@@ -758,8 +755,8 @@ CREATE TABLE other_transformation(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_other_transformation PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_other_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    --CONSTRAINT fk_other_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
+    --CONSTRAINT fk_other_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
+    --CONSTRAINT fk_other_transformation_source_crs FOREIGN1 KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_other_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_other_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
     CONSTRAINT fk_other_transformation_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -774,8 +771,8 @@ CREATE TABLE other_transformation(
 CREATE TRIGGER other_transformation_insert_trigger
 BEFORE INSERT ON other_transformation
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: coordinate_operation.type must be equal to ''other_transformation''')
-        WHERE (SELECT type FROM coordinate_operation WHERE coordinate_operation.auth_name = NEW.auth_name AND coordinate_operation.code = NEW.code) != 'other_transformation';
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
 
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: source_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
@@ -814,20 +811,30 @@ CREATE TABLE concatenated_operation(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_concatenated_operation PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
+    --CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     --CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_concatenated_operation_step1 FOREIGN KEY (step1_auth_name, step1_code) REFERENCES coordinate_operation(auth_name, code),
-    CONSTRAINT fk_concatenated_operation_step2 FOREIGN KEY (step2_auth_name, step2_code) REFERENCES coordinate_operation(auth_name, code),
-    CONSTRAINT fk_concatenated_operation_step3 FOREIGN KEY (step3_auth_name, step3_code) REFERENCES coordinate_operation(auth_name, code),
+    --CONSTRAINT fk_concatenated_operation_step1 FOREIGN KEY (step1_auth_name, step1_code) REFERENCES coordinate_operation(auth_name, code),
+    --CONSTRAINT fk_concatenated_operation_step2 FOREIGN KEY (step2_auth_name, step2_code) REFERENCES coordinate_operation(auth_name, code),
+    --CONSTRAINT fk_concatenated_operation_step3 FOREIGN KEY (step3_auth_name, step3_code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_concatenated_operation_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
 
 CREATE TRIGGER concatenated_operation_insert_trigger
 BEFORE INSERT ON concatenated_operation
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: coordinate_operation.type must be equal to ''concatenated_operation''')
-        WHERE (SELECT type FROM coordinate_operation WHERE coordinate_operation.auth_name = NEW.auth_name AND coordinate_operation.code = NEW.code) != 'concatenated_operation';
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step1(auth_name, code) must already exist in coordinate_operation_with_conversion_view')
+        WHERE NOT EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.step1_auth_name AND covwv.code = NEW.step1_code);
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step2(auth_name, code) must already exist in coordinate_operation_with_conversion_view')
+        WHERE NOT EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.step2_auth_name AND covwv.code = NEW.step2_code);
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step3(auth_name, code) must already exist in coordinate_operation_with_conversion_view')
+        WHERE NEW.step3_auth_name IS NOT NULL AND NOT EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.step3_auth_name AND covwv.code = NEW.step3_code);
 
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: source_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
@@ -868,6 +875,10 @@ CREATE VIEW coordinate_operation_view AS
            area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM concatenated_operation
 ;
+
+CREATE VIEW coordinate_operation_with_conversion_view AS
+    SELECT auth_name, code, table_name AS type FROM coordinate_operation_view UNION ALL
+    SELECT auth_name, code, 'conversion' FROM conversion;
 
 CREATE VIEW crs_view AS
     SELECT 'geodetic_crs' AS table_name, auth_name, code, name, type,
@@ -930,5 +941,5 @@ CREATE VIEW authority_list AS
     UNION
     SELECT DISTINCT auth_name FROM crs_view
     UNION
-    SELECT DISTINCT auth_name FROM coordinate_operation
+    SELECT DISTINCT auth_name FROM coordinate_operation_view
 ;

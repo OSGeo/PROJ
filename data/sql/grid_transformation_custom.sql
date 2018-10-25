@@ -1,7 +1,5 @@
 -- This file is hand generated.
 
-INSERT INTO "coordinate_operation" VALUES('PROJ','EPSG_5799_TO_EPSG_4937','grid_transformation');
-
 INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_5799_TO_EPSG_4937','DVR90 height to ETRS89',
     'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
@@ -11,8 +9,6 @@ INSERT INTO "grid_transformation" VALUES(
     NULL,
     'EPSG','8666','Geoid (height correction) model file','dvr90.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,0);
-
-INSERT INTO "coordinate_operation" VALUES('PROJ','EPSG_5733_TO_EPSG_4937','grid_transformation');
 
 INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_5733_TO_EPSG_4937','DNN height to ETRS89',

@@ -2204,9 +2204,10 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
     const std::string &code, bool allowConcatenated,
     bool usePROJAlternativeGridNames) const {
-    auto res = d->runWithCodeParam("SELECT type FROM coordinate_operation "
-                                   "WHERE auth_name = ? AND code = ?",
-                                   code);
+    auto res = d->runWithCodeParam(
+        "SELECT type FROM coordinate_operation_with_conversion_view "
+        "WHERE auth_name = ? AND code = ?",
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("coordinate operation not found",
                                            getAuthority(), code);
@@ -3366,7 +3367,8 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
         sql = "SELECT code FROM compound_crs WHERE ";
         break;
     case ObjectType::COORDINATE_OPERATION:
-        sql = "SELECT code FROM coordinate_operation WHERE ";
+        sql =
+            "SELECT code FROM coordinate_operation_with_conversion_view WHERE ";
         break;
     case ObjectType::CONVERSION:
         sql = "SELECT code FROM conversion WHERE ";

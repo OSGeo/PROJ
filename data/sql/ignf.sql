@@ -2,1452 +2,1104 @@
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_AMST63','Ile d''Amsterdam 1963','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','AMST63','Ile d''Amsterdam 1963','geocentric','EPSG','6500','IGNF','DATUM_AMST63','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_AMST63_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_AMST63_TO_EPSG_4978','Ile d''Amsterdam 1963 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','AMST63','EPSG','4978','EPSG','1262',NULL,109.7530,-528.1330,-362.2440,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_ANAA92','MOP92 (Anaa) Tuamotu','EPSG','7030','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','ANAA92','MOP92 (Anaa) Tuamotu','geocentric','EPSG','6500','IGNF','DATUM_ANAA92','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ANAA92_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ANAA92_TO_EPSG_4978','MOP92 (Anaa) Tuamotu to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','ANAA92','EPSG','4978','EPSG','1262',NULL,1.5000,3.8400,4.8100,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_APAT86','MOP86 (Apataki, Rapa, Hao) Tuamotu','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','APAT86','MOP86 (Apataki, Rapa, Hao) Tuamotu','geocentric','EPSG','6500','IGNF','DATUM_APAT86','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_APAT86_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_APAT86_TO_EPSG_4978','MOP86 (Apataki, Rapa, Hao) Tuamotu to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','APAT86','EPSG','4978','EPSG','1262',NULL,216.8400,118.8100,19.6100,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_ATI','Ancienne Triangulation des Ingenieurs','EPSG','7027','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','ATI','Ancienne Triangulation des Ingenieurs','geocentric','EPSG','6500','IGNF','DATUM_ATI','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ATI_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ATI_TO_EPSG_4978','Ancienne Triangulation des Ingenieurs to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','ATI','EPSG','4978','EPSG','1262',NULL,1127.0000,22.0000,57.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_CAD97','Cadastre 1997','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','CAD97','Cadastre 1997','geocentric','EPSG','6500','IGNF','DATUM_CAD97','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CAD97_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CAD97_TO_EPSG_4978','Cadastre 1997 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','CAD97','EPSG','4978','EPSG','1262',NULL,-381.7880,-57.5010,-256.6730,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_CIOBIH','CIO-BIH','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','CIOBIH','CIO-BIH','geocentric','EPSG','6500','IGNF','DATUM_CIOBIH','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CIOBIH_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CIOBIH_TO_EPSG_4978','CIO-BIH to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','CIOBIH','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.5000,'EPSG','9001',0.0000,0.0000,0.0140,'EPSG','9104',-0.100000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_CROZ63','Crozet 1963','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','CROZ63','Crozet 1963','geocentric','EPSG','6500','IGNF','DATUM_CROZ63','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CROZ63_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CROZ63_TO_EPSG_4978','Crozet 1963 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','CROZ63','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_CSG67','Guyane CSG67','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','CSG67','Guyane CSG67','geocentric','EPSG','6500','IGNF','DATUM_CSG67','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CSG67_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CSG67_TO_EPSG_4978','Guyane CSG67 to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','CSG67','EPSG','4978','EPSG','1262',NULL,-193.0660,236.9930,105.4470,'EPSG','9001',0.4814,-0.8074,0.1276,'EPSG','9104',1.564900,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_ED50','ED50','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','ED50','ED50','geocentric','EPSG','6500','IGNF','DATUM_ED50','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ED50_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ED50_TO_EPSG_4978','ED50 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','ED50','EPSG','4978','EPSG','1262',NULL,-84.0000,-97.0000,-117.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_EFATE57','EFATE-IGN 1957','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','EFATE57','EFATE-IGN 1957','geocentric','EPSG','6500','IGNF','DATUM_EFATE57','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_EFATE57_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_EFATE57_TO_EPSG_4978','EFATE-IGN 1957 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','EFATE57','EPSG','4978','EPSG','1262',NULL,-127.0000,-769.0000,472.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_ETRS89','Systeme de reference terrestre Europeen (1989)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','ETRS89','Systeme de reference terrestre Europeen (1989)','geocentric','EPSG','6500','IGNF','DATUM_ETRS89','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ETRS89_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ETRS89_TO_EPSG_4978','Systeme de reference terrestre Europeen (1989) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','ETRS89','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_FANGA84','MOP84 (Fangataufa 1984)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','FANGA84','MOP84 (Fangataufa 1984)','geocentric','EPSG','6500','IGNF','DATUM_FANGA84','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_FANGA84_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_FANGA84_TO_EPSG_4978','MOP84 (Fangataufa 1984) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','FANGA84','EPSG','4978','EPSG','1262',NULL,150.5700,158.3300,118.3200,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_GUAD48','Guadeloupe Ste Anne','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','GUAD48','Guadeloupe Ste Anne','geocentric','EPSG','6500','IGNF','DATUM_GUAD48','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_GUAD48_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_GUAD48_TO_EPSG_4978','Guadeloupe Ste Anne to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','GUAD48','EPSG','4978','EPSG','1262',NULL,-472.2900,-5.6300,-304.1200,'EPSG','9001',0.4362,-0.8374,0.2563,'EPSG','9104',1.898400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_GUADFM49','Guadeloupe Fort Marigot','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','GUADFM49','Guadeloupe Fort Marigot','geocentric','EPSG','6500','IGNF','DATUM_GUADFM49','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_GUADFM49_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_GUADFM49_TO_EPSG_4978','Guadeloupe Fort Marigot to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','GUADFM49','EPSG','4978','EPSG','1262',NULL,136.5960,248.1480,-429.7890,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_IGN63','IGN 1963 (Hiva Oa, Tahuata, Mohotani)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','IGN63','IGN 1963 (Hiva Oa, Tahuata, Mohotani)','geocentric','EPSG','6500','IGNF','DATUM_IGN63','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_IGN63_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_IGN63_TO_EPSG_4978','IGN 1963 (Hiva Oa, Tahuata, Mohotani) to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','IGN63','EPSG','4978','EPSG','1262',NULL,410.7210,55.0490,80.7460,'EPSG','9001',-2.5779,-2.3514,-0.6664,'EPSG','9104',17.331100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_IGN72','IGN 1972 Grande-Terre / Ile des Pins','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','IGN72','IGN 1972 Grande-Terre / Ile des Pins','geocentric','EPSG','6500','IGNF','DATUM_IGN72','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_IGN72_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_IGN72_TO_EPSG_4978','IGN 1972 Grande-Terre / Ile des Pins to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','IGN72','EPSG','4978','EPSG','1262',NULL,-11.6400,-348.6000,291.6800,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_KAUE70','MHPF70 (Kauehi) Tuamotu','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','KAUE70','MHPF70 (Kauehi) Tuamotu','geocentric','EPSG','6500','IGNF','DATUM_KAUE70','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_KAUE70_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_KAUE70_TO_EPSG_4978','MHPF70 (Kauehi) Tuamotu to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','KAUE70','EPSG','4978','EPSG','1262',NULL,126.7400,300.1000,-75.4900,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_KERG62CAR','Kerguelen - K0','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','KERG62CAR','Kerguelen - K0','geocentric','EPSG','6500','IGNF','DATUM_KERG62CAR','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_KERG62CAR_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_KERG62CAR_TO_EPSG_4978','Kerguelen - K0 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','KERG62CAR','EPSG','4978','EPSG','1262',NULL,144.8990,-186.7700,100.9230,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_LIFOU56','Lifou - Iles Loyaute (IGN56)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','LIFOU56','Lifou - Iles Loyaute (IGN56)','geocentric','EPSG','6500','IGNF','DATUM_LIFOU56','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_LIFOU56_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_LIFOU56_TO_EPSG_4978','Lifou - Iles Loyaute (IGN56) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','LIFOU56','EPSG','4978','EPSG','1262',NULL,336.0000,223.0000,-231.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_LUREF','Nouvelle Triangulation du Grand Duche du Luxembourg','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','LUREF','Nouvelle Triangulation du Grand Duche du Luxembourg','geocentric','EPSG','6500','IGNF','DATUM_LUREF','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_LUREF_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_LUREF_TO_EPSG_4978','Nouvelle Triangulation du Grand Duche du Luxembourg to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','LUREF','EPSG','4978','EPSG','1262',NULL,-192.9860,13.6730,-39.3090,'EPSG','9001',-0.4099,-2.9332,2.6881,'EPSG','9104',0.430000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_MARE53','Mare - Iles Loyaute (IGN53)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','MARE53','Mare - Iles Loyaute (IGN53)','geocentric','EPSG','6500','IGNF','DATUM_MARE53','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MARE53_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MARE53_TO_EPSG_4978','Mare - Iles Loyaute (IGN53) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','MARE53','EPSG','4978','EPSG','1262',NULL,287.0000,178.0000,-136.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_MARQUI72','IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','MARQUI72','IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises','geocentric','EPSG','6500','IGNF','DATUM_MARQUI72','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MARQUI72_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MARQUI72_TO_EPSG_4978','IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','MARQUI72','EPSG','4978','EPSG','1262',NULL,327.8400,-14.9600,59.3300,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_MART38','Martinique Fort-Desaix','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','MART38','Martinique Fort-Desaix','geocentric','EPSG','6500','IGNF','DATUM_MART38','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MART38_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MART38_TO_EPSG_4978','Martinique Fort-Desaix to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','MART38','EPSG','4978','EPSG','1262',NULL,126.9260,547.9390,130.4090,'EPSG','9001',-2.7867,5.1612,-0.8584,'EPSG','9104',13.822650,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_MAYO50','Mayotte Combani','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','MAYO50','Mayotte Combani','geocentric','EPSG','6500','IGNF','DATUM_MAYO50','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MAYO50_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MAYO50_TO_EPSG_4978','Mayotte Combani to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','MAYO50','EPSG','4978','EPSG','1262',NULL,-599.9280,-275.5520,-195.6650,'EPSG','9001',-0.0835,-0.4715,0.0602,'EPSG','9104',49.281400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_MHEFO55F','MHEFO 1955 (Fatu Huku)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','MHEFO55F','MHEFO 1955 (Fatu Huku)','geocentric','EPSG','6500','IGNF','DATUM_MHEFO55F','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MHEFO55F_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MHEFO55F_TO_EPSG_4978','MHEFO 1955 (Fatu Huku) to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','MHEFO55F','EPSG','4978','EPSG','1262',NULL,347.1030,1078.1250,2623.9220,'EPSG','9001',33.8875,-70.6773,9.3943,'EPSG','9104',186.074000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_MHPF67','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','MHPF67','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles)','geocentric','EPSG','6500','IGNF','DATUM_MHPF67','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MHPF67_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MHPF67_TO_EPSG_4978','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','MHPF67','EPSG','4978','EPSG','1262',NULL,338.0800,212.5800,-296.1700,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_MOOREA87','Moorea 1987','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','MOOREA87','Moorea 1987','geocentric','EPSG','6500','IGNF','DATUM_MOOREA87','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MOOREA87_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MOOREA87_TO_EPSG_4978','Moorea 1987 to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','MOOREA87','EPSG','4978','EPSG','1262',NULL,215.9820,149.5930,176.2290,'EPSG','9001',3.2624,1.6920,1.1571,'EPSG','9104',10.477300,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_MOP90','MOP90 (Tetiaroa) Iles de la Societe','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','MOP90','MOP90 (Tetiaroa) Iles de la Societe','geocentric','EPSG','6500','IGNF','DATUM_MOP90','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MOP90_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MOP90_TO_EPSG_4978','MOP90 (Tetiaroa) Iles de la Societe to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','MOP90','EPSG','4978','EPSG','1262',NULL,217.0370,86.9590,23.9560,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_NTF','Nouvelle Triangulation Francaise','EPSG','7011','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','NTF','Nouvelle Triangulation Francaise','geocentric','EPSG','6500','IGNF','DATUM_NTF','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTF_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NTF_TO_EPSG_4978','Nouvelle Triangulation Francaise to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','NTF','EPSG','4978','EPSG','1262',NULL,-168.0000,-60.0000,320.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTF_TO_EPSG_4978_GRID','grid_transformation');
 INSERT INTO "grid_transformation" VALUES('IGNF','IGNF_NTF_TO_EPSG_4978_GRID','Nouvelle Triangulation Francaise to WGS 84 (2)','EPSG','9615','NTv2','IGNF','NTF','EPSG','4978','EPSG','1262',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_NUKU72','IGN 1972 Nuku Hiva','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU72','IGN 1972 Nuku Hiva','geocentric','EPSG','6500','IGNF','DATUM_NUKU72','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NUKU72_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NUKU72_TO_EPSG_4978','IGN 1972 Nuku Hiva to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','NUKU72','EPSG','4978','EPSG','1262',NULL,165.7320,216.7200,180.5050,'EPSG','9001',-0.6434,-0.4512,-0.0791,'EPSG','9104',7.420400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_NUKU94','SAT94 (Nukutavake) Tuamotu','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU94','SAT94 (Nukutavake) Tuamotu','geocentric','EPSG','6500','IGNF','DATUM_NUKU94','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NUKU94_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NUKU94_TO_EPSG_4978','SAT94 (Nukutavake) Tuamotu to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','NUKU94','EPSG','4978','EPSG','1262',NULL,197.1600,200.1700,-48.0800,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_OUVEA72CAR','Ouvea - Iles Loyaute (MHNC 1972 - OUVEA)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','OUVEA72CAR','Ouvea - Iles Loyaute (MHNC 1972 - OUVEA)','geocentric','EPSG','6500','IGNF','DATUM_OUVEA72CAR','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_OUVEA72CAR_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_OUVEA72CAR_TO_EPSG_4978','Ouvea - Iles Loyaute (MHNC 1972 - OUVEA) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','OUVEA72CAR','EPSG','4978','EPSG','1262',NULL,-13.0000,-348.0000,292.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_PETRELS72','Petrels - IGN 1972','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','PETRELS72','Petrels - IGN 1972','geocentric','EPSG','6500','IGNF','DATUM_PETRELS72','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_PETRELS72_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_PETRELS72_TO_EPSG_4978','Petrels - IGN 1972 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','PETRELS72','EPSG','4978','EPSG','1262',NULL,365.0000,194.0000,166.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RAIA53','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RAIA53','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine','geocentric','EPSG','6500','IGNF','DATUM_RAIA53','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RAIA53_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RAIA53_TO_EPSG_4978','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RAIA53','EPSG','4978','EPSG','1262',NULL,65.0300,341.5500,76.6700,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_REUN47','Reunion 1947','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','REUN47','Reunion 1947','geocentric','EPSG','6500','IGNF','DATUM_REUN47','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_REUN47_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_REUN47_TO_EPSG_4978','Reunion 1947 to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','REUN47','EPSG','4978','EPSG','1262',NULL,789.5240,-626.4860,-89.9040,'EPSG','9001',0.6006,76.7946,-10.5788,'EPSG','9104',-32.324100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGF93','Reseau geodesique francais 1993','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGF93','Reseau geodesique francais 1993','geocentric','EPSG','6500','IGNF','DATUM_RGF93','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGF93_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGF93_TO_EPSG_4978','Reseau geodesique francais 1993 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGF93','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGFG95','Reseau geodesique francais de Guyane 1995','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGFG95','Reseau geodesique francais de Guyane 1995','geocentric','EPSG','6500','IGNF','DATUM_RGFG95','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGFG95_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGFG95_TO_EPSG_4978','Reseau geodesique francais de Guyane 1995 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGFG95','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGM04','RGM04 (Reseau Geodesique de Mayotte 2004)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGM04','RGM04 (Reseau Geodesique de Mayotte 2004)','geocentric','EPSG','6500','IGNF','DATUM_RGM04','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGM04_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGM04_TO_EPSG_4978','RGM04 (Reseau Geodesique de Mayotte 2004) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGM04','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGNC','Reseau Geodesique de Nouvelle-Caledonie','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGNC','Reseau Geodesique de Nouvelle-Caledonie','geocentric','EPSG','6500','IGNF','DATUM_RGNC','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGNC_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGNC_TO_EPSG_4978','Reseau Geodesique de Nouvelle-Caledonie to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGNC','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGPF','RGPF (Reseau Geodesique de Polynesie Francaise)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGPF','RGPF (Reseau Geodesique de Polynesie Francaise)','geocentric','EPSG','6500','IGNF','DATUM_RGPF','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGPF_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGPF_TO_EPSG_4978','RGPF (Reseau Geodesique de Polynesie Francaise) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGPF','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGR92','Reseau geodesique Reunion 1992','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGR92','Reseau geodesique Reunion 1992','geocentric','EPSG','6500','IGNF','DATUM_RGR92','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGR92_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGR92_TO_EPSG_4978','Reseau geodesique Reunion 1992 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGR92','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGSPM06','Reseau Geodesique Saint-Pierre-et-Miquelon (2006)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGSPM06','Reseau Geodesique Saint-Pierre-et-Miquelon (2006)','geocentric','EPSG','6500','IGNF','DATUM_RGSPM06','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGSPM06_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGSPM06_TO_EPSG_4978','Reseau Geodesique Saint-Pierre-et-Miquelon (2006) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGSPM06','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGTAAF07','Reseau Geodesique des TAAF (2007)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGTAAF07','Reseau Geodesique des TAAF (2007)','geocentric','EPSG','6500','IGNF','DATUM_RGTAAF07','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGTAAF07_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGTAAF07_TO_EPSG_4978','Reseau Geodesique des TAAF (2007) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RGTAAF07','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RRAF91','RRAF 1991 (Reseau de Reference des Antilles Francaises)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RRAF91','RRAF 1991 (Reseau de Reference des Antilles Francaises)','geocentric','EPSG','6500','IGNF','DATUM_RRAF91','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RRAF91_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RRAF91_TO_EPSG_4978','RRAF 1991 (Reseau de Reference des Antilles Francaises) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','RRAF91','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_SAT84','SAT84 (Rurutu) Iles Australes','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','SAT84','SAT84 (Rurutu) Iles Australes','geocentric','EPSG','6500','IGNF','DATUM_SAT84','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_SAT84_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_SAT84_TO_EPSG_4978','SAT84 (Rurutu) Iles Australes to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','SAT84','EPSG','4978','EPSG','1262',NULL,202.1300,174.6000,-15.7400,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_SHOM84','SHOM 1984 Martinique Montagne Du Vauclin','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','SHOM84','SHOM 1984 Martinique Montagne Du Vauclin','geocentric','EPSG','6500','IGNF','DATUM_SHOM84','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_SHOM84_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_SHOM84_TO_EPSG_4978','SHOM 1984 Martinique Montagne Du Vauclin to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','SHOM84','EPSG','4978','EPSG','1262',NULL,189.5060,486.5470,148.7830,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_STPL69','Ile de Saint-Paul 1969','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','STPL69','Ile de Saint-Paul 1969','geocentric','EPSG','6500','IGNF','DATUM_STPL69','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_STPL69_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_STPL69_TO_EPSG_4978','Ile de Saint-Paul 1969 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','STPL69','EPSG','4978','EPSG','1262',NULL,225.5710,-346.6080,-46.5670,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_STPM50','St Pierre et Miquelon 1950','EPSG','7008','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','STPM50','St Pierre et Miquelon 1950','geocentric','EPSG','6500','IGNF','DATUM_STPM50','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_STPM50_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_STPM50_TO_EPSG_4978','St Pierre et Miquelon 1950 to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','STPM50','EPSG','4978','EPSG','1262',NULL,-95.5930,573.7630,173.4420,'EPSG','9001',-0.9602,1.2510,-1.3918,'EPSG','9104',42.626500,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_TAHAA','Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','TAHAA','Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est)','geocentric','EPSG','6500','IGNF','DATUM_TAHAA','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHAA_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHAA_TO_EPSG_4978','Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est) to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','TAHAA','EPSG','4978','EPSG','1262',NULL,72.4380,345.9180,79.4860,'EPSG','9001',-1.6045,-0.8823,-0.5565,'EPSG','9104',1.374600,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_TAHI51','Tahiti-Terme Nord 1951','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','TAHI51','Tahiti-Terme Nord 1951','geocentric','EPSG','6500','IGNF','DATUM_TAHI51','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHI51_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHI51_TO_EPSG_4978','Tahiti-Terme Nord 1951 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','TAHI51','EPSG','4978','EPSG','1262',NULL,162.0000,117.0000,154.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_TAHI79','IGN79 (Tahiti) Iles de la Societe','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','TAHI79','IGN79 (Tahiti) Iles de la Societe','geocentric','EPSG','6500','IGNF','DATUM_TAHI79','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHI79_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHI79_TO_EPSG_4978','IGN79 (Tahiti) Iles de la Societe to WGS 84','EPSG','1033','Position Vector transformation (geocentric domain)','IGNF','TAHI79','EPSG','4978','EPSG','1262',NULL,221.5250,152.9480,176.7680,'EPSG','9001',2.3847,1.3896,0.8770,'EPSG','9104',11.474100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_TANNA','Tanna Bloc Sud','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','TANNA','Tanna Bloc Sud','geocentric','EPSG','6500','IGNF','DATUM_TANNA','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TANNA_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TANNA_TO_EPSG_4978','Tanna Bloc Sud to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','TANNA','EPSG','4978','EPSG','1262',NULL,-139.0000,-967.0000,436.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_TERA50','Pointe Geologie - Perroud 1950','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','TERA50','Pointe Geologie - Perroud 1950','geocentric','EPSG','6500','IGNF','DATUM_TERA50','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TERA50_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TERA50_TO_EPSG_4978','Pointe Geologie - Perroud 1950 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','TERA50','EPSG','4978','EPSG','1262',NULL,324.9120,153.2820,172.0260,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_TUBU69','MHPF 1969 (Tubuai) Iles Australes','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','TUBU69','MHPF 1969 (Tubuai) Iles Australes','geocentric','EPSG','6500','IGNF','DATUM_TUBU69','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TUBU69_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TUBU69_TO_EPSG_4978','MHPF 1969 (Tubuai) Iles Australes to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','TUBU69','EPSG','4978','EPSG','1262',NULL,237.1700,171.6100,-77.8400,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WALL78','Wallis-Uvea 1978 (MOP78)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','WALL78','Wallis-Uvea 1978 (MOP78)','geocentric','EPSG','6500','IGNF','DATUM_WALL78','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WALL78_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WALL78_TO_EPSG_4978','Wallis-Uvea 1978 (MOP78) to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','WALL78','EPSG','4978','EPSG','1262',NULL,253.0000,-133.0000,-127.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WGS72','World Geodetic System 1972','EPSG','7043','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','WGS72','World Geodetic System 1972','geocentric','EPSG','6500','IGNF','DATUM_WGS72','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS72_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS72_TO_EPSG_4978','World Geodetic System 1972 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','WGS72','EPSG','4978','EPSG','1262',NULL,0.0000,12.0000,6.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WGS84','World Geodetic System 1984','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','WGS84','World Geodetic System 1984','geocentric','EPSG','6500','IGNF','DATUM_WGS84','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS84_TO_EPSG_4978','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS84_TO_EPSG_4978','World Geodetic System 1984 to WGS 84','EPSG','1031','Geocentric translations (geocentric domain)','IGNF','WGS84','EPSG','4978','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','AMST63GEO','Ile d''Amsterdam 1963','geographic 2D','EPSG','6424','IGNF','DATUM_AMST63','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_AMST63GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_AMST63GEO_TO_EPSG_4326','Ile d''Amsterdam 1963 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','AMST63GEO','EPSG','4326','EPSG','1262',NULL,109.7530,-528.1330,-362.2440,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','ANAA92GEO','MOP92 (Anaa) Tuamotu','geographic 2D','EPSG','6424','IGNF','DATUM_ANAA92','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ANAA92GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ANAA92GEO_TO_EPSG_4326','MOP92 (Anaa) Tuamotu to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ANAA92GEO','EPSG','4326','EPSG','1262',NULL,1.5000,3.8400,4.8100,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','APAT86GEO','MOP86 (Apataki, Rapa, Hao) Tuamotu','geographic 2D','EPSG','6424','IGNF','DATUM_APAT86','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_APAT86GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_APAT86GEO_TO_EPSG_4326','MOP86 (Apataki, Rapa, Hao) Tuamotu to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','APAT86GEO','EPSG','4326','EPSG','1262',NULL,216.8400,118.8100,19.6100,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','ATIGEO','Ancienne Triangulation des Ingenieurs','geographic 2D','EPSG','6424','IGNF','DATUM_ATI','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ATIGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ATIGEO_TO_EPSG_4326','Ancienne Triangulation des Ingenieurs to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ATIGEO','EPSG','4326','EPSG','1262',NULL,1127.0000,22.0000,57.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','CAD97GEO','Cadastre 1997','geographic 2D','EPSG','6424','IGNF','DATUM_CAD97','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CAD97GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CAD97GEO_TO_EPSG_4326','Cadastre 1997 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','CAD97GEO','EPSG','4326','EPSG','1262',NULL,-381.7880,-57.5010,-256.6730,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','CROZ63GEO','Crozet 1963','geographic 2D','EPSG','6424','IGNF','DATUM_CROZ63','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CROZ63GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CROZ63GEO_TO_EPSG_4326','Crozet 1963 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','CROZ63GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','CSG67GEO','Guyane CSG67','geographic 2D','EPSG','6424','IGNF','DATUM_CSG67','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_CSG67GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_CSG67GEO_TO_EPSG_4326','Guyane CSG67 to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','CSG67GEO','EPSG','4326','EPSG','1262',NULL,-193.0660,236.9930,105.4470,'EPSG','9001',0.4814,-0.8074,0.1276,'EPSG','9104',1.564900,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','ED50G','ED50','geographic 2D','EPSG','6424','IGNF','DATUM_ED50','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ED50G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ED50G_TO_EPSG_4326','ED50 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ED50G','EPSG','4326','EPSG','1262',NULL,-84.0000,-97.0000,-117.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','EFATE57GEO','EFATE-IGN 1957','geographic 2D','EPSG','6424','IGNF','DATUM_EFATE57','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_EFATE57GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_EFATE57GEO_TO_EPSG_4326','EFATE-IGN 1957 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','EFATE57GEO','EPSG','4326','EPSG','1262',NULL,-127.0000,-769.0000,472.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_ETRS89GEO','ETRS89 geographiques (dms)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','ETRS89GEO','ETRS89 geographiques (dms)','geographic 2D','EPSG','6424','IGNF','DATUM_ETRS89GEO','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_ETRS89GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_ETRS89GEO_TO_EPSG_4326','ETRS89 geographiques (dms) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','ETRS89GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','FANGA84GEO','MOP84 (Fangataufa 1984)','geographic 2D','EPSG','6424','IGNF','DATUM_FANGA84','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_FANGA84GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_FANGA84GEO_TO_EPSG_4326','MOP84 (Fangataufa 1984) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','FANGA84GEO','EPSG','4326','EPSG','1262',NULL,150.5700,158.3300,118.3200,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','GUAD48GEO','Guadeloupe Ste Anne','geographic 2D','EPSG','6424','IGNF','DATUM_GUAD48','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_GUAD48GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_GUAD48GEO_TO_EPSG_4326','Guadeloupe Ste Anne to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','GUAD48GEO','EPSG','4326','EPSG','1262',NULL,-472.2900,-5.6300,-304.1200,'EPSG','9001',0.4362,-0.8374,0.2563,'EPSG','9104',1.898400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','GUADFM49GEO','Guadeloupe Fort Marigot','geographic 2D','EPSG','6424','IGNF','DATUM_GUADFM49','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_GUADFM49GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_GUADFM49GEO_TO_EPSG_4326','Guadeloupe Fort Marigot to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','GUADFM49GEO','EPSG','4326','EPSG','1262',NULL,136.5960,248.1480,-429.7890,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','IGN63GEO','IGN 1963 (Hiva Oa, Tahuata, Mohotani)','geographic 2D','EPSG','6424','IGNF','DATUM_IGN63','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_IGN63GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_IGN63GEO_TO_EPSG_4326','IGN 1963 (Hiva Oa, Tahuata, Mohotani) to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','IGN63GEO','EPSG','4326','EPSG','1262',NULL,410.7210,55.0490,80.7460,'EPSG','9001',-2.5779,-2.3514,-0.6664,'EPSG','9104',17.331100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','IGN72GEO','IGN 1972 Grande-Terre / Ile des Pins','geographic 2D','EPSG','6424','IGNF','DATUM_IGN72','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_IGN72GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_IGN72GEO_TO_EPSG_4326','IGN 1972 Grande-Terre / Ile des Pins to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','IGN72GEO','EPSG','4326','EPSG','1262',NULL,-11.6400,-348.6000,291.6800,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','KAUE70GEO','MHPF70 (Kauehi) Tuamotu','geographic 2D','EPSG','6424','IGNF','DATUM_KAUE70','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_KAUE70GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_KAUE70GEO_TO_EPSG_4326','MHPF70 (Kauehi) Tuamotu to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','KAUE70GEO','EPSG','4326','EPSG','1262',NULL,126.7400,300.1000,-75.4900,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','KERG62GEO','Kerguelen - K0','geographic 2D','EPSG','6424','IGNF','DATUM_KERG62CAR','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_KERG62GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_KERG62GEO_TO_EPSG_4326','Kerguelen - K0 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','KERG62GEO','EPSG','4326','EPSG','1262',NULL,144.8990,-186.7700,100.9230,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','LIFOU56GEO','Lifou - Iles Loyaute (IGN56)','geographic 2D','EPSG','6424','IGNF','DATUM_LIFOU56','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_LIFOU56GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_LIFOU56GEO_TO_EPSG_4326','Lifou - Iles Loyaute (IGN56) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','LIFOU56GEO','EPSG','4326','EPSG','1262',NULL,336.0000,223.0000,-231.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','LUXGEO','Nouvelle Triangulation du Grand Duche du Luxembourg','geographic 2D','EPSG','6424','IGNF','DATUM_LUREF','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_LUXGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_LUXGEO_TO_EPSG_4326','Nouvelle Triangulation du Grand Duche du Luxembourg to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','LUXGEO','EPSG','4326','EPSG','1262',NULL,-192.9860,13.6730,-39.3090,'EPSG','9001',-0.4099,-2.9332,2.6881,'EPSG','9104',0.430000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','MARE53GEO','Mare - Iles Loyaute (IGN53)','geographic 2D','EPSG','6424','IGNF','DATUM_MARE53','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MARE53GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MARE53GEO_TO_EPSG_4326','Mare - Iles Loyaute (IGN53) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','MARE53GEO','EPSG','4326','EPSG','1262',NULL,287.0000,178.0000,-136.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','MARQUI72GEO','IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises','geographic 2D','EPSG','6424','IGNF','DATUM_MARQUI72','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MARQUI72GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MARQUI72GEO_TO_EPSG_4326','IGN 1972 (Eiao, Hiva Oa, Mohotani) Marquises to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','MARQUI72GEO','EPSG','4326','EPSG','1262',NULL,327.8400,-14.9600,59.3300,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','MART38GEO','Martinique Fort-Desaix','geographic 2D','EPSG','6424','IGNF','DATUM_MART38','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MART38GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MART38GEO_TO_EPSG_4326','Martinique Fort-Desaix to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','MART38GEO','EPSG','4326','EPSG','1262',NULL,126.9260,547.9390,130.4090,'EPSG','9001',-2.7867,5.1612,-0.8584,'EPSG','9104',13.822650,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','MAYO50GEO','Mayotte Combani','geographic 2D','EPSG','6424','IGNF','DATUM_MAYO50','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MAYO50GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MAYO50GEO_TO_EPSG_4326','Mayotte Combani to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','MAYO50GEO','EPSG','4326','EPSG','1262',NULL,-599.9280,-275.5520,-195.6650,'EPSG','9001',-0.0835,-0.4715,0.0602,'EPSG','9104',49.281400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','MHEFO55FGEO','MHEFO 1955 (Fatu Huku)','geographic 2D','EPSG','6424','IGNF','DATUM_MHEFO55F','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MHEFO55FGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MHEFO55FGEO_TO_EPSG_4326','MHEFO 1955 (Fatu Huku) to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','MHEFO55FGEO','EPSG','4326','EPSG','1262',NULL,347.1030,1078.1250,2623.9220,'EPSG','9001',33.8875,-70.6773,9.3943,'EPSG','9104',186.074000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','MHPF67GEO','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles)','geographic 2D','EPSG','6424','IGNF','DATUM_MHPF67','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MHPF67GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MHPF67GEO_TO_EPSG_4326','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','MHPF67GEO','EPSG','4326','EPSG','1262',NULL,338.0800,212.5800,-296.1700,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','MOOREA87GEO','Moorea 1987','geographic 2D','EPSG','6424','IGNF','DATUM_MOOREA87','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MOOREA87GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MOOREA87GEO_TO_EPSG_4326','Moorea 1987 to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','MOOREA87GEO','EPSG','4326','EPSG','1262',NULL,215.9820,149.5930,176.2290,'EPSG','9001',3.2624,1.6920,1.1571,'EPSG','9104',10.477300,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','MOP90GEO','MOP90 (Tetiaroa) Iles de la Societe','geographic 2D','EPSG','6424','IGNF','DATUM_MOP90','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_MOP90GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_MOP90GEO_TO_EPSG_4326','MOP90 (Tetiaroa) Iles de la Societe to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','MOP90GEO','EPSG','4326','EPSG','1262',NULL,217.0370,86.9590,23.9560,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_NTFG','Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','EPSG','7011','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','NTFG','Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','geographic 2D','EPSG','6424','IGNF','DATUM_NTFG','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326','Nouvelle Triangulation Francaise Greenwich degres sexagesimaux to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','NTFG','EPSG','4326','EPSG','1262',NULL,-168.0000,-60.0000,320.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326_GRID','grid_transformation');
 INSERT INTO "grid_transformation" VALUES('IGNF','IGNF_NTFG_TO_EPSG_4326_GRID','Nouvelle Triangulation Francaise Greenwich degres sexagesimaux to WGS 84 (2)','EPSG','9615','NTv2','IGNF','NTFG','EPSG','4326','EPSG','1262',NULL,'EPSG','8656','Latitude and longitude difference file','ntf_r93.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_NTFP','Nouvelle Triangulation Francaise Paris grades','EPSG','7011','EPSG','8903','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','NTFP','Nouvelle Triangulation Francaise Paris grades','geographic 2D','EPSG','6425','IGNF','DATUM_NTFP','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','other_transformation');
 INSERT INTO "other_transformation" VALUES('IGNF','IGNF_NTFP_TO_IGNF_NTFG','Nouvelle Triangulation Francaise Paris grades to Nouvelle Triangulation Francaise Greenwich degres sexagesimaux','EPSG','9601','Longitude rotation','IGNF','NTFP','IGNF','NTFG','EPSG','1262',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','concatenated_operation');
 INSERT INTO "concatenated_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326','Nouvelle Triangulation Francaise Paris grades to WGS 84','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,'IGNF','IGNF_NTFP_TO_IGNF_NTFG','IGNF','IGNF_NTFG_TO_EPSG_4326',NULL,NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','concatenated_operation');
 INSERT INTO "concatenated_operation" VALUES('IGNF','IGNF_NTFP_TO_EPSG_4326_GRID','Nouvelle Triangulation Francaise Paris grades to WGS 84 (2)','IGNF','NTFP','EPSG','4326','EPSG','1262',NULL,'IGNF','IGNF_NTFP_TO_IGNF_NTFG','IGNF','IGNF_NTFG_TO_EPSG_4326_GRID',NULL,NULL,0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU72GEO','IGN 1972 Nuku Hiva','geographic 2D','EPSG','6424','IGNF','DATUM_NUKU72','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NUKU72GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NUKU72GEO_TO_EPSG_4326','IGN 1972 Nuku Hiva to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','NUKU72GEO','EPSG','4326','EPSG','1262',NULL,165.7320,216.7200,180.5050,'EPSG','9001',-0.6434,-0.4512,-0.0791,'EPSG','9104',7.420400,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','NUKU94GEO','SAT94 (Nukutavake) Tuamotu','geographic 2D','EPSG','6424','IGNF','DATUM_NUKU94','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_NUKU94GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_NUKU94GEO_TO_EPSG_4326','SAT94 (Nukutavake) Tuamotu to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','NUKU94GEO','EPSG','4326','EPSG','1262',NULL,197.1600,200.1700,-48.0800,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','OUVEA72GEO','Ouvea - Iles Loyaute (MHNC 1972 - OUVEA)','geographic 2D','EPSG','6424','IGNF','DATUM_OUVEA72CAR','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_OUVEA72GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_OUVEA72GEO_TO_EPSG_4326','Ouvea - Iles Loyaute (MHNC 1972 - OUVEA) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','OUVEA72GEO','EPSG','4326','EPSG','1262',NULL,-13.0000,-348.0000,292.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','RAIA53GEO','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine','geographic 2D','EPSG','6424','IGNF','DATUM_RAIA53','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RAIA53GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RAIA53GEO_TO_EPSG_4326','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RAIA53GEO','EPSG','4326','EPSG','1262',NULL,65.0300,341.5500,76.6700,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','REUN47GEO','Reunion 1947','geographic 2D','EPSG','6424','IGNF','DATUM_REUN47','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_REUN47GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_REUN47GEO_TO_EPSG_4326','Reunion 1947 to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','REUN47GEO','EPSG','4326','EPSG','1262',NULL,789.5240,-626.4860,-89.9040,'EPSG','9001',0.6006,76.7946,-10.5788,'EPSG','9104',-32.324100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGF93G','Reseau geodesique francais 1993','geographic 2D','EPSG','6424','IGNF','DATUM_RGF93','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGF93G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGF93G_TO_EPSG_4326','Reseau geodesique francais 1993 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGF93G','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGFG95GEO','Reseau geodesique francais de Guyane 1995','geographic 2D','EPSG','6424','IGNF','DATUM_RGFG95','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGFG95GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGFG95GEO_TO_EPSG_4326','Reseau geodesique francais de Guyane 1995 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGFG95GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGM04GEO','RGM04 (Reseau Geodesique de Mayotte 2004)','geographic 2D','EPSG','6424','IGNF','DATUM_RGM04','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGM04GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGM04GEO_TO_EPSG_4326','RGM04 (Reseau Geodesique de Mayotte 2004) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGM04GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGNCGEO','Reseau Geodesique de Nouvelle-Caledonie','geographic 2D','EPSG','6424','IGNF','DATUM_RGNC','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGNCGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGNCGEO_TO_EPSG_4326','Reseau Geodesique de Nouvelle-Caledonie to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGNCGEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGPFGEO','RGPF (Reseau Geodesique de Polynesie Francaise)','geographic 2D','EPSG','6424','IGNF','DATUM_RGPF','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGPFGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGPFGEO_TO_EPSG_4326','RGPF (Reseau Geodesique de Polynesie Francaise) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGPFGEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGR92GEO','Reseau geodesique de la Reunion 1992','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGR92GEO','Reseau geodesique de la Reunion 1992','geographic 2D','EPSG','6424','IGNF','DATUM_RGR92GEO','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGR92GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGR92GEO_TO_EPSG_4326','Reseau geodesique de la Reunion 1992 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGR92GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGSPM06GEO','Saint-Pierre-et-Miquelon (2006)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGSPM06GEO','Saint-Pierre-et-Miquelon (2006)','geographic 2D','EPSG','6424','IGNF','DATUM_RGSPM06GEO','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGSPM06GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGSPM06GEO_TO_EPSG_4326','Saint-Pierre-et-Miquelon (2006) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGSPM06GEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_RGTAAF07G','Reseau Geodesique des TAAF (2007) (dms)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','RGTAAF07G','Reseau Geodesique des TAAF (2007) (dms)','geographic 2D','EPSG','6424','IGNF','DATUM_RGTAAF07G','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_RGTAAF07G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_RGTAAF07G_TO_EPSG_4326','Reseau Geodesique des TAAF (2007) (dms) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','RGTAAF07G','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','SAT84GEO','SAT84 (Rurutu) Iles Australes','geographic 2D','EPSG','6424','IGNF','DATUM_SAT84','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_SAT84GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_SAT84GEO_TO_EPSG_4326','SAT84 (Rurutu) Iles Australes to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','SAT84GEO','EPSG','4326','EPSG','1262',NULL,202.1300,174.6000,-15.7400,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','SHOM84GEO','SHOM 1984 Martinique Montagne Du Vauclin','geographic 2D','EPSG','6424','IGNF','DATUM_SHOM84','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_SHOM84GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_SHOM84GEO_TO_EPSG_4326','SHOM 1984 Martinique Montagne Du Vauclin to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','SHOM84GEO','EPSG','4326','EPSG','1262',NULL,189.5060,486.5470,148.7830,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','STPL69GEO','Ile de Saint-Paul 1969','geographic 2D','EPSG','6424','IGNF','DATUM_STPL69','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_STPL69GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_STPL69GEO_TO_EPSG_4326','Ile de Saint-Paul 1969 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','STPL69GEO','EPSG','4326','EPSG','1262',NULL,225.5710,-346.6080,-46.5670,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_STPM50GEO','St Pierre et Miquelon 1950 ','EPSG','7008','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','STPM50GEO','St Pierre et Miquelon 1950 ','geographic 2D','EPSG','6424','IGNF','DATUM_STPM50GEO','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_STPM50GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_STPM50GEO_TO_EPSG_4326','St Pierre et Miquelon 1950  to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','STPM50GEO','EPSG','4326','EPSG','1262',NULL,-95.5930,573.7630,173.4420,'EPSG','9001',-0.9602,1.2510,-1.3918,'EPSG','9104',42.626500,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','TAHAAGEO','Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est)','geographic 2D','EPSG','6424','IGNF','DATUM_TAHAA','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHAAGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHAAGEO_TO_EPSG_4326','Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est) to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','TAHAAGEO','EPSG','4326','EPSG','1262',NULL,72.4380,345.9180,79.4860,'EPSG','9001',-1.6045,-0.8823,-0.5565,'EPSG','9104',1.374600,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','TAHI51GEO','Tahiti-Terme Nord 1951','geographic 2D','EPSG','6424','IGNF','DATUM_TAHI51','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHI51GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHI51GEO_TO_EPSG_4326','Tahiti-Terme Nord 1951 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TAHI51GEO','EPSG','4326','EPSG','1262',NULL,162.0000,117.0000,154.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','TAHI79GEO','IGN79 (Tahiti) Iles de la Societe','geographic 2D','EPSG','6424','IGNF','DATUM_TAHI79','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TAHI79GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TAHI79GEO_TO_EPSG_4326','IGN79 (Tahiti) Iles de la Societe to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','TAHI79GEO','EPSG','4326','EPSG','1262',NULL,221.5250,152.9480,176.7680,'EPSG','9001',2.3847,1.3896,0.8770,'EPSG','9104',11.474100,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','TANNAGEO','Tanna Bloc Sud','geographic 2D','EPSG','6424','IGNF','DATUM_TANNA','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TANNAGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TANNAGEO_TO_EPSG_4326','Tanna Bloc Sud to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TANNAGEO','EPSG','4326','EPSG','1262',NULL,-139.0000,-967.0000,436.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','TERA50G','Pointe Geologie - Perroud 1950','geographic 2D','EPSG','6424','IGNF','DATUM_TERA50','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TERA50G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TERA50G_TO_EPSG_4326','Pointe Geologie - Perroud 1950 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TERA50G','EPSG','4326','EPSG','1262',NULL,324.9120,153.2820,172.0260,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','TUBU69GEO','MHPF 1969 (Tubuai) Iles Australes','geographic 2D','EPSG','6424','IGNF','DATUM_TUBU69','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_TUBU69GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_TUBU69GEO_TO_EPSG_4326','MHPF 1969 (Tubuai) Iles Australes to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','TUBU69GEO','EPSG','4326','EPSG','1262',NULL,237.1700,171.6100,-77.8400,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WALL78GEO','Wallis - Uvea 1978 (MOP78)','EPSG','7022','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','WALL78GEO','Wallis - Uvea 1978 (MOP78)','geographic 2D','EPSG','6424','IGNF','DATUM_WALL78GEO','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WALL78GEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WALL78GEO_TO_EPSG_4326','Wallis - Uvea 1978 (MOP78) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','WALL78GEO','EPSG','4326','EPSG','1262',NULL,253.0000,-133.0000,-127.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WGS72G','WGS72','EPSG','7043','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','WGS72G','WGS72','geographic 2D','EPSG','6424','IGNF','DATUM_WGS72G','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS72G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS72G_TO_EPSG_4326','WGS72 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','WGS72G','EPSG','4326','EPSG','1262',NULL,0.0000,12.0000,6.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_crs" VALUES('IGNF','WGS84G','World Geodetic System 1984','geographic 2D','EPSG','6424','IGNF','DATUM_WGS84','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS84G_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS84G_TO_EPSG_4326','World Geodetic System 1984 to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','WGS84G','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_WGS84RRAFGEO','Reseau de reference des Antilles francaises (1988-1991)','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','WGS84RRAFGEO','Reseau de reference des Antilles francaises (1988-1991)','geographic 2D','EPSG','6424','IGNF','DATUM_WGS84RRAFGEO','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_WGS84RRAFGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_WGS84RRAFGEO_TO_EPSG_4326','Reseau de reference des Antilles francaises (1988-1991) to WGS 84','EPSG','9603','Geocentric translations (geog2D domain)','IGNF','WGS84RRAFGEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.0000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL, NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "geodetic_datum" VALUES('IGNF','DATUM_XGEO','Systeme CIO-BIH','EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('IGNF','XGEO','Systeme CIO-BIH','geographic 2D','EPSG','6424','IGNF','DATUM_XGEO','EPSG','1262',NULL,0);
-INSERT INTO "coordinate_operation" VALUES('IGNF','IGNF_XGEO_TO_EPSG_4326','helmert_transformation');
 INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_XGEO_TO_EPSG_4326','Systeme CIO-BIH to WGS 84','EPSG','9606','Position Vector transformation (geog2D domain)','IGNF','XGEO','EPSG','4326','EPSG','1262',NULL,0.0000,0.0000,0.5000,'EPSG','9001',0.0000,0.0000,0.0140,'EPSG','9104',-0.100000,'EPSG', '9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_AMST63UTM43S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_AMST63UTM43S','Conversion for Amsterdam 1963','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',75.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','AMST63UTM43S','Amsterdam 1963','EPSG','4499','IGNF','AMST63GEO','IGNF','CONV_AMST63UTM43S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_ANAA92UTM6S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_ANAA92UTM6S','Conversion for MOP92 (Anaa) Tuamotu - UTM fuseau 6 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','ANAA92UTM6S','MOP92 (Anaa) Tuamotu - UTM fuseau 6 Sud','EPSG','4499','IGNF','ANAA92GEO','IGNF','CONV_ANAA92UTM6S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_APAT86UTM6S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_APAT86UTM6S','Conversion for MOP86 (Apataki, Rapa, Hao) Tuamotu - UTM fuseau 6 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','APAT86UTM6S','MOP86 (Apataki, Rapa, Hao) Tuamotu - UTM fuseau 6 Sud','EPSG','4499','IGNF','APAT86GEO','IGNF','CONV_APAT86UTM6S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_APAT86UTM7S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_APAT86UTM7S','Conversion for MOP86 (Apataki, Rapa, Hao) Tuamotu - UTM fuseau 7 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','APAT86UTM7S','MOP86 (Apataki, Rapa, Hao) Tuamotu - UTM fuseau 7 Sud','EPSG','4499','IGNF','APAT86GEO','IGNF','CONV_APAT86UTM7S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_CAD97UTM38S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_CAD97UTM38S','Conversion for Cadastre 1997 - UTM fuseau 38 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',45.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','CAD97UTM38S','Cadastre 1997 - UTM fuseau 38 Sud','EPSG','4499','IGNF','CAD97GEO','IGNF','CONV_CAD97UTM38S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_CROZ63UTM39S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_CROZ63UTM39S','Conversion for Crozet 1963','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',51.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','CROZ63UTM39S','Crozet 1963','EPSG','4499','IGNF','CROZ63GEO','IGNF','CONV_CROZ63UTM39S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_CSG67UTM21','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_CSG67UTM21','Conversion for Guyane CSG67 UTM fuseau 21','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-57.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','CSG67UTM21','Guyane CSG67 UTM fuseau 21','EPSG','4499','IGNF','CSG67GEO','IGNF','CONV_CSG67UTM21','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_CSG67UTM22','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_CSG67UTM22','Conversion for Guyane CSG67 UTM fuseau 22','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-51.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','CSG67UTM22','Guyane CSG67 UTM fuseau 22','EPSG','4499','IGNF','CSG67GEO','IGNF','CONV_CSG67UTM22','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_EFATE57UT59S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_EFATE57UT59S','Conversion for EFATE-IGN 1957 - UTM fuseau 59 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',171.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','EFATE57UT59S','EFATE-IGN 1957 - UTM fuseau 59 Sud','EPSG','4499','IGNF','EFATE57GEO','IGNF','CONV_EFATE57UT59S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_ETRS89LAEA','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_ETRS89LAEA','Conversion for ETRS89 Lambert Azimutal Equal Area','EPSG','1262','EPSG','9820','Lambert Azimuthal Equal Area','EPSG','8801','Latitude of natural origin',52.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',10.000000000,'EPSG','9102','EPSG','8806','False easting',4321000.000,'EPSG','9001','EPSG','8807','False northing',3210000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','ETRS89LAEA','ETRS89 Lambert Azimutal Equal Area','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_ETRS89LAEA','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_ETRS89LCC','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_ETRS89LCC','Conversion for ETRS89 Lambert Conformal Conic','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',52.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',9.999999995,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',35.000000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',65.000000000,'EPSG','9102','EPSG','8826','Easting at false origin',4000000.000,'EPSG','9001','EPSG','8827','Northing at false origin',2800000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','ETRS89LCC','ETRS89 Lambert Conformal Conic','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_ETRS89LCC','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_FANGA84UTM7S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_FANGA84UTM7S','Conversion for Fangataufa 1984 - UTM fuseau 7 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','FANGA84UTM7S','Fangataufa 1984 - UTM fuseau 7 Sud','EPSG','4499','IGNF','FANGA84GEO','IGNF','CONV_FANGA84UTM7S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALANF','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALANF','Conversion for Geoportail - Antilles francaises','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',15.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALANF','Geoportail - Antilles francaises','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALANF','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALASP','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALASP','Conversion for Geoportail - Amsterdam et Saint-Paul','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',-38.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALASP','Geoportail - Amsterdam et Saint-Paul','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALASP','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALCRZ','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALCRZ','Conversion for Geoportail - Crozet','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',-46.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALCRZ','Geoportail - Crozet','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALCRZ','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALFXX','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALFXX','Conversion for Geoportail - France metropolitaine','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',46.500000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALFXX','Geoportail - France metropolitaine','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALFXX','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALGUF','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALGUF','Conversion for Geoportail - Guyane','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',4.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALGUF','Geoportail - Guyane','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALGUF','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALKER','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALKER','Conversion for Geoportail - Kerguelen','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',-49.500000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALKER','Geoportail - Kerguelen','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALKER','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALMYT','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALMYT','Conversion for Geoportail - Mayotte','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',-12.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALMYT','Geoportail - Mayotte','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALMYT','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALNCL','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALNCL','Conversion for Geoportail - Nouvelle-Caledonie','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',-22.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALNCL','Geoportail - Nouvelle-Caledonie','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALNCL','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALPYF','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALPYF','Conversion for Geoportail - Polynesie francaise','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',-15.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALPYF','Geoportail - Polynesie francaise','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALPYF','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALREU','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALREU','Conversion for Geoportail - Reunion et dependances','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',-21.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALREU','Geoportail - Reunion et dependances','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALREU','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALSPM','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALSPM','Conversion for Geoportail - Saint-Pierre et Miquelon','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',47.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALSPM','Geoportail - Saint-Pierre et Miquelon','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALSPM','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GEOPORTALWLF','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GEOPORTALWLF','Conversion for Geoportail - Wallis et Futuna','EPSG','1262','EPSG','1028','Equidistant Cylindrical','EPSG','8823','Latitude of 1st standard parallel',-14.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8806','False easting',0.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GEOPORTALWLF','Geoportail - Wallis et Futuna','EPSG','4499','IGNF','RGF93G','IGNF','CONV_GEOPORTALWLF','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GUAD48UTM20','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GUAD48UTM20','Conversion for Guadeloupe Ste Anne','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GUAD48UTM20','Guadeloupe Ste Anne','EPSG','4499','IGNF','GUAD48GEO','IGNF','CONV_GUAD48UTM20','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_GUADFM49U20','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_GUADFM49U20','Conversion for Guadeloupe Fort Marigot ','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','GUADFM49U20','Guadeloupe Fort Marigot ','EPSG','4499','IGNF','GUADFM49GEO','IGNF','CONV_GUADFM49U20','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_IGN63UTM7S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_IGN63UTM7S','Conversion for IGN 1963 - Hiva Oa, Tahuata, Mohotani - UTM fuseau 7 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','IGN63UTM7S','IGN 1963 - Hiva Oa, Tahuata, Mohotani - UTM fuseau 7 Sud','EPSG','4499','IGNF','IGN63GEO','IGNF','CONV_IGN63UTM7S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_IGN72LAM','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_IGN72LAM','Conversion for IGN 1972 - Lambert Nouvelle Caledonie','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',-21.499999999,'EPSG','9102','EPSG','8822','Longitude of false origin',166.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',-20.666666667,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',-22.333333333,'EPSG','9102','EPSG','8826','Easting at false origin',400000.000,'EPSG','9001','EPSG','8827','Northing at false origin',300000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','IGN72LAM','IGN 1972 - Lambert Nouvelle Caledonie','EPSG','4499','IGNF','IGN72GEO','IGNF','CONV_IGN72LAM','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_IGN72UTM58S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_IGN72UTM58S','Conversion for IGN 1972 - UTM fuseau 58 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',165.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','IGN72UTM58S','IGN 1972 - UTM fuseau 58 Sud','EPSG','4499','IGNF','IGN72GEO','IGNF','CONV_IGN72UTM58S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_KAUE70UTM6S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_KAUE70UTM6S','Conversion for MHPF70 (Kauehi) Tuamotu - UTM fuseau 6 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','KAUE70UTM6S','MHPF70 (Kauehi) Tuamotu - UTM fuseau 6 Sud','EPSG','4499','IGNF','KAUE70GEO','IGNF','CONV_KAUE70UTM6S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_KERG62UTM42S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_KERG62UTM42S','Conversion for Kerguelen 1962','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',69.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','KERG62UTM42S','Kerguelen 1962','EPSG','4499','IGNF','KERG62GEO','IGNF','CONV_KERG62UTM42S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB1','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB1','Conversion for Lambert I','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',49.500000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99987734,'EPSG','9201','EPSG','8806','False easting',600000.000,'EPSG','9001','EPSG','8807','False northing',200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB1','Lambert I','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMB1','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB1C','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB1C','Conversion for Lambert I Carto','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',49.500000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99987734,'EPSG','9201','EPSG','8806','False easting',600000.000,'EPSG','9001','EPSG','8807','False northing',1200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB1C','Lambert I Carto','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMB1C','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB2','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB2','Conversion for Lambert II','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',46.800000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99987742,'EPSG','9201','EPSG','8806','False easting',600000.000,'EPSG','9001','EPSG','8807','False northing',200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB2','Lambert II','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMB2','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB2C','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB2C','Conversion for Lambert II Carto','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',46.800000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99987742,'EPSG','9201','EPSG','8806','False easting',600000.000,'EPSG','9001','EPSG','8807','False northing',2200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB2C','Lambert II Carto','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMB2C','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB3','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB3','Conversion for Lambert III','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',44.100000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99987750,'EPSG','9201','EPSG','8806','False easting',600000.000,'EPSG','9001','EPSG','8807','False northing',200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB3','Lambert III','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMB3','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB3C','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB3C','Conversion for Lambert III Carto','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',44.100000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99987750,'EPSG','9201','EPSG','8806','False easting',600000.000,'EPSG','9001','EPSG','8807','False northing',3200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB3C','Lambert III Carto','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMB3C','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB4','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB4','Conversion for Lambert IV','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',42.165000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99994471,'EPSG','9201','EPSG','8806','False easting',234.358,'EPSG','9001','EPSG','8807','False northing',185861.369,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB4','Lambert IV','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMB4','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB4C','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB4C','Conversion for Lambert IV Carto','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',42.165000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99994471,'EPSG','9201','EPSG','8806','False easting',234.358,'EPSG','9001','EPSG','8807','False northing',4185861.369,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB4C','Lambert IV Carto','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMB4C','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMB93','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMB93','Conversion for Lambert 93','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',46.500000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',44.000000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',49.000000000,'EPSG','9102','EPSG','8826','Easting at false origin',700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',6600000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMB93','Lambert 93','EPSG','4499','IGNF','RGF93G','IGNF','CONV_LAMB93','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMBE','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMBE','Conversion for Lambert II etendu','EPSG','1262','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',46.800000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99987742,'EPSG','9201','EPSG','8806','False easting',600000.000,'EPSG','9001','EPSG','8807','False northing',2200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMBE','Lambert II etendu','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMBE','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LAMBGC','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LAMBGC','Conversion for Lambert grand champ','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',47.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',0.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',45.000000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',49.000000000,'EPSG','9102','EPSG','8826','Easting at false origin',600000.000,'EPSG','9001','EPSG','8827','Northing at false origin',600000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LAMBGC','Lambert grand champ','EPSG','4499','IGNF','NTFP','IGNF','CONV_LAMBGC','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_LUXGAUSSK','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_LUXGAUSSK','Conversion for Luxembourg 1929','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',49.833333333,'EPSG','9102','EPSG','8802','Longitude of natural origin',6.166666667,'EPSG','9102','EPSG','8805','Scale factor at natural origin',1.00000000,'EPSG','9201','EPSG','8806','False easting',80000.000,'EPSG','9001','EPSG','8807','False northing',100000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','LUXGAUSSK','Luxembourg 1929','EPSG','4499','IGNF','LUXGEO','IGNF','CONV_LUXGAUSSK','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_MARE53UTM58S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_MARE53UTM58S','Conversion for Mare - Iles Loyaute - UTM fuseau 58 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',165.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','MARE53UTM58S','Mare - Iles Loyaute - UTM fuseau 58 Sud','EPSG','4499','IGNF','MARE53GEO','IGNF','CONV_MARE53UTM58S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_MART38UTM20','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_MART38UTM20','Conversion for Martinique Fort-Desaix','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','MART38UTM20','Martinique Fort-Desaix','EPSG','4499','IGNF','MART38GEO','IGNF','CONV_MART38UTM20','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_MAYO50UTM38S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_MAYO50UTM38S','Conversion for Mayotte Combani','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',45.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','MAYO50UTM38S','Mayotte Combani','EPSG','4499','IGNF','MAYO50GEO','IGNF','CONV_MAYO50UTM38S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_MHPF67UTM8S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_MHPF67UTM8S','Conversion for MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles) - UTM 8 S','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-135.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','MHPF67UTM8S','MHPF67 (Mangareva, Agakauitai, Aukena, Mekiro) Gambiers (Iles) - UTM 8 S','EPSG','4499','IGNF','MHPF67GEO','IGNF','CONV_MHPF67UTM8S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_MILLER','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_MILLER','Conversion for Geoportail - Monde','EPSG','1262',NULL,NULL,'PROJ mill',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','MILLER','Geoportail - Monde','EPSG','4499','IGNF','WGS84G','IGNF','CONV_MILLER','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_MOOREA87U6S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_MOOREA87U6S','Conversion for Moorea 1987 - UTM fuseau 6 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','MOOREA87U6S','Moorea 1987 - UTM fuseau 6 Sud','EPSG','4499','IGNF','MOOREA87GEO','IGNF','CONV_MOOREA87U6S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_MOP90UTM6S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_MOP90UTM6S','Conversion for MOP90 (Tetiaroa) Iles de la Societe - UTM fuseau 6 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','MOP90UTM6S','MOP90 (Tetiaroa) Iles de la Societe - UTM fuseau 6 Sud','EPSG','4499','IGNF','MOP90GEO','IGNF','CONV_MOP90UTM6S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_NUKU72U7S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_NUKU72U7S','Conversion for IGN 1972 Nuku Hiva - UTM fuseau 7 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','NUKU72U7S','IGN 1972 Nuku Hiva - UTM fuseau 7 Sud','EPSG','4499','IGNF','NUKU72GEO','IGNF','CONV_NUKU72U7S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_NUKU94UTM7S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_NUKU94UTM7S','Conversion for IGN 1994 Nuku Hiva - UTM fuseau 7 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','NUKU94UTM7S','IGN 1994 Nuku Hiva - UTM fuseau 7 Sud','EPSG','4499','IGNF','NUKU94GEO','IGNF','CONV_NUKU94UTM7S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_OUVEA72U58S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_OUVEA72U58S','Conversion for Ouvea - Iles Loyaute - UTM fuseau 58 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',165.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','OUVEA72U58S','Ouvea - Iles Loyaute - UTM fuseau 58 Sud','EPSG','4499','IGNF','OUVEA72GEO','IGNF','CONV_OUVEA72U58S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RAIA53UTM5S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RAIA53UTM5S','Conversion for IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine - UTM fuseau 5','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-153.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RAIA53UTM5S','IGN53 (IGN Raiatea-Tahaa) Raiatea-Tahaa-Bora Bora-Huahine - UTM fuseau 5','EPSG','4499','IGNF','RAIA53GEO','IGNF','CONV_RAIA53UTM5S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_REUN47GAUSSL','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_REUN47GAUSSL','Conversion for Reunion Gauss Laborde','EPSG','1262',NULL,NULL,'Gauss Schreiber Transverse Mercator','EPSG','8801','Latitude of natural origin',-21.116666667,'EPSG','9102','EPSG','8802','Longitude of natural origin',55.533333333,'EPSG','9102','EPSG','8805','Scale factor at natural origin',1.00000000,'EPSG','9201','EPSG','8806','False easting',160000.000,'EPSG','9001','EPSG','8807','False northing',50000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','REUN47GAUSSL','Reunion Gauss Laborde','EPSG','4499','IGNF','REUN47GEO','IGNF','CONV_REUN47GAUSSL','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC42','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC42','Conversion for Projection conique conforme Zone 1','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',42.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',41.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',42.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',1200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC42','Projection conique conforme Zone 1','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC42','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC43','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC43','Conversion for Projection conique conforme Zone 2','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',43.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',42.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',43.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',2200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC43','Projection conique conforme Zone 2','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC43','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC44','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC44','Conversion for Projection conique conforme Zone 3','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',44.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',43.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',44.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',3200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC44','Projection conique conforme Zone 3','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC44','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC45','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC45','Conversion for Projection conique conforme Zone 4','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',45.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',44.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',45.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',4200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC45','Projection conique conforme Zone 4','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC45','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC46','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC46','Conversion for Projection conique conforme Zone 5','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',46.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',45.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',46.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',5200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC46','Projection conique conforme Zone 5','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC46','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC47','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC47','Conversion for Projection conique conforme Zone 6','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',47.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',46.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',47.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',6200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC47','Projection conique conforme Zone 6','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC47','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC48','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC48','Conversion for Projection conique conforme Zone 7','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',48.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',47.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',48.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',7200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC48','Projection conique conforme Zone 7','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC48','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC49','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC49','Conversion for Projection conique conforme Zone 8','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',49.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',48.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',49.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',8200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC49','Projection conique conforme Zone 8','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC49','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGF93CC50','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGF93CC50','Conversion for Projection conique conforme Zone 9','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',50.000000000,'EPSG','9102','EPSG','8822','Longitude of false origin',3.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',49.250000000,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',50.750000000,'EPSG','9102','EPSG','8826','Easting at false origin',1700000.000,'EPSG','9001','EPSG','8827','Northing at false origin',9200000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGF93CC50','Projection conique conforme Zone 9','EPSG','4499','IGNF','RGF93G','IGNF','CONV_RGF93CC50','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGM04UTM38S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGM04UTM38S','Conversion for UTM fuseau 38 Sud (Reseau Geodesique de Mayotte 2004)','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',45.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGM04UTM38S','UTM fuseau 38 Sud (Reseau Geodesique de Mayotte 2004)','EPSG','4499','IGNF','RGM04GEO','IGNF','CONV_RGM04UTM38S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGNCLAM','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGNCLAM','Conversion for Reseau Geodesique de Nouvelle-Caledonie - Lambert Nouvelle Caledonie','EPSG','1262','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',-21.499999999,'EPSG','9102','EPSG','8822','Longitude of false origin',166.000000000,'EPSG','9102','EPSG','8823','Latitude of 1st standard parallel',-20.666666667,'EPSG','9102','EPSG','8824','Latitude of 2nd standard parallel',-22.333333333,'EPSG','9102','EPSG','8826','Easting at false origin',400000.000,'EPSG','9001','EPSG','8827','Northing at false origin',300000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGNCLAM','Reseau Geodesique de Nouvelle-Caledonie - Lambert Nouvelle Caledonie','EPSG','4499','IGNF','RGNCGEO','IGNF','CONV_RGNCLAM','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGNCUTM57S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGNCUTM57S','Conversion for Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 57 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',159.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGNCUTM57S','Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 57 Sud','EPSG','4499','IGNF','RGNCGEO','IGNF','CONV_RGNCUTM57S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGNCUTM58S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGNCUTM58S','Conversion for Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 58 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',165.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGNCUTM58S','Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 58 Sud','EPSG','4499','IGNF','RGNCGEO','IGNF','CONV_RGNCUTM58S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGNCUTM59S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGNCUTM59S','Conversion for Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 59 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',171.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGNCUTM59S','Reseau Geodesique de Nouvelle-Caledonie - UTM fuseau 59 Sud','EPSG','4499','IGNF','RGNCGEO','IGNF','CONV_RGNCUTM59S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGPFUTM5S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGPFUTM5S','Conversion for RGPF - UTM fuseau 5 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-153.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGPFUTM5S','RGPF - UTM fuseau 5 Sud','EPSG','4499','IGNF','RGPFGEO','IGNF','CONV_RGPFUTM5S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGPFUTM6S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGPFUTM6S','Conversion for RGPF - UTM fuseau 6 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGPFUTM6S','RGPF - UTM fuseau 6 Sud','EPSG','4499','IGNF','RGPFGEO','IGNF','CONV_RGPFUTM6S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGPFUTM7S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGPFUTM7S','Conversion for RGPF - UTM fuseau 7 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGPFUTM7S','RGPF - UTM fuseau 7 Sud','EPSG','4499','IGNF','RGPFGEO','IGNF','CONV_RGPFUTM7S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGR92UTM40S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGR92UTM40S','Conversion for RGR92 UTM fuseau 40 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',57.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGR92UTM40S','RGR92 UTM fuseau 40 Sud','EPSG','4499','IGNF','RGR92GEO','IGNF','CONV_RGR92UTM40S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_RGSPM06U21','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_RGSPM06U21','Conversion for Saint-Pierre-et-Miquelon (2006) UTM Fuseau 21 Nord','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-57.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','RGSPM06U21','Saint-Pierre-et-Miquelon (2006) UTM Fuseau 21 Nord','EPSG','4499','IGNF','RGSPM06GEO','IGNF','CONV_RGSPM06U21','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_SAT84UTM5S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_SAT84UTM5S','Conversion for SAT84 (Rurutu) Iles Australes - UTM fuseau 5 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-153.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','SAT84UTM5S','SAT84 (Rurutu) Iles Australes - UTM fuseau 5 Sud','EPSG','4499','IGNF','SAT84GEO','IGNF','CONV_SAT84UTM5S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_STPL69UTM43S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_STPL69UTM43S','Conversion for Saint-Paul 1969','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',75.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','STPL69UTM43S','Saint-Paul 1969','EPSG','4499','IGNF','STPL69GEO','IGNF','CONV_STPL69UTM43S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_STPM50UTM21','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_STPM50UTM21','Conversion for St Pierre et Miquelon 1950','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-57.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','STPM50UTM21','St Pierre et Miquelon 1950','EPSG','4499','IGNF','STPM50GEO','IGNF','CONV_STPM50UTM21','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_TAHAAUTM05S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_TAHAAUTM05S','Conversion for Tahaa 1951','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-153.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','TAHAAUTM05S','Tahaa 1951','EPSG','4499','IGNF','TAHAAGEO','IGNF','CONV_TAHAAUTM05S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_TAHI51UTM06S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_TAHI51UTM06S','Conversion for Tahiti-Terme Nord UTM fuseau 6 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','TAHI51UTM06S','Tahiti-Terme Nord UTM fuseau 6 Sud','EPSG','4499','IGNF','TAHI51GEO','IGNF','CONV_TAHI51UTM06S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_TAHI79UTM6S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_TAHI79UTM6S','Conversion for Tahiti 1979','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','TAHI79UTM6S','Tahiti 1979','EPSG','4499','IGNF','TAHI79GEO','IGNF','CONV_TAHI79UTM6S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_TANNAUTM59S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_TANNAUTM59S','Conversion for Tanna Bloc Sud - UTM fuseau 59 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',171.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','TANNAUTM59S','Tanna Bloc Sud - UTM fuseau 59 Sud','EPSG','4499','IGNF','TANNAGEO','IGNF','CONV_TANNAUTM59S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_TERA50STEREO','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_TERA50STEREO','Conversion for Terre Adelie 1950','EPSG','1262','EPSG','9829','Polar Stereographic (variant B)','EPSG','8832','Latitude of standard parallel',-67.000000000,'EPSG','9102','EPSG','8833','Longitude of origin',140.000000000,'EPSG','9102','EPSG','8806','False easting',300000.000,'EPSG','9001','EPSG','8807','False northing',-2299363.482,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','TERA50STEREO','Terre Adelie 1950','EPSG','1025','IGNF','TERA50G','IGNF','CONV_TERA50STEREO','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_TUBU69UTM6S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_TUBU69UTM6S','Conversion for Tubuai - Iles Australes - UTM fuseau 6 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','TUBU69UTM6S','Tubuai - Iles Australes - UTM fuseau 6 Sud','EPSG','4499','IGNF','TUBU69GEO','IGNF','CONV_TUBU69UTM6S','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM01SW72','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM01SW72','Conversion for World Geodetic System 1972 UTM fuseau 01 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-177.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM01SW72','World Geodetic System 1972 UTM fuseau 01 Sud','EPSG','4499','IGNF','WGS72G','IGNF','CONV_UTM01SW72','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM01SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM01SW84','Conversion for World Geodetic System 1984 UTM fuseau 01 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-177.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM01SW84','World Geodetic System 1984 UTM fuseau 01 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM01SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM01W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM01W84','Conversion for World Geodetic System 1984 UTM fuseau 01','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-177.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM01W84','World Geodetic System 1984 UTM fuseau 01','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM01W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM02SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM02SW84','Conversion for World Geodetic System 1984 UTM fuseau 02 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-171.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM02SW84','World Geodetic System 1984 UTM fuseau 02 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM02SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM02W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM02W84','Conversion for World Geodetic System 1984 UTM fuseau 02','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-171.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM02W84','World Geodetic System 1984 UTM fuseau 02','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM02W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM03SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM03SW84','Conversion for World Geodetic System 1984 UTM fuseau 03 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-165.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM03SW84','World Geodetic System 1984 UTM fuseau 03 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM03SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM03W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM03W84','Conversion for World Geodetic System 1984 UTM fuseau 03','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-165.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM03W84','World Geodetic System 1984 UTM fuseau 03','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM03W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM04SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM04SW84','Conversion for World Geodetic System 1984 UTM fuseau 04 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-159.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM04SW84','World Geodetic System 1984 UTM fuseau 04 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM04SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM04W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM04W84','Conversion for World Geodetic System 1984 UTM fuseau 04','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-159.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM04W84','World Geodetic System 1984 UTM fuseau 04','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM04W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM05SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM05SW84','Conversion for World Geodetic System 1984 UTM fuseau 05 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-153.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM05SW84','World Geodetic System 1984 UTM fuseau 05 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM05SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM05W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM05W84','Conversion for World Geodetic System 1984 UTM fuseau 05','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-153.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM05W84','World Geodetic System 1984 UTM fuseau 05','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM05W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM06SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM06SW84','Conversion for World Geodetic System 1984 UTM fuseau 06 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM06SW84','World Geodetic System 1984 UTM fuseau 06 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM06SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM06W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM06W84','Conversion for World Geodetic System 1984 UTM fuseau 06','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM06W84','World Geodetic System 1984 UTM fuseau 06','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM06W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM07SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM07SW84','Conversion for World Geodetic System 1984 UTM fuseau 07 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM07SW84','World Geodetic System 1984 UTM fuseau 07 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM07SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM07W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM07W84','Conversion for World Geodetic System 1984 UTM fuseau 07','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM07W84','World Geodetic System 1984 UTM fuseau 07','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM07W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM08SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM08SW84','Conversion for World Geodetic System 1984 UTM fuseau 08 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-135.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM08SW84','World Geodetic System 1984 UTM fuseau 08 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM08SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM08W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM08W84','Conversion for World Geodetic System 1984 UTM fuseau 08','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-135.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM08W84','World Geodetic System 1984 UTM fuseau 08','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM08W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM09SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM09SW84','Conversion for World Geodetic System 1984 UTM fuseau 09 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-129.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM09SW84','World Geodetic System 1984 UTM fuseau 09 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM09SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM09W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM09W84','Conversion for World Geodetic System 1984 UTM fuseau 09','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-129.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM09W84','World Geodetic System 1984 UTM fuseau 09','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM09W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM10SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM10SW84','Conversion for World Geodetic System 1984 UTM fuseau 10 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-123.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM10SW84','World Geodetic System 1984 UTM fuseau 10 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM10SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM10W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM10W84','Conversion for World Geodetic System 1984 UTM fuseau 10','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-123.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM10W84','World Geodetic System 1984 UTM fuseau 10','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM10W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM11SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM11SW84','Conversion for World Geodetic System 1984 UTM fuseau 11 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-117.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM11SW84','World Geodetic System 1984 UTM fuseau 11 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM11SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM11W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM11W84','Conversion for World Geodetic System 1984 UTM fuseau 11','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-117.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM11W84','World Geodetic System 1984 UTM fuseau 11','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM11W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM12SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM12SW84','Conversion for World Geodetic System 1984 UTM fuseau 12 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-111.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM12SW84','World Geodetic System 1984 UTM fuseau 12 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM12SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM12W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM12W84','Conversion for World Geodetic System 1984 UTM fuseau 12','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-111.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM12W84','World Geodetic System 1984 UTM fuseau 12','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM12W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM13SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM13SW84','Conversion for World Geodetic System 1984 UTM fuseau 13 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-105.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM13SW84','World Geodetic System 1984 UTM fuseau 13 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM13SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM13W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM13W84','Conversion for World Geodetic System 1984 UTM fuseau 13','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-105.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM13W84','World Geodetic System 1984 UTM fuseau 13','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM13W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM14SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM14SW84','Conversion for World Geodetic System 1984 UTM fuseau 14 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-99.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM14SW84','World Geodetic System 1984 UTM fuseau 14 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM14SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM14W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM14W84','Conversion for World Geodetic System 1984 UTM fuseau 14','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-99.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM14W84','World Geodetic System 1984 UTM fuseau 14','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM14W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM15SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM15SW84','Conversion for World Geodetic System 1984 UTM fuseau 15 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-93.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM15SW84','World Geodetic System 1984 UTM fuseau 15 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM15SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM15W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM15W84','Conversion for World Geodetic System 1984 UTM fuseau 15','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-93.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM15W84','World Geodetic System 1984 UTM fuseau 15','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM15W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM16SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM16SW84','Conversion for World Geodetic System 1984 UTM fuseau 16 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-87.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM16SW84','World Geodetic System 1984 UTM fuseau 16 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM16SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM16W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM16W84','Conversion for World Geodetic System 1984 UTM fuseau 16','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-87.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM16W84','World Geodetic System 1984 UTM fuseau 16','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM16W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM17SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM17SW84','Conversion for World Geodetic System 1984 UTM fuseau 17 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-81.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM17SW84','World Geodetic System 1984 UTM fuseau 17 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM17SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM17W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM17W84','Conversion for World Geodetic System 1984 UTM fuseau 17','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-81.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM17W84','World Geodetic System 1984 UTM fuseau 17','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM17W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM18SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM18SW84','Conversion for World Geodetic System 1984 UTM fuseau 18 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-75.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM18SW84','World Geodetic System 1984 UTM fuseau 18 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM18SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM18W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM18W84','Conversion for World Geodetic System 1984 UTM fuseau 18','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-75.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM18W84','World Geodetic System 1984 UTM fuseau 18','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM18W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM19SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM19SW84','Conversion for World Geodetic System 1984 UTM fuseau 19 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-69.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM19SW84','World Geodetic System 1984 UTM fuseau 19 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM19SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM19W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM19W84','Conversion for World Geodetic System 1984 UTM fuseau 19','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-69.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM19W84','World Geodetic System 1984 UTM fuseau 19','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM19W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM20SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM20SW84','Conversion for World Geodetic System 1984 UTM fuseau 20 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM20SW84','World Geodetic System 1984 UTM fuseau 20 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM20SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM20W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM20W84','Conversion for World Geodetic System 1984 UTM fuseau 20','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM20W84','World Geodetic System 1984 UTM fuseau 20','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM20W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM20W84GUAD','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM20W84GUAD','Conversion for World Geodetic System 1984 UTM fuseau 20 Nord-Guadeloupe','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM20W84GUAD','World Geodetic System 1984 UTM fuseau 20 Nord-Guadeloupe','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM20W84GUAD','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM20W84MART','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM20W84MART','Conversion for World Geodetic System 1984 UTM fuseau 20 Nord-Martinique','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM20W84MART','World Geodetic System 1984 UTM fuseau 20 Nord-Martinique','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM20W84MART','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM21SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM21SW84','Conversion for World Geodetic System 1984 UTM fuseau 21 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-57.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM21SW84','World Geodetic System 1984 UTM fuseau 21 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM21SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM21W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM21W84','Conversion for World Geodetic System 1984 UTM fuseau 21','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-57.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM21W84','World Geodetic System 1984 UTM fuseau 21','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM21W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM22RGFG95','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM22RGFG95','Conversion for RGFG95 UTM fuseau 22 Nord-Guyane','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-51.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM22RGFG95','RGFG95 UTM fuseau 22 Nord-Guyane','EPSG','4499','IGNF','RGFG95GEO','IGNF','CONV_UTM22RGFG95','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM22SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM22SW84','Conversion for World Geodetic System 1984 UTM fuseau 22 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-51.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM22SW84','World Geodetic System 1984 UTM fuseau 22 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM22SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM22W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM22W84','Conversion for World Geodetic System 1984 UTM fuseau 22','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-51.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM22W84','World Geodetic System 1984 UTM fuseau 22','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM22W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM23SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM23SW84','Conversion for World Geodetic System 1984 UTM fuseau 23 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-45.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM23SW84','World Geodetic System 1984 UTM fuseau 23 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM23SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM23W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM23W84','Conversion for World Geodetic System 1984 UTM fuseau 23','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-45.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM23W84','World Geodetic System 1984 UTM fuseau 23','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM23W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM24SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM24SW84','Conversion for World Geodetic System 1984 UTM fuseau 24 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-39.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM24SW84','World Geodetic System 1984 UTM fuseau 24 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM24SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM24W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM24W84','Conversion for World Geodetic System 1984 UTM fuseau 24','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-39.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM24W84','World Geodetic System 1984 UTM fuseau 24','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM24W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM25SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM25SW84','Conversion for World Geodetic System 1984 UTM fuseau 25 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-33.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM25SW84','World Geodetic System 1984 UTM fuseau 25 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM25SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM25W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM25W84','Conversion for World Geodetic System 1984 UTM fuseau 25','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-33.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM25W84','World Geodetic System 1984 UTM fuseau 25','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM25W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM26ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM26ETRS89','Conversion for Europe - de 30d a 24d Ouest','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-27.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM26ETRS89','Europe - de 30d a 24d Ouest','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM26ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM26SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM26SW84','Conversion for World Geodetic System 1984 UTM fuseau 26 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-27.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM26SW84','World Geodetic System 1984 UTM fuseau 26 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM26SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM26W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM26W84','Conversion for World Geodetic System 1984 UTM fuseau 26','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-27.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM26W84','World Geodetic System 1984 UTM fuseau 26','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM26W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM27ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM27ETRS89','Conversion for Europe - de 24d a 18d Ouest','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-21.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM27ETRS89','Europe - de 24d a 18d Ouest','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM27ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM27SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM27SW84','Conversion for World Geodetic System 1984 UTM fuseau 27 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-21.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM27SW84','World Geodetic System 1984 UTM fuseau 27 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM27SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM27W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM27W84','Conversion for World Geodetic System 1984 UTM fuseau 27','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-21.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM27W84','World Geodetic System 1984 UTM fuseau 27','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM27W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM28ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM28ETRS89','Conversion for Europe - de 18d a 12d Ouest','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-15.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM28ETRS89','Europe - de 18d a 12d Ouest','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM28ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM28SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM28SW84','Conversion for World Geodetic System 1984 UTM fuseau 28 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-15.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM28SW84','World Geodetic System 1984 UTM fuseau 28 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM28SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM28W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM28W84','Conversion for World Geodetic System 1984 UTM fuseau 28','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-15.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM28W84','World Geodetic System 1984 UTM fuseau 28','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM28W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM29ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM29ETRS89','Conversion for Europe - de 12d a 6d Ouest','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM29ETRS89','Europe - de 12d a 6d Ouest','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM29ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM29SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM29SW84','Conversion for World Geodetic System 1984 UTM fuseau 29 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM29SW84','World Geodetic System 1984 UTM fuseau 29 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM29SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM29W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM29W84','Conversion for World Geodetic System 1984 UTM fuseau 29','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM29W84','World Geodetic System 1984 UTM fuseau 29','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM29W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM30','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM30','Conversion for European Datum 1950 UTM fuseau 30','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM30','European Datum 1950 UTM fuseau 30','EPSG','4499','IGNF','ED50G','IGNF','CONV_UTM30','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM30ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM30ETRS89','Conversion for Europe - de -6d a 0d Ouest','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM30ETRS89','Europe - de -6d a 0d Ouest','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM30ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM30RGF93','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM30RGF93','Conversion for RGF93 UTM fuseau 30','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM30RGF93','RGF93 UTM fuseau 30','EPSG','4499','IGNF','RGF93G','IGNF','CONV_UTM30RGF93','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM30SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM30SW84','Conversion for World Geodetic System 1984 UTM fuseau 30 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM30SW84','World Geodetic System 1984 UTM fuseau 30 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM30SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM30W72','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM30W72','Conversion for World Geodetic System 1972 UTM fuseau 30','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM30W72','World Geodetic System 1972 UTM fuseau 30','EPSG','4499','IGNF','WGS72G','IGNF','CONV_UTM30W72','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM30W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM30W84','Conversion for World Geodetic System 1984 UTM fuseau 30','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM30W84','World Geodetic System 1984 UTM fuseau 30','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM30W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM31','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM31','Conversion for European Datum 1950 UTM fuseau 31','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM31','European Datum 1950 UTM fuseau 31','EPSG','4499','IGNF','ED50G','IGNF','CONV_UTM31','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM31ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM31ETRS89','Conversion for Europe - de 0d a 6d Est','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM31ETRS89','Europe - de 0d a 6d Est','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM31ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM31RGF93','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM31RGF93','Conversion for RGF93 UTM fuseau 31','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM31RGF93','RGF93 UTM fuseau 31','EPSG','4499','IGNF','RGF93G','IGNF','CONV_UTM31RGF93','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM31SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM31SW84','Conversion for World Geodetic System 1984 UTM fuseau 31 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM31SW84','World Geodetic System 1984 UTM fuseau 31 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM31SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM31W72','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM31W72','Conversion for World Geodetic System 1972 UTM fuseau 31','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM31W72','World Geodetic System 1972 UTM fuseau 31','EPSG','4499','IGNF','WGS72G','IGNF','CONV_UTM31W72','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM31W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM31W84','Conversion for World Geodetic System 1984 UTM fuseau 31','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',3.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM31W84','World Geodetic System 1984 UTM fuseau 31','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM31W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM32','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM32','Conversion for European Datum 1950 UTM fuseau 32','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM32','European Datum 1950 UTM fuseau 32','EPSG','4499','IGNF','ED50G','IGNF','CONV_UTM32','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM32ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM32ETRS89','Conversion for Europe - de 6d a 12d Est','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM32ETRS89','Europe - de 6d a 12d Est','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM32ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM32RGF93','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM32RGF93','Conversion for RGF93 UTM fuseau 32','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM32RGF93','RGF93 UTM fuseau 32','EPSG','4499','IGNF','RGF93G','IGNF','CONV_UTM32RGF93','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM32SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM32SW84','Conversion for World Geodetic System 1984 UTM fuseau 32 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM32SW84','World Geodetic System 1984 UTM fuseau 32 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM32SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM32W72','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM32W72','Conversion for World Geodetic System 1972 UTM fuseau 32','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM32W72','World Geodetic System 1972 UTM fuseau 32','EPSG','4499','IGNF','WGS72G','IGNF','CONV_UTM32W72','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM32W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM32W84','Conversion for World Geodetic System 1984 UTM fuseau 32','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',9.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM32W84','World Geodetic System 1984 UTM fuseau 32','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM32W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM33ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM33ETRS89','Conversion for Europe - de 12d a 18d Est','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',15.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM33ETRS89','Europe - de 12d a 18d Est','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM33ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM33SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM33SW84','Conversion for World Geodetic System 1984 UTM fuseau 33 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',15.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM33SW84','World Geodetic System 1984 UTM fuseau 33 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM33SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM33W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM33W84','Conversion for World Geodetic System 1984 UTM fuseau 33','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',15.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM33W84','World Geodetic System 1984 UTM fuseau 33','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM33W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM34ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM34ETRS89','Conversion for Europe - de 18d a 24d Est','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',21.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM34ETRS89','Europe - de 18d a 24d Est','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM34ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM34SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM34SW84','Conversion for World Geodetic System 1984 UTM fuseau 34 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',21.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM34SW84','World Geodetic System 1984 UTM fuseau 34 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM34SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM34W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM34W84','Conversion for World Geodetic System 1984 UTM fuseau 34','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',21.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM34W84','World Geodetic System 1984 UTM fuseau 34','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM34W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM35ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM35ETRS89','Conversion for Europe - de 24d a 30d Est','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',27.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM35ETRS89','Europe - de 24d a 30d Est','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM35ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM35SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM35SW84','Conversion for World Geodetic System 1984 UTM fuseau 35 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',27.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM35SW84','World Geodetic System 1984 UTM fuseau 35 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM35SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM35W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM35W84','Conversion for World Geodetic System 1984 UTM fuseau 35','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',27.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM35W84','World Geodetic System 1984 UTM fuseau 35','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM35W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM36ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM36ETRS89','Conversion for Europe - de 30d a 36d Est','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',33.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM36ETRS89','Europe - de 30d a 36d Est','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM36ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM36SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM36SW84','Conversion for World Geodetic System 1984 UTM fuseau 36 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',33.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM36SW84','World Geodetic System 1984 UTM fuseau 36 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM36SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM36W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM36W84','Conversion for World Geodetic System 1984 UTM fuseau 36','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',33.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM36W84','World Geodetic System 1984 UTM fuseau 36','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM36W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM37ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM37ETRS89','Conversion for Europe - de 36d a 42d Est','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',39.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM37ETRS89','Europe - de 36d a 42d Est','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM37ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM37SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM37SW84','Conversion for World Geodetic System 1984 UTM fuseau 37 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',39.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM37SW84','World Geodetic System 1984 UTM fuseau 37 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM37SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM37W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM37W84','Conversion for World Geodetic System 1984 UTM fuseau 37','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',39.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM37W84','World Geodetic System 1984 UTM fuseau 37','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM37W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM38ETRS89','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM38ETRS89','Conversion for Europe - de 42d a 48d Est','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',45.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM38ETRS89','Europe - de 42d a 48d Est','EPSG','4499','IGNF','ETRS89GEO','IGNF','CONV_UTM38ETRS89','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM38SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM38SW84','Conversion for World Geodetic System 1984 UTM fuseau 38 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',45.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM38SW84','World Geodetic System 1984 UTM fuseau 38 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM38SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM38W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM38W84','Conversion for World Geodetic System 1984 UTM fuseau 38','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',45.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM38W84','World Geodetic System 1984 UTM fuseau 38','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM38W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM39SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM39SW84','Conversion for World Geodetic System 1984 UTM fuseau 39 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',51.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM39SW84','World Geodetic System 1984 UTM fuseau 39 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM39SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM39W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM39W84','Conversion for World Geodetic System 1984 UTM fuseau 39','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',51.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM39W84','World Geodetic System 1984 UTM fuseau 39','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM39W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM40SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM40SW84','Conversion for World Geodetic System 1984 UTM fuseau 40 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',57.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM40SW84','World Geodetic System 1984 UTM fuseau 40 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM40SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM40W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM40W84','Conversion for World Geodetic System 1984 UTM fuseau 40','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',57.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM40W84','World Geodetic System 1984 UTM fuseau 40','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM40W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM41SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM41SW84','Conversion for World Geodetic System 1984 UTM fuseau 41 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM41SW84','World Geodetic System 1984 UTM fuseau 41 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM41SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM41W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM41W84','Conversion for World Geodetic System 1984 UTM fuseau 41','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',63.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM41W84','World Geodetic System 1984 UTM fuseau 41','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM41W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM42SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM42SW84','Conversion for World Geodetic System 1984 UTM fuseau 42 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',69.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM42SW84','World Geodetic System 1984 UTM fuseau 42 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM42SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM42W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM42W84','Conversion for World Geodetic System 1984 UTM fuseau 42','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',69.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM42W84','World Geodetic System 1984 UTM fuseau 42','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM42W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM43SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM43SW84','Conversion for World Geodetic System 1984 UTM fuseau 43 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',75.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM43SW84','World Geodetic System 1984 UTM fuseau 43 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM43SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM43W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM43W84','Conversion for World Geodetic System 1984 UTM fuseau 43','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',75.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM43W84','World Geodetic System 1984 UTM fuseau 43','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM43W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM44SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM44SW84','Conversion for World Geodetic System 1984 UTM fuseau 44 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',81.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM44SW84','World Geodetic System 1984 UTM fuseau 44 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM44SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM44W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM44W84','Conversion for World Geodetic System 1984 UTM fuseau 44','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',81.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM44W84','World Geodetic System 1984 UTM fuseau 44','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM44W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM45SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM45SW84','Conversion for World Geodetic System 1984 UTM fuseau 45 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',87.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM45SW84','World Geodetic System 1984 UTM fuseau 45 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM45SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM45W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM45W84','Conversion for World Geodetic System 1984 UTM fuseau 45','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',87.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM45W84','World Geodetic System 1984 UTM fuseau 45','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM45W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM46SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM46SW84','Conversion for World Geodetic System 1984 UTM fuseau 46 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',93.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM46SW84','World Geodetic System 1984 UTM fuseau 46 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM46SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM46W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM46W84','Conversion for World Geodetic System 1984 UTM fuseau 46','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',93.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM46W84','World Geodetic System 1984 UTM fuseau 46','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM46W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM47SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM47SW84','Conversion for World Geodetic System 1984 UTM fuseau 47 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',99.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM47SW84','World Geodetic System 1984 UTM fuseau 47 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM47SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM47W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM47W84','Conversion for World Geodetic System 1984 UTM fuseau 47','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',99.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM47W84','World Geodetic System 1984 UTM fuseau 47','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM47W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM48SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM48SW84','Conversion for World Geodetic System 1984 UTM fuseau 48 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',105.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM48SW84','World Geodetic System 1984 UTM fuseau 48 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM48SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM48W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM48W84','Conversion for World Geodetic System 1984 UTM fuseau 48','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',105.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM48W84','World Geodetic System 1984 UTM fuseau 48','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM48W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM49SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM49SW84','Conversion for World Geodetic System 1984 UTM fuseau 49 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',111.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM49SW84','World Geodetic System 1984 UTM fuseau 49 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM49SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM49W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM49W84','Conversion for World Geodetic System 1984 UTM fuseau 49','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',111.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM49W84','World Geodetic System 1984 UTM fuseau 49','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM49W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM50SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM50SW84','Conversion for World Geodetic System 1984 UTM fuseau 50 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',117.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM50SW84','World Geodetic System 1984 UTM fuseau 50 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM50SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM50W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM50W84','Conversion for World Geodetic System 1984 UTM fuseau 50','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',117.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM50W84','World Geodetic System 1984 UTM fuseau 50','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM50W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM51SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM51SW84','Conversion for World Geodetic System 1984 UTM fuseau 51 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',123.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM51SW84','World Geodetic System 1984 UTM fuseau 51 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM51SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM51W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM51W84','Conversion for World Geodetic System 1984 UTM fuseau 51','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',123.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM51W84','World Geodetic System 1984 UTM fuseau 51','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM51W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM52SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM52SW84','Conversion for World Geodetic System 1984 UTM fuseau 52 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',129.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM52SW84','World Geodetic System 1984 UTM fuseau 52 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM52SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM52W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM52W84','Conversion for World Geodetic System 1984 UTM fuseau 52','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',129.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM52W84','World Geodetic System 1984 UTM fuseau 52','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM52W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM53SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM53SW84','Conversion for World Geodetic System 1984 UTM fuseau 53 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',135.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM53SW84','World Geodetic System 1984 UTM fuseau 53 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM53SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM53W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM53W84','Conversion for World Geodetic System 1984 UTM fuseau 53','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',135.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM53W84','World Geodetic System 1984 UTM fuseau 53','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM53W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM54SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM54SW84','Conversion for World Geodetic System 1984 UTM fuseau 54 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM54SW84','World Geodetic System 1984 UTM fuseau 54 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM54SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM54W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM54W84','Conversion for World Geodetic System 1984 UTM fuseau 54','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',141.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM54W84','World Geodetic System 1984 UTM fuseau 54','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM54W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM55SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM55SW84','Conversion for World Geodetic System 1984 UTM fuseau 55 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM55SW84','World Geodetic System 1984 UTM fuseau 55 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM55SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM55W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM55W84','Conversion for World Geodetic System 1984 UTM fuseau 55','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',147.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM55W84','World Geodetic System 1984 UTM fuseau 55','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM55W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM56SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM56SW84','Conversion for World Geodetic System 1984 UTM fuseau 56 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',153.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM56SW84','World Geodetic System 1984 UTM fuseau 56 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM56SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM56W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM56W84','Conversion for World Geodetic System 1984 UTM fuseau 56','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',153.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM56W84','World Geodetic System 1984 UTM fuseau 56','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM56W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM57SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM57SW84','Conversion for World Geodetic System 1984 UTM fuseau 57 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',159.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM57SW84','World Geodetic System 1984 UTM fuseau 57 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM57SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM57W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM57W84','Conversion for World Geodetic System 1984 UTM fuseau 57','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',159.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM57W84','World Geodetic System 1984 UTM fuseau 57','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM57W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM58SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM58SW84','Conversion for World Geodetic System 1984 UTM fuseau 58 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',165.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM58SW84','World Geodetic System 1984 UTM fuseau 58 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM58SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM58W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM58W84','Conversion for World Geodetic System 1984 UTM fuseau 58','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',165.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM58W84','World Geodetic System 1984 UTM fuseau 58','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM58W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM59SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM59SW84','Conversion for World Geodetic System 1984 UTM fuseau 59 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',171.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM59SW84','World Geodetic System 1984 UTM fuseau 59 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM59SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM59W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM59W84','Conversion for World Geodetic System 1984 UTM fuseau 59','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',171.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM59W84','World Geodetic System 1984 UTM fuseau 59','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM59W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM60SW84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM60SW84','Conversion for World Geodetic System 1984 UTM fuseau 60 Sud','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',177.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM60SW84','World Geodetic System 1984 UTM fuseau 60 Sud','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM60SW84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_UTM60W84','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_UTM60W84','Conversion for World Geodetic System 1984 UTM fuseau 60','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',177.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',0.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','UTM60W84','World Geodetic System 1984 UTM fuseau 60','EPSG','4499','IGNF','WGS84G','IGNF','CONV_UTM60W84','EPSG','1262',NULL,0);
 
-INSERT INTO "coordinate_operation" VALUES('IGNF','CONV_WALL78UTM1S','conversion');
 INSERT INTO "conversion" VALUES('IGNF','CONV_WALL78UTM1S','Conversion for Wallis-Uvea 1978 (MOP78) UTM 1 SUD','EPSG','1262','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',0.000000000,'EPSG','9102','EPSG','8802','Longitude of natural origin',-177.000000000,'EPSG','9102','EPSG','8805','Scale factor at natural origin',0.99960000,'EPSG','9201','EPSG','8806','False easting',500000.000,'EPSG','9001','EPSG','8807','False northing',10000000.000,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "projected_crs" VALUES('IGNF','WALL78UTM1S','Wallis-Uvea 1978 (MOP78) UTM 1 SUD','EPSG','4499','IGNF','WALL78GEO','IGNF','CONV_WALL78UTM1S','EPSG','1262',NULL,0);
 
