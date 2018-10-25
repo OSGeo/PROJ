@@ -35,11 +35,11 @@
 #include <cctype>
 #include <cmath>
 #include <cstring>
-#include <iomanip>
+#include <list>
 #include <locale>
 #include <map>
 #include <set>
-#include <sstream> // std::ostringstream
+#include <sstream> // std::istringstream
 #include <string>
 #include <utility>
 #include <vector>
@@ -419,7 +419,9 @@ void WKTFormatter::addQuotedString(const char *str) {
 
 void WKTFormatter::addQuotedString(const std::string &str) {
     d->startNewChild();
-    d->result_ += "\"" + replaceAll(str, "\"", "\"\"") + "\"";
+    d->result_ += "\"";
+    d->result_ += replaceAll(str, "\"", "\"\"");
+    d->result_ += "\"";
 }
 
 // ---------------------------------------------------------------------------
@@ -433,20 +435,7 @@ void WKTFormatter::add(const std::string &str) {
 
 void WKTFormatter::add(int number) {
     d->startNewChild();
-    std::ostringstream buffer;
-    buffer.imbue(std::locale::classic());
-    buffer << number;
-    d->result_ += buffer.str();
-}
-
-// ---------------------------------------------------------------------------
-
-void WKTFormatter::add(size_t number) {
-    d->startNewChild();
-    std::ostringstream buffer;
-    buffer.imbue(std::locale::classic());
-    buffer << number;
-    d->result_ += buffer.str();
+    d->result_ += internal::toString(number);
 }
 
 // ---------------------------------------------------------------------------
@@ -473,10 +462,8 @@ static std::string normalizeSerializedString(const std::string &in) {
 
 void WKTFormatter::add(double number, int precision) {
     d->startNewChild();
-    std::ostringstream buffer;
-    buffer.imbue(std::locale::classic());
-    buffer << std::setprecision(precision) << number;
-    d->result_ += normalizeSerializedString(buffer.str());
+    d->result_ +=
+        normalizeSerializedString(internal::toString(number, precision));
 }
 
 // ---------------------------------------------------------------------------
@@ -993,8 +980,10 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart) {
 //! @cond Doxygen_Suppress
 static std::string escapeIfQuotedString(const std::string &str) {
     if (str.size() > 2 && str[0] == '"' && str.back() == '"') {
-        return "\"" + replaceAll(str.substr(1, str.size() - 2), "\"", "\"\"") +
-               "\"";
+        std::string res("\"");
+        res += replaceAll(str.substr(1, str.size() - 2), "\"", "\"\"");
+        res += "\"";
+        return res;
     } else {
         return str;
     }
@@ -1043,6 +1032,7 @@ struct WKTParser::Private {
         }
         delete[] properties_;
     }
+    Private(const Private &) = delete;
 
     void emitRecoverableAssertion(const std::string &errorMsg);
 
@@ -1217,36 +1207,42 @@ static double asDouble(const std::string &val) { return c_locale_stod(val); }
 
 // ---------------------------------------------------------------------------
 
-static void ThrowNotEnoughChildren(const std::string &nodeName) PROJ_NO_RETURN {
-    throw ParsingException("not enough children in " + nodeName + " node");
+// ---------------------------------------------------------------------------
+
+PROJ_NO_RETURN static void ThrowNotEnoughChildren(const std::string &nodeName) {
+    throw ParsingException(
+        concat("not enough children in ", nodeName, " node"));
 }
 
 // ---------------------------------------------------------------------------
 
-static void
-ThrowNotRequiredNumberOfChildren(const std::string &nodeName) PROJ_NO_RETURN {
-    throw ParsingException("not required number of children in " + nodeName +
-                           " node");
+PROJ_NO_RETURN static void
+ThrowNotRequiredNumberOfChildren(const std::string &nodeName) {
+    throw ParsingException(
+        concat("not required number of children in ", nodeName, " node"));
 }
 
 // ---------------------------------------------------------------------------
 
-static void ThrowMissing(const std::string &nodeName) PROJ_NO_RETURN {
-    throw ParsingException("missing " + nodeName + " node");
+PROJ_NO_RETURN static void ThrowMissing(const std::string &nodeName) {
+    throw ParsingException(concat("missing ", nodeName, " node"));
 }
 
 // ---------------------------------------------------------------------------
 
-static void
-ThrowNotExpectedCSType(const std::string &expectedCSType) PROJ_NO_RETURN {
-    throw ParsingException("CS node is not of type " + expectedCSType);
+PROJ_NO_RETURN static void
+ThrowNotExpectedCSType(const std::string &expectedCSType) {
+    throw ParsingException(concat("CS node is not of type ", expectedCSType));
 }
 
 // ---------------------------------------------------------------------------
 
 static ParsingException buildRethrow(const char *funcName,
                                      const std::exception &e) {
-    return ParsingException(std::string(funcName) + ": " + e.what());
+    std::string res(funcName);
+    res += ": ";
+    res += e.what();
+    return ParsingException(res);
 }
 
 // ---------------------------------------------------------------------------
@@ -1290,8 +1286,10 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
     } else if (strict_ || !tolerant) {
         ThrowNotEnoughChildren(node->GP()->value());
     } else {
-        warningList_.push_back("not enough children in " + node->GP()->value() +
-                               " node");
+        std::string msg("not enough children in ");
+        msg += node->GP()->value();
+        msg += " node";
+        warningList_.emplace_back(std::move(msg));
     }
     return nullptr;
 }
@@ -1342,8 +1340,8 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
         if (ci_equal(subNode->GP()->value(), WKTConstants::USAGE)) {
             auto objectDomain = buildObjectDomain(subNode);
             if (!objectDomain) {
-                throw ParsingException("missing children in " +
-                                       subNode->GP()->value() + " node");
+                throw ParsingException(concat("missing children in ",
+                                              subNode->GP()->value(), " node"));
             }
             array->add(NN_NO_CHECK(objectDomain));
         }
@@ -1408,9 +1406,9 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
                                                                   east, north);
                         geogExtent.emplace_back(bbox);
                     } catch (const std::exception &) {
-                        throw ParsingException("not 4 double values in " +
-                                               bboxNode->GP()->value() +
-                                               " node");
+                        throw ParsingException(concat("not 4 double values in ",
+                                                      bboxNode->GP()->value(),
+                                                      " node"));
                     }
                 } else {
                     ThrowNotRequiredNumberOfChildren(bboxNode->GP()->value());
@@ -1433,8 +1431,8 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
                                            ->value());
                     } catch (const std::exception &) {
                         throw ParsingException(
-                            "not 2 double values in " +
-                            verticalExtentNode->GP()->value() + " node");
+                            concat("not 2 double values in ",
+                                   verticalExtentNode->GP()->value(), " node"));
                     }
                     UnitOfMeasure unit = UnitOfMeasure::METRE;
                     if (verticalExtentNode->GP()->childrenSize() == 3) {
@@ -1791,12 +1789,11 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
             orderNum = std::stoi(order);
         } catch (const std::exception &) {
             throw ParsingException(
-                std::string("buildAxis: invalid ORDER value: ") + order);
+                concat("buildAxis: invalid ORDER value: ", order));
         }
         if (orderNum != expectedOrderNum) {
             throw ParsingException(
-                std::string("buildAxis: did not get expected ORDER value: ") +
-                order);
+                concat("buildAxis: did not get expected ORDER value: ", order));
         }
     }
 
@@ -1869,8 +1866,8 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
     }
 
     if (!direction) {
-        throw ParsingException("unhandled axis direction: " +
-                               children[1]->GP()->value());
+        throw ParsingException(
+            concat("unhandled axis direction: ", children[1]->GP()->value()));
     }
     UnitOfMeasure unit(buildUnitInSubNode(node));
     if (unit == UnitOfMeasure::NONE) {
@@ -1892,17 +1889,18 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
 
 static const PropertyMap emptyPropertyMap{};
 
-static void ThrowParsingException(const std::string &msg) PROJ_NO_RETURN {
+PROJ_NO_RETURN static void ThrowParsingException(const std::string &msg) {
     throw ParsingException(msg);
 }
 
-static void ThrowParsingExceptionMissingUNIT() PROJ_NO_RETURN {
+PROJ_NO_RETURN static void ThrowParsingExceptionMissingUNIT() {
     throw ParsingException("buildCS: missing UNIT");
 }
 
 static ParsingException
 buildParsingExceptionInvalidAxisCount(const std::string &csType) {
-    return ParsingException("buildCS: invalid CS axis count for " + csType);
+    return ParsingException(
+        concat("buildCS: invalid CS axis count for ", csType));
 }
 
 CoordinateSystemNNPtr
@@ -1923,9 +1921,8 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         try {
             axisCount = std::stoi(children[1]->GP()->value());
         } catch (const std::exception &) {
-            ThrowParsingException(
-                std::string("buildCS: invalid CS axis count: ") +
-                children[1]->GP()->value());
+            ThrowParsingException(concat("buildCS: invalid CS axis count: ",
+                                         children[1]->GP()->value()));
         }
     } else {
         const char *csTypeCStr = "";
@@ -2048,8 +2045,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         } else {
             // Shouldn't happen normally
             throw ParsingException(
-                std::string("buildCS: unexpected parent node: ") +
-                parentNodeName);
+                concat("buildCS: unexpected parent node: ", parentNodeName));
         }
         csType = csTypeCStr;
     }
@@ -2138,7 +2134,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
             return TemporalMeasureCS::create(csMap, axisList[0]);
         }
     } else {
-        throw ParsingException(std::string("unhandled CS type: ") + csType);
+        throw ParsingException(concat("unhandled CS type: ", csType));
     }
     throw buildParsingExceptionInvalidAxisCount(csType);
 }
@@ -2157,11 +2153,11 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     auto &dynamicNode = node->GP()->lookForChild(WKTConstants::DYNAMIC);
 
     auto &csNode = node->GP()->lookForChild(WKTConstants::CS);
-    if (isNull(csNode) &&
-        !ci_equal(node->GP()->value(), WKTConstants::GEOGCS) &&
-        !ci_equal(node->GP()->value(), WKTConstants::GEOCCS) &&
-        !ci_equal(node->GP()->value(), WKTConstants::BASEGEODCRS) &&
-        !ci_equal(node->GP()->value(), WKTConstants::BASEGEOGCRS)) {
+    const auto &nodeName = node->GP()->value();
+    if (isNull(csNode) && !ci_equal(nodeName, WKTConstants::GEOGCS) &&
+        !ci_equal(nodeName, WKTConstants::GEOCCS) &&
+        !ci_equal(nodeName, WKTConstants::BASEGEODCRS) &&
+        !ci_equal(nodeName, WKTConstants::BASEGEOGCRS)) {
         ThrowMissing(WKTConstants::CS);
     }
 
@@ -2169,17 +2165,16 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
         WKTConstants::PRIMEM, WKTConstants::PRIMEMERIDIAN);
     if (isNull(primeMeridianNode)) {
         // PRIMEM is required in WKT1
-        if (ci_equal(node->GP()->value(), WKTConstants::GEOGCS) ||
-            ci_equal(node->GP()->value(), WKTConstants::GEOCCS)) {
-            emitRecoverableAssertion(node->GP()->value() +
-                                     " should have a PRIMEM node");
+        if (ci_equal(nodeName, WKTConstants::GEOGCS) ||
+            ci_equal(nodeName, WKTConstants::GEOCCS)) {
+            emitRecoverableAssertion(nodeName + " should have a PRIMEM node");
         }
     }
 
-    auto angularUnit = buildUnitInSubNode(
-        node, ci_equal(node->GP()->value(), WKTConstants::GEOGCS)
-                  ? UnitOfMeasure::Type::ANGULAR
-                  : UnitOfMeasure::Type::UNKNOWN);
+    auto angularUnit =
+        buildUnitInSubNode(node, ci_equal(nodeName, WKTConstants::GEOGCS)
+                                     ? UnitOfMeasure::Type::ANGULAR
+                                     : UnitOfMeasure::Type::UNKNOWN);
     if (angularUnit.type() != UnitOfMeasure::Type::ANGULAR) {
         angularUnit = UnitOfMeasure::NONE;
     }
@@ -2205,7 +2200,7 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     auto cs = buildCS(csNode, node, angularUnit);
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
-        assert(!ci_equal(node->GP()->value(), WKTConstants::GEOCCS));
+        assert(!ci_equal(nodeName, WKTConstants::GEOCCS));
         try {
             return GeographicCRS::create(buildProperties(node), datum,
                                          datumEnsemble,
@@ -2214,12 +2209,12 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
             throw ParsingException(std::string("buildGeodeticCRS: ") +
                                    e.what());
         }
-    } else if (ci_equal(node->GP()->value(), WKTConstants::GEOGCRS) ||
-               ci_equal(node->GP()->value(), WKTConstants::GEOGRAPHICCRS) ||
-               ci_equal(node->GP()->value(), WKTConstants::BASEGEOGCRS)) {
+    } else if (ci_equal(nodeName, WKTConstants::GEOGCRS) ||
+               ci_equal(nodeName, WKTConstants::GEOGRAPHICCRS) ||
+               ci_equal(nodeName, WKTConstants::BASEGEOGCRS)) {
         // This is a WKT2-2018 GeographicCRS. An ellipsoidal CS is expected
-        throw ParsingException("ellipsoidal CS expected, but found " +
-                               cs->getWKT2Type(true));
+        throw ParsingException(concat("ellipsoidal CS expected, but found ",
+                                      cs->getWKT2Type(true)));
     }
 
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
@@ -2248,7 +2243,8 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
         }
     }
 
-    throw ParsingException("unhandled CS type: " + cs->getWKT2Type(true));
+    throw ParsingException(
+        concat("unhandled CS type: ", cs->getWKT2Type(true)));
 }
 
 // ---------------------------------------------------------------------------
@@ -2283,8 +2279,8 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
                                             NN_NO_CHECK(ellipsoidalCS));
     } else if (ci_equal(node->GP()->value(), WKTConstants::GEOGCRS)) {
         // This is a WKT2-2018 GeographicCRS. An ellipsoidal CS is expected
-        throw ParsingException("ellipsoidal CS expected, but found " +
-                               cs->getWKT2Type(true));
+        throw ParsingException(concat("ellipsoidal CS expected, but found ",
+                                      cs->getWKT2Type(true)));
     }
 
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
@@ -2305,7 +2301,8 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
                                           NN_NO_CHECK(sphericalCS));
     }
 
-    throw ParsingException("unhandled CS type: " + cs->getWKT2Type(true));
+    throw ParsingException(
+        concat("unhandled CS type: ", cs->getWKT2Type(true)));
 }
 
 // ---------------------------------------------------------------------------
@@ -2387,8 +2384,8 @@ void WKTParser::Private::consumeParameters(
                     values.push_back(
                         ParameterValue::create(Measure(val, unit)));
                 } catch (const std::exception &) {
-                    throw ParsingException("unhandled parameter value type : " +
-                                           paramValue);
+                    throw ParsingException(concat(
+                        "unhandled parameter value type : ", paramValue));
                 }
             }
         } else if (ci_equal(childNode->GP()->value(),
@@ -2714,8 +2711,8 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
                     wkt1ParameterName, defaultLinearUnit, defaultAngularUnit);
                 values.push_back(ParameterValue::create(Measure(val, unit)));
             } catch (const std::exception &) {
-                throw ParsingException("unhandled parameter value type : " +
-                                       paramValue);
+                throw ParsingException(
+                    concat("unhandled parameter value type : ", paramValue));
             }
         }
     }
@@ -2953,8 +2950,8 @@ WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
 
     auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(cs);
     if (!verticalCS) {
-        throw ParsingException("vertical CS expected, but found " +
-                               cs->getWKT2Type(true));
+        throw ParsingException(
+            concat("vertical CS expected, but found ", cs->getWKT2Type(true)));
     }
 
     return DerivedVerticalCRS::create(buildProperties(node), baseVertCRS,
@@ -3426,7 +3423,7 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
             NN_NO_CHECK(buildId(node, false)));
     }
 
-    throw ParsingException("unhandled keyword: " + name);
+    throw ParsingException(concat("unhandled keyword: ", name));
 }
 //! @endcond
 
@@ -3485,7 +3482,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
         if (type == "meridian") {
             return factory->createPrimeMeridian(code);
         }
-        throw ParsingException("unhandled object type: " + type);
+        throw ParsingException(concat("unhandled object type: ", type));
     }
 
     throw ParsingException("unrecognized format");
@@ -3565,6 +3562,43 @@ std::string IPROJStringExportable::exportToPROJString(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+struct Step {
+    std::string name{};
+    bool inverted{false};
+
+    struct KeyValue {
+        std::string key{};
+        std::string value{};
+
+        KeyValue(const std::string &keyIn) : key(keyIn) {}
+
+        KeyValue(const char *keyIn, const std::string &valueIn);
+
+        KeyValue(const std::string &keyIn, const std::string &valueIn)
+            : key(keyIn), value(valueIn) {}
+
+        // cppcheck-suppress functionStatic
+        bool keyEquals(const char *otherKey) const noexcept {
+            return key == otherKey;
+        }
+
+        // cppcheck-suppress functionStatic
+        bool equals(const char *otherKey, const char *otherVal) const noexcept {
+            return key == otherKey && value == otherVal;
+        }
+
+        bool operator!=(const KeyValue &other) const noexcept {
+            return key != other.key || value != other.value;
+        }
+    };
+
+    std::vector<KeyValue> paramValues{};
+};
+
+Step::KeyValue::KeyValue(const char *keyIn, const std::string &valueIn)
+    : key(keyIn), value(valueIn) {}
+
 struct PROJStringFormatter::Private {
     PROJStringFormatter::Convention convention_ =
         PROJStringFormatter::Convention::PROJ_5;
@@ -3572,15 +3606,11 @@ struct PROJStringFormatter::Private {
     std::string vDatumExtension_{};
     std::string hDatumExtension_{};
 
-    struct Step {
-        std::string name{};
-        bool inverted{false};
-        std::vector<std::string> paramValues{};
-    };
-    std::vector<Step> steps_{};
+    std::list<Step> steps_{};
 
     struct InversionStackElt {
-        size_t startIdx = 0;
+        std::list<Step>::iterator startIter{};
+        bool iterValid = false;
         bool currentInversionState = false;
     };
     std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
@@ -3592,10 +3622,12 @@ struct PROJStringFormatter::Private {
     std::string result_{};
 
     // cppcheck-suppress functionStatic
-    void appendToResult(const std::string &str);
+    void appendToResult(const char *str);
+
     // cppcheck-suppress functionStatic
     void addStep();
 };
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -3645,31 +3677,20 @@ void PROJStringFormatter::setUseETMercForTMerc(bool flag) {
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
-static std::string toStr(double d) {
-    std::ostringstream buffer;
-    buffer.imbue(std::locale::classic());
-    buffer << d;
-    return buffer.str();
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
 /** \brief Returns the PROJ string. */
 const std::string &PROJStringFormatter::toString() const {
     d->result_.clear();
 
-    for (size_t i = 0; i < d->steps_.size(); ++i) {
+    for (auto iter = d->steps_.begin(); iter != d->steps_.end();) {
         // Remove no-op helmert
-        if (d->steps_[i].name == "helmert" &&
-            d->steps_[i].paramValues.size() == 3 &&
-            d->steps_[i].paramValues[0] == "x=0" &&
-            d->steps_[i].paramValues[1] == "y=0" &&
-            d->steps_[i].paramValues[2] == "z=0") {
-            d->steps_.erase(d->steps_.begin() + i, d->steps_.begin() + i + 1);
-            --i;
-            continue;
+        auto &step = *iter;
+        if (step.name == "helmert" && step.paramValues.size() == 3 &&
+            step.paramValues[0].equals("x", "0") &&
+            step.paramValues[1].equals("y", "0") &&
+            step.paramValues[2].equals("z", "0")) {
+            iter = d->steps_.erase(iter);
+        } else {
+            ++iter;
         }
     }
 
@@ -3680,47 +3701,35 @@ const std::string &PROJStringFormatter::toString() const {
 
         // axisswap order=2,1 is its own inverse
         if (step.name == "axisswap" && step.paramValues.size() == 1 &&
-            step.paramValues[0] == "order=2,1") {
+            step.paramValues[0].equals("order", "2,1")) {
             step.inverted = false;
             continue;
         }
 
         // handle unitconvert inverse
         if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
-            starts_with(step.paramValues[0], "xy_in=") &&
-            starts_with(step.paramValues[1], "xy_out=")) {
-            auto xy_in = step.paramValues[0].substr(strlen("xy_in="));
-            auto xy_out = step.paramValues[1].substr(strlen("xy_out="));
-            step.paramValues[0] = "xy_in=" + xy_out;
-            step.paramValues[1] = "xy_out=" + xy_in;
+            step.paramValues[0].keyEquals("xy_in") &&
+            step.paramValues[1].keyEquals("xy_out")) {
+            std::swap(step.paramValues[0].value, step.paramValues[1].value);
             step.inverted = false;
             continue;
         }
 
         if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
-            starts_with(step.paramValues[0], "z_in=") &&
-            starts_with(step.paramValues[1], "z_out=")) {
-            auto z_in = step.paramValues[0].substr(strlen("z_in="));
-            auto z_out = step.paramValues[1].substr(strlen("z_out="));
-            step.paramValues[0] = "z_in=" + z_out;
-            step.paramValues[1] = "z_out=" + z_in;
+            step.paramValues[0].keyEquals("z_in") &&
+            step.paramValues[1].keyEquals("z_out")) {
+            std::swap(step.paramValues[0].value, step.paramValues[1].value);
             step.inverted = false;
             continue;
         }
 
         if (step.name == "unitconvert" && step.paramValues.size() == 4 &&
-            starts_with(step.paramValues[0], "xy_in=") &&
-            starts_with(step.paramValues[1], "z_in=") &&
-            starts_with(step.paramValues[2], "xy_out=") &&
-            starts_with(step.paramValues[3], "z_out=")) {
-            auto xy_in = step.paramValues[0].substr(strlen("xy_in="));
-            auto z_in = step.paramValues[1].substr(strlen("z_in="));
-            auto xy_out = step.paramValues[2].substr(strlen("xy_out="));
-            auto z_out = step.paramValues[3].substr(strlen("z_out="));
-            step.paramValues[0] = "xy_in=" + xy_out;
-            step.paramValues[1] = "z_in=" + z_out;
-            step.paramValues[2] = "xy_out=" + xy_in;
-            step.paramValues[3] = "z_out=" + z_in;
+            step.paramValues[0].keyEquals("xy_in") &&
+            step.paramValues[1].keyEquals("z_in") &&
+            step.paramValues[2].keyEquals("xy_out") &&
+            step.paramValues[3].keyEquals("z_out")) {
+            std::swap(step.paramValues[0].value, step.paramValues[2].value);
+            std::swap(step.paramValues[1].value, step.paramValues[3].value);
             step.inverted = false;
             continue;
         }
@@ -3729,116 +3738,111 @@ const std::string &PROJStringFormatter::toString() const {
     bool changeDone;
     do {
         changeDone = false;
-        for (size_t i = 1; i < d->steps_.size(); i++) {
+        auto iterPrev = d->steps_.begin();
+        if (iterPrev == d->steps_.end()) {
+            break;
+        }
+        auto iterCur = iterPrev;
+        iterCur++;
+        for (size_t i = 1; i < d->steps_.size(); ++i, ++iterCur, ++iterPrev) {
+
+            auto &prevStep = *iterPrev;
+            auto &curStep = *iterCur;
 
             // longlat (or its inverse) with ellipsoid only is a no-op
             // do that only for an internal step
-            if (i + 1 < d->steps_.size() && d->steps_[i].name == "longlat" &&
-                d->steps_[i].paramValues.size() == 1 &&
-                starts_with(d->steps_[i].paramValues[0], "ellps=")) {
-                d->steps_.erase(d->steps_.begin() + i);
+            if (i + 1 < d->steps_.size() && curStep.name == "longlat" &&
+                curStep.paramValues.size() == 1 &&
+                curStep.paramValues[0].keyEquals("ellps")) {
+                d->steps_.erase(iterCur);
                 changeDone = true;
                 break;
             }
 
             // unitconvert (xy) followed by its inverse is a no-op
-            if (d->steps_[i].name == "unitconvert" &&
-                d->steps_[i - 1].name == "unitconvert" &&
-                !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
-                d->steps_[i].paramValues.size() == 2 &&
-                d->steps_[i - 1].paramValues.size() == 2 &&
-                starts_with(d->steps_[i].paramValues[0], "xy_in=") &&
-                starts_with(d->steps_[i - 1].paramValues[0], "xy_in=") &&
-                starts_with(d->steps_[i].paramValues[1], "xy_out=") &&
-                starts_with(d->steps_[i - 1].paramValues[1], "xy_out=") &&
-                d->steps_[i].paramValues[0].substr(strlen("xy_in=")) ==
-                    d->steps_[i - 1].paramValues[1].substr(strlen("xy_out=")) &&
-                d->steps_[i].paramValues[1].substr(strlen("xy_out=")) ==
-                    d->steps_[i - 1].paramValues[0].substr(strlen("xy_in="))) {
-                d->steps_.erase(d->steps_.begin() + i - 1,
-                                d->steps_.begin() + i + 1);
+            if (curStep.name == "unitconvert" &&
+                prevStep.name == "unitconvert" && !curStep.inverted &&
+                !prevStep.inverted && curStep.paramValues.size() == 2 &&
+                prevStep.paramValues.size() == 2 &&
+                curStep.paramValues[0].keyEquals("xy_in") &&
+                prevStep.paramValues[0].keyEquals("xy_in") &&
+                curStep.paramValues[1].keyEquals("xy_out") &&
+                prevStep.paramValues[1].keyEquals("xy_out") &&
+                curStep.paramValues[0].value == prevStep.paramValues[1].value &&
+                curStep.paramValues[1].value == prevStep.paramValues[0].value) {
+                ++iterCur;
+                d->steps_.erase(iterPrev, iterCur);
                 changeDone = true;
                 break;
             }
 
             // unitconvert (z) followed by its inverse is a no-op
-            if (d->steps_[i].name == "unitconvert" &&
-                d->steps_[i - 1].name == "unitconvert" &&
-                !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
-                d->steps_[i].paramValues.size() == 2 &&
-                d->steps_[i - 1].paramValues.size() == 2 &&
-                starts_with(d->steps_[i].paramValues[0], "z_in=") &&
-                starts_with(d->steps_[i - 1].paramValues[0], "z_in=") &&
-                starts_with(d->steps_[i].paramValues[1], "z_out=") &&
-                starts_with(d->steps_[i - 1].paramValues[1], "z_out=") &&
-                d->steps_[i].paramValues[0].substr(strlen("z_in=")) ==
-                    d->steps_[i - 1].paramValues[1].substr(strlen("z_out=")) &&
-                d->steps_[i].paramValues[1].substr(strlen("z_out=")) ==
-                    d->steps_[i - 1].paramValues[0].substr(strlen("z_in="))) {
-                d->steps_.erase(d->steps_.begin() + i - 1,
-                                d->steps_.begin() + i + 1);
+            if (curStep.name == "unitconvert" &&
+                prevStep.name == "unitconvert" && !curStep.inverted &&
+                !prevStep.inverted && curStep.paramValues.size() == 2 &&
+                prevStep.paramValues.size() == 2 &&
+                curStep.paramValues[0].keyEquals("z_in") &&
+                prevStep.paramValues[0].keyEquals("z_in") &&
+                curStep.paramValues[1].keyEquals("z_out") &&
+                prevStep.paramValues[1].keyEquals("z_out") &&
+                curStep.paramValues[0].value == prevStep.paramValues[1].value &&
+                curStep.paramValues[1].value == prevStep.paramValues[0].value) {
+                ++iterCur;
+                d->steps_.erase(iterPrev, iterCur);
                 changeDone = true;
                 break;
             }
 
             // unitconvert (xyz) followed by its inverse is a no-op
-            if (d->steps_[i].name == "unitconvert" &&
-                d->steps_[i - 1].name == "unitconvert" &&
-                !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
-                d->steps_[i].paramValues.size() == 4 &&
-                d->steps_[i - 1].paramValues.size() == 4 &&
-                starts_with(d->steps_[i].paramValues[0], "xy_in=") &&
-                starts_with(d->steps_[i - 1].paramValues[0], "xy_in=") &&
-                starts_with(d->steps_[i].paramValues[1], "z_in=") &&
-                starts_with(d->steps_[i - 1].paramValues[1], "z_in=") &&
-                starts_with(d->steps_[i].paramValues[2], "xy_out=") &&
-                starts_with(d->steps_[i - 1].paramValues[2], "xy_out=") &&
-                starts_with(d->steps_[i].paramValues[3], "z_out=") &&
-                starts_with(d->steps_[i - 1].paramValues[3], "z_out=") &&
-                d->steps_[i].paramValues[0].substr(strlen("xy_in=")) ==
-                    d->steps_[i - 1].paramValues[2].substr(strlen("xy_out=")) &&
-                d->steps_[i].paramValues[1].substr(strlen("z_in=")) ==
-                    d->steps_[i - 1].paramValues[3].substr(strlen("z_out=")) &&
-                d->steps_[i].paramValues[2].substr(strlen("xy_out=")) ==
-                    d->steps_[i - 1].paramValues[0].substr(strlen("xy_in=")) &&
-                d->steps_[i].paramValues[3].substr(strlen("z_out=")) ==
-                    d->steps_[i - 1].paramValues[1].substr(strlen("z_in="))) {
-                d->steps_.erase(d->steps_.begin() + i - 1,
-                                d->steps_.begin() + i + 1);
+            if (curStep.name == "unitconvert" &&
+                prevStep.name == "unitconvert" && !curStep.inverted &&
+                !prevStep.inverted && curStep.paramValues.size() == 4 &&
+                prevStep.paramValues.size() == 4 &&
+                curStep.paramValues[0].keyEquals("xy_in") &&
+                prevStep.paramValues[0].keyEquals("xy_in") &&
+                curStep.paramValues[1].keyEquals("z_in") &&
+                prevStep.paramValues[1].keyEquals("z_in") &&
+                curStep.paramValues[2].keyEquals("xy_out") &&
+                prevStep.paramValues[2].keyEquals("xy_out") &&
+                curStep.paramValues[3].keyEquals("z_out") &&
+                prevStep.paramValues[3].keyEquals("z_out") &&
+                curStep.paramValues[0].value == prevStep.paramValues[2].value &&
+                curStep.paramValues[1].value == prevStep.paramValues[3].value &&
+                curStep.paramValues[2].value == prevStep.paramValues[0].value &&
+                curStep.paramValues[3].value == prevStep.paramValues[1].value) {
+                ++iterCur;
+                d->steps_.erase(iterPrev, iterCur);
                 changeDone = true;
                 break;
             }
 
             // combine unitconvert (xy) and unitconvert (z)
             for (int k = 0; k < 2; ++k) {
-                auto first = (k == 0) ? i : i - 1;
-                auto second = (k == 0) ? i - 1 : i;
-                if (d->steps_[first].name == "unitconvert" &&
-                    d->steps_[second].name == "unitconvert" &&
-                    !d->steps_[first].inverted && !d->steps_[second].inverted &&
-                    d->steps_[first].paramValues.size() == 2 &&
-                    d->steps_[second].paramValues.size() == 2 &&
-                    starts_with(d->steps_[second].paramValues[0], "xy_in=") &&
-                    starts_with(d->steps_[second].paramValues[1], "xy_out=") &&
-                    starts_with(d->steps_[first].paramValues[0], "z_in=") &&
-                    starts_with(d->steps_[first].paramValues[1], "z_out=")) {
+                auto &first = (k == 0) ? curStep : prevStep;
+                auto &second = (k == 0) ? prevStep : curStep;
+                if (first.name == "unitconvert" &&
+                    second.name == "unitconvert" && !first.inverted &&
+                    !second.inverted && first.paramValues.size() == 2 &&
+                    second.paramValues.size() == 2 &&
+                    second.paramValues[0].keyEquals("xy_in") &&
+                    second.paramValues[1].keyEquals("xy_out") &&
+                    first.paramValues[0].keyEquals("z_in") &&
+                    first.paramValues[1].keyEquals("z_out")) {
 
-                    auto xy_in = d->steps_[second].paramValues[0].substr(
-                        strlen("xy_in="));
-                    auto xy_out = d->steps_[second].paramValues[1].substr(
-                        strlen("xy_out="));
-                    auto z_in =
-                        d->steps_[first].paramValues[0].substr(strlen("z_in="));
-                    auto z_out = d->steps_[first].paramValues[1].substr(
-                        strlen("z_out="));
-                    d->steps_.erase(d->steps_.begin() + i - 1,
-                                    d->steps_.begin() + i);
-                    d->steps_[i - 1].paramValues.clear();
-                    d->steps_[i - 1].paramValues.emplace_back("xy_in=" + xy_in);
-                    d->steps_[i - 1].paramValues.emplace_back("z_in=" + z_in);
-                    d->steps_[i - 1].paramValues.emplace_back("xy_out=" +
-                                                              xy_out);
-                    d->steps_[i - 1].paramValues.emplace_back("z_out=" + z_out);
+                    auto xy_in = second.paramValues[0].value;
+                    auto xy_out = second.paramValues[1].value;
+                    auto z_in = first.paramValues[0].value;
+                    auto z_out = first.paramValues[1].value;
+                    d->steps_.erase(iterPrev, iterCur);
+                    iterCur->paramValues.clear();
+                    iterCur->paramValues.emplace_back(
+                        Step::KeyValue("xy_in", xy_in));
+                    iterCur->paramValues.emplace_back(
+                        Step::KeyValue("z_in", z_in));
+                    iterCur->paramValues.emplace_back(
+                        Step::KeyValue("xy_out", xy_out));
+                    iterCur->paramValues.emplace_back(
+                        Step::KeyValue("z_out", z_out));
                     changeDone = true;
                     break;
                 }
@@ -3851,40 +3855,32 @@ const std::string &PROJStringFormatter::toString() const {
             //  +step +proj=unitconvert +xy_in=X2 +z_in=Z1 +xy_out=X1 +z_out=Z2
             // ==> step +proj=unitconvert +z_in=Z1 +z_out=Z2
             for (int k = 0; k < 2; ++k) {
-                auto first = (k == 0) ? i : i - 1;
-                auto second = (k == 0) ? i - 1 : i;
-                if (d->steps_[first].name == "unitconvert" &&
-                    d->steps_[second].name == "unitconvert" &&
-                    !d->steps_[first].inverted && !d->steps_[second].inverted &&
-                    d->steps_[first].paramValues.size() == 4 &&
-                    d->steps_[second].paramValues.size() == 2 &&
-                    starts_with(d->steps_[first].paramValues[0], "xy_in=") &&
-                    starts_with(d->steps_[first].paramValues[1], "z_in=") &&
-                    starts_with(d->steps_[first].paramValues[2], "xy_out=") &&
-                    starts_with(d->steps_[first].paramValues[3], "z_out=") &&
-                    starts_with(d->steps_[second].paramValues[0], "xy_in=") &&
-                    starts_with(d->steps_[second].paramValues[1], "xy_out=") &&
-                    d->steps_[first].paramValues[0].substr(strlen("xy_in=")) ==
-                        d->steps_[second].paramValues[1].substr(
-                            strlen("xy_out=")) &&
-                    d->steps_[first].paramValues[2].substr(strlen("xy_out=")) ==
-                        d->steps_[second].paramValues[0].substr(
-                            strlen("xy_in="))) {
-                    auto z_in =
-                        d->steps_[first].paramValues[1].substr(strlen("z_in="));
-                    auto z_out = d->steps_[first].paramValues[3].substr(
-                        strlen("z_out="));
+                auto &first = (k == 0) ? curStep : prevStep;
+                auto &second = (k == 0) ? prevStep : curStep;
+                if (first.name == "unitconvert" &&
+                    second.name == "unitconvert" && !first.inverted &&
+                    !second.inverted && first.paramValues.size() == 4 &&
+                    second.paramValues.size() == 2 &&
+                    first.paramValues[0].keyEquals("xy_in") &&
+                    first.paramValues[1].keyEquals("z_in") &&
+                    first.paramValues[2].keyEquals("xy_out") &&
+                    first.paramValues[3].keyEquals("z_out") &&
+                    second.paramValues[0].keyEquals("xy_in=") &&
+                    second.paramValues[1].keyEquals("xy_out") &&
+                    first.paramValues[0].value == second.paramValues[1].value &&
+                    first.paramValues[2].value == second.paramValues[0].value) {
+                    auto z_in = first.paramValues[1].value;
+                    auto z_out = first.paramValues[3].value;
                     if (z_in != z_out) {
-                        d->steps_.erase(d->steps_.begin() + i - 1,
-                                        d->steps_.begin() + i);
-                        d->steps_[i - 1].paramValues.clear();
-                        d->steps_[i - 1].paramValues.emplace_back("z_in=" +
-                                                                  z_in);
-                        d->steps_[i - 1].paramValues.emplace_back("z_out=" +
-                                                                  z_out);
+                        d->steps_.erase(iterPrev, iterCur);
+                        iterCur->paramValues.clear();
+                        iterCur->paramValues.emplace_back(
+                            Step::KeyValue("z_in", z_in));
+                        iterCur->paramValues.emplace_back(
+                            Step::KeyValue("z_out", z_out));
                     } else {
-                        d->steps_.erase(d->steps_.begin() + i - 1,
-                                        d->steps_.begin() + i + 1);
+                        ++iterCur;
+                        d->steps_.erase(iterPrev, iterCur);
                     }
                     changeDone = true;
                     break;
@@ -3895,14 +3891,13 @@ const std::string &PROJStringFormatter::toString() const {
             }
 
             // axisswap order=2,1 followed by itself is a no-op
-            if (d->steps_[i].name == "axisswap" &&
-                d->steps_[i - 1].name == "axisswap" &&
-                d->steps_[i].paramValues.size() == 1 &&
-                d->steps_[i - 1].paramValues.size() == 1 &&
-                d->steps_[i].paramValues[0] == "order=2,1" &&
-                d->steps_[i - 1].paramValues[0] == "order=2,1") {
-                d->steps_.erase(d->steps_.begin() + i - 1,
-                                d->steps_.begin() + i + 1);
+            if (curStep.name == "axisswap" && prevStep.name == "axisswap" &&
+                curStep.paramValues.size() == 1 &&
+                prevStep.paramValues.size() == 1 &&
+                curStep.paramValues[0].equals("order", "2,1") &&
+                prevStep.paramValues[0].equals("order", "2,1")) {
+                ++iterCur;
+                d->steps_.erase(iterPrev, iterCur);
                 changeDone = true;
                 break;
             }
@@ -3912,96 +3907,81 @@ const std::string &PROJStringFormatter::toString() const {
             // of the order of 1e-14 deg..).
             // No need to do a cart roundtrip for that...
             // and actually IGNF uses the GRS80 definition for the WGS84 datum
-            if (d->steps_[i].name == "cart" &&
-                d->steps_[i - 1].name == "cart" &&
-                d->steps_[i].inverted == !d->steps_[i - 1].inverted &&
-                d->steps_[i].paramValues.size() == 1 &&
-                d->steps_[i - 1].paramValues.size() == 1 &&
-                ((d->steps_[i].paramValues[0] == "ellps=WGS84" &&
-                  d->steps_[i - 1].paramValues[0] == "ellps=GRS80") ||
-                 (d->steps_[i].paramValues[0] == "ellps=GRS80" &&
-                  d->steps_[i - 1].paramValues[0] == "ellps=WGS84"))) {
-                d->steps_.erase(d->steps_.begin() + i - 1,
-                                d->steps_.begin() + i + 1);
+            if (curStep.name == "cart" && prevStep.name == "cart" &&
+                curStep.inverted == !prevStep.inverted &&
+                curStep.paramValues.size() == 1 &&
+                prevStep.paramValues.size() == 1 &&
+                ((curStep.paramValues[0].equals("ellps", "WGS84") &&
+                  prevStep.paramValues[0].equals("ellps", "GRS80")) ||
+                 (curStep.paramValues[0].equals("ellps", "GRS80") &&
+                  prevStep.paramValues[0].equals("ellps", "WGS84")))) {
+                ++iterCur;
+                d->steps_.erase(iterPrev, iterCur);
                 changeDone = true;
                 break;
             }
 
-            try {
-                if (d->steps_[i].name == "helmert" &&
-                    d->steps_[i - 1].name == "helmert" &&
-                    !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
-                    d->steps_[i].paramValues.size() == 3 &&
-                    d->steps_[i].paramValues.size() ==
-                        d->steps_[i - 1].paramValues.size()) {
-                    std::map<std::string, double> leftParamsMap;
-                    std::map<std::string, double> rightParamsMap;
-                    for (const auto &str : d->steps_[i - 1].paramValues) {
-                        auto key_value = split(str, '=');
-                        if (key_value.size() == 2) {
-                            leftParamsMap[key_value[0]] =
-                                c_locale_stod(key_value[1]);
-                        }
+            if (curStep.name == "helmert" && prevStep.name == "helmert" &&
+                !curStep.inverted && !prevStep.inverted &&
+                curStep.paramValues.size() == 3 &&
+                curStep.paramValues.size() == prevStep.paramValues.size()) {
+                std::map<std::string, double> leftParamsMap;
+                std::map<std::string, double> rightParamsMap;
+                try {
+                    for (const auto &kv : prevStep.paramValues) {
+                        leftParamsMap[kv.key] = c_locale_stod(kv.value);
                     }
-                    for (const auto &str : d->steps_[i].paramValues) {
-                        auto key_value = split(str, '=');
-                        if (key_value.size() == 2) {
-                            rightParamsMap[key_value[0]] =
-                                c_locale_stod(key_value[1]);
-                        }
+                    for (const auto &kv : curStep.paramValues) {
+                        rightParamsMap[kv.key] = c_locale_stod(kv.value);
                     }
-                    if (leftParamsMap.find("x") != leftParamsMap.end() &&
-                        leftParamsMap.find("y") != leftParamsMap.end() &&
-                        leftParamsMap.find("z") != leftParamsMap.end() &&
-                        rightParamsMap.find("x") != rightParamsMap.end() &&
-                        rightParamsMap.find("y") != rightParamsMap.end() &&
-                        rightParamsMap.find("z") != rightParamsMap.end()) {
-
-                        d->steps_[i - 1].paramValues[0] =
-                            "x=" +
-                            toStr(leftParamsMap["x"] + rightParamsMap["x"]);
-                        d->steps_[i - 1].paramValues[1] =
-                            "y=" +
-                            toStr(leftParamsMap["y"] + rightParamsMap["y"]);
-                        d->steps_[i - 1].paramValues[2] =
-                            "z=" +
-                            toStr(leftParamsMap["z"] + rightParamsMap["z"]);
-
-                        d->steps_.erase(d->steps_.begin() + i);
-                        changeDone = true;
-                        break;
-                    }
+                } catch (const std::invalid_argument &) {
+                    break;
                 }
-            } catch (const std::invalid_argument &) {
+                const std::string x("x");
+                const std::string y("y");
+                const std::string z("z");
+                if (leftParamsMap.find(x) != leftParamsMap.end() &&
+                    leftParamsMap.find(y) != leftParamsMap.end() &&
+                    leftParamsMap.find(z) != leftParamsMap.end() &&
+                    rightParamsMap.find(x) != rightParamsMap.end() &&
+                    rightParamsMap.find(y) != rightParamsMap.end() &&
+                    rightParamsMap.find(z) != rightParamsMap.end()) {
+
+                    prevStep.paramValues[0] = Step::KeyValue(
+                        "x", internal::toString(leftParamsMap[x] +
+                                                rightParamsMap[x]));
+                    prevStep.paramValues[1] = Step::KeyValue(
+                        "y", internal::toString(leftParamsMap[y] +
+                                                rightParamsMap[y]));
+                    prevStep.paramValues[2] = Step::KeyValue(
+                        "z", internal::toString(leftParamsMap[z] +
+                                                rightParamsMap[z]));
+
+                    d->steps_.erase(iterCur);
+                    changeDone = true;
+                    break;
+                }
             }
 
             // hermert followed by its inverse is a no-op
-            try {
-                if (d->steps_[i].name == "helmert" &&
-                    d->steps_[i - 1].name == "helmert" &&
-                    !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
-                    d->steps_[i].paramValues.size() ==
-                        d->steps_[i - 1].paramValues.size()) {
-                    std::set<std::string> leftParamsSet;
-                    std::set<std::string> rightParamsSet;
-                    std::map<std::string, std::string> leftParamsMap;
-                    std::map<std::string, std::string> rightParamsMap;
-                    for (const auto &str : d->steps_[i - 1].paramValues) {
-                        auto key_value = split(str, '=');
-                        leftParamsSet.insert(key_value[0]);
-                        if (key_value.size() == 2) {
-                            leftParamsMap[key_value[0]] = key_value[1];
-                        }
-                    }
-                    for (const auto &str : d->steps_[i].paramValues) {
-                        auto key_value = split(str, '=');
-                        rightParamsSet.insert(key_value[0]);
-                        if (key_value.size() == 2) {
-                            rightParamsMap[key_value[0]] = key_value[1];
-                        }
-                    }
-                    if (leftParamsSet == rightParamsSet) {
-                        bool doErase = true;
+            if (curStep.name == "helmert" && prevStep.name == "helmert" &&
+                !curStep.inverted && !prevStep.inverted &&
+                curStep.paramValues.size() == prevStep.paramValues.size()) {
+                std::set<std::string> leftParamsSet;
+                std::set<std::string> rightParamsSet;
+                std::map<std::string, std::string> leftParamsMap;
+                std::map<std::string, std::string> rightParamsMap;
+                for (const auto &kv : prevStep.paramValues) {
+                    leftParamsSet.insert(kv.key);
+                    leftParamsMap[kv.key] = kv.value;
+                }
+                for (const auto &kv : curStep.paramValues) {
+                    rightParamsSet.insert(kv.key);
+                    rightParamsMap[kv.key] = kv.value;
+                }
+                if (leftParamsSet == rightParamsSet) {
+                    bool doErase = true;
+                    try {
                         for (const auto &param : leftParamsSet) {
                             if (param == "convention" || param == "t_epoch" ||
                                 param == "t_obs") {
@@ -4016,33 +3996,32 @@ const std::string &PROJStringFormatter::toString() const {
                                 break;
                             }
                         }
-                        if (doErase) {
-                            d->steps_.erase(d->steps_.begin() + i - 1,
-                                            d->steps_.begin() + i + 1);
-                            changeDone = true;
-                            break;
-                        }
+                    } catch (const std::invalid_argument &) {
+                        break;
+                    }
+                    if (doErase) {
+                        ++iterCur;
+                        d->steps_.erase(iterPrev, iterCur);
+                        changeDone = true;
+                        break;
                     }
                 }
-            } catch (const std::invalid_argument &) {
             }
 
             // detect a step and its inverse
-            if (d->steps_[i].inverted != d->steps_[i - 1].inverted &&
-                d->steps_[i].name == d->steps_[i - 1].name &&
-                d->steps_[i].paramValues.size() ==
-                    d->steps_[i - 1].paramValues.size()) {
+            if (curStep.inverted != prevStep.inverted &&
+                curStep.name == prevStep.name &&
+                curStep.paramValues.size() == prevStep.paramValues.size()) {
                 bool allSame = true;
-                for (size_t j = 0; j < d->steps_[i].paramValues.size(); j++) {
-                    if (d->steps_[i].paramValues[j] !=
-                        d->steps_[i - 1].paramValues[j]) {
+                for (size_t j = 0; j < curStep.paramValues.size(); j++) {
+                    if (curStep.paramValues[j] != prevStep.paramValues[j]) {
                         allSame = false;
                         break;
                     }
                 }
                 if (allSame) {
-                    d->steps_.erase(d->steps_.begin() + i - 1,
-                                    d->steps_.begin() + i + 1);
+                    ++iterCur;
+                    d->steps_.erase(iterPrev, iterCur);
                     changeDone = true;
                     break;
                 }
@@ -4051,7 +4030,7 @@ const std::string &PROJStringFormatter::toString() const {
     } while (changeDone);
 
     if (d->steps_.size() > 1 ||
-        (d->steps_.size() == 1 && d->steps_[0].inverted)) {
+        (d->steps_.size() == 1 && d->steps_.front().inverted)) {
         d->appendToResult("+proj=pipeline");
     }
     for (const auto &step : d->steps_) {
@@ -4062,10 +4041,16 @@ const std::string &PROJStringFormatter::toString() const {
             d->appendToResult("+inv");
         }
         if (!step.name.empty()) {
-            d->appendToResult("+proj=" + step.name);
+            d->appendToResult("+proj=");
+            d->result_ += step.name;
         }
         for (const auto &paramValue : step.paramValues) {
-            d->appendToResult("+" + paramValue);
+            d->appendToResult("+");
+            d->result_ += paramValue.key;
+            if (!paramValue.value.empty()) {
+                d->result_ += "=";
+                d->result_ += paramValue.value;
+            }
         }
     }
     return d->result_;
@@ -4087,7 +4072,7 @@ bool PROJStringFormatter::getUseETMercForTMerc() const {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::Private::appendToResult(const std::string &str) {
+void PROJStringFormatter::Private::appendToResult(const char *str) {
     if (!result_.empty()) {
         result_ += " ";
     }
@@ -4108,15 +4093,22 @@ void PROJStringFormatter::ingestPROJString(
         if (word[0] == '+') {
             word = word.substr(1);
         }
+        std::string key(word);
+        std::string value;
+        auto equalPos = word.find('=');
+        if (equalPos != std::string::npos) {
+            key = word.substr(0, equalPos);
+            value = word.substr(equalPos + 1);
+        }
 
         if (word == "proj=pipeline") {
             inverted = false;
             prevWasStep = false;
             inProj = true;
-        } else if (word == "step") {
+        } else if (key == "step") {
             inverted = false;
             prevWasStep = true;
-        } else if (word == "inv") {
+        } else if (key == "inv") {
             if (prevWasStep) {
                 inverted = true;
             } else {
@@ -4126,13 +4118,13 @@ void PROJStringFormatter::ingestPROJString(
                 d->steps_.back().inverted = true;
             }
             prevWasStep = false;
-        } else if (starts_with(word, "proj=")) {
-            addStep(word.substr(std::string("proj=").size()));
+        } else if (starts_with(key, "proj")) {
+            addStep(value);
             setCurrentStepInverted(inverted);
             prevWasStep = false;
             inProj = true;
         } else if (inProj) {
-            addParam(word);
+            addParam(key, value);
             prevWasStep = false;
         } else {
             throw ParsingException("Unexpected token: " + word);
@@ -4144,7 +4136,13 @@ void PROJStringFormatter::ingestPROJString(
 
 void PROJStringFormatter::startInversion() {
     PROJStringFormatter::Private::InversionStackElt elt;
-    elt.startIdx = d->steps_.size();
+    elt.startIter = d->steps_.end();
+    if (elt.startIter != d->steps_.begin()) {
+        elt.iterValid = true;
+        --elt.startIter; // point to the last valid element
+    } else {
+        elt.iterValid = false;
+    }
     elt.currentInversionState =
         !d->inversionStack_.back().currentInversionState;
     d->inversionStack_.push_back(elt);
@@ -4154,11 +4152,19 @@ void PROJStringFormatter::startInversion() {
 
 void PROJStringFormatter::stopInversion() {
     assert(!d->inversionStack_.empty());
-    auto startIdx = d->inversionStack_.back().startIdx;
-    for (size_t i = startIdx; i < d->steps_.size(); i++) {
-        d->steps_[i].inverted = !d->steps_[i].inverted;
+    auto startIter = d->inversionStack_.back().startIter;
+    if (!d->inversionStack_.back().iterValid) {
+        startIter = d->steps_.begin();
+    } else {
+        ++startIter; // advance after the last valid element we marked above
     }
-    std::reverse(d->steps_.begin() + startIdx, d->steps_.end());
+    // Invert the inversion status of the steps between the start point and
+    // the current end of steps
+    for (auto iter = startIter; iter != d->steps_.end(); ++iter) {
+        iter->inverted = !iter->inverted;
+    }
+    // And reverse the order of steps in that range as well.
+    std::reverse(startIter, d->steps_.end());
     d->inversionStack_.pop_back();
 }
 
@@ -4170,9 +4176,7 @@ bool PROJStringFormatter::isInverted() const {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::Private::addStep() {
-    steps_.emplace_back(Private::Step());
-}
+void PROJStringFormatter::Private::addStep() { steps_.emplace_back(Step()); }
 
 // ---------------------------------------------------------------------------
 
@@ -4201,7 +4205,7 @@ void PROJStringFormatter::addParam(const std::string &paramName) {
     if (d->steps_.empty()) {
         d->addStep();
     }
-    d->steps_.back().paramValues.push_back(paramName);
+    d->steps_.back().paramValues.push_back(Step::KeyValue(paramName));
 }
 
 // ---------------------------------------------------------------------------
@@ -4211,18 +4215,12 @@ void PROJStringFormatter::addParam(const char *paramName, int val) {
 }
 
 void PROJStringFormatter::addParam(const std::string &paramName, int val) {
-    std::ostringstream buffer;
-    buffer.imbue(std::locale::classic());
-    buffer << val;
-
-    addParam(paramName, buffer.str());
+    addParam(paramName, internal::toString(val));
 }
 
 // ---------------------------------------------------------------------------
 
 static std::string formatToString(double val) {
-    std::ostringstream buffer;
-    buffer.imbue(std::locale::classic());
     if (std::abs(val * 10 - std::round(val * 10)) < 1e-8) {
         // For the purpose of
         // https://www.epsg-registry.org/export.htm?wkt=urn:ogc:def:crs:EPSG::27561
@@ -4231,8 +4229,7 @@ static std::string formatToString(double val) {
         // 49.5 deg
         val = std::round(val * 10) / 10;
     }
-    buffer << std::setprecision(15) << val;
-    return normalizeSerializedString(buffer.str());
+    return normalizeSerializedString(internal::toString(val));
 }
 
 // ---------------------------------------------------------------------------
@@ -4282,7 +4279,7 @@ void PROJStringFormatter::addParam(const std::string &paramName,
     if (d->steps_.empty()) {
         d->addStep();
     }
-    d->steps_.back().paramValues.push_back(paramName + "=" + val);
+    d->steps_.back().paramValues.push_back(Step::KeyValue(paramName, val));
 }
 
 // ---------------------------------------------------------------------------
@@ -4304,8 +4301,8 @@ std::set<std::string> PROJStringFormatter::getUsedGridNames() const {
     std::set<std::string> res;
     for (const auto &step : d->steps_) {
         for (const auto &param : step.paramValues) {
-            if (starts_with(param, "grids=")) {
-                res.insert(param.substr(strlen("grids=")));
+            if (param.keyEquals("grids")) {
+                res.insert(param.value);
             }
         }
     }
@@ -4380,24 +4377,19 @@ struct PROJStringParser::Private {
     DatabaseContextPtr dbContext_{};
     std::vector<std::string> warningList_{};
 
-    struct Step {
-        std::string name{};
-        bool inverted{false};
-        std::vector<std::pair<std::string, std::string>> paramValues{};
-    };
     std::vector<Step> steps_{};
-    std::vector<std::pair<std::string, std::string>> globalParamValues_{};
+    std::vector<Step::KeyValue> globalParamValues_{};
 
     template <class T>
     // cppcheck-suppress functionStatic
     bool hasParamValue(const Step &step, const T key) {
         for (const auto &pair : globalParamValues_) {
-            if (ci_equal(pair.first, key)) {
+            if (ci_equal(pair.key, key)) {
                 return true;
             }
         }
         for (const auto &pair : step.paramValues) {
-            if (ci_equal(pair.first, key)) {
+            if (ci_equal(pair.key, key)) {
                 return true;
             }
         }
@@ -4406,16 +4398,15 @@ struct PROJStringParser::Private {
 
     template <class T>
     // cppcheck-suppress functionStatic
-    const std::string &
-    getParamValue(const PROJStringParser::Private::Step &step, const T key) {
+    const std::string &getParamValue(const Step &step, const T key) {
         for (const auto &pair : globalParamValues_) {
-            if (ci_equal(pair.first, key)) {
-                return pair.second;
+            if (ci_equal(pair.key, key)) {
+                return pair.value;
             }
         }
         for (const auto &pair : step.paramValues) {
-            if (ci_equal(pair.first, key)) {
-                return pair.second;
+            if (ci_equal(pair.key, key)) {
+                return pair.value;
             }
         }
         return emptyString;
@@ -4562,9 +4553,10 @@ static UnitOfMeasure _buildUnit(double to_meter_value) {
 
 // ---------------------------------------------------------------------------
 
-UnitOfMeasure PROJStringParser::Private::buildUnit(
-    const PROJStringParser::Private::Step &step,
-    const std::string &unitsParamName, const std::string &toMeterParamName) {
+UnitOfMeasure
+PROJStringParser::Private::buildUnit(const Step &step,
+                                     const std::string &unitsParamName,
+                                     const std::string &toMeterParamName) {
     UnitOfMeasure unit = UnitOfMeasure::METRE;
     const LinearUnitDesc *unitsMatch = nullptr;
     const auto &projUnits = getParamValue(step, unitsParamName);
@@ -4671,8 +4663,8 @@ static PropertyMap createMapWithUnknownName() {
 
 // ---------------------------------------------------------------------------
 
-PrimeMeridianNNPtr PROJStringParser::Private::buildPrimeMeridian(
-    const PROJStringParser::Private::Step &step) {
+PrimeMeridianNNPtr
+PROJStringParser::Private::buildPrimeMeridian(const Step &step) {
 
     PrimeMeridianNNPtr pm = PrimeMeridian::GREENWICH;
     const auto &pmStr = getParamValue(step, "pm");
@@ -4732,8 +4724,9 @@ std::string PROJStringParser::Private::guessBodyName(double a) {
 
 // ---------------------------------------------------------------------------
 
-GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
-    const PROJStringParser::Private::Step &step, const std::string &title) {
+GeodeticReferenceFrameNNPtr
+PROJStringParser::Private::buildDatum(const Step &step,
+                                      const std::string &title) {
 
     const auto &ellpsStr = getParamValue(step, "ellps");
     const auto &datumStr = getParamValue(step, "datum");
@@ -5070,11 +5063,10 @@ EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
         AxisAbbreviation::h, AxisDirection::UP,
         buildUnit(step, "vunits", "vto_meter"));
 
-    return
-        (!ignoreVUnits && !hasParamValue(step, "geoidgrids") &&
-         (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter")))
-            ? EllipsoidalCS::create(emptyPropertyMap, axis[0], axis[1], up)
-            : EllipsoidalCS::create(emptyPropertyMap, axis[0], axis[1]);
+    return (!ignoreVUnits && !hasParamValue(step, "geoidgrids") &&
+            (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter")))
+               ? EllipsoidalCS::create(emptyPropertyMap, axis[0], axis[1], up)
+               : EllipsoidalCS::create(emptyPropertyMap, axis[0], axis[1]);
 }
 
 // ---------------------------------------------------------------------------
@@ -5339,7 +5331,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             mapping = getMapping(
                 EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR);
             for (size_t i = 0; i < step.paramValues.size(); ++i) {
-                if (ci_equal(step.paramValues[i].first, "nadgrids")) {
+                if (ci_equal(step.paramValues[i].key, "nadgrids")) {
                     step.paramValues.erase(step.paramValues.begin() + i);
                     break;
                 }
@@ -5467,39 +5459,38 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         std::vector<ParameterValueNNPtr> values;
         std::string methodName = "PROJ " + step.name;
         for (const auto &param : step.paramValues) {
-            if (param.first == "wktext" || param.first == "no_defs" ||
-                param.first == "datum" || param.first == "ellps" ||
-                param.first == "a" || param.first == "b" ||
-                param.first == "R" || param.first == "towgs84" ||
-                param.first == "nadgrids" || param.first == "geoidgrids" ||
-                param.first == "units" || param.first == "to_meter" ||
-                param.first == "vunits" || param.first == "vto_meter") {
+            if (param.key == "wktext" || param.key == "no_defs" ||
+                param.key == "datum" || param.key == "ellps" ||
+                param.key == "a" || param.key == "b" || param.key == "R" ||
+                param.key == "towgs84" || param.key == "nadgrids" ||
+                param.key == "geoidgrids" || param.key == "units" ||
+                param.key == "to_meter" || param.key == "vunits" ||
+                param.key == "vto_meter") {
                 continue;
             }
-            if (param.second.empty()) {
-                methodName += " " + param.first;
-            } else if (param.first == "o_proj") {
-                methodName += " " + param.first + "=" + param.second;
+            if (param.value.empty()) {
+                methodName += " " + param.key;
+            } else if (param.key == "o_proj") {
+                methodName += " " + param.key + "=" + param.value;
             } else {
-                parameters.push_back(
-                    OperationParameter::create(PropertyMap().set(
-                        IdentifiedObject::NAME_KEY, param.first)));
+                parameters.push_back(OperationParameter::create(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY, param.key)));
                 bool hasError = false;
-                if (param.first == "x_0" || param.first == "y_0") {
-                    double value = getNumericValue(param.second, &hasError);
+                if (param.key == "x_0" || param.key == "y_0") {
+                    double value = getNumericValue(param.value, &hasError);
                     values.push_back(ParameterValue::create(
                         Measure(value, UnitOfMeasure::METRE)));
-                } else if (param.first == "k" || param.first == "k_0") {
-                    double value = getNumericValue(param.second, &hasError);
+                } else if (param.key == "k" || param.key == "k_0") {
+                    double value = getNumericValue(param.value, &hasError);
                     values.push_back(ParameterValue::create(
                         Measure(value, UnitOfMeasure::SCALE_UNITY)));
                 } else {
-                    double value = getAngularValue(param.second, &hasError);
+                    double value = getAngularValue(param.value, &hasError);
                     values.push_back(ParameterValue::create(
                         Measure(value, UnitOfMeasure::DEGREE)));
                 }
                 if (hasError) {
-                    throw ParsingException("invalid value for " + param.first);
+                    throw ParsingException("invalid value for " + param.key);
                 }
             }
         }
@@ -5642,15 +5633,15 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     };
 
     for (const auto &param : step.paramValues) {
-        if (param.first == "datum" || param.first == "ellps" ||
-            param.first == "a" || param.first == "b" || param.first == "R") {
+        if (param.key == "datum" || param.key == "ellps" || param.key == "a" ||
+            param.key == "b" || param.key == "R") {
             continue;
         }
-        if (param.first == "convention") {
-            if (param.second == "position_vector") {
+        if (param.key == "convention") {
+            if (param.value == "position_vector") {
                 positionVectorConvention = true;
                 conventionFound = true;
-            } else if (param.second == "coordinate_frame") {
+            } else if (param.value == "coordinate_frame") {
                 positionVectorConvention = false;
                 conventionFound = true;
             } else {
@@ -5659,10 +5650,10 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
         } else {
             bool found = false;
             for (auto &&knownParam : knownParams) {
-                if (param.first == knownParam.name) {
+                if (param.key == knownParam.name) {
                     found = true;
                     if (knownParam.pValue)
-                        *(knownParam.pValue) = getNumericValue(param.second);
+                        *(knownParam.pValue) = getNumericValue(param.value);
                     if (knownParam.pPresent)
                         *(knownParam.pPresent) = true;
                     break;
@@ -5670,7 +5661,7 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
             }
             if (!found) {
                 throw ParsingException("unsupported keyword for Helmert: " +
-                                       param.first);
+                                       param.key);
             }
         }
     }
@@ -5745,24 +5736,24 @@ PROJStringParser::Private::buildMolodenskyTransformation(
     bool abridged = false;
 
     for (const auto &param : step.paramValues) {
-        if (param.first == "datum" || param.first == "ellps" ||
-            param.first == "a" || param.first == "b" || param.first == "R") {
+        if (param.key == "datum" || param.key == "ellps" || param.key == "a" ||
+            param.key == "b" || param.key == "R") {
             continue;
-        } else if (param.first == "abridged") {
+        } else if (param.key == "abridged") {
             abridged = true;
         } else {
             bool found = false;
             for (auto &&knownParam : knownParams) {
-                if (param.first == knownParam.name) {
+                if (param.key == knownParam.name) {
                     found = true;
                     if (knownParam.pValue)
-                        *(knownParam.pValue) = getNumericValue(param.second);
+                        *(knownParam.pValue) = getNumericValue(param.value);
                     break;
                 }
             }
             if (!found) {
                 throw ParsingException("unsupported keyword for Molodensky: " +
-                                       param.first);
+                                       param.key);
             }
         }
     }
@@ -5875,12 +5866,12 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             prevWasStep = false;
         } else if (starts_with(word, "proj=")) {
             auto stepName = word.substr(std::string("proj=").size());
-            d->steps_.push_back(Private::Step());
+            d->steps_.push_back(Step());
             d->steps_.back().name = stepName;
             d->steps_.back().inverted = inverted;
             if (!title.empty()) {
                 d->steps_.back().paramValues.push_back(
-                    std::pair<std::string, std::string>("title", title));
+                    Step::KeyValue("title", title));
                 title.clear();
             }
             prevWasStep = false;
@@ -5895,7 +5886,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             } else {
                 key = word;
             }
-            auto pair = std::pair<std::string, std::string>(key, value);
+            auto pair = Step::KeyValue(key, value);
             if (d->steps_.empty()) {
                 d->globalParamValues_.push_back(pair);
             } else {
@@ -5917,15 +5908,14 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     if (d->steps_.empty()) {
 
         if (!vunits.empty() || !vto_meter.empty()) {
-            Private::Step fakeStep;
+            Step fakeStep;
             if (!vunits.empty()) {
                 fakeStep.paramValues.emplace_back(
-                    std::pair<std::string, std::string>("vunits", vunits));
+                    Step::KeyValue("vunits", vunits));
             }
             if (!vto_meter.empty()) {
                 fakeStep.paramValues.emplace_back(
-                    std::pair<std::string, std::string>("vto_meter",
-                                                        vto_meter));
+                    Step::KeyValue("vto_meter", vto_meter));
             }
             auto vdatum =
                 VerticalReferenceFrame::create(createMapWithUnknownName());

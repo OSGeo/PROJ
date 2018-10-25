@@ -382,15 +382,6 @@ std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
 
 // ---------------------------------------------------------------------------
 
-static std::string asString(size_t v) {
-    std::ostringstream buffer;
-    buffer.imbue(std::locale::classic());
-    buffer << v;
-    return buffer.str();
-}
-
-// ---------------------------------------------------------------------------
-
 void DatabaseContext::Private::attachExtraDatabases(
     const std::vector<std::string> &auxiliaryDatabasePaths) {
     assert(close_handle_);
@@ -427,14 +418,18 @@ void DatabaseContext::Private::attachExtraDatabases(
     detach_ = true;
     int count = 1;
     for (const auto &otherDb : auxiliaryDatabasePaths) {
-        std::string sql = "ATTACH DATABASE '" + replaceAll(otherDb, "'", "''") +
-                          "' AS db_" + asString(count);
+        std::string sql = "ATTACH DATABASE '";
+        sql += replaceAll(otherDb, "'", "''");
+        sql += "' AS db_";
+        sql += toString(static_cast<int>(count));
         count++;
         run(sql);
     }
 
     for (const auto &pair : tableStructure) {
-        auto sql = "CREATE TEMP VIEW " + pair.first + " AS ";
+        std::string sql("CREATE TEMP VIEW ");
+        sql += pair.first;
+        sql += " AS ";
         for (size_t i = 0; i <= auxiliaryDatabasePaths.size(); ++i) {
             std::string selectFromAux("SELECT ");
             bool firstCol = true;
@@ -445,7 +440,10 @@ void DatabaseContext::Private::attachExtraDatabases(
                 firstCol = false;
                 selectFromAux += colName;
             }
-            selectFromAux += " FROM db_" + asString(i) + "." + pair.first;
+            selectFromAux += " FROM db_";
+            selectFromAux += toString(static_cast<int>(i));
+            selectFromAux += ".";
+            selectFromAux += pair.first;
 
             try {
                 // Check that the request will succeed. In case of 'sparse'
@@ -1783,7 +1781,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
                 return cloneWithProps(NN_NO_CHECK(geodCRS), props);
             }
 
-            auto boundCRS = util::nn_dynamic_pointer_cast<crs::BoundCRS>(obj);
+            auto boundCRS = dynamic_cast<const crs::BoundCRS *>(obj.get());
             if (boundCRS) {
                 geodCRS = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
                     boundCRS->baseCRS());
@@ -2012,18 +2010,17 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(d->context());
             auto obj = createFromUserInput(text_definition, d->context());
-            auto projCRS =
-                util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(obj);
+            auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(obj.get());
             if (projCRS) {
                 return crs::ProjectedCRS::create(props, projCRS->baseCRS(),
                                                  projCRS->derivingConversion(),
                                                  projCRS->coordinateSystem());
             }
 
-            auto boundCRS = util::nn_dynamic_pointer_cast<crs::BoundCRS>(obj);
+            auto boundCRS = dynamic_cast<const crs::BoundCRS *>(obj.get());
             if (boundCRS) {
-                projCRS = util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(
-                    boundCRS->baseCRS());
+                projCRS = dynamic_cast<const crs::ProjectedCRS *>(
+                    boundCRS->baseCRS().get());
                 if (projCRS) {
                     auto newBoundCRS = crs::BoundCRS::create(
                         crs::ProjectedCRS::create(props, projCRS->baseCRS(),
@@ -2755,21 +2752,26 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 
             // Some concatenated operations, like 8443, might actually chain
             // reverse operations rather than forward operations.
-            if (operations[0]->sourceCRS()->identifiers()[0]->code() !=
-                    source_crs_code ||
-                *operations[0]->sourceCRS()->identifiers()[0]->codeSpace() !=
-                    source_crs_auth_name) {
-                operations[0] = operations[0]->inverse();
+            {
+                const auto &op0SrcId =
+                    operations[0]->sourceCRS()->identifiers()[0];
+                if (op0SrcId->code() != source_crs_code ||
+                    *op0SrcId->codeSpace() != source_crs_auth_name) {
+                    operations[0] = operations[0]->inverse();
+                }
             }
 
-            if (operations[0]->sourceCRS()->identifiers()[0]->code() !=
-                    source_crs_code ||
-                *operations[0]->sourceCRS()->identifiers()[0]->codeSpace() !=
-                    source_crs_auth_name) {
-                throw FactoryException(
-                    "Source CRS of first operation in concatenated operation " +
-                    code +
-                    " doest not match source CRS of concatenated operation");
+            {
+                const auto &op0SrcId =
+                    operations[0]->sourceCRS()->identifiers()[0];
+                if (op0SrcId->code() != source_crs_code ||
+                    *op0SrcId->codeSpace() != source_crs_auth_name) {
+                    throw FactoryException(
+                        "Source CRS of first operation in concatenated "
+                        "operation " +
+                        code + " does not match source CRS of "
+                               "concatenated operation");
+                }
             }
 
             // In case the operation is a conversion (we hope this is the
@@ -2792,39 +2794,35 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 }
             }
 
-            if (step3_auth_name.empty() &&
-                operations.back()->targetCRS()->identifiers()[0]->code() ==
-                    target_crs_code &&
-                *(operations.back()
-                      ->targetCRS()
-                      ->identifiers()[0]
-                      ->codeSpace()) == target_crs_auth_name) {
-                // in case we have only 2 steps, and
-                // step2.targetCRS == concatenate.targetCRS do nothing,
-                // but ConcatenatedOperation::create() will ultimately
-                // check that step1.targetCRS == step2.sourceCRS
-            } else if (operations[1]->sourceCRS()->identifiers()[0]->code() !=
-                           operations[0]
-                               ->targetCRS()
-                               ->identifiers()[0]
-                               ->code() ||
-                       *operations[1]
-                               ->sourceCRS()
-                               ->identifiers()[0]
-                               ->codeSpace() !=
-                           *(operations[0]
-                                 ->targetCRS()
-                                 ->identifiers()[0]
-                                 ->codeSpace())) {
-                operations[1] = operations[1]->inverse();
+            const auto &op1SrcId = operations[1]->sourceCRS()->identifiers()[0];
+            const auto &op0TargetId =
+                operations[0]->targetCRS()->identifiers()[0];
+            while (true) {
+                if (step3_auth_name.empty()) {
+                    const auto &opLastTargetId =
+                        operations.back()->targetCRS()->identifiers()[0];
+                    if (opLastTargetId->code() == target_crs_code &&
+                        *opLastTargetId->codeSpace() == target_crs_auth_name) {
+                        // in case we have only 2 steps, and
+                        // step2.targetCRS == concatenate.targetCRS do nothing,
+                        // but ConcatenatedOperation::create() will ultimately
+                        // check that step1.targetCRS == step2.sourceCRS
+                        break;
+                    }
+                }
+                if (op1SrcId->code() != op0TargetId->code() ||
+                    *op1SrcId->codeSpace() != *op0TargetId->codeSpace()) {
+                    operations[1] = operations[1]->inverse();
+                }
+                break;
             }
 
             if (!step3_auth_name.empty()) {
 
+                const auto &op2Src = operations[2]->sourceCRS();
                 // In case the operation is a conversion (we hope this is the
                 // forward case!)
-                if (!operations[2]->sourceCRS() ||
-                    !operations[2]->targetCRS()) {
+                if (!op2Src || !operations[2]->targetCRS()) {
                     operations[2]->setCRSs(
                         NN_NO_CHECK(operations[1]->targetCRS()),
                         d->createFactory(target_crs_auth_name)
@@ -2832,26 +2830,19 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                         nullptr);
                 }
 
-                if (operations[2]->sourceCRS()->identifiers()[0]->code() !=
-                        operations[1]->targetCRS()->identifiers()[0]->code() ||
-                    *operations[2]
-                            ->sourceCRS()
-                            ->identifiers()[0]
-                            ->codeSpace() !=
-                        *(operations[1]
-                              ->targetCRS()
-                              ->identifiers()[0]
-                              ->codeSpace())) {
+                const auto &op2SrcId = op2Src->identifiers()[0];
+                const auto &op1TargetId =
+                    operations[1]->targetCRS()->identifiers()[0];
+                if (op2SrcId->code() != op1TargetId->code() ||
+                    *op2SrcId->codeSpace() != *op1TargetId->codeSpace()) {
                     operations[2] = operations[2]->inverse();
                 }
             }
 
-            if (operations.back()->targetCRS()->identifiers()[0]->code() !=
-                    target_crs_code ||
-                *operations.back()
-                        ->targetCRS()
-                        ->identifiers()[0]
-                        ->codeSpace() != target_crs_auth_name) {
+            const auto &opLastTargetId =
+                operations.back()->targetCRS()->identifiers()[0];
+            if (opLastTargetId->code() != target_crs_code ||
+                *opLastTargetId->codeSpace() != target_crs_auth_name) {
                 throw FactoryException(
                     "Target CRS of last operation in concatenated operation " +
                     code +
@@ -2885,11 +2876,9 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                         }
                     }
                     if (totalAcc >= 0) {
-                        std::ostringstream buffer;
-                        buffer.imbue(std::locale::classic());
-                        buffer << totalAcc;
                         accuracies.emplace_back(
-                            metadata::PositionalAccuracy::create(buffer.str()));
+                            metadata::PositionalAccuracy::create(
+                                toString(totalAcc)));
                     }
                 } catch (const std::exception &) {
                 }
@@ -3050,7 +3039,7 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
                                const std::string &targetCRSAuthName,
                                const std::string &targetCRSCode) {
     auto concat =
-        util::nn_dynamic_pointer_cast<operation::ConcatenatedOperation>(op);
+        dynamic_cast<const operation::ConcatenatedOperation *>(op.get());
     if (!concat) {
         return false;
     }
@@ -3058,7 +3047,7 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
     for (size_t i = 0; i + 1 < ops.size(); i++) {
         auto targetCRS = ops[i]->targetCRS();
         if (targetCRS) {
-            auto ids = targetCRS->identifiers();
+            const auto &ids = targetCRS->identifiers();
             if (ids.size() == 1 &&
                 ((*ids[0]->codeSpace() == sourceCRSAuthName &&
                   ids[0]->code() == sourceCRSCode) ||

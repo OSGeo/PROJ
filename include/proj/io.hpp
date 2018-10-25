@@ -223,7 +223,7 @@ class WKTFormatter {
     void addQuotedString(const std::string &str);
     void add(const std::string &str);
     void add(int number);
-    void add(size_t number);
+    void add(size_t number) = delete;
     void add(double number, int precision = 15);
 
     void pushOutputUnit(bool outputUnitIn);

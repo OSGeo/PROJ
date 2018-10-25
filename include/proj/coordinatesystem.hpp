@@ -56,8 +56,8 @@ namespace cs {
 class AxisDirection : public util::CodeList {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL static const AxisDirection *valueOf(const std::string &nameIn);
-    PROJ_DLL static const std::set<std::string> &getKeys();
+    PROJ_DLL static const AxisDirection *
+    valueOf(const std::string &nameIn) noexcept;
     //! @endcond
 
     PROJ_DLL static const AxisDirection NORTH;
@@ -106,7 +106,6 @@ class AxisDirection : public util::CodeList {
     explicit AxisDirection(const std::string &nameIn);
 
     static std::map<std::string, const AxisDirection *> registry;
-    static std::set<std::string> keys;
 };
 
 // ---------------------------------------------------------------------------

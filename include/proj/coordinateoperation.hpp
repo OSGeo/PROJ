@@ -61,6 +61,32 @@ namespace operation {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Grid description */
+struct GridDescription {
+    std::string shortName{};   /**< Grid short filename */
+    std::string fullName{};    /**< Grid full path name (if found) */
+    std::string packageName{}; /**< Package name (or empty) */
+    std::string url{}; /**< Grid URL (if packageName is empty), or package
+                            URL (or empty) */
+    bool directDownload = false; /**< Whether url can be fetched directly. */
+    bool openLicense =
+        false; /**< Whether the grid is released with an open license. */
+    bool available = false; /**< Whether GRID is available. */
+
+    //! @cond Doxygen_Suppress
+    bool operator<(const GridDescription &other) const {
+        return shortName < other.shortName;
+    }
+
+    PROJ_DLL GridDescription();
+    PROJ_DLL ~GridDescription();
+    PROJ_DLL GridDescription(const GridDescription &);
+    PROJ_DLL GridDescription(GridDescription &&) noexcept;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
 class CoordinateOperation;
 /** Shared pointer of CoordinateOperation */
 using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
@@ -115,26 +141,6 @@ class CoordinateOperation : public common::ObjectUsage,
      * @throw util::UnsupportedOperationException
      */
     PROJ_DLL virtual CoordinateOperationNNPtr inverse() const = 0;
-
-    /** \brief Grid description */
-    struct GridDescription {
-        std::string shortName{};   /**< Grid short filename */
-        std::string fullName{};    /**< Grid full path name (if found) */
-        std::string packageName{}; /**< Package name (or empty) */
-        std::string url{}; /**< Grid URL (if packageName is empty), or package
-                              URL (or empty) */
-        bool directDownload =
-            false; /**< Whether url can be fetched directly. */
-        bool openLicense =
-            false; /**< Whether the grid is released with an open license. */
-        bool available = false; /**< Whether GRID is available. */
-
-        //! @cond Doxygen_Suppress
-        bool operator<(const GridDescription &other) const {
-            return shortName < other.shortName;
-        }
-        //! @endcond
-    };
 
     /** \brief Return grids needed by an operation. */
     PROJ_DLL virtual std::set<GridDescription>

@@ -38,6 +38,7 @@
 #endif
 
 #include <cassert>
+#include <cstring>
 #include <memory>
 #include <string>
 #ifndef DOXYGEN_ENABLED
@@ -104,9 +105,21 @@ size_t ci_find(const std::string &osStr, const char *needle) noexcept;
 size_t ci_find(const std::string &osStr, const std::string &needle,
                size_t startPos = 0) noexcept;
 
-bool starts_with(const std::string &str, const std::string &prefix) noexcept;
+inline bool starts_with(const std::string &str,
+                        const std::string &prefix) noexcept {
+    if (str.size() < prefix.size()) {
+        return false;
+    }
+    return std::memcmp(str.c_str(), prefix.c_str(), prefix.size()) == 0;
+}
 
-bool starts_with(const std::string &str, const char *prefix) noexcept;
+inline bool starts_with(const std::string &str, const char *prefix) noexcept {
+    const size_t prefixSize = std::strlen(prefix);
+    if (str.size() < prefixSize) {
+        return false;
+    }
+    return std::memcmp(str.c_str(), prefix, prefixSize) == 0;
+}
 
 bool ci_starts_with(const std::string &str, const std::string &prefix) noexcept;
 
@@ -125,8 +138,30 @@ PROJ_DLL bool ci_equal(const std::string &a, const std::string &b) noexcept;
 
 std::string stripQuotes(const std::string &osStr);
 
+std::string toString(int val);
+
+std::string toString(double val, int precision = 15);
+
 PROJ_DLL double
 c_locale_stod(const std::string &s); // throw(std::invalid_argument)
+
+std::string concat(const std::string &, const std::string &) = delete;
+std::string concat(const char *, const char *) = delete;
+std::string concat(const char *a, const std::string &b);
+std::string concat(const std::string &, const char *) = delete;
+
+std::string concat(const char *, const char *, const char *) = delete;
+std::string concat(const char *, const char *, const std::string &) = delete;
+std::string concat(const char *a, const std::string &b, const char *c);
+std::string concat(const char *, const std::string &,
+                   const std::string &) = delete;
+std::string concat(const std::string &, const char *, const char *) = delete;
+std::string concat(const std::string &, const char *,
+                   const std::string &) = delete;
+std::string concat(const std::string &, const std::string &,
+                   const char *) = delete;
+std::string concat(const std::string &, const std::string &,
+                   const std::string &) = delete;
 
 } // namespace internal
 

@@ -50,7 +50,6 @@ namespace cs {
 class AxisDirectionWKT1 : public util::CodeList {
   public:
     static const AxisDirectionWKT1 *valueOf(const std::string &nameIn);
-    static const std::set<std::string> &getKeys();
 
     static const AxisDirectionWKT1 NORTH;
     static const AxisDirectionWKT1 SOUTH;
@@ -64,7 +63,6 @@ class AxisDirectionWKT1 : public util::CodeList {
     explicit AxisDirectionWKT1(const std::string &nameIn);
 
     static std::map<std::string, const AxisDirectionWKT1 *> registry;
-    static std::set<std::string> keys;
 };
 
 // ---------------------------------------------------------------------------

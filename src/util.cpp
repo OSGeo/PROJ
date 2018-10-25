@@ -73,9 +73,11 @@ BaseObject::BaseObject() : d(internal::make_unique<Private>()) {}
 
 //! @cond Doxygen_Suppress
 BaseObject::~BaseObject() = default;
-//! @endcond
 
-// BaseObjectNNPtr::~BaseObjectNNPtr() = default;
+// ---------------------------------------------------------------------------
+
+BaseObjectNNPtr::~BaseObjectNNPtr() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -564,54 +566,15 @@ NameFactory::createGenericName(const NameSpacePtr &scope,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct CodeList::Private {
-    std::string name{};
-};
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-CodeList::CodeList(const std::string &nameIn)
-    : d(internal::make_unique<Private>()) {
-    d->name = nameIn;
-}
-
-// ---------------------------------------------------------------------------
-
-CodeList::CodeList(const CodeList &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
 CodeList::~CodeList() = default;
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
 CodeList &CodeList::operator=(const CodeList &other) {
-    d->name = other.d->name;
+    name_ = other.name_;
     return *this;
 }
-
-// ---------------------------------------------------------------------------
-
-/** Return the CodeList item as a string. */
-const std::string &CodeList::toString() const { return d->name; }
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-bool CodeList::operator==(const CodeList &other) const {
-    return toString() == other.toString();
-}
-
-// ---------------------------------------------------------------------------
-
-bool CodeList::operator!=(const CodeList &other) const {
-    return toString() != other.toString();
-}
-//! @endcond
 
 // ---------------------------------------------------------------------------
 

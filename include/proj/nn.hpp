@@ -128,9 +128,9 @@ public:
   //PROJ_DLL ~nn();
 
   // Semi-private constructor for use by NN_CHECK_ macros.
-  explicit nn(i_promise_i_checked_for_null_t, const PtrType &arg) : ptr(arg) {
+  explicit nn(i_promise_i_checked_for_null_t, const PtrType &arg) noexcept : ptr(arg) {
   }
-  explicit nn(i_promise_i_checked_for_null_t, PtrType &&arg)
+  explicit nn(i_promise_i_checked_for_null_t, PtrType &&arg) noexcept
       : ptr(std::move(arg)) {
   }
 

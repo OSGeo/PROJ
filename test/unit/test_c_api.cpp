@@ -1045,7 +1045,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
         auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         OperationResultKeeper keeper_res(res);
-        EXPECT_EQ(proj_operation_result_get_count(res), 5);
+        EXPECT_EQ(proj_operation_result_get_count(res), 6);
         auto op = proj_operation_result_get(res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);

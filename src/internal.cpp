@@ -39,8 +39,9 @@
 #include <strings.h>
 #endif
 #include <exception>
+#include <iomanip> // std::setprecision
 #include <locale>
-#include <sstream> // std::istringstream
+#include <sstream> // std::istringstream and std::ostringstream
 #include <string>
 
 NS_PROJ_START
@@ -166,15 +167,18 @@ size_t ci_find(const std::string &str, const std::string &needle,
 
 // ---------------------------------------------------------------------------
 
+/*
 bool starts_with(const std::string &str, const std::string &prefix) noexcept {
     if (str.size() < prefix.size()) {
         return false;
     }
     return std::memcmp(str.c_str(), prefix.c_str(), prefix.size()) == 0;
 }
+*/
 
 // ---------------------------------------------------------------------------
 
+/*
 bool starts_with(const std::string &str, const char *prefix) noexcept {
     const size_t prefixSize = std::strlen(prefix);
     if (str.size() < prefixSize) {
@@ -182,6 +186,7 @@ bool starts_with(const std::string &str, const char *prefix) noexcept {
     }
     return std::memcmp(str.c_str(), prefix, prefixSize) == 0;
 }
+*/
 
 // ---------------------------------------------------------------------------
 
@@ -227,6 +232,37 @@ std::vector<std::string> split(const std::string &str, char separator) {
         lastPos = newPos + 1;
     }
     res.push_back(str.substr(lastPos));
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string toString(int val) {
+    std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
+    buffer << val;
+    return buffer.str();
+}
+
+std::string toString(double val, int precision) {
+    std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
+    buffer << std::setprecision(precision) << val;
+    return buffer.str();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string concat(const char *a, const std::string &b) {
+    std::string res(a);
+    res += b;
+    return res;
+}
+
+std::string concat(const char *a, const std::string &b, const char *c) {
+    std::string res(a);
+    res += b;
+    res += c;
     return res;
 }
 

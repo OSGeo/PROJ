@@ -463,7 +463,7 @@ void CoordinateSystem::_exportToWKT(
     if (isWKT2) {
         formatter->startNode(io::WKTConstants::CS, !identifiers().empty());
         formatter->add(getWKT2Type(formatter->use2018Keywords()));
-        formatter->add(l_axisList.size());
+        formatter->add(static_cast<int>(l_axisList.size()));
         formatter->endNode();
         formatter->startNode(std::string(),
                              false); // anonymous indentation level
@@ -945,24 +945,20 @@ ParametricCS::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 AxisDirection::AxisDirection(const std::string &nameIn) : CodeList(nameIn) {
-    assert(keys.find(nameIn) == keys.end());
+    assert(registry.find(nameIn) == registry.end());
     registry[nameIn] = this;
-    keys.insert(nameIn);
 }
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-const AxisDirection *AxisDirection::valueOf(const std::string &nameIn) {
+const AxisDirection *
+AxisDirection::valueOf(const std::string &nameIn) noexcept {
     auto iter = registry.find(nameIn);
     if (iter == registry.end())
         return nullptr;
     return iter->second;
 }
-
-// ---------------------------------------------------------------------------
-
-const std::set<std::string> &AxisDirection::getKeys() { return keys; }
 //! @endcond
 
 //! @cond Doxygen_Suppress
@@ -970,9 +966,8 @@ const std::set<std::string> &AxisDirection::getKeys() { return keys; }
 
 AxisDirectionWKT1::AxisDirectionWKT1(const std::string &nameIn)
     : CodeList(nameIn) {
-    assert(keys.find(nameIn) == keys.end());
+    assert(registry.find(nameIn) == registry.end());
     registry[nameIn] = this;
-    keys.insert(nameIn);
 }
 
 // ---------------------------------------------------------------------------
@@ -984,9 +979,6 @@ const AxisDirectionWKT1 *AxisDirectionWKT1::valueOf(const std::string &nameIn) {
     return iter->second;
 }
 
-// ---------------------------------------------------------------------------
-
-const std::set<std::string> &AxisDirectionWKT1::getKeys() { return keys; }
 //! @endcond
 
 // ---------------------------------------------------------------------------

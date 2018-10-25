@@ -118,7 +118,7 @@ namespace proj {}
 #define PROJ_PRIVATE public
 #endif
 
-#if defined(__GNU_C__)
+#if defined(__GNUC__)
 #define PROJ_NO_INLINE __attribute__((noinline))
 #define PROJ_NO_RETURN __attribute__((noreturn))
 // Applies to a function that has no side effect, and its return will not
@@ -236,14 +236,31 @@ template <class T> class optional {
 class BaseObject;
 /** Shared pointer of BaseObject. */
 using BaseObjectPtr = std::shared_ptr<BaseObject>;
+#if 1
 /** Non-null shared pointer of BaseObject. */
-using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
-#if 0
-struct BaseObjectNNPtr: public util::nn<BaseObjectPtr> {
-    template<class T> BaseObjectNNPtr(const util::nn<std::shared_ptr<T>>& x): util::nn<BaseObjectPtr>(x) {}
-    template<class T> BaseObjectNNPtr(util::nn<std::shared_ptr<T>>&& x): util::nn<BaseObjectPtr>(NN_NO_CHECK(std::move(x.as_nullable()))) {}
-    ~BaseObjectNNPtr();
+struct BaseObjectNNPtr : public util::nn<BaseObjectPtr> {
+    // This trick enables to avoid inlining of the destructor.
+    // This is mostly an alias of the base class.
+    //! @cond Doxygen_Suppress
+    template <class T>
+    // cppcheck-suppress noExplicitConstructor
+    BaseObjectNNPtr(const util::nn<std::shared_ptr<T>> &x)
+        : util::nn<BaseObjectPtr>(x) {}
+    template <class T>
+    BaseObjectNNPtr(util::nn<std::shared_ptr<T>> &&x) noexcept
+        : util::nn<BaseObjectPtr>(NN_NO_CHECK(std::move(x.as_nullable()))) {}
+    explicit BaseObjectNNPtr(::dropbox::oxygen::i_promise_i_checked_for_null_t,
+                             BaseObjectPtr &&arg) noexcept
+        : util::nn<BaseObjectPtr>(i_promise_i_checked_for_null,
+                                  std::move(arg)) {}
+    BaseObjectNNPtr(const BaseObjectNNPtr &) = default;
+    BaseObjectNNPtr &operator=(const BaseObjectNNPtr &) = default;
+
+    PROJ_DLL ~BaseObjectNNPtr();
+    //! @endcond
 };
+#else
+using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
 #endif
 
 /** \brief Class that can be derived from, to emulate Java's Object behaviour.
@@ -405,7 +422,9 @@ class PropertyMap {
     template <class T>
     inline PropertyMap &set(const std::string &key,
                             const nn_shared_ptr<T> &val) {
-        return set(key, nn_static_pointer_cast<BaseObject>(val));
+        return set(
+            key, BaseObjectNNPtr(i_promise_i_checked_for_null,
+                                 BaseObjectPtr(val.as_nullable(), val.get())));
     }
     //! @endcond
 
@@ -595,21 +614,28 @@ class CodeList {
     PROJ_DLL ~CodeList();
     //! @endcond
 
-    PROJ_DLL const std::string &toString() const;
     /** Return the CodeList item as a string. */
-    inline operator std::string() const { return toString(); }
+    // cppcheck-suppress functionStatic
+    inline const std::string &toString() PROJ_CONST_DECL { return name_; }
+
+    /** Return the CodeList item as a string. */
+    inline operator std::string() PROJ_CONST_DECL { return toString(); }
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool operator==(const CodeList &other) const;
-    PROJ_DLL bool operator!=(const CodeList &other) const;
+    inline bool operator==(const CodeList &other) PROJ_CONST_DECL {
+        return name_ == other.name_;
+    }
+    inline bool operator!=(const CodeList &other) PROJ_CONST_DECL {
+        return name_ != other.name_;
+    }
     //! @endcond
   protected:
-    explicit CodeList(const std::string &nameIn);
-    CodeList(const CodeList &other);
+    explicit CodeList(const std::string &nameIn) : name_(nameIn) {}
+    CodeList(const CodeList &other) = default;
     CodeList &operator=(const CodeList &other);
 
   private:
-    PROJ_OPAQUE_PRIVATE_DATA
+    std::string name_{};
 };
 
 // ---------------------------------------------------------------------------

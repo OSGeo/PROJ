@@ -96,7 +96,7 @@ struct PJ_OBJ {
     std::string mapWKTString[PJ_WKT_TYPE_LAST + 1]{};
     std::string mapPROJString[PJ_PROJ_STRING_TYPE_LAST + 1]{};
     bool gridsNeededAsked = false;
-    std::vector<CoordinateOperation::GridDescription> gridsNeeded{};
+    std::vector<GridDescription> gridsNeeded{};
 
     explicit PJ_OBJ(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn)
         : ctx(ctxIn), obj(objIn) {}
@@ -996,7 +996,7 @@ PJ_OBJ *proj_obj_get_target_crs(PJ_OBJ *obj) {
 
 // ---------------------------------------------------------------------------
 
-static PROJ_STRING_LIST set_to_string_list(const std::set<std::string> &set) {
+static PROJ_STRING_LIST set_to_string_list(std::set<std::string> &&set) {
     auto ret = new char *[set.size() + 1];
     size_t i = 0;
     for (const auto &str : set) {

@@ -366,7 +366,6 @@ const UnitOfMeasure UnitOfMeasure::PPM_PER_YEAR("parts per million per year",
 
 namespace cs {
 std::map<std::string, const AxisDirection *> AxisDirection::registry;
-std::set<std::string> AxisDirection::keys;
 
 /** Axis positive direction is north. In a geodetic or projected CRS, north is
  * defined through the geodetic reference frame. In an engineering CRS, north
@@ -507,7 +506,6 @@ const AxisDirection AxisDirection::UNSPECIFIED("unspecified");
 //! @cond Doxygen_Suppress
 
 std::map<std::string, const AxisDirectionWKT1 *> AxisDirectionWKT1::registry;
-std::set<std::string> AxisDirectionWKT1::keys;
 
 const AxisDirectionWKT1 AxisDirectionWKT1::NORTH("NORTH");
 const AxisDirectionWKT1 AxisDirectionWKT1::EAST("EAST");

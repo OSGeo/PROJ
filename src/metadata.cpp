@@ -40,7 +40,6 @@
 
 #include <algorithm>
 #include <memory>
-#include <sstream> // std::ostringstream
 #include <string>
 #include <vector>
 
@@ -895,9 +894,7 @@ void Identifier::Private::setProperties(
             if (auto genVal =
                     dynamic_cast<const BoxedValue *>(oIter->second.get())) {
                 if (genVal->type() == BoxedValue::Type::INTEGER) {
-                    std::ostringstream buffer;
-                    buffer << genVal->integerValue();
-                    code_ = buffer.str();
+                    code_ = toString(genVal->integerValue());
                 } else if (genVal->type() == BoxedValue::Type::STRING) {
                     code_ = genVal->stringValue();
                 } else {
