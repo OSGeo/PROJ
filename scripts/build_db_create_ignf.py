@@ -148,7 +148,7 @@ for line in open(IGNF_file, 'rt').readlines():
 
         geocentric_crs_name_to_datum_code[d['title']] = datum_code
 
-        sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s','EPSG','%s','EPSG','8901','EPSG','1262',0);""" % (datum_code, escape_literal(d['title']), ellps_code)
+        sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,'EPSG','%s','EPSG','8901','EPSG','1262',0);""" % (datum_code, escape_literal(d['title']), ellps_code)
         all_sql.append(sql)
 
         #sql = """INSERT INTO "crs" VALUES('IGNF','%s','geocentric');""" % (code)
@@ -216,7 +216,7 @@ for line in open(IGNF_file, 'rt').readlines():
             datum_code = geocentric_crs_name_to_datum_code[d['title']]
         else:
             datum_code = 'DATUM_' + code
-            sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s','EPSG','%s','EPSG',%s,'EPSG','1262',0);""" % (datum_code, escape_literal(d['title']), ellps_code, pm_code)
+            sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,'EPSG','%s','EPSG',%s,'EPSG','1262',0);""" % (datum_code, escape_literal(d['title']), ellps_code, pm_code)
             all_sql.append(sql)
 
         #sql = """INSERT INTO "crs" VALUES('IGNF','%s','geographic 2D');""" % (code)

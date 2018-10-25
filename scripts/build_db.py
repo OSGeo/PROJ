@@ -28,10 +28,8 @@
 #  DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-import csv
 import os
 import sqlite3
-import sys
 
 EPSG_AUTHORITY = 'EPSG'
 
@@ -75,7 +73,7 @@ def fill_unit_of_measure(proj_db_cursor):
 
 def fill_ellipsoid(proj_db_cursor):
     proj_db_cursor.execute(
-        "INSERT INTO ellipsoid SELECT ?, ellipsoid_code, ellipsoid_name, 'PROJ', 'EARTH', semi_major_axis, ?, uom_code, inv_flattening, semi_minor_axis, deprecated FROM epsg.epsg_ellipsoid", (EPSG_AUTHORITY, EPSG_AUTHORITY))
+        "INSERT INTO ellipsoid SELECT ?, ellipsoid_code, ellipsoid_name, NULL, 'PROJ', 'EARTH', semi_major_axis, ?, uom_code, inv_flattening, semi_minor_axis, deprecated FROM epsg.epsg_ellipsoid", (EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
 def fill_area(proj_db_cursor):
@@ -96,7 +94,7 @@ def fill_geodetic_datum(proj_db_cursor):
         raise Exception('Found unexpected datum_type in epsg_datum: %s' % str(res))
 
     proj_db_cursor.execute(
-        "INSERT INTO geodetic_datum SELECT ?, datum_code, datum_name, ?, ellipsoid_code, ?, prime_meridian_code, ?, area_of_use_code, deprecated FROM epsg.epsg_datum WHERE datum_type = 'geodetic'", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+        "INSERT INTO geodetic_datum SELECT ?, datum_code, datum_name, NULL, ?, ellipsoid_code, ?, prime_meridian_code, ?, area_of_use_code, deprecated FROM epsg.epsg_datum WHERE datum_type = 'geodetic'", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
 def fill_vertical_datum(proj_db_cursor):

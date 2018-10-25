@@ -5,9 +5,9 @@ pkgdata_DATA = GL27 nad.lst proj_def.dat nad27 nad83 world epsg esri \
 		CH IGNF \
 		ITRF2000 ITRF2008 ITRF2014 proj.db
 
-SQL_ORDERED_LIST = sql/proj_db_table_defs.sql \
+SQL_ORDERED_LIST = sql/begin.sql \
+		sql/proj_db_table_defs.sql \
 		sql/conversion_triggers.sql \
-		sql/begin.sql \
 		sql/metadata.sql \
 		sql/unit_of_measure.sql \
 		sql/area.sql \
@@ -27,6 +27,7 @@ SQL_ORDERED_LIST = sql/proj_db_table_defs.sql \
 		sql/grid_transformation_custom.sql \
 		sql/other_transformation.sql \
 		sql/concatenated_operation.sql \
+		sql/esri.sql \
 		sql/ignf.sql \
 		sql/grid_alternatives.sql \
 		sql/grid_alternatives_generated.sql \
@@ -83,7 +84,9 @@ proj.db: $(DATAPATH)/sql/*.sql
 	 for x in $(SQL_ORDERED_LIST); do \
 		export SQL_EXPANDED_LIST="$${SQL_EXPANDED_LIST} $(DATAPATH)/$$x"; \
 	 done; \
-	 cat $${SQL_EXPANDED_LIST} | sqlite3 proj.db
+	 cat $${SQL_EXPANDED_LIST} > all.sql.in; \
+	 sqlite3 -init all.sql.in proj.db .quit; \
+	 rm -f all.sql.in
 
 	
 # For out-of-tree builds, link all file of the source data dir to the generated data

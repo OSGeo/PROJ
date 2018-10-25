@@ -32,6 +32,7 @@ CREATE TABLE ellipsoid (
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    description TEXT,
     celestial_body_auth_name TEXT NOT NULL,
     celestial_body_code TEXT NOT NULL,
     semi_major_axis FLOAT NOT NULL CHECK (semi_major_axis > 0),
@@ -99,6 +100,7 @@ CREATE TABLE geodetic_datum (
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    description TEXT,
     ellipsoid_auth_name TEXT NOT NULL,
     ellipsoid_code TEXT NOT NULL,
     prime_meridian_auth_name TEXT NOT NULL,
@@ -435,11 +437,11 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system must NOT be defined when text_definition is NOT NULL')
         WHERE (NOT(NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL)) AND NEW.text_definition IS NOT NULL;
 
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must NOT be defined when text_definition is NOT NULL')
-        WHERE (NOT(NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL)) AND NEW.text_definition IS NOT NULL;
+    --SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must NOT be defined when text_definition is NOT NULL')
+    --    WHERE (NOT(NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL)) AND NEW.text_definition IS NOT NULL;
 
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must be defined when text_definition is NULL')
-        WHERE (NEW.conversion_auth_name IS NULL OR NEW.conversion_code IS NULL) AND NEW.text_definition IS NULL;
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must NOT be defined when text_definition is NULL')
+        WHERE (NOT(NEW.conversion_auth_name IS NULL OR NEW.conversion_code IS NULL)) AND NEW.text_definition IS NOT NULL;
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must be defined when text_definition is NULL')
         WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
@@ -850,6 +852,57 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step3 should not be a concatenated_operation')
         WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step3_auth_name AND code = NEW.step3_code);
 END;
+
+
+CREATE TABLE alias_name(
+    table_name TEXT NOT NULL,
+    auth_name TEXT NOT NULL,
+    code TEXT NOT NULL,
+    alt_name TEXT NOT NULL,
+    source TEXT
+);
+
+CREATE TRIGGER alias_name_insert_trigger
+BEFORE INSERT ON alias_name
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on alias_name violates constraint: table_name should be a known value')
+        WHERE NEW.table_name NOT IN ('unit_of_measure', 'celestial_body', 'ellipsoid', 
+        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
+        'helmert_transformation', 'other_transformation', 'concatenated_operation');
+
+    SELECT RAISE(ABORT, 'insert on alias_name violates constraint: new entry refers to unexisting code')
+        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.auth_name AND o.code = NEW.code);
+END;
+
+-- For ESRI stuff
+-- typically deprecated is the 'wkid' column of deprecated = 'yes' entries in the .csv files, and non_deprecates is the 'latestWkid' column
+CREATE TABLE link_from_deprecated_to_non_deprecated(
+    table_name TEXT NOT NULL,
+    deprecated_auth_name TEXT NOT NULL,
+    deprecated_code TEXT NOT NULL,
+    non_deprecated_auth_name TEXT NOT NULL,
+    non_deprecated_code TEXT NOT NULL,
+    source TEXT
+);
+
+CREATE TRIGGER link_from_deprecated_to_non_deprecated_insert_trigger
+BEFORE INSERT ON link_from_deprecated_to_non_deprecated
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on link_from_deprecated_to_non_deprecated violates constraint: table_name should be a known value')
+        WHERE NEW.table_name NOT IN ('unit_of_measure', 'celestial_body', 'ellipsoid', 
+        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
+        'helmert_transformation', 'other_transformation', 'concatenated_operation');
+
+    SELECT RAISE(ABORT, 'insert on link_from_deprecated_to_non_deprecated violates constraint: deprecated entry refers to unexisting code')
+        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.deprecated_auth_name AND o.code = NEW.deprecated_code);
+
+    SELECT RAISE(ABORT, 'insert on link_from_deprecated_to_non_deprecated violates constraint: non_deprecated entry refers to unexisting code')
+        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.non_deprecated_auth_name AND o.code = NEW.non_deprecated_code);
+END;
+
+
 
 CREATE VIEW coordinate_operation_view AS
     SELECT 'grid_transformation' AS table_name, auth_name, code, name,

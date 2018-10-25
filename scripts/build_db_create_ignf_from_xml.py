@@ -93,7 +93,7 @@ def ingest_ellipsoids(root, all_sql):
             assert len(names) == 1
             assert E.find('secondDefiningParameter').find('SecondDefiningParameter').find('isSphere').text == 'sphere'
             mapEllpsId[id] = ('IGNF', id)
-            all_sql.append("""INSERT INTO "ellipsoid" VALUES('IGNF','%s','%s','PROJ', 'EARTH', %s,'EPSG','9001',0,NULL,0);""" % (id, names[0], E.find('semiMajorAxis').text))
+            all_sql.append("""INSERT INTO "ellipsoid" VALUES('IGNF','%s','%s',NULL,'PROJ', 'EARTH', %s,'EPSG','9001',0,NULL,0);""" % (id, names[0], E.find('semiMajorAxis').text))
 
     return mapEllpsId
 
@@ -144,7 +144,7 @@ def ingest_datums(root, all_sql, mapEllpsId, mapPmId):
                 assert ellpsCode in mapEllpsId
 
                 # We sheat by using EPSG:1262 = World for area of use
-                sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s','%s','%s','%s','%s','EPSG','1262',0);""" % (id, names[0], mapEllpsId[ellpsCode][0], mapEllpsId[ellpsCode][1], mapPmId[pmCode][0], mapPmId[pmCode][1])
+                sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,'%s','%s','%s','%s','EPSG','1262',0);""" % (id, names[0], mapEllpsId[ellpsCode][0], mapEllpsId[ellpsCode][1], mapPmId[pmCode][0], mapPmId[pmCode][1])
                 all_sql.append(sql)
 
                 mapDatumId[id] = ('IGNF', id)

@@ -1255,14 +1255,14 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                     "6378137.0);"))
             << last_error();
         ASSERT_TRUE(
-            execute("INSERT INTO ellipsoid VALUES('EPSG','7030','WGS 84',"
+            execute("INSERT INTO ellipsoid VALUES('EPSG','7030','WGS 84','',"
                     "'PROJ','EARTH',6378137.0,'EPSG','9001',298.257223563,"
                     "NULL,0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_datum "
                     "VALUES('EPSG','6326','World Geodetic System "
-                    "1984','EPSG','7030','EPSG','8901','EPSG','1262',0);"))
+                    "1984','','EPSG','7030','EPSG','8901','EPSG','1262',0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_datum VALUES('EPSG','1027','EGM2008 "
