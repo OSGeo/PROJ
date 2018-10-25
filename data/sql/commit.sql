@@ -6,18 +6,6 @@ CREATE TRIGGER final_checks
 BEFORE INSERT ON dummy
 FOR EACH ROW BEGIN
 
-    -- check consistency of CRS related tables
-    SELECT RAISE(ABORT, 'crs of type geodetic declared in crs table but missing in geodetic_crs')
-        WHERE EXISTS(SELECT auth_name || ':' || code AS concat_code FROM crs WHERE type IN ('geocentric', 'geographic 2D', 'geographic 3D') AND concat_code NOT IN (SELECT auth_name || ':' || code FROM geodetic_crs));
-    SELECT RAISE(ABORT, 'crs of type projected declared in crs table but missing in projected_crs')
-        WHERE EXISTS(SELECT auth_name || ':' || code AS concat_code FROM crs WHERE type IN ('projected') AND concat_code NOT IN (SELECT auth_name || ':' || code FROM projected_crs));
-    SELECT RAISE(ABORT, 'crs of type vertical declared in crs table but missing in vertical_crs')
-        WHERE EXISTS(SELECT auth_name || ':' || code AS concat_code FROM crs WHERE type IN ('vertical') AND concat_code NOT IN (SELECT auth_name || ':' || code FROM vertical_crs));
-    SELECT RAISE(ABORT, 'crs of type compound declared in crs table but missing in compound_crs')
-        WHERE EXISTS(SELECT auth_name || ':' || code AS concat_code FROM crs WHERE type IN ('compound') AND concat_code NOT IN (SELECT auth_name || ':' || code FROM compound_crs));
-    SELECT RAISE(ABORT, 'crs count != crs_view count')
-        WHERE (SELECT COUNT(*) FROM crs) != (SELECT COUNT(*) FROM crs_view);
-
     -- check consistency of coordinate_operation related tables
     SELECT RAISE(ABORT, 'coordinate_operation of type helmert_transformation declared in coordinate_operation table but missing in helmert_transformation')
         WHERE EXISTS(SELECT auth_name || ':' || code AS concat_code FROM coordinate_operation WHERE type IN ('helmert_transformation') AND concat_code NOT IN (SELECT auth_name || ':' || code FROM helmert_transformation));

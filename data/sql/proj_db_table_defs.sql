@@ -165,13 +165,6 @@ FOR EACH ROW BEGIN
         WHERE NEW.coordinate_system_order > (SELECT dimension FROM coordinate_system WHERE auth_name = NEW.coordinate_system_auth_name AND code = NEW.coordinate_system_code);
 END;
 
-CREATE TABLE crs(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('geographic 2D', 'geographic 3D', 'geocentric', 'vertical', 'projected', 'compound')),
-    CONSTRAINT pk_geodetic_crs PRIMARY KEY (auth_name, code)
-);
-
 CREATE TABLE geodetic_crs(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
@@ -186,7 +179,6 @@ CREATE TABLE geodetic_crs(
     text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_geodetic_crs_crs FOREIGN KEY (auth_name, code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_geodetic_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_geodetic_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES geodetic_datum(auth_name, code),
     CONSTRAINT fk_geodetic_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
@@ -195,8 +187,9 @@ CREATE TABLE geodetic_crs(
 CREATE TRIGGER geodetic_crs_insert_trigger
 BEFORE INSERT ON geodetic_crs
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: type must be equal to crs.type')
-        WHERE NEW.type != (SELECT type FROM crs WHERE crs.auth_name = NEW.auth_name AND crs.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: (auth_name, code) must not already exist in crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
 
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system must be defined when text_definition is NULL')
         WHERE (NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL) AND NEW.text_definition IS NULL;
@@ -241,7 +234,6 @@ CREATE TABLE vertical_crs(
     area_of_use_code TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_vertical_crs_crs FOREIGN KEY (auth_name, code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_vertical_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_vertical_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES vertical_datum(auth_name, code),
     CONSTRAINT fk_vertical_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
@@ -250,8 +242,10 @@ CREATE TABLE vertical_crs(
 CREATE TRIGGER vertical_crs_insert_trigger
 BEFORE INSERT ON vertical_crs
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: crs.type must be equal to ''vertical''')
-        WHERE (SELECT type FROM crs WHERE crs.auth_name = NEW.auth_name AND crs.code = NEW.code) != 'vertical';
+
+    SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: (auth_name, code) must not already exist in crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
+
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: coordinate_system.type must be ''vertical''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'vertical';
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: coordinate_system.dimension must be 1')
@@ -419,7 +413,6 @@ CREATE TABLE projected_crs(
     text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_projected_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_projected_crs_crs FOREIGN KEY (auth_name, code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_projected_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_projected_crs_geodetic_crs FOREIGN KEY (geodetic_crs_auth_name, geodetic_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_projected_crs_conversion FOREIGN KEY (conversion_auth_name, conversion_code) REFERENCES conversion(auth_name, code),
@@ -429,8 +422,9 @@ CREATE TABLE projected_crs(
 CREATE TRIGGER projected_crs_insert_trigger
 BEFORE INSERT ON projected_crs
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: crs.type must be equal to ''projected''')
-        WHERE (SELECT type FROM crs WHERE crs.auth_name = NEW.auth_name AND crs.code = NEW.code) != 'projected';
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: (auth_name, code) must not already exist in crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system must be defined when text_definition is NULL')
         WHERE (NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL) AND NEW.text_definition IS NULL;
@@ -473,8 +467,6 @@ CREATE TABLE compound_crs(
     area_of_use_code TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_compound_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_compound_crs_crs FOREIGN KEY (auth_name, code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_compound_crs_horiz_crs FOREIGN KEY (horiz_crs_auth_name, horiz_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_compound_crs_vertical_crs FOREIGN KEY (vertical_crs_auth_name, vertical_crs_code) REFERENCES vertical_crs(auth_name, code),
     CONSTRAINT fk_compoundcrs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
@@ -482,12 +474,18 @@ CREATE TABLE compound_crs(
 CREATE TRIGGER compound_crs_insert_trigger
 BEFORE INSERT ON compound_crs
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: crs.type must be equal to ''compound''')
-        WHERE (SELECT type FROM crs WHERE crs.auth_name = NEW.auth_name AND crs.code = NEW.code) != 'compound';
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: (auth_name, code) must not already exist in crs_view')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: horiz_crs(auth_name, code) not found')
+        WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.horiz_crs_auth_name AND crs_view.code = NEW.horiz_crs_code);
+
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: horiz_crs must be equal to ''geographic 2D'' or ''projected''')
-        WHERE (SELECT type FROM crs WHERE crs.auth_name = NEW.horiz_crs_auth_name AND crs.code = NEW.horiz_crs_code) NOT IN ('geographic 2D', 'projected');
+        WHERE (SELECT type FROM crs_view WHERE crs_view.auth_name = NEW.horiz_crs_auth_name AND crs_view.code = NEW.horiz_crs_code) NOT IN ('geographic 2D', 'projected');
+
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: vertical_crs must be equal to ''vertical''')
-        WHERE (SELECT type FROM crs WHERE crs.auth_name = NEW.vertical_crs_auth_name AND crs.code = NEW.vertical_crs_code) NOT IN ('vertical');
+        WHERE (SELECT type FROM crs_view WHERE crs_view.auth_name = NEW.vertical_crs_auth_name AND crs_view.code = NEW.vertical_crs_code) NOT IN ('vertical');
 END;
 
 CREATE TABLE helmert_transformation(
@@ -612,8 +610,8 @@ CREATE TABLE grid_transformation(
 
     CONSTRAINT pk_grid_transformation PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_grid_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
+    --CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
+    --CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_grid_transformation_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
@@ -623,6 +621,13 @@ BEFORE INSERT ON grid_transformation
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: coordinate_operation.type must be equal to ''grid_transformation''')
         WHERE (SELECT type FROM coordinate_operation WHERE coordinate_operation.auth_name = NEW.auth_name AND coordinate_operation.code = NEW.code) != 'grid_transformation';
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: source_crs(auth_name, code) not found')
+        WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
+
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs(auth_name, code) not found')
+        WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
+
 END;
 
 -- Table that describe packages/archives that contain several grids
@@ -754,8 +759,8 @@ CREATE TABLE other_transformation(
 
     CONSTRAINT pk_other_transformation PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_other_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    CONSTRAINT fk_other_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_other_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
+    --CONSTRAINT fk_other_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
+    --CONSTRAINT fk_other_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_other_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
     CONSTRAINT fk_other_transformation_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_other_transformation_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -771,6 +776,13 @@ BEFORE INSERT ON other_transformation
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: coordinate_operation.type must be equal to ''other_transformation''')
         WHERE (SELECT type FROM coordinate_operation WHERE coordinate_operation.auth_name = NEW.auth_name AND coordinate_operation.code = NEW.code) != 'other_transformation';
+
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: source_crs(auth_name, code) not found')
+        WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
+
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: target_crs(auth_name, code) not found')
+        WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
+
 END;
 
 -- Note: in EPSG, the steps might be to be chained in reverse order, so we cannot
@@ -803,8 +815,8 @@ CREATE TABLE concatenated_operation(
 
     CONSTRAINT pk_concatenated_operation PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
+    --CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
+    --CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_concatenated_operation_step1 FOREIGN KEY (step1_auth_name, step1_code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_concatenated_operation_step2 FOREIGN KEY (step2_auth_name, step2_code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_concatenated_operation_step3 FOREIGN KEY (step3_auth_name, step3_code) REFERENCES coordinate_operation(auth_name, code),
@@ -816,6 +828,13 @@ BEFORE INSERT ON concatenated_operation
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: coordinate_operation.type must be equal to ''concatenated_operation''')
         WHERE (SELECT type FROM coordinate_operation WHERE coordinate_operation.auth_name = NEW.auth_name AND coordinate_operation.code = NEW.code) != 'concatenated_operation';
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: source_crs(auth_name, code) not found')
+        WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: target_crs(auth_name, code) not found')
+        WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
+
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step1 should not be a concatenated_operation')
         WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step1_auth_name AND code = NEW.step1_code);
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step2 should not be a concatenated_operation')
@@ -909,7 +928,7 @@ CREATE VIEW authority_list AS
     UNION
     SELECT DISTINCT auth_name FROM axis
     UNION
-    SELECT DISTINCT auth_name FROM crs
+    SELECT DISTINCT auth_name FROM crs_view
     UNION
     SELECT DISTINCT auth_name FROM coordinate_operation
 ;

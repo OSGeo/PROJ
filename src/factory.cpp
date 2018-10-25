@@ -2129,7 +2129,7 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
         return NN_NO_CHECK(crs);
     }
     auto res = d->runWithCodeParam(
-        "SELECT type FROM crs WHERE auth_name = ? AND code = ?", code);
+        "SELECT type FROM crs_view WHERE auth_name = ? AND code = ?", code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("crs not found", getAuthority(),
                                            code);
@@ -3347,7 +3347,7 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
         sql = "SELECT code FROM vertical_datum WHERE ";
         break;
     case ObjectType::CRS:
-        sql = "SELECT code FROM crs WHERE ";
+        sql = "SELECT code FROM crs_view WHERE ";
         break;
     case ObjectType::GEODETIC_CRS:
         sql = "SELECT code FROM geodetic_crs WHERE ";

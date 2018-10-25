@@ -1279,9 +1279,9 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             execute("INSERT INTO axis VALUES('EPSG','107','Geodetic "
                     "longitude','Lon','east','EPSG','6422',2,'EPSG','9122');"))
             << last_error();
-        ASSERT_TRUE(
-            execute("INSERT INTO crs VALUES('EPSG','4326','geographic 2D');"))
-            << last_error();
+        //ASSERT_TRUE(
+        //    execute("INSERT INTO crs VALUES('EPSG','4326','geographic 2D');"))
+        //    << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_crs VALUES('EPSG','4326','WGS "
                     "84','geographic "
@@ -1295,9 +1295,9 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             execute("INSERT INTO axis VALUES('EPSG','114','Gravity-related "
                     "height','H','up','EPSG','6499',1,'EPSG','9001');"))
             << last_error();
-        ASSERT_TRUE(
-            execute("INSERT INTO crs VALUES('EPSG','3855','vertical');"))
-            << last_error();
+        //ASSERT_TRUE(
+        //    execute("INSERT INTO crs VALUES('EPSG','3855','vertical');"))
+        //    << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_crs VALUES('EPSG','3855','EGM2008 "
                     "height','EPSG','6499','EPSG','1027','EPSG','1262',0);"))
@@ -1348,18 +1348,18 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                     "VALUES('EPSG','2','Northing','N','north','EPSG','4400'"
                     ",2,'EPSG','9001');"))
             << last_error();
-        ASSERT_TRUE(
-            execute("INSERT INTO crs VALUES('EPSG','32631','projected');"))
-            << last_error();
+        //ASSERT_TRUE(
+        //    execute("INSERT INTO crs VALUES('EPSG','32631','projected');"))
+        //    << last_error();
         ASSERT_TRUE(execute("INSERT INTO projected_crs "
                             "VALUES('EPSG','32631','WGS 84 / UTM zone "
                             "31N','EPSG','4400','EPSG','4326','EPSG','16031','"
                             "EPSG','2060',NULL,0);"))
             << last_error();
 
-        ASSERT_TRUE(
-            execute("INSERT INTO crs VALUES('EPSG','MY_COMPOUND','compound');"))
-            << last_error();
+        //ASSERT_TRUE(
+        //    execute("INSERT INTO crs VALUES('EPSG','MY_COMPOUND','compound');"))
+        //    << last_error();
         ASSERT_TRUE(execute(
             "INSERT INTO compound_crs VALUES('EPSG','MY_COMPOUND','WGS 84 + "
             "EGM2008 geoid "
@@ -1427,9 +1427,9 @@ class FactoryWithTmpDatabase : public ::testing::Test {
     void createSourceTargetPivotCRS() {
         for (const auto &val :
              std::vector<std::string>{"SOURCE", "TARGET", "PIVOT"}) {
-            ASSERT_TRUE(execute("INSERT INTO crs VALUES('NS_" + val + "','" +
-                                val + "','geographic 2D');"))
-                << last_error();
+            //ASSERT_TRUE(execute("INSERT INTO crs VALUES('NS_" + val + "','" +
+            //                    val + "','geographic 2D');"))
+            //    << last_error();
             ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
                                 "VALUES('NS_" +
                                 val + "','" + val + "','" + val +
@@ -1706,18 +1706,18 @@ TEST_F(FactoryWithTmpDatabase,
     createStructure();
     populateWithFakeEPSG();
 
-    ASSERT_TRUE(execute(
-        "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic 2D');"))
-        << last_error();
+    //ASSERT_TRUE(execute(
+    //    "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic 2D');"))
+    //    << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO geodetic_crs VALUES('OTHER','OTHER_4326','WGS "
                 "84','geographic "
                 "2D','EPSG','6422','EPSG','6326','EPSG','1262',NULL,0);"))
         << last_error();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO crs VALUES('OTHER','OTHER_32631','projected');"))
-        << last_error();
+    //ASSERT_TRUE(
+    //    execute("INSERT INTO crs VALUES('OTHER','OTHER_32631','projected');"))
+    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
                         "VALUES('OTHER','OTHER_32631','WGS 84 / UTM zone "
                         "31N','EPSG','4400','OTHER','OTHER_4326','EPSG','16031'"
@@ -1920,14 +1920,9 @@ TEST_F(FactoryWithTmpDatabase, getAuthorities) {
     createStructure();
     populateWithFakeEPSG();
 
-    ASSERT_TRUE(execute(
-        "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic 2D');"))
-        << last_error();
-
     auto res = DatabaseContext::create(m_ctxt)->getAuthorities();
-    EXPECT_EQ(res.size(), 3);
+    EXPECT_EQ(res.size(), 2);
     EXPECT_TRUE(res.find("EPSG") != res.end());
-    EXPECT_TRUE(res.find("OTHER") != res.end());
     EXPECT_TRUE(res.find("PROJ") != res.end());
 }
 
@@ -1975,18 +1970,18 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
     createStructure();
     populateWithFakeEPSG();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO crs VALUES('TEST_NS','TEST','geographic 2D');"))
-        << last_error();
+    //ASSERT_TRUE(
+    //    execute("INSERT INTO crs VALUES('TEST_NS','TEST','geographic 2D');"))
+    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES('TEST_NS','TEST','my "
                         "name TEST','geographic "
                         "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=longlat +a=2 "
                         "+rf=300',0);"))
         << last_error();
 
-    ASSERT_TRUE(execute(
-        "INSERT INTO crs VALUES('TEST_NS','TEST_BOUND','geographic 2D');"))
-        << last_error();
+    //ASSERT_TRUE(execute(
+    //    "INSERT INTO crs VALUES('TEST_NS','TEST_BOUND','geographic 2D');"))
+    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES"
                         "('TEST_NS','TEST_BOUND',"
                         "'my name TEST','geographic "
@@ -1994,35 +1989,35 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
                         "+rf=300 +towgs84=1,2,3',0);"))
         << last_error();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO crs VALUES('TEST_NS','TEST_GC','geocentric');"))
-        << last_error();
+    //ASSERT_TRUE(
+    //    execute("INSERT INTO crs VALUES('TEST_NS','TEST_GC','geocentric');"))
+    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES('TEST_NS','TEST_GC',"
                         "'my name','geocentric',NULL,NULL,NULL,NULL,NULL,NULL,"
                         "'+proj=geocent +a=2 +rf=300',0);"))
         << last_error();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO crs "
-                "VALUES('TEST_NS','TEST_REF_ANOTHER','geographic 2D');"))
-        << last_error();
+    //ASSERT_TRUE(
+    //    execute("INSERT INTO crs "
+    //            "VALUES('TEST_NS','TEST_REF_ANOTHER','geographic 2D');"))
+    //    << last_error();
     ASSERT_TRUE(execute(
         "INSERT INTO geodetic_crs "
         "VALUES('TEST_NS','TEST_REF_ANOTHER','my name TEST_REF_ANOTHER',"
         "'geographic 2D',NULL,NULL,NULL,NULL,NULL,NULL,'TEST_NS:TEST',0);"))
         << last_error();
 
-    ASSERT_TRUE(execute(
-        "INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','geographic 2D');"))
-        << last_error();
+    //ASSERT_TRUE(execute(
+    //    "INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','geographic 2D');"))
+    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
                         "VALUES('TEST_NS','TEST_WRONG','my name','geographic "
                         "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=merc',0);"))
         << last_error();
 
-    ASSERT_TRUE(execute(
-        "INSERT INTO crs VALUES('TEST_NS','TEST_RECURSIVE','geographic 2D');"))
-        << last_error();
+    //ASSERT_TRUE(execute(
+    //    "INSERT INTO crs VALUES('TEST_NS','TEST_RECURSIVE','geographic 2D');"))
+    //    << last_error();
     ASSERT_TRUE(execute(
         "INSERT INTO geodetic_crs "
         "VALUES('TEST_NS','TEST_RECURSIVE','my name','geographic "
@@ -2078,27 +2073,27 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     createStructure();
     populateWithFakeEPSG();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO crs VALUES('TEST_NS','TEST','projected');"))
-        << last_error();
+    //ASSERT_TRUE(
+    //    execute("INSERT INTO crs VALUES('TEST_NS','TEST','projected');"))
+    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
                         "VALUES('TEST_NS','TEST','my "
                         "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
                         "mbt_s +unused_flag',0);"))
         << last_error();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO crs VALUES('TEST_NS','TEST_BOUND','projected');"))
-        << last_error();
+    //ASSERT_TRUE(
+    //    execute("INSERT INTO crs VALUES('TEST_NS','TEST_BOUND','projected');"))
+    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
                         "VALUES('TEST_NS','TEST_BOUND','my "
                         "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
                         "mbt_s +unused_flag +towgs84=1,2,3',0);"))
         << last_error();
 
-    ASSERT_TRUE(
-        execute("INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','projected');"))
-        << last_error();
+    //ASSERT_TRUE(
+    //    execute("INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','projected');"))
+    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
                         "VALUES('TEST_NS','TEST_WRONG','my "
                         "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
@@ -2193,11 +2188,11 @@ TEST(factory, attachExtraDatabases_auxiliary) {
             }
         }
 
-        ASSERT_TRUE(
-            sqlite3_exec(
-                dbAux,
-                "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic 2D');",
-                nullptr, nullptr, nullptr) == SQLITE_OK);
+        //ASSERT_TRUE(
+        //    sqlite3_exec(
+        //        dbAux,
+        //        "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic 2D');",
+        //        nullptr, nullptr, nullptr) == SQLITE_OK);
         ASSERT_TRUE(
             sqlite3_exec(
                 dbAux,
