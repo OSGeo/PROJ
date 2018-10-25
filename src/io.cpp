@@ -3607,6 +3607,7 @@ struct PROJStringFormatter::Private {
     std::string hDatumExtension_{};
 
     std::list<Step> steps_{};
+    std::vector<Step::KeyValue> globalParamValues_;
 
     struct InversionStackElt {
         std::list<Step>::iterator startIter{};
@@ -4030,9 +4031,20 @@ const std::string &PROJStringFormatter::toString() const {
     } while (changeDone);
 
     if (d->steps_.size() > 1 ||
-        (d->steps_.size() == 1 && d->steps_.front().inverted)) {
+        (d->steps_.size() == 1 &&
+         (d->steps_.front().inverted || !d->globalParamValues_.empty()))) {
         d->appendToResult("+proj=pipeline");
+
+        for (const auto &paramValue : d->globalParamValues_) {
+            d->appendToResult("+");
+            d->result_ += paramValue.key;
+            if (!paramValue.value.empty()) {
+                d->result_ += "=";
+                d->result_ += paramValue.value;
+            }
+        }
     }
+
     for (const auto &step : d->steps_) {
         if (!d->result_.empty()) {
             d->appendToResult("+step");
@@ -4081,55 +4093,102 @@ void PROJStringFormatter::Private::appendToResult(const char *str) {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::ingestPROJString(
-    const std::string &str) // throw ParsingException
-{
+static void
+PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
+                       std::vector<Step::KeyValue> &globalParamValues,
+                       std::string &title, std::string &vunits,
+                       std::string &vto_meter) {
     std::string word;
-    std::istringstream iss(str, std::istringstream::in);
+    std::istringstream iss(projString, std::istringstream::in);
     bool inverted = false;
     bool prevWasStep = false;
     bool inProj = false;
+    bool inPipeline = false;
+    bool prevWasTitle = false;
+
     while (iss >> word) {
         if (word[0] == '+') {
             word = word.substr(1);
-        }
-        std::string key(word);
-        std::string value;
-        auto equalPos = word.find('=');
-        if (equalPos != std::string::npos) {
-            key = word.substr(0, equalPos);
-            value = word.substr(equalPos + 1);
+        } else if (prevWasTitle) {
+            title += " ";
+            title += word;
+            continue;
         }
 
+        prevWasTitle = false;
         if (word == "proj=pipeline") {
+            if (inPipeline) {
+                throw ParsingException("nested pipeline not supported");
+            }
             inverted = false;
             prevWasStep = false;
             inProj = true;
-        } else if (key == "step") {
+            inPipeline = true;
+        } else if (word == "step") {
+            if (!inPipeline) {
+                throw ParsingException("+step found outside pipeline");
+            }
             inverted = false;
             prevWasStep = true;
-        } else if (key == "inv") {
+        } else if (word == "inv") {
             if (prevWasStep) {
                 inverted = true;
             } else {
-                if (d->steps_.empty()) {
+                if (steps.empty()) {
                     throw ParsingException("+inv found at unexpected place");
                 }
-                d->steps_.back().inverted = true;
+                steps.back().inverted = true;
             }
             prevWasStep = false;
-        } else if (starts_with(key, "proj")) {
-            addStep(value);
-            setCurrentStepInverted(inverted);
+        } else if (starts_with(word, "proj=")) {
+            auto stepName = word.substr(strlen("proj="));
+            steps.push_back(Step());
+            steps.back().name = stepName;
+            steps.back().inverted = inverted;
+            if (!title.empty()) {
+                steps.back().paramValues.push_back(
+                    Step::KeyValue("title", title));
+                title.clear();
+            }
             prevWasStep = false;
             inProj = true;
         } else if (inProj) {
-            addParam(key, value);
+            const auto pos = word.find('=');
+            auto key = word.substr(0, pos);
+            auto pair = (pos != std::string::npos)
+                            ? Step::KeyValue(key, word.substr(pos + 1))
+                            : Step::KeyValue(key);
+            if (steps.empty()) {
+                globalParamValues.push_back(pair);
+            } else {
+                steps.back().paramValues.push_back(pair);
+            }
             prevWasStep = false;
+        } else if (starts_with(word, "vunits=")) {
+            vunits = word.substr(strlen("vunits="));
+        } else if (starts_with(word, "vto_meter=")) {
+            vto_meter = word.substr(strlen("vto_meter="));
+        } else if (starts_with(word, "title=")) {
+            title = word.substr(strlen("title="));
+            prevWasTitle = true;
         } else {
             throw ParsingException("Unexpected token: " + word);
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::ingestPROJString(
+    const std::string &str) // throw ParsingException
+{
+    std::vector<Step> steps;
+    std::string title;
+    std::string vunits;
+    std::string vto_meter;
+    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title, vunits,
+                           vto_meter);
+    d->steps_.insert(d->steps_.begin(), steps.begin(), steps.end());
 }
 
 // ---------------------------------------------------------------------------
@@ -5821,89 +5880,12 @@ PROJStringParser::Private::buildMolodenskyTransformation(
  */
 BaseObjectNNPtr
 PROJStringParser::createFromPROJString(const std::string &projString) {
-    std::string word;
-    std::istringstream iss(projString, std::istringstream::in);
-    bool inverted = false;
-    bool prevWasStep = false;
-    bool inProj = false;
-    bool inPipeline = false;
-    bool prevWasTitle = false;
     std::string vunits;
     std::string vto_meter;
     std::string title;
-    while (iss >> word) {
-        if (word[0] == '+') {
-            word = word.substr(1);
-        } else if (prevWasTitle) {
-            title += " " + word;
-            continue;
-        }
 
-        prevWasTitle = false;
-        if (word == "proj=pipeline") {
-            if (inPipeline) {
-                throw ParsingException("nested pipeline not supported");
-            }
-            inverted = false;
-            prevWasStep = false;
-            inProj = true;
-            inPipeline = true;
-        } else if (word == "step") {
-            if (!inPipeline) {
-                throw ParsingException("+step found outside pipeline");
-            }
-            inverted = false;
-            prevWasStep = true;
-        } else if (word == "inv") {
-            if (prevWasStep) {
-                inverted = true;
-            } else {
-                if (d->steps_.empty()) {
-                    throw ParsingException("+inv found at unexpected place");
-                }
-                d->steps_.back().inverted = true;
-            }
-            prevWasStep = false;
-        } else if (starts_with(word, "proj=")) {
-            auto stepName = word.substr(std::string("proj=").size());
-            d->steps_.push_back(Step());
-            d->steps_.back().name = stepName;
-            d->steps_.back().inverted = inverted;
-            if (!title.empty()) {
-                d->steps_.back().paramValues.push_back(
-                    Step::KeyValue("title", title));
-                title.clear();
-            }
-            prevWasStep = false;
-            inProj = true;
-        } else if (inProj) {
-            std::string key;
-            std::string value;
-            size_t pos = word.find('=');
-            if (pos != std::string::npos) {
-                key = word.substr(0, pos);
-                value = word.substr(pos + 1);
-            } else {
-                key = word;
-            }
-            auto pair = Step::KeyValue(key, value);
-            if (d->steps_.empty()) {
-                d->globalParamValues_.push_back(pair);
-            } else {
-                d->steps_.back().paramValues.push_back(pair);
-            }
-            prevWasStep = false;
-        } else if (starts_with(word, "vunits=")) {
-            vunits = word.substr(std::string("vunits=").size());
-        } else if (starts_with(word, "vto_meter=")) {
-            vto_meter = word.substr(std::string("vto_meter=").size());
-        } else if (starts_with(word, "title=")) {
-            title = word.substr(std::string("title=").size());
-            prevWasTitle = true;
-        } else {
-            throw ParsingException("Unexpected token: " + word);
-        }
-    }
+    PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_, title,
+                           vunits, vto_meter);
 
     if (d->steps_.empty()) {
 

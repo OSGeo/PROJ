@@ -3700,6 +3700,17 @@ TEST(operation, PROJ_based_empty) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, PROJ_based_with_global_parameters) {
+    auto conv = SingleOperation::createPROJBased(
+        PropertyMap(), "+proj=pipeline +ellps=WGS84 +step +proj=longlat",
+        nullptr, nullptr);
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +ellps=WGS84 +step +proj=longlat");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(

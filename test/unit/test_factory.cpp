@@ -1907,6 +1907,33 @@ TEST_F(
 
 // ---------------------------------------------------------------------------
 
+TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('OTHER','FOO','My PROJ string based op','PROJ',"
+        "'PROJString','+proj=pipeline +ellps=WGS84 +step +proj=longlat',"
+        "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    auto factoryOTHER =
+        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+    auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
+        "EPSG", "4326", "EPSG", "4326", false, false);
+    ASSERT_EQ(res.size(), 1);
+    EXPECT_EQ(res[0]->nameStr(), "My PROJ string based op");
+    EXPECT_EQ(res[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +ellps=WGS84 +step +proj=longlat");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_EPSG_4326_approximate_equivalent_to_builtin) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(

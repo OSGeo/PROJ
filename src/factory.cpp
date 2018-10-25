@@ -2658,17 +2658,23 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 d->createProperties(code, name, deprecated,
                                     area_of_use_auth_name, area_of_use_code);
 
+            std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+            if (!accuracy.empty()) {
+                accuracies.emplace_back(
+                    metadata::PositionalAccuracy::create(accuracy));
+            }
+
+            if (method_auth_name == "PROJ" && method_code == "PROJString") {
+                return operation::SingleOperation::createPROJBased(
+                    props, method_name, sourceCRS, targetCRS, accuracies);
+            }
+
             auto propsMethod =
                 util::PropertyMap()
                     .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
                     .set(metadata::Identifier::CODE_KEY, method_code)
                     .set(common::IdentifiedObject::NAME_KEY, method_name);
 
-            std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
-            if (!accuracy.empty()) {
-                accuracies.emplace_back(
-                    metadata::PositionalAccuracy::create(accuracy));
-            }
             if (operation::isAxisOrderReversal(
                     method_name, method_auth_name == metadata::Identifier::EPSG
                                      ? std::atoi(method_code.c_str())

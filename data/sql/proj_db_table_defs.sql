@@ -689,7 +689,7 @@ CREATE TABLE other_transformation(
     code TEXT NOT NULL,
     name TEXT NOT NULL,
 
-    method_auth_name TEXT NOT NULL,
+    method_auth_name TEXT NOT NULL,         -- if 'PROJ', method_code can be 'PROJString' for a PROJ string and then method_name is a PROJ string (typically a pipeline)
     method_code TEXT NOT NULL,
     method_name NOT NULL,
 
