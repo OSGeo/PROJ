@@ -390,6 +390,7 @@ FOR EACH ROW BEGIN
             'EPSG_9842_Equidistant Cylindrical',
             'EPSG_9843_Axis Order Reversal (2D)',
             'EPSG_9844_Axis Order Reversal (Geographic3D horizontal)',
+            'EPSG_9827_Bonne',
             '__Gauss Schreiber Transverse Mercator',
             '__PROJ mill');
 END;
