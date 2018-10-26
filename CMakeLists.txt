@@ -9,7 +9,7 @@
 #################################################################################
 # General settings
 #################################################################################
-cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
 
 # For historic reasons, the CMake PROJECT-NAME is PROJ4
 project(PROJ4 LANGUAGES C CXX)
