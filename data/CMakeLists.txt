@@ -56,6 +56,7 @@ add_custom_target(generate_all_sql_in ALL DEPENDS ${ALL_SQL_IN})
 add_custom_command(OUTPUT ${PROJ_DB}
     COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJ_DB}
     COMMAND ${EXE_SQLITE3} -init ${ALL_SQL_IN} ${PROJ_DB} .quit
+    # note: we didn't port yet the foreign_key_check done in Makefile.am
     DEPENDS generate_all_sql_in ${ALL_SQL_IN}
     COMMENT "Generating proj.db"
     VERBATIM

@@ -7267,6 +7267,8 @@ void Transformation::_exportToPROJString(
         }
     }
 
+    const bool isMethodInverseOf = starts_with(methodName, INVERSE_OF);
+
     const auto &NTv1Filename = _getNTv1Filename(this, true);
     const auto &NTv2Filename = _getNTv2Filename(this, true);
     const auto &CTABLE2Filename = _getCTABLE2Filename(this, true);
@@ -7293,12 +7295,12 @@ void Transformation::_exportToPROJString(
         sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
 
-        if (starts_with(methodName, INVERSE_OF)) {
+        if (isMethodInverseOf) {
             formatter->startInversion();
         }
         formatter->addStep("hgridshift");
         formatter->addParam("grids", hGridShiftFilename);
-        if (starts_with(methodName, INVERSE_OF)) {
+        if (isMethodInverseOf) {
             formatter->stopInversion();
         }
 
@@ -7309,12 +7311,12 @@ void Transformation::_exportToPROJString(
 
     const auto &heightFilename = _getHeightToGeographic3DFilename(this, true);
     if (!heightFilename.empty()) {
-        if (starts_with(methodName, INVERSE_OF)) {
+        if (isMethodInverseOf) {
             formatter->startInversion();
         }
         formatter->addStep("vgridshift");
         formatter->addParam("grids", heightFilename);
-        if (starts_with(methodName, INVERSE_OF)) {
+        if (isMethodInverseOf) {
             formatter->stopInversion();
         }
         return;
@@ -7327,12 +7329,12 @@ void Transformation::_exportToPROJString(
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             auto filename = fileParameter->valueFile();
-            if (starts_with(methodName, INVERSE_OF)) {
+            if (isMethodInverseOf) {
                 formatter->startInversion();
             }
             formatter->addStep("vgridshift");
             formatter->addParam("grids", filename);
-            if (starts_with(methodName, INVERSE_OF)) {
+            if (isMethodInverseOf) {
                 formatter->stopInversion();
             }
             return;

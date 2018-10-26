@@ -1,5 +1,10 @@
 COMMIT;
 
+-- Do an explicit foreign_key_check as foreign key checking is a no-op within
+-- a transaction. Unfortunately we can't ask for this to be an error, so this
+-- is just for verbose output. In Makefile, we check this separately
+PRAGMA foreign_key_check;
+
 -- Final consistency checks
 CREATE TABLE dummy(foo);
 CREATE TRIGGER final_checks

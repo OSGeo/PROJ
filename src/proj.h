@@ -571,7 +571,8 @@ typedef struct PJ_OPERATION_FACTORY_CONTEXT PJ_OPERATION_FACTORY_CONTEXT;
 /*! @endcond */
 
 PJ_OPERATION_FACTORY_CONTEXT PROJ_DLL *proj_create_operation_factory_context(
-                                            PJ_CONTEXT *ctx);
+                                            PJ_CONTEXT *ctx,
+                                            const char *authority);
 
 void PROJ_DLL proj_operation_factory_context_unref(
                                             PJ_OPERATION_FACTORY_CONTEXT *ctxt);

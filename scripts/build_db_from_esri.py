@@ -961,7 +961,260 @@ def import_hvcoordsys():
                         latestWkid, escape_literal(esri_name))
                     all_sql.append(sql)
             else:
-                assert False, row # no ESRI specific entries at that time !
+                assert False, row  # no ESRI specific entries at that time !
+
+
+########################
+
+
+def get_parameter(wkt, param_name):
+    needle = ',PARAMETER["' + param_name + '",'
+    pos = wkt.find(needle)
+    assert pos >= 0, wkt
+    pos += len(needle)
+    end_pos = wkt[pos:].find(']')
+    assert end_pos >= 0, (wkt, wkt[pos:])
+    end_pos += pos
+    return wkt[pos:end_pos]
+
+
+def import_geogtran():
+    with open(os.path.join(path_to_csv, 'pe_list_geogtran.csv'), 'rt') as csvfile:
+        reader = csv.reader(csvfile)
+        header = next(reader)
+        nfields = len(header)
+
+        idx_wkid = header.index('wkid')
+        assert idx_wkid >= 0
+
+        idx_latestWkid = header.index('latestWkid')
+        assert idx_latestWkid >= 0
+
+        idx_name = header.index('name')
+        assert idx_name >= 0
+
+        idx_description = header.index('description')
+        assert idx_description >= 0
+
+        idx_wkt = header.index('wkt')
+        assert idx_wkt >= 0
+
+        idx_authority = header.index('authority')
+        assert idx_authority >= 0
+
+        idx_deprecated = header.index('deprecated')
+        assert idx_deprecated >= 0
+
+        idx_areaname = header.index('areaname')
+        assert idx_areaname >= 0
+
+        idx_slat = header.index('slat')
+        assert idx_slat >= 0
+
+        idx_nlat = header.index('nlat')
+        assert idx_nlat >= 0
+
+        idx_llon = header.index('llon')
+        assert idx_llon >= 0
+
+        idx_rlon = header.index('rlon')
+        assert idx_rlon >= 0
+
+        idx_accuracy = header.index('accuracy')
+        assert idx_accuracy >= 0
+
+        while True:
+            try:
+                row = next(reader)
+            except StopIteration:
+                break
+            assert len(row) == nfields, row
+
+            wkid = row[idx_wkid]
+            authority = row[idx_authority]
+            esri_name = row[idx_name]
+            wkt = row[idx_wkt]
+            deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+
+            if authority == 'EPSG':
+
+                map_compoundcrs_esri_name_to_auth_code[esri_name] = [
+                    'EPSG', wkid]
+
+                cursor.execute(
+                    "SELECT name FROM coordinate_operation_view WHERE auth_name = 'EPSG' AND code = ?", (wkid,))
+                src_row = cursor.fetchone()
+
+                if not src_row:
+                    if 'Molodensky_Badekas' in wkt:
+                        # print('Skipping GEOGTRAN %s (EPSG source) since it uses a non-supported yet suported method'% esri_name)
+                        continue
+
+                # Don't do anything particular in part of checking we now
+                # it
+                assert src_row, row
+
+            else:
+
+                # We don't want to import ESRI deprecated transformations
+                # (there are a lot), do we ?
+                if deprecated:
+                    #print('Skipping deprecated GEOGTRAN %s' % esri_name)
+                    continue
+
+                assert wkt.startswith('GEOGTRAN')
+
+                pos = wkt.find(',GEOGCS["')
+                assert pos >= 0
+                pos += len(',GEOGCS["')
+                end_pos = wkt[pos:].find('"')
+                assert end_pos >= 0
+                end_pos += pos
+                src_crs_name = wkt[pos:end_pos]
+                if src_crs_name == 'GCS_Voirol_Unifie_1960_Paris':
+                    print(
+                        'Skipping GEOGTRAN %s as it refers to a ignored CRS' % esri_name)
+                    continue
+
+                pos = wkt[end_pos:].find(',GEOGCS["')
+                assert pos >= 0
+                pos += end_pos + len(',GEOGCS["')
+                end_pos = wkt[pos:].find('"')
+                assert end_pos >= 0
+                end_pos += pos
+                dst_crs_name = wkt[pos:end_pos]
+
+                assert src_crs_name in map_geogcs_esri_name_to_auth_code, (
+                    src_crs_name, row)
+                src_crs_auth_name, src_crs_code = map_geogcs_esri_name_to_auth_code[src_crs_name]
+
+                assert dst_crs_name in map_geogcs_esri_name_to_auth_code, (
+                    dst_crs_name, row)
+                dst_crs_auth_name, dst_crs_code = map_geogcs_esri_name_to_auth_code[dst_crs_name]
+
+                if 'Molodensky_Badekas' in wkt:
+                    print(
+                        'Skipping GEOGTRAN %s since it uses a non-supported yet suported method' % esri_name)
+                    continue
+
+                is_cf = 'METHOD["Coordinate_Frame"]' in wkt
+                is_pv = 'METHOD["Position_Vector"]' in wkt
+                is_geocentric_translation = 'METHOD["Geocentric_Translation"]' in wkt
+                is_geog2d_offset = 'METHOD["Geographic_2D_Offset"]' in wkt
+                is_null = 'METHOD["Null"]' in wkt
+                is_unitchange = 'METHOD["Unit_Change"]' in wkt
+                is_nadcon = 'METHOD["NADCON"]' in wkt
+                is_ntv2 = 'METHOD["NTv2"]' in wkt
+                is_geocon = 'METHOD["GEOCON"]' in wkt
+                is_harn = 'METHOD["HARN"]' in wkt
+                assert is_cf or is_pv or is_geocentric_translation or is_nadcon or is_geog2d_offset or is_ntv2 or is_geocon or is_null or is_harn or is_unitchange, (
+                    row)
+
+                area_auth_name, area_code = find_area(
+                    row[idx_areaname], row[idx_slat], row[idx_nlat], row[idx_llon], row[idx_rlon])
+
+                accuracy = row[idx_accuracy]
+
+                if is_cf or is_pv:
+                    x = get_parameter(wkt, 'X_Axis_Translation')
+                    y = get_parameter(wkt, 'Y_Axis_Translation')
+                    z = get_parameter(wkt, 'Z_Axis_Translation')
+                    rx = get_parameter(wkt, 'X_Axis_Rotation')  # in arc second
+                    ry = get_parameter(wkt, 'Y_Axis_Rotation')
+                    rz = get_parameter(wkt, 'Z_Axis_Rotation')
+                    s = get_parameter(wkt, 'Scale_Difference')  # in ppm
+                    assert wkt.count('PARAMETER[') == 7
+
+                    if is_cf:
+                        method_code = '9607'
+                        method_name = 'Coordinate Frame rotation (geog2D domain)'
+                    else:
+                        method_code = '9606'
+                        method_name = 'Position Vector transformation (geog2D domain)'
+
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s','EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, rx, ry, rz, s, deprecated)
+                    all_sql.append(sql)
+
+                elif is_geocentric_translation:
+                    x = get_parameter(wkt, 'X_Axis_Translation')
+                    y = get_parameter(wkt, 'Y_Axis_Translation')
+                    z = get_parameter(wkt, 'Z_Axis_Translation')
+                    assert wkt.count('PARAMETER[') == 3
+
+                    method_code = '9603'
+                    method_name = 'Geocentric translations (geog2D domain)'
+
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s','EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, deprecated)
+                    all_sql.append(sql)
+
+                elif is_geog2d_offset:
+
+                    # The only occurence is quite boring: from NTF(Paris) to NTF.
+                    # But interestingly the longitude offset value is not
+                    # completely exactly the value of the Paris prime meridian
+
+                    long_offset = get_parameter(
+                        wkt, 'Longitude_Offset')  # in arc second
+                    lat_offset = get_parameter(wkt, 'Latitude_Offset')
+                    assert wkt.count('PARAMETER[') == 2
+
+                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s','EPSG','9619','Geographic2D offsets','%s','%s','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, lat_offset, long_offset, deprecated)
+                    all_sql.append(sql)
+
+                elif is_null:
+                    long_offset = '0'
+                    lat_offset = '0'
+                    assert wkt.count('PARAMETER[') == 0
+
+                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s','EPSG','9619','Geographic2D offsets','%s','%s','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, lat_offset, long_offset, deprecated)
+                    all_sql.append(sql)
+
+                elif is_unitchange:
+
+                    # Automatically handled by PROJ. Not worth importing
+                    continue
+
+                else:
+                    assert wkt.count('PARAMETER[') == 1
+                    needle = ',PARAMETER["'
+                    pos = wkt.find(needle)
+                    assert pos >= 0, wkt
+                    pos += len(needle)
+                    end_pos = wkt[pos:].find('"')
+                    assert end_pos >= 0, (wkt, wkt[pos:])
+                    end_pos += pos
+                    filename = wkt[pos:end_pos]
+                    assert filename.startswith('Dataset_')
+                    filename = filename[len('Dataset_'):]
+
+
+                    cursor.execute(
+                        "SELECT name, grid_name FROM grid_transformation WHERE source_crs_auth_name = ? AND source_crs_code = ? AND target_crs_auth_name = ? AND target_crs_code = ? AND area_of_use_auth_name = ? AND area_of_use_code = ?", (src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code))
+                    src_row = cursor.fetchone()
+                    if src_row:
+                        print('A grid_transformation (%s, using grid %s) is already known for the equivalent of %s (%s:%s --> %s:%s) for area %s, which uses grid %s. Skipping it' % (src_row[0], src_row[1], esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, row[idx_areaname], filename))
+                        continue
+
+                    sql = """INSERT INTO "grid_transformation" VALUES('ESRI','%s','%s','EPSG','9615','NTv2','%s','%s','%s','%s','%s','%s',%s,'EPSG','8656','Latitude and longitude difference file','%s',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, filename, deprecated)
+                    all_sql.append(sql)
+
+                    if filename in ('c1hpgn', 'c2hpgn'):
+                        sql = """INSERT INTO grid_alternatives VALUES ('%s', '%s', 'NTv2', 'hgridshift', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);""" % (
+                            filename, filename + '.gsb')
+                        all_sql.append(sql)
+                    elif filename == 'wohpgn':
+                        sql = """INSERT INTO grid_alternatives VALUES ('%s', '%s', 'CTable2', 'hgridshift', 0, 'proj-datumgrid', NULL, NULL, NULL, NULL);""" % (
+                            filename, 'WO')
+                        all_sql.append(sql)
+                    elif filename == 'prvi':
+                        continue
+                    else:
+                        print('not handled grid: ' + filename)
 
 
 import_spheroid()
@@ -972,6 +1225,7 @@ import_projcs()
 import_vdatum()
 import_vertcs()
 import_hvcoordsys()  # compoundcrs
+import_geogtran()  # transformations between GeogCRS
 
 script_dir_name = os.path.dirname(os.path.realpath(__file__))
 sql_dir_name = os.path.join(os.path.dirname(script_dir_name), 'data', 'sql')

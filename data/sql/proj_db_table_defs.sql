@@ -692,7 +692,11 @@ CREATE TABLE other_transformation(
     code TEXT NOT NULL,
     name TEXT NOT NULL,
 
-    method_auth_name TEXT NOT NULL,         -- if 'PROJ', method_code can be 'PROJString' for a PROJ string and then method_name is a PROJ string (typically a pipeline)
+    -- if method_auth_name = 'PROJ', method_code can be 'PROJString' for a
+    -- PROJ string and then method_name is a PROJ string (typically a pipeline)
+    -- if method_auth_name = 'PROJ', method_code can be 'WKT' for a
+    -- PROJ string and then method_name is a WKT string (CoordinateOperation)
+    method_auth_name TEXT NOT NULL,
     method_code TEXT NOT NULL,
     method_name NOT NULL,
 
@@ -782,6 +786,9 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: target_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
+
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: method_code should be in (PROJString, WKT) when method_auth_name = PROJ')
+        WHERE NEW.method_auth_name = 'PROJ' AND NEW.method_code NOT IN ('PROJString', 'WKT');
 
 END;
 

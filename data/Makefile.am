@@ -86,6 +86,10 @@ proj.db: $(DATAPATH)/sql/*.sql
 	 done; \
 	 cat $${SQL_EXPANDED_LIST} > all.sql.in; \
 	 sqlite3 -init all.sql.in proj.db .quit; \
+	 if [[ $$(echo "pragma foreign_key_check;" | sqlite3 proj.db | head -c1 | wc -c) -ne 0 ]]; then \
+		echo "Foreign key check failed"; \
+		exit 1; \
+	 fi; \
 	 rm -f all.sql.in
 
 	

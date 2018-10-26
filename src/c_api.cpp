@@ -1527,19 +1527,22 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
  * proj_operation_factory_context_unref() after use.
  *
  * @param ctx Context, or NULL for default context.
+ * @param authority Name of authority to which to restrict the search of
+ *                  canidate operations. Or NULL to allow any authority.
  * @return Object that must be unreferenced with
  * proj_operation_factory_context_unref(), or NULL in
  * case of error.
  */
 PJ_OPERATION_FACTORY_CONTEXT *
-proj_create_operation_factory_context(PJ_CONTEXT *ctx) {
+proj_create_operation_factory_context(PJ_CONTEXT *ctx, const char *authority) {
     SANITIZE_CTX(ctx);
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
         if (dbContext) {
             auto factory = CoordinateOperationFactory::create();
-            auto authFactory =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
+            auto authFactory = AuthorityFactory::create(
+                NN_NO_CHECK(dbContext),
+                std::string(authority ? authority : ""));
             auto operationContext =
                 CoordinateOperationContext::create(authFactory, nullptr, 0.0);
             return new PJ_OPERATION_FACTORY_CONTEXT(

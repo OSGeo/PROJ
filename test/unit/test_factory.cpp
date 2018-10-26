@@ -1934,6 +1934,125 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    auto wkt = "COORDINATEOPERATION[\"My WKT string based op\",\n"
+               "    SOURCECRS[\n"
+               "        GEODCRS[\"unknown\",\n"
+               "            DATUM[\"World Geodetic System 1984\",\n"
+               "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                    LENGTHUNIT[\"metre\",1]],\n"
+               "                ID[\"EPSG\",6326]],\n"
+               "            PRIMEM[\"Greenwich\",0,\n"
+               "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "                ID[\"EPSG\",8901]],\n"
+               "            CS[ellipsoidal,2],\n"
+               "                AXIS[\"geodetic latitude (Lat)\",north],\n"
+               "                AXIS[\"geodetic longitude (Lon)\",east],\n"
+               "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+               "    TARGETCRS[\n"
+               "        GEODCRS[\"unknown\",\n"
+               "            DATUM[\"World Geodetic System 1984\",\n"
+               "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                    LENGTHUNIT[\"metre\",1]],\n"
+               "                ID[\"EPSG\",6326]],\n"
+               "            PRIMEM[\"Greenwich\",0,\n"
+               "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "                ID[\"EPSG\",8901]],\n"
+               "            CS[ellipsoidal,2],\n"
+               "                AXIS[\"geodetic latitude (Lat)\",north],\n"
+               "                AXIS[\"geodetic longitude (Lon)\",east],\n"
+               "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+               "    METHOD[\"Geocentric translations (geog2D domain)\"],\n"
+               "    PARAMETER[\"X-axis translation\",1],\n"
+               "    PARAMETER[\"Y-axis translation\",2],\n"
+               "    PARAMETER[\"Z-axis translation\",3]]";
+
+    ASSERT_TRUE(
+        execute("INSERT INTO other_transformation "
+                "VALUES('OTHER','FOO','My WKT string based op','PROJ',"
+                "'WKT','" +
+                std::string(wkt) +
+                "',"
+                "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    auto factoryOTHER =
+        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+    auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
+        "EPSG", "4326", "EPSG", "4326", false, false);
+    ASSERT_EQ(res.size(), 1);
+    EXPECT_EQ(res[0]->nameStr(), "My WKT string based op");
+    EXPECT_EQ(res[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +step +inv "
+              "+proj=cart +ellps=WGS84 +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase,
+       AuthorityFactory_wkt_based_transformation_not_wkt) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO other_transformation "
+                "VALUES('OTHER','FOO','My WKT string based op','PROJ',"
+                "'WKT','" +
+                std::string("invalid_wkt") +
+                "',"
+                "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    auto factoryOTHER =
+        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+    EXPECT_THROW(factoryOTHER->createFromCoordinateReferenceSystemCodes(
+                     "EPSG", "4326", "EPSG", "4326", false, false),
+                 FactoryException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase,
+       AuthorityFactory_wkt_based_transformation_not_co_wkt) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO other_transformation "
+                "VALUES('OTHER','FOO','My WKT string based op','PROJ',"
+                "'WKT','" +
+                std::string("LOCAL_CS[\"foo\"]") +
+                "',"
+                "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    auto factoryOTHER =
+        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+    EXPECT_THROW(factoryOTHER->createFromCoordinateReferenceSystemCodes(
+                     "EPSG", "4326", "EPSG", "4326", false, false),
+                 FactoryException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_EPSG_4326_approximate_equivalent_to_builtin) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(

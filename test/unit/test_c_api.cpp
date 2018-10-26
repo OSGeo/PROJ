@@ -936,7 +936,7 @@ TEST_F(CApi, proj_coordoperation_is_instanciable) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_operations) {
-    auto ctxt = proj_create_operation_factory_context(m_ctxt);
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
     ASSERT_NE(ctxt, nullptr);
     ContextKeeper keeper_ctxt(ctxt);
 
@@ -960,7 +960,7 @@ TEST_F(CApi, proj_obj_create_operations) {
     ASSERT_NE(res, nullptr);
     OperationResultKeeper keeper_res(res);
 
-    EXPECT_EQ(proj_operation_result_get_count(res), 6);
+    EXPECT_EQ(proj_operation_result_get_count(res), 7);
 
     EXPECT_EQ(proj_operation_result_get(res, -1), nullptr);
     EXPECT_EQ(
@@ -991,7 +991,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
     // Default behaviour: allow any pivot
     {
-        auto ctxt = proj_create_operation_factory_context(m_ctxt);
+        auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
 
@@ -1011,7 +1011,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
     // Disallow pivots
     {
-        auto ctxt = proj_create_operation_factory_context(m_ctxt);
+        auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
         proj_operation_factory_context_set_allow_use_intermediate_crs(ctxt,
@@ -1032,7 +1032,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
     // Restrict pivot to Tokyo CRS
     {
-        auto ctxt = proj_create_operation_factory_context(m_ctxt);
+        auto ctxt = proj_create_operation_factory_context(m_ctxt, "EPSG");
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
 
@@ -1060,7 +1060,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
     // Restrict pivot to JGD2000
     {
-        auto ctxt = proj_create_operation_factory_context(m_ctxt);
+        auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
 

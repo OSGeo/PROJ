@@ -2664,9 +2664,21 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     metadata::PositionalAccuracy::create(accuracy));
             }
 
-            if (method_auth_name == "PROJ" && method_code == "PROJString") {
-                return operation::SingleOperation::createPROJBased(
-                    props, method_name, sourceCRS, targetCRS, accuracies);
+            if (method_auth_name == "PROJ") {
+                if (method_code == "PROJString") {
+                    return operation::SingleOperation::createPROJBased(
+                        props, method_name, sourceCRS, targetCRS, accuracies);
+                } else if (method_code == "WKT") {
+                    auto op = util::nn_dynamic_pointer_cast<
+                        operation::CoordinateOperation>(
+                        WKTParser().createFromWKT(method_name));
+                    if (!op) {
+                        throw FactoryException("WKT string does not express a "
+                                               "coordinate operation");
+                    }
+                    op->setCRSs(sourceCRS, targetCRS, nullptr);
+                    return NN_NO_CHECK(op);
+                }
             }
 
             auto propsMethod =
