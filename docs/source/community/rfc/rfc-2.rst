@@ -7,6 +7,7 @@ PROJ RFC 2: Initial integration of "GDAL SRS barn" work
 :Author: Even Rouault
 :Contact: even.rouault at spatialys.com
 :Status: In development
+:Initial version: 2018-10-09
 :Last Updated: 2018-10-26
 
 Summary
@@ -32,12 +33,14 @@ Consult `Applicable standards`_
 
 .. _`Applicable standards`: http://even.rouault.free.fr/proj_cpp_api/html/general_doc.html#standards
 
+(They will be linked from the PROJ documentation)
+
 
 Details
 -------
 
-Structuration in packages / namespaces
-**************************************
+Structure in packages / namespaces
+**********************************
 
 The C++ implementation of the (upcoming) ISO-19111:2018 / OGC Topic 2 "Referencing by
 coordinates" classes follows this abstract modeling as much as possible, using
@@ -109,8 +112,8 @@ The classes are organized into several namespaces:
         WKTParser, PROJStringParser, DatabaseContext, AuthorityFactory,
         FactoryException, NoSuchAuthorityCodeException
 
-What does what ?
-****************
+What does what?
+***************
 
 The code to parse WKT and PROJ strings and build ISO-19111 objects is
 contained in `io.cpp`_
@@ -211,9 +214,9 @@ Algorithmic focus
 On the algorithmic side, a somewhat involved logic is the
 CoordinateOperationFactory::createOperations() in `coordinateoperation.cpp`_
 that takes a pair of source and target CRS and returns a set of possible
-coordinate operations (either single operations like a Conversion or a
+`coordinate operations`_ (either single operations like a Conversion or a
 Transformation, or concatenated operations). It uses the intrinsinc structure
-of those objets to create the coordinate operation pipeline. That is, if
+of those objects to create the coordinate operation pipeline. That is, if
 going from a ProjectedCRS to another one, by doing first the inverse conversion
 from the source ProjectedCRS to its base GeographicCRS, then finding the
 appropriate transformation(s) from this base GeographicCRS to the base
@@ -223,7 +226,8 @@ database to find if one or several transformations are available. The
 resulting coordinate operations are filtered, and sorted, with user provided hints:
 
     - desired accuracy
-    - area of use (defined as a bounding box)
+    - area of use, defined as a bounding box in longitude, latitude space (its
+      actual CRS does not matter for the intended use)
     - if no area of use is defined, if and how the area of use of the source
       and target CRS should be used. By default, the smallest area of use is
       used. The rationale is for example when transforming between a national
@@ -234,9 +238,9 @@ resulting coordinate operations are filtered, and sorted, with user provided hin
       compared. By default, only transformations whose area of use is fully
       contained in the desired area of use are selected. It is also possible
       to relax this test by specifying that only an intersection test must be used.
-    - whether PROJ grid names should be susbstituted to the official names,
-      when a match is found in the `grid_alternatives` table of the database.
-      Defaults to true
+    - whether `PROJ transformation grid`_ names should be susbstituted to the
+      official names, when a match is found in the `grid_alternatives` table
+      of the database. Defaults to true
     - whether the availability of those grids should be used to filter and sort
       the results. By default, the transformations using grids available in the
       system will be presented first.
@@ -264,28 +268,29 @@ passed to createOperations().
 An interesting example to understand how those parameters play together is
 to use `projinfo -s EPSG:4267 -t EPSG:4326` (NAD27 to WGS84 conversions),
 and see how specifying desired area of use, spatial criterion, grid availability,
-etc... affects the results.
+etc. affects the results.
+
+The following command currently returns 78 results:
 
 ::
 
     projinfo -s EPSG:4267 -t EPSG:4326 --summary --spatial-test intersects
-
-returns 78 results
-
 
 The createOperations() algorithm also does a kind of "CRS routing".
 A typical example is if wanting to transform between CRS A and
 CRS B, but no direct transformation is referenced in proj.db between those.
 But if there are transformations between A <--> C and B <--> C, then it
 is possible to build a concatenated operation A --> C --> B. The typical
-example is when C is WGS84, but the implementation is generic and just find
-a common pivot from the database. As an example of that, for example there is
-no direct transformation registered in the EPSG database between EPSG:4326
-and EPSG:6668 (JGD2011 - Japanese Geodetic Datum 2011), but there are
-transformations between those two CRS and JGD2000 (and also Tokyo datum, but
-that one involves less accurate transformations)
+example is when C is WGS84, but the implementation is generic and just finds
+a common pivot from the database. An example of finding a non-WGS84 pivot is
+when searching a transformation between EPSG:4326 and EPSG:6668 (JGD2011 -
+Japanese Geodetic Datum 2011), which has no direct transformation registered
+in the EPSG database . However there are transformations between those two
+CRS and JGD2000 (and also Tokyo datum, but that one involves less accurate
+transformations)
 
 ::
+
     projinfo -s EPSG:4326 -t EPSG:6668  --grid-check none --bbox 135.42,34.84,142.14,41.58 --summary
 
     Candidate operations found: 7
@@ -297,11 +302,18 @@ that one involves less accurate transformations)
     unknown id, Inverse of Tokyo to WGS 84 (2) + Tokyo to JGD2000 (2) + JGD2000 to JGD2011 (1), 13.4 m, Japan - northern Honshu
     unknown id, Inverse of Tokyo to WGS 84 (1) + Tokyo to JGD2011 (2), 29.2 m, Asia - Japan and South Korea
 
+
+.. _`coordinate operations`: https://proj4.org/operations/index.html
+
+.. _`PROJ transformation grid`: https://proj4.org/resource_files.html#transformation-grids
+
+
 Code repository
 ---------------
 
 The current state of the work can be found in the
-`iso19111 branch of rouault/proj.4 repository`_
+`iso19111 branch of rouault/proj.4 repository`_ , and is also available as
+a GitHub pull request at https://github.com/OSGeo/proj.4/pull/1040
 
 Here is a not-so-usable `comparison with a fixed snapshot of master branch`_
 
@@ -316,42 +328,59 @@ Database
 Content
 *******
 
-The database contains CRS and coordinate operation definitions from the EPSG
-database v9.5.3 and the IGNF registry, as well as a few customizations.
+The database contains CRS and coordinate operation definitions from the `EPSG`_
+database (IOGP’s EPSG Geodetic Parameter Dataset) v9.5.3,
+`IGNF registry`_ (French National Geographic Institute), ESRI database, as well
+as a few customizations.
+
+.. _`EPSG`: http://www.epsg.org/
+.. _`IGNF registry`: https://geodesie.ign.fr/index.php?page=documentation#titre3
 
 Building (for PROJ developers creating the database)
 ****************************************************
 
 The building of the database is a several stage process:
 
-    - the first stage consists in constructing .sql scripts mostly with
-      CREATE TABLE and INSERT statements to create the database structure and
-      populate it. There is one .sql file for each database table, populated
-      with the content of the EPSG database, automatically
-      generated with the `build_db.py`_ script, which processes the PostgreSQL
-      dumps issued by IOGP. A number of other scripts are dedicated to manual
-      edition, for example `grid_alternatives.sql`_ file that binds official
-      grid names to PROJ grid names
+Construct SQL scripts for EPSG
+++++++++++++++++++++++++++++++
 
-    - the second stage is done automatically by the make process. It pipes the
-      .sql script, in the right order, to the sqlite3 binary to generate a
-      first version of the proj.db SQLite3 database.
+The first stage consists in constructing .sql scripts mostly with
+CREATE TABLE and INSERT statements to create the database structure and
+populate it. There is one .sql file for each database table, populated
+with the content of the EPSG database, automatically
+generated with the `build_db.py`_ script, which processes the PostgreSQL
+dumps issued by IOGP. A number of other scripts are dedicated to manual
+editing, for example `grid_alternatives.sql`_ file that binds official
+grid names to PROJ grid names
 
-    - the third stage consists in creating additional .sql files from the
-      content of other registries. For that process, we need to bind some
-      definitions of those registries to those of the EPSG database, to be
-      able to link to existing objects and detect some boring duplicates.
-      The `ignf.sql`_ file has been generated using
-      the `build_db_create_ignf.py`_ script from the current data/IGNF file
-      that contains CRS definitions (and implicit transformations to WGS84)
-      as PROJ.4 strings.
-      The `esri.sql`_ file has been generated using the `build_db_from_esri.py`_
-      script, from the .csv files in
-      https://github.com/Esri/projection-engine-db-doc/tree/master/csv
+Concert UTF8 SQL to sqlite3 db
+++++++++++++++++++++++++++++++
 
-    - the last stage runs make again to incorporate the new .sql files generated
-      in the previous stage (so the process of building the database involves
-      a kind of bootstrapping...)
+The second stage is done automatically by the make process. It pipes the
+.sql script, in the right order, to the sqlite3 binary to generate a
+first version of the proj.db SQLite3 database.
+
+Add extra registries
+++++++++++++++++++++
+
+The third stage consists in creating additional .sql files from the
+content of other registries. For that process, we need to bind some
+definitions of those registries to those of the EPSG database, to be
+able to link to existing objects and detect some boring duplicates.
+The `ignf.sql`_ file has been generated using
+the `build_db_create_ignf.py`_ script from the current data/IGNF file
+that contains CRS definitions (and implicit transformations to WGS84)
+as PROJ.4 strings.
+The `esri.sql`_ file has been generated using the `build_db_from_esri.py`_
+script, from the .csv files in
+https://github.com/Esri/projection-engine-db-doc/tree/master/csv
+
+Finalize proj.db
+++++++++++++++++
+
+The last stage runs make again to incorporate the new .sql files generated
+in the previous stage (so the process of building the database involves
+a kind of bootstrapping...)
 
 Building (for PROJ users)
 *************************
@@ -406,13 +435,12 @@ be combined together.
     - `helmert_transformation`: table with all Helmert-based transformations.
     - `other_transformation`: table with other type of transformations.
 
-    The main departure with the structure of the EPSG database is the split of
-    the various coordinate operations over several tables. This was done mostly
-    for human-readability as the EPSG organization into coordoperation,
-    coordoperationmethod, coordoperationparam, coordoperationparamusage,
-    coordoperationparamvalue tables makes it hard to grasp at once all the
-    parameters and values for a given operation.
-
+The main departure with the structure of the EPSG database is the split of
+the various coordinate operations over several tables. This was done mostly
+for human-readability as the EPSG organization of coordoperation,
+coordoperationmethod, coordoperationparam, coordoperationparamusage,
+coordoperationparamvalue tables makes it hard to grasp at once all the
+parameters and values for a given operation.
 
 
 Utilities
@@ -786,14 +814,14 @@ C API
 The main structure is an opaque PJ_OBJ* roughly encapsulating a osgeo::proj::BaseObject,
 that can represent a CRS or a CoordinateOperation object. A number of the
 C functions will work only if the right type of underlying C++ object is used
-with them, but misuse will be properly handled at runtime, ie. if a user passes
-a PJ_OBJ* representing a coordinate operation to a pj_obj_crs_xxxx() functions,
-that one will properly error out. This design has been chosen over creating a
+with them. Misuse will be properly handled at runtime. If a user passes
+a PJ_OBJ* representing a coordinate operation to a pj_obj_crs_xxxx() function,
+it will properly error out. This design has been chosen over creating a
 dedicate PJ_xxx object for each C++ class, because such an approach would
-require using conversion and free functions a lot of time for little benefit.
+require adding many conversion and free functions for little benefit.
 
-This C API is far from being complete. In particular it does not allow to
-build ISO19111 objects at hand. However it currently permits a fair number of
+This C API is incomplete. In particular, it does not allow to
+build ISO19111 objects at hand. However it currently permits a number of
 actions:
 
     - building CRS and coordinate operations from WKT and PROJ strings, or
@@ -802,11 +830,11 @@ actions:
     - querying main attributes of those objects
     - finding coordinate operations between two CRS.
 
-`test_c_api.cpp`_ should give a taste of how using the API (small note:
-for the conveniency of writing the tests in C++, it wraps the C PJ_OBJ*
+`test_c_api.cpp`_ should demonstrates simple usage of the API (note:
+for the conveniency of writing the tests in C++, test_c_api.cpp wraps the C PJ_OBJ*
 instances in C++ 'keeper' objects that automatically call the pj_obj_unref()
-function at function end. In a pure C use, the programmer has of course to
-manually do those pj_obj_unref() calls).
+function at function end. In a pure C use, the caller must use pj_obj_unref()
+to prevent leaks.)
 
 .. _`proj.h`: http://even.rouault.free.fr/proj_cpp_api/html/proj_8h.html
 
@@ -876,7 +904,7 @@ Runtime requirements
 Backward compatibility
 ----------------------
 
-At this stage, no backward compatibility issue is to be foreseen, as no
+At this stage, no backward compatibility issue is foreseen, as no
 existing functional C code has been modified to use the new capabilities
 
 Future work
@@ -885,12 +913,12 @@ Future work
 The work described in this RFC will be pursued in a number of directions.
 Non-exhaustively:
 
-  - Support for ESRI WKT1 dialect (we currently ingest the ProjectedCRS in
+  - Support for ESRI WKT1 dialect (PROJ currently ingest the ProjectedCRS in
     `esri.sql`_ in that dialect, but there is no mapping between it and EPSG
     operation and parameter names, so conversion to PROJ strings does not
     always work.
 
-  - closer integration with existing code base. In particular, the +init=dict:code
+  - closer integration with the existing code base. In particular, the +init=dict:code
     syntax should now go first to the database (then the `epsg` and `IGNF`
     files can be removed). Similarly proj_create_crs_to_crs() could use the
     new capabilities to find an appropriate coordinate transformation.
