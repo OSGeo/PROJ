@@ -7,7 +7,7 @@ PROJ RFC 2: Initial integration of "GDAL SRS barn" work
 :Author: Even Rouault
 :Contact: even.rouault at spatialys.com
 :Status: In development
-:Last Updated: 2018-10-09
+:Last Updated: 2018-10-26
 
 Summary
 -------
@@ -272,6 +272,31 @@ etc... affects the results.
 
 returns 78 results
 
+
+The createOperations() algorithm also does a kind of "CRS routing".
+A typical example is if wanting to transform between CRS A and
+CRS B, but no direct transformation is referenced in proj.db between those.
+But if there are transformations between A <--> C and B <--> C, then it
+is possible to build a concatenated operation A --> C --> B. The typical
+example is when C is WGS84, but the implementation is generic and just find
+a common pivot from the database. As an example of that, for example there is
+no direct transformation registered in the EPSG database between EPSG:4326
+and EPSG:6668 (JGD2011 - Japanese Geodetic Datum 2011), but there are
+transformations between those two CRS and JGD2000 (and also Tokyo datum, but
+that one involves less accurate transformations)
+
+::
+    projinfo -s EPSG:4326 -t EPSG:6668  --grid-check none --bbox 135.42,34.84,142.14,41.58 --summary
+
+    Candidate operations found: 7
+    unknown id, Inverse of JGD2000 to WGS 84 (1) + JGD2000 to JGD2011 (1), 1.2 m, Japan - northern Honshu
+    unknown id, Inverse of JGD2000 to WGS 84 (1) + JGD2000 to JGD2011 (2), 2 m, Japan excluding northern main province
+    unknown id, Inverse of Tokyo to WGS 84 (108) + Tokyo to JGD2011 (2), 9.2 m, Japan onshore excluding northern main province
+    unknown id, Inverse of Tokyo to WGS 84 (108) + Tokyo to JGD2000 (2) + JGD2000 to JGD2011 (1), 9.4 m, Japan - northern Honshu
+    unknown id, Inverse of Tokyo to WGS 84 (2) + Tokyo to JGD2011 (2), 13.2 m, Japan - onshore mainland and adjacent islands
+    unknown id, Inverse of Tokyo to WGS 84 (2) + Tokyo to JGD2000 (2) + JGD2000 to JGD2011 (1), 13.4 m, Japan - northern Honshu
+    unknown id, Inverse of Tokyo to WGS 84 (1) + Tokyo to JGD2011 (2), 29.2 m, Asia - Japan and South Korea
+
 Code repository
 ---------------
 
@@ -294,27 +319,45 @@ Content
 The database contains CRS and coordinate operation definitions from the EPSG
 database v9.5.3 and the IGNF registry, as well as a few customizations.
 
-Building
-********
+Building (for PROJ developers creating the database)
+****************************************************
 
-The building of the database is a two stage process:
+The building of the database is a several stage process:
 
     - the first stage consists in constructing .sql scripts mostly with
       CREATE TABLE and INSERT statements to create the database structure and
       populate it. There is one .sql file for each database table, populated
       with the content of the EPSG database, automatically
       generated with the `build_db.py`_ script, which processes the PostgreSQL
-      dumps issued by IOGP. The `ignf.sql`_ file has also been generated using
-      the `build_db_create_ignf.py`_ script from the current data/IGNF file
-      that contains CRS definitions (and implicit transformations to WGS84)
-      as PROJ.4 strings. A number of other scripts are dedicatedt to manual
+      dumps issued by IOGP. A number of other scripts are dedicated to manual
       edition, for example `grid_alternatives.sql`_ file that binds official
       grid names to PROJ grid names
 
     - the second stage is done automatically by the make process. It pipes the
-      .sql script, in the right order, to the sqlite3 binary to generate the
-      final proj.db SQLite3 database. The resulting file is currently 3.8 MB
-      large.
+      .sql script, in the right order, to the sqlite3 binary to generate a
+      first version of the proj.db SQLite3 database.
+
+    - the third stage consists in creating additional .sql files from the
+      content of other registries. For that process, we need to bind some
+      definitions of those registries to those of the EPSG database, to be
+      able to link to existing objects and detect some boring duplicates.
+      The `ignf.sql`_ file has been generated using
+      the `build_db_create_ignf.py`_ script from the current data/IGNF file
+      that contains CRS definitions (and implicit transformations to WGS84)
+      as PROJ.4 strings.
+      The `esri.sql`_ file has been generated using the `build_db_from_esri.py`_
+      script, from the .csv files in
+      https://github.com/Esri/projection-engine-db-doc/tree/master/csv
+
+    - the last stage runs make again to incorporate the new .sql files generated
+      in the previous stage (so the process of building the database involves
+      a kind of bootstrapping...)
+
+Building (for PROJ users)
+*************************
+
+The make process just runs the second stage mentionned above from the .sql
+files. The resulting proj.db is currently 5.3 MB large.
 
 Structure
 *********
@@ -330,6 +373,8 @@ be combined together.
     - `authority_list`: view enumerating the authorities present in the database. Currently: EPSG, IGNF, PROJ
     - `metadata`: a few key/value pairs, for example to indicate the version of the registries imported in the database
     - `object_view`: synthetic view listing objects (ellipsoids, datums, CRS, coordinate operations...) code and name, and the table name where they are further described
+    - `alias_names`: list possible alias for the `name` field of object table
+    - `link_from_deprecated_to_non_deprecated`: to handle the link between old ESRI to new ESRI/EPSG codes
 
 - Commmon:
     - `unit_of_measure`: table with UnitOfMeasure definitions.
@@ -346,14 +391,12 @@ be combined together.
     - `vertical_datum`: table with VerticalReferenceFrame definitions.
 
 - CRS:
-    - `crs`: synthetic table listing codes for CRS (which are refined in geodetic_crs, projected_crs, vertical_crs and compound_crs).
     - `geodetic_crs`: table with GeodeticCRS and GeographicCRS definitions.
     - `projected_crs`: table with ProjectedCRS definitions.
     - `vertical_crs`: table with VerticalCRS definitions.
     - `compound_crs`: table with CompoundCRS definitions.
 
 - Coordinate operations:
-    - `coordinate_operation`: synthetic table listing codes for CoordinateOperation (which are refined in conversion, grid_transformation, helmert_transformation, - other_transformation or concatenated_operation tables)
     - `coordinate_operation_view`: view giving a number of common attributes shared by the concrete tables implementing CoordinateOperation
     - `conversion`: table with definitions of Conversion (mostly parameter and values of Projection)
     - `concatenated_operation`: table with definitions of ConcatenatedOperation.
@@ -548,9 +591,8 @@ Summary view:
 
     $ projinfo -s EPSG:2171 -t EPSG:32634 --summary
 
-    Candidate operations found: 2
+    Candidate operations found: 1
     unknown id, Inverse of Poland zone I + Pulkovo 1942(58) to WGS 84 (1) + UTM zone 34N, 1 m, Poland - onshore
-    unknown id, Inverse of Poland zone I + Pulkovo 1942(58) to WGS 84 (4) + UTM zone 34N, 6 m, Poland - onshore
 
 Display of pipelines:
 
@@ -558,18 +600,8 @@ Display of pipelines:
 
     $ PROJ_LIB=data src/projinfo -s EPSG:2171 -t EPSG:32634 -o PROJ
 
-    -------------------------------------
-    Operation n°1:
-
     PROJ string: 
     +proj=pipeline +step +proj=axisswap +order=2,1 +step +inv +proj=sterea +lat_0=50.625 +lon_0=21.0833333333333 +k=0.9998 +x_0=4637000 +y_0=5647000 +ellps=krass +step +proj=cart +ellps=krass +step +proj=helmert +x=33.4 +y=-146.6 +z=-76.3 +rx=-0.359 +ry=-0.053 +rz=0.844 +s=-0.84 +convention=position_vector +step +inv +proj=cart +ellps=WGS84 +step +proj=utm +zone=34 +ellps=WGS84
-
-    -------------------------------------
-    Operation n°2:
-
-    PROJ string: 
-    +proj=pipeline +step +proj=axisswap +order=2,1 +step +inv +proj=sterea +lat_0=50.625 +lon_0=21.0833333333333 +k=0.9998 +x_0=4637000 +y_0=5647000 +ellps=krass +step +proj=cart +ellps=krass +step +proj=helmert +x=23 +y=-124 +z=-82 +step +inv +proj=cart +ellps=WGS84 +step +proj=utm +zone=34 +ellps=WGS84
-
 
 
 Impacted files
@@ -667,6 +699,7 @@ artifacts):
         - `grid_transformation_custom.sql`_: hand-generated
         - `helmert_transformation.sql`_: generated by `build_db.py`_
         - `ignf.sql`_: generated by `build_db_create_ignf.py`_
+        - `esri.sql`_: generated by `build_db_from_esri.py`_
         - `metadata.sql`_: hand-generated
         - `other_transformation.sql`_: generated by `build_db.py`_
         - `prime_meridian.sql`_: generated by `build_db.py`_
@@ -695,6 +728,7 @@ artifacts):
     .. _`grid_transformation.sql`: https://github.com/rouault/proj.4/blob/iso19111/data/sql/grid_transformation.sql
     .. _`helmert_transformation.sql`: https://github.com/rouault/proj.4/blob/iso19111/data/sql/helmert_transformation.sql
     .. _`ignf.sql`: https://github.com/rouault/proj.4/blob/iso19111/data/sql/ignf.sql
+    .. _`esri.sql`: https://github.com/rouault/proj.4/blob/iso19111/data/sql/esri.sql
     .. _`metadata.sql`: https://github.com/rouault/proj.4/blob/iso19111/data/sql/metadata.sql
     .. _`other_transformation.sql`: https://github.com/rouault/proj.4/blob/iso19111/data/sql/other_transformation.sql
     .. _`prime_meridian.sql`: https://github.com/rouault/proj.4/blob/iso19111/data/sql/prime_meridian.sql
@@ -707,6 +741,7 @@ artifacts):
     * scripts/:
         - `build_db.py`_ : generate .sql files from EPSG database dumps
         - `build_db_create_ignf.py`_: generates data/sql/`ignf.sql`_
+        - `build_db_from_esri.py`_: generates data/sql/`esri.sql`_
         - `doxygen.sh`_: generates Doxygen documentation
         - `gen_html_coverage.sh`_: generates HTML report of the coverage for --coverage build
         - `filter_lcov_info.py`_: utility used by gen_html_coverage.sh
@@ -715,6 +750,7 @@ artifacts):
 
     .. _`build_db.py`: https://github.com/rouault/proj.4/blob/iso19111/scripts/build_db.py
     .. _`build_db_create_ignf.py`: https://github.com/rouault/proj.4/blob/iso19111/scripts/build_db_create_ignf.py
+    .. _`build_db_from_esri.py`: https://github.com/rouault/proj.4/blob/iso19111/scripts/build_db_from_esri.py
     .. _`doxygen.sh`: https://github.com/rouault/proj.4/blob/iso19111/scripts/doxygen.sh
     .. _`gen_html_coverage.sh`: https://github.com/rouault/proj.4/blob/iso19111/scripts/gen_html_coverage.sh
     .. _`filter_lcov_info.py`: https://github.com/rouault/proj.4/blob/iso19111/scripts/filter_lcov_info.py
@@ -847,14 +883,12 @@ Future work
 -----------
 
 The work described in this RFC will be pursued in a number of directions.
-Non exhaustively:
+Non-exhaustively:
 
-  - improvements in the createOperations() algorithm to do a kind of "CRS
-    routing". A typical example is if wanting to transform between CRS A and
-    CRS B, but no direct transformation is referenced in proj.db between those.
-    But if there are transformations between A <--> C and B <--> C, then it
-    is possible to build a concatenated operation A --> C --> B. The typical
-    example is when C is WGS84.
+  - Support for ESRI WKT1 dialect (we currently ingest the ProjectedCRS in
+    `esri.sql`_ in that dialect, but there is no mapping between it and EPSG
+    operation and parameter names, so conversion to PROJ strings does not
+    always work.
 
   - closer integration with existing code base. In particular, the +init=dict:code
     syntax should now go first to the database (then the `epsg` and `IGNF`
