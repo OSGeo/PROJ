@@ -94,6 +94,7 @@ PROJ_HEAD(mil_os, "Miller Oblated Stereographic")
 PROJ_HEAD(mill, "Miller Cylindrical")
 PROJ_HEAD(misrsom, "Space oblique for MISR")
 PROJ_HEAD(moll, "Mollweide")
+PROJ_HEAD(molobadekas, "Molodensky-Badekas transform") /* implemented in PJ_helmert.c */
 PROJ_HEAD(molodensky, "Molodensky transform")
 PROJ_HEAD(murd1, "Murdoch I")
 PROJ_HEAD(murd2, "Murdoch II")
