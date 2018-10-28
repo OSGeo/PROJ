@@ -124,5 +124,6 @@ test/unit/proj_errno_string_test.o
 jniwrap/out
 
 /docs/build
+/docs/.doxygen_up_to_date
 
 tmp_breathe

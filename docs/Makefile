@@ -51,8 +51,12 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
+.doxygen_up_to_date: ../src/*.cpp ../include/proj/*.hpp
+	../scripts/doxygen.sh
+	touch .doxygen_up_to_date
+
 .PHONY: html
-html:
+html: .doxygen_up_to_date
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	# Undoes the hack done in scripts/doxygen.sh
 	@sed -i "s/io::Convention_/io::Convention/g" $(BUILDDIR)/html/development/reference/cpp/io.html
