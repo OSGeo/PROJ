@@ -7,7 +7,7 @@ Helmert transform
 .. versionadded:: 5.0.0
 
 The Helmert transformation changes coordinates from one reference frame to
-anoether by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
+another by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
 14-parameter kinematic counterparts.
 
 
@@ -25,7 +25,7 @@ anoether by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
 | **Output type** | Cartesian coordinates                                             |
 +-----------------+-------------------------------------------------------------------+
 
-The Helmert transform, in all it's various incarnations, is used to perform reference
+The Helmert transform, in all its various incarnations, is used to perform reference
 frame shifts. The transformation operates in cartesian space. It can be used to transform
 planar coordinates from one datum to another, transform 3D cartesian
 coordinates from one static reference frame to another or it can be used to do fully
@@ -117,7 +117,7 @@ Parameters
 
 .. option:: +y=<value>
 
-    Translation of the x-axis given in meters.
+    Translation of the y-axis given in meters.
 
 .. option:: +z=<value>
 

@@ -411,6 +411,30 @@ expect     failure   errno invalid_arg
 
 
 -------------------------------------------------------------------------------
+Molodensky-Badekas from IOGP Guidance 7.2, Transformation from La Canoa to REGVEN
+between geographic 2D coordinate reference systems (EPSG Dataset transformation code 1771).
+Here just taking the Cartesian step of the transformation.
+-------------------------------------------------------------------------------
+operation  proj=molobadekas convention=coordinate_frame
+           x=-270.933 y=115.599 z=-360.226 rx=-5.266 ry=-1.238 rz=2.381
+           s=-5.109 px=2464351.59 py=-5783466.61 pz=974809.81
+-------------------------------------------------------------------------------
+tolerance  1 cm
+roundtrip  1
+accept     2550408.96 -5749912.26 1054891.11
+expect     2550138.45 -5749799.87 1054530.82
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Test error cases of molobadekas
+-------------------------------------------------------------------------------
+
+# Missing convention
+operation  proj=molobadekas
+expect     failure   errno missing_arg
+
+
+-------------------------------------------------------------------------------
 geocentric latitude
 -------------------------------------------------------------------------------
 operation  proj=geoc ellps=GRS80
