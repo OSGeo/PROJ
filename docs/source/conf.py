@@ -349,5 +349,5 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 breathe_projects = {
-    "cpp_stuff":"../../xml/",
+    "cpp_stuff":"../build/xml/",
 }

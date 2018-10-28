@@ -20,7 +20,8 @@ pushd "${TOPDIR}" > /dev/null || exit
 
 # HTML generation
 # Check that doxygen runs warning free
-rm -rf html/
+rm -rf docs/build/html/
+mkdir -p docs/build/
 doxygen > /tmp/docs_log.txt 2>&1
 if grep -i warning /tmp/docs_log.txt; then
     echo "Doxygen warnings found" && cat /tmp/docs_log.txt && /bin/false;
@@ -30,29 +31,30 @@ fi
 
 
 # XML generation (for Breathe)
-mkdir -p tmp_breathe
+mkdir -p docs/build/tmp_breathe
 python scripts/generate_breathe_friendly_general_doc.py
-rm -rf xml/
-(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src include/proj src/proj.h tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > /tmp/docs_log.txt 2>&1
+rm -rf docs/build/xml/
+(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src include/proj src/proj.h docs/build/tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > /tmp/docs_log.txt 2>&1
 if grep -i warning /tmp/docs_log.txt; then
     echo "Doxygen warnings found" && cat /tmp/docs_log.txt && /bin/false;
 else
     echo "No Doxygen warnings found";
 fi
 
-for i in ${TOPDIR}/xml/*; do
+for i in ${TOPDIR}/docs/build/xml/*; do
 
 # Fix Breathe error on Doxygen XML
 # Type must be either just a name or a typedef-like declaration.
 #   If just a name:
 #     Invalid definition: Expected end of definition. [error at 32]
 #       osgeo::proj::common::MeasurePtr = typedef std::shared_ptr<Measure>
-    sed -i "s/ = typedef /=/g" $i;
+    sed "s/ = typedef /=/g" < $i > $i.tmp;
+    mv $i.tmp $i
 done
 
 # There is a confusion for Breathe between PROJStringFormatter::Convention and WKTFormatter:Convention
-sed -i "s/Convention/Convention_/g" ${TOPDIR}/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml
-
+sed "s/Convention/Convention_/g" < ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml > ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml.tmp
+mv ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml.tmp  ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml
 
 popd > /dev/null || exit
 

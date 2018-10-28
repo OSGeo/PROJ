@@ -38,7 +38,7 @@ script_dir_name = os.path.dirname(os.path.realpath(__file__))
 general_doc_dox = os.path.join(os.path.dirname(
     script_dir_name), 'src', 'general_doc.dox')
 general_doc_dox_reworked_h = os.path.join(os.path.dirname(
-    script_dir_name), 'tmp_breathe', 'general_doc.dox.reworked.h')
+    script_dir_name), 'docs/build/tmp_breathe', 'general_doc.dox.reworked.h')
 
 out = open(general_doc_dox_reworked_h, 'wt')
 
