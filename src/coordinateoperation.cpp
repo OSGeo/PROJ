@@ -4683,13 +4683,16 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
     const auto &l_method = method();
     const auto &methodName = l_method->nameStr();
     const int methodEPSGCode = l_method->getEPSGCode();
-    if (ci_find(methodName, "Coordinate Frame") != std::string::npos ||
+    const auto paramCount = parameterValues().size();
+    if ((paramCount == 7 &&
+         ci_find(methodName, "Coordinate Frame") != std::string::npos) ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D) {
         sevenParamsTransform = true;
         invertRotSigns = true;
-    } else if (ci_find(methodName, "Position Vector") != std::string::npos ||
+    } else if ((paramCount == 7 &&
+                ci_find(methodName, "Position Vector") != std::string::npos) ||
                methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
                methodEPSGCode ==
                    EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
@@ -4697,8 +4700,9 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                    EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D) {
         sevenParamsTransform = true;
         invertRotSigns = false;
-    } else if (ci_find(methodName, "Geocentric translations") !=
-                   std::string::npos ||
+    } else if ((paramCount == 3 &&
+                ci_find(methodName, "Geocentric translations") !=
+                    std::string::npos) ||
                methodEPSGCode ==
                    EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC ||
                methodEPSGCode ==
@@ -5946,6 +5950,11 @@ createApproximateInverseIfPossible(const Transformation *op) {
     const auto &method = op->method();
     const auto &methodName = method->nameStr();
     const int methodEPSGCode = method->getEPSGCode();
+    const auto paramCount = op->parameterValues().size();
+    const bool isPositionVector =
+        ci_find(methodName, "Position Vector") != std::string::npos;
+    const bool isCoordinateFrame =
+        ci_find(methodName, "Coordinate Frame") != std::string::npos;
 
     // See end of "2.4.3.3 Helmert 7-parameter transformations"
     // in EPSG 7-2 guidance
@@ -5955,14 +5964,14 @@ createApproximateInverseIfPossible(const Transformation *op) {
     // (except reference epoch!)
     // So for WKT export use that. But for PROJ string, we use the +inv flag
     // so as to get "perfect" round-tripability.
-    if ((ci_find(methodName, "Coordinate Frame") != std::string::npos &&
+    if ((paramCount == 7 && isCoordinateFrame &&
          !isTimeDependent(methodName)) ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D) {
         sevenParamsTransform = true;
     } else if (
-        (ci_find(methodName, "Coordinate Frame") != std::string::npos &&
+        (paramCount == 15 && isCoordinateFrame &&
          isTimeDependent(methodName)) ||
         methodEPSGCode ==
             EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC ||
@@ -5971,7 +5980,7 @@ createApproximateInverseIfPossible(const Transformation *op) {
         methodEPSGCode ==
             EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D) {
         fifteenParamsTransform = true;
-    } else if ((ci_find(methodName, "Position Vector") != std::string::npos &&
+    } else if ((paramCount == 7 && isPositionVector &&
                 !isTimeDependent(methodName)) ||
                methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
                methodEPSGCode ==
@@ -5980,8 +5989,7 @@ createApproximateInverseIfPossible(const Transformation *op) {
                    EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D) {
         sevenParamsTransform = true;
     } else if (
-        (ci_find(methodName, "Position Vector") != std::string::npos &&
-         isTimeDependent(methodName)) ||
+        (paramCount == 15 && isPositionVector && isTimeDependent(methodName)) ||
         methodEPSGCode ==
             EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC ||
         methodEPSGCode ==
@@ -6139,7 +6147,8 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                 coordinateOperationAccuracies()));
     }
 
-    if (ci_find(methodName, "Molodensky") != std::string::npos ||
+    if ((ci_find(methodName, "Badekas") == std::string::npos &&
+         ci_find(methodName, "Molodensky") != std::string::npos) ||
         methodEPSGCode == EPSG_CODE_METHOD_MOLODENSKY ||
         methodEPSGCode == EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY) {
         double x =
@@ -6531,7 +6540,7 @@ static bool
 isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
                                      bool allowInverse) {
     const auto &methodName = method->nameStr();
-    static const std::vector<std::string> methodCodes = {
+    static const char *const methodCodes[] = {
         "1025", // Geographic3D to GravityRelatedHeight (EGM2008)
         "1030", // Geographic3D to GravityRelatedHeight (NZgeoid)
         "1045", // Geographic3D to GravityRelatedHeight (OSGM02-Ire)
@@ -6826,7 +6835,63 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
 
     return self;
 }
+// ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+static void ThrowExpectionNotGeodeticGeographic(const char *trfrm_name) {
+    throw io::FormattingException(concat("Can apply ", std::string(trfrm_name),
+                                         " only to GeodeticCRS / "
+                                         "GeographicCRS"));
+}
+
+// ---------------------------------------------------------------------------
+
+static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
+                                       const crs::CRSNNPtr &crs,
+                                       const char *trfrm_name) {
+    auto sourceCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
+    if (sourceCRSGeog) {
+        formatter->startInversion();
+        sourceCRSGeog->_exportToPROJString(formatter);
+        formatter->stopInversion();
+
+        formatter->addStep("cart");
+        sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+    } else {
+        auto sourceCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(crs.get());
+        if (!sourceCRSGeod) {
+            ThrowExpectionNotGeodeticGeographic(trfrm_name);
+        }
+        formatter->startInversion();
+        sourceCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
+        formatter->stopInversion();
+    }
+}
+// ---------------------------------------------------------------------------
+
+static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
+                                       const crs::CRSNNPtr &crs,
+                                       const char *trfrm_name) {
+    auto targetCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
+    if (targetCRSGeog) {
+        formatter->addStep("cart");
+        formatter->setCurrentStepInverted(true);
+        targetCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+
+        targetCRSGeog->_exportToPROJString(formatter);
+    } else {
+        auto targetCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(crs.get());
+        if (!targetCRSGeod) {
+            ThrowExpectionNotGeodeticGeographic(trfrm_name);
+        }
+        targetCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
+    }
+}
+
+inline static void consume_unused(const std::string &) {}
+
+//! @endcond
 // ---------------------------------------------------------------------------
 
 void Transformation::_exportToPROJString(
@@ -6845,19 +6910,22 @@ void Transformation::_exportToPROJString(
     const auto &l_method = method();
     const int methodEPSGCode = l_method->getEPSGCode();
     const auto &methodName = l_method->nameStr();
+    const auto paramCount = parameterValues().size();
     const bool l_isTimeDependent = isTimeDependent(methodName);
     const bool isPositionVector =
-        ci_find(methodName, "Position Vector") != std::string::npos;
+        ci_find(methodName, "Position Vector") != std::string::npos ||
+        ci_find(methodName, "PV") != std::string::npos;
     const bool isCoordinateFrame =
-        ci_find(methodName, "Coordinate Frame") != std::string::npos;
-    if ((isCoordinateFrame && !l_isTimeDependent) ||
+        ci_find(methodName, "Coordinate Frame") != std::string::npos ||
+        ci_find(methodName, "CF") != std::string::npos;
+    if ((paramCount == 7 && isCoordinateFrame && !l_isTimeDependent) ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
         methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D) {
         positionVectorConvention = false;
         sevenParamsTransform = true;
     } else if (
-        (isCoordinateFrame && l_isTimeDependent) ||
+        (paramCount == 15 && isCoordinateFrame && l_isTimeDependent) ||
         methodEPSGCode ==
             EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC ||
         methodEPSGCode ==
@@ -6866,7 +6934,7 @@ void Transformation::_exportToPROJString(
             EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D) {
         positionVectorConvention = false;
         fifteenParamsTransform = true;
-    } else if ((isPositionVector && !l_isTimeDependent) ||
+    } else if ((paramCount == 7 && isPositionVector && !l_isTimeDependent) ||
                methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
                methodEPSGCode ==
                    EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
@@ -6874,7 +6942,7 @@ void Transformation::_exportToPROJString(
                    EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D) {
         sevenParamsTransform = true;
     } else if (
-        (isPositionVector && l_isTimeDependent) ||
+        (paramCount == 15 && isPositionVector && l_isTimeDependent) ||
         methodEPSGCode ==
             EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC ||
         methodEPSGCode ==
@@ -6882,8 +6950,9 @@ void Transformation::_exportToPROJString(
         methodEPSGCode ==
             EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D) {
         fifteenParamsTransform = true;
-    } else if (ci_find(methodName, "Geocentric translations") !=
-                   std::string::npos ||
+    } else if ((paramCount == 3 &&
+                ci_find(methodName, "Geocentric translations") !=
+                    std::string::npos) ||
                methodEPSGCode ==
                    EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC ||
                methodEPSGCode ==
@@ -6904,27 +6973,7 @@ void Transformation::_exportToPROJString(
             parameterValueNumericAsSI(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
                                       EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION);
 
-        auto sourceCRSGeog =
-            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
-        if (sourceCRSGeog) {
-            formatter->startInversion();
-            sourceCRSGeog->_exportToPROJString(formatter);
-            formatter->stopInversion();
-
-            formatter->addStep("cart");
-            sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
-        } else {
-            auto sourceCRSGeod =
-                dynamic_cast<const crs::GeodeticCRS *>(sourceCRS().get());
-            if (!sourceCRSGeod) {
-                throw io::FormattingException("Can apply Helmert only to "
-                                              "GeodeticCRS / "
-                                              "GeographicCRS");
-            }
-            formatter->startInversion();
-            sourceCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
-            formatter->stopInversion();
-        }
+        setupPROJGeodeticSourceCRS(formatter, sourceCRS(), "Helmert");
 
         formatter->addStep("helmert");
         formatter->addParam("x", x);
@@ -7000,28 +7049,99 @@ void Transformation::_exportToPROJString(
             }
         }
 
-        auto targetCRSGeog =
-            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
-        if (targetCRSGeog) {
-            formatter->addStep("cart");
-            formatter->setCurrentStepInverted(true);
-            targetCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+        setupPROJGeodeticTargetCRS(formatter, targetCRS(), "Helmert");
 
-            targetCRSGeog->_exportToPROJString(formatter);
-        } else {
-            auto targetCRSGeod =
-                dynamic_cast<const crs::GeodeticCRS *>(targetCRS().get());
-            if (!targetCRSGeod) {
-                throw io::FormattingException("Can apply Helmert only to "
-                                              "GeodeticCRS / "
-                                              "GeographicCRS");
-            }
-            targetCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
-        }
         return;
     }
 
-    if (ci_find(methodName, "Molodensky") != std::string::npos ||
+    if (ci_find(methodName, "Molodensky-Badekas") != std::string::npos ||
+        ci_find(methodName, "Molodensky Badekas") != std::string::npos ||
+        methodEPSGCode == EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOCENTRIC ||
+        methodEPSGCode == EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOCENTRIC ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_3D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_3D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D ||
+        methodEPSGCode ==
+            EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D) {
+        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOCENTRIC);
+        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOCENTRIC);
+        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_3D);
+        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_3D);
+        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D);
+        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D);
+        positionVectorConvention =
+            isPositionVector ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOCENTRIC ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_3D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D;
+
+        double x =
+            parameterValueNumericAsSI(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                      EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION);
+        double y =
+            parameterValueNumericAsSI(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                      EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION);
+        double z =
+            parameterValueNumericAsSI(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                      EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION);
+        double rx = parameterValueNumeric(EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
+                                          EPSG_CODE_PARAMETER_X_AXIS_ROTATION,
+                                          common::UnitOfMeasure::ARC_SECOND);
+        double ry = parameterValueNumeric(EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
+                                          EPSG_CODE_PARAMETER_Y_AXIS_ROTATION,
+                                          common::UnitOfMeasure::ARC_SECOND);
+        double rz = parameterValueNumeric(EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
+                                          EPSG_CODE_PARAMETER_Z_AXIS_ROTATION,
+                                          common::UnitOfMeasure::ARC_SECOND);
+        double scaleDiff =
+            parameterValueNumeric(EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
+                                  EPSG_CODE_PARAMETER_SCALE_DIFFERENCE,
+                                  common::UnitOfMeasure::PARTS_PER_MILLION);
+
+        double px = parameterValueNumericAsSI(
+            EPSG_NAME_PARAMETER_ORDINATE_1_EVAL_POINT,
+            EPSG_CODE_PARAMETER_ORDINATE_1_EVAL_POINT);
+        double py = parameterValueNumericAsSI(
+            EPSG_NAME_PARAMETER_ORDINATE_2_EVAL_POINT,
+            EPSG_CODE_PARAMETER_ORDINATE_2_EVAL_POINT);
+        double pz = parameterValueNumericAsSI(
+            EPSG_NAME_PARAMETER_ORDINATE_3_EVAL_POINT,
+            EPSG_CODE_PARAMETER_ORDINATE_3_EVAL_POINT);
+
+        setupPROJGeodeticSourceCRS(formatter, sourceCRS(),
+                                   "Molodensky-Badekas");
+
+        formatter->addStep("molobadekas");
+        formatter->addParam("x", x);
+        formatter->addParam("y", y);
+        formatter->addParam("z", z);
+        formatter->addParam("rx", rx);
+        formatter->addParam("ry", ry);
+        formatter->addParam("rz", rz);
+        formatter->addParam("s", scaleDiff);
+        formatter->addParam("px", px);
+        formatter->addParam("py", py);
+        formatter->addParam("pz", pz);
+        if (positionVectorConvention) {
+            formatter->addParam("convention", "position_vector");
+        } else {
+            formatter->addParam("convention", "coordinate_frame");
+        }
+
+        setupPROJGeodeticTargetCRS(formatter, targetCRS(),
+                                   "Molodensky-Badekas");
+
+        return;
+    }
+
+    if ((ci_find(methodName, "Badekas") == std::string::npos &&
+         ci_find(methodName, "Molodensky") != std::string::npos) ||
         methodEPSGCode == EPSG_CODE_METHOD_MOLODENSKY ||
         methodEPSGCode == EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY) {
         double x =

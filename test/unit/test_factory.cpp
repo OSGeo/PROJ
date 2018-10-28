@@ -650,7 +650,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_3) {
 
 // ---------------------------------------------------------------------------
 
-TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7) {
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7_CF) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto op = factory->createCoordinateOperation("7676", false);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
@@ -665,7 +665,19 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7) {
 
 // ---------------------------------------------------------------------------
 
-TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8) {
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7_PV) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("1074", false);
+    auto wkt = op->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_TRUE(wkt.find("+proj=helmert +x=-275.7224 +y=94.7824 +z=340.8944 "
+                         "+rx=-8.001 +ry=-4.42 +rz=-11.821 +s=1 "
+                         "+convention=position_vector") != std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8_CF) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto op = factory->createCoordinateOperation("7702", false);
     auto expected = "    PARAMETER[\"Transformation reference epoch\",2002,\n"
@@ -679,7 +691,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8) {
 
 // ---------------------------------------------------------------------------
 
-TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15) {
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto op = factory->createCoordinateOperation("6276", false);
     auto expected =
@@ -781,6 +793,47 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15) {
         op->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
         expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_PV) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("8069", false);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=helmert +x=-0.0254 +y=0.0005 +z=0.1548 +rx=-0.0001 +ry=0 "
+              "+rz=-0.00026 +s=-0.01129 +dx=-0.0001 +dy=0.0005 +dz=0.0033 "
+              "+drx=0 +dry=0 +drz=-2e-05 +ds=-0.00012 +t_epoch=2010 "
+              "+convention=position_vector");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory,
+     AuthorityFactory_createCoordinateOperation_helmert_15_PV_rounding_of_drz) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("7932", false);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=helmert +x=0 +y=0 +z=0 +rx=0 +ry=0 +rz=0 +s=0 +dx=0 +dy=0 "
+              "+dz=0 +drx=0.00011 +dry=0.00057 +drz=-0.00071 +ds=0 "
+              "+t_epoch=1989 +convention=position_vector");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory,
+     AuthorityFactory_createCoordinateOperation_molodensky_badekas_PV) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("1066", false);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=bessel +step +proj=molobadekas +x=593.032 +y=26 "
+              "+z=478.741 +rx=0.409394387439237 +ry=-0.359705195614311 "
+              "+rz=1.86849100035057 +s=4.0772 +px=3903453.148 +py=368135.313 "
+              "+pz=5012970.306 +convention=coordinate_frame +step +inv "
+              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -1378,7 +1431,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "domain)','EPSG','4326','EPSG','4326','EPSG','1262',44.0,-143."
             "0,-90.0,-294.0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
         // ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
@@ -1455,7 +1508,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "','EPSG'"
             ",'1262',1.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
     }
 

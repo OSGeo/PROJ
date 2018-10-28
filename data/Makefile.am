@@ -84,13 +84,17 @@ proj.db: $(DATAPATH)/sql/*.sql
 	 for x in $(SQL_ORDERED_LIST); do \
 		export SQL_EXPANDED_LIST="$${SQL_EXPANDED_LIST} $(DATAPATH)/$$x"; \
 	 done; \
-	 cat $${SQL_EXPANDED_LIST} > all.sql.in; \
-	 sqlite3 -init all.sql.in proj.db .quit; \
+	 cat $${SQL_EXPANDED_LIST} | sqlite3 proj.db; \
+	 if [ $$? -ne 0 ] ; then \
+		echo "Build of proj.db failed"; \
+		$(RM) proj.db; \
+		exit 1; \
+	fi; \
 	 if [[ $$(echo "pragma foreign_key_check;" | sqlite3 proj.db | head -c1 | wc -c) -ne 0 ]]; then \
 		echo "Foreign key check failed"; \
+		$(RM) proj.db; \
 		exit 1; \
-	 fi; \
-	 rm -f all.sql.in
+	 fi
 
 	
 # For out-of-tree builds, link all file of the source data dir to the generated data

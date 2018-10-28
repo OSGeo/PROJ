@@ -4,6 +4,8 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','3896','MGI (Ferro) to WGS 84
 INSERT INTO "concatenated_operation" VALUES('EPSG','3966','MGI (Ferro) to WGS 84 (1)','EPSG','4805','EPSG','4326','EPSG','2370',NULL,'EPSG','3913','EPSG','3962',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','4435','Puerto Rico to NAD83(HARN) (1)','EPSG','4139','EPSG','4152','EPSG','3634',NULL,'EPSG','1461','EPSG','1495',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','4837','Amersfoort to ED50 (1)','EPSG','4289','EPSG','4230','EPSG','1275',NULL,'EPSG','1672','EPSG','1311',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','5190','Tokyo 1892 to Korea 2000 (1)','EPSG','5132','EPSG','4737','EPSG','3266',NULL,'EPSG','5134','EPSG','5189',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','5192','Tokyo 1892 to WGS 84 (1)','EPSG','5132','EPSG','4326','EPSG','3266',NULL,'EPSG','5134','EPSG','5191',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','5230','S-JTSK (Ferro) to WGS 84 (2)','EPSG','4818','EPSG','4326','EPSG','1211',NULL,'EPSG','1884','EPSG','4836',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','5240','S-JTSK/05 (Ferro) to WGS 84 (1)','EPSG','5229','EPSG','4326','EPSG','1079',NULL,'EPSG','5238','EPSG','5227',NULL,NULL,0);
 INSERT INTO "concatenated_operation" VALUES('EPSG','5242','S-JTSK (Ferro) to WGS 84 (3)','EPSG','4818','EPSG','4326','EPSG','1079',NULL,'EPSG','1884','EPSG','5239',NULL,NULL,0);

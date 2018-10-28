@@ -647,7 +647,7 @@ for node in root.iterfind('.//Transformation'):
             #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','helmert_transformation');""" % (custom_id)
             #all_sql.append(sql)
 
-            sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','%s','%s','EPSG',%s,%s,'%s','%s','%s','%s','%s','%s',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (custom_id, name, method_code, method_name, src[0], src[1], target[0], target[1], area_of_use[0], area_of_use[1], x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code)
+            sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','%s','%s','EPSG',%s,%s,'%s','%s','%s','%s','%s','%s',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (custom_id, name, method_code, method_name, src[0], src[1], target[0], target[1], area_of_use[0], area_of_use[1], x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code)
             all_sql.append(sql)
 
 
@@ -669,7 +669,7 @@ for node in root.iterfind('.//Transformation'):
                     #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','helmert_transformation');""" % (id_geog)
                     #all_sql.append(sql)
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','%s','%s','EPSG',%s,%s,'%s','%s','%s','%s','%s','%s',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (id_geog, name, method_geog_code, method_geog_name, src[0], src[1], target[0], target[1], area_of_use[0], area_of_use[1], x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code)
+                    sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','%s','%s','EPSG',%s,%s,'%s','%s','%s','%s','%s','%s',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (id_geog, name, method_geog_code, method_geog_name, src[0], src[1], target[0], target[1], area_of_use[0], area_of_use[1], x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code)
                     all_sql.append(sql)
 
                     if src[1] == 'NTFG':

@@ -188,7 +188,7 @@ for line in open(IGNF_file, 'rt').readlines():
             method_code = "'1033'"
             method_name = "'Position Vector transformation (geocentric domain)'"
 
-        sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_%s_TO_EPSG_4978','%s to WGS 84','EPSG',%s,%s,'IGNF','%s','EPSG','4978','EPSG','1262',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), method_code, method_name, code, x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code)
+        sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_%s_TO_EPSG_4978','%s to WGS 84','EPSG',%s,%s,'IGNF','%s','EPSG','4978','EPSG','1262',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), method_code, method_name, code, x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code)
         all_sql.append(sql)
 
         if 'nadgrids' in d and d['nadgrids'] == 'ntf_r93.gsb,null':
@@ -293,7 +293,7 @@ for line in open(IGNF_file, 'rt').readlines():
             method_code = "'9606'"
             method_name = "'Position Vector transformation (geog2D domain)'"
  
-        sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_%s_TO_EPSG_4326','%s to WGS 84','EPSG',%s,%s,'IGNF','%s','EPSG','4326','EPSG','1262',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), method_code, method_name, code, x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code)
+        sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','IGNF_%s_TO_EPSG_4326','%s to WGS 84','EPSG',%s,%s,'IGNF','%s','EPSG','4326','EPSG','1262',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (code, escape_literal(d['title']), method_code, method_name, code, x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code)
         all_sql.append(sql)
 
         if 'nadgrids' in d and d['nadgrids'] == 'ntf_r93.gsb,null':

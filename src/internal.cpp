@@ -247,8 +247,17 @@ std::string toString(int val) {
 std::string toString(double val, int precision) {
     std::ostringstream buffer;
     buffer.imbue(std::locale::classic());
-    buffer << std::setprecision(precision) << val;
-    return buffer.str();
+    buffer << std::setprecision(precision);
+    buffer << val;
+    auto str = buffer.str();
+    if (precision == 15 && str.find("9999999999") != std::string::npos) {
+        buffer.str("");
+        buffer.clear();
+        buffer << std::setprecision(14);
+        buffer << val;
+        return buffer.str();
+    }
+    return str;
 }
 
 // ---------------------------------------------------------------------------

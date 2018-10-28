@@ -404,6 +404,30 @@ static const char *
 constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D =
     1058;
 
+static const char *EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOCENTRIC(
+    "Molodensky-Badekas (CF geocentric domain)");
+constexpr int EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOCENTRIC = 1034;
+
+static const char *EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOCENTRIC(
+    "Molodensky-Badekas (PV geocentric domain)");
+constexpr int EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOCENTRIC = 1061;
+
+static const char *EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_3D(
+    "Molodensky-Badekas (CF geog3D domain)");
+constexpr int EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_3D = 1039;
+
+static const char *EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_3D(
+    "Molodensky-Badekas (PV geog3D domain)");
+constexpr int EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_3D = 1062;
+
+static const char *EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D(
+    "Molodensky-Badekas (CF geog2D domain)");
+constexpr int EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D = 9636;
+
+static const char *EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D(
+    "Molodensky-Badekas (PV geog2D domain)");
+constexpr int EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D = 1063;
+
 #include "helmert_constants.hpp"
 
 static const char *EPSG_NAME_METHOD_MOLODENSKY("Molodensky");

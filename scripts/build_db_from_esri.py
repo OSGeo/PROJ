@@ -1092,11 +1092,6 @@ def import_geogtran():
                     dst_crs_name, row)
                 dst_crs_auth_name, dst_crs_code = map_geogcs_esri_name_to_auth_code[dst_crs_name]
 
-                if 'Molodensky_Badekas' in wkt:
-                    print(
-                        'Skipping GEOGTRAN %s since it uses a non-supported yet suported method' % esri_name)
-                    continue
-
                 is_cf = 'METHOD["Coordinate_Frame"]' in wkt
                 is_pv = 'METHOD["Position_Vector"]' in wkt
                 is_geocentric_translation = 'METHOD["Geocentric_Translation"]' in wkt
@@ -1107,7 +1102,8 @@ def import_geogtran():
                 is_ntv2 = 'METHOD["NTv2"]' in wkt
                 is_geocon = 'METHOD["GEOCON"]' in wkt
                 is_harn = 'METHOD["HARN"]' in wkt
-                assert is_cf or is_pv or is_geocentric_translation or is_nadcon or is_geog2d_offset or is_ntv2 or is_geocon or is_null or is_harn or is_unitchange, (
+                is_molodensky_badekas = 'METHOD["Molodensky_Badekas"]' in wkt
+                assert is_cf or is_pv or is_geocentric_translation or is_molodensky_badekas or is_nadcon or is_geog2d_offset or is_ntv2 or is_geocon or is_null or is_harn or is_unitchange, (
                     row)
 
                 area_auth_name, area_code = find_area(
@@ -1132,8 +1128,30 @@ def import_geogtran():
                         method_code = '9606'
                         method_name = 'Position Vector transformation (geog2D domain)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s','EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s','EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, rx, ry, rz, s, deprecated)
+                    all_sql.append(sql)
+
+                elif is_molodensky_badekas:
+                    x = get_parameter(wkt, 'X_Axis_Translation')
+                    y = get_parameter(wkt, 'Y_Axis_Translation')
+                    z = get_parameter(wkt, 'Z_Axis_Translation')
+                    rx = get_parameter(wkt, 'X_Axis_Rotation')  # in arc second
+                    ry = get_parameter(wkt, 'Y_Axis_Rotation')
+                    rz = get_parameter(wkt, 'Z_Axis_Rotation')
+                    s = get_parameter(wkt, 'Scale_Difference')  # in ppm
+                    px = get_parameter(wkt, 'X_Coordinate_of_Rotation_Origin')
+                    py = get_parameter(wkt, 'Y_Coordinate_of_Rotation_Origin')
+                    pz = get_parameter(wkt, 'Z_Coordinate_of_Rotation_Origin')
+                    assert wkt.count('PARAMETER[') == 10
+
+                    # The ESRI naming is not really clear about the convention
+                    # but it looks like it is Coordinate Frame when comparing ESRI:1066 (Amersfoort_To_ETRS_1989_MB) with EPSG:1066
+                    method_code = '9636'
+                    method_name = 'Molodensky-Badekas (CF geog2D domain)'
+
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s','EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%s,%s,%s,'EPSG','9001',%d);""" % (
+                        wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, rx, ry, rz, s, px, py, pz, deprecated)
                     all_sql.append(sql)
 
                 elif is_geocentric_translation:
@@ -1145,7 +1163,7 @@ def import_geogtran():
                     method_code = '9603'
                     method_name = 'Geocentric translations (geog2D domain)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s','EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s','EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, deprecated)
                     all_sql.append(sql)
 

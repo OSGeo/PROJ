@@ -2234,7 +2234,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             "rate_rotation_uom_auth_name, rate_rotation_uom_code, "
             "rate_scale_difference, rate_scale_difference_uom_auth_name, "
             "rate_scale_difference_uom_code, epoch, epoch_uom_auth_name, "
-            "epoch_uom_code, deprecated FROM "
+            "epoch_uom_code, px, py, pz, pivot_uom_auth_name, pivot_uom_code, "
+            "deprecated FROM "
             "helmert_transformation WHERE auth_name = ? AND code = ?",
             code);
         if (res.empty()) {
@@ -2289,38 +2290,19 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &epoch_uom_auth_name = row[idx++];
             const auto &epoch_uom_code = row[idx++];
 
+            const auto &px = row[idx++];
+            const auto &py = row[idx++];
+            const auto &pz = row[idx++];
+            const auto &pivot_uom_auth_name = row[idx++];
+            const auto &pivot_uom_code = row[idx++];
+
             const auto &deprecated_str = row[idx++];
             const bool deprecated = deprecated_str == "1";
             assert(idx == row.size());
 
             auto uom_translation = d->createUnitOfMeasure(
                 translation_uom_auth_name, translation_uom_code);
-            auto uom_rotation =
-                rotation_uom_auth_name.empty()
-                    ? common::UnitOfMeasure::NONE
-                    : d->createUnitOfMeasure(rotation_uom_auth_name,
-                                             rotation_uom_code);
-            auto uom_scale_difference =
-                scale_difference_uom_auth_name.empty()
-                    ? common::UnitOfMeasure::NONE
-                    : d->createUnitOfMeasure(scale_difference_uom_auth_name,
-                                             scale_difference_uom_code);
-            auto uom_rate_translation =
-                rate_translation_uom_auth_name.empty()
-                    ? common::UnitOfMeasure::NONE
-                    : d->createUnitOfMeasure(rate_translation_uom_auth_name,
-                                             rate_translation_uom_code);
-            auto uom_rate_rotation =
-                rate_rotation_uom_auth_name.empty()
-                    ? common::UnitOfMeasure::NONE
-                    : d->createUnitOfMeasure(rate_rotation_uom_auth_name,
-                                             rate_rotation_uom_code);
-            auto uom_rate_scale_difference =
-                rate_scale_difference_uom_auth_name.empty()
-                    ? common::UnitOfMeasure::NONE
-                    : d->createUnitOfMeasure(
-                          rate_scale_difference_uom_auth_name,
-                          rate_scale_difference_uom_code);
+
             auto uom_epoch = epoch_uom_auth_name.empty()
                                  ? common::UnitOfMeasure::NONE
                                  : d->createUnitOfMeasure(epoch_uom_auth_name,
@@ -2351,7 +2333,11 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION));
             values.emplace_back(createLength(tz, uom_translation));
 
-            if (uom_rotation != common::UnitOfMeasure::NONE) {
+            if (!rx.empty()) {
+                // Helmert 7-, 8-, 10- or 15- parameter cases
+                auto uom_rotation = d->createUnitOfMeasure(
+                    rotation_uom_auth_name, rotation_uom_code);
+
                 parameters.emplace_back(createOpParamNameEPSGCode(
                     EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
                     EPSG_CODE_PARAMETER_X_AXIS_ROTATION));
@@ -2367,6 +2353,12 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     EPSG_CODE_PARAMETER_Z_AXIS_ROTATION));
                 values.emplace_back(createAngle(rz, uom_rotation));
 
+                auto uom_scale_difference =
+                    scale_difference_uom_auth_name.empty()
+                        ? common::UnitOfMeasure::NONE
+                        : d->createUnitOfMeasure(scale_difference_uom_auth_name,
+                                                 scale_difference_uom_code);
+
                 parameters.emplace_back(createOpParamNameEPSGCode(
                     EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
                     EPSG_CODE_PARAMETER_SCALE_DIFFERENCE));
@@ -2375,7 +2367,12 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                                   uom_scale_difference)));
             }
 
-            if (uom_rate_translation != common::UnitOfMeasure::NONE) {
+            if (!rate_tx.empty()) {
+                // Helmert 15-parameter
+
+                auto uom_rate_translation = d->createUnitOfMeasure(
+                    rate_translation_uom_auth_name, rate_translation_uom_code);
+
                 parameters.emplace_back(createOpParamNameEPSGCode(
                     EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION,
                     EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION));
@@ -2394,6 +2391,9 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 values.emplace_back(
                     createLength(rate_tz, uom_rate_translation));
 
+                auto uom_rate_rotation = d->createUnitOfMeasure(
+                    rate_rotation_uom_auth_name, rate_rotation_uom_code);
+
                 parameters.emplace_back(createOpParamNameEPSGCode(
                     EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION,
                     EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION));
@@ -2409,6 +2409,9 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION));
                 values.emplace_back(createAngle(rate_rz, uom_rate_rotation));
 
+                auto uom_rate_scale_difference =
+                    d->createUnitOfMeasure(rate_scale_difference_uom_auth_name,
+                                           rate_scale_difference_uom_code);
                 parameters.emplace_back(createOpParamNameEPSGCode(
                     EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE,
                     EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE));
@@ -2422,6 +2425,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 values.emplace_back(operation::ParameterValue::create(
                     common::Measure(c_locale_stod(epoch), uom_epoch)));
             } else if (uom_epoch != common::UnitOfMeasure::NONE) {
+                // Helmert 8-parameter
                 constexpr int
                     EPSG_CODE_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH = 1049;
                 static const std::string
@@ -2433,6 +2437,25 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     EPSG_CODE_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Measure(c_locale_stod(epoch), uom_epoch)));
+            } else if (!px.empty()) {
+                // Molodensky-Badekas case
+                auto uom_pivot =
+                    d->createUnitOfMeasure(pivot_uom_auth_name, pivot_uom_code);
+
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_ORDINATE_1_EVAL_POINT,
+                    EPSG_CODE_PARAMETER_ORDINATE_1_EVAL_POINT));
+                values.emplace_back(createLength(px, uom_pivot));
+
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_ORDINATE_2_EVAL_POINT,
+                    EPSG_CODE_PARAMETER_ORDINATE_2_EVAL_POINT));
+                values.emplace_back(createLength(py, uom_pivot));
+
+                parameters.emplace_back(createOpParamNameEPSGCode(
+                    EPSG_NAME_PARAMETER_ORDINATE_3_EVAL_POINT,
+                    EPSG_CODE_PARAMETER_ORDINATE_3_EVAL_POINT));
+                values.emplace_back(createLength(pz, uom_pivot));
             }
 
             auto props =

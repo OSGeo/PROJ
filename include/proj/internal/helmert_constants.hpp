@@ -46,6 +46,10 @@ constexpr int EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION = 1045;
 constexpr int EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE = 1046;
 constexpr int EPSG_CODE_PARAMETER_REFERENCE_EPOCH = 1047;
 
+constexpr int EPSG_CODE_PARAMETER_ORDINATE_1_EVAL_POINT = 8617;
+constexpr int EPSG_CODE_PARAMETER_ORDINATE_2_EVAL_POINT = 8618;
+constexpr int EPSG_CODE_PARAMETER_ORDINATE_3_EVAL_POINT = 8667;
+
 static const std::string
     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION("X-axis translation");
 static const std::string
@@ -74,5 +78,12 @@ static const std::string EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE(
     "Rate of change of Scale difference");
 static const std::string
     EPSG_NAME_PARAMETER_REFERENCE_EPOCH("Parameter reference epoch");
+
+static const std::string
+    EPSG_NAME_PARAMETER_ORDINATE_1_EVAL_POINT("Ordinate 1 of evaluation point");
+static const std::string
+    EPSG_NAME_PARAMETER_ORDINATE_2_EVAL_POINT("Ordinate 2 of evaluation point");
+static const std::string
+    EPSG_NAME_PARAMETER_ORDINATE_3_EVAL_POINT("Ordinate 3 of evaluation point");
 
 #endif // HELMERT_CONSTANTS_HH_INCLUDED

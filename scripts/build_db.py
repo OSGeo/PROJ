@@ -231,7 +231,7 @@ def fill_compound_crs(proj_db_cursor):
     proj_db_cursor.execute("INSERT INTO compound_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, ?, cmpd_horizcrs_code, ?, cmpd_vertcrs_code, ?, area_of_use_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 def fill_helmert_transformation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1035, 1037, 1038, 1053, 1054, 1055, 1056, 1057, 1058, 1065, 1066, 9603, 9606, 9607) ")
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 9603, 9606, 9607, 9636) ")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 15
@@ -253,11 +253,18 @@ def fill_helmert_transformation(proj_db_cursor):
             expected_order += 1
         n_params = expected_order - 1
 
+        if param_value[0] is None and deprecated:
+            continue # silently discard non sense deprecated transforms (like EPSG:1076)
+
         assert param_code[0] == 8605
         assert param_code[1] == 8606
         assert param_code[2] == 8607
         assert param_uom_code[0] == param_uom_code[1]
         assert param_uom_code[0] == param_uom_code[2]
+        px = None
+        py = None
+        pz = None
+        pivot_uom_code = None
         if n_params > 3:
             assert param_code[3] == 8608
             assert param_code[4] == 8609
@@ -271,6 +278,24 @@ def fill_helmert_transformation(proj_db_cursor):
             param_uom_code[14] = param_uom_code[7]
             param_value[7] = None
             param_uom_code[7] = None
+
+        elif n_params == 10: # Molodensky-Badekas
+            assert param_code[7] == 8617, (code, name, param_code[7])
+            assert param_code[8] == 8618, (code, name, param_code[8])
+            assert param_code[9] == 8667, (code, name, param_code[9])
+            assert param_uom_code[7] == param_uom_code[8]
+            assert param_uom_code[7] == param_uom_code[9]
+            px = param_value[7]
+            py = param_value[8]
+            pz = param_value[9]
+            pivot_uom_code = param_uom_code[7]
+            param_value[7] = None
+            param_uom_code[7] = None
+            param_value[8] = None
+            param_uom_code[8] = None
+            param_value[9] = None
+            param_uom_code[9] = None
+
         elif n_params > 7: # Time-dependant transformation
             assert param_code[7] == 1040, (code, name, param_code[7])
             assert param_code[8] == 1041
@@ -298,12 +323,13 @@ def fill_helmert_transformation(proj_db_cursor):
                param_value[10], param_value[11], param_value[12], EPSG_AUTHORITY if param_uom_code[10] else None, param_uom_code[10],
                param_value[13], EPSG_AUTHORITY if param_uom_code[13] else None, param_uom_code[13],
                param_value[14], EPSG_AUTHORITY if param_uom_code[14] else None, param_uom_code[14],
+               px, py, pz, EPSG_AUTHORITY if px else None, pivot_uom_code,
                deprecated
                )
 
         #proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'helmert_transformation')", (EPSG_AUTHORITY, code))
         proj_db_cursor.execute('INSERT INTO helmert_transformation VALUES (' +
-            '?,?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?, ?)', arg)
+            '?,?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?, ?)', arg)
 
 def fill_grid_transformation(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND (coord_op_method_name LIKE 'Geographic3D to%' OR coord_op_method_name LIKE 'Geog3D to%' OR coord_op_method_name LIKE 'Point motion by grid%' OR coord_op_method_name LIKE 'Vertical Offset by Grid Interpolation%' OR coord_op_method_name IN ('NADCON', 'NTv1', 'NTv2', 'VERTCON'))")
