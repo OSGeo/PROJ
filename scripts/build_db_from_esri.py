@@ -74,12 +74,12 @@ def find_area(areaname, slat, nlat, llon, rlon):
         return map_areaname_to_auth_code[areaname]
 
     deg = b'\xC2\xB0'.decode('utf-8')
-    cursor.execute('SELECT auth_name, code FROM area WHERE name = ?',
+    cursor.execute("SELECT auth_name, code FROM area WHERE name = ? AND auth_name != 'ESRI'",
                    (areaname.replace('~', deg),))
     row = cursor.fetchone()
     if row is None:
         cursor.execute(
-            'SELECT auth_name, code FROM area WHERE south_lat = ? AND north_lat = ? AND west_lon = ? AND east_lon = ?', (slat, nlat, llon, rlon))
+            "SELECT auth_name, code FROM area WHERE auth_name != 'ESRI' AND south_lat = ? AND north_lat = ? AND west_lon = ? AND east_lon = ?", (slat, nlat, llon, rlon))
         row = cursor.fetchone()
 
     if row is None:
@@ -510,11 +510,32 @@ def import_geogcs():
                         assert map_datum_esri_to_parameters[datum_code]['pm_auth_name'] == pm_auth_name, (
                             row, map_datum_esri_to_parameters[datum_code]['pm_auth_name'], pm_auth_name)
                         if map_datum_esri_to_parameters[datum_code]['pm_code'] != pm_code:
-                            print('Skipping geogcrs row ' + str(row) +
-                                  ' as it refers to a datum that has already been referenced with another prime meridian')
-                            all_sql.append(
-                                '-- Skipping geogcrs %s' % esri_name)
-                            continue
+
+                            # Case of GCS_Voirol_Unifie_1960 and GCS_Voirol_Unifie_1960_Paris which use the same
+                            # datum D_Voirol_Unifie_1960 but with different prime meridian
+                            # We create an artificial datum to avoid that issue
+                            datum_name += '_' + pm_name
+                            datum_code += '_' + pm_name
+
+                            datum_written.add(datum_code)
+                            map_datum_esri_name_to_auth_code[datum_name] = [
+                                'ESRI', latestWkid]
+                            map_datum_esri_to_parameters[datum_code] = {
+                                'esri_name': datum_name,
+                                'description': p['description'] + ' with ' + pm_name + ' prime meridian',
+                                'ellps_auth_name': p['ellps_auth_name'],
+                                'ellps_code': p['ellps_code'],
+                                'deprecated': p['deprecated']
+                            }
+                            p = map_datum_esri_to_parameters[datum_code]
+
+                            sql = """INSERT INTO "geodetic_datum" VALUES('ESRI','%s','%s','%s','%s','%s','%s','%s','%s','%s',%d);""" % (
+                                datum_code, p['esri_name'], p['description'], p['ellps_auth_name'], p['ellps_code'], pm_auth_name, pm_code, area_auth_name, area_code, p['deprecated'])
+                            all_sql.append(sql)
+                            p['pm_auth_name'] = pm_auth_name
+                            p['pm_code'] = pm_code
+                            map_datum_esri_to_parameters[datum_code] = p
+
 
                 map_geogcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
@@ -1071,10 +1092,6 @@ def import_geogtran():
                 assert end_pos >= 0
                 end_pos += pos
                 src_crs_name = wkt[pos:end_pos]
-                if src_crs_name == 'GCS_Voirol_Unifie_1960_Paris':
-                    print(
-                        'Skipping GEOGTRAN %s as it refers to a ignored CRS' % esri_name)
-                    continue
 
                 pos = wkt[end_pos:].find(',GEOGCS["')
                 assert pos >= 0
@@ -1091,6 +1108,11 @@ def import_geogtran():
                 assert dst_crs_name in map_geogcs_esri_name_to_auth_code, (
                     dst_crs_name, row)
                 dst_crs_auth_name, dst_crs_code = map_geogcs_esri_name_to_auth_code[dst_crs_name]
+
+                is_longitude_rotation = 'METHOD["Longitude_Rotation"]' in wkt
+                if is_longitude_rotation:
+                    # skip it as it is automatically handled by PROJ
+                    continue
 
                 is_cf = 'METHOD["Coordinate_Frame"]' in wkt
                 is_pv = 'METHOD["Position_Vector"]' in wkt
@@ -1211,7 +1233,7 @@ def import_geogtran():
 
 
                     cursor.execute(
-                        "SELECT name, grid_name FROM grid_transformation WHERE source_crs_auth_name = ? AND source_crs_code = ? AND target_crs_auth_name = ? AND target_crs_code = ? AND area_of_use_auth_name = ? AND area_of_use_code = ?", (src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code))
+                        "SELECT name, grid_name FROM grid_transformation WHERE auth_name != 'ESRI' AND source_crs_auth_name = ? AND source_crs_code = ? AND target_crs_auth_name = ? AND target_crs_code = ? AND area_of_use_auth_name = ? AND area_of_use_code = ?", (src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code))
                     src_row = cursor.fetchone()
                     if src_row:
                         print('A grid_transformation (%s, using grid %s) is already known for the equivalent of %s (%s:%s --> %s:%s) for area %s, which uses grid %s. Skipping it' % (src_row[0], src_row[1], esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, row[idx_areaname], filename))
