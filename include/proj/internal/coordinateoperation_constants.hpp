@@ -34,7 +34,6 @@
 #define COORDINATEOPERATION_CONSTANTS_HH_INCLUDED
 
 #include "coordinateoperation_internal.hpp"
-#include <string>
 
 //! @cond Doxygen_Suppress
 
@@ -122,7 +121,8 @@ static const char *EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL(
     "Equidistant Cylindrical (Spherical)");
 constexpr int EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL = 1029;
 
-static const char *PROJ_WKT2_NAME_METHOD_GALL("Gall");
+static const char *
+    PROJ_WKT2_NAME_METHOD_GALL_STEREOGRAPHIC("Gall Stereographic");
 
 static const char *PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE("Goode Homolosine");
 
@@ -205,7 +205,7 @@ static const char *PROJ_WKT2_NAME_METHOD_SINUSOIDAL("Sinusoidal");
 
 static const char *PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC("Stereographic");
 
-static const char *PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN("VanDerGrinten");
+static const char *PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN("Van Der Grinten");
 
 static const char *PROJ_WKT2_NAME_METHOD_WAGNER_I("Wagner I");
 static const char *PROJ_WKT2_NAME_METHOD_WAGNER_II("Wagner II");
@@ -223,6 +223,10 @@ static const char *PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT(
 
 static const char *EPSG_NAME_METHOD_EQUAL_EARTH("Equal Earth");
 constexpr int EPSG_CODE_METHOD_EQUAL_EARTH = 1078;
+
+static const char *
+    EPSG_NAME_METHOD_LABORDE_OBLIQUE_MERCATOR("Laborde Oblique Mercator");
+constexpr int EPSG_CODE_METHOD_LABORDE_OBLIQUE_MERCATOR = 9813;
 
 // ---------------------------------------------------------------------------
 
@@ -656,16 +660,16 @@ static const ParamMapping *const paramsNatOriginScale[] = {
     &paramFalseEasting,      &paramFalseNorthing,      nullptr};
 
 static const ParamMapping paramLatFirstPoint = {
-    "Latitude of first point", 0, "Latitude_Of_1st_Point",
+    "Latitude of 1st point", 0, "Latitude_Of_1st_Point",
     common::UnitOfMeasure::Type::ANGULAR, lat_1};
 static const ParamMapping paramLongFirstPoint = {
-    "Longitude of first point", 0, "Longitude_Of_1st_Point",
+    "Longitude of 1st point", 0, "Longitude_Of_1st_Point",
     common::UnitOfMeasure::Type::ANGULAR, lon_1};
 static const ParamMapping paramLatSecondPoint = {
-    "Latitude of second point", 0, "Latitude_Of_2nd_Point",
+    "Latitude of 2nd point", 0, "Latitude_Of_2nd_Point",
     common::UnitOfMeasure::Type::ANGULAR, lat_2};
 static const ParamMapping paramLongSecondPoint = {
-    "Longitude of second point", 0, "Longitude_Of_2nd_Point",
+    "Longitude of 2nd point", 0, "Longitude_Of_2nd_Point",
     common::UnitOfMeasure::Type::ANGULAR, lon_2};
 
 static const ParamMapping *const paramsTPEQD[] = {&paramLatFirstPoint,
@@ -834,19 +838,19 @@ static const ParamMapping *const paramsHomVariantB[] = {
     nullptr};
 
 static const ParamMapping paramLatPoint1 = {
-    "Latitude of point 1", 0, "latitude_of_point_1",
+    "Latitude of 1st point", 0, "latitude_of_point_1",
     common::UnitOfMeasure::Type::ANGULAR, lat_1};
 
 static const ParamMapping paramLonPoint1 = {
-    "Longitude of point 1", 0, "longitude_of_point_1",
+    "Longitude of 1st point", 0, "longitude_of_point_1",
     common::UnitOfMeasure::Type::ANGULAR, lon_1};
 
 static const ParamMapping paramLatPoint2 = {
-    "Latitude of point 2", 0, "latitude_of_point_2",
+    "Latitude of 2nd point", 0, "latitude_of_point_2",
     common::UnitOfMeasure::Type::ANGULAR, lat_2};
 
 static const ParamMapping paramLonPoint2 = {
-    "Longitude of point 2", 0, "longitude_of_point_2",
+    "Longitude of 2nd point", 0, "longitude_of_point_2",
     common::UnitOfMeasure::Type::ANGULAR, lon_2};
 
 static const ParamMapping *const paramsHomTwoPoint[] = {
@@ -908,8 +912,7 @@ static const ParamMapping *const paramsLaea[] = {
     &paramFalseNorthing, nullptr};
 
 static const ParamMapping *const paramsMiller[] = {
-    &paramLatNatLatCenter, &paramLonNatLonCenter, &paramFalseEasting,
-    &paramFalseNorthing, nullptr};
+    &paramLonNatLonCenter, &paramFalseEasting, &paramFalseNorthing, nullptr};
 
 static const ParamMapping paramLonMerc1SP = {
     EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
@@ -997,6 +1000,25 @@ static const ParamMapping paramLatLoxim = {
 static const ParamMapping *const paramsLoxim[] = {
     &paramLatLoxim, &paramLongitudeNatOrigin, &paramFalseEasting,
     &paramFalseNorthing, nullptr};
+
+static const ParamMapping paramLonCentre = {
+    EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+    EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, lon_0};
+
+static const ParamMapping paramLabordeObliqueMercatorAzimuth = {
+    EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
+    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, "azi"};
+
+static const ParamMapping *const paramsLabordeObliqueMercator[] = {
+    &paramLatCentreLatOrigin,
+    &paramLonCentre,
+    &paramLabordeObliqueMercatorAzimuth,
+    &paramScaleFactorInitialLine,
+    &paramFalseEasting,
+    &paramFalseNorthing,
+    nullptr};
 
 static const MethodMapping methodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
@@ -1104,8 +1126,8 @@ static const MethodMapping methodMappings[] = {
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL, "Equirectangular",
      "eqc", nullptr, paramsEqc},
 
-    {PROJ_WKT2_NAME_METHOD_GALL, 0, "Gall_Stereographic", "gall", nullptr,
-     paramsLonNatOrigin},
+    {PROJ_WKT2_NAME_METHOD_GALL_STEREOGRAPHIC, 0, "Gall_Stereographic", "gall",
+     nullptr, paramsLonNatOrigin},
 
     {PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE, 0, "Goode_Homolosine", "goode",
      nullptr, paramsLonNatOrigin},
@@ -1237,7 +1259,7 @@ static const MethodMapping methodMappings[] = {
     // The following methods have just the WKT <--> PROJ string mapping, but
     // no setter. Similarly to GDAL
 
-    {"Aitoff", 0, "Aitoff", "aitoff", nullptr, paramsNatOrigin},
+    {"Aitoff", 0, "Aitoff", "aitoff", nullptr, paramsLonNatOrigin},
 
     {"Winkel I", 0, "Winkel_I", "wink1", nullptr, paramsWink1},
 
@@ -1246,7 +1268,7 @@ static const MethodMapping methodMappings[] = {
     {"Winkel Tripel", 0, "Winkel_Tripel", "wintri", nullptr, paramsWink2},
 
     {"Craster Parabolic", 0, "Craster_Parabolic", "crast", nullptr,
-     paramsNatOrigin},
+     paramsLonNatOrigin},
 
     {"Loximuthal", 0, "Loximuthal", "loxim", nullptr, paramsLoxim},
 
@@ -1255,6 +1277,10 @@ static const MethodMapping methodMappings[] = {
 
     {EPSG_NAME_METHOD_EQUAL_EARTH, EPSG_CODE_METHOD_EQUAL_EARTH, nullptr,
      "eqearth", nullptr, paramsLonNatOrigin},
+
+    {EPSG_NAME_METHOD_LABORDE_OBLIQUE_MERCATOR,
+     EPSG_CODE_METHOD_LABORDE_OBLIQUE_MERCATOR, nullptr, "labrd", nullptr,
+     paramsLabordeObliqueMercator},
 
 };
 

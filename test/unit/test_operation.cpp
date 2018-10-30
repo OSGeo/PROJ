@@ -1246,13 +1246,13 @@ TEST(operation, tped_export) {
     EXPECT_EQ(conv->exportToWKT(formatter.get()),
               "CONVERSION[\"Two Point Equidistant\",\n"
               "    METHOD[\"Two Point Equidistant\"],\n"
-              "    PARAMETER[\"Latitude of first point\",1,\n"
+              "    PARAMETER[\"Latitude of 1st point\",1,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-              "    PARAMETER[\"Longitude of first point\",2,\n"
+              "    PARAMETER[\"Longitude of 1st point\",2,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-              "    PARAMETER[\"Latitude of second point\",3,\n"
+              "    PARAMETER[\"Latitude of 2nd point\",3,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-              "    PARAMETER[\"Longitude of second point\",4,\n"
+              "    PARAMETER[\"Longitude of 2nd point\",4,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    PARAMETER[\"False easting\",5,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
@@ -1941,8 +1941,8 @@ TEST(operation, gall_export) {
               "+proj=gall +lon_0=1 +x_0=2 +y_0=3");
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
-              "CONVERSION[\"Gall\",\n"
-              "    METHOD[\"Gall\"],\n"
+              "CONVERSION[\"Gall Stereographic\",\n"
+              "    METHOD[\"Gall Stereographic\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8802]],\n"
@@ -2267,13 +2267,13 @@ TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
         "    PARAMETER[\"Latitude of projection centre\",1,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "        ID[\"EPSG\",8811]],\n"
-        "    PARAMETER[\"Latitude of point 1\",2,\n"
+        "    PARAMETER[\"Latitude of 1st point\",2,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-        "    PARAMETER[\"Longitude of point 1\",3,\n"
+        "    PARAMETER[\"Longitude of 1st point\",3,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-        "    PARAMETER[\"Latitude of point 2\",4,\n"
+        "    PARAMETER[\"Latitude of 2nd point\",4,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-        "    PARAMETER[\"Longitude of point 2\",5,\n"
+        "    PARAMETER[\"Longitude of 2nd point\",5,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "    PARAMETER[\"Scale factor on initial line\",6,\n"
         "        SCALEUNIT[\"unity\",1],\n"
@@ -2471,18 +2471,15 @@ TEST(operation, lambert_azimuthal_equal_area_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, miller_cylindrical_export) {
-    auto conv = Conversion::createMillerCylindrical(
-        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    auto conv = Conversion::createMillerCylindrical(PropertyMap(), Angle(2),
+                                                    Length(3), Length(4));
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=mill +R_A +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
+              "+proj=mill +R_A +lon_0=2 +x_0=3 +y_0=4");
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Miller Cylindrical\",\n"
               "    METHOD[\"Miller Cylindrical\"],\n"
-              "    PARAMETER[\"Latitude of natural origin\",1,\n"
-              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
-              "        ID[\"EPSG\",8801]],\n"
               "    PARAMETER[\"Longitude of natural origin\",2,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8802]],\n"
@@ -2497,7 +2494,6 @@ TEST(operation, miller_cylindrical_export) {
         conv->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         "PROJECTION[\"Miller_Cylindrical\"],\n"
-        "PARAMETER[\"latitude_of_center\",1],\n"
         "PARAMETER[\"longitude_of_center\",2],\n"
         "PARAMETER[\"false_easting\",3],\n"
         "PARAMETER[\"false_northing\",4]");
@@ -3383,8 +3379,8 @@ TEST(operation, vandergrinten_export) {
               "+proj=vandg +R_A +lon_0=1 +x_0=2 +y_0=3");
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
-              "CONVERSION[\"VanDerGrinten\",\n"
-              "    METHOD[\"VanDerGrinten\"],\n"
+              "CONVERSION[\"Van Der Grinten\",\n"
+              "    METHOD[\"Van Der Grinten\"],\n"
               "    PARAMETER[\"Longitude of natural origin\",1,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8802]],\n"
@@ -3636,6 +3632,24 @@ TEST(operation, eqearth_export) {
               "    PARAMETER[\"False northing\",3,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8807]]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, laborde_oblique_mercator) {
+
+    // Content of EPSG:29701 "Tananarive (Paris) / Laborde Grid"
+    auto projString = "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                      "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
+                      "+proj=longlat +ellps=intl +pm=paris +step +proj=labrd "
+                      "+lat_0=-18.9 +lon_0=44.1 +azi=18.9 +k=0.9995 "
+                      "+x_0=400000 +y_0=800000 +ellps=intl +pm=paris +step "
+                      "+proj=axisswap +order=2,1";
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              projString);
 }
 
 // ---------------------------------------------------------------------------

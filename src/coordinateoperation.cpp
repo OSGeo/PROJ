@@ -2646,7 +2646,7 @@ ConversionNNPtr Conversion::createGall(const util::PropertyMap &properties,
                                        const common::Angle &centerLong,
                                        const common::Length &falseEasting,
                                        const common::Length &falseNorthing) {
-    return create(properties, PROJ_WKT2_NAME_METHOD_GALL,
+    return create(properties, PROJ_WKT2_NAME_METHOD_GALL_STEREOGRAPHIC,
                   createParams(centerLong, falseEasting, falseNorthing));
 }
 
@@ -3071,22 +3071,20 @@ ConversionNNPtr Conversion::createLambertAzimuthalEqualArea(
 /** \brief Instanciate a conversion based on the [Miller Cylindrical]
  *(https://proj4.org/operations/projections/mill.html) projection method.
  *
- * There is no equivalent in EPSG. *
+ * There is no equivalent in EPSG.
+ *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
- * @param centerLat See \ref center_latitude
  * @param centerLong See \ref center_longitude
  * @param falseEasting See \ref false_easting
  * @param falseNorthing See \ref false_northing
  * @return a new Conversion.
  */
 ConversionNNPtr Conversion::createMillerCylindrical(
-    const util::PropertyMap &properties, const common::Angle &centerLat,
-    const common::Angle &centerLong, const common::Length &falseEasting,
-    const common::Length &falseNorthing) {
-    return create(
-        properties, PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL,
-        createParams(centerLat, centerLong, falseEasting, falseNorthing));
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    return create(properties, PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL,
+                  createParams(centerLong, falseEasting, falseNorthing));
 }
 
 // ---------------------------------------------------------------------------
