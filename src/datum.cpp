@@ -751,8 +751,6 @@ void Ellipsoid::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
     const double a = semiMajorAxis().getSIValue();
-    const double b = computeSemiMinorAxis().getSIValue();
-    const double rf = computeInverseFlattening().getSIValue();
 
     std::string projEllpsName;
     std::string ellpsName;
@@ -761,11 +759,17 @@ void Ellipsoid::_exportToPROJString(
         return;
     }
 
-    formatter->addParam("a", a);
-    if (inverseFlattening().has_value()) {
-        formatter->addParam("rf", rf);
+    if (isSphere()) {
+        formatter->addParam("R", a);
     } else {
-        formatter->addParam("b", b);
+        formatter->addParam("a", a);
+        if (inverseFlattening().has_value()) {
+            const double rf = computeInverseFlattening().getSIValue();
+            formatter->addParam("rf", rf);
+        } else {
+            const double b = computeSemiMinorAxis().getSIValue();
+            formatter->addParam("b", b);
+        }
     }
 }
 

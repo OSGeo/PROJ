@@ -72,7 +72,7 @@ TEST(datum, ellipsoid_from_sphere) {
 
     EXPECT_EQ(
         ellipsoid->exportToPROJString(PROJStringFormatter::create().get()),
-        "+a=6378137 +b=6378137");
+        "+R=6378137");
 
     EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid.get()));
     EXPECT_FALSE(ellipsoid->isEquivalentTo(createUnrelatedObject().get()));

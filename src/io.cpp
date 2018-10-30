@@ -1594,8 +1594,13 @@ EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
         }
         Length semiMajorAxis(asDouble(children[1]->GP()->value()), unit);
         Scale invFlattening(asDouble(children[2]->GP()->value()));
-        return Ellipsoid::createFlattenedSphere(buildProperties(node),
-                                                semiMajorAxis, invFlattening);
+        if (invFlattening.getSIValue() == 0) {
+            return Ellipsoid::createSphere(buildProperties(node),
+                                           semiMajorAxis);
+        } else {
+            return Ellipsoid::createFlattenedSphere(
+                buildProperties(node), semiMajorAxis, invFlattening);
+        }
     } catch (const std::exception &e) {
         throw buildRethrow(__FUNCTION__, e);
     }

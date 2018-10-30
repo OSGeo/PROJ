@@ -148,6 +148,16 @@ TEST(io, wkt_parsing_with_printed_quotes) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, sphere) {
+    auto obj = WKTParser().createFromWKT(
+        "ELLIPSOID[\"Sphere\",6378137,0,LENGTHUNIT[\"metre\",1]]");
+    auto ellipsoid = nn_dynamic_pointer_cast<Ellipsoid>(obj);
+    ASSERT_TRUE(ellipsoid != nullptr);
+    EXPECT_TRUE(ellipsoid->isSphere());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, datum_with_ANCHOR) {
     auto obj = WKTParser().createFromWKT(
         "DATUM[\"WGS_1984 with anchor\",\n"
