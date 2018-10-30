@@ -2426,10 +2426,17 @@ TEST(operation, krovak_export) {
         "        LENGTHUNIT[\"metre\",1],\n"
         "        ID[\"EPSG\",8807]]]");
 
-    EXPECT_THROW(
+    EXPECT_EQ(
         conv->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
-        FormattingException);
+        "PROJECTION[\"Krovak\"],\n"
+        "PARAMETER[\"latitude_of_center\",49.5],\n"
+        "PARAMETER[\"longitude_of_center\",42.5],\n"
+        "PARAMETER[\"azimuth\",30.2881397222222],\n"
+        "PARAMETER[\"pseudo_standard_parallel_1\",78.5],\n"
+        "PARAMETER[\"scale_factor\",0.9999],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
 }
 
 // ---------------------------------------------------------------------------

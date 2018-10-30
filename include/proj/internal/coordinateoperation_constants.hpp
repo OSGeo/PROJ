@@ -1169,7 +1169,7 @@ static const MethodMapping methodMappings[] = {
      EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED, "Krovak", "krovak", nullptr,
      krovakParameters},
 
-    {EPSG_NAME_METHOD_KROVAK, EPSG_CODE_METHOD_KROVAK, nullptr, "krovak",
+    {EPSG_NAME_METHOD_KROVAK, EPSG_CODE_METHOD_KROVAK, "Krovak", "krovak",
      "axis=swu", krovakParameters},
 
     {EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,

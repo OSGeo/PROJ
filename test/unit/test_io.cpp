@@ -830,6 +830,194 @@ TEST(wkt_parse, wkt1_projected_no_axis) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_krovak_south_west) {
+    auto wkt =
+        "PROJCS[\"S-JTSK / Krovak\","
+        "    GEOGCS[\"S-JTSK\","
+        "        DATUM[\"System_Jednotne_Trigonometricke_Site_Katastralni\","
+        "            SPHEROID[\"Bessel 1841\",6377397.155,299.1528128,"
+        "                AUTHORITY[\"EPSG\",\"7004\"]],"
+        "            AUTHORITY[\"EPSG\",\"6156\"]],"
+        "        PRIMEM[\"Greenwich\",0,"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],"
+        "        UNIT[\"degree\",0.0174532925199433,"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],"
+        "        AUTHORITY[\"EPSG\",\"4156\"]],"
+        "    PROJECTION[\"Krovak\"],"
+        "    PARAMETER[\"latitude_of_center\",49.5],"
+        "    PARAMETER[\"longitude_of_center\",24.83333333333333],"
+        "    PARAMETER[\"azimuth\",30.28813972222222],"
+        "    PARAMETER[\"pseudo_standard_parallel_1\",78.5],"
+        "    PARAMETER[\"scale_factor\",0.9999],"
+        "    PARAMETER[\"false_easting\",0],"
+        "    PARAMETER[\"false_northing\",0],"
+        "    UNIT[\"metre\",1,"
+        "        AUTHORITY[\"EPSG\",\"9001\"]],"
+        "    AXIS[\"X\",SOUTH],"
+        "    AXIS[\"Y\",WEST],"
+        "    AUTHORITY[\"EPSG\",\"5513\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(), "Krovak");
+
+    auto expected_wkt2 =
+        "PROJCRS[\"S-JTSK / Krovak\",\n"
+        "    BASEGEODCRS[\"S-JTSK\",\n"
+        "        DATUM[\"System_Jednotne_Trigonometricke_Site_Katastralni\",\n"
+        "            ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    CONVERSION[\"unnamed\",\n"
+        "        METHOD[\"Krovak\",\n"
+        "            ID[\"EPSG\",9819]],\n"
+        "        PARAMETER[\"Latitude of projection centre\",49.5,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8811]],\n"
+        "        PARAMETER[\"Longitude of origin\",24.8333333333333,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8833]],\n"
+        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",1036]],\n"
+        "        PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8818]],\n"
+        "        PARAMETER[\"Scale factor on pseudo standard "
+        "parallel\",0.9999,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8819]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"x\",south,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"y\",west,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    ID[\"EPSG\",5513]]";
+
+    EXPECT_EQ(crs->exportToWKT(WKTFormatter::create().get()), expected_wkt2);
+
+    auto projString =
+        crs->exportToPROJString(PROJStringFormatter::create().get());
+    auto expectedPROJString =
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=krovak +axis=swu +lat_0=49.5 "
+        "+lon_0=24.8333333333333 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel";
+    EXPECT_EQ(projString, expectedPROJString);
+
+    obj = PROJStringParser().createFromPROJString(projString);
+    crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto wkt2 = crs->exportToWKT(WKTFormatter::create().get());
+    EXPECT_TRUE(
+        wkt2.find("PARAMETER[\"Latitude of pseudo standard parallel\",78.5,") !=
+        std::string::npos)
+        << wkt2;
+    EXPECT_TRUE(
+        wkt2.find("PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,") !=
+        std::string::npos)
+        << wkt2;
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              expectedPROJString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_krovak_north_oriented) {
+    auto wkt =
+        "PROJCS[\"S-JTSK / Krovak East North\","
+        "    GEOGCS[\"S-JTSK\","
+        "        DATUM[\"System_Jednotne_Trigonometricke_Site_Katastralni\","
+        "            SPHEROID[\"Bessel 1841\",6377397.155,299.1528128,"
+        "                AUTHORITY[\"EPSG\",\"7004\"]],"
+        "            AUTHORITY[\"EPSG\",\"6156\"]],"
+        "        PRIMEM[\"Greenwich\",0,"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],"
+        "        UNIT[\"degree\",0.0174532925199433,"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],"
+        "        AUTHORITY[\"EPSG\",\"4156\"]],"
+        "    PROJECTION[\"Krovak\"],"
+        "    PARAMETER[\"latitude_of_center\",49.5],"
+        "    PARAMETER[\"longitude_of_center\",24.83333333333333],"
+        "    PARAMETER[\"azimuth\",30.28813972222222],"
+        "    PARAMETER[\"pseudo_standard_parallel_1\",78.5],"
+        "    PARAMETER[\"scale_factor\",0.9999],"
+        "    PARAMETER[\"false_easting\",0],"
+        "    PARAMETER[\"false_northing\",0],"
+        "    UNIT[\"metre\",1,"
+        "        AUTHORITY[\"EPSG\",\"9001\"]],"
+        "    AXIS[\"X\",EAST],"
+        "    AXIS[\"Y\",NORTH],"
+        "    AUTHORITY[\"EPSG\",\"5514\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              "Krovak (North Orientated)");
+
+    EXPECT_EQ(
+        crs->exportToWKT(WKTFormatter::create().get()),
+        "PROJCRS[\"S-JTSK / Krovak East North\",\n"
+        "    BASEGEODCRS[\"S-JTSK\",\n"
+        "        DATUM[\"System_Jednotne_Trigonometricke_Site_Katastralni\",\n"
+        "            ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    CONVERSION[\"unnamed\",\n"
+        "        METHOD[\"Krovak (North Orientated)\",\n"
+        "            ID[\"EPSG\",1041]],\n"
+        "        PARAMETER[\"Latitude of projection centre\",49.5,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8811]],\n"
+        "        PARAMETER[\"Longitude of origin\",24.8333333333333,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8833]],\n"
+        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",1036]],\n"
+        "        PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8818]],\n"
+        "        PARAMETER[\"Scale factor on pseudo standard "
+        "parallel\",0.9999,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8819]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"x\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"y\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    ID[\"EPSG\",5514]]");
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 "
+              "+k=0.9999 +x_0=0 +y_0=0 +ellps=bessel");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt2_projected) {
     auto wkt = "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
                "    BASEGEODCRS[\"WGS 84\",\n"

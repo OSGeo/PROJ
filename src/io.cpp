@@ -2311,16 +2311,20 @@ UnitOfMeasure WKTParser::Private::guessUnitForParameter(
     const std::string &paramName, const UnitOfMeasure &defaultLinearUnit,
     const UnitOfMeasure &defaultAngularUnit) {
     UnitOfMeasure unit;
-    if (ci_find(paramName, "latitude") != std::string::npos ||
-        ci_find(paramName, "longitude") != std::string::npos ||
-        ci_find(paramName, "meridian") != std::string::npos ||
-        ci_find(paramName, "parallel") != std::string::npos) {
+    // scale must be first because of 'Scale factor on pseudo standard parallel'
+    if (ci_find(paramName, "scale") != std::string::npos) {
+        unit = UnitOfMeasure::SCALE_UNITY;
+    } else if (ci_find(paramName, "latitude") != std::string::npos ||
+               ci_find(paramName, "longitude") != std::string::npos ||
+               ci_find(paramName, "meridian") != std::string::npos ||
+               ci_find(paramName, "parallel") != std::string::npos ||
+               ci_find(paramName, "azimuth") != std::string::npos ||
+               ci_find(paramName, "angle") != std::string::npos) {
         unit = defaultAngularUnit;
     } else if (ci_find(paramName, "easting") != std::string::npos ||
-               ci_find(paramName, "northing") != std::string::npos) {
+               ci_find(paramName, "northing") != std::string::npos ||
+               ci_find(paramName, "height") != std::string::npos) {
         unit = defaultLinearUnit;
-    } else if (ci_find(paramName, "scale") != std::string::npos) {
-        unit = UnitOfMeasure::SCALE_UNITY;
     }
     return unit;
 }
@@ -2671,6 +2675,23 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
     std::string projectionName(wkt1ProjectionName);
     const MethodMapping *mapping =
         tryToIdentifyWKT1Method ? getMappingFromWKT1(projectionName) : nullptr;
+
+    // For Krovak, we need to look at axis to decide between the Krovak and
+    // Krovak East-North Oriented methods
+    if (ci_equal(projectionName, "Krovak") &&
+        projCRSNode->countChildrenOfName(WKTConstants::AXIS) == 2 &&
+        &buildAxis(
+             projCRSNode->GP()->lookForChild(WKTConstants::AXIS, 0),
+             defaultLinearUnit, false,
+             1)->direction() == &AxisDirection::SOUTH &&
+        &buildAxis(
+             projCRSNode->GP()->lookForChild(WKTConstants::AXIS, 1),
+             defaultLinearUnit, false,
+             2)->direction() == &AxisDirection::WEST) {
+        constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
+        mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
+    }
+
     PropertyMap propertiesMethod;
     if (mapping) {
         projectionName = mapping->wkt2_name;
@@ -4477,7 +4498,8 @@ struct PROJStringParser::Private {
     GeodeticReferenceFrameNNPtr buildDatum(const Step &step,
                                            const std::string &title);
     GeographicCRSNNPtr buildGeographicCRS(int iStep, int iUnitConvert,
-                                          int iAxisSwap, bool ignoreVUnits);
+                                          int iAxisSwap, bool ignoreVUnits,
+                                          bool ignorePROJAxis);
     GeodeticCRSNNPtr buildGeocentricCRS(int iStep, int iUnitConvert);
     CRSNNPtr buildProjectedCRS(int iStep, GeographicCRSNNPtr geogCRS,
                                int iUnitConvert, int iAxisSwap);
@@ -4497,10 +4519,11 @@ struct PROJStringParser::Private {
 
     std::vector<CoordinateSystemAxisNNPtr>
     processAxisSwap(const Step &step, const UnitOfMeasure &unit, int iAxisSwap,
-                    AxisType axisType);
+                    AxisType axisType, bool ignorePROJAxis);
 
     EllipsoidalCSNNPtr buildEllipsoidalCS(int iStep, int iUnitConvert,
-                                          int iAxisSwap, bool ignoreVUnits);
+                                          int iAxisSwap, bool ignoreVUnits,
+                                          bool ignorePROJAxis);
 };
 
 // ---------------------------------------------------------------------------
@@ -4983,7 +5006,8 @@ createAxis(const std::string &name, const std::string &abbreviation,
 std::vector<CoordinateSystemAxisNNPtr>
 PROJStringParser::Private::processAxisSwap(const Step &step,
                                            const UnitOfMeasure &unit,
-                                           int iAxisSwap, AxisType axisType) {
+                                           int iAxisSwap, AxisType axisType,
+                                           bool ignorePROJAxis) {
     assert(iAxisSwap < 0 || ci_equal(steps_[iAxisSwap].name, "axisswap"));
 
     const bool isGeographic = unit.type() == UnitOfMeasure::Type::ANGULAR;
@@ -5038,7 +5062,7 @@ PROJStringParser::Private::processAxisSwap(const Step &step,
     std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
 
     const auto &axisStr = getParamValue(step, "axis");
-    if (!axisStr.empty()) {
+    if (!ignorePROJAxis && !axisStr.empty()) {
         if (axisStr.size() == 3) {
             for (int i = 0; i < 2; i++) {
                 if (axisStr[i] == 'n') {
@@ -5086,8 +5110,10 @@ PROJStringParser::Private::processAxisSwap(const Step &step,
 
 // ---------------------------------------------------------------------------
 
-EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
-    int iStep, int iUnitConvert, int iAxisSwap, bool ignoreVUnits) {
+EllipsoidalCSNNPtr
+PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
+                                              int iAxisSwap, bool ignoreVUnits,
+                                              bool ignorePROJAxis) {
     const auto &step = steps_[iStep];
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
@@ -5114,8 +5140,8 @@ EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
         }
     }
 
-    std::vector<CoordinateSystemAxisNNPtr> axis =
-        processAxisSwap(step, angularUnit, iAxisSwap, AxisType::REGULAR);
+    std::vector<CoordinateSystemAxisNNPtr> axis = processAxisSwap(
+        step, angularUnit, iAxisSwap, AxisType::REGULAR, ignorePROJAxis);
     CoordinateSystemAxisNNPtr up = CoordinateSystemAxis::create(
         util::PropertyMap().set(IdentifiedObject::NAME_KEY,
                                 AxisName::Ellipsoidal_height),
@@ -5130,8 +5156,10 @@ EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
 
 // ---------------------------------------------------------------------------
 
-GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
-    int iStep, int iUnitConvert, int iAxisSwap, bool ignoreVUnits) {
+GeographicCRSNNPtr
+PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
+                                              int iAxisSwap, bool ignoreVUnits,
+                                              bool ignorePROJAxis) {
     const auto &step = steps_[iStep];
 
     const auto &title =
@@ -5142,8 +5170,8 @@ GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
     return GeographicCRS::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY,
                           title.empty() ? "unknown" : title),
-        datum,
-        buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignoreVUnits));
+        datum, buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignoreVUnits,
+                                  ignorePROJAxis));
 }
 
 // ---------------------------------------------------------------------------
@@ -5483,6 +5511,21 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     if (!paramValue->empty()) {
                         value = getAngularValue(*paramValue);
                     }
+                } else if (step.name == "krovak") {
+                    constexpr int EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS =
+                        1036;
+                    constexpr int
+                        EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL =
+                            8818;
+
+                    if (param->epsg_code ==
+                        EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
+                        value = 30.2881397222222;
+                    } else if (
+                        param->epsg_code ==
+                        EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL) {
+                        value = 78.5;
+                    }
                 }
             }
 
@@ -5563,7 +5606,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             return DerivedGeographicCRS::create(
                 PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
                 geogCRS, NN_NO_CHECK(conv),
-                buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false));
+                buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false,
+                                   false));
         }
     }
 
@@ -5597,7 +5641,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     }
 
     std::vector<CoordinateSystemAxisNNPtr> axis =
-        processAxisSwap(step, unit, iAxisSwap, axisType);
+        processAxisSwap(step, unit, iAxisSwap, axisType, false);
 
     auto cs = CartesianCS::create(emptyPropertyMap, axis[0], axis[1]);
 
@@ -5636,14 +5680,16 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
 
     auto sourceCRS =
         iFirstGeogStep >= 0
-            ? util::nn_static_pointer_cast<crs::CRS>(buildGeographicCRS(
-                  iFirstGeogStep, iFirstUnitConvert, iFirstAxisSwap, true))
+            ? util::nn_static_pointer_cast<crs::CRS>(
+                  buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
+                                     iFirstAxisSwap, true, false))
             : util::nn_static_pointer_cast<crs::CRS>(
                   GeodeticCRS::create(mapWithUnknownName, datum, cs));
     auto targetCRS =
         iSecondGeogStep >= 0
-            ? util::nn_static_pointer_cast<crs::CRS>(buildGeographicCRS(
-                  iSecondGeogStep, iSecondUnitConvert, iSecondAxisSwap, true))
+            ? util::nn_static_pointer_cast<crs::CRS>(
+                  buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
+                                     iSecondAxisSwap, true, false))
             : util::nn_static_pointer_cast<crs::CRS>(
                   GeodeticCRS::create(mapWithUnknownName, datum, cs));
 
@@ -5820,8 +5866,8 @@ PROJStringParser::Private::buildMolodenskyTransformation(
     auto datum = buildDatum(step, std::string());
     auto sourceCRS = iFirstGeogStep >= 0
                          ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                              iFirstAxisSwap, true)
-                         : buildGeographicCRS(iStep, -1, -1, true);
+                                              iFirstAxisSwap, true, false)
+                         : buildGeographicCRS(iStep, -1, -1, true, false);
 
     const auto &ellps = sourceCRS->ellipsoid();
     const double a = ellps->semiMajorAxis().getSIValue();
@@ -5842,7 +5888,7 @@ PROJStringParser::Private::buildMolodenskyTransformation(
     auto targetCRS = util::nn_static_pointer_cast<crs::CRS>(
         iSecondGeogStep >= 0
             ? buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
-                                 iSecondAxisSwap, true)
+                                 iSecondAxisSwap, true, false)
             : GeographicCRS::create(mapWithUnknownName, target_datum,
                                     EllipsoidalCS::createLongitudeLatitude(
                                         UnitOfMeasure::DEGREE)));
@@ -6002,7 +6048,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             const bool ignoreVUnits = false;
             return d->buildBoundOrCompoundCRSIfNeeded(
                 0, d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                         iFirstAxisSwap, ignoreVUnits));
+                                         iFirstAxisSwap, ignoreVUnits, false));
         }
         if (iProjStep >= 0 && !d->steps_[iProjStep].inverted &&
             (iFirstGeogStep < 0 || iFirstGeogStep + 1 == iProjStep) &&
@@ -6020,7 +6066,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         iFirstUnitConvert < iFirstGeogStep ? iFirstUnitConvert
                                                            : -1,
                         iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap : -1,
-                        ignoreVUnits),
+                        ignoreVUnits, true),
                     iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
                                                        : iFirstUnitConvert,
                     iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
