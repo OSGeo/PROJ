@@ -5407,6 +5407,14 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             mapping =
                 getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B);
         }
+    } else if (step.name == "somerc") {
+        constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B = 9815;
+        mapping =
+            getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B);
+        step.paramValues.emplace_back(Step::KeyValue("alpha", "90"));
+        step.paramValues.emplace_back(Step::KeyValue("gamma", "90"));
+        step.paramValues.emplace_back(
+            Step::KeyValue("lonc", getParamValue(step, "lon_0")));
     } else if (step.name == "krovak" && getParamValue(step, "axis") == "swu") {
         constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
         mapping = getMapping(EPSG_CODE_METHOD_KROVAK);

@@ -4855,6 +4855,43 @@ TEST(io, projparse_omerc_variant_b) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_somerc) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=somerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f.get());
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Hotine Oblique Mercator (variant "
+                         "B)\",ID[\"EPSG\",9815]]") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Latitude of projection centre\",1") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Longitude of projection centre\",2") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Scale factor on initial line\",3") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Azimuth of initial line\",90") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Angle from Rectified to Skew Grid\",90") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Easting at projection centre\",4") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Northing at projection centre\",5") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_krovak) {
     auto obj = PROJStringParser().createFromPROJString("+proj=krovak");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
