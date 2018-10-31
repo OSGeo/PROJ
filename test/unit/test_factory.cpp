@@ -1902,6 +1902,21 @@ TEST_F(FactoryWithTmpDatabase,
 
 TEST_F(
     FactoryWithTmpDatabase,
+    AuthorityFactory_createFromCRSCodesWithIntermediates_source_equals_target) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    auto factory = AuthorityFactory::create(DatabaseContext::create(m_ctxt),
+                                            std::string());
+    auto res = factory->createFromCRSCodesWithIntermediates(
+        "EPSG", "4326", "EPSG", "4326", false, false, {});
+    EXPECT_EQ(res.size(), 0);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(
+    FactoryWithTmpDatabase,
     AuthorityFactory_createFromCRSCodesWithIntermediates_case_source_pivot_target_pivot) {
     createStructure();
     populateWithFakeEPSG();

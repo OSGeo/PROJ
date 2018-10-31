@@ -3146,6 +3146,13 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     const std::vector<std::pair<std::string, std::string>>
         &intermediateCRSAuthCodes) const {
 
+    std::vector<operation::CoordinateOperationNNPtr> listTmp;
+
+    if (sourceCRSAuthName == targetCRSAuthName &&
+        sourceCRSCode == targetCRSCode) {
+        return listTmp;
+    }
+
     const std::string sqlProlog(
         "SELECT v1.auth_name AS auth_name1, v1.code AS code1, "
         "v1.accuracy AS accuracy1, "
@@ -3170,8 +3177,6 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         "ORDER BY (CASE WHEN accuracy1 is NULL THEN 1 ELSE 0 END) + "
         "(CASE WHEN accuracy2 is NULL THEN 1 ELSE 0 END), "
         "accuracy1 + accuracy2");
-
-    std::vector<operation::CoordinateOperationNNPtr> listTmp;
 
     // Case (source->intermediate) and (intermediate->target)
     std::string sql(
