@@ -166,6 +166,10 @@ static const char *EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA(
     "Lambert Azimuthal Equal Area");
 constexpr int EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA = 9820;
 
+static const char *EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL(
+    "Lambert Azimuthal Equal Area (Spherical)");
+constexpr int EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL = 1027;
+
 static const char *
     PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL("Miller Cylindrical");
 
@@ -784,14 +788,20 @@ static const ParamMapping *const paramsGeos[] = {
     &paramLongitudeNatOrigin, &paramSatelliteHeight, &paramFalseEasting,
     &paramFalseNorthing, nullptr};
 
+static const ParamMapping paramLatCentreLatCenter = {
+    EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+    EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE, "latitude_of_center",
+    common::UnitOfMeasure::Type::ANGULAR, lat_0};
+
+static const ParamMapping paramLonCentreLonCenterLonc = {
+    EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+    EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, "longitude_of_center",
+    common::UnitOfMeasure::Type::ANGULAR, lonc};
+
 static const ParamMapping paramLatCentreLatOrigin = {
     EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
     EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE, WKT1_LATITUDE_OF_ORIGIN,
     common::UnitOfMeasure::Type::ANGULAR, lat_0};
-static const ParamMapping paramLonCentreCentralMeridian = {
-    EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
-    EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, WKT1_CENTRAL_MERIDIAN,
-    common::UnitOfMeasure::Type::ANGULAR, lonc};
 
 static const ParamMapping paramAzimuth = {
     EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
@@ -808,8 +818,8 @@ static const ParamMapping paramScaleFactorInitialLine = {
     common::UnitOfMeasure::Type::SCALE, k};
 
 static const ParamMapping *const paramsHomVariantA[] = {
-    &paramLatCentreLatOrigin,
-    &paramLonCentreCentralMeridian,
+    &paramLatCentreLatCenter,
+    &paramLonCentreLonCenterLonc,
     &paramAzimuth,
     &paramAngleToSkewGrid,
     &paramScaleFactorInitialLine,
@@ -828,8 +838,8 @@ static const ParamMapping paramFalseNorthingProjectionCentre = {
     common::UnitOfMeasure::Type::LINEAR, y_0};
 
 static const ParamMapping *const paramsHomVariantB[] = {
-    &paramLatCentreLatOrigin,
-    &paramLonCentreCentralMeridian,
+    &paramLatCentreLatCenter,
+    &paramLonCentreLonCenterLonc,
     &paramAzimuth,
     &paramAngleToSkewGrid,
     &paramScaleFactorInitialLine,
@@ -868,11 +878,6 @@ static const ParamMapping *const paramsIMWP[] = {
     &paramLongitudeNatOrigin,     &paramLatitude1stStdParallel,
     &paramLatitude2ndStdParallel, &paramFalseEasting,
     &paramFalseNorthing,          nullptr};
-
-static const ParamMapping paramLatCentreLatCenter = {
-    EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
-    EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE, "latitude_of_center",
-    common::UnitOfMeasure::Type::ANGULAR, lat_0};
 
 static const ParamMapping paramLonCentreLonCenter = {
     EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN,
@@ -914,7 +919,7 @@ static const ParamMapping *const paramsLaea[] = {
 static const ParamMapping *const paramsMiller[] = {
     &paramLonNatLonCenter, &paramFalseEasting, &paramFalseNorthing, nullptr};
 
-static const ParamMapping paramLonMerc1SP = {
+static const ParamMapping paramLatMerc1SP = {
     EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
     nullptr, // always set to zero, not to be exported in WKT1
@@ -927,7 +932,7 @@ static const ParamMapping paramScaleFactorK = {
     common::UnitOfMeasure::Type::SCALE, k};
 
 static const ParamMapping *const paramsMerc1SP[] = {
-    &paramLonMerc1SP,   &paramLongitudeNatOrigin, &paramScaleFactorK,
+    &paramLatMerc1SP,   &paramLongitudeNatOrigin, &paramScaleFactorK,
     &paramFalseEasting, &paramFalseNorthing,      nullptr};
 
 static const ParamMapping *const paramsMerc2SP[] = {
@@ -983,14 +988,12 @@ static const ParamMapping *const paramsSch[] = {
     &paramPegLat, &paramPegLon, &paramPegHeading, &paramPegHeight, nullptr};
 
 static const ParamMapping *const paramsWink1[] = {
-    &paramLatitudeNatOrigin,   &paramLongitudeNatOrigin,
-    &paramLat1stParallelLatTs, &paramFalseEasting,
-    &paramFalseNorthing,       nullptr};
+    &paramLongitudeNatOrigin, &paramLat1stParallelLatTs, &paramFalseEasting,
+    &paramFalseNorthing, nullptr};
 
 static const ParamMapping *const paramsWink2[] = {
-    &paramLatitudeNatOrigin,      &paramLongitudeNatOrigin,
-    &paramLatitude1stStdParallel, &paramFalseEasting,
-    &paramFalseNorthing,          nullptr};
+    &paramLongitudeNatOrigin, &paramLatitude1stStdParallel, &paramFalseEasting,
+    &paramFalseNorthing, nullptr};
 
 static const ParamMapping paramLatLoxim = {
     EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
@@ -1176,6 +1179,10 @@ static const MethodMapping methodMappings[] = {
      EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
      "Lambert_Azimuthal_Equal_Area", "laea", nullptr, paramsLaea},
 
+    {EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL,
+     EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL,
+     "Lambert_Azimuthal_Equal_Area", "laea", nullptr, paramsLaea},
+
     {PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL, 0, "Miller_Cylindrical", "mill",
      "R_A", paramsMiller},
 
@@ -1273,7 +1280,7 @@ static const MethodMapping methodMappings[] = {
     {"Loximuthal", 0, "Loximuthal", "loxim", nullptr, paramsLoxim},
 
     {"Quartic Authalic", 0, "Quartic_Authalic", "qua_aut", nullptr,
-     paramsNatOrigin},
+     paramsLonNatOrigin},
 
     {EPSG_NAME_METHOD_EQUAL_EARTH, EPSG_CODE_METHOD_EQUAL_EARTH, nullptr,
      "eqearth", nullptr, paramsLonNatOrigin},

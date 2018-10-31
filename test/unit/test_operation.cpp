@@ -2168,8 +2168,8 @@ TEST(operation, hotine_oblique_mercator_variant_A_export) {
         conv->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         "PROJECTION[\"Hotine_Oblique_Mercator\"],\n"
-        "PARAMETER[\"latitude_of_origin\",1],\n"
-        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"latitude_of_center\",1],\n"
+        "PARAMETER[\"longitude_of_center\",2],\n"
         "PARAMETER[\"azimuth\",3],\n"
         "PARAMETER[\"rectified_grid_angle\",4],\n"
         "PARAMETER[\"scale_factor\",5],\n"
@@ -2228,8 +2228,8 @@ TEST(operation, hotine_oblique_mercator_variant_B_export) {
         conv->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         "PROJECTION[\"Hotine_Oblique_Mercator_Azimuth_Center\"],\n"
-        "PARAMETER[\"latitude_of_origin\",1],\n"
-        "PARAMETER[\"central_meridian\",2],\n"
+        "PARAMETER[\"latitude_of_center\",1],\n"
+        "PARAMETER[\"longitude_of_center\",2],\n"
         "PARAMETER[\"azimuth\",3],\n"
         "PARAMETER[\"rectified_grid_angle\",4],\n"
         "PARAMETER[\"scale_factor\",5],\n"
