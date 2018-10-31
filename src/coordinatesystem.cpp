@@ -364,8 +364,9 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
     }
     formatter->addQuotedString(axisDesignation);
     formatter->add(dir);
-    if (meridian()) {
-        meridian()->_exportToWKT(formatter);
+    const auto &l_meridian = meridian();
+    if (isWKT2 && l_meridian) {
+        l_meridian->_exportToWKT(formatter);
     }
     if (formatter->outputAxisOrder() && order > 0) {
         formatter->startNode(io::WKTConstants::ORDER, false);
