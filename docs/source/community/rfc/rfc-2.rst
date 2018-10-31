@@ -6,9 +6,9 @@ PROJ RFC 2: Initial integration of "GDAL SRS barn" work
 
 :Author: Even Rouault
 :Contact: even.rouault at spatialys.com
-:Status: In development
+:Status: Adopted (not yet merged into master)
 :Initial version: 2018-10-09
-:Last Updated: 2018-10-26
+:Last Updated: 2018-10-31
 
 Summary
 -------
@@ -929,4 +929,5 @@ Non-exhaustively:
 Adoption status
 ---------------
 
-To be submitted to vote after discussion phase
+The RFC has been adopted with support from PSC members Kurt Schwehr, Kristian
+Evers, Howard Butler and Even Rouault.
