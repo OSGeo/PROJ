@@ -74,6 +74,12 @@ using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
 
+//! @cond Doxygen_Suppress
+constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
+constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A = 9810;
+static const std::string emptyString{};
+//! @endcond
+
 #if 0
 namespace dropbox{ namespace oxygen {
 template<> nn<NS_PROJ::io::DatabaseContextPtr>::~nn() = default;
@@ -1019,6 +1025,8 @@ struct WKTParser::Private {
     std::vector<std::string> warningList_{};
     std::vector<double> toWGS84Parameters_{};
     std::string datumPROJ4Grids_{};
+    bool esriStyle_ = false;
+    DatabaseContextPtr dbContext_{};
 
     static constexpr int MAX_PROPERTY_SIZE = 1024;
     PropertyMap **properties_{};
@@ -1109,6 +1117,18 @@ struct WKTParser::Private {
                                     const WKTNodeNNPtr &projectionNode,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
+
+    ConversionNNPtr
+    buildProjectionStandard(const WKTNodeNNPtr &projCRSNode,
+                            const WKTNodeNNPtr &projectionNode,
+                            const UnitOfMeasure &defaultLinearUnit,
+                            const UnitOfMeasure &defaultAngularUnit);
+
+    ConversionNNPtr
+    buildProjectionFromESRI(const WKTNodeNNPtr &projCRSNode,
+                            const WKTNodeNNPtr &projectionNode,
+                            const UnitOfMeasure &defaultLinearUnit,
+                            const UnitOfMeasure &defaultAngularUnit);
 
     ProjectedCRSNNPtr buildProjectedCRS(const WKTNodeNNPtr &node);
 
@@ -1305,20 +1325,80 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
     auto &&properties = properties_[propertyCount_];
     propertyCount_++;
 
+    std::string authNameFromAlias;
+    std::string codeFromAlias;
     if (!node->GP()->children().empty()) {
-        properties->set(IdentifiedObject::NAME_KEY,
-                        stripQuotes(node->GP()->children()[0]->GP()->value()));
+        const auto &nodeName(node->GP()->value());
+        auto name(stripQuotes(node->GP()->children()[0]->GP()->value()));
+
+        const char *tableNameForAlias = nullptr;
+        if (ci_equal(nodeName, WKTConstants::GEOGCS)) {
+            if (starts_with(name, "GCS_")) {
+                esriStyle_ = true;
+                if (name == "GCS_WGS_1984") {
+                    name = "WGS 84";
+                } else {
+                    tableNameForAlias = "geodetic_crs";
+                }
+            }
+        } else if (ci_equal(nodeName, WKTConstants::DATUM)) {
+            if (starts_with(name, "D_")) {
+                esriStyle_ = true;
+                if (name == "D_WGS_1984") {
+                    name = "World Geodetic System 1984";
+                    codeFromAlias = "6326";
+                } else {
+                    tableNameForAlias = "geodetic_datum";
+                }
+            }
+        } else if (esriStyle_ && ci_equal(nodeName, WKTConstants::SPHEROID)) {
+            if (name == "WGS_1984") {
+                name = "WGS 84";
+                codeFromAlias = "7030";
+            } else {
+                tableNameForAlias = "ellipsoid";
+            }
+        }
+
+        if (dbContext_ && tableNameForAlias) {
+            std::string outTableName;
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto officialName = authFactory->getOfficialNameFromAlias(
+                name, tableNameForAlias, "ESRI", outTableName,
+                authNameFromAlias, codeFromAlias);
+            if (!officialName.empty()) {
+                name = officialName;
+
+                // Clearing authority for geodetic_crs because of
+                // potential axis order mismatch.
+                if (strcmp(tableNameForAlias, "geodetic_crs") == 0) {
+                    authNameFromAlias.clear();
+                    codeFromAlias.clear();
+                }
+            }
+        }
+
+        properties->set(IdentifiedObject::NAME_KEY, name);
     }
 
     auto identifiers = ArrayOfBaseObject::create();
     for (const auto &subNode : node->GP()->children()) {
-        if (ci_equal(subNode->GP()->value(), WKTConstants::ID) ||
-            ci_equal(subNode->GP()->value(), WKTConstants::AUTHORITY)) {
+        const auto &subNodeName(subNode->GP()->value());
+        if (ci_equal(subNodeName, WKTConstants::ID) ||
+            ci_equal(subNodeName, WKTConstants::AUTHORITY)) {
             auto id = buildId(subNode);
             if (id) {
                 identifiers->add(NN_NO_CHECK(id));
             }
         }
+    }
+    if (identifiers->empty() && !authNameFromAlias.empty()) {
+        identifiers->add(Identifier::create(
+            codeFromAlias,
+            PropertyMap()
+                .set(Identifier::CODESPACE_KEY, authNameFromAlias)
+                .set(Identifier::AUTHORITY_KEY, authNameFromAlias)));
     }
     if (!identifiers->empty()) {
         properties->set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
@@ -1337,11 +1417,12 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
 
     ArrayOfBaseObjectNNPtr array = ArrayOfBaseObject::create();
     for (const auto &subNode : node->GP()->children()) {
-        if (ci_equal(subNode->GP()->value(), WKTConstants::USAGE)) {
+        const auto &subNodeName(subNode->GP()->value());
+        if (ci_equal(subNodeName, WKTConstants::USAGE)) {
             auto objectDomain = buildObjectDomain(subNode);
             if (!objectDomain) {
-                throw ParsingException(concat("missing children in ",
-                                              subNode->GP()->value(), " node"));
+                throw ParsingException(
+                    concat("missing children in ", subNodeName, " node"));
             }
             array->add(NN_NO_CHECK(objectDomain));
         }
@@ -1492,14 +1573,46 @@ UnitOfMeasure WKTParser::Private::buildUnit(const WKTNodeNNPtr &node,
             emitRecoverableAssertion("not enough children in " +
                                      idNode->GP()->value() + " node");
         }
-        const bool hasValidNode =
+        const bool hasValidIdNode =
             !isNull(idNode) && idNode->GP()->childrenSize() >= 2;
+
+        const auto &idNodeChildren(idNode->GP()->children());
+        std::string codeSpace(
+            hasValidIdNode ? stripQuotes(idNodeChildren[0]->GP()->value())
+                           : std::string());
+        std::string code(hasValidIdNode
+                             ? stripQuotes(idNodeChildren[1]->GP()->value())
+                             : std::string());
+
+        bool queryDb = true;
         if (type == UnitOfMeasure::Type::UNKNOWN) {
             if (ci_equal(unitName, "METER") || ci_equal(unitName, "METRE")) {
                 type = UnitOfMeasure::Type::LINEAR;
+                unitName = "metre";
+                if (codeSpace.empty()) {
+                    codeSpace = Identifier::EPSG;
+                    code = "9001";
+                    queryDb = false;
+                }
             } else if (ci_equal(unitName, "DEGREE") ||
                        ci_equal(unitName, "GRAD")) {
                 type = UnitOfMeasure::Type::ANGULAR;
+            }
+        }
+
+        if (esriStyle_ && dbContext_ && queryDb) {
+            std::string outTableName;
+            std::string authNameFromAlias;
+            std::string codeFromAlias;
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto officialName = authFactory->getOfficialNameFromAlias(
+                unitName, "unit_of_measure", "ESRI", outTableName,
+                authNameFromAlias, codeFromAlias);
+            if (!officialName.empty()) {
+                unitName = officialName;
+                codeSpace = authNameFromAlias;
+                code = codeFromAlias;
             }
         }
 
@@ -1516,14 +1629,7 @@ UnitOfMeasure WKTParser::Private::buildUnit(const WKTNodeNNPtr &node,
             convFactor = US_FOOT_CONV_FACTOR;
         }
 
-        return UnitOfMeasure(
-            stripQuotes(children[0]->GP()->value()), convFactor, type,
-            hasValidNode
-                ? stripQuotes(idNode->GP()->children()[0]->GP()->value())
-                : std::string(),
-            hasValidNode
-                ? stripQuotes(idNode->GP()->children()[1]->GP()->value())
-                : std::string());
+        return UnitOfMeasure(unitName, convFactor, type, codeSpace, code);
     } catch (const std::exception &e) {
         throw buildRethrow(__FUNCTION__, e);
     }
@@ -1660,6 +1766,8 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     if (ellipsoidNode == null_node) {
         ThrowMissing(WKTConstants::ELLIPSOID);
     }
+    // call it before buildEllipsoid() so that esriStyle_ can be set
+    auto &properties = buildProperties(node);
     auto ellipsoid = buildEllipsoid(ellipsoidNode);
 
     auto &TOWGS84Node = node->GP()->lookForChild(WKTConstants::TOWGS84);
@@ -1686,7 +1794,6 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             stripQuotes(extensionNode->GP()->children()[1]->GP()->value());
     }
 
-    auto &properties = buildProperties(node);
     auto name = stripQuotes(node->GP()->children()[0]->GP()->value());
     if (name == "WGS_1984") {
         properties.set(
@@ -2571,6 +2678,163 @@ bool WKTParser::Private::hasWebMercPROJ4String(
 
 // ---------------------------------------------------------------------------
 
+ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
+    const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode,
+    const UnitOfMeasure &defaultLinearUnit,
+    const UnitOfMeasure &defaultAngularUnit) {
+    const std::string esriProjectionName =
+        stripQuotes(projectionNode->GP()->children()[0]->GP()->value());
+
+    // Lambert_Conformal_Conic or Krovak may map to different WKT2 methods
+    // depending
+    // on the parameters / their values
+    const auto esriMappings = getMappingsFromESRI(esriProjectionName);
+    if (esriMappings.empty()) {
+        return buildProjectionStandard(projCRSNode, projectionNode,
+                                       defaultLinearUnit, defaultAngularUnit);
+    }
+
+    // Build a map of present parameters
+    std::map<std::string, std::string> mapParamNameToValue;
+    for (const auto &childNode : projCRSNode->GP()->children()) {
+        if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
+            if (childNode->GP()->childrenSize() < 2) {
+                ThrowNotEnoughChildren(WKTConstants::PARAMETER);
+            }
+            const std::string parameterName(
+                stripQuotes(childNode->GP()->children()[0]->GP()->value()));
+            const auto &paramValue =
+                childNode->GP()->children()[1]->GP()->value();
+            mapParamNameToValue[parameterName] = paramValue;
+        }
+    }
+
+    // Compare parameters present with the ones expected in the mapping
+    const ESRIMethodMapping *esriMapping = esriMappings[0];
+    int bestMatchCount = -1;
+    for (const auto &mapping : esriMappings) {
+        int matchCount = 0;
+        for (const auto *param = mapping->params; param->esri_name; ++param) {
+            auto iter = mapParamNameToValue.find(param->esri_name);
+            if (iter != mapParamNameToValue.end()) {
+                if (param->wkt2_name == nullptr) {
+                    try {
+                        if (param->fixed_value == asDouble(iter->second)) {
+                            matchCount++;
+                        }
+                    } catch (const std::exception &) {
+                    }
+                } else {
+                    matchCount++;
+                }
+            }
+        }
+        if (matchCount > bestMatchCount) {
+            esriMapping = mapping;
+            bestMatchCount = matchCount;
+        }
+    }
+
+    std::map<std::string, const char *> mapWKT2NameToESRIName;
+    for (const auto *param = esriMapping->params; param->esri_name; ++param) {
+        if (param->wkt2_name) {
+            mapWKT2NameToESRIName[param->wkt2_name] = param->esri_name;
+        }
+    }
+
+    const auto *wkt2_mapping = getMapping(esriMapping->wkt2_name);
+    assert(wkt2_mapping);
+    if (esriProjectionName == "Stereographic") {
+        try {
+            if (std::fabs(asDouble(
+                    mapParamNameToValue["Latitude_Of_Origin"])) == 90.0) {
+                wkt2_mapping =
+                    getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A);
+            }
+        } catch (const std::exception &) {
+        }
+    }
+
+    PropertyMap propertiesMethod;
+    propertiesMethod.set(IdentifiedObject::NAME_KEY, wkt2_mapping->wkt2_name);
+    if (wkt2_mapping->epsg_code != 0) {
+        propertiesMethod.set(Identifier::CODE_KEY, wkt2_mapping->epsg_code);
+        propertiesMethod.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+    }
+
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+
+    constexpr int EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL = 1028;
+    constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A = 9812;
+    constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B = 9815;
+    if (wkt2_mapping->epsg_code == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL &&
+        ci_equal(esriProjectionName, "Plate_Carree")) {
+        // Add a fixed  Latitude of 1st parallel = 0 so as to have all
+        // parameters expected by Equidistant Cylindrical.
+        static const char *EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL(
+            "Latitude of 1st standard parallel");
+        mapWKT2NameToESRIName[EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL] =
+            "Standard_Parallel_1";
+        mapParamNameToValue["Standard_Parallel_1"] = "0";
+    } else if ((wkt2_mapping->epsg_code ==
+                    EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A ||
+                wkt2_mapping->epsg_code ==
+                    EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) &&
+               !ci_equal(esriProjectionName,
+                         "Rectified_Skew_Orthomorphic_Natural_Origin") &&
+               !ci_equal(esriProjectionName,
+                         "Rectified_Skew_Orthomorphic_Center")) {
+        // ESRI WKT lacks the angle to skew grid
+        // Take it from the azimuth value
+        static const char *EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID(
+            "Angle from Rectified to Skew Grid");
+        mapWKT2NameToESRIName
+            [EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID] = "Azimuth";
+    }
+
+    for (int i = 0; wkt2_mapping->params[i] != nullptr; i++) {
+        const auto *paramMapping = wkt2_mapping->params[i];
+
+        auto iter = mapWKT2NameToESRIName.find(paramMapping->wkt2_name);
+        if (iter == mapWKT2NameToESRIName.end()) {
+            continue;
+        }
+        auto iter2 = mapParamNameToValue.find(iter->second);
+        if (iter2 == mapParamNameToValue.end()) {
+            continue;
+        }
+
+        PropertyMap propertiesParameter;
+        propertiesParameter.set(IdentifiedObject::NAME_KEY,
+                                paramMapping->wkt2_name);
+        if (paramMapping->epsg_code != 0) {
+            propertiesParameter.set(Identifier::CODE_KEY,
+                                    paramMapping->epsg_code);
+            propertiesParameter.set(Identifier::CODESPACE_KEY,
+                                    Identifier::EPSG);
+        }
+        parameters.push_back(OperationParameter::create(propertiesParameter));
+
+        try {
+            double val = asDouble(iter2->second);
+            auto unit = guessUnitForParameter(
+                paramMapping->wkt2_name, defaultLinearUnit, defaultAngularUnit);
+            values.push_back(ParameterValue::create(Measure(val, unit)));
+        } catch (const std::exception &) {
+            throw ParsingException(
+                concat("unhandled parameter value type : ", iter2->second));
+        }
+    }
+
+    return Conversion::create(
+               PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+               propertiesMethod, parameters, values)
+        ->identify();
+}
+
+// ---------------------------------------------------------------------------
+
 ConversionNNPtr
 WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
                                     const WKTNodeNNPtr &projectionNode,
@@ -2579,6 +2843,19 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
     if (projectionNode->GP()->children().empty()) {
         ThrowNotEnoughChildren(WKTConstants::PROJECTION);
     }
+    if (esriStyle_) {
+        return buildProjectionFromESRI(projCRSNode, projectionNode,
+                                       defaultLinearUnit, defaultAngularUnit);
+    }
+    return buildProjectionStandard(projCRSNode, projectionNode,
+                                   defaultLinearUnit, defaultAngularUnit);
+}
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr WKTParser::Private::buildProjectionStandard(
+    const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode,
+    const UnitOfMeasure &defaultLinearUnit,
+    const UnitOfMeasure &defaultAngularUnit) {
     const std::string wkt1ProjectionName =
         stripQuotes(projectionNode->GP()->children()[0]->GP()->value());
 
@@ -2614,7 +2891,8 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
                 childNode->GP()->childrenSize() == 2) {
                 const std::string wkt1ParameterName(
                     stripQuotes(childNode->GP()->children()[0]->GP()->value()));
-                auto paramValue = childNode->GP()->children()[1]->GP()->value();
+                const auto &paramValue =
+                    childNode->GP()->children()[1]->GP()->value();
                 try {
                     double val = asDouble(paramValue);
                     auto unit = guessUnitForParameter(wkt1ParameterName,
@@ -2693,7 +2971,6 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
              projCRSNode->GP()->lookForChild(WKTConstants::AXIS, 1),
              defaultLinearUnit, false,
              2)->direction() == &AxisDirection::WEST) {
-        constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
         mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
     }
 
@@ -2730,7 +3007,8 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
             propertiesParameter.set(IdentifiedObject::NAME_KEY, parameterName);
             parameters.push_back(
                 OperationParameter::create(propertiesParameter));
-            auto paramValue = childNode->GP()->children()[1]->GP()->value();
+            const auto &paramValue =
+                childNode->GP()->children()[1]->GP()->value();
             try {
                 double val = asDouble(paramValue);
                 auto unit = guessUnitForParameter(
@@ -2795,11 +3073,106 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
+
+    if (isNull(csNode) && node->countChildrenOfName(WKTConstants::AXIS) == 0) {
+        const auto methodCode = conversion->method()->getEPSGCode();
+        // Krovak south oriented ?
+        if (methodCode == EPSG_CODE_METHOD_KROVAK) {
+            cartesianCS =
+                CartesianCS::create(
+                    PropertyMap(),
+                    CoordinateSystemAxis::create(
+                        util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                AxisName::Southing),
+                        emptyString, AxisDirection::SOUTH, linearUnit),
+                    CoordinateSystemAxis::create(
+                        util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                AxisName::Westing),
+                        emptyString, AxisDirection::WEST, linearUnit))
+                    .as_nullable();
+        } else if (esriStyle_ &&
+                   methodCode ==
+                       EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A) {
+            // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
+            // EPSG:32761 (UPS South) uses the easting-northing order, instead
+            // of the EPSG northing-easting order.
+            static const char *EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN(
+                "Latitude of natural origin");
+            constexpr int EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN = 8801;
+            const double lat0 = conversion->parameterValueNumeric(
+                EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+                EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+                common::UnitOfMeasure::DEGREE);
+            if (std::fabs(lat0 - 90) < 1e-10) {
+                cartesianCS =
+                    CartesianCS::create(
+                        PropertyMap(),
+                        CoordinateSystemAxis::create(
+                            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                    AxisName::Easting),
+                            AxisAbbreviation::E, AxisDirection::SOUTH,
+                            linearUnit,
+                            Meridian::create(Angle(90, UnitOfMeasure::DEGREE))),
+                        CoordinateSystemAxis::create(
+                            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                    AxisName::Northing),
+                            AxisAbbreviation::N, AxisDirection::SOUTH,
+                            linearUnit, Meridian::create(
+                                            Angle(180, UnitOfMeasure::DEGREE))))
+                        .as_nullable();
+            } else if (std::fabs(lat0 - -90) < 1e-10) {
+                cartesianCS =
+                    CartesianCS::create(
+                        PropertyMap(),
+                        CoordinateSystemAxis::create(
+                            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                    AxisName::Easting),
+                            AxisAbbreviation::E, AxisDirection::NORTH,
+                            linearUnit,
+                            Meridian::create(Angle(90, UnitOfMeasure::DEGREE))),
+                        CoordinateSystemAxis::create(
+                            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                    AxisName::Northing),
+                            AxisAbbreviation::N, AxisDirection::NORTH,
+                            linearUnit,
+                            Meridian::create(Angle(0, UnitOfMeasure::DEGREE))))
+                        .as_nullable();
+            }
+        }
+    }
     if (!cartesianCS) {
         ThrowNotExpectedCSType("Cartesian");
     }
 
-    return ProjectedCRS::create(buildProperties(node), baseGeodCRS, conversion,
+    auto props = buildProperties(node);
+    if (esriStyle_ && dbContext_) {
+        auto projCRSName =
+            stripQuotes(node->GP()->children()[0]->GP()->value());
+
+        // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
+        // EPSG:32761 (UPS South) uses the easting-northing order, instead
+        // of the EPSG northing-easting order
+        // so don't substitue names to avoid confusion.
+        if (projCRSName == "UPS_North") {
+            props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS North (E,N)");
+        } else if (projCRSName == "UPS_South") {
+            props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS South (E,N)");
+        } else {
+            std::string outTableName;
+            std::string authNameFromAlias;
+            std::string codeFromAlias;
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto officialName = authFactory->getOfficialNameFromAlias(
+                projCRSName, "projected_crs", "ESRI", outTableName,
+                authNameFromAlias, codeFromAlias);
+            if (!officialName.empty()) {
+                props.set(IdentifiedObject::NAME_KEY, officialName);
+            }
+        }
+    }
+
+    return ProjectedCRS::create(props, baseGeodCRS, conversion,
                                 NN_NO_CHECK(cartesianCS));
 }
 
@@ -3465,7 +3838,8 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
                                     const DatabaseContextPtr &dbContext) {
     for (const auto &wktConstants : WKTConstants::constants()) {
         if (ci_starts_with(text, wktConstants)) {
-            return WKTParser().createFromWKT(text);
+            return WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+                text);
         }
     }
     if (starts_with(text, "+proj=")) {
@@ -3522,6 +3896,71 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
 BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
     WKTNodeNNPtr root = WKTNode::createFrom(wkt);
     return d->build(root);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Attach a database context, to allow queries in it if needed.
+ */
+WKTParser &
+WKTParser::attachDatabaseContext(const DatabaseContextPtr &dbContext) {
+    d->dbContext_ = dbContext;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Guess the "dialect" of the WKT string.
+ */
+WKTParser::WKTGuessedDialect
+WKTParser::guessDialect(const std::string &wkt) noexcept {
+    const std::string *const wkt1_keywords[] = {
+        &WKTConstants::GEOCCS, &WKTConstants::GEOGCS,  &WKTConstants::COMPD_CS,
+        &WKTConstants::PROJCS, &WKTConstants::VERT_CS, &WKTConstants::LOCAL_CS};
+    for (const auto &pointerKeyword : wkt1_keywords) {
+        if (ci_starts_with(wkt, *pointerKeyword)) {
+
+            if (ci_find(wkt, "GEOGCS[\"GCS_") != std::string::npos) {
+                return WKTGuessedDialect::WKT1_ESRI;
+            }
+
+            return WKTGuessedDialect::WKT1_GDAL;
+        }
+    }
+
+    const std::string *const wkt2_2018_only_keywords[] = {
+        &WKTConstants::GEOGCRS,
+        // contained in previous one
+        // &WKTConstants::BASEGEOGCRS,
+        &WKTConstants::CONCATENATEDOPERATION, &WKTConstants::USAGE,
+        &WKTConstants::DYNAMIC, &WKTConstants::FRAMEEPOCH, &WKTConstants::MODEL,
+        &WKTConstants::VELOCITYGRID, &WKTConstants::ENSEMBLE,
+        &WKTConstants::DERIVEDPROJCRS, &WKTConstants::BASEPROJCRS,
+        &WKTConstants::GEOGRAPHICCRS, &WKTConstants::TRF, &WKTConstants::VRF};
+
+    for (const auto &pointerKeyword : wkt2_2018_only_keywords) {
+        auto pos = ci_find(wkt, *pointerKeyword);
+        if (pos != std::string::npos &&
+            wkt[pos + pointerKeyword->size()] == '[') {
+            return WKTGuessedDialect::WKT2_2018;
+        }
+    }
+    static const char *const wkt2_2018_only_substrings[] = {
+        "CS[TemporalDateTime,", "CS[TemporalCount,", "CS[TemporalMeasure,",
+    };
+    for (const auto &substrings : wkt2_2018_only_substrings) {
+        if (ci_find(wkt, substrings) != std::string::npos) {
+            return WKTGuessedDialect::WKT2_2018;
+        }
+    }
+
+    for (const auto &wktConstants : WKTConstants::constants()) {
+        if (ci_starts_with(wkt, wktConstants)) {
+            return WKTGuessedDialect::WKT2_2015;
+        }
+    }
+
+    return WKTGuessedDialect::NOT_WKT;
 }
 
 // ---------------------------------------------------------------------------
@@ -4455,8 +4894,6 @@ DatabaseContextPtr PROJStringFormatter::databaseContext() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-
-static const std::string emptyString{};
 
 struct PROJStringParser::Private {
     DatabaseContextPtr dbContext_{};
@@ -5416,7 +5853,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         step.paramValues.emplace_back(
             Step::KeyValue("lonc", getParamValue(step, "lon_0")));
     } else if (step.name == "krovak" && getParamValue(step, "axis") == "swu") {
-        constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
         mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
     } else if (step.name == "merc") {
         if (hasParamValue(step, "a") && hasParamValue(step, "b") &&
@@ -5459,8 +5895,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 mapping =
                     getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B);
             } else {
-                constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A =
-                    9810;
                 mapping =
                     getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A);
             }

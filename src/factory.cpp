@@ -3462,6 +3462,53 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Gets the official name from a possibly alias name.
+ *
+ * @param aliasedName Alias name.
+ * @param tableName Table name/category. Can help in case of ambiguities.
+ * Or empty otherwise.
+ * @param source Source of the alias. Can help in case of ambiguities.
+ * Or empty otherwise.
+ * @param outTableName Table name in which the official name has been found.
+ * @param outAuthName Authority name of the official name that has been found.
+ * @param outCode Code of the official name that has been found.
+ * @return official name (or empty if not found).
+ * @throw FactoryException
+ */
+std::string AuthorityFactory::getOfficialNameFromAlias(
+    const std::string &aliasedName, const std::string &tableName,
+    const std::string &source, std::string &outTableName,
+    std::string &outAuthName, std::string &outCode) const {
+    std::string sql("SELECT table_name, auth_name, code FROM alias_name WHERE "
+                    "alt_name = ?");
+    std::vector<SQLValues> params{aliasedName};
+    if (!tableName.empty()) {
+        sql += " AND table_name = ?";
+        params.push_back(tableName);
+    }
+    if (!source.empty()) {
+        sql += " AND source = ?";
+        params.push_back(source);
+    }
+    auto res = d->run(sql, params);
+    if (res.empty()) {
+        return std::string();
+    }
+    outTableName = res[0][0];
+    outAuthName = res[0][1];
+    outCode = res[0][2];
+    sql = "SELECT name FROM \"";
+    sql += replaceAll(outTableName, "\"", "\"\"");
+    sql += "\" WHERE auth_name = ? AND code = ?";
+    res = d->run(sql, {outAuthName, outCode});
+    if (res.empty()) { // shouldn't happen normally
+        return std::string();
+    }
+    return res[0][0];
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 FactoryException::FactoryException(const char *message) : Exception(message) {}
 

@@ -114,6 +114,61 @@ def find_area(areaname, slat, nlat, llon, rlon):
 
     return map_areaname_to_auth_code[areaname]
 
+#################
+
+def import_linunit():
+    with open(os.path.join(path_to_csv, 'pe_list_linunit.csv'), 'rt') as csvfile:
+        reader = csv.reader(csvfile)
+        header = next(reader)
+        nfields = len(header)
+
+        idx_wkid = header.index('wkid')
+        assert idx_wkid >= 0
+
+        idx_latestWkid = header.index('latestWkid')
+        assert idx_latestWkid >= 0
+
+        idx_name = header.index('name')
+        assert idx_name >= 0
+
+        idx_wkt = header.index('wkt')
+        assert idx_wkt >= 0
+
+        idx_authority = header.index('authority')
+        assert idx_authority >= 0
+
+        while True:
+            try:
+                row = next(reader)
+            except StopIteration:
+                break
+            assert len(row) == nfields, row
+
+            latestWkid = row[idx_latestWkid]
+            authority = row[idx_authority]
+            esri_name = row[idx_name]
+
+            wkt = row[idx_wkt]
+            assert wkt.startswith('UNIT[') and wkt.endswith(']')
+            tokens = wkt[len('UNIT['):len(wkt) - 1].split(',')
+            assert len(tokens) == 2
+            esri_conv_factor = float(tokens[1])
+
+            if authority == 'EPSG':
+
+                cursor.execute(
+                    "SELECT name, conv_factor FROM unit_of_measure WHERE code = ? AND auth_name = 'EPSG'", (latestWkid,))
+                src_row = cursor.fetchone()
+                assert src_row, row
+                src_name = src_row[0]
+                epsg_conv_factor = src_row[1]
+                assert abs(esri_conv_factor - epsg_conv_factor) <= 1e-15 * epsg_conv_factor, (esri_name, esri_conv_factor, epsg_conv_factor)
+
+                if src_name != esri_name:
+                    sql = """INSERT INTO alias_name VALUES('unit_of_measure','EPSG','%s','%s','ESRI');""" % (
+                        latestWkid, escape_literal(esri_name))
+                    all_sql.append(sql)
+
 
 #################
 map_spheroid_esri_name_to_auth_code = {}
@@ -1257,6 +1312,7 @@ def import_geogtran():
                         print('not handled grid: ' + filename)
 
 
+import_linunit()
 import_spheroid()
 import_prime_meridian()
 import_datum()

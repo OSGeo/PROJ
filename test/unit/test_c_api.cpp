@@ -1156,4 +1156,44 @@ TEST_F(CApi, proj_context_set_database_path_error_2) {
     ObjectKeeper keeper_source_crs(source_crs);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_guess_wkt_dialect) {
+
+    EXPECT_EQ(proj_context_guess_wkt_dialect(nullptr, "LOCAL_CS[\"foo\"]"),
+              PJ_GUESSED_WKT1_GDAL);
+
+    EXPECT_EQ(proj_context_guess_wkt_dialect(
+                  nullptr,
+                  "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_"
+                  "1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                  "UNIT[\"Degree\",0.0174532925199433]]"),
+              PJ_GUESSED_WKT1_ESRI);
+
+    EXPECT_EQ(proj_context_guess_wkt_dialect(
+                  nullptr,
+                  "GEOGCRS[\"WGS 84\",\n"
+                  "    DATUM[\"World Geodetic System 1984\",\n"
+                  "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+                  "    CS[ellipsoidal,2],\n"
+                  "        AXIS[\"geodetic latitude (Lat)\",north],\n"
+                  "        AXIS[\"geodetic longitude (Lon)\",east],\n"
+                  "        UNIT[\"degree\",0.0174532925199433]]"),
+              PJ_GUESSED_WKT2_2018);
+
+    EXPECT_EQ(proj_context_guess_wkt_dialect(
+                  nullptr,
+                  "GEODCRS[\"WGS 84\",\n"
+                  "    DATUM[\"World Geodetic System 1984\",\n"
+                  "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+                  "    CS[ellipsoidal,2],\n"
+                  "        AXIS[\"geodetic latitude (Lat)\",north],\n"
+                  "        AXIS[\"geodetic longitude (Lon)\",east],\n"
+                  "        UNIT[\"degree\",0.0174532925199433]]"),
+              PJ_GUESSED_WKT2_2015);
+
+    EXPECT_EQ(proj_context_guess_wkt_dialect(nullptr, "foo"),
+              PJ_GUESSED_NOT_WKT);
+}
+
 } // namespace

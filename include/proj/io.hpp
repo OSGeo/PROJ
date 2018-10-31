@@ -154,8 +154,9 @@ class WKTFormatter {
 
     /** WKT variant. */
     enum class PROJ_DLL Convention {
-        /** Full WKT2 string, conforming to ISO 19162:2015(E) / OGC 12-063r5,
-           with all possible nodes and new keyword names. */
+        /** Full WKT2 string, conforming to ISO 19162:2015(E) / OGC 12-063r5
+         * (\ref WKT2_2015) with all possible nodes and new keyword names.
+         */
         WKT2,
         WKT2_2015 = WKT2,
 
@@ -176,7 +177,7 @@ class WKTFormatter {
         WKT2_2015_SIMPLIFIED = WKT2_SIMPLIFIED,
 
         /** Full WKT2 string, conforming to ISO 19162:2018 / OGC 18-010, with
-         * all possible nodes and new keyword names.
+         * (\ref WKT2_2018) all possible nodes and new keyword names.
          * Non-normative list of differences:
          * <ul>
          *      <li>WKT2_2018 uses GEOGCRS / BASEGEOGCRS keywords for
@@ -570,11 +571,31 @@ class WKTParser {
     PROJ_DLL ~WKTParser();
     //! @endcond
 
+    PROJ_DLL WKTParser &
+    attachDatabaseContext(const DatabaseContextPtr &dbContext);
+
     PROJ_DLL WKTParser &setStrict(bool strict);
     PROJ_DLL std::vector<std::string> warningList() const;
 
     PROJ_DLL util::BaseObjectNNPtr
     createFromWKT(const std::string &wkt); // throw(ParsingException)
+
+    /** Guessed WKT "dialect" */
+    enum class PROJ_DLL WKTGuessedDialect {
+        /** \ref WKT2_2018 */
+        WKT2_2018,
+        /** \ref WKT2_2015 */
+        WKT2_2015,
+        /** \ref WKT1 */
+        WKT1_GDAL,
+        /** ESRI variant of WKT1 */
+        WKT1_ESRI,
+        /** Not WKT / unrecognized */
+        NOT_WKT
+    };
+
+    // cppcheck-suppress functionStatic
+    PROJ_DLL WKTGuessedDialect guessDialect(const std::string &wkt) noexcept;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -806,6 +827,11 @@ class AuthorityFactory {
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
         const std::vector<std::pair<std::string, std::string>>
             &intermediateCRSAuthCodes) const;
+
+    PROJ_DLL std::string getOfficialNameFromAlias(
+        const std::string &aliasedName, const std::string &tableName,
+        const std::string &source, std::string &outTableName,
+        std::string &outAuthName, std::string &outCode) const;
 
   protected:
     AuthorityFactory(const DatabaseContextNNPtr &context,

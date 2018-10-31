@@ -59,7 +59,9 @@ struct OutputOptions {
     bool PROJ5 = false;
     bool PROJ4 = false;
     bool WKT2_2018 = false;
+    bool WKT2_2018_SIMPLIFIED = false;
     bool WKT2_2015 = false;
+    bool WKT2_2015_SIMPLIFIED = false;
     bool WKT1_GDAL = false;
     bool c_ify = false;
 };
@@ -149,6 +151,12 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
             }
         }
         fs.close();
+    }
+    if (!l_user_string.empty() && l_user_string.back() == '\n') {
+        l_user_string.resize(l_user_string.size() - 1);
+    }
+    if (!l_user_string.empty() && l_user_string.back() == '\r') {
+        l_user_string.resize(l_user_string.size() - 1);
     }
 
     try {
@@ -266,6 +274,29 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
             alreadyOutputed = true;
         }
 
+        if (outputOpt.WKT2_2015_SIMPLIFIED) {
+            try {
+                if (alreadyOutputed) {
+                    std::cout << std::endl;
+                }
+                if (!outputOpt.quiet) {
+                    std::cout << "WKT2_2015_SIMPLIFIED string: " << std::endl;
+                }
+                auto wkt = wktExportable->exportToWKT(
+                    WKTFormatter::create(
+                        WKTFormatter::Convention::WKT2_2015_SIMPLIFIED)
+                        .get());
+                if (outputOpt.c_ify) {
+                    wkt = c_ify_string(wkt);
+                }
+                std::cout << wkt << std::endl;
+            } catch (const std::exception &e) {
+                std::cerr << "Error when exporting to WKT2_2015_SIMPLIFIED: "
+                          << e.what() << std::endl;
+            }
+            alreadyOutputed = true;
+        }
+
         if (outputOpt.WKT2_2018) {
             try {
                 if (alreadyOutputed) {
@@ -284,6 +315,29 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to WKT2_2018: " << e.what()
                           << std::endl;
+            }
+            alreadyOutputed = true;
+        }
+
+        if (outputOpt.WKT2_2018_SIMPLIFIED) {
+            try {
+                if (alreadyOutputed) {
+                    std::cout << std::endl;
+                }
+                if (!outputOpt.quiet) {
+                    std::cout << "WKT2_2018_SIMPLIFIED string: " << std::endl;
+                }
+                auto wkt = wktExportable->exportToWKT(
+                    WKTFormatter::create(
+                        WKTFormatter::Convention::WKT2_2018_SIMPLIFIED)
+                        .get());
+                if (outputOpt.c_ify) {
+                    wkt = c_ify_string(wkt);
+                }
+                std::cout << wkt << std::endl;
+            } catch (const std::exception &e) {
+                std::cerr << "Error when exporting to WKT2_2018_SIMPLIFIED: "
+                          << e.what() << std::endl;
             }
             alreadyOutputed = true;
         }
@@ -471,6 +525,7 @@ int main(int argc, char **argv) {
     bool usePROJGridAlternatives = true;
     std::string mainDBPath;
     std::vector<std::string> auxDBPath;
+    bool guessDialect = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -515,6 +570,10 @@ int main(int argc, char **argv) {
                            ci_equal(format, "WKT2-2018") ||
                            ci_equal(format, "WKT2:2018")) {
                     outputOpt.WKT2_2018 = true;
+                } else if (ci_equal(format, "WKT2_2018_SIMPLIFIED") ||
+                           ci_equal(format, "WKT2-2018_SIMPLIFIED") ||
+                           ci_equal(format, "WKT2:2018_SIMPLIFIED")) {
+                    outputOpt.WKT2_2018_SIMPLIFIED = true;
                 } else if (ci_equal(format, "-WKT2_2018") ||
                            ci_equal(format, "-WKT2-2018") ||
                            ci_equal(format, "-WKT2:2018")) {
@@ -523,6 +582,10 @@ int main(int argc, char **argv) {
                            ci_equal(format, "WKT2-2015") ||
                            ci_equal(format, "WKT2:2015")) {
                     outputOpt.WKT2_2015 = true;
+                } else if (ci_equal(format, "WKT2_2015_SIMPLIFIED") ||
+                           ci_equal(format, "WKT2-2015_SIMPLIFIED") ||
+                           ci_equal(format, "WKT2:2015_SIMPLIFIED")) {
+                    outputOpt.WKT2_2015_SIMPLIFIED = true;
                 } else if (ci_equal(format, "-WKT2_2015") ||
                            ci_equal(format, "-WKT2-2015") ||
                            ci_equal(format, "-WKT2:2015")) {
@@ -645,7 +708,7 @@ int main(int argc, char **argv) {
         } else if (arg == "--pivot-crs" && i + 1 < argc) {
             i++;
             auto value(argv[i]);
-            if (ci_equal(value, "none")) {
+            if (ci_equal(std::string(value), "none")) {
                 allowPivots = false;
             } else {
                 auto splitValue(split(value, ','));
@@ -667,6 +730,8 @@ int main(int argc, char **argv) {
         } else if (arg == "--aux-db-path" && i + 1 < argc) {
             i++;
             auxDBPath.push_back(argv[i]);
+        } else if (arg == "--guess-dialect") {
+            guessDialect = true;
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {
@@ -730,6 +795,22 @@ int main(int argc, char **argv) {
     if (!user_string.empty()) {
         auto obj(buildObject(dbContext, user_string, kindIsCRS, "input string",
                              buildBoundCRSToWGS84));
+        if (guessDialect) {
+            auto dialect = WKTParser().guessDialect(user_string);
+            std::cout << "Guessed WKT dialect: ";
+            if (dialect == WKTParser::WKTGuessedDialect::WKT2_2018) {
+                std::cout << "WKT2_2018";
+            } else if (dialect == WKTParser::WKTGuessedDialect::WKT2_2015) {
+                std::cout << "WKT2_2015";
+            } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_GDAL) {
+                std::cout << "WKT1_GDAL";
+            } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_ESRI) {
+                std::cout << "WKT1_ESRI";
+            } else {
+                std::cout << "Not WKT / unknown";
+            }
+            std::cout << std::endl;
+        }
         outputObject(dbContext, obj, outputOpt);
     } else {
         outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,

@@ -73,6 +73,23 @@ const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
                                        const std::string &wkt1_name);
 // ---------------------------------------------------------------------------
 
+struct ESRIParamMapping {
+    const char *esri_name;
+    const char *wkt2_name;
+    float fixed_value;
+};
+
+struct ESRIMethodMapping {
+    const char *esri_name;
+    const char *wkt2_name;
+    const ESRIParamMapping *const params;
+};
+
+std::vector<const ESRIMethodMapping *>
+getMappingsFromESRI(const std::string &esri_name);
+
+// ---------------------------------------------------------------------------
+
 bool isAxisOrderReversal(const std::string &methodName, int methodEPSGCode);
 
 // ---------------------------------------------------------------------------

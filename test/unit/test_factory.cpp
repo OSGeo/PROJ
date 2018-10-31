@@ -2470,4 +2470,41 @@ TEST(factory, attachExtraDatabases_auxiliary_error) {
                  FactoryException);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(factory, getOfficialNameFromAlias) {
+    auto ctxt = DatabaseContext::create(std::string(), {});
+    auto factory = AuthorityFactory::create(ctxt, std::string());
+    std::string outTableName;
+    std::string outAuthName;
+    std::string outCode;
+
+    {
+        auto officialName = factory->getOfficialNameFromAlias(
+            "GCS_WGS_1984", std::string(), std::string(), outTableName,
+            outAuthName, outCode);
+        EXPECT_EQ(officialName, "WGS 84");
+        EXPECT_EQ(outTableName, "geodetic_crs");
+        EXPECT_EQ(outAuthName, "EPSG");
+        EXPECT_EQ(outCode, "4326");
+    }
+
+    {
+        auto officialName = factory->getOfficialNameFromAlias(
+            "GCS_WGS_1984", "geodetic_crs", "ESRI", outTableName, outAuthName,
+            outCode);
+        EXPECT_EQ(officialName, "WGS 84");
+        EXPECT_EQ(outTableName, "geodetic_crs");
+        EXPECT_EQ(outAuthName, "EPSG");
+        EXPECT_EQ(outCode, "4326");
+    }
+
+    {
+        auto officialName = factory->getOfficialNameFromAlias(
+            "no match", std::string(), std::string(), outTableName, outAuthName,
+            outCode);
+        EXPECT_EQ(officialName, "");
+    }
+}
+
 } // namespace

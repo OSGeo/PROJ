@@ -73,6 +73,7 @@ template<> nn<std::unique_ptr<NS_PROJ::operation::CoordinateOperationContext, st
 
 #include "proj/internal/coordinateoperation_constants.hpp"
 #include "proj/internal/coordinateoperation_internal.hpp"
+#include "proj/internal/esri_projection_mappings.hpp"
 
 #if 0
 namespace dropbox{ namespace oxygen {
@@ -286,6 +287,19 @@ const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
         }
     }
     return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<const ESRIMethodMapping *>
+getMappingsFromESRI(const std::string &esri_name) {
+    std::vector<const ESRIMethodMapping *> res;
+    for (const auto &mapping : esriMappings) {
+        if (ci_equal(esri_name, mapping.esri_name)) {
+            res.push_back(&mapping);
+        }
+    }
+    return res;
 }
 
 // ---------------------------------------------------------------------------
@@ -5872,6 +5886,7 @@ static std::string buildOpName(const char *opType, const crs::CRSPtr &source,
 static util::PropertyMap
 createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
                            bool approximateInversion) {
+    assert(op);
     util::PropertyMap map;
 
     // The domain(s) are unchanged by the inverse operation

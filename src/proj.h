@@ -445,6 +445,28 @@ int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
 
 const char PROJ_DLL *proj_context_get_database_path(PJ_CONTEXT *ctx);
 
+/** \brief Guessed WKT "dialect". */
+typedef enum
+{
+    /** \ref WKT2_2018 */
+    PJ_GUESSED_WKT2_2018,
+
+    /** \ref WKT2_2015 */
+    PJ_GUESSED_WKT2_2015,
+
+    /** \ref WKT1 */
+    PJ_GUESSED_WKT1_GDAL,
+
+    /** ESRI variant of WKT1 */
+    PJ_GUESSED_WKT1_ESRI,
+
+    /** Not WKT / unrecognized */
+    PJ_GUESSED_NOT_WKT
+} PJ_GUESSED_WKT_DIALECT;
+
+PJ_GUESSED_WKT_DIALECT PROJ_DLL proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
+                                                               const char *wkt);
+
 PJ_OBJ PROJ_DLL *proj_obj_create_from_user_input(PJ_CONTEXT *ctx,
                                                  const char *text);
 

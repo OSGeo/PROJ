@@ -28,6 +28,9 @@
 
 #include "gtest_include.h"
 
+// to be able to use internal::toString
+#define FROM_PROJ_CPP
+
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
@@ -37,12 +40,15 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "proj/internal/internal.hpp"
+
 #include <string>
 
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
+using namespace osgeo::proj::internal;
 using namespace osgeo::proj::io;
 using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::operation;
@@ -2541,6 +2547,1055 @@ TEST(wkt_parse, ensemble_vdatum) {
     EXPECT_EQ(firstDatum->nameStr(), "vdatum1");
 
     EXPECT_EQ(ensemble->positionalAccuracy()->value(), "100");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, esri_geogcs_datum_spheroid_name_hardcoded_substitution) {
+    auto wkt = "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\","
+               "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+               "PRIMEM[\"Greenwich\",0.0],"
+               "UNIT[\"Degree\",0.0174532925199433]]";
+
+    // Test substitutions of CRS, datum and ellipsoid names from ESRI names
+    // to EPSG names.
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "WGS 84");
+    EXPECT_EQ(crs->datum()->nameStr(), "World Geodetic System 1984");
+    EXPECT_EQ(crs->ellipsoid()->nameStr(), "WGS 84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, esri_geogcs_datum_spheroid_name_from_db_substitution) {
+    auto wkt = "GEOGCS[\"GCS_WGS_1966\",DATUM[\"D_WGS_1966\","
+               "SPHEROID[\"WGS_1966\",6378145.0,298.25]],"
+               "PRIMEM[\"Greenwich\",0.0],"
+               "UNIT[\"Degree\",0.0174532925199433]]";
+
+    // Test substitutions of CRS, datum and ellipsoid names from ESRI names
+    // to EPSG names.
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "WGS 66");
+    EXPECT_EQ(crs->datum()->nameStr(), "World Geodetic System 1966");
+    EXPECT_EQ(crs->ellipsoid()->nameStr(), "WGS_1966");
+}
+
+// ---------------------------------------------------------------------------
+
+static const struct {
+    const char *esriProjectionName;
+    std::vector<std::pair<const char *, double>> esriParams;
+    const char *wkt2ProjectionName;
+    std::vector<std::pair<const char *, double>> wkt2Params;
+} esriProjDefs[] = {
+
+    {"Plate_Carree",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Equidistant Cylindrical",
+     {
+         {"Latitude of 1st standard parallel", 0},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Equidistant_Cylindrical",
+     {
+         {"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Central_Meridian", 3},
+         {"Standard_Parallel_1", 4},
+     },
+     "Equidistant Cylindrical",
+     {
+         {"Latitude of 1st standard parallel", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Miller_Cylindrical",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Miller Cylindrical",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Mercator",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4}},
+     "Mercator (variant B)",
+     {
+         {"Latitude of 1st standard parallel", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Gauss_Kruger",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Scale_Factor", 4},
+      {"Latitude_Of_Origin", 5}},
+     "Transverse Mercator",
+     {
+         {"Latitude of natural origin", 5},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Transverse_Mercator",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Scale_Factor", 4},
+      {"Latitude_Of_Origin", 5}},
+     "Transverse Mercator",
+     {
+         {"Latitude of natural origin", 5},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Albers",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4},
+      {"Standard_Parallel_2", 5},
+      {"Latitude_Of_Origin", 6}},
+     "Albers Equal Area",
+     {
+         {"Latitude of false origin", 6},
+         {"Longitude of false origin", 3},
+         {"Latitude of 1st standard parallel", 4},
+         {"Latitude of 2nd standard parallel", 5},
+         {"Easting of false origin", 1},
+         {"Northing of false origin", 2},
+     }},
+
+    {"Sinusoidal",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Sinusoidal",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Mollweide",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Mollweide",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Eckert_I",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Eckert I",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    // skipping Eckert_II to Eckert_VI
+
+    {"Gall_Stereographic",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Gall Stereographic",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Winkel_I",
+     {
+         {"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Central_Meridian", 3},
+         {"Standard_Parallel_1", 4},
+     },
+     "Winkel I",
+     {
+         {"Longitude of natural origin", 3},
+         {"Latitude of 1st standard parallel", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Winkel_II",
+     {
+         {"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Central_Meridian", 3},
+         {"Standard_Parallel_1", 4},
+     },
+     "Winkel II",
+     {
+         {"Longitude of natural origin", 3},
+         {"Latitude of 1st standard parallel", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Lambert_Conformal_Conic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4},
+      {"Scale_Factor", 5},
+      {"Latitude_Of_Origin", 4}},
+     "Lambert Conic Conformal (1SP)",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 5},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Lambert_Conformal_Conic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4},
+      {"Standard_Parallel_2", 5},
+      {"Latitude_Of_Origin", 6}},
+     "Lambert Conic Conformal (2SP)",
+     {
+         {"Latitude of false origin", 6},
+         {"Longitude of false origin", 3},
+         {"Latitude of 1st standard parallel", 4},
+         {"Latitude of 2nd standard parallel", 5},
+         {"Easting of false origin", 1},
+         {"Northing of false origin", 2},
+     }},
+
+    // Unusual variant of above with Scale_Factor=1
+    {"Lambert_Conformal_Conic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4},
+      {"Standard_Parallel_2", 5},
+      {"Scale_Factor", 1.0},
+      {"Latitude_Of_Origin", 6}},
+     "Lambert Conic Conformal (2SP)",
+     {
+         {"Latitude of false origin", 6},
+         {"Longitude of false origin", 3},
+         {"Latitude of 1st standard parallel", 4},
+         {"Latitude of 2nd standard parallel", 5},
+         {"Easting of false origin", 1},
+         {"Northing of false origin", 2},
+     }},
+
+    {"Polyconic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Latitude_Of_Origin", 4}},
+     "American Polyconic",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Quartic_Authalic",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Quartic Authalic",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Loximuthal",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Central_Parallel", 4}},
+     "Loximuthal",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Bonne",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4}},
+     "Bonne",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Hotine_Oblique_Mercator_Two_Point_Natural_Origin",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Latitude_Of_1st_Point", 3},
+      {"Latitude_Of_2nd_Point", 4},
+      {"Scale_Factor", 5},
+      {"Longitude_Of_1st_Point", 6},
+      {"Longitude_Of_2nd_Point", 7},
+      {"Latitude_Of_Center", 8}},
+     "Hotine Oblique Mercator Two Point Natural Origin",
+     {
+         {"Latitude of projection centre", 8},
+         {"Latitude of 1st point", 3},
+         {"Longitude of 1st point", 6},
+         {"Latitude of 2nd point", 4},
+         {"Longitude of 2nd point", 7},
+         {"Scale factor on initial line", 5},
+         {"Easting at projection centre", 1},
+         {"Northing at projection centre", 2},
+     }},
+
+    {"Stereographic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Scale_Factor", 4},
+      {"Latitude_Of_Origin", 5}},
+     "Stereographic",
+     {
+         {"Latitude of natural origin", 5},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Stereographic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Scale_Factor", 4},
+      {"Latitude_Of_Origin", 90}},
+     "Polar Stereographic (variant A)",
+     {
+         {"Latitude of natural origin", 90},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Stereographic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Scale_Factor", 4},
+      {"Latitude_Of_Origin", -90}},
+     "Polar Stereographic (variant A)",
+     {
+         {"Latitude of natural origin", -90},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Equidistant_Conic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4},
+      {"Standard_Parallel_2", 5},
+      {"Latitude_Of_Origin", 6}},
+     "Equidistant Conic",
+     {
+         {"Latitude of natural origin", 6},
+         {"Longitude of natural origin", 3},
+         {"Latitude of 1st standard parallel", 4},
+         {"Latitude of 2nd standard parallel", 5},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Cassini",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Scale_Factor", 1},
+      {"Latitude_Of_Origin", 4}},
+     "Cassini-Soldner",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Van_der_Grinten_I",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Van Der Grinten",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Robinson",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Robinson",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Two_Point_Equidistant",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Latitude_Of_1st_Point", 3},
+      {"Latitude_Of_2nd_Point", 4},
+      {"Longitude_Of_1st_Point", 5},
+      {"Longitude_Of_2nd_Point", 6}},
+     "Two Point Equidistant",
+     {
+         {"Latitude of 1st point", 3},
+         {"Longitude of 1st point", 5},
+         {"Latitude of 2nd point", 4},
+         {"Longitude of 2nd point", 6},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Azimuthal_Equidistant",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Latitude_Of_Origin", 4}},
+     "Modified Azimuthal Equidistant",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Lambert_Azimuthal_Equal_Area",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Latitude_Of_Origin", 4}},
+     "Lambert Azimuthal Equal Area",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Cylindrical_Equal_Area",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4}},
+     "Lambert Cylindrical Equal Area (Spherical)",
+     {
+         {"Latitude of 1st standard parallel", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    // Untested: Hotine_Oblique_Mercator_Two_Point_Center
+
+    {"Hotine_Oblique_Mercator_Azimuth_Natural_Origin",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Scale_Factor", 3},
+      {"Azimuth", 4},
+      {"Longitude_Of_Center", 5},
+      {"Latitude_Of_Center", 6}},
+     "Hotine Oblique Mercator (variant A)",
+     {
+         {"Latitude of projection centre", 6},
+         {"Longitude of projection centre", 5},
+         {"Azimuth of initial line", 4},
+         {"Angle from Rectified to Skew Grid", 4},
+         {"Scale factor on initial line", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Hotine_Oblique_Mercator_Azimuth_Center",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Scale_Factor", 3},
+      {"Azimuth", 4},
+      {"Longitude_Of_Center", 5},
+      {"Latitude_Of_Center", 6}},
+     "Hotine Oblique Mercator (variant B)",
+     {
+         {"Latitude of projection centre", 6},
+         {"Longitude of projection centre", 5},
+         {"Azimuth of initial line", 4},
+         {"Angle from Rectified to Skew Grid", 4},
+         {"Scale factor on initial line", 3},
+         {"Easting at projection centre", 1},
+         {"Northing at projection centre", 2},
+     }},
+
+    {"Double_Stereographic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Scale_Factor", 4},
+      {"Latitude_Of_Origin", 5}},
+     "Oblique Stereographic",
+     {
+         {"Latitude of natural origin", 5},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Krovak",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Pseudo_Standard_Parallel_1", 3},
+      {"Scale_Factor", 4},
+      {"Azimuth", 5},
+      {"Longitude_Of_Center", 6},
+      {"Latitude_Of_Center", 7},
+      {"X_Scale", 1},
+      {"Y_Scale", 1},
+      {"XY_Plane_Rotation", 0}},
+     "Krovak",
+     {
+         {"Latitude of projection centre", 7},
+         {"Longitude of origin", 6},
+         {"Co-latitude of cone axis", 5},
+         {"Latitude of pseudo standard parallel", 3},
+         {"Scale factor on pseudo standard parallel", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Krovak",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Pseudo_Standard_Parallel_1", 3},
+      {"Scale_Factor", 4},
+      {"Azimuth", 5},
+      {"Longitude_Of_Center", 6},
+      {"Latitude_Of_Center", 7},
+      {"X_Scale", -1},
+      {"Y_Scale", 1},
+      {"XY_Plane_Rotation", 90}},
+     "Krovak (North Orientated)",
+     {
+         {"Latitude of projection centre", 7},
+         {"Longitude of origin", 6},
+         {"Co-latitude of cone axis", 5},
+         {"Latitude of pseudo standard parallel", 3},
+         {"Scale factor on pseudo standard parallel", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"New_Zealand_Map_Grid",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Longitude_Of_Origin", 3},
+      {"Latitude_Of_Origin", 4}},
+     "New Zealand Map Grid",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Orthographic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Longitude_Of_Center", 3},
+      {"Latitude_Of_Center", 4}},
+     "Orthographic",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Winkel_Tripel",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4}},
+     "Winkel Tripel",
+     {
+         {"Longitude of natural origin", 3},
+         {"Latitude of 1st standard parallel", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Aitoff",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Aitoff",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Craster_Parabolic",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Craster Parabolic",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Gnomonic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Longitude_Of_Center", 3},
+      {"Latitude_Of_Center", 4}},
+     "Gnomonic",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Stereographic_North_Pole",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4}},
+     "Polar Stereographic (variant B)",
+     {
+         {"Latitude of standard parallel", 4},
+         {"Longitude of origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Stereographic_South_Pole",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", -4}},
+     "Polar Stereographic (variant B)",
+     {
+         {"Latitude of standard parallel", -4},
+         {"Longitude of origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Rectified_Skew_Orthomorphic_Natural_Origin",
+     {
+         {"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Scale_Factor", 3},
+         {"Azimuth", 4},
+         {"Longitude_Of_Center", 5},
+         {"Latitude_Of_Center", 6},
+         {"XY_Plane_Rotation", 7},
+     },
+     "Hotine Oblique Mercator (variant A)",
+     {
+         {"Latitude of projection centre", 6},
+         {"Longitude of projection centre", 5},
+         {"Azimuth of initial line", 4},
+         {"Angle from Rectified to Skew Grid", 7},
+         {"Scale factor on initial line", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    // Temptative mapping
+    {"Rectified_Skew_Orthomorphic_Center",
+     {
+         {"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Scale_Factor", 3},
+         {"Azimuth", 4},
+         {"Longitude_Of_Center", 5},
+         {"Latitude_Of_Center", 6},
+         {"XY_Plane_Rotation", 7},
+     },
+     "Hotine Oblique Mercator (variant B)",
+     {
+         {"Latitude of projection centre", 6},
+         {"Longitude of projection centre", 5},
+         {"Azimuth of initial line", 4},
+         {"Angle from Rectified to Skew Grid", 7},
+         {"Scale factor on initial line", 3},
+         {"Easting at projection centre", 1},
+         {"Northing at projection centre", 2},
+     }},
+
+    {"Goode_Homolosine",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Goode Homolosine",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Equidistant_Cylindrical_Ellipsoidal",
+     {
+         {"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Central_Meridian", 3},
+         {"Standard_Parallel_1", 4},
+     },
+     "Equidistant Cylindrical",
+     {
+         {"Latitude of 1st standard parallel", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Laborde_Oblique_Mercator",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Scale_Factor", 3},
+      {"Azimuth", 4},
+      {"Longitude_Of_Center", 5},
+      {"Latitude_Of_Center", 6}},
+     "Laborde Oblique Mercator",
+     {
+         {"Latitude of projection centre", 6},
+         {"Longitude of projection centre", 5},
+         {"Azimuth of initial line", 4},
+         {"Scale factor on initial line", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Gnomonic_Ellipsoidal",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Longitude_Of_Center", 3},
+      {"Latitude_Of_Center", 4}},
+     "Gnomonic",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Wagner_IV",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Latitude_Of_Center", 0}},
+     "Wagner IV",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Wagner_V",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Wagner V",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Wagner_VII",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Wagner VII",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Geostationary_Satellite",
+     {
+         {"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Longitude_Of_Center", 3},
+         {"Height", 4},
+         {"Option", 0.0},
+     },
+     "Geostationary Satellite (Sweep Y)",
+     {
+         {"Longitude of natural origin", 3},
+         {"Satellite Height", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Mercator_Auxiliary_Sphere",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Standard_Parallel_1", 4},
+      {"Auxiliary_Sphere_Type", 0}},
+     "Popular Visualisation Pseudo Mercator",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {
+        "Unknown_Method",
+        {{"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Longitude_Of_Origin", 3},
+         {"Latitude_Of_Origin", 4}},
+        "Unknown_Method",
+        {{"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Longitude_Of_Origin", 3},
+         {"Latitude_Of_Origin", 4}},
+    },
+
+};
+
+TEST(wkt_parse, esri_projcs) {
+
+    for (const auto &projDef : esriProjDefs) {
+        std::string wkt("PROJCS[\"unnamed\",GEOGCS[\"GCS_WGS_1984\","
+                        "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                        "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                        "UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"");
+        wkt += projDef.esriProjectionName;
+        wkt += "\"],";
+        for (const auto &param : projDef.esriParams) {
+            wkt += "PARAMETER[\"";
+            wkt += param.first;
+            wkt += "\",";
+            wkt += toString(param.second);
+            wkt += "],";
+        }
+        wkt += "UNIT[\"Meter\",1.0]]";
+
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto conv = crs->derivingConversion();
+        auto method = conv->method();
+        EXPECT_EQ(method->nameStr(), projDef.wkt2ProjectionName) << wkt;
+        auto values = conv->parameterValues();
+        EXPECT_EQ(values.size(), projDef.wkt2Params.size()) << wkt;
+        if (values.size() == projDef.wkt2Params.size()) {
+            for (size_t i = 0; i < values.size(); i++) {
+                const auto &opParamvalue =
+                    nn_dynamic_pointer_cast<OperationParameterValue>(values[i]);
+                ASSERT_TRUE(opParamvalue);
+                const auto &paramName = opParamvalue->parameter()->nameStr();
+                const auto &parameterValue = opParamvalue->parameterValue();
+                EXPECT_EQ(paramName, projDef.wkt2Params[i].first) << wkt;
+                EXPECT_EQ(parameterValue->type(),
+                          ParameterValue::Type::MEASURE);
+                auto measure = parameterValue->value();
+                EXPECT_EQ(measure.value(), projDef.wkt2Params[i].second) << wkt;
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_esri_krovak_south_west) {
+    auto wkt = "PROJCS[\"S-JTSK_Krovak\",GEOGCS[\"GCS_S_JTSK\","
+               "DATUM[\"D_S_JTSK\","
+               "SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],"
+               "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Krovak\"],PARAMETER[\"False_Easting\",0.0],"
+               "PARAMETER[\"False_Northing\",0.0],"
+               "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
+               "PARAMETER[\"Scale_Factor\",0.9999],"
+               "PARAMETER[\"Azimuth\",30.28813975277778],"
+               "PARAMETER[\"Longitude_Of_Center\",24.83333333333333],"
+               "PARAMETER[\"Latitude_Of_Center\",49.5],"
+               "PARAMETER[\"X_Scale\",1.0],"
+               "PARAMETER[\"Y_Scale\",1.0],"
+               "PARAMETER[\"XY_Plane_Rotation\",0.0],UNIT[\"Meter\",1.0]]";
+
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(), "Krovak");
+
+    auto expected_wkt2 =
+        "PROJCRS[\"S-JTSK / Krovak\",\n"
+        "    BASEGEODCRS[\"S-JTSK\",\n"
+        "        DATUM[\"System of the Unified Trigonometrical Cadastral "
+        "Network\",\n"
+        "            ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",6156]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433]]],\n"
+        "    CONVERSION[\"unnamed\",\n"
+        "        METHOD[\"Krovak\",\n"
+        "            ID[\"EPSG\",9819]],\n"
+        "        PARAMETER[\"Latitude of projection centre\",49.5,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8811]],\n"
+        "        PARAMETER[\"Longitude of origin\",24.8333333333333,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8833]],\n"
+        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397527778,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",1036]],\n"
+        "        PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8818]],\n"
+        "        PARAMETER[\"Scale factor on pseudo standard "
+        "parallel\",0.9999,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8819]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"southing\",south,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "        AXIS[\"westing\",west,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]]]";
+
+    EXPECT_EQ(crs->exportToWKT(WKTFormatter::create().get()), expected_wkt2);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_esri_normalize_unit) {
+    auto wkt = "PROJCS[\"Accra_Ghana_Grid\",GEOGCS[\"GCS_Accra\","
+               "DATUM[\"D_Accra\",SPHEROID[\"War_Office\",6378300.0,296.0]],"
+               "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Transverse_Mercator\"],"
+               "PARAMETER[\"False_Easting\",900000.0],"
+               "PARAMETER[\"False_Northing\",0.0],"
+               "PARAMETER[\"Central_Meridian\",-1.0],"
+               "PARAMETER[\"Scale_Factor\",0.99975],"
+               "PARAMETER[\"Latitude_Of_Origin\",4.666666666666667],"
+               "UNIT[\"Foot_Gold_Coast\",0.3047997101815088]]";
+
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(),
+              "Gold Coast foot");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_esri_ups_north) {
+    auto wkt = "PROJCS[\"UPS_North\",GEOGCS[\"GCS_WGS_1984\","
+               "DATUM[\"D_WGS_1984\","
+               "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+               "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Stereographic\"],"
+               "PARAMETER[\"False_Easting\",2000000.0],"
+               "PARAMETER[\"False_Northing\",2000000.0],"
+               "PARAMETER[\"Central_Meridian\",0.0],"
+               "PARAMETER[\"Scale_Factor\",0.994],"
+               "PARAMETER[\"Latitude_Of_Origin\",90.0],"
+               "UNIT[\"Meter\",1.0]]";
+
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UPS North (E,N)");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->direction(),
+              AxisDirection::SOUTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->abbreviation(), "E");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
+              AxisDirection::SOUTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->abbreviation(), "N");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_esri_ups_south) {
+    auto wkt = "PROJCS[\"UPS_South\",GEOGCS[\"GCS_WGS_1984\","
+               "DATUM[\"D_WGS_1984\","
+               "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+               "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Stereographic\"],"
+               "PARAMETER[\"False_Easting\",2000000.0],"
+               "PARAMETER[\"False_Northing\",2000000.0],"
+               "PARAMETER[\"Central_Meridian\",0.0],"
+               "PARAMETER[\"Scale_Factor\",0.994],"
+               "PARAMETER[\"Latitude_Of_Origin\",-90.0],"
+               "UNIT[\"Meter\",1.0]]";
+
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UPS South (E,N)");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->direction(),
+              AxisDirection::NORTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->abbreviation(), "E");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
+              AxisDirection::NORTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->abbreviation(), "N");
 }
 
 // ---------------------------------------------------------------------------
@@ -5863,4 +6918,49 @@ TEST(io, createFromUserInput) {
         "            UNIT[\"metre\",1]],\n"
         "    ID[\"EPSG\",4979]]",
         nullptr));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, guessDialect) {
+    EXPECT_EQ(WKTParser().guessDialect("LOCAL_CS[\"foo\"]"),
+              WKTParser::WKTGuessedDialect::WKT1_GDAL);
+
+    EXPECT_EQ(WKTParser().guessDialect(
+                  "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_"
+                  "1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                  "UNIT[\"Degree\",0.0174532925199433]]"),
+              WKTParser::WKTGuessedDialect::WKT1_ESRI);
+
+    EXPECT_EQ(WKTParser().guessDialect(
+                  "GEOGCRS[\"WGS 84\",\n"
+                  "    DATUM[\"World Geodetic System 1984\",\n"
+                  "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+                  "    CS[ellipsoidal,2],\n"
+                  "        AXIS[\"geodetic latitude (Lat)\",north],\n"
+                  "        AXIS[\"geodetic longitude (Lon)\",east],\n"
+                  "        UNIT[\"degree\",0.0174532925199433]]"),
+              WKTParser::WKTGuessedDialect::WKT2_2018);
+
+    EXPECT_EQ(
+        WKTParser().guessDialect("TIMECRS[\"Temporal CRS\",\n"
+                                 "    TDATUM[\"Gregorian calendar\",\n"
+                                 "        CALENDAR[\"proleptic Gregorian\"],\n"
+                                 "        TIMEORIGIN[0000-01-01]],\n"
+                                 "    CS[TemporalDateTime,1],\n"
+                                 "        AXIS[\"time (T)\",future]]"),
+        WKTParser::WKTGuessedDialect::WKT2_2018);
+
+    EXPECT_EQ(WKTParser().guessDialect(
+                  "GEODCRS[\"WGS 84\",\n"
+                  "    DATUM[\"World Geodetic System 1984\",\n"
+                  "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+                  "    CS[ellipsoidal,2],\n"
+                  "        AXIS[\"geodetic latitude (Lat)\",north],\n"
+                  "        AXIS[\"geodetic longitude (Lon)\",east],\n"
+                  "        UNIT[\"degree\",0.0174532925199433]]"),
+              WKTParser::WKTGuessedDialect::WKT2_2015);
+
+    EXPECT_EQ(WKTParser().guessDialect("foo"),
+              WKTParser::WKTGuessedDialect::NOT_WKT);
 }

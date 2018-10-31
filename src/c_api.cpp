@@ -228,6 +228,32 @@ const char *proj_context_get_database_path(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Guess the "dialect" of the WKT string.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param wkt String (must not be NULL)
+ */
+PJ_GUESSED_WKT_DIALECT proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
+                                                      const char *wkt) {
+    (void)ctx;
+    assert(wkt);
+    switch (WKTParser().guessDialect(wkt)) {
+    case WKTParser::WKTGuessedDialect::WKT2_2018:
+        return PJ_GUESSED_WKT2_2018;
+    case WKTParser::WKTGuessedDialect::WKT2_2015:
+        return PJ_GUESSED_WKT2_2015;
+    case WKTParser::WKTGuessedDialect::WKT1_GDAL:
+        return PJ_GUESSED_WKT1_GDAL;
+    case WKTParser::WKTGuessedDialect::WKT1_ESRI:
+        return PJ_GUESSED_WKT1_ESRI;
+    case WKTParser::WKTGuessedDialect::NOT_WKT:
+        break;
+    }
+    return PJ_GUESSED_NOT_WKT;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate an object from a WKT string, PROJ string or object code
  * (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
  * "urn:ogc:def:coordinateOperation:EPSG::1671").
@@ -649,7 +675,7 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
     try {
         auto formatter = PROJStringFormatter::create(convention, dbContext);
         if (options != nullptr && options[0] != nullptr) {
-            if (ci_equal(options[0], "USE_ETMERC=YES")) {
+            if (ci_equal(std::string(options[0]), "USE_ETMERC=YES")) {
                 formatter->setUseETMercForTMerc(true);
             }
         }
