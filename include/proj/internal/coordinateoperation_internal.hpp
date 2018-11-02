@@ -76,12 +76,14 @@ const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
 struct ESRIParamMapping {
     const char *esri_name;
     const char *wkt2_name;
+    int epsg_code;
     float fixed_value;
 };
 
 struct ESRIMethodMapping {
     const char *esri_name;
     const char *wkt2_name;
+    int epsg_code;
     const ESRIParamMapping *const params;
 };
 

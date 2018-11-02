@@ -5312,3 +5312,114 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_A_to_variant_B) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createMercatorVariantA(PropertyMap(), Angle(0), Angle(1),
+                                           Scale(0.9), Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto sameConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
+    ASSERT_TRUE(sameConv);
+    EXPECT_TRUE(sameConv->isEquivalentTo(projCRS->derivingConversion().get()));
+
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+    ASSERT_TRUE(targetConv);
+    EXPECT_EQ(
+        targetConv->parameterValueNumeric("Latitude of 1st standard parallel",
+                                          8823, UnitOfMeasure::DEGREE),
+        25.917499691810534)
+        << targetConv->parameterValueNumeric(
+            "Latitude of 1st standard parallel", 8823, UnitOfMeasure::DEGREE);
+    EXPECT_EQ(targetConv->parameterValueNumeric("Longitude of natural origin",
+                                                8802, UnitOfMeasure::DEGREE),
+              1);
+    EXPECT_EQ(targetConv->parameterValueNumeric("False easting", 8806,
+                                                UnitOfMeasure::METRE),
+              3);
+    EXPECT_EQ(targetConv->parameterValueNumeric("False northing", 8807,
+                                                UnitOfMeasure::METRE),
+              4);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_A_to_variant_B_scale_1) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createMercatorVariantA(PropertyMap(), Angle(0), Angle(1),
+                                           Scale(1.0), Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+    ASSERT_TRUE(targetConv);
+    EXPECT_EQ(
+        targetConv->parameterValueNumeric("Latitude of 1st standard parallel",
+                                          8823, UnitOfMeasure::DEGREE),
+        0.0)
+        << targetConv->parameterValueNumeric(
+            "Latitude of 1st standard parallel", 8823, UnitOfMeasure::DEGREE);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_A_to_variant_B_no_crs) {
+    auto targetConv =
+        Conversion::createMercatorVariantA(PropertyMap(), Angle(0), Angle(1),
+                                           Scale(1.0), Length(3), Length(4))
+            ->convertToOtherMethod(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_A_to_variant_B_invalid_scale) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createMercatorVariantA(PropertyMap(), Angle(0), Angle(1),
+                                           Scale(0.0), Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_B_to_variant_A) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createMercatorVariantB(PropertyMap(),
+                                           Angle(25.917499691810534), Angle(1),
+                                           Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
+    ASSERT_TRUE(targetConv);
+
+    EXPECT_EQ(targetConv->parameterValueNumeric("Latitude of natural origin",
+                                                8801, UnitOfMeasure::DEGREE),
+              0);
+    EXPECT_EQ(targetConv->parameterValueNumeric("Longitude of natural origin",
+                                                8802, UnitOfMeasure::DEGREE),
+              1);
+    EXPECT_EQ(
+        targetConv->parameterValueNumeric("Scale factor at natural origin",
+                                          8805, UnitOfMeasure::SCALE_UNITY),
+        0.9)
+        << targetConv->parameterValueNumeric("Scale factor at natural origin",
+                                             8805, UnitOfMeasure::SCALE_UNITY);
+    EXPECT_EQ(targetConv->parameterValueNumeric("False easting", 8806,
+                                                UnitOfMeasure::METRE),
+              3);
+    EXPECT_EQ(targetConv->parameterValueNumeric("False northing", 8807,
+                                                UnitOfMeasure::METRE),
+              4);
+}

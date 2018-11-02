@@ -59,6 +59,12 @@ class ProjectedCRS;
 */
 namespace operation {
 
+/** EPSG code of projection method "Mercator (variant A)" / "Mercator_1SP" */
+constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_A = 9804;
+
+/** EPSG code of projection method "Mercator (variant B)" / "Mercator_2SP" */
+constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_B = 9805;
+
 // ---------------------------------------------------------------------------
 
 /** \brief Grid description */
@@ -547,8 +553,9 @@ class SingleOperation : virtual public CoordinateOperation {
         parameterValueNumeric(const std::string &paramName, int epsg_code,
                               const common::UnitOfMeasure &targetUnit) const
         noexcept;
-    double parameterValueNumeric(const char *paramName, int epsg_code,
-                                 const common::UnitOfMeasure &targetUnit) const
+    PROJ_DLL double
+    parameterValueNumeric(const char *paramName, int epsg_code,
+                          const common::UnitOfMeasure &targetUnit) const
         noexcept;
     double parameterValueNumericAsSI(const std::string &paramName,
                                      int epsg_code) const noexcept;
@@ -1243,6 +1250,8 @@ class Conversion : public SingleOperation {
                              const common::Scale &factor);
 
     PROJ_DLL static ConversionNNPtr createAxisOrderReversal(bool is3D);
+
+    PROJ_DLL ConversionPtr convertToOtherMethod(int targetEPSGCode) const;
 
     PROJ_PRIVATE : void _exportToPROJString(io::PROJStringFormatter *formatter)
                        const override; // throw(FormattingException)

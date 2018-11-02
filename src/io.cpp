@@ -127,8 +127,10 @@ struct WKTFormatter::Private {
         bool outputCSUnitOnlyOnceIfSame_ = false;
         bool primeMeridianInDegree_ = false;
         bool use2018Keywords_ = false;
+        bool useESRIDialect_ = false;
     };
     Params params_{};
+    DatabaseContextPtr dbContext_{};
 
     int indentLevel_ = 0;
     int level_ = 0;
@@ -166,10 +168,16 @@ struct WKTFormatter::Private {
  * Its default behaviour can be adjusted with the different setters.
  *
  * @param convention WKT flavor. Defaults to Convention::WKT2
+ * @param dbContext Database context, to allow queries in it if needed.
+ * This is used for example for WKT1_ESRI output to do name substitutions.
+ *
  * @return new formatter.
  */
-WKTFormatterNNPtr WKTFormatter::create(Convention convention) {
-    return NN_NO_CHECK(WKTFormatter::make_unique<WKTFormatter>(convention));
+WKTFormatterNNPtr WKTFormatter::create(Convention convention,
+                                       DatabaseContextPtr dbContext) {
+    auto ret = NN_NO_CHECK(WKTFormatter::make_unique<WKTFormatter>(convention));
+    ret->d->dbContext_ = dbContext;
+    return ret;
 }
 
 // ---------------------------------------------------------------------------
@@ -184,7 +192,7 @@ WKTFormatterNNPtr WKTFormatter::create(Convention convention) {
  * @return new formatter.
  */
 WKTFormatterNNPtr WKTFormatter::create(const WKTFormatterNNPtr &other) {
-    auto f = create(other->d->params_.convention_);
+    auto f = create(other->d->params_.convention_, other->d->dbContext_);
     f->d->params_ = other->d->params_;
     return f;
 }
@@ -288,6 +296,15 @@ WKTFormatter::WKTFormatter(Convention convention)
         d->params_.outputAxisOrder_ = false;
         d->params_.forceUNITKeyword_ = true;
         d->params_.primeMeridianInDegree_ = true;
+        break;
+
+    case Convention::WKT1_ESRI:
+        d->params_.version_ = WKTFormatter::Version::WKT1;
+        d->params_.outputAxisOrder_ = false;
+        d->params_.forceUNITKeyword_ = true;
+        d->params_.primeMeridianInDegree_ = true;
+        d->params_.useESRIDialect_ = true;
+        d->params_.multiLine_ = false;
         break;
 
     default:
@@ -468,8 +485,12 @@ static std::string normalizeSerializedString(const std::string &in) {
 
 void WKTFormatter::add(double number, int precision) {
     d->startNewChild();
-    d->result_ +=
-        normalizeSerializedString(internal::toString(number, precision));
+    std::string val(
+        normalizeSerializedString(internal::toString(number, precision)));
+    d->result_ += val;
+    if (d->params_.useESRIDialect_ && val.find('.') == std::string::npos) {
+        d->result_ += ".0";
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -498,7 +519,9 @@ void WKTFormatter::popOutputId() { d->outputIdStack_.pop_back(); }
 
 // ---------------------------------------------------------------------------
 
-bool WKTFormatter::outputId() const { return d->outputIdStack_.back(); }
+bool WKTFormatter::outputId() const {
+    return !d->params_.useESRIDialect_ && d->outputIdStack_.back();
+}
 
 // ---------------------------------------------------------------------------
 
@@ -586,6 +609,16 @@ bool WKTFormatter::use2018Keywords() const {
 
 // ---------------------------------------------------------------------------
 
+bool WKTFormatter::useESRIDialect() const { return d->params_.useESRIDialect_; }
+
+// ---------------------------------------------------------------------------
+
+const DatabaseContextPtr &WKTFormatter::databaseContext() const {
+    return d->dbContext_;
+}
+
+// ---------------------------------------------------------------------------
+
 void WKTFormatter::setAbridgedTransformation(bool outputIn) {
     d->abridgedTransformation_ = outputIn;
 }
@@ -642,6 +675,28 @@ void WKTFormatter::setHDatumExtension(const std::string &filename) {
 
 const std::string &WKTFormatter::getHDatumExtension() const {
     return d->hDatumExtension_;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string WKTFormatter::morphNameToESRI(const std::string &name) {
+    std::string ret;
+    bool insertUnderscore = false;
+    // Replace any special character by underscore, except at the beginning
+    // and of the name where those characters are removed.
+    for (char ch : name) {
+        if (ch == '+' || (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') ||
+            (ch >= 'A' && ch <= 'Z')) {
+            if (insertUnderscore && !ret.empty()) {
+                ret += '_';
+            }
+            ret += ch;
+            insertUnderscore = false;
+        } else {
+            insertUnderscore = true;
+        }
+    }
+    return ret;
 }
 
 #ifdef unused
@@ -1341,19 +1396,10 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
                     tableNameForAlias = "geodetic_crs";
                 }
             }
-        } else if (ci_equal(nodeName, WKTConstants::DATUM)) {
-            if (starts_with(name, "D_")) {
-                esriStyle_ = true;
-                if (name == "D_WGS_1984") {
-                    name = "World Geodetic System 1984";
-                    codeFromAlias = "6326";
-                } else {
-                    tableNameForAlias = "geodetic_datum";
-                }
-            }
         } else if (esriStyle_ && ci_equal(nodeName, WKTConstants::SPHEROID)) {
             if (name == "WGS_1984") {
                 name = "WGS 84";
+                authNameFromAlias = Identifier::EPSG;
                 codeFromAlias = "7030";
             } else {
                 tableNameForAlias = "ellipsoid";
@@ -1766,8 +1812,59 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     if (ellipsoidNode == null_node) {
         ThrowMissing(WKTConstants::ELLIPSOID);
     }
-    // call it before buildEllipsoid() so that esriStyle_ can be set
     auto &properties = buildProperties(node);
+
+    // do that before buildEllipsoid() so that esriStyle_ can be set
+    auto name = stripQuotes(node->GP()->children()[0]->GP()->value());
+    if (name == "WGS_1984") {
+        properties.set(
+            IdentifiedObject::NAME_KEY,
+            *(GeodeticReferenceFrame::EPSG_6326->name()->description()));
+    } else if (starts_with(name, "D_")) {
+        esriStyle_ = true;
+        const char *tableNameForAlias = nullptr;
+        std::string authNameFromAlias;
+        std::string codeFromAlias;
+        if (name == "D_WGS_1984") {
+            name = "World Geodetic System 1984";
+            authNameFromAlias = Identifier::EPSG;
+            codeFromAlias = "6326";
+        } else {
+            tableNameForAlias = "geodetic_datum";
+        }
+
+        if (dbContext_ && tableNameForAlias) {
+            std::string outTableName;
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto officialName = authFactory->getOfficialNameFromAlias(
+                name, tableNameForAlias, "ESRI", outTableName,
+                authNameFromAlias, codeFromAlias);
+            if (!officialName.empty()) {
+                if (primeMeridian->nameStr() !=
+                    PrimeMeridian::GREENWICH->nameStr()) {
+                    auto nameWithPM =
+                        officialName + " (" + primeMeridian->nameStr() + ")";
+                    if (dbContext_->isKnownName(nameWithPM, "geodetic_datum")) {
+                        officialName = nameWithPM;
+                    }
+                }
+                name = officialName;
+            }
+        }
+
+        properties.set(IdentifiedObject::NAME_KEY, name);
+        if (!authNameFromAlias.empty()) {
+            auto identifiers = ArrayOfBaseObject::create();
+            identifiers->add(Identifier::create(
+                codeFromAlias,
+                PropertyMap()
+                    .set(Identifier::CODESPACE_KEY, authNameFromAlias)
+                    .set(Identifier::AUTHORITY_KEY, authNameFromAlias)));
+            properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
+        }
+    }
+
     auto ellipsoid = buildEllipsoid(ellipsoidNode);
 
     auto &TOWGS84Node = node->GP()->lookForChild(WKTConstants::TOWGS84);
@@ -1792,13 +1889,6 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                  "PROJ4_GRIDS")) {
         datumPROJ4Grids_ =
             stripQuotes(extensionNode->GP()->children()[1]->GP()->value());
-    }
-
-    auto name = stripQuotes(node->GP()->children()[0]->GP()->value());
-    if (name == "WGS_1984") {
-        properties.set(
-            IdentifiedObject::NAME_KEY,
-            *(GeodeticReferenceFrame::EPSG_6326->name()->description()));
     }
 
     if (!isNull(dynamicNode)) {
@@ -3057,7 +3147,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     }
     auto baseGeodCRS = buildGeodeticCRS(baseGeodCRSNode);
 
-    auto linearUnit = buildUnitInSubNode(node);
+    auto linearUnit = buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR);
     auto angularUnit = baseGeodCRS->coordinateSystem()->axisList()[0]->unit();
 
     auto conversion =
@@ -3842,7 +3932,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
                 text);
         }
     }
-    if (starts_with(text, "+proj=")) {
+    if (starts_with(text, "+proj=") || starts_with(text, "+title=")) {
         return PROJStringParser()
             .attachDatabaseContext(dbContext)
             .createFromPROJString(text);
@@ -4885,7 +4975,7 @@ bool PROJStringFormatter::omitZUnitConversion() const {
 
 // ---------------------------------------------------------------------------
 
-DatabaseContextPtr PROJStringFormatter::databaseContext() const {
+const DatabaseContextPtr &PROJStringFormatter::databaseContext() const {
     return d->dbContext_;
 }
 
@@ -5791,11 +5881,13 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         const auto &lat_1 = getParamValue(step, "lat_1");
         const auto &lat_2 = getParamValue(step, "lat_2");
         const auto &k_0 = getParamValue(step, "k_0");
+        const auto &k = getParamValue(step, "k");
         if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
             getAngularValue(lat_0) == getAngularValue(lat_1)) {
             constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP = 9801;
             mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
-        } else if (!k_0.empty()) {
+        } else if ((!k_0.empty() && getNumericValue(k_0) != 1.0) ||
+                   (!k.empty() && getNumericValue(k) != 1.0)) {
             constexpr int
                 EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN = 1051;
             mapping = getMapping(
@@ -5873,10 +5965,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 }
             }
         } else if (hasParamValue(step, "lat_ts")) {
-            constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_B = 9805;
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
         } else {
-            constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_A = 9804;
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
         }
     } else if (step.name == "stere") {

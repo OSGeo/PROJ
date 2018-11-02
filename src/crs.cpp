@@ -749,9 +749,39 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                                 : isGeocentric() ? io::WKTConstants::GEOCCS
                                                  : io::WKTConstants::GEOGCS,
                          !identifiers().empty());
-    formatter->addQuotedString(nameStr());
+    auto l_name = nameStr();
     const auto &cs = coordinateSystem();
     const auto &axisList = cs->axisList();
+
+    if (formatter->useESRIDialect()) {
+        if (axisList.size() != 2) {
+            io::FormattingException::Throw(
+                "Only export of Geographic 2D CRS is supported in ESRI_WKT1");
+        }
+
+        if (l_name == "WGS 84") {
+            l_name = "GCS_WGS_1984";
+        } else {
+            bool aliasFound = false;
+            const auto &dbContext = formatter->databaseContext();
+            if (dbContext) {
+                auto l_alias = dbContext->getAliasFromOfficialName(
+                    l_name, "geodetic_crs", "ESRI");
+                if (!l_alias.empty()) {
+                    l_name = l_alias;
+                    aliasFound = true;
+                }
+            }
+            if (!aliasFound) {
+                l_name = io::WKTFormatter::morphNameToESRI(l_name);
+                if (!starts_with(l_name, "GCS_")) {
+                    l_name = "GCS_" + l_name;
+                }
+            }
+        }
+    }
+    formatter->addQuotedString(l_name);
+
     const auto &unit = axisList[0]->unit();
     formatter->pushAxisAngularUnit(common::UnitOfMeasure::create(unit));
     exportDatumOrDatumEnsembleToWkt(formatter);
@@ -1101,7 +1131,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     auto cs(cs::EllipsoidalCS::create(util::PropertyMap(), axisLat, axisLong));
 
     auto datum(datum::GeodeticReferenceFrame::create(
-        createMapNameEPSGCode("Nouvelle_Triangulation_Francaise_Paris", 6807),
+        createMapNameEPSGCode("Nouvelle Triangulation Francaise (Paris)", 6807),
         ellps, util::optional<std::string>(), datum::PrimeMeridian::PARIS));
 
     auto gcrs(create(createMapNameEPSGCode("NTF (Paris)", 4807), datum, cs));
@@ -1636,7 +1666,7 @@ const cs::CartesianCSNNPtr &ProjectedCRS::coordinateSystem() PROJ_CONST_DEFN {
 void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
-    if (!isWKT2 &&
+    if (!isWKT2 && !formatter->useESRIDialect() &&
         starts_with(nameStr(), "Popular Visualisation CRS / Mercator")) {
         formatter->startNode(io::WKTConstants::PROJCS, !identifiers().empty());
         formatter->addQuotedString(nameStr());
@@ -1680,7 +1710,23 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->startNode(isWKT2 ? io::WKTConstants::PROJCRS
                                 : io::WKTConstants::PROJCS,
                          !identifiers().empty());
-    formatter->addQuotedString(nameStr());
+    auto l_name = nameStr();
+    if (formatter->useESRIDialect()) {
+        bool aliasFound = false;
+        const auto &dbContext = formatter->databaseContext();
+        if (dbContext) {
+            auto l_alias = dbContext->getAliasFromOfficialName(
+                l_name, "projected_crs", "ESRI");
+            if (!l_alias.empty()) {
+                l_name = l_alias;
+                aliasFound = true;
+            }
+        }
+        if (!aliasFound) {
+            l_name = io::WKTFormatter::morphNameToESRI(l_name);
+        }
+    }
+    formatter->addQuotedString(l_name);
 
     const auto &l_baseCRS = d->baseCRS();
     const auto &geodeticCRSAxisList = l_baseCRS->coordinateSystem()->axisList();
@@ -1726,7 +1772,7 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     d->coordinateSystem()->_exportToWKT(formatter);
 
-    if (!isWKT2) {
+    if (!isWKT2 && !formatter->useESRIDialect()) {
         derivingConversionRef()->addWKTExtensionNode(formatter);
     }
 
@@ -2249,7 +2295,9 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                 "Cannot export BoundCRS with non-WGS 84 hub CRS in WKT1");
         }
         auto params = d->transformation()->getTOWGS84Parameters();
-        formatter->setTOWGS84Parameters(params);
+        if (!formatter->useESRIDialect()) {
+            formatter->setTOWGS84Parameters(params);
+        }
         d->baseCRS()->_exportToWKT(formatter);
         formatter->setTOWGS84Parameters(std::vector<double>());
     }

@@ -722,7 +722,7 @@ void DatabaseContext::attachPJContext(void *pjCtxt) {
 bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
                                              std::string &projFilename,
                                              std::string &projFormat,
-                                             bool &inverse) {
+                                             bool &inverse) const {
     auto res = d->run(
         "SELECT proj_grid_name, proj_grid_format, inverse_direction FROM "
         "grid_alternatives WHERE original_grid_name = ?",
@@ -742,7 +742,8 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
                                       std::string &fullFilename,
                                       std::string &packageName,
                                       std::string &url, bool &directDownload,
-                                      bool &openLicense, bool &gridAvailable) {
+                                      bool &openLicense,
+                                      bool &gridAvailable) const {
     fullFilename.clear();
     packageName.clear();
     url.clear();
@@ -780,6 +781,49 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     openLicense = (res[0][3].empty() ? res[0][4] : res[0][3]) == "1";
     directDownload = (res[0][5].empty() ? res[0][6] : res[0][5]) == "1";
     return true;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DatabaseContext::isKnownName(const std::string &name,
+                                  const std::string &tableName) const {
+    std::string sql("SELECT 1 FROM \"");
+    sql += replaceAll(tableName, "\"", "\"\"");
+    sql += "\" WHERE name = ? LIMIT 1";
+    return !d->run(sql, {name}).empty();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Gets the alias name from an official name.
+ *
+ * @param officialName Official name.
+ * @param tableName Table name/category. Mandatory
+ * @param source Source of the alias. Mandatory
+ * @return Alias name (or empty if not found).
+ * @throw FactoryException
+ */
+std::string
+DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
+                                          const std::string &tableName,
+                                          const std::string &source) const {
+    std::string sql("SELECT auth_name, code FROM \"");
+    sql += replaceAll(tableName, "\"", "\"\"");
+    sql += "\" WHERE name = ?";
+    if (tableName == "geodetic_crs") {
+        sql += " AND type = 'geographic 2D'";
+    }
+    auto res = d->run(sql, {officialName});
+    if (res.empty()) {
+        return std::string();
+    }
+    res = d->run("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
+                 "auth_name = ? AND code = ? AND source = ?",
+                 {tableName, res[0][0], res[0][1], source});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res[0][0];
 }
 
 //! @endcond

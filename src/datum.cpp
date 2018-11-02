@@ -685,10 +685,29 @@ void Ellipsoid::_exportToWKT(
                                 : io::WKTConstants::SPHEROID,
                          !identifiers().empty());
     {
-        const auto &l_name = nameStr();
+        auto l_name = nameStr();
         if (l_name.empty()) {
             formatter->addQuotedString("unnamed");
         } else {
+            if (formatter->useESRIDialect()) {
+                if (l_name == "WGS 84") {
+                    l_name = "WGS_1984";
+                } else {
+                    bool aliasFound = false;
+                    const auto &dbContext = formatter->databaseContext();
+                    if (dbContext) {
+                        auto l_alias = dbContext->getAliasFromOfficialName(
+                            l_name, "ellipsoid", "ESRI");
+                        if (!l_alias.empty()) {
+                            l_name = l_alias;
+                            aliasFound = true;
+                        }
+                    }
+                    if (!aliasFound) {
+                        l_name = io::WKTFormatter::morphNameToESRI(l_name);
+                    }
+                }
+            }
             formatter->addQuotedString(l_name);
         }
         const auto &semiMajor = semiMajorAxis();
@@ -979,9 +998,40 @@ void GeodeticReferenceFrame::_exportToWKT(
         l_name = "unnamed";
     }
     if (!isWKT2) {
-        l_name = replaceAll(l_name, " ", "_");
-        if (l_name == "World_Geodetic_System_1984") {
-            l_name = "WGS_1984";
+        if (formatter->useESRIDialect()) {
+            if (l_name == "World Geodetic System 1984") {
+                l_name = "D_WGS_1984";
+            } else {
+                bool aliasFound = false;
+                const auto &dbContext = formatter->databaseContext();
+                if (dbContext) {
+                    auto l_alias = dbContext->getAliasFromOfficialName(
+                        l_name, "geodetic_datum", "ESRI");
+                    size_t pos;
+                    if (!l_alias.empty()) {
+                        l_name = l_alias;
+                        aliasFound = true;
+                    } else if ((pos = l_name.find(" (")) != std::string::npos) {
+                        l_alias = dbContext->getAliasFromOfficialName(
+                            l_name.substr(0, pos), "geodetic_datum", "ESRI");
+                        if (!l_alias.empty()) {
+                            l_name = l_alias;
+                            aliasFound = true;
+                        }
+                    }
+                }
+                if (!aliasFound) {
+                    l_name = io::WKTFormatter::morphNameToESRI(l_name);
+                    if (!starts_with(l_name, "D_")) {
+                        l_name = "D_" + l_name;
+                    }
+                }
+            }
+        } else {
+            l_name = io::WKTFormatter::morphNameToESRI(l_name);
+            if (l_name == "World_Geodetic_System_1984") {
+                l_name = "WGS_1984";
+            }
         }
     }
     formatter->addQuotedString(l_name);

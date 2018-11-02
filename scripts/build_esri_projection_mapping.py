@@ -35,7 +35,9 @@ import yaml
 
 config_str = """
 - Plate_Carree:
-    WKT2_name: EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL
+    WKT2_name:
+        - EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL
+        - EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL
     Params:
         - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
@@ -203,6 +205,17 @@ config_str = """
             - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
             - Standard_Parallel_2: EPSG_NAME_PARAMETER_LATITUDE_2ND_STD_PARALLEL
             - Scale_Factor: 1.0
+            - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN
+
+    # Tempative mapping. Did not find any example
+    -   WKT2_name: EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN
+        Params:
+            - False_Easting: EPSG_NAME_PARAMETER_EASTING_FALSE_ORIGIN
+            - False_Northing: EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN
+            - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_FALSE_ORIGIN
+            - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
+            - Standard_Parallel_2: EPSG_NAME_PARAMETER_LATITUDE_2ND_STD_PARALLEL
+            - Scale_Factor: EPSG_NAME_PARAMETER_ELLIPSOID_SCALE_FACTOR
             - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN
 
 - Polyconic:
@@ -642,19 +655,23 @@ all_projs = []
 def generate_mapping(WKT2_name, esri_proj_name, Params, suffix=''):
 
     c_name = 'paramsESRI_%s%s' % (esri_proj_name, suffix)
-    all_projs.append([esri_proj_name, WKT2_name, c_name])
+    if isinstance(WKT2_name, list):
+        for WKT2_name_s in WKT2_name:
+            all_projs.append([esri_proj_name, WKT2_name_s, c_name])
+    else:
+        all_projs.append([esri_proj_name, WKT2_name, c_name])
     print('static const ESRIParamMapping %s[] = { ' % c_name)
     for param in Params:
         for param_name in param:
             param_value = param[param_name]
             if isinstance(param_value, str):
                 if param_value.startswith('EPSG_'):
-                    print('  { "%s", %s, 0.0 },' % (param_name, param_value))
+                    print('  { "%s", %s, %s, 0.0 },' % (param_name, param_value, param_value.replace('_NAME_', '_CODE_')))
                 else:
-                    print('  { "%s", "%s", 0.0 },' % (param_name, param_value))
+                    print('  { "%s", "%s", 0, 0.0 },' % (param_name, param_value))
             else:
-                print('  { "%s", nullptr, %.1f },' % (param_name, param_value))
-    print('  { nullptr, nullptr, 0.0 }')
+                print('  { "%s", nullptr, 0, %.1f },' % (param_name, param_value))
+    print('  { nullptr, nullptr, 0, 0.0 }')
     print('};')
 
 
@@ -701,10 +718,12 @@ for item in config:
 
 print('static const ESRIMethodMapping esriMappings[] = {')
 for esri_proj_name, WKT2_name, c_name in all_projs:
-    if WKT2_name.startswith('EPSG_') or WKT2_name.startswith('PROJ_'):
-        print('  { "%s", %s, %s },' % (esri_proj_name, WKT2_name, c_name))
+    if WKT2_name.startswith('EPSG_'):
+        print('  { "%s", %s, %s, %s },' % (esri_proj_name, WKT2_name, WKT2_name.replace('_NAME_', '_CODE_'), c_name))
+    elif WKT2_name.startswith('PROJ_'):
+        print('  { "%s", %s, 0, %s },' % (esri_proj_name, WKT2_name, c_name))
     else:
-        print('  { "%s", "%s", %s },' % (esri_proj_name, WKT2_name, c_name))
+        print('  { "%s", "%s", 0, %s },' % (esri_proj_name, WKT2_name, c_name))
 print('};')
 
 print("""

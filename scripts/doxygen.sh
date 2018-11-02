@@ -53,7 +53,7 @@ for i in ${TOPDIR}/docs/build/xml/*; do
 done
 
 # There is a confusion for Breathe between PROJStringFormatter::Convention and WKTFormatter:Convention
-sed "s/Convention/Convention_/g" < ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml | sed "s/WKT2_2018/_WKT2_2018/g" | sed "s/WKT2_2015/_WKT2_2015/g" | sed "s/WKT1_GDAL/_WKT1_GDAL/g" > ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml.tmp
+sed "s/Convention/Convention_/g" < ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml | sed "s/WKT2_2018/_WKT2_2018/g" | sed "s/WKT2_2015/_WKT2_2015/g" | sed "s/WKT1_GDAL/_WKT1_GDAL/g" | sed "s/WKT1_ESRI/_WKT1_ESRI/g" > ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml.tmp
 mv ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml.tmp  ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml
 
 popd > /dev/null || exit

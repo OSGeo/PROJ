@@ -195,7 +195,21 @@ void UnitOfMeasure::_exportToWKT(
     }
 
     {
-        formatter->addQuotedString(name());
+        const auto &l_name = name();
+        const bool esri = formatter->useESRIDialect();
+        if (esri) {
+            if (ci_equal(l_name, "degree")) {
+                formatter->addQuotedString("Degree");
+            } else if (ci_equal(l_name, "grad")) {
+                formatter->addQuotedString("Grad");
+            } else if (ci_equal(l_name, "metre")) {
+                formatter->addQuotedString("Meter");
+            } else {
+                formatter->addQuotedString(l_name);
+            }
+        } else {
+            formatter->addQuotedString(l_name);
+        }
         const auto &factor = conversionToSI();
         if (!isWKT2 || factor != 0.0) {
             // Some TIMEUNIT do not have a conversion factor

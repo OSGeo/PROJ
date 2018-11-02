@@ -41,6 +41,8 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
+#include "projects.h" // M_PI
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -300,6 +302,19 @@ getMappingsFromESRI(const std::string &esri_name) {
         }
     }
     return res;
+}
+
+// ---------------------------------------------------------------------------
+
+static const ESRIMethodMapping *getESRIMapping(const std::string &wkt2_name,
+                                               int epsg_code) {
+    for (const auto &mapping : esriMappings) {
+        if ((epsg_code != 0 && mapping.epsg_code == epsg_code) ||
+            ci_equal(wkt2_name, mapping.wkt2_name)) {
+            return &mapping;
+        }
+    }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -3934,8 +3949,293 @@ CoordinateOperationNNPtr Conversion::inverse() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+static double msfn(double phi, double ec) {
+    const double sinphi = std::sin(phi);
+    const double cosphi = std::cos(phi);
+    const double sinphi_ec = sinphi * ec;
+    return cosphi / std::sqrt(1.0 - sinphi_ec * sinphi_ec);
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/**
+ * \brief Return an equivalent projection.
+ *
+ * Currently implemented:
+ * <ul>
+ * <li>EPSG_CODE_METHOD_MERCATOR_VARIANT_A (1SP) to
+ * EPSG_CODE_METHOD_MERCATOR_VARIANT_B (2SP)</li>
+ * <li>EPSG_CODE_METHOD_MERCATOR_VARIANT_B (2SP) to
+ * EPSG_CODE_METHOD_MERCATOR_VARIANT_A (1SP)</li>
+ * </ul>
+ *
+ * @param targetEPSGCode EPSG code of the target method.
+ * @return new conversion, or nullptr
+ */
+ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
+    const int current_epsg_code = method()->getEPSGCode();
+    if (current_epsg_code == targetEPSGCode) {
+        return util::nn_dynamic_pointer_cast<Conversion>(shared_from_this());
+    }
+
+    auto geogCRS = dynamic_cast<crs::GeodeticCRS *>(sourceCRS().get());
+    if (!geogCRS) {
+        return nullptr;
+    }
+
+    if (current_epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_A &&
+        targetEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
+        parameterValueNumericAsSI(
+            EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+            EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) == 0.0) {
+        const double k0 = parameterValueNumericAsSI(
+            EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+            EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN);
+        if (!(k0 > 0 && k0 <= 1.0 + 1e-10))
+            return nullptr;
+        const double rf =
+            geogCRS->ellipsoid()->computeInverseFlattening().value();
+        const double f = rf != 0.0 ? 1. / rf : 0.0;
+        const double e2 = 2 * f - f * f;
+        if (e2 < 0)
+            return nullptr;
+        const double dfStdP1Lat =
+            (k0 >= 1.0)
+                ? 0.0
+                : std::acos(std::sqrt((1.0 - e2) / ((1.0 / (k0 * k0)) - e2)));
+        auto latitudeFirstParallel = common::Angle(
+            common::Angle(dfStdP1Lat, common::UnitOfMeasure::RADIAN)
+                .convertToUnit(common::UnitOfMeasure::DEGREE),
+            common::UnitOfMeasure::DEGREE);
+        auto conv = createMercatorVariantB(
+            util::PropertyMap(), latitudeFirstParallel,
+            common::Angle(parameterValueMeasure(
+                EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+                EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)),
+            common::Length(
+                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_EASTING,
+                                      EPSG_CODE_PARAMETER_FALSE_EASTING)),
+            common::Length(
+                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
+                                      EPSG_CODE_PARAMETER_FALSE_NORTHING)));
+        return conv;
+    }
+
+    if (current_epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
+        targetEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_A) {
+        const double phi1 = parameterValueNumericAsSI(
+            EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL);
+        if (!(fabs(phi1) < M_PI / 2))
+            return nullptr;
+        const double rf =
+            geogCRS->ellipsoid()->computeInverseFlattening().value();
+        const double f = rf != 0.0 ? 1. / rf : 0.0;
+        const double e2 = 2 * f - f * f;
+        if (e2 < 0)
+            return nullptr;
+        const double ec = std::sqrt(e2);
+        const double k0 = msfn(phi1, ec);
+        auto conv = createMercatorVariantA(
+            util::PropertyMap(),
+            common::Angle(0.0, common::UnitOfMeasure::DEGREE),
+            common::Angle(parameterValueMeasure(
+                EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+                EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)),
+            common::Scale(k0, common::UnitOfMeasure::SCALE_UNITY),
+            common::Length(
+                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_EASTING,
+                                      EPSG_CODE_PARAMETER_FALSE_EASTING)),
+            common::Length(
+                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
+                                      EPSG_CODE_PARAMETER_FALSE_NORTHING)));
+        return conv;
+    }
+
+#if 0
+ * <li>EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP to
+ * EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP</li>
+ * <li>EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP to
+ * EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP</li>
+
+    if( EQUAL(pszProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_1SP) &&
+        EQUAL(pszTargetProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_2SP) )
+    {
+        // Notations m0, t0, n, m1, t1, F are those of the EPSG guidance
+        // "1.3.1.1 Lambert Conic Conformal (2SP)" and
+        // "1.3.1.2 Lambert Conic Conformal (1SP)" and
+        // or Snyder pages 106-109
+        const double dfLatitudeOfOrigin =
+            GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0);
+        const double phi0 = DegToRad(dfLatitudeOfOrigin);
+        const double k0 = GetNormProjParm(SRS_PP_SCALE_FACTOR, 1.0);
+        if( !(fabs(phi0) < M_PI / 2) )
+            return nullptr;
+        if( !(k0 > 0 && k0 <= 1.0+ 1e-10) )
+            return nullptr;
+        const double ec = GetEccentricity();
+        if( ec < 0 )
+            return nullptr;
+        const double m0 = msfn(phi0, ec);
+        const double t0 = tsfn(phi0, ec);
+        const double n = sin(phi0);
+        if( fabs(n) < 1e-10 )
+            return nullptr;
+        OGRSpatialReference* poLCC2SP = new OGRSpatialReference();
+        poLCC2SP->CopyGeogCSFrom(this);
+        if( fabs(k0 - 1.0) <= 1e-10 )
+        {
+            poLCC2SP->SetLCC( dfLatitudeOfOrigin,
+                              dfLatitudeOfOrigin,
+                              dfLatitudeOfOrigin,
+                              GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0),
+                              GetNormProjParm(SRS_PP_FALSE_EASTING, 0.0),
+                              GetNormProjParm(SRS_PP_FALSE_NORTHING, 0.0) );
+        }
+        else
+        {
+            const double K = k0 * m0 / pow(t0, n);
+            const double phi1 =
+                asin(find_zero_lcc_1sp_to_2sp_f(n, true, K, ec));
+            const double phi2 =
+                asin(find_zero_lcc_1sp_to_2sp_f(n, false, K, ec));
+            double phi1Deg = RadToDeg(phi1);
+            double phi2Deg = RadToDeg(phi2);
+
+            // Try to round to hundreth of degree if very close to it
+            if( fabs(phi1Deg * 1000 - floor(phi1Deg * 1000 + 0.5)) < 1e-8 )
+                phi1Deg = floor(phi1Deg * 1000 + 0.5) / 1000;
+            if( fabs(phi2Deg * 1000 - floor(phi2Deg * 1000 + 0.5)) < 1e-8 )
+                phi2Deg = floor(phi2Deg * 1000 + 0.5) / 1000;
+
+            // The following improvement is too turn the LCC1SP equivalent of
+            // EPSG:2154 to the real LCC2SP
+            // If the computed latitude of origin is close to .0 or .5 degrees
+            // then check if rounding it to it will get a false northing
+            // close to an integer
+            const double FN = GetNormProjParm(SRS_PP_FALSE_NORTHING, 0.0);
+            if( fabs(dfLatitudeOfOrigin * 2 -
+                     floor(dfLatitudeOfOrigin * 2 + 0.5)) < 0.2 )
+            {
+                const double dfRoundedLatOfOrig =
+                    floor(dfLatitudeOfOrigin * 2 + 0.5) / 2;
+                const double m1 = msfn(phi1, ec);
+                const double t1 = tsfn(phi1, ec);
+                const double F = m1 / (n * pow(t1, n));
+                const double a = GetSemiMajor();
+                const double tRoundedLatOfOrig =
+                    tsfn(DegToRad(dfRoundedLatOfOrig), ec);
+                const double FN_correction =
+                    a * F * (pow(tRoundedLatOfOrig, n) - pow(t0, n));
+                const double FN_corrected = FN - FN_correction;
+                const double FN_corrected_rounded = floor(FN_corrected + 0.5);
+                if( fabs(FN_corrected - FN_corrected_rounded) < 1e-8 )
+                {
+                    poLCC2SP->SetLCC(
+                              phi1Deg,
+                              phi2Deg,
+                              dfRoundedLatOfOrig,
+                              GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0),
+                              GetNormProjParm(SRS_PP_FALSE_EASTING, 0.0),
+                              FN_corrected_rounded );
+                    return poLCC2SP;
+                }
+            }
+
+            poLCC2SP->SetLCC( phi1Deg,
+                              phi2Deg,
+                              dfLatitudeOfOrigin,
+                              GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0),
+                              GetNormProjParm(SRS_PP_FALSE_EASTING, 0.0),
+                              FN );
+        }
+        return poLCC2SP;
+    }
+
+    if( EQUAL(pszProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_2SP) &&
+        EQUAL(pszTargetProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_1SP) )
+    {
+        // Notations m0, t0, m1, t1, m2, t2 n, F are those of the EPSG guidance
+        // "1.3.1.1 Lambert Conic Conformal (2SP)" and
+        // "1.3.1.2 Lambert Conic Conformal (1SP)" and
+        // or Snyder pages 106-109
+        const double phiF =
+            DegToRad(GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0));
+        const double phi1 =
+            DegToRad(GetNormProjParm(SRS_PP_STANDARD_PARALLEL_1, 0.0));
+        const double phi2 =
+            DegToRad(GetNormProjParm(SRS_PP_STANDARD_PARALLEL_2, 0.0));
+        if( !(fabs(phiF) < M_PI / 2) )
+            return nullptr;
+        if( !(fabs(phi1) < M_PI / 2) )
+            return nullptr;
+        if( !(fabs(phi2) < M_PI / 2) )
+            return nullptr;
+        const double ec = GetEccentricity();
+        if( ec < 0 )
+            return nullptr;
+        const double m1 = msfn(phi1, ec);
+        const double m2 = msfn(phi2, ec);
+        const double t1 = tsfn(phi1, ec);
+        const double t2 = tsfn(phi2, ec);
+        const double n_denom = log(t1) - log(t2);
+        const double n = (fabs(n_denom) < 1e-10) ? sin(phi1) :
+                                (log(m1) - log(m2)) / n_denom;
+        if( fabs(n) < 1e-10 )
+            return nullptr;
+        const double F = m1 / (n * pow(t1, n));
+        const double phi0 = asin(n);
+        const double m0 = msfn(phi0, ec);
+        const double t0 = tsfn(phi0, ec);
+        const double F0 = m0 / (n * pow(t0, n));
+        const double k0 = F / F0;
+        const double a = GetSemiMajor();
+        const double tF = tsfn(phiF, ec);
+        const double FN_correction = a * F * (pow(tF, n) - pow(t0, n));
+
+        OGRSpatialReference* poLCC1SP = new OGRSpatialReference();
+        poLCC1SP->CopyGeogCSFrom(this);
+        double phi0Deg = RadToDeg(phi0);
+        // Try to round to thousandth of degree if very close to it
+        if( fabs(phi0Deg * 1000 - floor(phi0Deg * 1000 + 0.5)) < 1e-8 )
+            phi0Deg = floor(phi0Deg * 1000 + 0.5) / 1000;
+        poLCC1SP->SetLCC1SP(
+                phi0Deg,
+                GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0),
+                k0,
+                GetNormProjParm(SRS_PP_FALSE_EASTING, 0.0),
+                GetNormProjParm(SRS_PP_FALSE_NORTHING, 0.0) +
+                    (fabs(FN_correction) > 1e-8 ? FN_correction : 0) );
+        return poLCC1SP;
+    }
+#endif
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
+    const auto &l_method = method();
+    const auto &methodName = l_method->nameStr();
+    const auto methodEPSGCode = l_method->getEPSGCode();
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+
+    if (!isWKT2 && formatter->useESRIDialect()) {
+        if (methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_A ||
+            ci_equal(methodName, EPSG_NAME_METHOD_MERCATOR_VARIANT_A)) {
+            auto eqConv =
+                convertToOtherMethod(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+            if (eqConv) {
+                eqConv->_exportToWKT(formatter);
+                return;
+            }
+        }
+    }
+
     if (isWKT2) {
         formatter->startNode(formatter->useDerivingConversion()
                                  ? io::WKTConstants::DERIVINGCONVERSION
@@ -3949,10 +4249,138 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     }
 
     bool bAlreadyWritten = false;
-    if (!isWKT2) {
-        const auto &l_method = method();
-        const auto &methodName = l_method->nameStr();
-        const int methodEPSGCode = l_method->getEPSGCode();
+    if (!isWKT2 && formatter->useESRIDialect()) {
+        const ESRIParamMapping *esriParams = nullptr;
+        const char *esriMethodName = nullptr;
+        const auto *esriMapping = getESRIMapping(methodName, methodEPSGCode);
+        if (esriMapping) {
+            esriParams = esriMapping->params;
+            esriMethodName = esriMapping->esri_name;
+            auto l_targetCRS = targetCRS();
+            if (esriMapping->epsg_code ==
+                    EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL ||
+                esriMapping->epsg_code ==
+                    EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL) {
+                if (l_targetCRS &&
+                    ci_find(l_targetCRS->nameStr(), "Plate Carree") !=
+                        std::string::npos &&
+                    parameterValueNumericAsSI(
+                        EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+                        EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) ==
+                        0.0) {
+                    esriParams = paramsESRI_Plate_Carree;
+                    esriMethodName = "Plate_Carree";
+                } else {
+                    esriParams = paramsESRI_Equidistant_Cylindrical;
+                    esriMethodName = "Equidistant_Cylindrical";
+                }
+            } else if (esriMapping->epsg_code ==
+                       EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
+                if (l_targetCRS && (ci_find(l_targetCRS->nameStr(), "Gauss") !=
+                                        std::string::npos ||
+                                    ci_find(l_targetCRS->nameStr(), "GK_") !=
+                                        std::string::npos)) {
+                    esriParams = paramsESRI_Gauss_Kruger;
+                    esriMethodName = "Gauss_Kruger";
+                } else {
+                    esriParams = paramsESRI_Transverse_Mercator;
+                    esriMethodName = "Transverse_Mercator";
+                }
+            } else if (esriMapping->epsg_code ==
+                       EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
+                if (parameterValueNumericAsSI(
+                        EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
+                        EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) ==
+                    parameterValueNumericAsSI(
+                        EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
+                        EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) {
+                    esriParams =
+                        paramsESRI_Hotine_Oblique_Mercator_Azimuth_Natural_Origin;
+                    esriMethodName =
+                        "Hotine_Oblique_Mercator_Azimuth_Natural_Origin";
+                } else {
+                    esriParams =
+                        paramsESRI_Rectified_Skew_Orthomorphic_Natural_Origin;
+                    esriMethodName =
+                        "Rectified_Skew_Orthomorphic_Natural_Origin";
+                }
+            } else if (esriMapping->epsg_code ==
+                       EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) {
+                if (parameterValueNumericAsSI(
+                        EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
+                        EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) ==
+                    parameterValueNumericAsSI(
+                        EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
+                        EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) {
+                    esriParams =
+                        paramsESRI_Hotine_Oblique_Mercator_Azimuth_Center;
+                    esriMethodName = "Hotine_Oblique_Mercator_Azimuth_Center";
+                } else {
+                    esriParams = paramsESRI_Rectified_Skew_Orthomorphic_Center;
+                    esriMethodName = "Rectified_Skew_Orthomorphic_Center";
+                }
+            } else if (esriMapping->epsg_code ==
+                       EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
+                if (parameterValueNumericAsSI(
+                        EPSG_NAME_PARAMETER_LATITUDE_STD_PARALLEL,
+                        EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL) > 0) {
+                    esriMethodName = "Stereographic_North_Pole";
+                } else {
+                    esriMethodName = "Stereographic_South_Pole";
+                }
+            }
+        }
+
+        if (esriMethodName && esriParams) {
+            formatter->startNode(io::WKTConstants::PROJECTION, false);
+            formatter->addQuotedString(esriMethodName);
+            formatter->endNode();
+
+            for (int i = 0; esriParams[i].esri_name != nullptr; i++) {
+                const auto &esriParam = esriParams[i];
+                formatter->startNode(io::WKTConstants::PARAMETER, false);
+                formatter->addQuotedString(esriParam.esri_name);
+                if (esriParam.wkt2_name) {
+                    const auto &pv = parameterValue(esriParam.wkt2_name,
+                                                    esriParam.epsg_code);
+                    if (pv && pv->type() == ParameterValue::Type::MEASURE) {
+                        const auto &v = pv->value();
+                        // as we don't output the natural unit, output
+                        // to the registered linear / angular unit.
+                        const auto &unitType = v.unit().type();
+                        if (unitType == common::UnitOfMeasure::Type::LINEAR) {
+                            formatter->add(v.convertToUnit(
+                                *(formatter->axisLinearUnit())));
+                        } else if (unitType ==
+                                   common::UnitOfMeasure::Type::ANGULAR) {
+                            const auto &angUnit =
+                                *(formatter->axisAngularUnit());
+                            double val = v.convertToUnit(angUnit);
+                            if (angUnit == common::UnitOfMeasure::DEGREE) {
+                                if (val > 180.0) {
+                                    val -= 360.0;
+                                } else if (val < -180.0) {
+                                    val += 360.0;
+                                }
+                            }
+                            formatter->add(val);
+                        } else {
+                            formatter->add(v.getSIValue());
+                        }
+                    } else if (ci_find(esriParam.esri_name, "scale") !=
+                               std::string::npos) {
+                        formatter->add(1.0);
+                    } else {
+                        formatter->add(0.0);
+                    }
+                } else {
+                    formatter->add(esriParam.fixed_value);
+                }
+                formatter->endNode();
+            }
+            bAlreadyWritten = true;
+        }
+    } else if (!isWKT2) {
         if (ci_equal(methodName,
                      EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) ||
             methodEPSGCode ==
@@ -4010,10 +4438,10 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     }
 
     if (!bAlreadyWritten) {
-        method()->_exportToWKT(formatter);
+        l_method->_exportToWKT(formatter);
 
         const MethodMapping *mapping =
-            !isWKT2 ? getMapping(method().get()) : nullptr;
+            !isWKT2 ? getMapping(l_method.get()) : nullptr;
         for (const auto &paramValue : parameterValues()) {
             paramValue->_exportToWKT(formatter, mapping);
         }

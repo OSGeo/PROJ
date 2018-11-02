@@ -308,6 +308,30 @@ TEST(crs, EPSG_4326_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4326_as_WKT1_ESRI_with_database) {
+    auto crs = GeographicCRS::EPSG_4326;
+    WKTFormatterNNPtr f(WKTFormatter::create(
+        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+    EXPECT_EQ(crs->exportToWKT(f.get()),
+              "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_"
+              "1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+              "UNIT[\"Degree\",0.0174532925199433]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_4326_as_WKT1_ESRI_without_database) {
+    auto crs = GeographicCRS::EPSG_4326;
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI));
+    EXPECT_EQ(crs->exportToWKT(f.get()),
+              "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_"
+              "1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+              "UNIT[\"Degree\",0.0174532925199433]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4326_as_PROJ_string) {
     auto crs = GeographicCRS::EPSG_4326;
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
@@ -389,6 +413,17 @@ TEST(crs, EPSG_4979_as_WKT1_GDAL) {
               "    AUTHORITY[\"EPSG\",\"4979\"]]");
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_4979_as_WKT1_ESRI) {
+    auto crs = GeographicCRS::EPSG_4979;
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI));
+    EXPECT_THROW(crs->exportToWKT(f.get()), FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, GeographicCRS_is2DPartOf3D) {
     EXPECT_TRUE(
         GeographicCRS::EPSG_4326->is2DPartOf3D(GeographicCRS::EPSG_4979));
@@ -409,7 +444,7 @@ TEST(crs, EPSG_4807_as_WKT2) {
     EXPECT_EQ(
         f->toString(),
         "GEODCRS[\"NTF (Paris)\",\n"
-        "    DATUM[\"Nouvelle_Triangulation_Francaise_Paris\",\n"
+        "    DATUM[\"Nouvelle Triangulation Francaise (Paris)\",\n"
         "        ELLIPSOID[\"Clarke 1880 (IGN)\",6378249.2,293.466021293627,\n"
         "            LENGTHUNIT[\"metre\",1]]],\n"
         "    PRIMEM[\"Paris\",2.5969213,\n"
@@ -433,7 +468,7 @@ TEST(crs, EPSG_4807_as_WKT2_SIMPLIFIED) {
     crs->exportToWKT(f.get());
     EXPECT_EQ(f->toString(),
               "GEODCRS[\"NTF (Paris)\",\n"
-              "    DATUM[\"Nouvelle_Triangulation_Francaise_Paris\",\n"
+              "    DATUM[\"Nouvelle Triangulation Francaise (Paris)\",\n"
               "        ELLIPSOID[\"Clarke 1880 "
               "(IGN)\",6378249.2,293.466021293627]],\n"
               "    PRIMEM[\"Paris\",2.5969213],\n"
@@ -466,6 +501,31 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
         "    AXIS[\"Latitude\",NORTH],\n"
         "    AXIS[\"Longitude\",EAST],\n"
         "    AUTHORITY[\"EPSG\",\"4807\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_4807_as_WKT1_ESRI_with_database) {
+    auto crs = GeographicCRS::EPSG_4807;
+    WKTFormatterNNPtr f(WKTFormatter::create(
+        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+    EXPECT_EQ(crs->exportToWKT(f.get()),
+              "GEOGCS[\"GCS_NTF_Paris\",DATUM[\"D_NTF\",SPHEROID[\"Clarke_1880_"
+              "IGN\",6378249.2,293.466021293627]],PRIMEM[\"Paris\",2.33722917],"
+              "UNIT[\"Grad\",0.015707963267949]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_4807_as_WKT1_ESRI_without_database) {
+    auto crs = GeographicCRS::EPSG_4807;
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI));
+    EXPECT_EQ(crs->exportToWKT(f.get()),
+              "GEOGCS[\"GCS_NTF_Paris\",DATUM[\"D_Nouvelle_Triangulation_"
+              "Francaise_Paris\",SPHEROID[\"Clarke_1880_IGN\",6378249.2,293."
+              "466021293627]],PRIMEM[\"Paris\",2.33722917],UNIT[\"Grad\",0."
+              "015707963267949]]");
 }
 
 // ---------------------------------------------------------------------------
@@ -507,6 +567,19 @@ TEST(crs, EPSG_4267) {
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
         "+proj=longlat +datum=NAD27");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_4267_as_WKT1_ESRI_with_database) {
+    auto crs = GeographicCRS::EPSG_4267;
+    WKTFormatterNNPtr f(WKTFormatter::create(
+        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+    EXPECT_EQ(crs->exportToWKT(f.get()),
+              "GEOGCS[\"GCS_North_American_1927\","
+              "DATUM[\"D_North_American_1927\",SPHEROID[\"Clarke_1866\","
+              "6378206.4,294.978698213898]],PRIMEM[\"Greenwich\",0.0],"
+              "UNIT[\"Degree\",0.0174532925199433]]");
 }
 
 // ---------------------------------------------------------------------------
@@ -588,7 +661,7 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string_and_WKT1) {
         wkt1,
         "PROJCS[\"NTF (Paris) / Lambert Nord France\",\n"
         "    GEOGCS[\"NTF (Paris)\",\n"
-        "        DATUM[\"Nouvelle_Triangulation_Francaise_(Paris)\",\n"
+        "        DATUM[\"Nouvelle_Triangulation_Francaise_Paris\",\n"
         "            SPHEROID[\"Clarke 1880 (IGN)\",6378249.2,293.4660213]],\n"
         "        PRIMEM[\"Paris\",2.33722917000759],\n"
         "        UNIT[\"grad\",0.015707963268],\n"
@@ -604,6 +677,25 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string_and_WKT1) {
         "    AXIS[\"Easting\",EAST],\n"
         "    AXIS[\"Northing\",NORTH],\n"
         "    AUTHORITY[\"EPSG\",\"27561\"]]");
+
+    auto wkt1_esri = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                             DatabaseContext::create())
+            .get());
+    EXPECT_EQ(
+        wkt1_esri,
+        "PROJCS[\"NTF_Paris_Lambert_Nord_France\",GEOGCS[\"GCS_NTF_Paris\","
+        "DATUM[\"D_NTF\",SPHEROID[\"Clarke_1880_IGN\",6378249.2,"
+        "293.4660213]],PRIMEM[\"Paris\",2.33722917000759],"
+        "UNIT[\"Grad\",0.015707963268]],"
+        "PROJECTION[\"Lambert_Conformal_Conic\"],"
+        "PARAMETER[\"False_Easting\",600000.0],"
+        "PARAMETER[\"False_Northing\",200000.0],"
+        "PARAMETER[\"Central_Meridian\",0.0],"
+        "PARAMETER[\"Standard_Parallel_1\",55.0],"
+        "PARAMETER[\"Scale_Factor\",0.999877341],"
+        "PARAMETER[\"Latitude_Of_Origin\",55.0],"
+        "UNIT[\"Meter\",1.0]]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1197,6 +1289,30 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_as_WKT1_ESRI) {
+    auto crs = createProjected();
+
+    auto expected = "PROJCS[\"WGS_1984_UTM_Zone_31N\",GEOGCS[\"GCS_WGS_1984\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,"
+                    "298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Transverse_Mercator\"],"
+                    "PARAMETER[\"False_Easting\",500000.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Central_Meridian\",3.0],"
+                    "PARAMETER[\"Scale_Factor\",0.9996],"
+                    "PARAMETER[\"Latitude_Of_Origin\",0.0],"
+                    "UNIT[\"Meter\",1.0]]";
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_as_PROJ_string) {
     auto crs = createProjected();
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
@@ -1208,6 +1324,444 @@ TEST(crs, projectedCRS_as_PROJ_string) {
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
         "+proj=utm +zone=31 +datum=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, mercator_1SP_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 "
+        "+ellps=bessel");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_Unknown_based_on_Bessel_1841_ellipsoid\","
+                    "SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],"
+                    "PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Mercator\"],"
+                    "PARAMETER[\"False_Easting\",3900000.0],"
+                    "PARAMETER[\"False_Northing\",900000.0],"
+                    "PARAMETER[\"Central_Meridian\",110.0],"
+                    "PARAMETER[\"Standard_Parallel_1\",4.45405154589748],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Plate_Carree_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+title=my Plate carree +proj=eqc");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"my_Plate_carree\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Plate_Carree\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Central_Meridian\",0.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Equidistant_Cylindrical_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString("+proj=eqc");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Equidistant_Cylindrical\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Central_Meridian\",0.0],"
+                    "PARAMETER[\"Standard_Parallel_1\",0.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Hotine_Oblique_Mercator_Azimuth_Natural_Origin_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=omerc +no_uoff +gamma=295 +alpha=295");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION["
+                    "\"Hotine_Oblique_Mercator_Azimuth_Natural_Origin\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Scale_Factor\",1.0],"
+                    // we renormalize angles to [-180,180]
+                    "PARAMETER[\"Azimuth\",-65.0],"
+                    "PARAMETER[\"Longitude_Of_Center\",0.0],"
+                    "PARAMETER[\"Latitude_Of_Center\",0.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Rectified_Skew_Orthomorphic_Natural_Origin_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=omerc +no_uoff +gamma=3 +alpha=2");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION["
+                    "\"Rectified_Skew_Orthomorphic_Natural_Origin\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Scale_Factor\",1.0],"
+                    "PARAMETER[\"Azimuth\",2.0],"
+                    "PARAMETER[\"Longitude_Of_Center\",0.0],"
+                    "PARAMETER[\"Latitude_Of_Center\",0.0],"
+                    "PARAMETER[\"XY_Plane_Rotation\",3.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Hotine_Oblique_Mercator_Azimuth_Center_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=omerc +gamma=2 +alpha=2");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION["
+                    "\"Hotine_Oblique_Mercator_Azimuth_Center\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Scale_Factor\",1.0],"
+                    "PARAMETER[\"Azimuth\",2.0],"
+                    "PARAMETER[\"Longitude_Of_Center\",0.0],"
+                    "PARAMETER[\"Latitude_Of_Center\",0.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Rectified_Skew_Orthomorphic_Center_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=omerc +gamma=3 +alpha=2");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION["
+                    "\"Rectified_Skew_Orthomorphic_Center\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Scale_Factor\",1.0],"
+                    "PARAMETER[\"Azimuth\",2.0],"
+                    "PARAMETER[\"Longitude_Of_Center\",0.0],"
+                    "PARAMETER[\"Latitude_Of_Center\",0.0],"
+                    "PARAMETER[\"XY_Plane_Rotation\",3.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Gauss_Kruger_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+title=my Gauss Kruger +proj=tmerc");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"my_Gauss_Kruger\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,"
+                    "298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Gauss_Kruger\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Central_Meridian\",0.0],"
+                    "PARAMETER[\"Scale_Factor\",1.0],"
+                    "PARAMETER[\"Latitude_Of_Origin\",0.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Stereographic_North_Pole_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=stere +lat_0=90 +lat_ts=70");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Stereographic_North_Pole\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Central_Meridian\",0.0],"
+                    "PARAMETER[\"Standard_Parallel_1\",70.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Stereographic_South_Pole_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=stere +lat_0=-90 +lat_ts=-70");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Stereographic_South_Pole\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Central_Meridian\",0.0],"
+                    "PARAMETER[\"Standard_Parallel_1\",-70.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Krovak_North_Orientated_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString("+proj=krovak");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Krovak\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
+                    "PARAMETER[\"Scale_Factor\",1.0],"
+                    "PARAMETER[\"Azimuth\",30.2881397222222],"
+                    "PARAMETER[\"Longitude_Of_Center\",0.0],"
+                    "PARAMETER[\"Latitude_Of_Center\",0.0],"
+                    "PARAMETER[\"X_Scale\",-1.0],"
+                    "PARAMETER[\"Y_Scale\",1.0],"
+                    "PARAMETER[\"XY_Plane_Rotation\",90.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, Krovak_as_WKT1_ESRI) {
+
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=krovak +axis=swu");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Krovak\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
+                    "PARAMETER[\"Scale_Factor\",1.0],"
+                    "PARAMETER[\"Azimuth\",30.2881397222222],"
+                    "PARAMETER[\"Longitude_Of_Center\",0.0],"
+                    "PARAMETER[\"Latitude_Of_Center\",0.0],"
+                    "PARAMETER[\"X_Scale\",1.0],"
+                    "PARAMETER[\"Y_Scale\",1.0],"
+                    "PARAMETER[\"XY_Plane_Rotation\",0.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, LCC_1SP_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=lcc +lat_1=1 +lat_0=1 +k=0.9");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Lambert_Conformal_Conic\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Central_Meridian\",0.0],"
+                    "PARAMETER[\"Standard_Parallel_1\",1.0],"
+                    "PARAMETER[\"Scale_Factor\",0.9],"
+                    "PARAMETER[\"Latitude_Of_Origin\",1.0],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, LCC_2SP_as_WKT1_ESRI) {
+
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=lcc +lat_0=1.5 +lat_1=1 +lat_2=2");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\","
+                    "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                    "6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
+                    "UNIT[\"Degree\",0.0174532925199433]],"
+                    "PROJECTION[\"Lambert_Conformal_Conic\"],"
+                    "PARAMETER[\"False_Easting\",0.0],"
+                    "PARAMETER[\"False_Northing\",0.0],"
+                    "PARAMETER[\"Central_Meridian\",0.0],"
+                    "PARAMETER[\"Standard_Parallel_1\",1.0],"
+                    "PARAMETER[\"Standard_Parallel_2\",2.0],"
+                    "PARAMETER[\"Latitude_Of_Origin\",1.5],"
+                    "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, ESRI_WKT1_to_ESRI_WKT1) {
+
+    auto in_wkt =
+        "PROJCS[\"NAD_1983_CORS96_StatePlane_North_Carolina_FIPS_3200_Ft_US\","
+        "GEOGCS[\"GCS_NAD_1983_CORS96\",DATUM[\"D_NAD_1983_CORS96\","
+        "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Lambert_Conformal_Conic\"],"
+        "PARAMETER[\"False_Easting\",2000000.0],"
+        "PARAMETER[\"False_Northing\",0.0],"
+        "PARAMETER[\"Central_Meridian\",-79.0],"
+        "PARAMETER[\"Standard_Parallel_1\",34.33333333333334],"
+        "PARAMETER[\"Standard_Parallel_2\",36.16666666666666],"
+        "PARAMETER[\"Latitude_Of_Origin\",33.75],"
+        "UNIT[\"Foot_US\",0.3048006096012192]]";
+
+    auto obj = WKTParser().createFromWKT(in_wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto expected =
+        "PROJCS[\"NAD_1983_CORS96_StatePlane_North_Carolina_FIPS_3200_Ft_US\","
+        "GEOGCS[\"GCS_NAD_1983_CORS96\",DATUM[\"D_NAD_1983_CORS96\","
+        "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Lambert_Conformal_Conic\"],"
+        "PARAMETER[\"False_Easting\",2000000.0],"
+        "PARAMETER[\"False_Northing\",0.0],"
+        "PARAMETER[\"Central_Meridian\",-79.0],"
+        "PARAMETER[\"Standard_Parallel_1\",34.3333333333333],"
+        "PARAMETER[\"Standard_Parallel_2\",36.1666666666667],"
+        "PARAMETER[\"Latitude_Of_Origin\",33.75],"
+        "UNIT[\"Foot_US\",0.304800609601219]]";
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
 }
 
 // ---------------------------------------------------------------------------

@@ -142,16 +142,6 @@ using WKTFormatterNNPtr = util::nn<WKTFormatterPtr>;
  */
 class WKTFormatter {
   public:
-    //! @cond Doxygen_Suppress
-    /** WKT version. */
-    enum class PROJ_DLL Version {
-        /** WKT1 */
-        WKT1,
-        /** WKT2 / ISO 19162 */
-        WKT2
-    };
-    //! @endcond
-
     /** WKT variant. */
     enum class PROJ_DLL Convention {
         /** Full WKT2 string, conforming to ISO 19162:2015(E) / OGC 12-063r5
@@ -190,11 +180,15 @@ class WKTFormatter {
         WKT2_2018_SIMPLIFIED,
 
         /** WKT1 as traditionally output by GDAL */
-        WKT1_GDAL
+        WKT1_GDAL,
+
+        /** WKT1 as traditionally output by ESRI software */
+        WKT1_ESRI,
     };
 
     PROJ_DLL static WKTFormatterNNPtr
-    create(Convention convention = Convention::WKT2);
+    create(Convention convention = Convention::WKT2,
+           DatabaseContextPtr dbContext = nullptr);
     PROJ_DLL static WKTFormatterNNPtr create(const WKTFormatterNNPtr &other);
     //! @cond Doxygen_Suppress
     PROJ_DLL ~WKTFormatter();
@@ -258,6 +252,8 @@ class WKTFormatter {
     void setHDatumExtension(const std::string &filename);
     const std::string &getHDatumExtension() const;
 
+    static std::string morphNameToESRI(const std::string &name);
+
 #ifdef unused
     void startInversion();
     void stopInversion();
@@ -271,8 +267,20 @@ class WKTFormatter {
     bool primeMeridianOrParameterUnitOmittedIfSameAsAxis() const;
     bool primeMeridianInDegree() const;
     bool outputCSUnitOnlyOnceIfSame() const;
+
+    /** WKT version. */
+    enum class PROJ_DLL Version {
+        /** WKT1 */
+        WKT1,
+        /** WKT2 / ISO 19162 */
+        WKT2
+    };
+
     Version version() const;
     bool use2018Keywords() const;
+    bool useESRIDialect() const;
+
+    const DatabaseContextPtr &databaseContext() const;
 
     //! @endcond
 
@@ -368,7 +376,7 @@ class PROJStringFormatter {
     void setOmitZUnitConversion(bool omit);
     bool omitZUnitConversion() const;
 
-    DatabaseContextPtr databaseContext() const;
+    const DatabaseContextPtr &databaseContext() const;
 
     Convention convention() const;
 
@@ -662,13 +670,21 @@ class DatabaseContext {
 
     bool lookForGridAlternative(const std::string &officialName,
                                 std::string &projFilename,
-                                std::string &projFormat, bool &inverse);
+                                std::string &projFormat, bool &inverse) const;
 
     PROJ_DLL bool lookForGridInfo(const std::string &projFilename,
                                   std::string &fullFilename,
                                   std::string &packageName, std::string &url,
                                   bool &directDownload, bool &openLicense,
-                                  bool &gridAvailable);
+                                  bool &gridAvailable) const;
+
+    std::string getAliasFromOfficialName(const std::string &officialName,
+                                         const std::string &tableName,
+                                         const std::string &source) const;
+
+    bool isKnownName(const std::string &name,
+                     const std::string &tableName) const;
+
     //! @endcond
 
   protected:

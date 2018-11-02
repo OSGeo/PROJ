@@ -171,6 +171,7 @@ class Scale : public Measure {
     PROJ_DLL explicit Scale(double valueIn, const UnitOfMeasure &unitIn);
 
     //! @cond Doxygen_Suppress
+    explicit Scale(const Measure &other) : Scale(other.value(), other.unit()) {}
     PROJ_DLL Scale(const Scale &other);
     PROJ_DLL ~Scale() override;
     //! @endcond
@@ -189,6 +190,7 @@ class Angle : public Measure {
     PROJ_DLL Angle(double valueIn, const UnitOfMeasure &unitIn);
 
     //! @cond Doxygen_Suppress
+    explicit Angle(const Measure &other) : Angle(other.value(), other.unit()) {}
     PROJ_DLL Angle(const Angle &other);
     PROJ_DLL ~Angle() override;
     //! @endcond
@@ -207,6 +209,8 @@ class Length : public Measure {
     PROJ_DLL Length(double valueIn, const UnitOfMeasure &unitIn);
 
     //! @cond Doxygen_Suppress
+    explicit Length(const Measure &other)
+        : Length(other.value(), other.unit()) {}
     PROJ_DLL Length(const Length &other);
     PROJ_DLL ~Length() override;
     //! @endcond

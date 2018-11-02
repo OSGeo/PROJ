@@ -63,6 +63,7 @@ struct OutputOptions {
     bool WKT2_2015 = false;
     bool WKT2_2015_SIMPLIFIED = false;
     bool WKT1_GDAL = false;
+    bool WKT1_ESRI = false;
     bool c_ify = false;
 };
 
@@ -88,7 +89,8 @@ static void usage() {
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
-                 "all,default,PROJ4,PROJ,WKT_ALL,WKT2_2015,WKT2_2018,WKT1_GDAL"
+                 "all,default,PROJ4,PROJ,WKT_ALL,WKT2_2015,WKT2_2018,WKT1_GDAL,"
+                 "WKT1_ESRI"
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
@@ -373,6 +375,31 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 std::cerr << "Error when exporting to WKT1_GDAL: " << e.what()
                           << std::endl;
             }
+            alreadyOutputed = true;
+        }
+
+        if (outputOpt.WKT1_ESRI && !nn_dynamic_pointer_cast<Conversion>(obj)) {
+            try {
+                if (alreadyOutputed) {
+                    std::cout << std::endl;
+                }
+                if (!outputOpt.quiet) {
+                    std::cout << "WKT1_ESRI: " << std::endl;
+                }
+
+                auto wkt = wktExportable->exportToWKT(
+                    WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                         dbContext)
+                        .get());
+                if (outputOpt.c_ify) {
+                    wkt = c_ify_string(wkt);
+                }
+                std::cout << wkt << std::endl;
+                std::cout << std::endl;
+            } catch (const std::exception &e) {
+                std::cerr << "Error when exporting to WKT1_ESRI: " << e.what()
+                          << std::endl;
+            }
         }
     }
 }
@@ -598,6 +625,14 @@ int main(int argc, char **argv) {
                            ci_equal(format, "-WKT1-GDAL") ||
                            ci_equal(format, "-WKT1:GDAL")) {
                     outputOpt.WKT1_GDAL = false;
+                } else if (ci_equal(format, "WKT1_ESRI") ||
+                           ci_equal(format, "WKT1-ESRI") ||
+                           ci_equal(format, "WKT1:ESRI")) {
+                    outputOpt.WKT1_ESRI = true;
+                } else if (ci_equal(format, "-WKT1_ESRI") ||
+                           ci_equal(format, "-WKT1-ESRI") ||
+                           ci_equal(format, "-WKT1:ESRI")) {
+                    outputOpt.WKT1_ESRI = false;
                 } else {
                     std::cerr << "Unrecognized value for option -o: " << format
                               << std::endl;

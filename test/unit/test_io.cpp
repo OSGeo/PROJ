@@ -2591,6 +2591,29 @@ TEST(wkt_parse, esri_geogcs_datum_spheroid_name_from_db_substitution) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, esri_datum_name_with_prime_meridian) {
+    auto wkt = "GEOGCS[\"GCS_NTF_Paris\",DATUM[\"D_NTF\","
+               "SPHEROID[\"Clarke_1880_IGN\",6378249.2,293.4660212936265]],"
+               "PRIMEM[\"Paris\",2.337229166666667],"
+               "UNIT[\"Grad\",0.01570796326794897]]";
+
+    // D_NTF normally translates to "Nouvelle Triangulation Francaise",
+    // but as we have a non-Greenwich prime meridian, we also test if
+    // "Nouvelle Triangulation Francaise (Paris)" is not a registered datum name
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "NTF (Paris)");
+    EXPECT_EQ(crs->datum()->nameStr(),
+              "Nouvelle Triangulation Francaise (Paris)");
+    EXPECT_EQ(crs->ellipsoid()->nameStr(), "Clarke 1880 (IGN)");
+}
+
+// ---------------------------------------------------------------------------
+
 static const struct {
     const char *esriProjectionName;
     std::vector<std::pair<const char *, double>> esriParams;
