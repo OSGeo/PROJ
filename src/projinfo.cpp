@@ -414,8 +414,8 @@ static void outputOperations(
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
     bool allowPivots,
     const std::vector<std::pair<std::string, std::string>> &pivots,
-    bool usePROJGridAlternatives, const OutputOptions &outputOpt,
-    bool summary) {
+    const std::string &authority, bool usePROJGridAlternatives,
+    const OutputOptions &outputOpt, bool summary) {
     auto sourceObj =
         buildObject(dbContext, sourceCRSStr, true, "source CRS", false);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
@@ -434,11 +434,11 @@ static void outputOperations(
 
     std::vector<CoordinateOperationNNPtr> list;
     try {
-        auto authFactory = dbContext
-                               ? AuthorityFactory::create(
-                                     NN_NO_CHECK(dbContext), std::string())
-                                     .as_nullable()
-                               : nullptr;
+        auto authFactory =
+            dbContext
+                ? AuthorityFactory::create(NN_NO_CHECK(dbContext), authority)
+                      .as_nullable()
+                : nullptr;
         auto ctxt =
             CoordinateOperationContext::create(authFactory, bboxFilter, 0);
         ctxt->setSpatialCriterion(spatialCriterion);
@@ -553,6 +553,7 @@ int main(int argc, char **argv) {
     std::string mainDBPath;
     std::vector<std::string> auxDBPath;
     bool guessDialect = false;
+    std::string authority;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -767,6 +768,9 @@ int main(int argc, char **argv) {
             auxDBPath.push_back(argv[i]);
         } else if (arg == "--guess-dialect") {
             guessDialect = true;
+        } else if (arg == "--authority" && i + 1 < argc) {
+            i++;
+            authority = argv[i];
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {
@@ -850,8 +854,8 @@ int main(int argc, char **argv) {
     } else {
         outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
                          spatialCriterion, crsExtentUse, gridAvailabilityUse,
-                         allowPivots, pivots, usePROJGridAlternatives,
-                         outputOpt, summary);
+                         allowPivots, pivots, authority,
+                         usePROJGridAlternatives, outputOpt, summary);
     }
 
     return 0;

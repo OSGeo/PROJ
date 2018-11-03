@@ -8634,10 +8634,22 @@ CoordinateOperationContextNNPtr CoordinateOperationContext::create(
 
 //! @cond Doxygen_Suppress
 struct CoordinateOperationFactory::Private {
+
+    struct Context {
+        const crs::CRSNNPtr &sourceCRS;
+        const crs::CRSNNPtr &targetCRS;
+        const CoordinateOperationContextNNPtr &context;
+
+        Context(const crs::CRSNNPtr &sourceCRSIn,
+                const crs::CRSNNPtr &targetCRSIn,
+                const CoordinateOperationContextNNPtr &contextIn)
+            : sourceCRS(sourceCRSIn), targetCRS(targetCRSIn),
+              context(contextIn) {}
+    };
+
     static std::vector<CoordinateOperationNNPtr>
     createOperations(const crs::CRSNNPtr &sourceCRS,
-                     const crs::CRSNNPtr &targetCRS,
-                     const CoordinateOperationContextNNPtr &context);
+                     const crs::CRSNNPtr &targetCRS, const Context &context);
 
   private:
     static std::vector<CoordinateOperationNNPtr>
@@ -8843,7 +8855,8 @@ struct FilterAndSort {
     FilterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceListIn,
                   const CoordinateOperationContextNNPtr &contextIn,
                   const crs::CRSNNPtr &sourceCRSIn,
-                  const crs::CRSNNPtr &targetCRSIn)
+                  const crs::CRSNNPtr &targetCRSIn,
+                  bool forceStrictContainmentTest)
         : sourceList(sourceListIn), context(contextIn), sourceCRS(sourceCRSIn),
           targetCRS(targetCRSIn), sourceCRSExtent(getExtent(sourceCRS)),
           targetCRSExtent(getExtent(targetCRS)),
@@ -8853,7 +8866,7 @@ struct FilterAndSort {
               context->getSourceAndTargetCRSExtentUse()) {
 
         computeAreaOfIntest();
-        filterOut();
+        filterOut(forceStrictContainmentTest);
         sort();
 
         // And now that we have a sorted list, we can remove uninteresting
@@ -8920,11 +8933,15 @@ struct FilterAndSort {
 
     // ---------------------------------------------------------------------------
 
-    void filterOut() {
+    void filterOut(bool forceStrictContainmentTest) {
 
         // Filter out operations that do not match the expected accuracy
         // and area of use.
-        const auto spatialCriterion = context->getSpatialCriterion();
+        const auto spatialCriterion =
+            forceStrictContainmentTest
+                ? CoordinateOperationContext::SpatialCriterion::
+                      STRICT_CONTAINMENT
+                : context->getSpatialCriterion();
         for (const auto &op : sourceList) {
             if (desiredAccuracy != 0) {
                 const double accuracy = getAccuracy(op);
@@ -9256,7 +9273,8 @@ static std::vector<CoordinateOperationNNPtr>
 filterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceList,
               const CoordinateOperationContextNNPtr &context,
               const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) {
-    return FilterAndSort(sourceList, context, sourceCRS, targetCRS).getRes();
+    return FilterAndSort(sourceList, context, sourceCRS, targetCRS, false)
+        .getRes();
 }
 //! @endcond
 
@@ -9779,13 +9797,13 @@ CoordinateOperationFactory::Private::createOperations(
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperations(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    const CoordinateOperationContextNNPtr &context) {
+    const Private::Context &context) {
 
     std::vector<CoordinateOperationNNPtr> res;
     const bool allowEmptyIntersection = true;
 
     // First look-up if the registry provide us with operations.
-    auto authFactory = context->getAuthorityFactory();
+    auto authFactory = context.context->getAuthorityFactory();
     io::DatabaseContextPtr databaseContext =
         authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
     auto derivedSrc = dynamic_cast<const crs::DerivedCRS *>(sourceCRS.get());
@@ -9798,38 +9816,49 @@ CoordinateOperationFactory::Private::createOperations(
          !derivedDst->baseCRS()->isEquivalentTo(
              sourceCRS.get(), util::IComparable::Criterion::EQUIVALENT))) {
 
-        res = findOpsInRegistryDirect(sourceCRS, targetCRS, context);
+        bool doFilterAndCheckPerfectOp = true;
+        res = findOpsInRegistryDirect(sourceCRS, targetCRS, context.context);
         if (!sourceCRS->isEquivalentTo(targetCRS.get())) {
             auto resFromInverse = applyInverse(
-                findOpsInRegistryDirect(targetCRS, sourceCRS, context));
+                findOpsInRegistryDirect(targetCRS, sourceCRS, context.context));
             res.insert(res.end(), resFromInverse.begin(), resFromInverse.end());
 
             // If we get at least a result with perfect accuracy, do not
             // bother
             // generating synthetic transforms.
-            for (const auto &op : res) {
+            auto resTmp = FilterAndSort(res, context.context, context.sourceCRS,
+                                        context.targetCRS, true)
+                              .getRes();
+            for (const auto &op : resTmp) {
                 const double acc = getAccuracy(op);
                 if (acc == 0.0) {
                     return res;
                 }
             }
+            doFilterAndCheckPerfectOp = false;
 
             // NAD27 to NAD83 has tens of results already. No need to look
             // for a pivot
             if (res.size() < 5 || getenv("PROJ_FORCE_SEARCH_PIVOT")) {
                 auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
-                    sourceCRS, targetCRS, context);
+                    sourceCRS, targetCRS, context.context);
                 res.insert(res.end(), resWithIntermediate.begin(),
                            resWithIntermediate.end());
+                doFilterAndCheckPerfectOp = true;
             }
         }
 
-        // If we get at least a result with perfect accuracy, do not bother
-        // generating synthetic transforms.
-        for (const auto &op : res) {
-            const double acc = getAccuracy(op);
-            if (acc == 0.0) {
-                return res;
+        if (doFilterAndCheckPerfectOp) {
+            // If we get at least a result with perfect accuracy, do not bother
+            // generating synthetic transforms.
+            auto resTmp = FilterAndSort(res, context.context, context.sourceCRS,
+                                        context.targetCRS, true)
+                              .getRes();
+            for (const auto &op : resTmp) {
+                const double acc = getAccuracy(op);
+                if (acc == 0.0) {
+                    return res;
+                }
             }
         }
     }
@@ -10240,9 +10269,10 @@ CoordinateOperationFactory::createOperations(
     auto l_sourceCRS = srcBoundCRS ? NN_NO_CHECK(srcBoundCRS) : sourceCRS;
     auto l_targetCRS = targetBoundCRS ? NN_NO_CHECK(targetBoundCRS) : targetCRS;
 
-    return filterAndSort(
-        Private::createOperations(l_sourceCRS, l_targetCRS, context), context,
-        l_sourceCRS, l_targetCRS);
+    return filterAndSort(Private::createOperations(
+                             l_sourceCRS, l_targetCRS,
+                             Private::Context(sourceCRS, targetCRS, context)),
+                         context, l_sourceCRS, l_targetCRS);
 }
 
 // ---------------------------------------------------------------------------

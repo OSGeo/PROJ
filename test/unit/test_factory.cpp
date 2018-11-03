@@ -2522,4 +2522,52 @@ TEST(factory, getOfficialNameFromAlias) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(FactoryWithTmpDatabase,
+       createOperations_exact_transform_not_whole_area) {
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO other_transformation "
+                "VALUES('OTHER','PARTIAL_AREA_PERFECT_ACCURACY',"
+                "'PARTIAL_AREA_PERFECT_ACCURACY','PROJ',"
+                "'PROJString','+proj=helmert +x=1',"
+                "'EPSG','4326','EPSG','4326','EPSG','1933',0.0,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO other_transformation "
+                "VALUES('OTHER','WHOLE_AREA_APPROX_ACCURACY',"
+                "'WHOLE_AREA_APPROX_ACCURACY','PROJ',"
+                "'PROJString','+proj=helmert +x=2',"
+                "'EPSG','4326','EPSG','4326','EPSG','1262',1.0,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    auto dbContext = DatabaseContext::create(m_ctxt);
+    auto authFactory =
+        AuthorityFactory::create(dbContext, std::string("OTHER"));
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        AuthorityFactory::create(dbContext, "EPSG")
+            ->createCoordinateReferenceSystem("4326"),
+        AuthorityFactory::create(dbContext, "EPSG")
+            ->createCoordinateReferenceSystem("4326"),
+        ctxt);
+    ASSERT_EQ(list.size(), 2);
+    EXPECT_EQ(list[0]->nameStr(), "WHOLE_AREA_APPROX_ACCURACY");
+    EXPECT_EQ(list[1]->nameStr(), "PARTIAL_AREA_PERFECT_ACCURACY");
+}
+
 } // namespace
