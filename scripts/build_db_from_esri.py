@@ -592,7 +592,9 @@ def import_geogcs():
                             map_datum_esri_to_parameters[datum_code] = p
 
 
-                map_geogcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
+                # We may have already the EPSG entry, so use it preferably
+                if esri_name not in map_geogcs_esri_name_to_auth_code:
+                    map_geogcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
                 sql = """INSERT INTO "geodetic_crs" VALUES('ESRI','%s','%s','geographic 2D','EPSG','%s','%s','%s','%s','%s',NULL,%d);""" % (
                     code, esri_name, cs_code, datum_auth_name, datum_code, area_auth_name, area_code, deprecated)
