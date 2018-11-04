@@ -394,7 +394,7 @@ static metadata::ExtentPtr getExtent(const CoordinateOperationNNPtr &op,
 
 // ---------------------------------------------------------------------------
 
-static metadata::ExtentPtr getExtent(crs::CRSNNPtr crs) {
+static metadata::ExtentPtr getExtent(const crs::CRSNNPtr &crs) {
     const auto &domains = crs->domains();
     if (!domains.empty()) {
         return domains[0]->domainOfValidity();
@@ -3755,7 +3755,7 @@ Conversion::createChangeVerticalUnit(const util::PropertyMap &properties,
  *
  * This method is defined as [EPSG:9843]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9843),
- * or for 3DD as [EPSG:9844]
+ * or for 3D as [EPSG:9844]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9844)
  *
  * @param is3D Whether this should apply on 3D geographicCRS
@@ -3780,9 +3780,29 @@ ConversionNNPtr Conversion::createAxisOrderReversal(bool is3D) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the Geographic/Geocentric method.
+ *
+ * This method is defined as [EPSG:9602]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9602),
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @return a new Conversion.
+ */
+ConversionNNPtr
+Conversion::createGeographicGeocentric(const util::PropertyMap &properties) {
+    return create(properties,
+                  createMapNameEPSGCode(EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC,
+                                        EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC),
+                  {}, {});
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
-static void addDomains(util::PropertyMap &map, const common::ObjectUsage *obj) {
+static util::PropertyMap &addDomains(util::PropertyMap &map,
+                                     const common::ObjectUsage *obj) {
 
     auto ar = util::ArrayOfBaseObject::create();
     for (const auto &domain : obj->domains()) {
@@ -3791,6 +3811,7 @@ static void addDomains(util::PropertyMap &map, const common::ObjectUsage *obj) {
     if (!ar->empty()) {
         map.set(common::ObjectUsage::OBJECT_DOMAIN_KEY, ar);
     }
+    return map;
 }
 
 // ---------------------------------------------------------------------------
@@ -3933,6 +3954,20 @@ CoordinateOperationNNPtr Conversion::inverse() const {
         isAxisOrderReversal3D(methodName, methodEPSGCode);
     if (l_isAxisOrderReversal2D || l_isAxisOrderReversal3D) {
         auto conv = createAxisOrderReversal(l_isAxisOrderReversal3D);
+        auto l_sourceCRS = sourceCRS();
+        auto l_targetCRS = targetCRS();
+        if (l_sourceCRS && l_targetCRS) {
+            conv->setCRSs(NN_NO_CHECK(l_targetCRS), NN_NO_CHECK(l_sourceCRS),
+                          nullptr);
+        }
+        return conv;
+    }
+
+    if (ci_equal(methodName, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
+        methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC) {
+
+        auto conv = createGeographicGeocentric(
+            createPropertiesForInverse(this, false, false));
         auto l_sourceCRS = sourceCRS();
         auto l_targetCRS = targetCRS();
         if (l_sourceCRS && l_targetCRS) {
@@ -4608,9 +4643,13 @@ void Conversion::_exportToPROJString(
         (ci_equal(methodName,
                   EPSG_NAME_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION) ||
          methodEPSGCode == EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION);
+    const bool isGeographicGeocentric =
+        (ci_equal(methodName, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
+         methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC);
     const bool applySourceCRSModifiers =
         !isZUnitConversion && !isAffineParametric &&
-        !isAxisOrderReversal(methodName, methodEPSGCode);
+        !isAxisOrderReversal(methodName, methodEPSGCode) &&
+        !isGeographicGeocentric;
     const bool applyTargetCRSModifiers = applySourceCRSModifiers;
 
     auto l_sourceCRS = sourceCRS();
@@ -6285,16 +6324,22 @@ TransformationNNPtr Transformation::createVerticalOffset(
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
-static TransformationNNPtr
-createGeographicGeocentric(const util::PropertyMap &properties,
-                           const crs::CRSNNPtr &sourceCRSIn,
-                           const crs::CRSNNPtr &targetCRSIn) {
-    return Transformation::create(
-        properties, sourceCRSIn, targetCRSIn, nullptr,
-        createMapNameEPSGCode(EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC,
-                              EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC),
-        VectorOfParameters(), VectorOfValues(), buildAccuracyZero());
+static const char *getCRSQualifierStr(const crs::CRSPtr &crs) {
+    auto geod = dynamic_cast<crs::GeodeticCRS *>(crs.get());
+    if (geod) {
+        if (geod->isGeocentric()) {
+            return " (geocentric)";
+        }
+        auto geog = dynamic_cast<crs::GeographicCRS *>(geod);
+        if (geog) {
+            if (geog->coordinateSystem()->axisList().size() == 2) {
+                return " (geog2D)";
+            } else {
+                return " (geog3D)";
+            }
+        }
+    }
+    return "";
 }
 
 // ---------------------------------------------------------------------------
@@ -6302,10 +6347,24 @@ createGeographicGeocentric(const util::PropertyMap &properties,
 static std::string buildOpName(const char *opType, const crs::CRSPtr &source,
                                const crs::CRSPtr &target) {
     std::string res(opType);
+    const auto &srcName = source->nameStr();
+    const auto &targetName = target->nameStr();
+    const char *srcQualifier = "";
+    const char *targetQualifier = "";
+    if (srcName == targetName) {
+        srcQualifier = getCRSQualifierStr(source);
+        targetQualifier = getCRSQualifierStr(target);
+        if (strcmp(srcQualifier, targetQualifier) == 0) {
+            srcQualifier = "";
+            targetQualifier = "";
+        }
+    }
     res += " from ";
-    res += source->nameStr();
+    res += srcName;
+    res += srcQualifier;
     res += " to ";
-    res += target->nameStr();
+    res += targetName;
+    res += targetQualifier;
     return res;
 }
 
@@ -6320,10 +6379,15 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     // The domain(s) are unchanged by the inverse operation
     addDomains(map, op);
 
+    const std::string &forwardName = op->nameStr();
+
     // Forge a name for the inverse, either from the forward name, or
     // from the source and target CRS names
     const char *opType;
-    if (dynamic_cast<const Transformation *>(op)) {
+    if (starts_with(forwardName, "Null geocentric translation")) {
+        opType = "Null geocentric translation";
+    } else if (dynamic_cast<const Transformation *>(op) ||
+               starts_with(forwardName, "Transformation from ")) {
         opType = "Transformation";
     } else if (dynamic_cast<const Conversion *>(op)) {
         opType = "Conversion";
@@ -6335,7 +6399,6 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
 
     auto sourceCRS = op->sourceCRS();
     auto targetCRS = op->targetCRS();
-    const std::string &forwardName = op->nameStr();
     std::string name;
     if (!forwardName.empty()) {
         if (starts_with(forwardName, INVERSE_OF)) {
@@ -6350,10 +6413,6 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     }
     if (approximateInversion) {
         name += " (approx. inversion)";
-    }
-
-    if (dynamic_cast<const PROJBasedOperation *>(op)) {
-        name = forwardName;
     }
 
     if (!name.empty()) {
@@ -6731,16 +6790,6 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
             createVerticalOffset(createPropertiesForInverse(this, false, false),
                                  l_targetCRS, l_sourceCRS, newOffsetHeight,
                                  coordinateOperationAccuracies()));
-    }
-
-    if (ci_equal(methodName, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
-        methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC) {
-
-        return d->registerInv(
-            shared_from_this(),
-            createGeographicGeocentric(
-                createPropertiesForInverse(this, false, false), l_targetCRS,
-                l_sourceCRS));
     }
 
     return InverseTransformation::create(NN_NO_CHECK(
@@ -7982,40 +8031,6 @@ void Transformation::_exportToPROJString(
         return;
     }
 
-    if (ci_equal(methodName, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
-        methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC) {
-
-        auto sourceCRSGeod =
-            dynamic_cast<const crs::GeodeticCRS *>(sourceCRS().get());
-        auto targetCRSGeod =
-            dynamic_cast<const crs::GeodeticCRS *>(targetCRS().get());
-        if (sourceCRSGeod && targetCRSGeod) {
-            auto sourceCRSGeog =
-                dynamic_cast<const crs::GeographicCRS *>(sourceCRSGeod);
-            auto targetCRSGeog =
-                dynamic_cast<const crs::GeographicCRS *>(targetCRSGeod);
-            bool isSrcGeocentric = sourceCRSGeod->isGeocentric();
-            bool isSrcGeographic = sourceCRSGeog != nullptr;
-            bool isTargetGeocentric = targetCRSGeod->isGeocentric();
-            bool isTargetGeographic = targetCRSGeog != nullptr;
-            if ((isSrcGeocentric && isTargetGeographic) ||
-                (isSrcGeographic && isTargetGeocentric)) {
-
-                formatter->startInversion();
-                sourceCRSGeod->_exportToPROJString(formatter);
-                formatter->stopInversion();
-
-                targetCRSGeod->_exportToPROJString(formatter);
-
-                return;
-            }
-        }
-
-        throw io::FormattingException("Invalid nature of source and/or "
-                                      "targetCRS for Geographic/Geocentric "
-                                      "conversion");
-    }
-
     if (exportToPROJStringGeneric(formatter)) {
         return;
     }
@@ -8069,6 +8084,40 @@ bool SingleOperation::exportToPROJStringGeneric(
         formatter->addStep("axisswap");
         formatter->addParam("order", "2,1");
         return true;
+    }
+
+    if (ci_equal(methodName, EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC) ||
+        methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC) {
+
+        auto sourceCRSGeod =
+            dynamic_cast<const crs::GeodeticCRS *>(sourceCRS().get());
+        auto targetCRSGeod =
+            dynamic_cast<const crs::GeodeticCRS *>(targetCRS().get());
+        if (sourceCRSGeod && targetCRSGeod) {
+            auto sourceCRSGeog =
+                dynamic_cast<const crs::GeographicCRS *>(sourceCRSGeod);
+            auto targetCRSGeog =
+                dynamic_cast<const crs::GeographicCRS *>(targetCRSGeod);
+            bool isSrcGeocentric = sourceCRSGeod->isGeocentric();
+            bool isSrcGeographic = sourceCRSGeog != nullptr;
+            bool isTargetGeocentric = targetCRSGeod->isGeocentric();
+            bool isTargetGeographic = targetCRSGeog != nullptr;
+            if ((isSrcGeocentric && isTargetGeographic) ||
+                (isSrcGeographic && isTargetGeocentric)) {
+
+                formatter->startInversion();
+                sourceCRSGeod->_exportToPROJString(formatter);
+                formatter->stopInversion();
+
+                targetCRSGeod->_exportToPROJString(formatter);
+
+                return true;
+            }
+        }
+
+        throw io::FormattingException("Invalid nature of source and/or "
+                                      "targetCRS for Geographic/Geocentric "
+                                      "conversion");
     }
 
     return false;
@@ -8656,6 +8705,11 @@ struct CoordinateOperationFactory::Private {
     createOperations(std::vector<CoordinateOperationNNPtr> &res,
                      const crs::GeographicCRSNNPtr &sourceCRS,
                      const crs::GeographicCRSNNPtr &targetCRS);
+
+    static ConversionNNPtr
+    createGeographicGeocentric(const util::PropertyMap &properties,
+                               const crs::CRSNNPtr &sourceCRSIn,
+                               const crs::CRSNNPtr &targetCRSIn);
 };
 //! @endcond
 
@@ -9624,6 +9678,17 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+ConversionNNPtr CoordinateOperationFactory::Private::createGeographicGeocentric(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn) {
+    auto conv = Conversion::createGeographicGeocentric(properties);
+    conv->setCRSs(sourceCRSIn, targetCRSIn, nullptr);
+    return conv;
+}
+
+// ---------------------------------------------------------------------------
+
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperations(
     std::vector<CoordinateOperationNNPtr> &res,
@@ -9889,17 +9954,68 @@ CoordinateOperationFactory::Private::createOperations(
         bool isSrcGeographic = geogSrc != nullptr;
         bool isTargetGeocentric = geodDst->isGeocentric();
         bool isTargetGeographic = geogDst != nullptr;
-        if ((isSrcGeocentric && isTargetGeographic) ||
-            (isSrcGeographic && isTargetGeocentric)) {
-            res.emplace_back(createGeographicGeocentric(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        buildTransfName(sourceCRS->nameStr(),
-                                                        targetCRS->nameStr())),
-                sourceCRS, targetCRS));
+        if (((isSrcGeocentric && isTargetGeographic) ||
+             (isSrcGeographic && isTargetGeocentric)) &&
+            geodSrc->datum() != nullptr && geodDst->datum() != nullptr) {
+
+            // Same datum ?
+            if (geodSrc->datum()->isEquivalentTo(
+                    geodDst->datum().get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                res.emplace_back(createGeographicGeocentric(
+                    util::PropertyMap().set(
+                        common::IdentifiedObject::NAME_KEY,
+                        buildOpName("Conversion", sourceCRS, targetCRS)),
+                    sourceCRS, targetCRS));
+            } else if (isSrcGeocentric) {
+                std::string interm_crs_name(geogDst->nameStr());
+                interm_crs_name += " (geocentric)";
+                auto interm_crs = util::nn_static_pointer_cast<crs::CRS>(
+                    crs::GeodeticCRS::create(
+                        addDomains(util::PropertyMap().set(
+                                       common::IdentifiedObject::NAME_KEY,
+                                       interm_crs_name),
+                                   geogDst.get()),
+                        NN_NO_CHECK(geogDst->datum()),
+                        NN_CHECK_ASSERT(
+                            util::nn_dynamic_pointer_cast<cs::CartesianCS>(
+                                geodSrc->coordinateSystem()))));
+                auto opsFirst =
+                    createOperations(sourceCRS, interm_crs, context);
+                auto opsSecond =
+                    createOperations(interm_crs, targetCRS, context);
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opSecond : opsSecond) {
+                        res.emplace_back(
+                            ConcatenatedOperation::createComputeMetadata(
+                                {opFirst, opSecond}, !allowEmptyIntersection));
+                    }
+                }
+            } else {
+                return applyInverse(
+                    createOperations(targetCRS, sourceCRS, context));
+            }
+
             return res;
         }
 
-        // Tranformation between two geocentric systems
+        if (isSrcGeocentric && isTargetGeocentric) {
+            std::string name("Null geocentric translation from ");
+            name += sourceCRS->nameStr();
+            name += " to ";
+            name += targetCRS->nameStr();
+
+            res.emplace_back(Transformation::createGeocentricTranslations(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY, name)
+                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                         metadata::Extent::WORLD),
+                sourceCRS, targetCRS, 0.0, 0.0, 0.0, {}));
+            return res;
+        }
+
+        // Tranformation between two geodetic systems of unknown type
+        // This should normally not be triggered with "standard" CRS
         res.emplace_back(createGeodToGeodPROJBased(NN_NO_CHECK(geodSrc),
                                                    NN_NO_CHECK(geodDst)));
         return res;

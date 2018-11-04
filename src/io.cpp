@@ -4235,6 +4235,9 @@ void PROJStringFormatter::setUseETMercForTMerc(bool flag) {
 
 /** \brief Returns the PROJ string. */
 const std::string &PROJStringFormatter::toString() const {
+
+    assert(d->inversionStack_.size() == 1);
+
     d->result_.clear();
 
     for (auto iter = d->steps_.begin(); iter != d->steps_.end();) {

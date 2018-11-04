@@ -471,7 +471,7 @@ TEST(operation, transformation_createGeocentricTranslations) {
 
 // ---------------------------------------------------------------------------
 
-static GeodeticCRSNNPtr createGeocentric() {
+static GeodeticCRSNNPtr createGeocentricDatumWGS84() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4328)
@@ -500,16 +500,16 @@ TEST(operation,
      transformation_createGeocentricTranslations_between_geocentricCRS) {
 
     auto transf1 = Transformation::createGeocentricTranslations(
-        PropertyMap(), createGeocentric(), createGeocentricKM(), 1.0, 2.0, 3.0,
-        std::vector<PositionalAccuracyNNPtr>());
+        PropertyMap(), createGeocentricDatumWGS84(), createGeocentricKM(), 1.0,
+        2.0, 3.0, std::vector<PositionalAccuracyNNPtr>());
 
     EXPECT_EQ(transf1->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=helmert +x=1 +y=2 +z=3 +step "
               "+proj=unitconvert +xy_in=m +z_in=m +xy_out=km +z_out=km");
 
     auto transf2 = Transformation::createGeocentricTranslations(
-        PropertyMap(), createGeocentricKM(), createGeocentric(), 1.0, 2.0, 3.0,
-        std::vector<PositionalAccuracyNNPtr>());
+        PropertyMap(), createGeocentricKM(), createGeocentricDatumWGS84(), 1.0,
+        2.0, 3.0, std::vector<PositionalAccuracyNNPtr>());
 
     EXPECT_EQ(transf2->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=km +z_in=km "
@@ -530,7 +530,8 @@ TEST(operation,
 TEST(operation, transformation_createGeocentricTranslations_null) {
 
     auto transf = Transformation::createGeocentricTranslations(
-        PropertyMap(), createGeocentric(), createGeocentric(), 0.0, 0.0, 0.0,
+        PropertyMap(), createGeocentricDatumWGS84(),
+        createGeocentricDatumWGS84(), 0.0, 0.0, 0.0,
         std::vector<PositionalAccuracyNNPtr>());
 
     EXPECT_EQ(transf->inverse()->exportToPROJString(
@@ -543,7 +544,8 @@ TEST(operation, transformation_createGeocentricTranslations_null) {
 TEST(operation, transformation_createGeocentricTranslations_neg_zero) {
 
     auto transf = Transformation::createGeocentricTranslations(
-        PropertyMap(), createGeocentric(), createGeocentric(), 1.0, -0.0, 0.0,
+        PropertyMap(), createGeocentricDatumWGS84(),
+        createGeocentricDatumWGS84(), 1.0, -0.0, 0.0,
         std::vector<PositionalAccuracyNNPtr>());
 
     EXPECT_EQ(transf->inverse()->exportToPROJString(
@@ -4047,6 +4049,8 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->nameStr(),
+              "Null geographic offset transformation from WGS 84 to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
 }
 
@@ -4055,14 +4059,16 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
 TEST(operation, geogCRS_to_geogCRS_longitude_rotation) {
 
     auto src = GeographicCRS::create(
-        PropertyMap(), GeodeticReferenceFrame::create(
-                           PropertyMap(), Ellipsoid::WGS84,
-                           optional<std::string>(), PrimeMeridian::GREENWICH),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "A"),
+        GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                       optional<std::string>(),
+                                       PrimeMeridian::GREENWICH),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto dest = GeographicCRS::create(
-        PropertyMap(), GeodeticReferenceFrame::create(
-                           PropertyMap(), Ellipsoid::WGS84,
-                           optional<std::string>(), PrimeMeridian::PARIS),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "B"),
+        GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                       optional<std::string>(),
+                                       PrimeMeridian::PARIS),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
 
     auto op = CoordinateOperationFactory::create()->createOperation(src, dest);
@@ -4222,12 +4228,103 @@ TEST(operation, geogCRS_to_geogCRS_3D) {
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, geocentricCRS_to_geogCRS) {
+TEST(operation, geocentricCRS_to_geogCRS_same_datum) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
-        createGeocentric(), GeographicCRS::EPSG_4326);
+        createGeocentricDatumWGS84(), GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geocentricCRS_to_geogCRS_different_datum) {
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        createGeocentricDatumWGS84(), GeographicCRS::EPSG_4269);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->nameStr(), "Null geocentric translation from WGS 84 to NAD83 "
+                             "(geocentric) + Conversion from NAD83 "
+                             "(geocentric) to NAD83");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=cart +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geocentricCRS_different_datum) {
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4269, createGeocentricDatumWGS84());
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->nameStr(), "Conversion from NAD83 to NAD83 (geocentric) + "
+                             "Null geocentric translation from NAD83 "
+                             "(geocentric) to WGS 84");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geocentricCRS_to_geocentricCRS_noop) {
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        createGeocentricDatumWGS84(), createGeocentricDatumWGS84());
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->nameStr(),
+              "Null geocentric translation from WGS 84 to WGS 84");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geocentricCRS_to_geogCRS_same_datum_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4326"),
+        // WGS84 geocentric
+        authFactory->createCoordinateReferenceSystem("4978"), ctxt);
+    ASSERT_EQ(list.size(), 1);
+
+    EXPECT_EQ(list[0]->nameStr(),
+              "Conversion from WGS 84 (geog2D) to WGS 84 (geocentric)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=WGS84");
+
+    EXPECT_EQ(list[0]->inverse()->nameStr(),
+              "Conversion from WGS 84 (geocentric) to WGS 84 (geog2D)");
+    EXPECT_EQ(list[0]->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_geocentricCRS_same_datum_to_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // WGS84 geocentric
+        authFactory->createCoordinateReferenceSystem("4978"),
+        authFactory->createCoordinateReferenceSystem("4326"), ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Conversion from WGS 84 (geocentric) to WGS 84 (geog2D)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
@@ -4367,7 +4464,7 @@ TEST(operation,
 TEST(operation, geocentricCRS_to_projCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
-        createGeocentric(), createUTM31_WGS84());
+        createGeocentricDatumWGS84(), createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "

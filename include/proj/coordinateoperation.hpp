@@ -1251,6 +1251,9 @@ class Conversion : public SingleOperation {
 
     PROJ_DLL static ConversionNNPtr createAxisOrderReversal(bool is3D);
 
+    PROJ_DLL static ConversionNNPtr
+    createGeographicGeocentric(const util::PropertyMap &properties);
+
     PROJ_DLL ConversionPtr convertToOtherMethod(int targetEPSGCode) const;
 
     PROJ_PRIVATE : void _exportToPROJString(io::PROJStringFormatter *formatter)

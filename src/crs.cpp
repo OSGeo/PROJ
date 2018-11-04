@@ -644,6 +644,7 @@ bool GeodeticCRS::isGeocentric() PROJ_CONST_DEFN {
     const auto &cs = coordinateSystem();
     const auto &axisList = cs->axisList();
     return axisList.size() == 3 &&
+           dynamic_cast<cs::CartesianCS *>(cs.get()) != nullptr &&
            &axisList[0]->direction() == &cs::AxisDirection::GEOCENTRIC_X &&
            &axisList[1]->direction() == &cs::AxisDirection::GEOCENTRIC_Y &&
            &axisList[2]->direction() == &cs::AxisDirection::GEOCENTRIC_Z;
@@ -849,7 +850,7 @@ void GeodeticCRS::_exportToPROJString(
     } else {
         formatter->addStep("cart");
     }
-    ellipsoid()->exportToPROJString(formatter);
+    ellipsoid()->_exportToPROJString(formatter);
     if (formatter->convention() ==
         io::PROJStringFormatter::Convention::PROJ_4) {
         const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
