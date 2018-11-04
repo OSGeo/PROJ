@@ -425,14 +425,14 @@ TEST(crs, EPSG_4979_as_WKT1_ESRI) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, GeographicCRS_is2DPartOf3D) {
-    EXPECT_TRUE(
-        GeographicCRS::EPSG_4326->is2DPartOf3D(GeographicCRS::EPSG_4979));
-    EXPECT_FALSE(
-        GeographicCRS::EPSG_4326->is2DPartOf3D(GeographicCRS::EPSG_4326));
-    EXPECT_FALSE(
-        GeographicCRS::EPSG_4979->is2DPartOf3D(GeographicCRS::EPSG_4326));
-    EXPECT_FALSE(
-        GeographicCRS::EPSG_4979->is2DPartOf3D(GeographicCRS::EPSG_4979));
+    EXPECT_TRUE(GeographicCRS::EPSG_4326->is2DPartOf3D(
+        NN_NO_CHECK(GeographicCRS::EPSG_4979.get())));
+    EXPECT_FALSE(GeographicCRS::EPSG_4326->is2DPartOf3D(
+        NN_NO_CHECK(GeographicCRS::EPSG_4326.get())));
+    EXPECT_FALSE(GeographicCRS::EPSG_4979->is2DPartOf3D(
+        NN_NO_CHECK(GeographicCRS::EPSG_4326.get())));
+    EXPECT_FALSE(GeographicCRS::EPSG_4979->is2DPartOf3D(
+        NN_NO_CHECK(GeographicCRS::EPSG_4979.get())));
 }
 
 // ---------------------------------------------------------------------------

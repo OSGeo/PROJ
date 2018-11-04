@@ -1034,10 +1034,12 @@ GeographicCRS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
 /** \brief Return whether the current GeographicCRS is the 2D part of the
  * other 3D GeographicCRS.
  */
-bool GeographicCRS::is2DPartOf3D(const GeographicCRSNNPtr &other)
+bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
     PROJ_CONST_DEFN {
     const auto &axis = d->coordinateSystem_->axisList();
     const auto &otherAxis = other->d->coordinateSystem_->axisList();
@@ -1059,6 +1061,8 @@ bool GeographicCRS::is2DPartOf3D(const GeographicCRSNNPtr &other)
     }
     return false;
 }
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

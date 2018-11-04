@@ -299,8 +299,6 @@ class GeographicCRS : public GeodeticCRS {
            const datum::DatumEnsemblePtr &datumEnsemble,
            const cs::EllipsoidalCSNNPtr &cs);
 
-    PROJ_DLL bool is2DPartOf3D(const GeographicCRSNNPtr &other) PROJ_CONST_DECL;
-
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4267; // NAD27
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4269; // NAD83
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4326; // WGS 84 2D
@@ -318,6 +316,9 @@ class GeographicCRS : public GeodeticCRS {
 
     void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_DLL bool
+    is2DPartOf3D(util::nn<const GeographicCRS *> other) PROJ_CONST_DECL;
 
     //! @endcond
 
