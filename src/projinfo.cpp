@@ -533,6 +533,7 @@ int main(int argc, char **argv) {
     }
 
     std::string user_string;
+    bool user_string_specified = false;
     std::string sourceCRSStr;
     std::string targetCRSStr;
     bool outputSwithSpecified = false;
@@ -777,7 +778,8 @@ int main(int argc, char **argv) {
             std::cerr << "Unrecognized option: " << arg << std::endl;
             usage();
         } else {
-            if (user_string.empty()) {
+            if (!user_string_specified) {
+                user_string_specified = true;
                 user_string = arg;
             } else {
                 std::cerr << "Too many parameters: " << arg << std::endl;
@@ -809,11 +811,11 @@ int main(int argc, char **argv) {
                   << std::endl;
         usage();
     } else if (!sourceCRSStr.empty() && !targetCRSStr.empty()) {
-        if (!user_string.empty()) {
+        if (user_string_specified) {
             std::cerr << "Unused extra value" << std::endl;
             usage();
         }
-    } else if (user_string.empty()) {
+    } else if (!user_string_specified) {
         std::cerr << "Missing user string" << std::endl;
         usage();
     }

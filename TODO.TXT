@@ -1,8 +1,5 @@
 - Functional:
-    - make setFromUserInput() accept arbitrary proj strings
     - WKTv2 Bison based validator ?
-    - import from Proj4
-            init= syntax
     - test sphericalCS
     - identification of CRS code from registry from name, etc
     - identify ? (cf OSRFindMatches)

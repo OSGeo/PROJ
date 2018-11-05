@@ -6802,6 +6802,38 @@ TEST(io, projparse_projected_title) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_init) {
+
+    {
+        auto obj = PROJStringParser().createFromPROJString("init=epsg:4326");
+        auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
+        ASSERT_TRUE(co != nullptr);
+        EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+init=epsg:4326");
+    }
+
+    {
+        auto obj = PROJStringParser().createFromPROJString(
+            "title=mytitle init=epsg:4326 ellps=WGS84");
+        auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
+        ASSERT_TRUE(co != nullptr);
+        EXPECT_EQ(co->nameStr(), "mytitle");
+        EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+init=epsg:4326 +ellps=WGS84");
+    }
+
+    {
+        auto obj = PROJStringParser().createFromPROJString(
+            "proj=pipeline step init=epsg:4326 step proj=longlat");
+        auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
+        ASSERT_TRUE(co != nullptr);
+        EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline +step +init=epsg:4326 +step +proj=longlat");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString(""), ParsingException);
 
@@ -6814,8 +6846,24 @@ TEST(io, projparse_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString("step"),
                  ParsingException);
 
+    EXPECT_THROW(PROJStringParser().createFromPROJString("proj=unknown"),
+                 ParsingException);
+
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString(
+            "proj=pipeline step proj=unitconvert step proj=longlat a=invalid"),
+        ParsingException);
+
     EXPECT_THROW(PROJStringParser().createFromPROJString(
                      "proj=pipeline step proj=pipeline"),
+                 ParsingException);
+
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "proj=pipeline step init=epsg:4326 init=epsg:4326"),
+                 ParsingException);
+
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "proj=pipeline step init=epsg:4326 proj=longlat"),
                  ParsingException);
 }
 

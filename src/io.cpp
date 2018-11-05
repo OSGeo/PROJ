@@ -1521,14 +1521,11 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
             if (!isNull(bboxNode)) {
                 if (bboxNode->GP()->childrenSize() == 4) {
                     try {
-                        double south = asDouble(
-                            bboxNode->GP()->children()[0]->GP()->value());
-                        double west = asDouble(
-                            bboxNode->GP()->children()[1]->GP()->value());
-                        double north = asDouble(
-                            bboxNode->GP()->children()[2]->GP()->value());
-                        double east = asDouble(
-                            bboxNode->GP()->children()[3]->GP()->value());
+                        const auto &bboxChildren = bboxNode->GP()->children();
+                        double south = asDouble(bboxChildren[0]->GP()->value());
+                        double west = asDouble(bboxChildren[1]->GP()->value());
+                        double north = asDouble(bboxChildren[2]->GP()->value());
+                        double east = asDouble(bboxChildren[3]->GP()->value());
                         auto bbox = GeographicBoundingBox::create(west, south,
                                                                   east, north);
                         geogExtent.emplace_back(bbox);
@@ -1543,29 +1540,28 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
             }
 
             if (!isNull(verticalExtentNode)) {
-                if (verticalExtentNode->GP()->childrenSize() == 2 ||
-                    verticalExtentNode->GP()->childrenSize() == 3) {
+                const auto verticalExtentChildrenSize =
+                    verticalExtentNode->GP()->childrenSize();
+                if (verticalExtentChildrenSize == 2 ||
+                    verticalExtentChildrenSize == 3) {
+                    const auto &verticalExtentChildren =
+                        verticalExtentNode->GP()->children();
                     double min;
                     double max;
                     try {
-                        min = asDouble(verticalExtentNode->GP()
-                                           ->children()[0]
-                                           ->GP()
-                                           ->value());
-                        max = asDouble(verticalExtentNode->GP()
-                                           ->children()[1]
-                                           ->GP()
-                                           ->value());
+                        min =
+                            asDouble(verticalExtentChildren[0]->GP()->value());
+                        max =
+                            asDouble(verticalExtentChildren[1]->GP()->value());
                     } catch (const std::exception &) {
                         throw ParsingException(
                             concat("not 2 double values in ",
                                    verticalExtentNode->GP()->value(), " node"));
                     }
                     UnitOfMeasure unit = UnitOfMeasure::METRE;
-                    if (verticalExtentNode->GP()->childrenSize() == 3) {
-                        unit =
-                            buildUnit(verticalExtentNode->GP()->children()[2],
-                                      UnitOfMeasure::Type::LINEAR);
+                    if (verticalExtentChildrenSize == 3) {
+                        unit = buildUnit(verticalExtentChildren[2],
+                                         UnitOfMeasure::Type::LINEAR);
                     }
                     verticalExtent.emplace_back(VerticalExtent::create(
                         min, max, util::nn_make_shared<UnitOfMeasure>(unit)));
@@ -1577,15 +1573,11 @@ WKTParser::Private::buildObjectDomain(const WKTNodeNNPtr &node) {
 
             if (!isNull(temporalExtentNode)) {
                 if (temporalExtentNode->GP()->childrenSize() == 2) {
+                    const auto &temporalExtentChildren =
+                        temporalExtentNode->GP()->children();
                     temporalExtent.emplace_back(TemporalExtent::create(
-                        stripQuotes(temporalExtentNode->GP()
-                                        ->children()[0]
-                                        ->GP()
-                                        ->value()),
-                        stripQuotes(temporalExtentNode->GP()
-                                        ->children()[1]
-                                        ->GP()
-                                        ->value())));
+                        stripQuotes(temporalExtentChildren[0]->GP()->value()),
+                        stripQuotes(temporalExtentChildren[1]->GP()->value())));
                 } else {
                     ThrowNotRequiredNumberOfChildren(
                         temporalExtentNode->GP()->value());
@@ -3932,7 +3924,13 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
                 text);
         }
     }
-    if (starts_with(text, "+proj=") || starts_with(text, "+title=")) {
+    const char *textWithoutPlusPrefix = text.c_str();
+    if (textWithoutPlusPrefix[0] == '+')
+        textWithoutPlusPrefix++;
+
+    if (strncmp(textWithoutPlusPrefix, "proj=", strlen("proj=")) == 0 ||
+        strncmp(textWithoutPlusPrefix, "init=", strlen("init=")) == 0 ||
+        strncmp(textWithoutPlusPrefix, "title=", strlen("title=")) == 0) {
         return PROJStringParser()
             .attachDatabaseContext(dbContext)
             .createFromPROJString(text);
@@ -4120,6 +4118,7 @@ std::string IPROJStringExportable::exportToPROJString(
 
 struct Step {
     std::string name{};
+    bool isInit = false;
     bool inverted{false};
 
     struct KeyValue {
@@ -4611,7 +4610,7 @@ const std::string &PROJStringFormatter::toString() const {
             d->appendToResult("+inv");
         }
         if (!step.name.empty()) {
-            d->appendToResult("+proj=");
+            d->appendToResult(step.isInit ? "+init=" : "+proj=");
             d->result_ += step.name;
         }
         for (const auto &paramValue : step.paramValues) {
@@ -4663,11 +4662,12 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
     bool inProj = false;
     bool inPipeline = false;
     bool prevWasTitle = false;
+    bool prevWasInit = false;
 
     while (iss >> word) {
         if (word[0] == '+') {
             word = word.substr(1);
-        } else if (prevWasTitle) {
+        } else if (prevWasTitle && word.find('=') == std::string::npos) {
             title += " ";
             title += word;
             continue;
@@ -4688,6 +4688,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             }
             inverted = false;
             prevWasStep = true;
+            prevWasInit = false;
         } else if (word == "inv") {
             if (prevWasStep) {
                 inverted = true;
@@ -4699,16 +4700,26 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             }
             prevWasStep = false;
         } else if (starts_with(word, "proj=")) {
+            if (prevWasInit) {
+                throw ParsingException("+init= found at unexpected place");
+            }
             auto stepName = word.substr(strlen("proj="));
             steps.push_back(Step());
             steps.back().name = stepName;
             steps.back().inverted = inverted;
-            if (!title.empty()) {
-                steps.back().paramValues.push_back(
-                    Step::KeyValue("title", title));
-                title.clear();
-            }
             prevWasStep = false;
+            inProj = true;
+        } else if (starts_with(word, "init=")) {
+            if (prevWasInit) {
+                throw ParsingException("+init= found at unexpected place");
+            }
+            auto initName = word.substr(strlen("init="));
+            steps.push_back(Step());
+            steps.back().name = initName;
+            steps.back().isInit = true;
+            steps.back().inverted = inverted;
+            prevWasStep = false;
+            prevWasInit = true;
             inProj = true;
         } else if (inProj) {
             const auto pos = word.find('=');
@@ -4994,6 +5005,7 @@ struct PROJStringParser::Private {
 
     std::vector<Step> steps_{};
     std::vector<Step::KeyValue> globalParamValues_{};
+    std::string title_{};
 
     template <class T>
     // cppcheck-suppress functionStatic
@@ -5697,8 +5709,7 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
                                               bool ignorePROJAxis) {
     const auto &step = steps_[iStep];
 
-    const auto &title =
-        isGeodeticStep(step.name) ? getParamValue(step, "title") : emptyString;
+    const auto &title = isGeodeticStep(step.name) ? title_ : emptyString;
 
     auto datum = buildDatum(step, title);
 
@@ -5719,7 +5730,7 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
 
-    const auto &title = getParamValue(step, "title");
+    const auto &title = title_;
 
     auto datum = buildDatum(step, title);
 
@@ -5859,7 +5870,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
 
-    const auto &title = getParamValue(step, "title");
+    const auto &title = title_;
 
     if (!buildPrimeMeridian(step)->isEquivalentTo(
             geogCRS->primeMeridian().get())) {
@@ -6468,10 +6479,9 @@ BaseObjectNNPtr
 PROJStringParser::createFromPROJString(const std::string &projString) {
     std::string vunits;
     std::string vto_meter;
-    std::string title;
 
-    PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_, title,
-                           vunits, vto_meter);
+    PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_,
+                           d->title_, vunits, vto_meter);
 
     if (d->steps_.empty()) {
 
@@ -6493,8 +6503,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     d->buildUnit(fakeStep, "vunits", "vto_meter")));
             return vcrs;
         }
-
-        throw ParsingException("Missing proj= argument");
     }
 
     if ((d->steps_.size() == 1 ||
@@ -6662,7 +6670,52 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
     }
 
-    throw ParsingException("could not parse PROJ string");
+    struct Logger {
+        std::string msg{};
+
+        // cppcheck-suppress functionStatic
+        void setMessage(const char *msgIn) noexcept {
+            try {
+                msg = msgIn;
+            } catch (const std::exception &) {
+            }
+        }
+
+        static void log(void *user_data, int level, const char *msg) {
+            if (level == PJ_LOG_ERROR) {
+                static_cast<Logger *>(user_data)->setMessage(msg);
+            }
+        }
+    };
+
+    // If the structure is not recognized, then try to instanciate the
+    // pipeline, and if successful, wrap it in a PROJBasedOperation
+    Logger logger;
+    auto pj_context = proj_context_create();
+    if (!pj_context) {
+        throw ParsingException("out of memory");
+    }
+    proj_log_func(pj_context, &logger, Logger::log);
+    auto pj = proj_create(pj_context, projString.c_str());
+    bool valid = pj != nullptr;
+    proj_destroy(pj);
+
+    if (!valid && logger.msg.empty()) {
+        logger.setMessage(proj_errno_string(proj_context_errno(pj_context)));
+    }
+
+    proj_context_destroy(pj_context);
+
+    if (!valid) {
+        throw ParsingException(logger.msg);
+    }
+
+    auto props = PropertyMap();
+    if (!d->title_.empty()) {
+        props.set(IdentifiedObject::NAME_KEY, d->title_);
+    }
+    return operation::SingleOperation::createPROJBased(props, projString,
+                                                       nullptr, nullptr, {});
 }
 
 } // namespace io

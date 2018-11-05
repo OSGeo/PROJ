@@ -8449,7 +8449,7 @@ CoordinateOperationContext::CoordinateOperationContext()
 // ---------------------------------------------------------------------------
 
 /** \brief Return the authority factory, or null */
-io::AuthorityFactoryPtr
+const io::AuthorityFactoryPtr &
 CoordinateOperationContext::getAuthorityFactory() const {
     return d->authorityFactory_;
 }
@@ -8457,7 +8457,8 @@ CoordinateOperationContext::getAuthorityFactory() const {
 // ---------------------------------------------------------------------------
 
 /** \brief Return the desired area of interest, or null */
-metadata::ExtentPtr CoordinateOperationContext::getAreaOfInterest() const {
+const metadata::ExtentPtr &
+CoordinateOperationContext::getAreaOfInterest() const {
     return d->extent_;
 }
 
@@ -8955,8 +8956,8 @@ struct FilterAndSort {
   private:
     const std::vector<CoordinateOperationNNPtr> &sourceList;
     const CoordinateOperationContextNNPtr &context;
-    crs::CRSNNPtr sourceCRS;
-    crs::CRSNNPtr targetCRS;
+    const crs::CRSNNPtr &sourceCRS;
+    const crs::CRSNNPtr &targetCRS;
     metadata::ExtentPtr sourceCRSExtent;
     metadata::ExtentPtr targetCRSExtent;
     metadata::ExtentPtr areaOfInterest;
@@ -9370,7 +9371,7 @@ static std::vector<CoordinateOperationNNPtr>
 findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
                         const crs::CRSNNPtr &targetCRS,
                         const CoordinateOperationContextNNPtr &context) {
-    auto authFactory = context->getAuthorityFactory();
+    const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
     for (const auto &idSrc : sourceCRS->identifiers()) {
         const auto &srcAuthName = *(idSrc->codeSpace());

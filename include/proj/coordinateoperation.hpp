@@ -1596,9 +1596,9 @@ class CoordinateOperationContext {
     PROJ_DLL virtual ~CoordinateOperationContext();
     //! @endcond
 
-    PROJ_DLL io::AuthorityFactoryPtr getAuthorityFactory() const;
+    PROJ_DLL const io::AuthorityFactoryPtr &getAuthorityFactory() const;
 
-    PROJ_DLL metadata::ExtentPtr getAreaOfInterest() const;
+    PROJ_DLL const metadata::ExtentPtr &getAreaOfInterest() const;
 
     PROJ_DLL void setAreaOfInterest(const metadata::ExtentPtr &extent);
 
