@@ -383,7 +383,7 @@ bool PrimeMeridian::isEquivalentTo(
         !IdentifiedObject::isEquivalentTo(other, criterion)) {
         return false;
     }
-    return longitude() == otherPM->longitude();
+    return longitude().isEquivalentTo(otherPM->longitude(), criterion);
 }
 
 // ---------------------------------------------------------------------------

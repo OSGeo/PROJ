@@ -131,7 +131,7 @@ struct DatabaseContext::Private {
 
     // Mechanism to detect recursion in calls from
     // AuthorityFactory::createXXX() -> createFromUserInput() ->
-    // AuthorityFacotry::createXXX()
+    // AuthorityFactory::createXXX()
     struct RecursionDetector {
         explicit RecursionDetector(const DatabaseContextNNPtr &context)
             : dbContext_(context) {
@@ -838,7 +838,9 @@ struct AuthorityFactory::Private {
 
     inline const std::string &authority() PROJ_CONST_DEFN { return authority_; }
 
-    inline DatabaseContextNNPtr context() PROJ_CONST_DEFN { return context_; }
+    inline const DatabaseContextNNPtr &context() PROJ_CONST_DEFN {
+        return context_;
+    }
 
     // cppcheck-suppress functionStatic
     void setThis(AuthorityFactoryNNPtr factory) {
@@ -1109,7 +1111,7 @@ AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
 // clang-format on
 
 AuthorityFactoryNNPtr
-AuthorityFactory::create(DatabaseContextNNPtr context,
+AuthorityFactory::create(const DatabaseContextNNPtr &context,
                          const std::string &authorityName) {
     auto factory = AuthorityFactory::nn_make_shared<AuthorityFactory>(
         context, authorityName);
@@ -1120,7 +1122,7 @@ AuthorityFactory::create(DatabaseContextNNPtr context,
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the database context. */
-DatabaseContextNNPtr AuthorityFactory::databaseContext() const {
+const DatabaseContextNNPtr &AuthorityFactory::databaseContext() const {
     return d->context();
 }
 
@@ -3554,6 +3556,30 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
         return std::string();
     }
     return res[0][0];
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the list of GeodeticCRS using the specified datum.
+ *
+ * @throw FactoryException
+ */
+std::vector<crs::GeodeticCRSNNPtr>
+AuthorityFactory::findGeodCRSUsingDatum(const std::string &datumCode) const {
+    std::string sql(
+        "SELECT auth_name, code FROM geodetic_crs WHERE datum_code = ? "
+        "AND deprecated = 0 ");
+    auto params = std::vector<SQLValues>{datumCode};
+    if (!getAuthority().empty()) {
+        sql += " AND auth_name = ?";
+        params.emplace_back(getAuthority());
+    }
+    auto sqlRes = d->run(sql, params);
+    std::vector<crs::GeodeticCRSNNPtr> res;
+    for (const auto &row : sqlRes) {
+        res.emplace_back(d->createFactory(row[0])->createGeodeticCRS(row[1]));
+    }
+    return res;
 }
 
 // ---------------------------------------------------------------------------

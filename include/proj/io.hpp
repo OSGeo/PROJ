@@ -826,9 +826,10 @@ class AuthorityFactory {
 
     // non-standard
     PROJ_DLL static AuthorityFactoryNNPtr
-    create(DatabaseContextNNPtr context, const std::string &authorityName);
+    create(const DatabaseContextNNPtr &context,
+           const std::string &authorityName);
 
-    PROJ_DLL DatabaseContextNNPtr databaseContext() const;
+    PROJ_DLL const DatabaseContextNNPtr &databaseContext() const;
 
     PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
     createFromCoordinateReferenceSystemCodes(
@@ -848,6 +849,9 @@ class AuthorityFactory {
         const std::string &aliasedName, const std::string &tableName,
         const std::string &source, std::string &outTableName,
         std::string &outAuthName, std::string &outCode) const;
+
+    PROJ_DLL std::vector<crs::GeodeticCRSNNPtr>
+    findGeodCRSUsingDatum(const std::string &datumCode) const;
 
   protected:
     AuthorityFactory(const DatabaseContextNNPtr &context,

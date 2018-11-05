@@ -1026,8 +1026,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
         ObjectKeeper keeper_op(op);
 
         EXPECT_EQ(proj_obj_get_name(op),
-                  std::string("Null geographic offset transformation from WGS "
-                              "84 to JGD2011"));
+                  std::string("Null geographic offset from WGS 84 to JGD2011"));
     }
 
     // Restrict pivot to Tokyo CRS

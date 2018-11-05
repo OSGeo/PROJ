@@ -4049,9 +4049,9 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->nameStr(),
-              "Null geographic offset transformation from WGS 84 to WGS 84");
+    EXPECT_EQ(op->nameStr(), "Null geographic offset from WGS 84 to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
+    EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
 
 // ---------------------------------------------------------------------------
@@ -4281,6 +4281,7 @@ TEST(operation, geocentricCRS_to_geocentricCRS_noop) {
     EXPECT_EQ(op->nameStr(),
               "Null geocentric translation from WGS 84 to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
+    EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
 
 // ---------------------------------------------------------------------------
@@ -4313,6 +4314,26 @@ TEST(operation, geocentricCRS_to_geogCRS_same_datum_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geocentricCRS_to_geocentricCRS_different_datum_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // ITRF2000 (geocentric)
+        authFactory->createCoordinateReferenceSystem("4919"),
+        // ITRF2005 (geocentric)
+        authFactory->createCoordinateReferenceSystem("4896"), ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->nameStr(), "ITRF2000 to ITRF2005 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=helmert +x=-0.0001 "
+              "+y=0.0008 +z=0.0058 +rx=0 +ry=0 +rz=0 +s=-0.0004 +dx=0.0002 "
+              "+dy=-0.0001 +dz=0.0018 +drx=0 +dry=0 +drz=0 +ds=-8e-05 "
+              "+t_epoch=2000 +convention=position_vector");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_geocentricCRS_same_datum_to_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
@@ -4328,6 +4349,119 @@ TEST(operation, geogCRS_geocentricCRS_same_datum_to_context) {
               "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     geogCRS_to_geogCRS_different_datum_though_geocentric_transform_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // ITRF2000 (geog3D)
+        authFactory->createCoordinateReferenceSystem("7909"),
+        // ITRF2005 (geog3D)
+        authFactory->createCoordinateReferenceSystem("7910"), ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Conversion from ITRF2000 (geog3D) to ITRF2000 (geocentric) + "
+              "ITRF2000 to ITRF2005 (1) + "
+              "Conversion from ITRF2005 (geocentric) to ITRF2005 (geog3D)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 +step +proj=helmert +x=-0.0001 "
+              "+y=0.0008 +z=0.0058 +rx=0 +ry=0 +rz=0 +s=-0.0004 +dx=0.0002 "
+              "+dy=-0.0001 +dz=0.0018 +drx=0 +dry=0 +drz=0 +ds=-8e-05 "
+              "+t_epoch=2000 +convention=position_vector +step +inv "
+              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+              "+z_in=m +xy_out=deg +z_out=m +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geocentricCRS_different_datum_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // ITRF2000 (geog3D)
+        authFactory->createCoordinateReferenceSystem("7909"),
+        // ITRF2005 (geocentric)
+        authFactory->createCoordinateReferenceSystem("4896"), ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Conversion from ITRF2000 (geog3D) to ITRF2000 (geocentric) + "
+              "ITRF2000 to ITRF2005 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 +step +proj=helmert +x=-0.0001 "
+              "+y=0.0008 +z=0.0058 +rx=0 +ry=0 +rz=0 +s=-0.0004 +dx=0.0002 "
+              "+dy=-0.0001 +dz=0.0018 +drx=0 +dry=0 +drz=0 +ds=-8e-05 "
+              "+t_epoch=2000 +convention=position_vector");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geocentricCRS_to_geogCRS_different_datum_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // ITRF2000 (geocentric)
+        authFactory->createCoordinateReferenceSystem("4919"),
+        // ITRF2005 (geog3D)
+        authFactory->createCoordinateReferenceSystem("7910"), ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->nameStr(),
+              "ITRF2000 to ITRF2005 (1) + "
+              "Conversion from ITRF2005 (geocentric) to ITRF2005 (geog3D)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=helmert +x=-0.0001 "
+              "+y=0.0008 +z=0.0058 +rx=0 +ry=0 +rz=0 +s=-0.0004 +dx=0.0002 "
+              "+dy=-0.0001 +dz=0.0018 +drx=0 +dry=0 +drz=0 +ds=-8e-05 "
+              "+t_epoch=2000 +convention=position_vector +step +inv "
+              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+              "+z_in=m +xy_out=deg +z_out=m +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, esri_projectedCRS_to_geogCRS_with_ITRF_intermediate_context) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto authFactoryESRI = AuthorityFactory::create(dbContext, "ESRI");
+    auto ctxt =
+        CoordinateOperationContext::create(authFactoryEPSG, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // NAD_1983_CORS96_StatePlane_North_Carolina_FIPS_3200_Ft_US (projected)
+        authFactoryESRI->createCoordinateReferenceSystem("103501"),
+        // ITRF2005 (geog3D)
+        authFactoryEPSG->createCoordinateReferenceSystem("7910"), ctxt);
+    ASSERT_EQ(list.size(), 1);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of unnamed + "
+              "Conversion from NAD83(CORS96) (geog2D) to NAD83(CORS96) "
+              "(geocentric) + Inverse of ITRF2000 to NAD83(CORS96) (1) + "
+              "ITRF2000 to ITRF2005 (1) + "
+              "Conversion from ITRF2005 (geocentric) to ITRF2005 (geog3D)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=us-ft +z_in=us-ft "
+              "+xy_out=m +z_out=m +step +inv +proj=lcc +lat_0=33.75 +lon_0=-79 "
+              "+lat_1=34.3333333333333 +lat_2=36.1666666666667 "
+              "+x_0=609601.219202438 +y_0=0 +ellps=GRS80 +step +proj=cart "
+              "+ellps=GRS80 +step +inv +proj=helmert +x=0.9956 +y=-1.9013 "
+              "+z=-0.5215 +rx=0.025915 +ry=0.009426 +rz=0.011599 +s=0.00062 "
+              "+dx=0.0007 +dy=-0.0007 +dz=0.0005 +drx=6.7e-05 +dry=-0.000757 "
+              "+drz=-5.1e-05 +ds=-0.00018 +t_epoch=1997 "
+              "+convention=coordinate_frame +step +proj=helmert +x=-0.0001 "
+              "+y=0.0008 +z=0.0058 +rx=0 +ry=0 +rz=0 +s=-0.0004 +dx=0.0002 "
+              "+dy=-0.0001 +dz=0.0018 +drx=0 +dry=0 +drz=0 +ds=-8e-05 "
+              "+t_epoch=2000 +convention=position_vector +step +inv +proj=cart "
+              "+ellps=GRS80 +step +proj=unitconvert +xy_in=rad +z_in=m "
+              "+xy_out=deg +z_out=m +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------

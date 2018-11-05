@@ -1,6 +1,5 @@
 - Functional:
     - make setFromUserInput() accept arbitrary proj strings
-    - export as ESRI WKT 1 ? caution: Mercator_1SP, LCC
     - WKTv2 Bison based validator ?
     - import from Proj4
             init= syntax

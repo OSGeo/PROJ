@@ -93,6 +93,8 @@ namespace operation {
 
 //! @cond Doxygen_Suppress
 static const std::string INVERSE_OF = "Inverse of ";
+static const char *NULL_GEOCENTRIC_TRANSLATION = "Null geocentric translation";
+static const char *NULL_GEOGRAPHIC_OFFSET = "Null geographic offset";
 //! @endcond
 
 //! @cond Doxygen_Suppress
@@ -6384,15 +6386,15 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     // Forge a name for the inverse, either from the forward name, or
     // from the source and target CRS names
     const char *opType;
-    if (starts_with(forwardName, "Null geocentric translation")) {
-        opType = "Null geocentric translation";
+    if (starts_with(forwardName, NULL_GEOCENTRIC_TRANSLATION)) {
+        opType = NULL_GEOCENTRIC_TRANSLATION;
+    } else if (starts_with(forwardName, NULL_GEOGRAPHIC_OFFSET)) {
+        opType = NULL_GEOGRAPHIC_OFFSET;
     } else if (dynamic_cast<const Transformation *>(op) ||
                starts_with(forwardName, "Transformation from ")) {
         opType = "Transformation";
     } else if (dynamic_cast<const Conversion *>(op)) {
         opType = "Conversion";
-    } else if (dynamic_cast<const ConcatenatedOperation *>(op)) {
-        opType = "Concatenated operation";
     } else {
         opType = "Operation";
     }
@@ -8694,6 +8696,7 @@ struct CoordinateOperationFactory::Private {
         const crs::CRSNNPtr &sourceCRS;
         const crs::CRSNNPtr &targetCRS;
         const CoordinateOperationContextNNPtr &context;
+        bool inCreateOperationsWithDatumPivotAntiRecursion = false;
 
         Context(const crs::CRSNNPtr &sourceCRSIn,
                 const crs::CRSNNPtr &targetCRSIn,
@@ -8704,7 +8707,7 @@ struct CoordinateOperationFactory::Private {
 
     static std::vector<CoordinateOperationNNPtr>
     createOperations(const crs::CRSNNPtr &sourceCRS,
-                     const crs::CRSNNPtr &targetCRS, const Context &context);
+                     const crs::CRSNNPtr &targetCRS, Context &context);
 
   private:
     static std::vector<CoordinateOperationNNPtr> createOperationsGeogToGeog(
@@ -8712,10 +8715,15 @@ struct CoordinateOperationFactory::Private {
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
         const crs::GeographicCRS *geogSrc, const crs::GeographicCRS *geogDst);
 
+    static void createOperationsWithDatumPivot(
+        std::vector<CoordinateOperationNNPtr> &res,
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        const crs::GeodeticCRS *geodSrc, const crs::GeodeticCRS *geodDst,
+        Context &context);
+
     static ConversionNNPtr
-    createGeographicGeocentric(const util::PropertyMap &properties,
-                               const crs::CRSNNPtr &sourceCRSIn,
-                               const crs::CRSNNPtr &targetCRSIn);
+    createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
+                               const crs::CRSNNPtr &targetCRS);
 };
 //! @endcond
 
@@ -8932,10 +8940,10 @@ struct FilterAndSort {
         // And now that we have a sorted list, we can remove uninteresting
         // results
         // ...
-        removeSyntheticNullGeogOffset();
+        removeSyntheticNullTransforms();
         removeUninterestingOps();
         removeDuplicateOps();
-        removeSyntheticNullGeogOffset();
+        removeSyntheticNullTransforms();
     }
 
     // ----------------------------------------------------------------------
@@ -9138,20 +9146,22 @@ struct FilterAndSort {
 
     // ----------------------------------------------------------------------
 
-    void removeSyntheticNullGeogOffset() {
+    void removeSyntheticNullTransforms() {
 
         // If we have more than one result, and than the last result is the
-        // default
-        // "Null geographic offset" operation we have synthetized, remove it as
+        // default "Null geographic offset" or "Null geocentric translation"
+        // operations we have synthetized, remove it as
         // all previous results are necessarily better
-        if (hasOpThatContainsAreaOfInterest && res.size() > 1 &&
-            res.back()->nameStr().find("Null geographic offset") !=
-                std::string::npos) {
-            std::vector<CoordinateOperationNNPtr> resTemp;
-            for (size_t i = 0; i < res.size() - 1; i++) {
-                resTemp.emplace_back(res[i]);
+        if (hasOpThatContainsAreaOfInterest && res.size() > 1) {
+            const std::string &name = res.back()->nameStr();
+            if (name.find(NULL_GEOGRAPHIC_OFFSET) != std::string::npos ||
+                name.find(NULL_GEOCENTRIC_TRANSLATION) != std::string::npos) {
+                std::vector<CoordinateOperationNNPtr> resTemp;
+                for (size_t i = 0; i < res.size() - 1; i++) {
+                    resTemp.emplace_back(res[i]);
+                }
+                res = std::move(resTemp);
             }
-            res = std::move(resTemp);
         }
     }
 
@@ -9363,12 +9373,12 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
     auto authFactory = context->getAuthorityFactory();
     assert(authFactory);
     for (const auto &idSrc : sourceCRS->identifiers()) {
-        auto srcAuthName = *(idSrc->codeSpace());
-        auto srcCode = idSrc->code();
+        const auto &srcAuthName = *(idSrc->codeSpace());
+        const auto &srcCode = idSrc->code();
         if (!srcAuthName.empty()) {
             for (const auto &idTarget : targetCRS->identifiers()) {
-                auto targetAuthName = *(idTarget->codeSpace());
-                auto targetCode = idTarget->code();
+                const auto &targetAuthName = *(idTarget->codeSpace());
+                const auto &targetCode = idTarget->code();
                 if (!targetAuthName.empty()) {
                     auto res =
                         authFactory->createFromCoordinateReferenceSystemCodes(
@@ -9402,15 +9412,15 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
         return std::vector<CoordinateOperationNNPtr>();
     }
 
-    auto authFactory = context->getAuthorityFactory();
+    const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
     for (const auto &idSrc : sourceCRS->identifiers()) {
-        auto srcAuthName = *(idSrc->codeSpace());
-        auto srcCode = idSrc->code();
+        const auto &srcAuthName = *(idSrc->codeSpace());
+        const auto &srcCode = idSrc->code();
         if (!srcAuthName.empty()) {
             for (const auto &idTarget : targetCRS->identifiers()) {
-                auto targetAuthName = *(idTarget->codeSpace());
-                auto targetCode = idTarget->code();
+                const auto &targetAuthName = *(idTarget->codeSpace());
+                const auto &targetCode = idTarget->code();
                 if (!targetAuthName.empty()) {
                     auto res = authFactory->createFromCRSCodesWithIntermediates(
                         srcAuthName, srcCode, targetAuthName, targetCode,
@@ -9436,7 +9446,8 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
 static TransformationNNPtr
 createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
                            const crs::CRSNNPtr &targetCRS) {
-    std::string name("Null geographic offset transformation from ");
+    std::string name(NULL_GEOGRAPHIC_OFFSET);
+    name += " from ";
     name += sourceCRS->nameStr();
     name += " to ";
     name += targetCRS->nameStr();
@@ -9702,10 +9713,12 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
 //! @cond Doxygen_Suppress
 
 ConversionNNPtr CoordinateOperationFactory::Private::createGeographicGeocentric(
-    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
-    const crs::CRSNNPtr &targetCRSIn) {
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) {
+    auto properties = util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY,
+        buildOpName("Conversion", sourceCRS, targetCRS));
     auto conv = Conversion::createGeographicGeocentric(properties);
-    conv->setCRSs(sourceCRSIn, targetCRSIn, nullptr);
+    conv->setCRSs(sourceCRS, targetCRS, nullptr);
     return conv;
 }
 
@@ -9885,13 +9898,164 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+static bool hasIdentifiers(const CoordinateOperationNNPtr &op) {
+    if (!op->identifiers().empty()) {
+        return true;
+    }
+    auto concatenated = dynamic_cast<const ConcatenatedOperation *>(op.get());
+    if (concatenated) {
+        for (const auto &subOp : concatenated->operations()) {
+            if (hasIdentifiers(subOp)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+static std::vector<crs::CRSNNPtr>
+findCandidateGeodCRSForDatum(const io::DatabaseContextNNPtr &dbContext,
+                             const datum::GeodeticReferenceFramePtr &datum) {
+    std::vector<crs::CRSNNPtr> candidates;
+    for (const auto &id : datum->identifiers()) {
+        const auto &authName = *(id->codeSpace());
+        const auto code = id->code();
+        if (!authName.empty()) {
+            auto l_candidates =
+                io::AuthorityFactory::create(dbContext, authName)
+                    ->findGeodCRSUsingDatum(code);
+            for (const auto &candidate : l_candidates) {
+                candidates.emplace_back(candidate);
+            }
+        }
+    }
+    return candidates;
+}
+
+// ---------------------------------------------------------------------------
+
+static bool isNullTransformation(const std::string &name) {
+
+    return starts_with(name, NULL_GEOCENTRIC_TRANSLATION) ||
+           starts_with(name, NULL_GEOGRAPHIC_OFFSET);
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
+    std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
+    const crs::CRSNNPtr &targetCRS, const crs::GeodeticCRS *geodSrc,
+    const crs::GeodeticCRS *geodDst, Private::Context &context) {
+
+    const bool allowEmptyIntersection = true;
+
+    struct CreateOperationsWithDatumPivotAntiRecursion {
+        Context &context;
+
+        CreateOperationsWithDatumPivotAntiRecursion(Context &contextIn)
+            : context(contextIn) {
+            assert(!context.inCreateOperationsWithDatumPivotAntiRecursion);
+            context.inCreateOperationsWithDatumPivotAntiRecursion = true;
+        }
+
+        ~CreateOperationsWithDatumPivotAntiRecursion() {
+            context.inCreateOperationsWithDatumPivotAntiRecursion = false;
+        }
+    };
+    CreateOperationsWithDatumPivotAntiRecursion guard(context);
+
+    const auto &dbContext =
+        context.context->getAuthorityFactory()->databaseContext();
+    const auto candidatesSrcGeod(
+        findCandidateGeodCRSForDatum(dbContext, geodSrc->datum()));
+    const auto candidatesDstGeod(
+        findCandidateGeodCRSForDatum(dbContext, geodDst->datum()));
+
+    for (const auto &candidateSrcGeod : candidatesSrcGeod) {
+        const auto opsFirst =
+            createOperations(sourceCRS, candidateSrcGeod, context);
+        assert(opsFirst.size() == 1);
+        const bool isNullFirst = isNullTransformation(opsFirst[0]->nameStr());
+
+        for (const auto &candidateDstGeod : candidatesDstGeod) {
+            const auto opsSecond =
+                createOperations(candidateSrcGeod, candidateDstGeod, context);
+            const auto opsThird =
+                createOperations(candidateDstGeod, targetCRS, context);
+            assert(opsThird.size() == 1);
+
+            for (auto &opSecond : opsSecond) {
+                if (!hasIdentifiers(opSecond)) {
+                    continue;
+                }
+
+                std::vector<CoordinateOperationNNPtr> subOps;
+                if (isNullFirst) {
+                    opSecond->setCRSs(sourceCRS,
+                                      NN_CHECK_ASSERT(opSecond->targetCRS()),
+                                      nullptr);
+                } else {
+                    subOps.emplace_back(opsFirst[0]);
+                }
+                if (isNullTransformation(opsThird[0]->nameStr())) {
+                    opSecond->setCRSs(NN_CHECK_ASSERT(opSecond->sourceCRS()),
+                                      targetCRS, nullptr);
+                    subOps.emplace_back(opSecond);
+                } else {
+                    subOps.emplace_back(opSecond);
+                    subOps.emplace_back(opsThird[0]);
+                }
+                res.emplace_back(ConcatenatedOperation::createComputeMetadata(
+                    subOps, !allowEmptyIntersection));
+            }
+        }
+        if (!res.empty()) {
+            return;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static CoordinateOperationNNPtr
+createNullGeocentricTranslation(const crs::CRSNNPtr &sourceCRS,
+                                const crs::CRSNNPtr &targetCRS) {
+    std::string name(NULL_GEOCENTRIC_TRANSLATION);
+    name += " from ";
+    name += sourceCRS->nameStr();
+    name += " to ";
+    name += targetCRS->nameStr();
+
+    return util::nn_static_pointer_cast<CoordinateOperation>(
+        Transformation::createGeocentricTranslations(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY, name)
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                     metadata::Extent::WORLD),
+            sourceCRS, targetCRS, 0.0, 0.0, 0.0, {}));
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperations(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    const Private::Context &context) {
+    Private::Context &context) {
 
     std::vector<CoordinateOperationNNPtr> res;
     const bool allowEmptyIntersection = true;
+
+    auto geodSrc = dynamic_cast<const crs::GeodeticCRS *>(sourceCRS.get());
+    auto geodDst = dynamic_cast<const crs::GeodeticCRS *>(targetCRS.get());
 
     // First look-up if the registry provide us with operations.
     auto derivedSrc = dynamic_cast<const crs::DerivedCRS *>(sourceCRS.get());
@@ -9935,6 +10099,29 @@ CoordinateOperationFactory::Private::createOperations(
             }
         }
 
+        if (res.empty() &&
+            !context.inCreateOperationsWithDatumPivotAntiRecursion && geodSrc &&
+            geodDst) {
+            // If we still didn't find a transformation, and that the source
+            // and target are GeodeticCRS, then go through their underlying
+            // datum to find potential transformations between other GeodeticRSs
+            // that are made of those datum
+            // The typical example is if transforming between two GeographicCRS,
+            // but transformations are only available between their
+            // corresponding geocentric CRS.
+            const auto &srcDatum = geodSrc->datum();
+            const bool srcHasDatumWithId =
+                srcDatum && !srcDatum->identifiers().empty();
+            const auto &dstDatum = geodDst->datum();
+            const bool dstHasDatumWithId =
+                dstDatum && !dstDatum->identifiers().empty();
+            if (srcHasDatumWithId && dstHasDatumWithId) {
+                createOperationsWithDatumPivot(res, sourceCRS, targetCRS,
+                                               geodSrc, geodDst, context);
+                doFilterAndCheckPerfectOp = !res.empty();
+            }
+        }
+
         if (doFilterAndCheckPerfectOp) {
             // If we get at least a result with perfect accuracy, do not bother
             // generating synthetic transforms.
@@ -9951,8 +10138,6 @@ CoordinateOperationFactory::Private::createOperations(
     }
 
     // Special case if both CRS are geodetic
-    auto geodSrc = dynamic_cast<const crs::GeodeticCRS *>(sourceCRS.get());
-    auto geodDst = dynamic_cast<const crs::GeodeticCRS *>(targetCRS.get());
     if (geodSrc && geodDst && !derivedSrc && !derivedDst) {
 
         if (geodSrc->ellipsoid()->celestialBody() !=
@@ -9971,10 +10156,10 @@ CoordinateOperationFactory::Private::createOperations(
                                               geogSrc, geogDst);
         }
 
-        bool isSrcGeocentric = geodSrc->isGeocentric();
-        bool isSrcGeographic = geogSrc != nullptr;
-        bool isTargetGeocentric = geodDst->isGeocentric();
-        bool isTargetGeographic = geogDst != nullptr;
+        const bool isSrcGeocentric = geodSrc->isGeocentric();
+        const bool isSrcGeographic = geogSrc != nullptr;
+        const bool isTargetGeocentric = geodDst->isGeocentric();
+        const bool isTargetGeographic = geogDst != nullptr;
         if (((isSrcGeocentric && isTargetGeographic) ||
              (isSrcGeographic && isTargetGeocentric)) &&
             geodSrc->datum() != nullptr && geodDst->datum() != nullptr) {
@@ -9983,11 +10168,8 @@ CoordinateOperationFactory::Private::createOperations(
             if (geodSrc->datum()->isEquivalentTo(
                     geodDst->datum().get(),
                     util::IComparable::Criterion::EQUIVALENT)) {
-                res.emplace_back(createGeographicGeocentric(
-                    util::PropertyMap().set(
-                        common::IdentifiedObject::NAME_KEY,
-                        buildOpName("Conversion", sourceCRS, targetCRS)),
-                    sourceCRS, targetCRS));
+                res.emplace_back(
+                    createGeographicGeocentric(sourceCRS, targetCRS));
             } else if (isSrcGeocentric) {
                 std::string interm_crs_name(geogDst->nameStr());
                 interm_crs_name += " (geocentric)";
@@ -10001,17 +10183,12 @@ CoordinateOperationFactory::Private::createOperations(
                         NN_CHECK_ASSERT(
                             util::nn_dynamic_pointer_cast<cs::CartesianCS>(
                                 geodSrc->coordinateSystem()))));
-                auto opsFirst =
-                    createOperations(sourceCRS, interm_crs, context);
-                auto opsSecond =
-                    createOperations(interm_crs, targetCRS, context);
-                for (const auto &opFirst : opsFirst) {
-                    for (const auto &opSecond : opsSecond) {
-                        res.emplace_back(
-                            ConcatenatedOperation::createComputeMetadata(
-                                {opFirst, opSecond}, !allowEmptyIntersection));
-                    }
-                }
+                auto opFirst =
+                    createNullGeocentricTranslation(sourceCRS, interm_crs);
+                auto opSecond =
+                    createGeographicGeocentric(interm_crs, targetCRS);
+                res.emplace_back(ConcatenatedOperation::createComputeMetadata(
+                    {opFirst, opSecond}, !allowEmptyIntersection));
             } else {
                 return applyInverse(
                     createOperations(targetCRS, sourceCRS, context));
@@ -10021,17 +10198,8 @@ CoordinateOperationFactory::Private::createOperations(
         }
 
         if (isSrcGeocentric && isTargetGeocentric) {
-            std::string name("Null geocentric translation from ");
-            name += sourceCRS->nameStr();
-            name += " to ";
-            name += targetCRS->nameStr();
-
-            res.emplace_back(Transformation::createGeocentricTranslations(
-                util::PropertyMap()
-                    .set(common::IdentifiedObject::NAME_KEY, name)
-                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                         metadata::Extent::WORLD),
-                sourceCRS, targetCRS, 0.0, 0.0, 0.0, {}));
+            res.emplace_back(
+                createNullGeocentricTranslation(sourceCRS, targetCRS));
             return res;
         }
 
@@ -10401,10 +10569,10 @@ CoordinateOperationFactory::createOperations(
     auto l_sourceCRS = srcBoundCRS ? NN_NO_CHECK(srcBoundCRS) : sourceCRS;
     auto l_targetCRS = targetBoundCRS ? NN_NO_CHECK(targetBoundCRS) : targetCRS;
 
-    return filterAndSort(Private::createOperations(
-                             l_sourceCRS, l_targetCRS,
-                             Private::Context(sourceCRS, targetCRS, context)),
-                         context, l_sourceCRS, l_targetCRS);
+    Private::Context contextPrivate(sourceCRS, targetCRS, context);
+    return filterAndSort(
+        Private::createOperations(l_sourceCRS, l_targetCRS, contextPrivate),
+        context, l_sourceCRS, l_targetCRS);
 }
 
 // ---------------------------------------------------------------------------

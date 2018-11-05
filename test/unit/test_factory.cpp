@@ -2570,4 +2570,13 @@ TEST_F(FactoryWithTmpDatabase,
     EXPECT_EQ(list[1]->nameStr(), "PARTIAL_AREA_PERFECT_ACCURACY");
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(factory, findGeodCRSUsingDatum) {
+    auto ctxt = DatabaseContext::create(std::string(), {});
+    auto factory = AuthorityFactory::create(ctxt, "EPSG");
+    auto res = factory->findGeodCRSUsingDatum("6326");
+    EXPECT_EQ(res.size(), 3);
+}
+
 } // namespace
