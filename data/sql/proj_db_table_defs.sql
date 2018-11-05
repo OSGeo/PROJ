@@ -101,6 +101,7 @@ CREATE TABLE geodetic_datum (
     code TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
+    scope TEXT,
     ellipsoid_auth_name TEXT NOT NULL,
     ellipsoid_code TEXT NOT NULL,
     prime_meridian_auth_name TEXT NOT NULL,
@@ -118,6 +119,8 @@ CREATE TABLE vertical_datum (
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    description TEXT,
+    scope TEXT,
     area_of_use_auth_name TEXT NOT NULL,
     area_of_use_code TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
@@ -171,6 +174,8 @@ CREATE TABLE geodetic_crs(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    description TEXT,
+    scope TEXT,
     type TEXT NOT NULL CHECK (type IN ('geographic 2D', 'geographic 3D', 'geocentric')),
     coordinate_system_auth_name TEXT,
     coordinate_system_code TEXT,
@@ -228,6 +233,8 @@ CREATE TABLE vertical_crs(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    description TEXT,
+    scope TEXT,
     coordinate_system_auth_name TEXT NOT NULL,
     coordinate_system_code TEXT NOT NULL,
     datum_auth_name TEXT NOT NULL,
@@ -259,6 +266,9 @@ CREATE TABLE conversion(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+
+    description TEXT,
+    scope TEXT,
 
     area_of_use_auth_name TEXT NOT NULL,
     area_of_use_code TEXT NOT NULL,
@@ -401,6 +411,8 @@ CREATE TABLE projected_crs(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    description TEXT,
+    scope TEXT,
     coordinate_system_auth_name TEXT,
     coordinate_system_code TEXT,
     geodetic_crs_auth_name TEXT,
@@ -458,6 +470,8 @@ CREATE TABLE compound_crs(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    description TEXT,
+    scope TEXT,
     horiz_crs_auth_name TEXT NOT NULL,
     horiz_crs_code TEXT NOT NULL,
     vertical_crs_auth_name TEXT NOT NULL,
@@ -491,6 +505,9 @@ CREATE TABLE helmert_transformation(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+
+    description TEXT,
+    scope TEXT,
 
     method_auth_name TEXT NOT NULL,
     method_code TEXT NOT NULL,
@@ -586,6 +603,9 @@ CREATE TABLE grid_transformation(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+
+    description TEXT,
+    scope TEXT,
 
     method_auth_name TEXT NOT NULL,
     method_code TEXT NOT NULL,
@@ -700,6 +720,9 @@ CREATE TABLE other_transformation(
     code TEXT NOT NULL,
     name TEXT NOT NULL,
 
+    description TEXT,
+    scope TEXT,
+
     -- if method_auth_name = 'PROJ', method_code can be 'PROJString' for a
     -- PROJ string and then method_name is a PROJ string (typically a pipeline)
     -- if method_auth_name = 'PROJ', method_code can be 'WKT' for a
@@ -806,6 +829,9 @@ CREATE TABLE concatenated_operation(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+
+    description TEXT,
+    scope TEXT,
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
@@ -921,24 +947,28 @@ END;
 
 CREATE VIEW coordinate_operation_view AS
     SELECT 'grid_transformation' AS table_name, auth_name, code, name,
+           description, scope,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
            area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM grid_transformation
     UNION ALL
     SELECT 'helmert_transformation' AS table_name, auth_name, code, name,
+           description, scope,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
            area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM helmert_transformation
     UNION ALL
     SELECT 'other_transformation' AS table_name, auth_name, code, name,
+           description, scope,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
            area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM other_transformation
     UNION ALL
     SELECT 'concatenated_operation' AS table_name, auth_name, code, name,
+           description, scope,
            NULL, NULL, NULL, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
            area_of_use_auth_name, area_of_use_code,
@@ -951,18 +981,22 @@ CREATE VIEW coordinate_operation_with_conversion_view AS
 
 CREATE VIEW crs_view AS
     SELECT 'geodetic_crs' AS table_name, auth_name, code, name, type,
+           description, scope,
            area_of_use_auth_name, area_of_use_code,
            deprecated FROM geodetic_crs
     UNION ALL
     SELECT 'projected_crs' AS table_name, auth_name, code, name, 'projected',
+           description, scope,
            area_of_use_auth_name, area_of_use_code,
            deprecated FROM projected_crs
     UNION ALL
     SELECT 'vertical_crs' AS table_name, auth_name, code, name, 'vertical',
+           description, scope,
            area_of_use_auth_name, area_of_use_code,
            deprecated FROM vertical_crs
     UNION ALL
     SELECT 'compound_crs' AS table_name, auth_name, code, name, 'compound',
+           description, scope,
            area_of_use_auth_name, area_of_use_code,
            deprecated FROM compound_crs
 ;

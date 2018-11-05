@@ -1315,11 +1315,11 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_datum "
                     "VALUES('EPSG','6326','World Geodetic System "
-                    "1984','','EPSG','7030','EPSG','8901','EPSG','1262',0);"))
+                    "1984','',NULL,'EPSG','7030','EPSG','8901','EPSG','1262',0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_datum VALUES('EPSG','1027','EGM2008 "
-                    "geoid','EPSG','1262',0);"))
+                    "geoid',NULL,NULL,'EPSG','1262',0);"))
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO coordinate_system "
                             "VALUES('EPSG','6422','ellipsoidal',2);"))
@@ -1332,12 +1332,9 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             execute("INSERT INTO axis VALUES('EPSG','107','Geodetic "
                     "longitude','Lon','east','EPSG','6422',2,'EPSG','9122');"))
             << last_error();
-        // ASSERT_TRUE(
-        //    execute("INSERT INTO crs VALUES('EPSG','4326','geographic 2D');"))
-        //    << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_crs VALUES('EPSG','4326','WGS "
-                    "84','geographic "
+                    "84',NULL,NULL,'geographic "
                     "2D','EPSG','6422','EPSG','6326','EPSG','1262',NULL,0);"))
             << last_error();
 
@@ -1348,20 +1345,15 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             execute("INSERT INTO axis VALUES('EPSG','114','Gravity-related "
                     "height','H','up','EPSG','6499',1,'EPSG','9001');"))
             << last_error();
-        // ASSERT_TRUE(
-        //    execute("INSERT INTO crs VALUES('EPSG','3855','vertical');"))
-        //    << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_crs VALUES('EPSG','3855','EGM2008 "
-                    "height','EPSG','6499','EPSG','1027','EPSG','1262',0);"))
+                    "height',NULL,NULL,'EPSG','6499','EPSG','1027','EPSG',"
+                    "'1262',0);"))
             << last_error();
 
         ASSERT_TRUE(execute("INSERT INTO unit_of_measure "
                             "VALUES('EPSG','9201','unity','scale',1.0,0);"))
             << last_error();
-        // ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
-        //                    "VALUES('EPSG','16031','conversion');"))
-        //    << last_error();
 
         ASSERT_TRUE(execute(
             "INSERT INTO area VALUES('EPSG','1933','World - N hemisphere - "
@@ -1370,7 +1362,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
         ASSERT_TRUE(execute(
             "INSERT INTO conversion VALUES('EPSG','16031','UTM zone "
-            "31N','EPSG','1933','EPSG','9807','Transverse "
+            "31N',NULL,NULL,'EPSG','1933','EPSG','9807','Transverse "
             "Mercator','EPSG','8801','Latitude "
             "of "
             "natural origin',0.0,'EPSG','9102','EPSG','8802','Longitude of "
@@ -1401,46 +1393,34 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                     "VALUES('EPSG','2','Northing','N','north','EPSG','4400'"
                     ",2,'EPSG','9001');"))
             << last_error();
-        // ASSERT_TRUE(
-        //    execute("INSERT INTO crs VALUES('EPSG','32631','projected');"))
-        //    << last_error();
+
         ASSERT_TRUE(execute("INSERT INTO projected_crs "
                             "VALUES('EPSG','32631','WGS 84 / UTM zone "
-                            "31N','EPSG','4400','EPSG','4326','EPSG','16031','"
+                            "31N',NULL,NULL,'EPSG','4400','EPSG','4326',"
+                            "'EPSG','16031','"
                             "EPSG','2060',NULL,0);"))
             << last_error();
 
-        // ASSERT_TRUE(
-        //    execute("INSERT INTO crs
-        //    VALUES('EPSG','MY_COMPOUND','compound');"))
-        //    << last_error();
         ASSERT_TRUE(execute(
             "INSERT INTO compound_crs VALUES('EPSG','MY_COMPOUND','WGS 84 + "
-            "EGM2008 geoid "
-            "height','EPSG','4326','EPSG','3855','EPSG','1262',0);"))
+            "EGM2008 geoid height',NULL,NULL,'EPSG','4326','EPSG','3855',"
+            "'EPSG','1262',0);"))
             << last_error();
 
-        // ASSERT_TRUE(
-        //    execute("INSERT INTO coordinate_operation "
-        //            "VALUES('EPSG','DUMMY_HELMERT','helmert_transformation');"))
-        //    << last_error();
         ASSERT_TRUE(execute(
             "INSERT INTO helmert_transformation "
-            "VALUES('EPSG','DUMMY_HELMERT','name','EPSG','9603','"
-            "Geocentric translations (geog2D "
-            "domain)','EPSG','4326','EPSG','4326','EPSG','1262',44.0,-143."
+            "VALUES('EPSG','DUMMY_HELMERT','name',NULL,NULL,'EPSG','9603','"
+            "Geocentric translations (geog2D domain)','EPSG','4326',"
+            "'EPSG','4326','EPSG','1262',44.0,-143."
             "0,-90.0,-294.0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
-        // ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
-        //                    "VALUES('EPSG','DUMMY_GRID_TRANSFORMATION','grid_"
-        //                    "transformation');"))
-        //    << last_error();
         ASSERT_TRUE(execute(
             "INSERT INTO grid_transformation "
-            "VALUES('EPSG','DUMMY_GRID_TRANSFORMATION','name','EPSG','9615'"
+            "VALUES('EPSG','DUMMY_GRID_TRANSFORMATION','name',NULL,NULL,"
+            "'EPSG','9615'"
             ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
             "8656','Latitude and longitude difference "
             "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
@@ -1450,15 +1430,12 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "INSERT INTO unit_of_measure VALUES('EPSG','9110','sexagesimal "
             "DMS','angle',NULL,0);"))
             << last_error();
-        // ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
-        //                    "VALUES('EPSG','DUMMY_OTHER_TRANSFORMATION','other_"
-        //                    "transformation');"))
-        //    << last_error();
+
         ASSERT_TRUE(execute(
             "INSERT INTO other_transformation "
-            "VALUES('EPSG','DUMMY_OTHER_TRANSFORMATION','name','EPSG','"
-            "9601','Longitude "
-            "rotation','EPSG','4326','EPSG','4326','EPSG','1262',0.0,'EPSG'"
+            "VALUES('EPSG','DUMMY_OTHER_TRANSFORMATION','name',NULL,NULL,"
+            "'EPSG','9601','Longitude rotation',"
+            "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,'EPSG'"
             ",'8602','Longitude "
             "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
@@ -1466,13 +1443,10 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
-        // ASSERT_TRUE(execute(
-        //    "INSERT INTO coordinate_operation "
-        //    "VALUES('EPSG','DUMMY_CONCATENATED','concatenated_operation');"))
-        //    << last_error();
         ASSERT_TRUE(execute(
             "INSERT INTO concatenated_operation "
-            "VALUES('EPSG','DUMMY_CONCATENATED','name','EPSG','4326','EPSG'"
+            "VALUES('EPSG','DUMMY_CONCATENATED','name',NULL,NULL,"
+            "'EPSG','4326','EPSG'"
             ",'4326','EPSG','1262',NULL,'EPSG','DUMMY_OTHER_TRANSFORMATION'"
             ",'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL,NULL,0);"))
             << last_error();
@@ -1481,13 +1455,12 @@ class FactoryWithTmpDatabase : public ::testing::Test {
     void createSourceTargetPivotCRS() {
         for (const auto &val :
              std::vector<std::string>{"SOURCE", "TARGET", "PIVOT"}) {
-            // ASSERT_TRUE(execute("INSERT INTO crs VALUES('NS_" + val + "','" +
-            //                    val + "','geographic 2D');"))
-            //    << last_error();
+
             ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
                                 "VALUES('NS_" +
                                 val + "','" + val + "','" + val +
-                                "','geographic 2D','EPSG','6422','EPSG','6326',"
+                                "',NULL,NULL,'geographic 2D','EPSG','6422',"
+                                "'EPSG','6326',"
                                 "'EPSG','1262',NULL,0);"))
                 << last_error();
         }
@@ -1495,14 +1468,11 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
     void createTransformationForPivotTesting(const std::string &src,
                                              const std::string &dst) {
-        // ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
-        //                    "VALUES('OTHER','" +
-        //                    src + "_" + dst + "','helmert_transformation');"))
-        //    << last_error();
+
         ASSERT_TRUE(execute(
             "INSERT INTO helmert_transformation "
             "VALUES('OTHER','" +
-            src + "_" + dst + "','name','EPSG','9603','"
+            src + "_" + dst + "','name',NULL,NULL,'EPSG','9603','"
                               "Geocentric translations (geog2D domain)','NS_" +
             src + "','" + src + "','NS_" + dst + "','" + dst +
             "','EPSG'"
@@ -1760,22 +1730,16 @@ TEST_F(FactoryWithTmpDatabase,
     createStructure();
     populateWithFakeEPSG();
 
-    // ASSERT_TRUE(execute(
-    //    "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic 2D');"))
-    //    << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO geodetic_crs VALUES('OTHER','OTHER_4326','WGS "
-                "84','geographic "
+                "84',NULL,NULL,'geographic "
                 "2D','EPSG','6422','EPSG','6326','EPSG','1262',NULL,0);"))
         << last_error();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO crs VALUES('OTHER','OTHER_32631','projected');"))
-    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
                         "VALUES('OTHER','OTHER_32631','WGS 84 / UTM zone "
-                        "31N','EPSG','4400','OTHER','OTHER_4326','EPSG','16031'"
-                        ",'EPSG','2060',NULL,0);"))
+                        "31N',NULL,NULL,'EPSG','4400','OTHER','OTHER_4326',"
+                        "'EPSG','16031','EPSG','2060',NULL,0);"))
         << last_error();
 
     auto factoryGeneral = AuthorityFactory::create(
@@ -1802,13 +1766,10 @@ TEST_F(FactoryWithTmpDatabase,
         ASSERT_EQ(res.size(), 0); // the conversion is in the EPSG space
     }
 
-    // ASSERT_TRUE(execute(
-    //    "INSERT INTO coordinate_operation "
-    //    "VALUES('OTHER','OTHER_GRID_TRANSFORMATION','grid_transformation');"))
-    //    << last_error();
     ASSERT_TRUE(execute(
         "INSERT INTO grid_transformation "
-        "VALUES('OTHER','OTHER_GRID_TRANSFORMATION','name','EPSG','9615'"
+        "VALUES('OTHER','OTHER_GRID_TRANSFORMATION','name',NULL,NULL,"
+        "'EPSG','9615'"
         ",'NTv2','EPSG','4326','OTHER','OTHER_4326','EPSG','1262',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
         "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
@@ -1837,51 +1798,37 @@ TEST_F(FactoryWithTmpDatabase,
     createStructure();
     populateWithFakeEPSG();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO coordinate_operation "
-    //            "VALUES('OTHER','TRANSFORMATION_10M','grid_transformation');"))
-    //    << last_error();
     ASSERT_TRUE(execute(
         "INSERT INTO grid_transformation "
-        "VALUES('OTHER','TRANSFORMATION_10M','TRANSFORMATION_10M','EPSG','9615'"
+        "VALUES('OTHER','TRANSFORMATION_10M','TRANSFORMATION_10M',NULL,NULL,"
+        "'EPSG','9615'"
         ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',10.0,'EPSG','"
         "8656','Latitude and longitude difference "
         "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
-    // ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
-    //                    "VALUES('OTHER','TRANSFORMATION_1M_SMALL_EXTENT','grid_"
-    //                    "transformation');"))
-    //    << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO grid_transformation "
                 "VALUES('OTHER','TRANSFORMATION_1M_SMALL_EXTENT','"
-                "TRANSFORMATION_1M_SMALL_EXTENT','EPSG','9615'"
+                "TRANSFORMATION_1M_SMALL_EXTENT',NULL,NULL,'EPSG','9615'"
                 ",'NTv2','EPSG','4326','EPSG','4326','EPSG','2060',1.0,'EPSG','"
                 "8656','Latitude and longitude difference "
                 "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO coordinate_operation "
-    //            "VALUES('OTHER','TRANSFORMATION_1M','grid_transformation');"))
-    //    << last_error();
     ASSERT_TRUE(execute(
         "INSERT INTO grid_transformation "
-        "VALUES('OTHER','TRANSFORMATION_1M','TRANSFORMATION_1M','EPSG','9615'"
+        "VALUES('OTHER','TRANSFORMATION_1M','TRANSFORMATION_1M',NULL,NULL,"
+        "'EPSG','9615'"
         ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
         "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
-    // ASSERT_TRUE(execute("INSERT INTO coordinate_operation "
-    //                    "VALUES('OTHER','TRANSFORMATION_0.5M_DEPRECATED','grid_"
-    //                    "transformation');"))
-    //    << last_error();
     ASSERT_TRUE(
         execute("INSERT INTO grid_transformation "
                 "VALUES('OTHER','TRANSFORMATION_0.5M_DEPRECATED','"
-                "TRANSFORMATION_0.5M_DEPRECATED','EPSG','9615'"
+                "TRANSFORMATION_0.5M_DEPRECATED',NULL,NULL,'EPSG','9615'"
                 ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
                 "8656','Latitude and longitude difference "
                 "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,1);"))
@@ -1981,7 +1928,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
 
     ASSERT_TRUE(execute(
         "INSERT INTO other_transformation "
-        "VALUES('OTHER','FOO','My PROJ string based op','PROJ',"
+        "VALUES('OTHER','FOO','My PROJ string based op',NULL,NULL,'PROJ',"
         "'PROJString','+proj=pipeline +ellps=WGS84 +step +proj=longlat',"
         "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
@@ -2040,8 +1987,8 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
 
     ASSERT_TRUE(
         execute("INSERT INTO other_transformation "
-                "VALUES('OTHER','FOO','My WKT string based op','PROJ',"
-                "'WKT','" +
+                "VALUES('OTHER','FOO','My WKT string based op',NULL,NULL,"
+                "'PROJ','WKT','" +
                 std::string(wkt) +
                 "',"
                 "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,"
@@ -2074,8 +2021,8 @@ TEST_F(FactoryWithTmpDatabase,
 
     ASSERT_TRUE(
         execute("INSERT INTO other_transformation "
-                "VALUES('OTHER','FOO','My WKT string based op','PROJ',"
-                "'WKT','" +
+                "VALUES('OTHER','FOO','My WKT string based op',NULL,NULL,"
+                "'PROJ','WKT','" +
                 std::string("invalid_wkt") +
                 "',"
                 "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,"
@@ -2101,8 +2048,8 @@ TEST_F(FactoryWithTmpDatabase,
 
     ASSERT_TRUE(
         execute("INSERT INTO other_transformation "
-                "VALUES('OTHER','FOO','My WKT string based op','PROJ',"
-                "'WKT','" +
+                "VALUES('OTHER','FOO','My WKT string based op',NULL,NULL,"
+                "'PROJ','WKT','" +
                 std::string("LOCAL_CS[\"foo\"]") +
                 "',"
                 "'EPSG','4326','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,"
@@ -2185,59 +2132,41 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
     createStructure();
     populateWithFakeEPSG();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO crs VALUES('TEST_NS','TEST','geographic 2D');"))
-    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES('TEST_NS','TEST','my "
-                        "name TEST','geographic "
-                        "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=longlat +a=2 "
+                        "name TEST',NULL,NULL,'geographic 2D',"
+                        "NULL,NULL,NULL,NULL,NULL,NULL,'+proj=longlat +a=2 "
                         "+rf=300',0);"))
         << last_error();
 
-    // ASSERT_TRUE(execute(
-    //    "INSERT INTO crs VALUES('TEST_NS','TEST_BOUND','geographic 2D');"))
-    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES"
                         "('TEST_NS','TEST_BOUND',"
-                        "'my name TEST','geographic "
-                        "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=longlat +a=2 "
+                        "'my name TEST',NULL,NULL,'geographic 2D',"
+                        "NULL,NULL,NULL,NULL,NULL,NULL,'+proj=longlat +a=2 "
                         "+rf=300 +towgs84=1,2,3',0);"))
         << last_error();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO crs VALUES('TEST_NS','TEST_GC','geocentric');"))
-    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs VALUES('TEST_NS','TEST_GC',"
-                        "'my name','geocentric',NULL,NULL,NULL,NULL,NULL,NULL,"
-                        "'+proj=geocent +a=2 +rf=300',0);"))
+                        "'my name',NULL,NULL,'geocentric',NULL,NULL,NULL,NULL,"
+                        "NULL,NULL,'+proj=geocent +a=2 +rf=300',0);"))
         << last_error();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO crs "
-    //            "VALUES('TEST_NS','TEST_REF_ANOTHER','geographic 2D');"))
-    //    << last_error();
     ASSERT_TRUE(execute(
         "INSERT INTO geodetic_crs "
         "VALUES('TEST_NS','TEST_REF_ANOTHER','my name TEST_REF_ANOTHER',"
+        "NULL,NULL,"
         "'geographic 2D',NULL,NULL,NULL,NULL,NULL,NULL,'TEST_NS:TEST',0);"))
         << last_error();
 
-    // ASSERT_TRUE(execute(
-    //    "INSERT INTO crs VALUES('TEST_NS','TEST_WRONG','geographic 2D');"))
-    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
-                        "VALUES('TEST_NS','TEST_WRONG','my name','geographic "
-                        "2D',NULL,NULL,NULL,NULL,NULL,NULL,'+proj=merc',0);"))
+                        "VALUES('TEST_NS','TEST_WRONG','my name',NULL,NULL,"
+                        "'geographic 2D',NULL,NULL,NULL,NULL,NULL,NULL,"
+                        "'+proj=merc',0);"))
         << last_error();
 
-    // ASSERT_TRUE(execute(
-    //    "INSERT INTO crs VALUES('TEST_NS','TEST_RECURSIVE','geographic
-    //    2D');"))
-    //    << last_error();
     ASSERT_TRUE(execute(
         "INSERT INTO geodetic_crs "
-        "VALUES('TEST_NS','TEST_RECURSIVE','my name','geographic "
-        "2D',NULL,NULL,NULL,NULL,NULL,NULL,'TEST_NS:TEST_RECURSIVE',0);"))
+        "VALUES('TEST_NS','TEST_RECURSIVE','my name',NULL,NULL,'geographic 2D',"
+        "NULL,NULL,NULL,NULL,NULL,NULL,'TEST_NS:TEST_RECURSIVE',0);"))
         << last_error();
 
     auto factory =
@@ -2289,33 +2218,22 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     createStructure();
     populateWithFakeEPSG();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO crs VALUES('TEST_NS','TEST','projected');"))
-    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
-                        "VALUES('TEST_NS','TEST','my "
-                        "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
-                        "mbt_s +unused_flag',0);"))
+                        "VALUES('TEST_NS','TEST','my name',NULL,NULL,NULL,"
+                        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                        "'+proj=mbt_s +unused_flag',0);"))
         << last_error();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO crs
-    //    VALUES('TEST_NS','TEST_BOUND','projected');"))
-    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
-                        "VALUES('TEST_NS','TEST_BOUND','my "
-                        "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
-                        "mbt_s +unused_flag +towgs84=1,2,3',0);"))
+                        "VALUES('TEST_NS','TEST_BOUND','my name',NULL,NULL,"
+                        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                        "'+proj=mbt_s +unused_flag +towgs84=1,2,3',0);"))
         << last_error();
 
-    // ASSERT_TRUE(
-    //    execute("INSERT INTO crs
-    //    VALUES('TEST_NS','TEST_WRONG','projected');"))
-    //    << last_error();
     ASSERT_TRUE(execute("INSERT INTO projected_crs "
-                        "VALUES('TEST_NS','TEST_WRONG','my "
-                        "name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'+proj="
-                        "longlat',0);"))
+                        "VALUES('TEST_NS','TEST_WRONG','my name',NULL,NULL,"
+                        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                        "'+proj=longlat',0);"))
         << last_error();
 
     auto factory =
@@ -2406,18 +2324,12 @@ TEST(factory, attachExtraDatabases_auxiliary) {
             }
         }
 
-        // ASSERT_TRUE(
-        //    sqlite3_exec(
-        //        dbAux,
-        //        "INSERT INTO crs VALUES('OTHER','OTHER_4326','geographic
-        //        2D');",
-        //        nullptr, nullptr, nullptr) == SQLITE_OK);
         ASSERT_TRUE(
             sqlite3_exec(
                 dbAux,
                 "INSERT INTO geodetic_crs VALUES('OTHER','OTHER_4326','WGS "
-                "84','geographic "
-                "2D','EPSG','6422','EPSG','6326','EPSG','1262',NULL,0);",
+                "84',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6326',"
+                "'EPSG','1262',NULL,0);",
                 nullptr, nullptr, nullptr) == SQLITE_OK);
         ASSERT_TRUE(sqlite3_exec(dbAux, "COMMIT", nullptr, nullptr, nullptr) ==
                     SQLITE_OK);
@@ -2532,7 +2444,7 @@ TEST_F(FactoryWithTmpDatabase,
     ASSERT_TRUE(
         execute("INSERT INTO other_transformation "
                 "VALUES('OTHER','PARTIAL_AREA_PERFECT_ACCURACY',"
-                "'PARTIAL_AREA_PERFECT_ACCURACY','PROJ',"
+                "'PARTIAL_AREA_PERFECT_ACCURACY',NULL,NULL,'PROJ',"
                 "'PROJString','+proj=helmert +x=1',"
                 "'EPSG','4326','EPSG','4326','EPSG','1933',0.0,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
@@ -2544,7 +2456,7 @@ TEST_F(FactoryWithTmpDatabase,
     ASSERT_TRUE(
         execute("INSERT INTO other_transformation "
                 "VALUES('OTHER','WHOLE_AREA_APPROX_ACCURACY',"
-                "'WHOLE_AREA_APPROX_ACCURACY','PROJ',"
+                "'WHOLE_AREA_APPROX_ACCURACY',NULL,NULL,'PROJ',"
                 "'PROJString','+proj=helmert +x=2',"
                 "'EPSG','4326','EPSG','4326','EPSG','1262',1.0,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"

@@ -2,6 +2,7 @@
 
 INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_5799_TO_EPSG_4937','DVR90 height to ETRS89',
+    NULL,NULL,
     'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
     'EPSG','5799', -- source CRS (DVR90 height)
     'EPSG','4937', -- target CRS (ETRS89)
@@ -12,6 +13,7 @@ INSERT INTO "grid_transformation" VALUES(
 
 INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_5733_TO_EPSG_4937','DNN height to ETRS89',
+    NULL,NULL,
     'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
     'EPSG','5733', -- source CRS (DNN height)
     'EPSG','4937', -- target CRS (ETRS89)
