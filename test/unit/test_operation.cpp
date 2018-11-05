@@ -4442,7 +4442,8 @@ TEST(operation, esri_projectedCRS_to_geogCRS_with_ITRF_intermediate_context) {
         authFactoryEPSG->createCoordinateReferenceSystem("7910"), ctxt);
     ASSERT_EQ(list.size(), 1);
     EXPECT_EQ(list[0]->nameStr(),
-              "Inverse of unnamed + "
+              "Inverse of NAD_1983_CORS96_StatePlane_North_Carolina_"
+              "FIPS_3200_Ft_US + "
               "Conversion from NAD83(CORS96) (geog2D) to NAD83(CORS96) "
               "(geocentric) + Inverse of ITRF2000 to NAD83(CORS96) (1) + "
               "ITRF2000 to ITRF2005 (1) + "
