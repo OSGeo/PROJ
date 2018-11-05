@@ -87,8 +87,8 @@ The same list can also be produced on the command line with :program:`proj` or
 :program:`cs2cs`, by adding the `-lu` flag when calling the utility.
 
 +----------+---------------------------------+
-| **Label**| **Name**                        |
-+----------+---------------------------------+
+| Label    | Name                            |
++==========+=================================+
 |     km   | Kilometer                       |
 +----------+---------------------------------+
 |      m   | Meter                           |
@@ -142,8 +142,8 @@ Angular units
 In the table below all angular units supported by PROJ `unitconvert` are listed.
 
 +----------+---------------------------------+
-| **Label**| **Name**                        |
-+----------+---------------------------------+
+| Label    | Name                            |
++==========+=================================+
 |    deg   | Degree                          |
 +----------+---------------------------------+
 |   grad   | Grad                            |
@@ -159,8 +159,8 @@ Time units
 In the table below all time units supported by PROJ are listed.
 
 +--------------+-----------------------------+
-| **label**    | **Name**                    |
-+--------------+-----------------------------+
+| Label        | Name                        |
++==============+=============================+
 | mjd          | Modified Julian date        |
 +--------------+-----------------------------+
 | decimalyear  | Decimal year                |
