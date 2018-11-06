@@ -535,16 +535,18 @@ typedef enum
     PJ_OBJ_TYPE_UNKNOWN
 } PJ_OBJ_TYPE;
 
-PJ_OBJ_LIST PROJ_DLL *proj_obj_create_objects_from_name(PJ_CONTEXT *ctx,
-                                                        const char *auth_name,
-                                                        const char *searchedName,
-                                                        const PJ_OBJ_TYPE* types,
-                                                        size_t typesCount,
-                                                        int approximateMatch,
-                                                        size_t limitResultCount,
-                                                        const char* const *options);
+PJ_OBJ_LIST PROJ_DLL *proj_obj_create_from_name(PJ_CONTEXT *ctx,
+                                                const char *auth_name,
+                                                const char *searchedName,
+                                                const PJ_OBJ_TYPE* types,
+                                                size_t typesCount,
+                                                int approximateMatch,
+                                                size_t limitResultCount,
+                                                const char* const *options);
 
 PJ_OBJ_TYPE PROJ_DLL proj_obj_get_type(PJ_OBJ *obj);
+
+int PROJ_DLL proj_obj_is_deprecated(PJ_OBJ *obj);
 
 /** \brief Type representing a NULL terminated list of NUL-terminate strings. */
 typedef char **PROJ_STRING_LIST;

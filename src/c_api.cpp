@@ -90,7 +90,7 @@ static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
 struct PJ_OBJ {
     //! @cond Doxygen_Suppress
     PJ_CONTEXT *ctx;
-    BaseObjectNNPtr obj;
+    IdentifiedObjectNNPtr obj;
 
     // cached results
     std::string mapWKTString[PJ_WKT_TYPE_LAST + 1]{};
@@ -98,9 +98,10 @@ struct PJ_OBJ {
     bool gridsNeededAsked = false;
     std::vector<GridDescription> gridsNeeded{};
 
-    explicit PJ_OBJ(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn)
+    explicit PJ_OBJ(PJ_CONTEXT *ctxIn, const IdentifiedObjectNNPtr &objIn)
         : ctx(ctxIn), obj(objIn) {}
-    static PJ_OBJ *create(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn);
+    static PJ_OBJ *create(PJ_CONTEXT *ctxIn,
+                          const IdentifiedObjectNNPtr &objIn);
 
     PJ_OBJ(const PJ_OBJ &) = delete;
     PJ_OBJ &operator=(const PJ_OBJ &) = delete;
@@ -108,7 +109,7 @@ struct PJ_OBJ {
 };
 
 //! @cond Doxygen_Suppress
-PJ_OBJ *PJ_OBJ::create(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn) {
+PJ_OBJ *PJ_OBJ::create(PJ_CONTEXT *ctxIn, const IdentifiedObjectNNPtr &objIn) {
     return new PJ_OBJ(ctxIn, objIn);
 }
 //! @endcond
@@ -119,10 +120,10 @@ PJ_OBJ *PJ_OBJ::create(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn) {
 struct PJ_OBJ_LIST {
     //! @cond Doxygen_Suppress
     PJ_CONTEXT *ctx;
-    std::vector<BaseObjectNNPtr> objects;
+    std::vector<IdentifiedObjectNNPtr> objects;
 
     explicit PJ_OBJ_LIST(PJ_CONTEXT *ctxIn,
-                         std::vector<BaseObjectNNPtr> &&objectsIn)
+                         std::vector<IdentifiedObjectNNPtr> &&objectsIn)
         : ctx(ctxIn), objects(std::move(objectsIn)) {}
 
     PJ_OBJ_LIST(const PJ_OBJ_LIST &) = delete;
@@ -290,11 +291,15 @@ PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text) {
     assert(text);
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        return PJ_OBJ::create(ctx, createFromUserInput(text, dbContext));
+        auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
+            createFromUserInput(text, dbContext));
+        if (identifiedObject) {
+            return PJ_OBJ::create(ctx, NN_NO_CHECK(identifiedObject));
+        }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
-        return nullptr;
     }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -315,11 +320,15 @@ PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt) {
     SANITIZE_CTX(ctx);
     assert(wkt);
     try {
-        return PJ_OBJ::create(ctx, WKTParser().createFromWKT(wkt));
+        auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
+            WKTParser().createFromWKT(wkt));
+        if (identifiedObject) {
+            return PJ_OBJ::create(ctx, NN_NO_CHECK(identifiedObject));
+        }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
-        return nullptr;
     }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -341,12 +350,15 @@ PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
     SANITIZE_CTX(ctx);
     assert(proj_string);
     try {
-        return PJ_OBJ::create(
-            ctx, PROJStringParser().createFromPROJString(proj_string));
+        auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
+            PROJStringParser().createFromPROJString(proj_string));
+        if (identifiedObject) {
+            return PJ_OBJ::create(ctx, NN_NO_CHECK(identifiedObject));
+        }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
-        return nullptr;
     }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -379,7 +391,7 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     const std::string codeStr(code);
     try {
         auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
-        BaseObjectPtr obj;
+        IdentifiedObjectPtr obj;
         switch (category) {
         case PJ_OBJ_CATEGORY_ELLIPSOID:
             obj = factory->createEllipsoid(codeStr).as_nullable();
@@ -532,10 +544,12 @@ convertPJObjectTypeToObjectType(PJ_OBJ_TYPE type, bool &valid) {
  * @return a result set that must be unreferenced with
  * proj_obj_list_unref(), or NULL in case of error.
  */
-PJ_OBJ_LIST *proj_obj_create_objects_from_name(
-    PJ_CONTEXT *ctx, const char *auth_name, const char *searchedName,
-    const PJ_OBJ_TYPE *types, size_t typesCount, int approximateMatch,
-    size_t limitResultCount, const char *const *options) {
+PJ_OBJ_LIST *proj_obj_create_from_name(PJ_CONTEXT *ctx, const char *auth_name,
+                                       const char *searchedName,
+                                       const PJ_OBJ_TYPE *types,
+                                       size_t typesCount, int approximateMatch,
+                                       size_t limitResultCount,
+                                       const char *const *options) {
     assert(searchedName);
     assert((types != nullptr && typesCount > 0) ||
            (types == nullptr && typesCount == 0));
@@ -555,7 +569,7 @@ PJ_OBJ_LIST *proj_obj_create_objects_from_name(
         auto res = factory->createObjectsFromName(searchedName, allowedTypes,
                                                   approximateMatch != 0,
                                                   limitResultCount);
-        std::vector<BaseObjectNNPtr> objects;
+        std::vector<IdentifiedObjectNNPtr> objects;
         for (const auto &obj : res) {
             objects.push_back(obj);
         }
@@ -655,6 +669,18 @@ PJ_OBJ_TYPE proj_obj_get_type(PJ_OBJ *obj) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether an object is deprecated.
+ *
+ * @param obj Object (must not be NULL)
+ * @return TRUE if it is deprecated, FALSE otherwise
+ */
+int proj_obj_is_deprecated(PJ_OBJ *obj) {
+    assert(obj);
+    return obj->obj->isDeprecated();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return whether an object is a CRS
  *
  * @param obj Object (must not be NULL)
@@ -675,13 +701,7 @@ int proj_obj_is_crs(PJ_OBJ *obj) {
  */
 const char *proj_obj_get_name(PJ_OBJ *obj) {
     assert(obj);
-    auto identifiable = dynamic_cast<const IdentifiedObject *>(obj->obj.get());
-    if (!identifiable) {
-        proj_log_error(obj->ctx, __FUNCTION__,
-                       "Object type not castable to IdentifiedObject");
-        return nullptr;
-    }
-    const auto &desc = identifiable->name()->description();
+    const auto &desc = obj->obj->name()->description();
     if (!desc.has_value()) {
         return nullptr;
     }
@@ -702,13 +722,7 @@ const char *proj_obj_get_name(PJ_OBJ *obj) {
  */
 const char *proj_obj_get_id_auth_name(PJ_OBJ *obj, int index) {
     assert(obj);
-    auto identifiable = dynamic_cast<const IdentifiedObject *>(obj->obj.get());
-    if (!identifiable) {
-        proj_log_error(obj->ctx, __FUNCTION__,
-                       "Object type not castable to IdentifiedObject");
-        return nullptr;
-    }
-    const auto &ids = identifiable->identifiers();
+    const auto &ids = obj->obj->identifiers();
     if (static_cast<size_t>(index) >= ids.size()) {
         return nullptr;
     }
@@ -733,13 +747,7 @@ const char *proj_obj_get_id_auth_name(PJ_OBJ *obj, int index) {
  */
 const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
     assert(obj);
-    auto identifiable = dynamic_cast<const IdentifiedObject *>(obj->obj.get());
-    if (!identifiable) {
-        proj_log_error(obj->ctx, __FUNCTION__,
-                       "Object type not castable to IdentifiedObject");
-        return nullptr;
-    }
-    const auto &ids = identifiable->identifiers();
+    const auto &ids = obj->obj->identifiers();
     if (static_cast<size_t>(index) >= ids.size()) {
         return nullptr;
     }
@@ -904,7 +912,9 @@ PJ_OBJ *proj_obj_crs_get_geodetic_crs(PJ_OBJ *crs) {
     if (!geodCRS) {
         return nullptr;
     }
-    return PJ_OBJ::create(crs->ctx, geodCRS->shared_from_this());
+    return PJ_OBJ::create(crs->ctx,
+                          NN_NO_CHECK(nn_dynamic_pointer_cast<IdentifiedObject>(
+                              geodCRS->shared_from_this())));
 }
 
 // ---------------------------------------------------------------------------
@@ -1949,7 +1959,7 @@ proj_obj_create_operations(PJ_OBJ *source_crs, PJ_OBJ *target_crs,
 
     try {
         auto factory = CoordinateOperationFactory::create();
-        std::vector<BaseObjectNNPtr> objects;
+        std::vector<IdentifiedObjectNNPtr> objects;
         auto ops = factory->createOperations(
             NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS),
             operationContext->operationContext);

@@ -488,8 +488,7 @@ TEST_F(CApi, proj_obj_get_type) {
         auto obj =
             proj_obj_create_from_wkt(m_ctxt, "AUTHORITY[\"EPSG\", 4326]");
         ObjectKeeper keeper(obj);
-        ASSERT_NE(obj, nullptr);
-        EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_UNKNOWN);
+        ASSERT_EQ(obj, nullptr);
     }
 }
 
@@ -507,6 +506,7 @@ TEST_F(CApi, proj_obj_create_from_database) {
         ASSERT_NE(crs, nullptr);
         ObjectKeeper keeper(crs);
         EXPECT_TRUE(proj_obj_is_crs(crs));
+        EXPECT_FALSE(proj_obj_is_deprecated(crs));
         EXPECT_EQ(proj_obj_get_type(crs), PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS);
     }
     {
@@ -730,7 +730,8 @@ TEST_F(CApi, proj_obj_get_source_target_crs_conversion_without_crs) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_get_source_target_crs_invalid_object) {
-    auto obj = proj_obj_create_from_wkt(m_ctxt, "AUTHORITY[\"EPSG\", 4326]");
+    auto obj = proj_obj_create_from_wkt(
+        m_ctxt, "ELLIPSOID[\"WGS 84\",6378137,298.257223563]");
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
 
@@ -1217,9 +1218,9 @@ TEST_F(CApi, proj_context_guess_wkt_dialect) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_obj_create_objects_from_name) {
+TEST_F(CApi, proj_obj_create_from_name) {
     /*
-        PJ_OBJ_LIST PROJ_DLL *proj_obj_create_objects_from_name(
+        PJ_OBJ_LIST PROJ_DLL *proj_obj_create_from_name(
             PJ_CONTEXT *ctx,
             const char *auth_name,
             const char *searchedName,
@@ -1229,15 +1230,15 @@ TEST_F(CApi, proj_obj_create_objects_from_name) {
             size_t limitResultCount,
             const char* const *options); */
     {
-        auto res = proj_obj_create_objects_from_name(
-            m_ctxt, nullptr, "WGS 84", nullptr, 0, false, 0, nullptr);
+        auto res = proj_obj_create_from_name(m_ctxt, nullptr, "WGS 84", nullptr,
+                                             0, false, 0, nullptr);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 4);
     }
     {
-        auto res = proj_obj_create_objects_from_name(
-            m_ctxt, "xx", "WGS 84", nullptr, 0, false, 0, nullptr);
+        auto res = proj_obj_create_from_name(m_ctxt, "xx", "WGS 84", nullptr, 0,
+                                             false, 0, nullptr);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 0);
@@ -1245,8 +1246,8 @@ TEST_F(CApi, proj_obj_create_objects_from_name) {
     {
         const PJ_OBJ_TYPE types[] = {PJ_OBJ_TYPE_GEODETIC_CRS,
                                      PJ_OBJ_TYPE_PROJECTED_CRS};
-        auto res = proj_obj_create_objects_from_name(
-            m_ctxt, nullptr, "WGS 84", types, 2, true, 10, nullptr);
+        auto res = proj_obj_create_from_name(m_ctxt, nullptr, "WGS 84", types,
+                                             2, true, 10, nullptr);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 10);

@@ -3646,6 +3646,14 @@ AuthorityFactory::createObjectsFromName(
     const std::vector<ObjectType> &allowedObjectTypes, bool approximateMatch,
     size_t limitResultCount) {
 
+    std::string searchedNameWithoutDeprecated(searchedName);
+    bool deprecated = false;
+    if (ends_with(searchedNameWithoutDeprecated, " (deprecated)")) {
+        deprecated = true;
+        searchedNameWithoutDeprecated.resize(
+            searchedNameWithoutDeprecated.size() - strlen(" (deprecated)"));
+    }
+
     const auto canonicalize = [](const std::string &in) {
         std::string ret;
         for (size_t i = 0; i < in.size(); ++i) {
@@ -3665,18 +3673,19 @@ AuthorityFactory::createObjectsFromName(
         return ret;
     };
 
-    const std::string canonicalizedSearchedName(canonicalize(searchedName));
+    const std::string canonicalizedSearchedName(
+        canonicalize(searchedNameWithoutDeprecated));
     if (canonicalizedSearchedName.size() <= 1) {
         return {};
     }
 
     std::string sql(
         "SELECT table_name, auth_name, code, name FROM object_view WHERE "
-        "deprecated = 0 AND ");
-    std::vector<SQLValues> params;
+        "deprecated = ? AND ");
+    std::vector<SQLValues> params{deprecated ? 1.0 : 0.0};
     if (!approximateMatch) {
         sql += "name LIKE ? AND ";
-        params.push_back(searchedName);
+        params.push_back(searchedNameWithoutDeprecated);
     }
     if (!getAuthority().empty()) {
         sql += " auth_name = ? AND ";
@@ -3796,7 +3805,8 @@ AuthorityFactory::createObjectsFromName(
     for (const auto &row : sqlRes) {
         const auto &name = row[3];
         if (approximateMatch) {
-            bool match = ci_find(name, searchedName) != std::string::npos;
+            bool match = ci_find(name, searchedNameWithoutDeprecated) !=
+                         std::string::npos;
             if (!match) {
                 const auto canonicalizedName(canonicalize(name));
                 match = ci_find(canonicalizedName, canonicalizedSearchedName) !=

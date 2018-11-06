@@ -610,6 +610,32 @@ TEST(crs, EPSG_4269) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4268_geogcrs_deprecated_as_WKT1_GDAL) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("4268");
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+    auto wkt = crs->exportToWKT(f.get());
+    EXPECT_TRUE(wkt.find("GEOGCS[\"NAD27 Michigan (deprecated)\"") == 0) << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_2008_projcrs_deprecated_as_WKT1_GDAL) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("2008");
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+    auto wkt = crs->exportToWKT(f.get());
+    EXPECT_TRUE(
+        wkt.find("PROJCS[\"NAD27(CGQ77) / SCoPQ zone 2 (deprecated)\"") == 0)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string_and_WKT1) {
     auto obj = WKTParser().createFromWKT(
         "PROJCRS[\"NTF (Paris) / Lambert Nord France\",\n"

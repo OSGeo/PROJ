@@ -2613,6 +2613,13 @@ TEST(factory, createObjectsFromName) {
             .size(),
         1);
 
+    // Deprecated object
+    EXPECT_EQ(factoryEPSG
+                  ->createObjectsFromName(
+                      "NAD27(CGQ77) / SCoPQ zone 2 (deprecated)", {}, false, 2)
+                  .size(),
+              1);
+
     const auto types = std::vector<AuthorityFactory::ObjectType>{
         AuthorityFactory::ObjectType::PRIME_MERIDIAN,
         AuthorityFactory::ObjectType::ELLIPSOID,

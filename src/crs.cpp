@@ -781,6 +781,9 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             }
         }
     }
+    if (!isWKT2 && !formatter->useESRIDialect() && isDeprecated()) {
+        l_name += " (deprecated)";
+    }
     formatter->addQuotedString(l_name);
 
     const auto &unit = axisList[0]->unit();
@@ -1730,6 +1733,9 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         if (!aliasFound) {
             l_name = io::WKTFormatter::morphNameToESRI(l_name);
         }
+    }
+    if (!isWKT2 && !formatter->useESRIDialect() && isDeprecated()) {
+        l_name += " (deprecated)";
     }
     formatter->addQuotedString(l_name);
 
