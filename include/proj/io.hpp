@@ -203,11 +203,11 @@ class WKTFormatter {
     PROJ_DLL ~WKTFormatter();
     //! @endcond
 
-    PROJ_DLL WKTFormatter &setMultiLine(bool multiLine);
-    PROJ_DLL WKTFormatter &setIndentationWidth(int width);
-    PROJ_DLL WKTFormatter &setOutputAxis(bool outputAxis);
-    PROJ_DLL WKTFormatter &setStrict(bool strict);
-    PROJ_DLL bool isStrict() const;
+    PROJ_DLL WKTFormatter &setMultiLine(bool multiLine) noexcept;
+    PROJ_DLL WKTFormatter &setIndentationWidth(int width) noexcept;
+    PROJ_DLL WKTFormatter &setOutputAxis(bool outputAxis) noexcept;
+    PROJ_DLL WKTFormatter &setStrict(bool strict) noexcept;
+    PROJ_DLL bool isStrict() const noexcept;
 
     PROJ_DLL const std::string &toString() const;
 

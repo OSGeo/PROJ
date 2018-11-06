@@ -571,14 +571,14 @@ const char PROJ_DLL* proj_obj_get_id_code(PJ_OBJ *obj, int index);
 /** \brief WKT version. */
 typedef enum
 {
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018 */
-    PJ_WKT2_2018,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018_SIMPLIFIED */
-    PJ_WKT2_2018_SIMPLIFIED,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2 */
     PJ_WKT2_2015,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_SIMPLIFIED */
     PJ_WKT2_2015_SIMPLIFIED,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018 */
+    PJ_WKT2_2018,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018_SIMPLIFIED */
+    PJ_WKT2_2018_SIMPLIFIED,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_GDAL */
     PJ_WKT1_GDAL,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_ESRI */

@@ -793,28 +793,41 @@ static const char *getOptionValue(const char *option,
 const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
                             const char *const *options) {
     assert(obj);
-    (void)options;
-    WKTFormatter::Convention convention = WKTFormatter::Convention::WKT2_2018;
+
+    // Make sure that the C and C++ enumerations match
+    static_assert(static_cast<int>(PJ_WKT2_2015) ==
+                      static_cast<int>(WKTFormatter::Convention::WKT2_2015),
+                  "");
+    static_assert(
+        static_cast<int>(PJ_WKT2_2015_SIMPLIFIED) ==
+            static_cast<int>(WKTFormatter::Convention::WKT2_2015_SIMPLIFIED),
+        "");
+    static_assert(static_cast<int>(PJ_WKT2_2018) ==
+                      static_cast<int>(WKTFormatter::Convention::WKT2_2018),
+                  "");
+    static_assert(
+        static_cast<int>(PJ_WKT2_2018_SIMPLIFIED) ==
+            static_cast<int>(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED),
+        "");
+    static_assert(static_cast<int>(PJ_WKT1_GDAL) ==
+                      static_cast<int>(WKTFormatter::Convention::WKT1_GDAL),
+                  "");
+    static_assert(static_cast<int>(PJ_WKT1_ESRI) ==
+                      static_cast<int>(WKTFormatter::Convention::WKT1_ESRI),
+                  "");
+    // Make sure we enumerate all values. If adding a new value, as we
+    // don't have a default clause, the compiler will warn.
     switch (type) {
-    case PJ_WKT2_2018:
-        convention = WKTFormatter::Convention::WKT2_2018;
-        break;
-    case PJ_WKT2_2018_SIMPLIFIED:
-        convention = WKTFormatter::Convention::WKT2_2018_SIMPLIFIED;
-        break;
     case PJ_WKT2_2015:
-        convention = WKTFormatter::Convention::WKT2_2015;
-        break;
     case PJ_WKT2_2015_SIMPLIFIED:
-        convention = WKTFormatter::Convention::WKT2_2015_SIMPLIFIED;
-        break;
+    case PJ_WKT2_2018:
+    case PJ_WKT2_2018_SIMPLIFIED:
     case PJ_WKT1_GDAL:
-        convention = WKTFormatter::Convention::WKT1_GDAL;
-        break;
     case PJ_WKT1_ESRI:
-        convention = WKTFormatter::Convention::WKT1_ESRI;
         break;
     }
+    const WKTFormatter::Convention convention =
+        static_cast<WKTFormatter::Convention>(type);
     try {
         auto formatter = WKTFormatter::create(convention);
         for (auto iter = options; iter && iter[0]; ++iter) {
@@ -832,8 +845,7 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
                 return nullptr;
             }
         }
-        auto wkt = obj->obj->exportToWKT(formatter.get());
-        obj->lastWKT = wkt;
+        obj->lastWKT = obj->obj->exportToWKT(formatter.get());
         return obj->lastWKT.c_str();
     } catch (const std::exception &e) {
         proj_log_error(obj->ctx, __FUNCTION__, e.what());
@@ -873,26 +885,31 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
                        "Object type not exportable to PROJ");
         return nullptr;
     }
-    PROJStringFormatter::Convention convention =
-        PROJStringFormatter::Convention::PROJ_5;
+    // Make sure that the C and C++ enumeration match
+    static_assert(static_cast<int>(PJ_PROJ_5) ==
+                      static_cast<int>(PROJStringFormatter::Convention::PROJ_5),
+                  "");
+    static_assert(static_cast<int>(PJ_PROJ_4) ==
+                      static_cast<int>(PROJStringFormatter::Convention::PROJ_4),
+                  "");
+    // Make sure we enumerate all values. If adding a new value, as we
+    // don't have a default clause, the compiler will warn.
     switch (type) {
     case PJ_PROJ_5:
-        convention = PROJStringFormatter::Convention::PROJ_5;
-        break;
     case PJ_PROJ_4:
-        convention = PROJStringFormatter::Convention::PROJ_4;
         break;
     }
+    const PROJStringFormatter::Convention convention =
+        static_cast<PROJStringFormatter::Convention>(type);
     auto dbContext = getDBcontextNoException(obj->ctx, __FUNCTION__);
     try {
         auto formatter = PROJStringFormatter::create(convention, dbContext);
         if (options != nullptr && options[0] != nullptr) {
-            if (ci_equal(std::string(options[0]), "USE_ETMERC=YES")) {
+            if (ci_equal(options[0], "USE_ETMERC=YES")) {
                 formatter->setUseETMercForTMerc(true);
             }
         }
-        auto wkt = exportable->exportToPROJString(formatter.get());
-        obj->lastPROJString = wkt;
+        obj->lastPROJString = exportable->exportToPROJString(formatter.get());
         return obj->lastPROJString.c_str();
     } catch (const std::exception &e) {
         proj_log_error(obj->ctx, __FUNCTION__, e.what());

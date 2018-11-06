@@ -207,7 +207,7 @@ WKTFormatter::~WKTFormatter() = default;
 // ---------------------------------------------------------------------------
 
 /** \brief Whether to use multi line output or not. */
-WKTFormatter &WKTFormatter::setMultiLine(bool multiLine) {
+WKTFormatter &WKTFormatter::setMultiLine(bool multiLine) noexcept {
     d->params_.multiLine_ = multiLine;
     return *this;
 }
@@ -216,7 +216,7 @@ WKTFormatter &WKTFormatter::setMultiLine(bool multiLine) {
 
 /** \brief Set number of spaces for each indentation level (defaults to 4).
  */
-WKTFormatter &WKTFormatter::setIndentationWidth(int width) {
+WKTFormatter &WKTFormatter::setIndentationWidth(int width) noexcept {
     d->params_.indentWidth_ = width;
     return *this;
 }
@@ -227,7 +227,7 @@ WKTFormatter &WKTFormatter::setIndentationWidth(int width) {
  *
  * This can typically be set to false for some variants of WKT1_GDAL.
  */
-WKTFormatter &WKTFormatter::setOutputAxis(bool outputAxisIn) {
+WKTFormatter &WKTFormatter::setOutputAxis(bool outputAxisIn) noexcept {
     d->params_.outputAxis_ = outputAxisIn;
     return *this;
 }
@@ -238,7 +238,7 @@ WKTFormatter &WKTFormatter::setOutputAxis(bool outputAxisIn) {
  *
  * The default is strit mode, in which case a FormattingException can be thrown.
  */
-WKTFormatter &WKTFormatter::setStrict(bool strictIn) {
+WKTFormatter &WKTFormatter::setStrict(bool strictIn) noexcept {
     d->params_.strict_ = strictIn;
     return *this;
 }
@@ -246,7 +246,7 @@ WKTFormatter &WKTFormatter::setStrict(bool strictIn) {
 // ---------------------------------------------------------------------------
 
 /** \brief Returns whether the formatter is in strict mode. */
-bool WKTFormatter::isStrict() const { return d->params_.strict_; }
+bool WKTFormatter::isStrict() const noexcept { return d->params_.strict_; }
 
 // ---------------------------------------------------------------------------
 
@@ -254,9 +254,8 @@ bool WKTFormatter::isStrict() const { return d->params_.strict_; }
 const std::string &WKTFormatter::toString() const {
     if (d->indentLevel_ > 0 || d->level_ > 0) {
         // For intermediary nodes, the formatter is in a inconsistent
-        // state, so return a dummy result.
-        static const std::string dummyReturn;
-        return dummyReturn;
+        // state.
+        throw FormattingException("toString() called on intermediate nodes");
     }
     if (d->axisLinearUnitStack_.size() != 1)
         throw FormattingException(
