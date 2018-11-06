@@ -4,14 +4,14 @@ PRAGMA page_size = 4096;
 PRAGMA foreign_keys = 1;
 
 CREATE TABLE metadata(
-    key TEXT NOT NULL PRIMARY KEY,
+    key TEXT NOT NULL PRIMARY KEY CHECK (length(key) >= 1),
     value TEXT NOT NULL
 );
 
 CREATE TABLE unit_of_measure(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     type TEXT NOT NULL CHECK (type IN ('length', 'angle', 'scale', 'time')),
     conv_factor FLOAT,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
@@ -19,9 +19,9 @@ CREATE TABLE unit_of_measure(
 );
 
 CREATE TABLE celestial_body (
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     semi_major_axis FLOAT NOT NULL CHECK (semi_major_axis > 0), -- approximate (in metre)
     CONSTRAINT pk_celestial_body PRIMARY KEY (auth_name, code)
 );
@@ -29,9 +29,9 @@ CREATE TABLE celestial_body (
 INSERT INTO celestial_body VALUES('PROJ', 'EARTH', 'Earth', 6378137.0);
 
 CREATE TABLE ellipsoid (
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     celestial_body_auth_name TEXT NOT NULL,
     celestial_body_code TEXT NOT NULL,
@@ -56,9 +56,9 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE area(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT NOT NULL,
     south_lat FLOAT CHECK (south_lat BETWEEN -90 AND 90),
     north_lat FLOAT CHECK (north_lat BETWEEN -90 AND 90),
@@ -78,9 +78,9 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE prime_meridian(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     longitude FLOAT NOT NULL CHECK (longitude BETWEEN -180 AND 180),
     uom_auth_name TEXT NOT NULL,
     uom_code TEXT NOT NULL,
@@ -97,9 +97,9 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE geodetic_datum (
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     scope TEXT,
     ellipsoid_auth_name TEXT NOT NULL,
@@ -116,9 +116,9 @@ CREATE TABLE geodetic_datum (
 );
 
 CREATE TABLE vertical_datum (
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     scope TEXT,
     area_of_use_auth_name TEXT NOT NULL,
@@ -129,8 +129,8 @@ CREATE TABLE vertical_datum (
 );
 
 CREATE TABLE coordinate_system(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
     type TEXT NOT NULL CHECK (type IN ('Cartesian', 'vertical', 'ellipsoidal', 'spherical')),
     dimension SMALLINT NOT NULL CHECK (dimension BETWEEN 1 AND 3),
     CONSTRAINT pk_coordinate_system PRIMARY KEY (auth_name, code)
@@ -148,9 +148,9 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE axis(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     abbrev TEXT NOT NULL,
     orientation TEXT NOT NULL,
     coordinate_system_auth_name TEXT NOT NULL,
@@ -171,9 +171,9 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE geodetic_crs(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     scope TEXT,
     type TEXT NOT NULL CHECK (type IN ('geographic 2D', 'geographic 3D', 'geocentric')),
@@ -230,9 +230,9 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE vertical_crs(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     scope TEXT,
     coordinate_system_auth_name TEXT NOT NULL,
@@ -263,9 +263,9 @@ END;
 
 
 CREATE TABLE conversion(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
     scope TEXT,
@@ -273,9 +273,9 @@ CREATE TABLE conversion(
     area_of_use_auth_name TEXT NOT NULL,
     area_of_use_code TEXT NOT NULL,
 
-    method_auth_name TEXT,
-    method_code TEXT,
-    method_name NOT NULL,
+    method_auth_name TEXT CHECK (method_auth_name IS NULL OR length(method_auth_name) >= 1),
+    method_code TEXT CHECK (method_code IS NULL OR length(method_code) >= 1),
+    method_name NOT NULL CHECK (length(method_name) >= 2),
 
     param1_auth_name TEXT,
     param1_code TEXT,
@@ -408,15 +408,15 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE projected_crs(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     scope TEXT,
     coordinate_system_auth_name TEXT,
     coordinate_system_code TEXT,
     geodetic_crs_auth_name TEXT,
-    geodetic_crs_code TEXTL,
+    geodetic_crs_code TEXT,
     conversion_auth_name TEXT,
     conversion_code TEXT,
     area_of_use_auth_name TEXT,
@@ -467,9 +467,9 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE compound_crs(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     scope TEXT,
     horiz_crs_auth_name TEXT NOT NULL,
@@ -502,16 +502,16 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE helmert_transformation(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
     scope TEXT,
 
-    method_auth_name TEXT NOT NULL,
-    method_code TEXT NOT NULL,
-    method_name NOT NULL,
+    method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
+    method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
+    method_name NOT NULL CHECK (length(method_name) >= 2),
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
@@ -600,16 +600,16 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE grid_transformation(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
     scope TEXT,
 
-    method_auth_name TEXT NOT NULL,
-    method_code TEXT NOT NULL,
-    method_name NOT NULL,
+    method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
+    method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
+    method_name NOT NULL CHECK (length(method_name) >= 2),
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
@@ -716,9 +716,9 @@ FOR EACH ROW BEGIN
 END;
 
 CREATE TABLE other_transformation(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
     scope TEXT,
@@ -727,9 +727,9 @@ CREATE TABLE other_transformation(
     -- PROJ string and then method_name is a PROJ string (typically a pipeline)
     -- if method_auth_name = 'PROJ', method_code can be 'WKT' for a
     -- PROJ string and then method_name is a WKT string (CoordinateOperation)
-    method_auth_name TEXT NOT NULL,
-    method_code TEXT NOT NULL,
-    method_name NOT NULL,
+    method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
+    method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
+    method_name NOT NULL CHECK (length(method_name) >= 2),
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
@@ -826,9 +826,9 @@ END;
 -- Note: in EPSG, the steps might be to be chained in reverse order, so we cannot
 -- enforce that source_crs_code == step1.source_crs_code etc
 CREATE TABLE concatenated_operation(
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
     scope TEXT,
@@ -896,22 +896,20 @@ END;
 
 
 CREATE TABLE alias_name(
-    table_name TEXT NOT NULL,
-    auth_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    alt_name TEXT NOT NULL,
+    table_name TEXT NOT NULL CHECK (table_name IN (
+        'unit_of_measure', 'celestial_body', 'ellipsoid', 
+        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
+        'helmert_transformation', 'other_transformation', 'concatenated_operation')),
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    alt_name TEXT NOT NULL CHECK (length(alt_name) >= 2),
     source TEXT
 );
 
 CREATE TRIGGER alias_name_insert_trigger
 BEFORE INSERT ON alias_name
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on alias_name violates constraint: table_name should be a known value')
-        WHERE NEW.table_name NOT IN ('unit_of_measure', 'celestial_body', 'ellipsoid', 
-        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
-        'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
-        'helmert_transformation', 'other_transformation', 'concatenated_operation');
-
     SELECT RAISE(ABORT, 'insert on alias_name violates constraint: new entry refers to unexisting code')
         WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.auth_name AND o.code = NEW.code);
 END;
@@ -919,7 +917,11 @@ END;
 -- For ESRI stuff
 -- typically deprecated is the 'wkid' column of deprecated = 'yes' entries in the .csv files, and non_deprecates is the 'latestWkid' column
 CREATE TABLE link_from_deprecated_to_non_deprecated(
-    table_name TEXT NOT NULL,
+    table_name TEXT NOT NULL CHECK (table_name IN (
+        'unit_of_measure', 'celestial_body', 'ellipsoid', 
+        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
+        'helmert_transformation', 'other_transformation', 'concatenated_operation')),
     deprecated_auth_name TEXT NOT NULL,
     deprecated_code TEXT NOT NULL,
     non_deprecated_auth_name TEXT NOT NULL,
@@ -930,12 +932,6 @@ CREATE TABLE link_from_deprecated_to_non_deprecated(
 CREATE TRIGGER link_from_deprecated_to_non_deprecated_insert_trigger
 BEFORE INSERT ON link_from_deprecated_to_non_deprecated
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on link_from_deprecated_to_non_deprecated violates constraint: table_name should be a known value')
-        WHERE NEW.table_name NOT IN ('unit_of_measure', 'celestial_body', 'ellipsoid', 
-        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
-        'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
-        'helmert_transformation', 'other_transformation', 'concatenated_operation');
-
     SELECT RAISE(ABORT, 'insert on link_from_deprecated_to_non_deprecated violates constraint: deprecated entry refers to unexisting code')
         WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.deprecated_auth_name AND o.code = NEW.deprecated_code);
 
@@ -1002,27 +998,27 @@ CREATE VIEW crs_view AS
 ;
 
 CREATE VIEW object_view AS
-    SELECT 'unit_of_measure' AS table_name, auth_name, code, name, NULL as area_of_use_auth_name, NULL as area_of_use_code, deprecated FROM unit_of_measure
+    SELECT 'unit_of_measure' AS table_name, auth_name, code, name, NULL as type, NULL as area_of_use_auth_name, NULL as area_of_use_code, deprecated FROM unit_of_measure
     UNION ALL
-    SELECT 'celestial_body', auth_name, code, name, NULL, NULL, 0 FROM celestial_body
+    SELECT 'celestial_body', auth_name, code, name, NULL, NULL, NULL, 0 FROM celestial_body
     UNION ALL
-    SELECT 'ellipsoid', auth_name, code, name, NULL, NULL, deprecated FROM ellipsoid
+    SELECT 'ellipsoid', auth_name, code, name, NULL, NULL, NULL, deprecated FROM ellipsoid
     UNION ALL
-    SELECT 'area', auth_name, code, name, NULL, NULL, deprecated FROM area
+    SELECT 'area', auth_name, code, name, NULL, NULL, NULL, deprecated FROM area
     UNION ALL
-    SELECT 'prime_meridian', auth_name, code, name, NULL, NULL, deprecated FROM prime_meridian
+    SELECT 'prime_meridian', auth_name, code, name, NULL, NULL, NULL, deprecated FROM prime_meridian
     UNION ALL
-    SELECT 'geodetic_datum', auth_name, code, name, area_of_use_auth_name, area_of_use_code, deprecated FROM geodetic_datum
+    SELECT 'geodetic_datum', auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM geodetic_datum
     UNION ALL
-    SELECT 'vertical_datum', auth_name, code, name, area_of_use_auth_name, area_of_use_code, deprecated FROM vertical_datum
+    SELECT 'vertical_datum', auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM vertical_datum
     UNION ALL
-    SELECT 'axis', auth_name, code, name, NULL, NULL, 0 as deprecated FROM axis
+    SELECT 'axis', auth_name, code, name, NULL, NULL, NULL, 0 as deprecated FROM axis
     UNION ALL
-    SELECT table_name, auth_name, code, name, area_of_use_auth_name, area_of_use_code, deprecated FROM crs_view
+    SELECT table_name, auth_name, code, name, type, area_of_use_auth_name, area_of_use_code, deprecated FROM crs_view
     UNION ALL
-    SELECT 'conversion', auth_name, code, name, area_of_use_auth_name, area_of_use_code, deprecated FROM conversion
+    SELECT 'conversion', auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM conversion
     UNION ALL
-    SELECT table_name, auth_name, code, name, area_of_use_auth_name, area_of_use_code, deprecated FROM coordinate_operation_view
+    SELECT table_name, auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM coordinate_operation_view
 ;
 
 CREATE VIEW authority_list AS
