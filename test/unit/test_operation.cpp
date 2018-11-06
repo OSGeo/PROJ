@@ -4180,6 +4180,32 @@ TEST(operation, geogCRS_to_geogCRS_geographic_offset_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4149"), // CH1903
+        authFactory->createCoordinateReferenceSystem("4150"), // CH1903+
+        ctxt);
+    ASSERT_EQ(list.size(), 2);
+
+    EXPECT_EQ(list[0]->nameStr(),
+              "CH1903 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "");
+
+    EXPECT_EQ(list[1]->nameStr(), "CH1903 to CH1903+ (1)");
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=hgridshift +grids=CHENyx06a.gsb "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_3D) {
 
     auto geogcrs_m_obj =

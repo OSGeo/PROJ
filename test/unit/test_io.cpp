@@ -4948,6 +4948,21 @@ TEST(io, projstringformatter_merge_consecutive_helmert_3_param) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_merge_consecutive_helmert_3_param_noop) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->addStep("helmert");
+    fmt->addParam("x", 10);
+    fmt->addParam("y", 20);
+    fmt->addParam("z", 30);
+    fmt->addStep("helmert");
+    fmt->addParam("x", -10);
+    fmt->addParam("y", -20);
+    fmt->addParam("z", -30);
+    EXPECT_EQ(fmt->toString(), "");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projstringformatter_cart_grs80_wgs84) {
     auto fmt = PROJStringFormatter::create();
     fmt->addStep("cart");

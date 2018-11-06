@@ -4575,17 +4575,22 @@ const std::string &PROJStringFormatter::toString() const {
                     rightParamsMap.find(y) != rightParamsMap.end() &&
                     rightParamsMap.find(z) != rightParamsMap.end()) {
 
-                    prevStep.paramValues[0] = Step::KeyValue(
-                        "x", internal::toString(leftParamsMap[x] +
-                                                rightParamsMap[x]));
-                    prevStep.paramValues[1] = Step::KeyValue(
-                        "y", internal::toString(leftParamsMap[y] +
-                                                rightParamsMap[y]));
-                    prevStep.paramValues[2] = Step::KeyValue(
-                        "z", internal::toString(leftParamsMap[z] +
-                                                rightParamsMap[z]));
+                    const double xSum = leftParamsMap[x] + rightParamsMap[x];
+                    const double ySum = leftParamsMap[y] + rightParamsMap[y];
+                    const double zSum = leftParamsMap[z] + rightParamsMap[z];
+                    if (xSum == 0.0 && ySum == 0.0 && zSum == 0.0) {
+                        ++iterCur;
+                        d->steps_.erase(iterPrev, iterCur);
+                    } else {
+                        prevStep.paramValues[0] =
+                            Step::KeyValue("x", internal::toString(xSum));
+                        prevStep.paramValues[1] =
+                            Step::KeyValue("y", internal::toString(ySum));
+                        prevStep.paramValues[2] =
+                            Step::KeyValue("z", internal::toString(zSum));
 
-                    d->steps_.erase(iterCur);
+                        d->steps_.erase(iterCur);
+                    }
                     changeDone = true;
                     break;
                 }

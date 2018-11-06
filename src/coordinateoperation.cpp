@@ -396,12 +396,14 @@ static metadata::ExtentPtr getExtent(const CoordinateOperationNNPtr &op,
 
 // ---------------------------------------------------------------------------
 
-static metadata::ExtentPtr getExtent(const crs::CRSNNPtr &crs) {
+static const metadata::ExtentPtr nullExtent{};
+
+static const metadata::ExtentPtr &getExtent(const crs::CRSNNPtr &crs) {
     const auto &domains = crs->domains();
     if (!domains.empty()) {
         return domains[0]->domainOfValidity();
     }
-    return nullptr;
+    return nullExtent;
 }
 
 // ---------------------------------------------------------------------------
@@ -8961,8 +8963,8 @@ struct FilterAndSort {
     const CoordinateOperationContextNNPtr &context;
     const crs::CRSNNPtr &sourceCRS;
     const crs::CRSNNPtr &targetCRS;
-    metadata::ExtentPtr sourceCRSExtent;
-    metadata::ExtentPtr targetCRSExtent;
+    const metadata::ExtentPtr &sourceCRSExtent;
+    const metadata::ExtentPtr &targetCRSExtent;
     metadata::ExtentPtr areaOfInterest;
     const double desiredAccuracy = context->getDesiredAccuracy();
     const CoordinateOperationContext::SourceTargetCRSExtentUse
@@ -9223,7 +9225,9 @@ struct FilterAndSort {
                      (curExtent && lastExtent &&
                       curExtent->contains(NN_NO_CHECK(lastExtent)) &&
                       lastExtent->contains(NN_NO_CHECK(curExtent))));
-                if (curAccuracy > lastAccuracy && sameExtent) {
+                if (((curAccuracy > lastAccuracy && lastAccuracy >= 0) ||
+                     (curAccuracy < 0 && lastAccuracy >= 0)) &&
+                    sameExtent) {
                     // If that set of grids has always been used for that
                     // extent,
                     // no need to add them again
@@ -9455,10 +9459,19 @@ createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
     name += sourceCRS->nameStr();
     name += " to ";
     name += targetCRS->nameStr();
+
+    const auto &sourceCRSExtent = getExtent(sourceCRS);
+    const auto &targetCRSExtent = getExtent(targetCRS);
+    const bool sameExtent =
+        sourceCRSExtent && targetCRSExtent &&
+        sourceCRSExtent->isEquivalentTo(
+            targetCRSExtent.get(), util::IComparable::Criterion::EQUIVALENT);
+
     util::PropertyMap map;
     map.set(common::IdentifiedObject::NAME_KEY, name)
         .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-             metadata::Extent::WORLD);
+             sameExtent ? NN_NO_CHECK(sourceCRSExtent)
+                        : metadata::Extent::WORLD);
     const common::Angle angle0(0);
     if (dynamic_cast<const crs::SingleCRS *>(sourceCRS.get())
                 ->coordinateSystem()
