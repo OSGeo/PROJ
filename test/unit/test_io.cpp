@@ -6953,29 +6953,28 @@ TEST(io, projparse_projected_errors) {
 // ---------------------------------------------------------------------------
 
 TEST(io, createFromUserInput) {
+    auto dbContext = DatabaseContext::create();
     EXPECT_THROW(createFromUserInput("foo", nullptr), ParsingException);
     EXPECT_THROW(createFromUserInput("GEOGCRS", nullptr), ParsingException);
     EXPECT_THROW(createFromUserInput("+proj=unhandled", nullptr),
                  ParsingException);
     EXPECT_THROW(createFromUserInput("EPSG:4326", nullptr), ParsingException);
-    EXPECT_THROW(createFromUserInput("urn:ogc:def:unhandled:EPSG::4326",
-                                     DatabaseContext::create()),
-                 ParsingException);
+    EXPECT_THROW(
+        createFromUserInput("urn:ogc:def:unhandled:EPSG::4326", dbContext),
+        ParsingException);
 
     EXPECT_NO_THROW(createFromUserInput("+proj=longlat", nullptr));
+    EXPECT_NO_THROW(createFromUserInput("EPSG:4326", dbContext));
     EXPECT_NO_THROW(
-        createFromUserInput("EPSG:4326", DatabaseContext::create()));
-    EXPECT_NO_THROW(createFromUserInput("urn:ogc:def:crs:EPSG::4326",
-                                        DatabaseContext::create()));
+        createFromUserInput("urn:ogc:def:crs:EPSG::4326", dbContext));
+    EXPECT_NO_THROW(createFromUserInput(
+        "urn:ogc:def:coordinateOperation:EPSG::1671", dbContext));
     EXPECT_NO_THROW(
-        createFromUserInput("urn:ogc:def:coordinateOperation:EPSG::1671",
-                            DatabaseContext::create()));
-    EXPECT_NO_THROW(createFromUserInput("urn:ogc:def:datum:EPSG::6326",
-                                        DatabaseContext::create()));
-    EXPECT_NO_THROW(createFromUserInput("urn:ogc:def:meridian:EPSG::8901",
-                                        DatabaseContext::create()));
-    EXPECT_NO_THROW(createFromUserInput("urn:ogc:def:ellipsoid:EPSG::7030",
-                                        DatabaseContext::create()));
+        createFromUserInput("urn:ogc:def:datum:EPSG::6326", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:ogc:def:meridian:EPSG::8901", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:ogc:def:ellipsoid:EPSG::7030", dbContext));
     EXPECT_NO_THROW(createFromUserInput(
         "GEOGCRS[\"WGS 84\",\n"
         "    DATUM[\"World Geodetic System 1984\",\n"
@@ -6989,6 +6988,15 @@ TEST(io, createFromUserInput) {
         "            UNIT[\"metre\",1]],\n"
         "    ID[\"EPSG\",4979]]",
         nullptr));
+
+    // Search names in the database
+    EXPECT_THROW(createFromUserInput("foobar", dbContext), ParsingException);
+    EXPECT_NO_THROW(createFromUserInput("WGS 84", dbContext));
+    EXPECT_NO_THROW(createFromUserInput("WGS84", dbContext));
+    EXPECT_NO_THROW(createFromUserInput("UTM zone 31N", dbContext));
+    EXPECT_THROW(createFromUserInput("UTM zone 31", dbContext),
+                 ParsingException);
+    EXPECT_NO_THROW(createFromUserInput("WGS84 UTM zone 31N", dbContext));
 }
 
 // ---------------------------------------------------------------------------

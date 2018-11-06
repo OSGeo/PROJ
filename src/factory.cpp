@@ -48,6 +48,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
+#include <limits>
 #include <map>
 #include <memory>
 #include <sstream> // std::ostringstream
@@ -72,6 +73,10 @@ NS_PROJ_START
 namespace io {
 
 //! @cond Doxygen_Suppress
+
+#define GEOG_2D "'geographic 2D'"
+#define GEOG_3D "'geographic 3D'"
+#define GEOCENTRIC "'geocentric'"
 
 // ---------------------------------------------------------------------------
 
@@ -811,7 +816,7 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
     sql += replaceAll(tableName, "\"", "\"\"");
     sql += "\" WHERE name = ?";
     if (tableName == "geodetic_crs") {
-        sql += " AND type = 'geographic 2D'";
+        sql += " AND type = " GEOG_2D;
     }
     auto res = d->run(sql, {officialName});
     if (res.empty()) {
@@ -1796,7 +1801,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
                     "deprecated FROM "
                     "geodetic_crs WHERE auth_name = ? AND code = ?");
     if (geographicOnly) {
-        sql += " AND type in ('geographic 2D', 'geographic 3D')";
+        sql += " AND type in (" GEOG_2D "," GEOG_3D ")";
     }
     auto res = d->runWithCodeParam(sql, code);
     if (res.empty()) {
@@ -3454,9 +3459,18 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
     case ObjectType::GEODETIC_CRS:
         sql = "SELECT code FROM geodetic_crs WHERE ";
         break;
+    case ObjectType::GEOCENTRIC_CRS:
+        sql = "SELECT code FROM geodetic_crs WHERE type = " GEOCENTRIC " AND ";
+        break;
     case ObjectType::GEOGRAPHIC_CRS:
-        sql = "SELECT code FROM geodetic_crs WHERE type IN ('geographic 2D', "
-              "'geographic 3D') AND ";
+        sql = "SELECT code FROM geodetic_crs WHERE type IN (" GEOG_2D
+              "," GEOG_3D ") AND ";
+        break;
+    case ObjectType::GEOGRAPHIC_2D_CRS:
+        sql = "SELECT code FROM geodetic_crs WHERE type = " GEOG_2D " AND ";
+        break;
+    case ObjectType::GEOGRAPHIC_3D_CRS:
+        sql = "SELECT code FROM geodetic_crs WHERE type = " GEOG_3D " AND ";
         break;
     case ObjectType::VERTICAL_CRS:
         sql = "SELECT code FROM vertical_crs WHERE ";
@@ -3569,6 +3583,7 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 /** \brief Return the list of GeodeticCRS using the specified datum.
  *
  * @throw FactoryException
@@ -3588,6 +3603,288 @@ AuthorityFactory::findGeodCRSUsingDatum(const std::string &datumCode) const {
     for (const auto &row : sqlRes) {
         res.emplace_back(d->createFactory(row[0])->createGeodeticCRS(row[1]));
     }
+    return res;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+static void addToListString(std::string &out, const char *in) {
+    if (!out.empty()) {
+        out += ',';
+    }
+    out += in;
+}
+
+static void addToListStringWithOR(std::string &out, const char *in) {
+    if (!out.empty()) {
+        out += " OR ";
+    }
+    out += in;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a list of objects by their name
+ *
+ * @param searchedName Searched name. Must be at least 2 character long.
+ * @param allowedObjectTypes List of object types into which to search. If
+ * empty, all object types will be searched.
+ * @param approximateMatch Whether approximate name identification is allowed.
+ * @param limitResultCount Maximum number of results to return.
+ * Or 0 for unlimited.
+ * @return list of matched objects.
+ * @throw FactoryException
+ */
+std::list<common::IdentifiedObjectNNPtr>
+AuthorityFactory::createObjectsFromName(
+    const std::string &searchedName,
+    const std::vector<ObjectType> &allowedObjectTypes, bool approximateMatch,
+    size_t limitResultCount) {
+
+    const auto canonicalize = [](const std::string &in) {
+        std::string ret;
+        for (size_t i = 0; i < in.size(); ++i) {
+            const auto ch = in[i];
+            // Strip 19 from 19xx numbers
+            if (ch == '1' && i + 3 < in.size() && in[i + 1] == '9' &&
+                in[i + 2] >= '0' && in[i + 2] <= '9' && in[i + 3] >= '0' &&
+                in[i + 3] <= '9') {
+                ++i;
+                continue;
+            }
+            if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+                (ch >= '0' && ch <= '9')) {
+                ret += ch;
+            }
+        }
+        return ret;
+    };
+
+    const std::string canonicalizedSearchedName(canonicalize(searchedName));
+    if (canonicalizedSearchedName.size() <= 1) {
+        return {};
+    }
+
+    std::string sql(
+        "SELECT table_name, auth_name, code, name FROM object_view WHERE "
+        "deprecated = 0 AND ");
+    std::vector<SQLValues> params;
+    if (!approximateMatch) {
+        sql += "name LIKE ? AND ";
+        params.push_back(searchedName);
+    }
+    if (!getAuthority().empty()) {
+        sql += " auth_name = ? AND ";
+        params.emplace_back(getAuthority());
+    }
+
+    if (allowedObjectTypes.empty()) {
+        sql += "table_name IN ("
+               "'prime_meridian','ellipsoid','geodetic_datum',"
+               "'vertical_datum','geodetic_crs','projected_crs',"
+               "'vertical_crs','compound_crs','conversion',"
+               "'helmert_transformation','grid_transformation',"
+               "'other_transformation','concatenated_operation'"
+               ")";
+    } else {
+        std::string tableNameList;
+        std::string otherConditions;
+        for (const auto type : allowedObjectTypes) {
+            switch (type) {
+            case ObjectType::PRIME_MERIDIAN:
+                addToListString(tableNameList, "'prime_meridian'");
+                break;
+            case ObjectType::ELLIPSOID:
+                addToListString(tableNameList, "'ellipsoid'");
+                break;
+            case ObjectType::DATUM:
+                addToListString(tableNameList,
+                                "'geodetic_datum','vertical_datum'");
+                break;
+            case ObjectType::GEODETIC_REFERENCE_FRAME:
+                addToListString(tableNameList, "'geodetic_datum'");
+                break;
+            case ObjectType::VERTICAL_REFERENCE_FRAME:
+                addToListString(tableNameList, "'vertical_datum'");
+                break;
+            case ObjectType::CRS:
+                addToListString(tableNameList, "'geodetic_crs','projected_crs',"
+                                               "'vertical_crs','compound_crs'");
+                break;
+            case ObjectType::GEODETIC_CRS:
+                addToListString(tableNameList, "'geodetic_crs'");
+                break;
+            case ObjectType::GEOCENTRIC_CRS:
+                addToListStringWithOR(otherConditions,
+                                      "(table_name = " GEOCENTRIC " AND "
+                                      "type = " GEOCENTRIC ")");
+                break;
+            case ObjectType::GEOGRAPHIC_CRS:
+                addToListStringWithOR(otherConditions,
+                                      "(table_name = 'geodetic_crs' AND "
+                                      "type IN (" GEOG_2D "," GEOG_3D "))");
+                break;
+            case ObjectType::GEOGRAPHIC_2D_CRS:
+                addToListStringWithOR(otherConditions,
+                                      "(table_name = 'geodetic_crs' AND "
+                                      "type = " GEOG_2D ")");
+                break;
+            case ObjectType::GEOGRAPHIC_3D_CRS:
+                addToListStringWithOR(otherConditions,
+                                      "(table_name = 'geodetic_crs' AND "
+                                      "type = " GEOG_3D ")");
+                break;
+            case ObjectType::PROJECTED_CRS:
+                addToListString(tableNameList, "'projected_crs'");
+                break;
+            case ObjectType::VERTICAL_CRS:
+                addToListString(tableNameList, "'vertical_crs'");
+                break;
+            case ObjectType::COMPOUND_CRS:
+                addToListString(tableNameList, "'compound_crs'");
+                break;
+            case ObjectType::COORDINATE_OPERATION:
+                addToListString(tableNameList,
+                                "'conversion','helmert_transformation',"
+                                "'grid_transformation','other_transformation',"
+                                "'concatenated_operation'");
+                break;
+            case ObjectType::CONVERSION:
+                addToListString(tableNameList, "'conversion'");
+                break;
+            case ObjectType::TRANSFORMATION:
+                addToListString(tableNameList,
+                                "'helmert_transformation',"
+                                "'grid_transformation','other_transformation'");
+                break;
+            case ObjectType::CONCATENATED_OPERATION:
+                addToListString(tableNameList, "'concatenated_operation'");
+                break;
+            }
+        }
+        if (!tableNameList.empty()) {
+            sql += "((table_name IN (";
+            sql += tableNameList;
+            sql += "))";
+            if (!otherConditions.empty()) {
+                sql += " OR ";
+                sql += otherConditions;
+            }
+            sql += ')';
+        } else if (!otherConditions.empty()) {
+            sql += "(";
+            sql += otherConditions;
+            sql += ')';
+        }
+    }
+    sql += " ORDER BY length(name), name";
+    if (limitResultCount > 0 &&
+        limitResultCount <
+            static_cast<size_t>(std::numeric_limits<int>::max()) &&
+        !approximateMatch) {
+        sql += " LIMIT ";
+        sql += toString(static_cast<int>(limitResultCount));
+    }
+
+    std::list<common::IdentifiedObjectNNPtr> res;
+    auto sqlRes = d->run(sql, params);
+    for (const auto &row : sqlRes) {
+        const auto &name = row[3];
+        if (approximateMatch) {
+            bool match = ci_find(name, searchedName) != std::string::npos;
+            if (!match) {
+                const auto canonicalizedName(canonicalize(name));
+                match = ci_find(canonicalizedName, canonicalizedSearchedName) !=
+                        std::string::npos;
+            }
+            if (!match) {
+                continue;
+            }
+        }
+        const auto &table_name = row[0];
+        const auto &auth_name = row[1];
+        const auto &code = row[2];
+        auto factory = d->createFactory(auth_name);
+        if (table_name == "prime_meridian") {
+            res.emplace_back(factory->createPrimeMeridian(code));
+        } else if (table_name == "ellipsoid") {
+            res.emplace_back(factory->createEllipsoid(code));
+        } else if (table_name == "geodetic_datum") {
+            res.emplace_back(factory->createGeodeticDatum(code));
+        } else if (table_name == "vertical_datum") {
+            res.emplace_back(factory->createVerticalDatum(code));
+        } else if (table_name == "geodetic_crs") {
+            res.emplace_back(factory->createGeodeticCRS(code));
+        } else if (table_name == "projected_crs") {
+            res.emplace_back(factory->createProjectedCRS(code));
+        } else if (table_name == "vertical_crs") {
+            res.emplace_back(factory->createVerticalCRS(code));
+        } else if (table_name == "compound_crs") {
+            res.emplace_back(factory->createCompoundCRS(code));
+        } else if (table_name == "conversion") {
+            res.emplace_back(factory->createConversion(code));
+        } else if (table_name == "grid_transformation" ||
+                   table_name == "helmert_transformation" ||
+                   table_name == "other_transformation" ||
+                   table_name == "concatenated_operation") {
+            res.emplace_back(factory->createCoordinateOperation(code, true));
+        } else {
+            assert(false);
+        }
+        if (limitResultCount > 0 && res.size() == limitResultCount) {
+            break;
+        }
+    }
+
+    auto sortLambda = [](const common::IdentifiedObjectNNPtr &a,
+                         const common::IdentifiedObjectNNPtr &b) {
+        const auto &aName = a->nameStr();
+        const auto &bName = b->nameStr();
+        if (aName.size() < bName.size()) {
+            return true;
+        }
+        if (aName.size() > bName.size()) {
+            return false;
+        }
+
+        const auto &aIds = a->identifiers();
+        const auto &bIds = b->identifiers();
+        if (aIds.size() < bIds.size()) {
+            return true;
+        }
+        if (aIds.size() > bIds.size()) {
+            return false;
+        }
+        for (size_t idx = 0; idx < aIds.size(); idx++) {
+            const auto &aCodeSpace = *aIds[idx]->codeSpace();
+            const auto &bCodeSpace = *bIds[idx]->codeSpace();
+            const auto codeSpaceComparison = aCodeSpace.compare(bCodeSpace);
+            if (codeSpaceComparison < 0) {
+                return true;
+            }
+            if (codeSpaceComparison > 0) {
+                return false;
+            }
+            const auto &aCode = aIds[idx]->code();
+            const auto &bCode = bIds[idx]->code();
+            const auto codeComparison = aCode.compare(bCode);
+            if (codeComparison < 0) {
+                return true;
+            }
+            if (codeComparison > 0) {
+                return false;
+            }
+        }
+        return strcmp(typeid(a.get()).name(), typeid(b.get()).name()) < 0;
+    };
+
+    res.sort(sortLambda);
+
     return res;
 }
 

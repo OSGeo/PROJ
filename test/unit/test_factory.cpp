@@ -1165,6 +1165,12 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
         ASSERT_TRUE(!setGeodeticCRS.empty());
         factory->createGeodeticCRS(*(setGeodeticCRS.begin()));
 
+        auto setGeocentricCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::GEOCENTRIC_CRS);
+        ASSERT_TRUE(!setGeocentricCRS.empty());
+        factory->createGeodeticCRS(*(setGeocentricCRS.begin()));
+        EXPECT_LT(setGeocentricCRS.size(), setGeodeticCRS.size());
+
         auto setGeographicCRS = factory->getAuthorityCodes(
             AuthorityFactory::ObjectType::GEOGRAPHIC_CRS);
         ASSERT_TRUE(!setGeographicCRS.empty());
@@ -1173,6 +1179,22 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
         for (const auto &v : setGeographicCRS) {
             EXPECT_TRUE(setGeodeticCRS.find(v) != setGeodeticCRS.end());
         }
+
+        auto setGeographic2DCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS);
+        ASSERT_TRUE(!setGeographic2DCRS.empty());
+        factory->createGeographicCRS(*(setGeographic2DCRS.begin()));
+
+        auto setGeographic3DCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+        ASSERT_TRUE(!setGeographic3DCRS.empty());
+        factory->createGeographicCRS(*(setGeographic3DCRS.begin()));
+
+        EXPECT_EQ(setGeographic2DCRS.size() + setGeographic3DCRS.size(),
+                  setGeographicCRS.size());
+
+        EXPECT_EQ(setGeocentricCRS.size() + setGeographicCRS.size(),
+                  setGeodeticCRS.size());
 
         auto setVerticalCRS = factory->getAuthorityCodes(
             AuthorityFactory::ObjectType::VERTICAL_CRS);
@@ -1314,8 +1336,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_datum "
-                    "VALUES('EPSG','6326','World Geodetic System "
-                    "1984','',NULL,'EPSG','7030','EPSG','8901','EPSG','1262',0);"))
+                    "VALUES('EPSG','6326','World Geodetic System 1984','',NULL,"
+                    "'EPSG','7030','EPSG','8901','EPSG','1262',0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_datum VALUES('EPSG','1027','EGM2008 "
@@ -2485,10 +2507,136 @@ TEST_F(FactoryWithTmpDatabase,
 // ---------------------------------------------------------------------------
 
 TEST(factory, findGeodCRSUsingDatum) {
-    auto ctxt = DatabaseContext::create(std::string(), {});
+    auto ctxt = DatabaseContext::create();
     auto factory = AuthorityFactory::create(ctxt, "EPSG");
     auto res = factory->findGeodCRSUsingDatum("6326");
     EXPECT_EQ(res.size(), 3);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, createObjectsFromName) {
+    auto ctxt = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(ctxt, std::string());
+    auto factoryEPSG = AuthorityFactory::create(ctxt, "EPSG");
+
+    EXPECT_EQ(factory->createObjectsFromName("").size(), 0);
+
+    // ellipsoid + 3 geodeticCRS
+    EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, false).size(), 4);
+
+    EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, true, 10).size(),
+              10);
+
+    EXPECT_EQ(factory
+                  ->createObjectsFromName(
+                      "WGS 84", {AuthorityFactory::ObjectType::CRS}, false)
+                  .size(),
+              3);
+
+    {
+        auto res = factoryEPSG->createObjectsFromName(
+            "WGS84", {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS}, true);
+        EXPECT_EQ(res.size(), 2); // EPSG:4326 and EPSG:4030
+        if (!res.empty()) {
+            EXPECT_EQ(res.front()->getEPSGCode(), 4326);
+        }
+    }
+
+    // Prime meridian
+    EXPECT_EQ(factoryEPSG->createObjectsFromName("Paris", {}, false, 2).size(),
+              1);
+    // Ellipsoid
+    EXPECT_EQ(
+        factoryEPSG->createObjectsFromName("Clarke 1880 (IGN)", {}, false, 2)
+            .size(),
+        1);
+    // Geodetic datum
+    EXPECT_EQ(
+        factoryEPSG->createObjectsFromName("Hungarian Datum 1909", {}, false, 2)
+            .size(),
+        1);
+    // Vertical datum
+    EXPECT_EQ(factoryEPSG->createObjectsFromName("EGM2008 geoid", {}, false, 2)
+                  .size(),
+              1);
+    // Geodetic CRS
+    EXPECT_EQ(factoryEPSG
+                  ->createObjectsFromName(
+                      "Unknown datum based upon the Airy 1830 ellipsoid", {},
+                      false, 2)
+                  .size(),
+              1);
+    // Projected CRS
+    EXPECT_EQ(factoryEPSG
+                  ->createObjectsFromName(
+                      "Anguilla 1957 / British West Indies Grid", {}, false, 2)
+                  .size(),
+              1);
+    // Vertical CRS
+    EXPECT_EQ(factoryEPSG->createObjectsFromName("EGM2008 height", {}, false, 2)
+                  .size(),
+              1);
+    // Compound CRS
+    EXPECT_EQ(factoryEPSG
+                  ->createObjectsFromName(
+                      "KKJ / Finland Uniform Coordinate System + N60 height",
+                      {}, false, 2)
+                  .size(),
+              1);
+    // Conversion
+    EXPECT_EQ(
+        factoryEPSG->createObjectsFromName("Belgian Lambert 2008", {}, false, 2)
+            .size(),
+        1);
+    // Helmert transform
+    EXPECT_EQ(
+        factoryEPSG->createObjectsFromName("MGI to ETRS89 (4)", {}, false, 2)
+            .size(),
+        1);
+    // Grid transform
+    EXPECT_EQ(factoryEPSG
+                  ->createObjectsFromName("Guam 1963 to NAD83(HARN) (1)", {},
+                                          false, 2)
+                  .size(),
+              1);
+    // Other transform
+    EXPECT_EQ(factoryEPSG
+                  ->createObjectsFromName(
+                      "Monte Mario (Rome) to Monte Mario (1)", {}, false, 2)
+                  .size(),
+              1);
+    // Concatenated operation
+    EXPECT_EQ(
+        factoryEPSG
+            ->createObjectsFromName("MGI (Ferro) to WGS 84 (2)", {}, false, 2)
+            .size(),
+        1);
+
+    const auto types = std::vector<AuthorityFactory::ObjectType>{
+        AuthorityFactory::ObjectType::PRIME_MERIDIAN,
+        AuthorityFactory::ObjectType::ELLIPSOID,
+        AuthorityFactory::ObjectType::DATUM,
+        AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME,
+        AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME,
+        AuthorityFactory::ObjectType::CRS,
+        AuthorityFactory::ObjectType::GEODETIC_CRS,
+        AuthorityFactory::ObjectType::GEOCENTRIC_CRS,
+        AuthorityFactory::ObjectType::GEOGRAPHIC_CRS,
+        AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS,
+        AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS,
+        AuthorityFactory::ObjectType::PROJECTED_CRS,
+        AuthorityFactory::ObjectType::VERTICAL_CRS,
+        AuthorityFactory::ObjectType::COMPOUND_CRS,
+        AuthorityFactory::ObjectType::COORDINATE_OPERATION,
+        AuthorityFactory::ObjectType::CONVERSION,
+        AuthorityFactory::ObjectType::TRANSFORMATION,
+        AuthorityFactory::ObjectType::CONCATENATED_OPERATION,
+    };
+    for (const auto type : types) {
+        factory->createObjectsFromName("i_dont_exist", {type}, false, 1);
+    }
+    factory->createObjectsFromName("i_dont_exist", types, false, 1);
 }
 
 } // namespace

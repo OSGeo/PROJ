@@ -127,14 +127,13 @@ class CApi : public ::testing::Test {
         ContextKeeper &operator=(const ContextKeeper &) = delete;
     };
 
-    struct OperationResultKeeper {
-        PJ_OPERATION_RESULT *m_res = nullptr;
-        explicit OperationResultKeeper(PJ_OPERATION_RESULT *res) : m_res(res) {}
-        ~OperationResultKeeper() { proj_operation_result_unref(m_res); }
+    struct ObjListKeeper {
+        PJ_OBJ_LIST *m_res = nullptr;
+        explicit ObjListKeeper(PJ_OBJ_LIST *res) : m_res(res) {}
+        ~ObjListKeeper() { proj_obj_list_unref(m_res); }
 
-        OperationResultKeeper(const OperationResultKeeper &) = delete;
-        OperationResultKeeper &
-        operator=(const OperationResultKeeper &) = delete;
+        ObjListKeeper(const ObjListKeeper &) = delete;
+        ObjListKeeper &operator=(const ObjListKeeper &) = delete;
     };
 };
 
@@ -390,7 +389,25 @@ TEST_F(CApi, proj_obj_get_type) {
                 .c_str());
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
-        EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_GEOGRAPHIC_CRS);
+        EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS);
+    }
+    {
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt,
+            GeographicCRS::EPSG_4979->exportToWKT(WKTFormatter::create().get())
+                .c_str());
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+        EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS);
+    }
+    {
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt,
+            GeographicCRS::EPSG_4978->exportToWKT(WKTFormatter::create().get())
+                .c_str());
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+        EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_GEOCENTRIC_CRS);
     }
     {
         auto obj = proj_obj_create_from_wkt(
@@ -490,7 +507,7 @@ TEST_F(CApi, proj_obj_create_from_database) {
         ASSERT_NE(crs, nullptr);
         ObjectKeeper keeper(crs);
         EXPECT_TRUE(proj_obj_is_crs(crs));
-        EXPECT_EQ(proj_obj_get_type(crs), PJ_OBJ_TYPE_GEOGRAPHIC_CRS);
+        EXPECT_EQ(proj_obj_get_type(crs), PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS);
     }
     {
         auto crs = proj_obj_create_from_database(
@@ -766,8 +783,12 @@ TEST_F(CApi, proj_get_codes_from_database) {
                                  PJ_OBJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME,
                                  PJ_OBJ_TYPE_DATUM_ENSEMBLE,
 
+                                 PJ_OBJ_TYPE_CRS,
                                  PJ_OBJ_TYPE_GEODETIC_CRS,
+                                 PJ_OBJ_TYPE_GEOCENTRIC_CRS,
                                  PJ_OBJ_TYPE_GEOGRAPHIC_CRS,
+                                 PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS,
+                                 PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS,
                                  PJ_OBJ_TYPE_VERTICAL_CRS,
                                  PJ_OBJ_TYPE_PROJECTED_CRS,
                                  PJ_OBJ_TYPE_COMPOUND_CRS,
@@ -958,15 +979,13 @@ TEST_F(CApi, proj_obj_create_operations) {
 
     auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
     ASSERT_NE(res, nullptr);
-    OperationResultKeeper keeper_res(res);
+    ObjListKeeper keeper_res(res);
 
-    EXPECT_EQ(proj_operation_result_get_count(res), 7);
+    EXPECT_EQ(proj_obj_list_get_count(res), 7);
 
-    EXPECT_EQ(proj_operation_result_get(res, -1), nullptr);
-    EXPECT_EQ(
-        proj_operation_result_get(res, proj_operation_result_get_count(res)),
-        nullptr);
-    auto op = proj_operation_result_get(res, 0);
+    EXPECT_EQ(proj_obj_list_get(res, -1), nullptr);
+    EXPECT_EQ(proj_obj_list_get(res, proj_obj_list_get_count(res)), nullptr);
+    auto op = proj_obj_list_get(res, 0);
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper_op(op);
 
@@ -997,9 +1016,9 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
         auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
-        OperationResultKeeper keeper_res(res);
-        EXPECT_EQ(proj_operation_result_get_count(res), 1);
-        auto op = proj_operation_result_get(res, 0);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_obj_list_get_count(res), 1);
+        auto op = proj_obj_list_get(res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1019,9 +1038,9 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
         auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
-        OperationResultKeeper keeper_res(res);
-        EXPECT_EQ(proj_operation_result_get_count(res), 1);
-        auto op = proj_operation_result_get(res, 0);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_obj_list_get_count(res), 1);
+        auto op = proj_obj_list_get(res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1045,9 +1064,9 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
         auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
-        OperationResultKeeper keeper_res(res);
-        EXPECT_EQ(proj_operation_result_get_count(res), 6);
-        auto op = proj_operation_result_get(res, 0);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_obj_list_get_count(res), 6);
+        auto op = proj_obj_list_get(res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1073,10 +1092,10 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
         auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
-        OperationResultKeeper keeper_res(res);
+        ObjListKeeper keeper_res(res);
         // includes 2 results from ESRI
-        EXPECT_EQ(proj_operation_result_get_count(res), 4);
-        auto op = proj_operation_result_get(res, 0);
+        EXPECT_EQ(proj_obj_list_get_count(res), 4);
+        auto op = proj_obj_list_get(res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1194,6 +1213,44 @@ TEST_F(CApi, proj_context_guess_wkt_dialect) {
 
     EXPECT_EQ(proj_context_guess_wkt_dialect(nullptr, "foo"),
               PJ_GUESSED_NOT_WKT);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_objects_from_name) {
+    /*
+        PJ_OBJ_LIST PROJ_DLL *proj_obj_create_objects_from_name(
+            PJ_CONTEXT *ctx,
+            const char *auth_name,
+            const char *searchedName,
+            const PJ_OBJ_TYPE* types,
+            size_t typesCount,
+            int approximateMatch,
+            size_t limitResultCount,
+            const char* const *options); */
+    {
+        auto res = proj_obj_create_objects_from_name(
+            m_ctxt, nullptr, "WGS 84", nullptr, 0, false, 0, nullptr);
+        ASSERT_NE(res, nullptr);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_obj_list_get_count(res), 4);
+    }
+    {
+        auto res = proj_obj_create_objects_from_name(
+            m_ctxt, "xx", "WGS 84", nullptr, 0, false, 0, nullptr);
+        ASSERT_NE(res, nullptr);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_obj_list_get_count(res), 0);
+    }
+    {
+        const PJ_OBJ_TYPE types[] = {PJ_OBJ_TYPE_GEODETIC_CRS,
+                                     PJ_OBJ_TYPE_PROJECTED_CRS};
+        auto res = proj_obj_create_objects_from_name(
+            m_ctxt, nullptr, "WGS 84", types, 2, true, 10, nullptr);
+        ASSERT_NE(res, nullptr);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_obj_list_get_count(res), 10);
+    }
 }
 
 } // namespace

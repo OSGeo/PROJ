@@ -115,6 +115,23 @@ PJ_OBJ *PJ_OBJ::create(PJ_CONTEXT *ctxIn, const BaseObjectNNPtr &objIn) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Opaque object representing a set of operation results. */
+struct PJ_OBJ_LIST {
+    //! @cond Doxygen_Suppress
+    PJ_CONTEXT *ctx;
+    std::vector<BaseObjectNNPtr> objects;
+
+    explicit PJ_OBJ_LIST(PJ_CONTEXT *ctxIn,
+                         std::vector<BaseObjectNNPtr> &&objectsIn)
+        : ctx(ctxIn), objects(std::move(objectsIn)) {}
+
+    PJ_OBJ_LIST(const PJ_OBJ_LIST &) = delete;
+    PJ_OBJ_LIST &operator=(const PJ_OBJ_LIST &) = delete;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 /** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
@@ -401,6 +418,156 @@ void proj_obj_unref(PJ_OBJ *obj) { delete obj; }
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static AuthorityFactory::ObjectType
+convertPJObjectTypeToObjectType(PJ_OBJ_TYPE type, bool &valid) {
+    valid = true;
+    AuthorityFactory::ObjectType cppType = AuthorityFactory::ObjectType::CRS;
+    switch (type) {
+    case PJ_OBJ_TYPE_ELLIPSOID:
+        cppType = AuthorityFactory::ObjectType::ELLIPSOID;
+        break;
+
+    case PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME:
+    case PJ_OBJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME:
+        cppType = AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME;
+        break;
+
+    case PJ_OBJ_TYPE_VERTICAL_REFERENCE_FRAME:
+    case PJ_OBJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME:
+        cppType = AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME;
+        break;
+
+    case PJ_OBJ_TYPE_DATUM_ENSEMBLE:
+        cppType = AuthorityFactory::ObjectType::DATUM;
+        break;
+
+    case PJ_OBJ_TYPE_CRS:
+        cppType = AuthorityFactory::ObjectType::CRS;
+        break;
+
+    case PJ_OBJ_TYPE_GEODETIC_CRS:
+        cppType = AuthorityFactory::ObjectType::GEODETIC_CRS;
+        break;
+
+    case PJ_OBJ_TYPE_GEOCENTRIC_CRS:
+        cppType = AuthorityFactory::ObjectType::GEOCENTRIC_CRS;
+        break;
+
+    case PJ_OBJ_TYPE_GEOGRAPHIC_CRS:
+        cppType = AuthorityFactory::ObjectType::GEOGRAPHIC_CRS;
+        break;
+
+    case PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS:
+        cppType = AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS;
+        break;
+
+    case PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS:
+        cppType = AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS;
+        break;
+
+    case PJ_OBJ_TYPE_VERTICAL_CRS:
+        cppType = AuthorityFactory::ObjectType::VERTICAL_CRS;
+        break;
+
+    case PJ_OBJ_TYPE_PROJECTED_CRS:
+        cppType = AuthorityFactory::ObjectType::PROJECTED_CRS;
+        break;
+
+    case PJ_OBJ_TYPE_COMPOUND_CRS:
+        cppType = AuthorityFactory::ObjectType::COMPOUND_CRS;
+        break;
+
+    case PJ_OBJ_TYPE_TEMPORAL_CRS:
+        valid = false;
+        break;
+
+    case PJ_OBJ_TYPE_BOUND_CRS:
+        valid = false;
+        break;
+
+    case PJ_OBJ_TYPE_OTHER_CRS:
+        cppType = AuthorityFactory::ObjectType::CRS;
+        break;
+
+    case PJ_OBJ_TYPE_CONVERSION:
+        cppType = AuthorityFactory::ObjectType::CONVERSION;
+        break;
+
+    case PJ_OBJ_TYPE_TRANSFORMATION:
+        cppType = AuthorityFactory::ObjectType::TRANSFORMATION;
+        break;
+
+    case PJ_OBJ_TYPE_CONCATENATED_OPERATION:
+        cppType = AuthorityFactory::ObjectType::CONCATENATED_OPERATION;
+        break;
+
+    case PJ_OBJ_TYPE_OTHER_COORDINATE_OPERATION:
+        cppType = AuthorityFactory::ObjectType::COORDINATE_OPERATION;
+        break;
+
+    case PJ_OBJ_TYPE_UNKNOWN:
+        valid = false;
+        break;
+    }
+    return cppType;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a list of objects by their name.
+ *
+ * @param ctx Context, or NULL for default context.
+ * @param auth_name Authority name, used to restrict the search.
+ * Or NULL for all authorities.
+ * @param searchedName Searched name. Must be at least 2 character long.
+ * @param types List of object types into which to search. If
+ * NULL, all object types will be searched.
+ * @param typesCount Number of elements in types, or 0 if types is NULL
+ * @param approximateMatch Whether approximate name identification is allowed.
+ * @param limitResultCount Maximum number of results to return.
+ * Or 0 for unlimited.
+ * @param options should be set to NULL for now
+ * @return a result set that must be unreferenced with
+ * proj_obj_list_unref(), or NULL in case of error.
+ */
+PJ_OBJ_LIST *proj_obj_create_objects_from_name(
+    PJ_CONTEXT *ctx, const char *auth_name, const char *searchedName,
+    const PJ_OBJ_TYPE *types, size_t typesCount, int approximateMatch,
+    size_t limitResultCount, const char *const *options) {
+    assert(searchedName);
+    assert((types != nullptr && typesCount > 0) ||
+           (types == nullptr && typesCount == 0));
+    (void)options;
+    SANITIZE_CTX(ctx);
+    try {
+        auto factory = AuthorityFactory::create(getDBcontext(ctx),
+                                                auth_name ? auth_name : "");
+        std::vector<AuthorityFactory::ObjectType> allowedTypes;
+        for (size_t i = 0; i < typesCount; ++i) {
+            bool valid = false;
+            auto type = convertPJObjectTypeToObjectType(types[i], valid);
+            if (valid) {
+                allowedTypes.push_back(type);
+            }
+        }
+        auto res = factory->createObjectsFromName(searchedName, allowedTypes,
+                                                  approximateMatch != 0,
+                                                  limitResultCount);
+        std::vector<BaseObjectNNPtr> objects;
+        for (const auto &obj : res) {
+            objects.push_back(obj);
+        }
+        return new PJ_OBJ_LIST(ctx, std::move(objects));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the type of an object.
  *
  * @param obj Object (must not be NULL)
@@ -429,12 +596,28 @@ PJ_OBJ_TYPE proj_obj_get_type(PJ_OBJ *obj) {
         return PJ_OBJ_TYPE_DATUM_ENSEMBLE;
     }
 
-    if (dynamic_cast<GeographicCRS *>(ptr)) {
-        return PJ_OBJ_TYPE_GEOGRAPHIC_CRS;
+    {
+        auto crs = dynamic_cast<GeographicCRS *>(ptr);
+        if (crs) {
+            if (crs->coordinateSystem()->axisList().size() == 2) {
+                return PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS;
+            } else {
+                return PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS;
+            }
+        }
     }
-    if (dynamic_cast<GeodeticCRS *>(ptr)) {
-        return PJ_OBJ_TYPE_GEODETIC_CRS;
+
+    {
+        auto crs = dynamic_cast<GeodeticCRS *>(ptr);
+        if (crs) {
+            if (crs->isGeocentric()) {
+                return PJ_OBJ_TYPE_GEOCENTRIC_CRS;
+            } else {
+                return PJ_OBJ_TYPE_GEODETIC_CRS;
+            }
+        }
     }
+
     if (dynamic_cast<VerticalCRS *>(ptr)) {
         return PJ_OBJ_TYPE_VERTICAL_CRS;
     }
@@ -1079,80 +1262,11 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
     SANITIZE_CTX(ctx);
     try {
         auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
-
-        AuthorityFactory::ObjectType typeInternal =
-            AuthorityFactory::ObjectType::CRS;
-        switch (type) {
-        case PJ_OBJ_TYPE_ELLIPSOID:
-            typeInternal = AuthorityFactory::ObjectType::ELLIPSOID;
-            break;
-
-        case PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME:
-        case PJ_OBJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME:
-            typeInternal =
-                AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME;
-            break;
-
-        case PJ_OBJ_TYPE_VERTICAL_REFERENCE_FRAME:
-        case PJ_OBJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME:
-            typeInternal =
-                AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME;
-            break;
-
-        case PJ_OBJ_TYPE_DATUM_ENSEMBLE:
-            typeInternal = AuthorityFactory::ObjectType::DATUM;
-            break;
-
-        case PJ_OBJ_TYPE_GEODETIC_CRS:
-            typeInternal = AuthorityFactory::ObjectType::GEODETIC_CRS;
-            break;
-
-        case PJ_OBJ_TYPE_GEOGRAPHIC_CRS:
-            typeInternal = AuthorityFactory::ObjectType::GEOGRAPHIC_CRS;
-            break;
-
-        case PJ_OBJ_TYPE_VERTICAL_CRS:
-            typeInternal = AuthorityFactory::ObjectType::VERTICAL_CRS;
-            break;
-
-        case PJ_OBJ_TYPE_PROJECTED_CRS:
-            typeInternal = AuthorityFactory::ObjectType::PROJECTED_CRS;
-            break;
-
-        case PJ_OBJ_TYPE_COMPOUND_CRS:
-            typeInternal = AuthorityFactory::ObjectType::COMPOUND_CRS;
-            break;
-
-        case PJ_OBJ_TYPE_TEMPORAL_CRS:
-            return nullptr;
-
-        case PJ_OBJ_TYPE_BOUND_CRS:
-            return nullptr;
-
-        case PJ_OBJ_TYPE_OTHER_CRS:
-            typeInternal = AuthorityFactory::ObjectType::CRS;
-            break;
-
-        case PJ_OBJ_TYPE_CONVERSION:
-            typeInternal = AuthorityFactory::ObjectType::CONVERSION;
-            break;
-
-        case PJ_OBJ_TYPE_TRANSFORMATION:
-            typeInternal = AuthorityFactory::ObjectType::TRANSFORMATION;
-            break;
-
-        case PJ_OBJ_TYPE_CONCATENATED_OPERATION:
-            typeInternal = AuthorityFactory::ObjectType::CONCATENATED_OPERATION;
-            break;
-
-        case PJ_OBJ_TYPE_OTHER_COORDINATE_OPERATION:
-            typeInternal = AuthorityFactory::ObjectType::COORDINATE_OPERATION;
-            break;
-
-        case PJ_OBJ_TYPE_UNKNOWN:
+        bool valid = false;
+        auto typeInternal = convertPJObjectTypeToObjectType(type, valid);
+        if (!valid) {
             return nullptr;
         }
-
         return set_to_string_list(
             factory->getAuthorityCodes(typeInternal, allow_deprecated != 0));
 
@@ -1797,23 +1911,6 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Opaque object representing a set of operation results. */
-struct PJ_OPERATION_RESULT {
-    //! @cond Doxygen_Suppress
-    PJ_CONTEXT *ctx;
-    std::vector<CoordinateOperationNNPtr> ops;
-
-    explicit PJ_OPERATION_RESULT(
-        PJ_CONTEXT *ctxIn, const std::vector<CoordinateOperationNNPtr> &opsIn)
-        : ctx(ctxIn), ops(opsIn) {}
-
-    PJ_OPERATION_RESULT(const PJ_OPERATION_RESULT &) = delete;
-    PJ_OPERATION_RESULT &operator=(const PJ_OPERATION_RESULT &) = delete;
-    //! @endcond
-};
-
-// ---------------------------------------------------------------------------
-
 /** \brief Find a list of CoordinateOperation from source_crs to target_crs.
  *
  * The operations are sorted with the most relevant ones first: by
@@ -1828,10 +1925,9 @@ struct PJ_OPERATION_RESULT {
  * @param target_crs source CRS. Must not be NULL.
  * @param operationContext Search context. Must not be NULL.
  * @return a result set that must be unreferenced with
- * proj_operation_result_unref(), or NULL in
- * case of error.
+ * proj_obj_list_unref(), or NULL in case of error.
  */
-PJ_OPERATION_RESULT *
+PJ_OBJ_LIST *
 proj_obj_create_operations(PJ_OBJ *source_crs, PJ_OBJ *target_crs,
                            PJ_OPERATION_FACTORY_CONTEXT *operationContext) {
     assert(source_crs);
@@ -1853,11 +1949,14 @@ proj_obj_create_operations(PJ_OBJ *source_crs, PJ_OBJ *target_crs,
 
     try {
         auto factory = CoordinateOperationFactory::create();
-        return new PJ_OPERATION_RESULT(
-            operationContext->ctx,
-            factory->createOperations(NN_NO_CHECK(sourceCRS),
-                                      NN_NO_CHECK(targetCRS),
-                                      operationContext->operationContext));
+        std::vector<BaseObjectNNPtr> objects;
+        auto ops = factory->createOperations(
+            NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS),
+            operationContext->operationContext);
+        for (const auto &op : ops) {
+            objects.emplace_back(op);
+        }
+        return new PJ_OBJ_LIST(operationContext->ctx, std::move(objects));
     } catch (const std::exception &e) {
         proj_log_error(operationContext->ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -1866,45 +1965,45 @@ proj_obj_create_operations(PJ_OBJ *source_crs, PJ_OBJ *target_crs,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return the number of CoordinateOperation in the result set
+/** \brief Return the number of objects in the result set
  *
- * @param result Objet of type PJ_OPERATION_RESULT (must not be NULL)
+ * @param result Objet of type PJ_OBJ_LIST (must not be NULL)
  */
-int proj_operation_result_get_count(PJ_OPERATION_RESULT *result) {
+int proj_obj_list_get_count(PJ_OBJ_LIST *result) {
     assert(result);
-    return static_cast<int>(result->ops.size());
+    return static_cast<int>(result->objects.size());
 }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return a CoordinateOperation in the result set
+/** \brief Return an object from the result set
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
  * It should be used by at most one thread at a time.
  *
- * @param result Objet of type PJ_OPERATION_RESULT (must not be NULL)
+ * @param result Objet of type PJ_OBJ_LIST (must not be NULL)
  * @param index Index
  * @return a new object that must be unreferenced with proj_obj_unref(),
  * or nullptr in case of error.
  */
 
-PJ_OBJ *proj_operation_result_get(PJ_OPERATION_RESULT *result, int index) {
+PJ_OBJ *proj_obj_list_get(PJ_OBJ_LIST *result, int index) {
     assert(result);
-    if (index < 0 || index >= proj_operation_result_get_count(result)) {
+    if (index < 0 || index >= proj_obj_list_get_count(result)) {
         proj_log_error(result->ctx, __FUNCTION__, "Invalid index");
         return nullptr;
     }
-    return PJ_OBJ::create(result->ctx, result->ops[index]);
+    return PJ_OBJ::create(result->ctx, result->objects[index]);
 }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Drops a reference on an object.
+/** \brief Drops a reference on the result set.
  *
  * This method should be called one and exactly one for each function
- * returning a PJ_OPERATION_RESULT*
+ * returning a PJ_OBJ_LIST*
  *
  * @param result Object, or NULL.
  */
-void proj_operation_result_unref(PJ_OPERATION_RESULT *result) { delete result; }
+void proj_obj_list_unref(PJ_OBJ_LIST *result) { delete result; }

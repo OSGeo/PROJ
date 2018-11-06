@@ -3910,9 +3910,19 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a sub-class of BaseObject from a WKT string, PROJ string
- * or database code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
- * "urn:ogc:def:coordinateOperation:EPSG::1671").
+/** \brief Instanciate a sub-class of BaseObject from a user specified text.
+ *
+ * The text can be a:
+ * <ul>
+ * <li>WKT string</li>
+ * <li>PROJ string</li>
+ * <li>database code, prefixed by its authoriy. e.g. "EPSG:4326"</li>
+ * <li>URN. e.g. "urn:ogc:def:crs:EPSG::4326",
+ *     "urn:ogc:def:coordinateOperation:EPSG::1671"</li>
+ * <li>an objet name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
+ *     uniqueness is not guaranteed, the function may apply heuristics to
+ *     determine the appropriate best match.</li>
+ * </ul>
  *
  * @throw ParsingException
  */
@@ -3973,7 +3983,67 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
         throw ParsingException(concat("unhandled object type: ", type));
     }
 
-    throw ParsingException("unrecognized format");
+    if (dbContext) {
+        auto factory =
+            AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
+        // First pass: exact match on CRS objects
+        // Second pass: exact match on other objects
+        // Third pass: approximate match on CRS objects
+        // Fourth pass: approximate match on other objects
+        constexpr size_t limitResultCount = 10;
+        for (int pass = 0; pass <= 3; ++pass) {
+            const bool approximateMatch = (pass >= 2);
+            auto res = factory->createObjectsFromName(
+                text,
+                (pass == 0 || pass == 2)
+                    ? std::vector<
+                          AuthorityFactory::ObjectType>{AuthorityFactory::
+                                                            ObjectType::CRS}
+                    : std::vector<
+                          AuthorityFactory::
+                              ObjectType>{AuthorityFactory::ObjectType::
+                                              ELLIPSOID,
+                                          AuthorityFactory::ObjectType::DATUM,
+                                          AuthorityFactory::ObjectType::
+                                              COORDINATE_OPERATION},
+                approximateMatch, limitResultCount);
+            if (res.size() == 1) {
+                return res.front();
+            }
+            if (res.size() > 1) {
+                if (pass == 0 || pass == 2) {
+                    for (size_t ndim = 2; ndim <= 3; ndim++) {
+                        for (const auto &obj : res) {
+                            auto crs =
+                                dynamic_cast<crs::GeographicCRS *>(obj.get());
+                            if (crs &&
+                                crs->coordinateSystem()->axisList().size() ==
+                                    ndim) {
+                                return obj;
+                            }
+                        }
+                    }
+                }
+
+                std::string msg("several objects matching this name: ");
+                bool first = true;
+                for (const auto &obj : res) {
+                    if (msg.size() > 200) {
+                        msg += ", ...";
+                        break;
+                    }
+                    if (!first) {
+                        msg += ", ";
+                    }
+                    first = false;
+                    msg += obj->nameStr();
+                }
+                throw ParsingException(msg);
+            }
+        }
+    }
+
+    throw ParsingException("unrecognized format / unknown name");
 }
 
 // ---------------------------------------------------------------------------

@@ -29,6 +29,7 @@
 #ifndef IO_HH_INCLUDED
 #define IO_HH_INCLUDED
 
+#include <list>
 #include <memory>
 #include <set>
 #include <string>
@@ -43,6 +44,10 @@ namespace common {
 class UnitOfMeasure;
 using UnitOfMeasurePtr = std::shared_ptr<UnitOfMeasure>;
 using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
+
+class IdentifiedObject;
+using IdentifiedObjectPtr = std::shared_ptr<IdentifiedObject>;
+using IdentifiedObjectNNPtr = util::nn<IdentifiedObjectPtr>;
 } // namespace common
 
 namespace cs {
@@ -797,8 +802,14 @@ class AuthorityFactory {
         CRS,
         /** Object of type crs::GeodeticCRS (and derived classes) */
         GEODETIC_CRS,
+        /** GEODETIC_CRS of type geocentric */
+        GEOCENTRIC_CRS,
         /** Object of type crs::GeographicCRS (and derived classes) */
         GEOGRAPHIC_CRS,
+        /** GEOGRAPHIC_CRS of type Geographic 2D */
+        GEOGRAPHIC_2D_CRS,
+        /** GEOGRAPHIC_CRS of type Geographic 3D */
+        GEOGRAPHIC_3D_CRS,
         /** Object of type crs::ProjectedCRS (and derived classes) */
         PROJECTED_CRS,
         /** Object of type crs::VerticalCRS (and derived classes) */
@@ -850,8 +861,18 @@ class AuthorityFactory {
         const std::string &source, std::string &outTableName,
         std::string &outAuthName, std::string &outCode) const;
 
-    PROJ_DLL std::vector<crs::GeodeticCRSNNPtr>
-    findGeodCRSUsingDatum(const std::string &datumCode) const;
+    PROJ_DLL std::list<common::IdentifiedObjectNNPtr>
+    createObjectsFromName(const std::string &name,
+                          const std::vector<ObjectType> &allowedObjectTypes =
+                              std::vector<ObjectType>(),
+                          bool approximateMatch = true,
+                          size_t limitResultCount = 0);
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_DLL std::vector<crs::GeodeticCRSNNPtr>
+        findGeodCRSUsingDatum(const std::string &datumCode) const;
+    //! @endcond
 
   protected:
     AuthorityFactory(const DatabaseContextNNPtr &context,

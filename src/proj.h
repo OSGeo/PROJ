@@ -439,6 +439,10 @@ char* proj_rtodms(char *s, double r, int pos, int neg);
 typedef struct PJ_OBJ PJ_OBJ;
 /*! @endcond */
 
+/*! @cond Doxygen_Suppress */
+typedef struct PJ_OBJ_LIST PJ_OBJ_LIST;
+/*! @endcond */
+
 int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
                                             const char *dbPath,
                                             const char *const *auxDbPaths);
@@ -504,8 +508,18 @@ typedef enum
     PJ_OBJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME,
     PJ_OBJ_TYPE_DATUM_ENSEMBLE,
 
+    /** Abstract type, not returned by proj_obj_get_type() */
+    PJ_OBJ_TYPE_CRS,
+
     PJ_OBJ_TYPE_GEODETIC_CRS,
+    PJ_OBJ_TYPE_GEOCENTRIC_CRS,
+
+    /** proj_obj_get_type() will never return that type, but
+     * PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS or PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS. */
     PJ_OBJ_TYPE_GEOGRAPHIC_CRS,
+
+    PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS,
+    PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS,
     PJ_OBJ_TYPE_VERTICAL_CRS,
     PJ_OBJ_TYPE_PROJECTED_CRS,
     PJ_OBJ_TYPE_COMPOUND_CRS,
@@ -520,6 +534,15 @@ typedef enum
 
     PJ_OBJ_TYPE_UNKNOWN
 } PJ_OBJ_TYPE;
+
+PJ_OBJ_LIST PROJ_DLL *proj_obj_create_objects_from_name(PJ_CONTEXT *ctx,
+                                                        const char *auth_name,
+                                                        const char *searchedName,
+                                                        const PJ_OBJ_TYPE* types,
+                                                        size_t typesCount,
+                                                        int approximateMatch,
+                                                        size_t limitResultCount,
+                                                        const char* const *options);
 
 PJ_OBJ_TYPE PROJ_DLL proj_obj_get_type(PJ_OBJ *obj);
 
@@ -680,21 +703,18 @@ void PROJ_DLL proj_operation_factory_context_set_allowed_intermediate_crs(
 
 /* ------------------------------------------------------------------------- */
 
-/*! @cond Doxygen_Suppress */
-typedef struct PJ_OPERATION_RESULT PJ_OPERATION_RESULT;
-/*! @endcond */
 
-PJ_OPERATION_RESULT PROJ_DLL *proj_obj_create_operations(
+PJ_OBJ_LIST PROJ_DLL *proj_obj_create_operations(
                             PJ_OBJ *source_crs,
                             PJ_OBJ *target_crs,
                             PJ_OPERATION_FACTORY_CONTEXT *operationContext);
 
-int PROJ_DLL proj_operation_result_get_count(PJ_OPERATION_RESULT *result);
+int PROJ_DLL proj_obj_list_get_count(PJ_OBJ_LIST *result);
 
-PJ_OBJ PROJ_DLL *proj_operation_result_get(PJ_OPERATION_RESULT *result,
+PJ_OBJ PROJ_DLL *proj_obj_list_get(PJ_OBJ_LIST *result,
                                            int index);
 
-void PROJ_DLL proj_operation_result_unref(PJ_OPERATION_RESULT *result);
+void PROJ_DLL proj_obj_list_unref(PJ_OBJ_LIST *result);
 
 /* ------------------------------------------------------------------------- */
 
