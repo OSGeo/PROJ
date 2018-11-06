@@ -184,10 +184,9 @@ TEST(wkt_parse, datum_with_ANCHOR) {
 // ---------------------------------------------------------------------------
 
 TEST(wkt_parse, datum_no_pm_not_earth) {
-    auto obj = WKTParser().createFromWKT(
-        "DATUM[\"unnamed\",\n"
-        "    ELLIPSOID[\"unnamed\",1,0,\n"
-        "        LENGTHUNIT[\"metre\",1]]]");
+    auto obj = WKTParser().createFromWKT("DATUM[\"unnamed\",\n"
+                                         "    ELLIPSOID[\"unnamed\",1,0,\n"
+                                         "        LENGTHUNIT[\"metre\",1]]]");
     auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
     ASSERT_TRUE(datum != nullptr);
     EXPECT_EQ(datum->ellipsoid()->celestialBody(), "Non-Earth body");
@@ -1686,7 +1685,36 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_codes) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, TOWGS84) {
+TEST(wkt_parse, geogcs_TOWGS84_3terms) {
+    auto wkt = "GEOGCS[\"my GEOGCRS\",\n"
+               "    DATUM[\"WGS_1984\",\n"
+               "        SPHEROID[\"WGS 84\",6378137,298.257223563],\n"
+               "        TOWGS84[1,2,3]],\n"
+               "    PRIMEM[\"Greenwich\",0],\n"
+               "    UNIT[\"degree\",0.0174532925199433]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->baseCRS()->nameStr(), "my GEOGCRS");
+
+    EXPECT_EQ(crs->hubCRS()->nameStr(), GeographicCRS::EPSG_4326->nameStr());
+
+    ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
+    EXPECT_EQ(crs->transformation()->sourceCRS()->nameStr(), "my GEOGCRS");
+
+    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto expected = std::vector<double>{1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0};
+    ASSERT_EQ(params.size(), expected.size());
+    for (int i = 0; i < 7; i++) {
+        EXPECT_NEAR(params[i], expected[i], 1e-10);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, projcs_TOWGS84_7terms) {
     auto wkt = "PROJCS[\"my PROJCRS\",\n"
                "    GEOGCS[\"my GEOGCRS\",\n"
                "        DATUM[\"WGS_1984\",\n"

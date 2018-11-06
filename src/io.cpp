@@ -1852,9 +1852,8 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     // do that before buildEllipsoid() so that esriStyle_ can be set
     auto name = stripQuotes(node->GP()->children()[0]->GP()->value());
     if (name == "WGS_1984") {
-        properties.set(
-            IdentifiedObject::NAME_KEY,
-            *(GeodeticReferenceFrame::EPSG_6326->name()->description()));
+        properties.set(IdentifiedObject::NAME_KEY,
+                       GeodeticReferenceFrame::EPSG_6326->nameStr());
     } else if (starts_with(name, "D_")) {
         esriStyle_ = true;
         const char *tableNameForAlias = nullptr;
@@ -1925,11 +1924,12 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     }
     auto &extensionNode = node->GP()->lookForChild(WKTConstants::EXTENSION);
     if (extensionNode != null_node &&
-        extensionNode->GP()->childrenSize() == 2 &&
-        ci_equal(stripQuotes(extensionNode->GP()->children()[0]->GP()->value()),
-                 "PROJ4_GRIDS")) {
-        datumPROJ4Grids_ =
-            stripQuotes(extensionNode->GP()->children()[1]->GP()->value());
+        extensionNode->GP()->childrenSize() == 2) {
+        const auto &extensionChildren = extensionNode->GP()->children();
+        if (ci_equal(stripQuotes(extensionChildren[0]->GP()->value()),
+                     "PROJ4_GRIDS")) {
+            datumPROJ4Grids_ = stripQuotes(extensionChildren[1]->GP()->value());
+        }
     }
 
     if (!isNull(dynamicNode)) {
@@ -1979,11 +1979,12 @@ WKTParser::Private::buildDatumEnsemble(const WKTNodeNNPtr &node,
 
     auto &accuracyNode =
         node->GP()->lookForChild(WKTConstants::ENSEMBLEACCURACY);
-    if (accuracyNode->GP()->children().empty()) {
+    auto &accuracyNodeChildren = accuracyNode->GP()->children();
+    if (accuracyNodeChildren.empty()) {
         ThrowMissing(WKTConstants::ENSEMBLEACCURACY);
     }
-    auto accuracy = PositionalAccuracy::create(
-        accuracyNode->GP()->children()[0]->GP()->value());
+    auto accuracy =
+        PositionalAccuracy::create(accuracyNodeChildren[0]->GP()->value());
 
     try {
         return DatumEnsemble::create(buildProperties(node), datums, accuracy);
@@ -2587,7 +2588,8 @@ void WKTParser::Private::consumeParameters(
             }
             parameters.push_back(
                 OperationParameter::create(buildProperties(childNode)));
-            auto paramValue = childNode->GP()->children()[1]->GP()->value();
+            const auto &childNodeChildren = childNode->GP()->children();
+            auto paramValue = childNodeChildren[1]->GP()->value();
             if (!paramValue.empty() && paramValue[0] == '"') {
                 values.push_back(
                     ParameterValue::create(stripQuotes(paramValue)));
@@ -2596,25 +2598,19 @@ void WKTParser::Private::consumeParameters(
                     double val = asDouble(paramValue);
                     auto unit = buildUnitInSubNode(childNode);
                     if (unit == UnitOfMeasure::NONE) {
-                        auto paramName =
-                            childNode->GP()->children()[0]->GP()->value();
+                        auto paramName = childNodeChildren[0]->GP()->value();
                         unit = guessUnitForParameter(
                             paramName, defaultLinearUnit, defaultAngularUnit);
                     }
 
                     if (isAbridged) {
-                        auto paramName =
-                            *(parameters.back()->name()->description());
+                        const auto &paramName = parameters.back()->nameStr();
                         int paramEPSGCode = 0;
-                        if (parameters.back()->identifiers().size() == 1 &&
-                            ci_equal(*(parameters.back()
-                                           ->identifiers()[0]
-                                           ->codeSpace()),
+                        const auto &paramIds = parameters.back()->identifiers();
+                        if (paramIds.size() == 1 &&
+                            ci_equal(*(paramIds[0]->codeSpace()),
                                      Identifier::EPSG)) {
-                            paramEPSGCode = ::atoi(parameters.back()
-                                                       ->identifiers()[0]
-                                                       ->code()
-                                                       .c_str());
+                            paramEPSGCode = ::atoi(paramIds[0]->code().c_str());
                         }
                         const common::UnitOfMeasure *pUnit = nullptr;
                         if (OperationParameterValue::convertFromAbridged(
@@ -3427,25 +3423,25 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
 
     if (!isNull(datumNode)) {
         auto &extensionNode = datumNode->lookForChild(WKTConstants::EXTENSION);
-        if (extensionNode && extensionNode->GP()->childrenSize() == 2 &&
-            ci_equal(
-                stripQuotes(extensionNode->GP()->children()[0]->GP()->value()),
-                "PROJ4_GRIDS")) {
-            std::string transformationName = *(crs->name()->description());
-            if (!ends_with(transformationName, " height")) {
-                transformationName += " height";
+        if (extensionNode && extensionNode->GP()->childrenSize() == 2) {
+            const auto &extensionChildren = extensionNode->GP()->children();
+            if (ci_equal(stripQuotes(extensionChildren[0]->GP()->value()),
+                         "PROJ4_GRIDS")) {
+                std::string transformationName(crs->nameStr());
+                if (!ends_with(transformationName, " height")) {
+                    transformationName += " height";
+                }
+                transformationName += " to WGS84 ellipsoidal height";
+                auto transformation =
+                    Transformation::createGravityRelatedHeightToGeographic3D(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          transformationName),
+                        crs, GeographicCRS::EPSG_4979,
+                        stripQuotes(extensionChildren[1]->GP()->value()),
+                        std::vector<PositionalAccuracyNNPtr>());
+                return nn_static_pointer_cast<CRS>(BoundCRS::create(
+                    crs, GeographicCRS::EPSG_4979, transformation));
             }
-            transformationName += " to WGS84 ellipsoidal height";
-            auto transformation =
-                Transformation::createGravityRelatedHeightToGeographic3D(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                      transformationName),
-                    crs, GeographicCRS::EPSG_4979,
-                    stripQuotes(
-                        extensionNode->GP()->children()[1]->GP()->value()),
-                    std::vector<PositionalAccuracyNNPtr>());
-            return nn_static_pointer_cast<CRS>(BoundCRS::create(
-                crs, GeographicCRS::EPSG_4979, transformation));
         }
     }
 
