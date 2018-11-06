@@ -1262,7 +1262,12 @@ double SingleOperation::parameterValueNumeric(
 //! @endcond
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a PROJ-based single operation;
+/** \brief Instanciate a PROJ-based single operation.
+ *
+ * \note The operation might internally be a pipeline chaining several
+ * operations.
+ * The use of the SingleOperation modeling here is mostly to be able to get
+ * the PROJ string as a parameter.
  *
  * @param properties Properties
  * @param PROJString the PROJ string.
@@ -4047,7 +4052,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Angle(dfStdP1Lat, common::UnitOfMeasure::RADIAN)
                 .convertToUnit(common::UnitOfMeasure::DEGREE),
             common::UnitOfMeasure::DEGREE);
-        auto conv = createMercatorVariantB(
+        return createMercatorVariantB(
             util::PropertyMap(), latitudeFirstParallel,
             common::Angle(parameterValueMeasure(
                 EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
@@ -4058,7 +4063,6 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Length(
                 parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
                                       EPSG_CODE_PARAMETER_FALSE_NORTHING)));
-        return conv;
     }
 
     if (current_epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
@@ -4076,7 +4080,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             return nullptr;
         const double ec = std::sqrt(e2);
         const double k0 = msfn(phi1, ec);
-        auto conv = createMercatorVariantA(
+        return createMercatorVariantA(
             util::PropertyMap(),
             common::Angle(0.0, common::UnitOfMeasure::DEGREE),
             common::Angle(parameterValueMeasure(
@@ -4089,7 +4093,6 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Length(
                 parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
                                       EPSG_CODE_PARAMETER_FALSE_NORTHING)));
-        return conv;
     }
 
 #if 0
