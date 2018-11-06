@@ -184,10 +184,14 @@ class WKTFormatter {
         /** WKT2_2018 with the simplification rule of WKT2_SIMPLIFIED */
         WKT2_2018_SIMPLIFIED,
 
-        /** WKT1 as traditionally output by GDAL */
+        /** WKT1 as traditionally output by GDAL, deriving from OGC 01-009.
+            A notable departure from WKT1_GDAL with respect to OGC 01-009 is
+            that in WKT1_GDAL, the unit of the PRIMEM value is always degrees.
+           */
         WKT1_GDAL,
 
-        /** WKT1 as traditionally output by ESRI software */
+        /** WKT1 as traditionally output by ESRI software,
+         * deriving from OGC 99-049. */
         WKT1_ESRI,
     };
 
@@ -200,7 +204,8 @@ class WKTFormatter {
     //! @endcond
 
     PROJ_DLL WKTFormatter &setMultiLine(bool multiLine);
-    PROJ_DLL WKTFormatter &setIndendationWidth(int width);
+    PROJ_DLL WKTFormatter &setIndentationWidth(int width);
+    PROJ_DLL WKTFormatter &setOutputAxis(bool outputAxis);
     PROJ_DLL WKTFormatter &setStrict(bool strict);
     PROJ_DLL bool isStrict() const;
 
@@ -265,6 +270,7 @@ class WKTFormatter {
     bool isInverted() const;
 #endif
 
+    bool outputAxis() const;
     bool outputAxisOrder() const;
     bool primeMeridianOmittedIfGreenwich() const;
     bool ellipsoidUnitOmittedIfMetre() const;

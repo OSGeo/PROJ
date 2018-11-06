@@ -93,8 +93,8 @@ struct PJ_OBJ {
     IdentifiedObjectNNPtr obj;
 
     // cached results
-    std::string mapWKTString[PJ_WKT_TYPE_LAST + 1]{};
-    std::string mapPROJString[PJ_PROJ_STRING_TYPE_LAST + 1]{};
+    std::string lastWKT{};
+    std::string lastPROJString{};
     bool gridsNeededAsked = false;
     std::vector<GridDescription> gridsNeeded{};
 
@@ -756,9 +756,21 @@ const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static const char *getOptionValue(const char *option, const char *keyWithEqual) {
+    if (ci_starts_with(option, keyWithEqual)) {
+        return option + strlen(keyWithEqual);
+    }
+    return nullptr;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Get a WKT representation of an object.
  *
- * The lifetime of the returned string is the same as the input obj parameter.
+ * The returned string is valid while the input obj parameter is valid,
+ * and until a next call to proj_obj_as_wkt() with the same input object.
  *
  * This function calls osgeo::proj::io::IWKTExportable::exportToWKT().
  *
@@ -767,18 +779,20 @@ const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
  *
  * @param obj Object (must not be NULL)
  * @param type WKT version.
- * @param options should be set to NULL for now
+ * @param options null-terminated list of options, or NULL. Currently
+ * supported options are:
+ * <ul>
+ * <li>MULTILINE=YES/NO. Defaults to YES, except for WKT1_ESRI</li>
+ * <li>INDENTATION_WIDTH=number. Defauls to 4 (when multiline output is
+ * on).</li>
+ * <li>OUTPUT_AXIS=YES/NO. Defaults to YES, except for WKT1_ESRI.</li>
+ * </ul>
  * @return a string, or NULL in case of error.
  */
 const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
                             const char *const *options) {
     assert(obj);
     (void)options;
-    assert(type >= 0 &&
-           type < sizeof(obj->mapWKTString) / sizeof(obj->mapWKTString[0]));
-    if (!obj->mapWKTString[type].empty()) {
-        return obj->mapWKTString[type].c_str();
-    }
     auto wktExportable = dynamic_cast<const IWKTExportable *>(obj->obj.get());
     if (!wktExportable) {
         proj_log_error(obj->ctx, __FUNCTION__,
@@ -802,12 +816,30 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
     case PJ_WKT1_GDAL:
         convention = WKTFormatter::Convention::WKT1_GDAL;
         break;
+    case PJ_WKT1_ESRI:
+        convention = WKTFormatter::Convention::WKT1_ESRI;
+        break;
     }
     try {
-        auto wkt =
-            wktExportable->exportToWKT(WKTFormatter::create(convention).get());
-        obj->mapWKTString[type] = wkt;
-        return obj->mapWKTString[type].c_str();
+        auto formatter = WKTFormatter::create(convention);
+        for (auto iter = options; iter && iter[0]; ++iter) {
+            const char *value;
+            if ((value = getOptionValue(*iter, "MULTILINE="))) {
+                formatter->setMultiLine(ci_equal(value, "YES"));
+            } else if ((value = getOptionValue(*iter, "INDENTATION_WIDTH="))) {
+                formatter->setIndentationWidth(std::atoi(value));
+            } else if ((value = getOptionValue(*iter, "OUTPUT_AXIS="))) {
+                formatter->setOutputAxis(ci_equal(value, "YES"));
+            } else {
+                std::string msg("Unknown option :");
+                msg += *iter;
+                proj_log_error(obj->ctx, __FUNCTION__, msg.c_str());
+                return nullptr;
+            }
+        }
+        auto wkt = wktExportable->exportToWKT(formatter.get());
+        obj->lastWKT = wkt;
+        return obj->lastWKT.c_str();
     } catch (const std::exception &e) {
         proj_log_error(obj->ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -818,7 +850,9 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
 
 /** \brief Get a PROJ string representation of an object.
  *
- * The lifetime of the returned string is the same as the input obj parameter.
+ * The returned string is valid while the input obj parameter is valid,
+ * and until a next call to proj_obj_as_proj_string() with the same input
+ * object.
  *
  * This function calls
  * osgeo::proj::io::IPROJStringExportable::exportToPROJString().
@@ -837,14 +871,6 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
 const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
                                     const char *const *options) {
     assert(obj);
-#ifndef __clang__
-    // clang 5 rightly raises a "always true" warning
-    assert(type >= 0 &&
-           type < sizeof(obj->mapPROJString) / sizeof(obj->mapPROJString[0]));
-#endif
-    if (!obj->mapPROJString[type].empty()) {
-        return obj->mapPROJString[type].c_str();
-    }
     auto exportable =
         dynamic_cast<const IPROJStringExportable *>(obj->obj.get());
     if (!exportable) {
@@ -871,8 +897,8 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
             }
         }
         auto wkt = exportable->exportToPROJString(formatter.get());
-        obj->mapPROJString[type] = wkt;
-        return obj->mapPROJString[type].c_str();
+        obj->lastPROJString = wkt;
+        return obj->lastPROJString.c_str();
     } catch (const std::exception &e) {
         proj_log_error(obj->ctx, __FUNCTION__, e.what());
         return nullptr;

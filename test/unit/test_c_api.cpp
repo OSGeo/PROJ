@@ -190,43 +190,78 @@ TEST_F(CApi, proj_obj_as_wkt) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto wkt2_2018 = proj_obj_as_wkt(obj, PJ_WKT2_2018, nullptr);
-    ASSERT_NE(wkt2_2018, nullptr);
+    {
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2018, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("GEOGCRS[") == 0) << wkt;
+    }
 
-    auto wkt2_2018_bis = proj_obj_as_wkt(obj, PJ_WKT2_2018, nullptr);
-    EXPECT_EQ(wkt2_2018_bis, wkt2_2018);
+    {
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2018_SIMPLIFIED, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("GEOGCRS[") == 0) << wkt;
+        EXPECT_TRUE(std::string(wkt).find("ANGULARUNIT[") == std::string::npos)
+            << wkt;
+    }
 
-    auto wkt2_2018_simplified =
-        proj_obj_as_wkt(obj, PJ_WKT2_2018_SIMPLIFIED, nullptr);
-    ASSERT_NE(wkt2_2018_simplified, nullptr);
+    {
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2015, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("GEODCRS[") == 0) << wkt;
+    }
 
-    auto wkt2_2015 = proj_obj_as_wkt(obj, PJ_WKT2_2015, nullptr);
-    ASSERT_NE(wkt2_2015, nullptr);
+    {
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2015_SIMPLIFIED, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("GEODCRS[") == 0) << wkt;
+        EXPECT_TRUE(std::string(wkt).find("ANGULARUNIT[") == std::string::npos)
+            << wkt;
+    }
 
-    auto wkt2_2015_simplified =
-        proj_obj_as_wkt(obj, PJ_WKT2_2015_SIMPLIFIED, nullptr);
-    ASSERT_NE(wkt2_2015_simplified, nullptr);
+    {
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("GEOGCS[\"WGS 84\"") == 0) << wkt;
+    }
 
-    auto wkt1_GDAL = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, nullptr);
-    ASSERT_NE(wkt1_GDAL, nullptr);
+    {
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_ESRI, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("GEOGCS[\"GCS_WGS_1984\"") == 0)
+            << wkt;
+    }
 
-    EXPECT_TRUE(std::string(wkt2_2018).find("GEOGCRS[") == 0) << wkt2_2018;
+    // MULTILINE=NO
+    {
+        const char *const options[] = {"MULTILINE=NO", nullptr};
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, options);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("\n") == std::string::npos) << wkt;
+    }
 
-    EXPECT_TRUE(std::string(wkt2_2018_simplified).find("GEOGCRS[") == 0)
-        << wkt2_2018_simplified;
-    EXPECT_TRUE(std::string(wkt2_2018_simplified).find("ANGULARUNIT[") ==
-                std::string::npos)
-        << wkt2_2018_simplified;
+    // INDENTATION_WIDTH=2
+    {
+        const char *const options[] = {"INDENTATION_WIDTH=2", nullptr};
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, options);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("\n  DATUM") != std::string::npos)
+            << wkt;
+    }
 
-    EXPECT_TRUE(std::string(wkt2_2015).find("GEODCRS[") == 0) << wkt2_2015;
+    // OUTPUT_AXIS=NO
+    {
+        const char *const options[] = {"OUTPUT_AXIS=NO", nullptr};
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, options);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("AXIS") == std::string::npos) << wkt;
+    }
 
-    EXPECT_TRUE(std::string(wkt2_2015_simplified).find("GEODCRS[") == 0)
-        << wkt2_2015_simplified;
-    EXPECT_TRUE(std::string(wkt2_2015_simplified).find("ANGULARUNIT[") ==
-                std::string::npos)
-        << wkt2_2015_simplified;
-
-    EXPECT_TRUE(std::string(wkt1_GDAL).find("GEOGCS[") == 0) << wkt1_GDAL;
+    // unsupported option
+    {
+        const char *const options[] = {"unsupported=yes", nullptr};
+        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2018, options);
+        EXPECT_EQ(wkt, nullptr);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -252,20 +287,19 @@ TEST_F(CApi, proj_obj_as_proj_string) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto proj_5 = proj_obj_as_proj_string(obj, PJ_PROJ_5, nullptr);
-    ASSERT_NE(proj_5, nullptr);
-
-    auto proj_5_bis = proj_obj_as_proj_string(obj, PJ_PROJ_5, nullptr);
-    EXPECT_EQ(proj_5_bis, proj_5);
-
-    auto proj_4 = proj_obj_as_proj_string(obj, PJ_PROJ_4, nullptr);
-    ASSERT_NE(proj_4, nullptr);
-
-    EXPECT_EQ(std::string(proj_5), "+proj=pipeline +step +proj=longlat "
-                                   "+ellps=WGS84 +step +proj=unitconvert "
-                                   "+xy_in=rad +xy_out=deg +step "
-                                   "+proj=axisswap +order=2,1");
-    EXPECT_EQ(std::string(proj_4), "+proj=longlat +datum=WGS84");
+    {
+        auto proj_5 = proj_obj_as_proj_string(obj, PJ_PROJ_5, nullptr);
+        ASSERT_NE(proj_5, nullptr);
+        EXPECT_EQ(std::string(proj_5), "+proj=pipeline +step +proj=longlat "
+                                       "+ellps=WGS84 +step +proj=unitconvert "
+                                       "+xy_in=rad +xy_out=deg +step "
+                                       "+proj=axisswap +order=2,1");
+    }
+    {
+        auto proj_4 = proj_obj_as_proj_string(obj, PJ_PROJ_4, nullptr);
+        ASSERT_NE(proj_4, nullptr);
+        EXPECT_EQ(std::string(proj_4), "+proj=longlat +datum=WGS84");
+    }
 }
 
 // ---------------------------------------------------------------------------

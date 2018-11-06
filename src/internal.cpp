@@ -89,15 +89,20 @@ bool ci_equal(const std::string &a, const std::string &b) noexcept {
     return EQUALN(a.c_str(), b.c_str(), size);
 }
 
-/**
- * Case-insensitive equality test
- */
 bool ci_equal(const std::string &a, const char *b) noexcept {
     const auto size = a.size();
     if (size != strlen(b)) {
         return false;
     }
     return EQUALN(a.c_str(), b, size);
+}
+
+bool ci_equal(const char *a, const char *b) noexcept {
+    const auto size = strlen(a);
+    if (size != strlen(b)) {
+        return false;
+    }
+    return EQUALN(a, b, size);
 }
 
 // ---------------------------------------------------------------------------
@@ -187,6 +192,17 @@ bool starts_with(const std::string &str, const char *prefix) noexcept {
     return std::memcmp(str.c_str(), prefix, prefixSize) == 0;
 }
 */
+
+// ---------------------------------------------------------------------------
+
+bool ci_starts_with(const char *str, const char *prefix) noexcept {
+    const auto str_size = strlen(str);
+    const auto prefix_size = strlen(prefix);
+    if (str_size < prefix_size) {
+        return false;
+    }
+    return EQUALN(str, prefix, prefix_size);
+}
 
 // ---------------------------------------------------------------------------
 

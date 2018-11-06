@@ -128,6 +128,7 @@ struct WKTFormatter::Private {
         bool primeMeridianInDegree_ = false;
         bool use2018Keywords_ = false;
         bool useESRIDialect_ = false;
+        bool outputAxis_ = true;
     };
     Params params_{};
     DatabaseContextPtr dbContext_{};
@@ -215,8 +216,19 @@ WKTFormatter &WKTFormatter::setMultiLine(bool multiLine) {
 
 /** \brief Set number of spaces for each indentation level (defaults to 4).
  */
-WKTFormatter &WKTFormatter::setIndendationWidth(int width) {
+WKTFormatter &WKTFormatter::setIndentationWidth(int width) {
     d->params_.indentWidth_ = width;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether AXIS nodes should be output.
+ *
+ * This can typically be set to false for some variants of WKT1_GDAL.
+ */
+WKTFormatter &WKTFormatter::setOutputAxis(bool outputAxisIn) {
+    d->params_.outputAxis_ = outputAxisIn;
     return *this;
 }
 
@@ -305,6 +317,7 @@ WKTFormatter::WKTFormatter(Convention convention)
         d->params_.primeMeridianInDegree_ = true;
         d->params_.useESRIDialect_ = true;
         d->params_.multiLine_ = false;
+        d->params_.outputAxis_ = false;
         break;
 
     default:
@@ -552,6 +565,10 @@ void WKTFormatter::popAxisAngularUnit() { d->axisAngularUnitStack_.pop_back(); }
 const UnitOfMeasureNNPtr &WKTFormatter::axisAngularUnit() const {
     return d->axisAngularUnitStack_.back();
 }
+
+// ---------------------------------------------------------------------------
+
+bool WKTFormatter::outputAxis() const { return d->params_.outputAxis_; }
 
 // ---------------------------------------------------------------------------
 

@@ -121,6 +121,8 @@ inline bool starts_with(const std::string &str, const char *prefix) noexcept {
     return std::memcmp(str.c_str(), prefix, prefixSize) == 0;
 }
 
+bool ci_starts_with(const char *str, const char *prefix) noexcept;
+
 bool ci_starts_with(const std::string &str, const std::string &prefix) noexcept;
 
 bool ends_with(const std::string &str, const std::string &suffix) noexcept;
@@ -131,6 +133,8 @@ std::string toupper(const std::string &osStr);
 
 PROJ_DLL std::vector<std::string> split(const std::string &osStr,
                                         char separator);
+
+bool ci_equal(const char *a, const char *b) noexcept;
 
 bool ci_equal(const char *a, const std::string &b) = delete;
 

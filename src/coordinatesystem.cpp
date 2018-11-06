@@ -458,7 +458,7 @@ CoordinateSystem::axisList() PROJ_CONST_DEFN {
 void CoordinateSystem::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
-    if (formatter->useESRIDialect()) {
+    if (!formatter->outputAxis()) {
         return;
     }
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;

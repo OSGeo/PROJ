@@ -581,10 +581,8 @@ typedef enum
     PJ_WKT2_2015_SIMPLIFIED,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_GDAL */
     PJ_WKT1_GDAL,
-
-/*! @cond Doxygen_Suppress */
-    PJ_WKT_TYPE_LAST = PJ_WKT1_GDAL /* developers: do not forget to update this */
-/*! @endcond */
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_ESRI */
+    PJ_WKT1_ESRI
 } PJ_WKT_TYPE;
 
 const char PROJ_DLL* proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
@@ -596,11 +594,7 @@ typedef enum
     /** cf osgeo::proj::io::PROJStringFormatter::Convention::PROJ_5 */
     PJ_PROJ_5,
     /** cf osgeo::proj::io::PROJStringFormatter::Convention::PROJ_4 */
-    PJ_PROJ_4,
-
-/*! @cond Doxygen_Suppress */
-    PJ_PROJ_STRING_TYPE_LAST = PJ_PROJ_4 /* developers: do not forget to update this */
-/*! @endcond */
+    PJ_PROJ_4
 } PJ_PROJ_STRING_TYPE;
 
 const char PROJ_DLL* proj_obj_as_proj_string(PJ_OBJ *obj,
