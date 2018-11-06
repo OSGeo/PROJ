@@ -1111,6 +1111,10 @@ bool OperationParameter::isEquivalentTo(
 
 // ---------------------------------------------------------------------------
 
+void OperationParameter::_exportToWKT(io::WKTFormatter *) const {}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct SingleOperation::Private {
     std::vector<GeneralParameterValueNNPtr> parameterValues_{};

@@ -81,7 +81,7 @@ using CRSNNPtr = util::nn<CRSPtr>;
  *
  * \remark Implements CRS from \ref ISO_19111_2018
  */
-class CRS : public common::ObjectUsage, public io::IWKTExportable {
+class CRS : public common::ObjectUsage {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CRS() override;

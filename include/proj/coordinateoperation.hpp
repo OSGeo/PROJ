@@ -122,7 +122,6 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  * \remark Implements CoordinateOperation from \ref ISO_19111_2018
  */
 class CoordinateOperation : public common::ObjectUsage,
-                            public io::IWKTExportable,
                             public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
@@ -246,6 +245,10 @@ class OperationParameter final : public GeneralOperationParameter {
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     OperationParameter &operator=(const OperationParameter &other) = delete;
+
+    // cppcheck-suppress functionStatic
+    void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
 };
 
 // ---------------------------------------------------------------------------
@@ -447,8 +450,7 @@ using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
  *
  * \remark Implements OperationMethod from \ref ISO_19111_2018
  */
-class OperationMethod : public common::IdentifiedObject,
-                        public io::IWKTExportable {
+class OperationMethod : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationMethod() override;

@@ -266,19 +266,18 @@ using IdentifiedObjectPtr = std::shared_ptr<IdentifiedObject>;
 /** Non-null shared pointer of IdentifiedObject. */
 using IdentifiedObjectNNPtr = util::nn<IdentifiedObjectPtr>;
 
-/** \brief Identifications of a CRS-related object.
+/** \brief Abstract class representating a CRS-related object that has an
+ * identification.
  *
  * \remark Implements IdentifiedObject from \ref ISO_19111_2018
  */
-class IdentifiedObject : public util::BaseObject, public util::IComparable {
+class IdentifiedObject : public util::BaseObject,
+                         public util::IComparable,
+                         public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~IdentifiedObject() override;
     //! @endcond
-
-    PROJ_DLL static IdentifiedObjectNNPtr
-    create(const util::PropertyMap
-               &properties); // throw(InvalidValueTypeException)
 
     PROJ_DLL static const std::string NAME_KEY;
     PROJ_DLL static const std::string IDENTIFIERS_KEY;
@@ -396,7 +395,7 @@ using ObjectUsagePtr = std::shared_ptr<ObjectUsage>;
 /** Non-null shared pointer of ObjectUsage. */
 using ObjectUsageNNPtr = util::nn<ObjectUsagePtr>;
 
-/** \brief Usage of a CRS-related object.
+/** \brief Abstract class of a CRS-related object that has usages.
  *
  * \remark Implements ObjectUsage from \ref ISO_19111_2018
  */

@@ -29,11 +29,13 @@
 #include "gtest_include.h"
 
 #include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::metadata;
+using namespace osgeo::proj::operation;
 using namespace osgeo::proj::util;
 
 // ---------------------------------------------------------------------------
@@ -73,7 +75,7 @@ TEST(common, measure) { EXPECT_TRUE(Measure(1.0) == Measure(1.0)); }
 
 TEST(common, identifiedobject_empty) {
     PropertyMap properties;
-    auto obj = IdentifiedObject::create(properties);
+    auto obj = OperationParameter::create(properties);
     EXPECT_TRUE(obj->name()->code().empty());
     EXPECT_TRUE(obj->identifiers().empty());
     EXPECT_TRUE(obj->aliases().empty());
@@ -92,7 +94,7 @@ TEST(common, identifiedobject) {
     properties.set(IdentifiedObject::ALIAS_KEY, "alias");
     properties.set(IdentifiedObject::REMARKS_KEY, "remarks");
     properties.set(IdentifiedObject::DEPRECATED_KEY, true);
-    auto obj = IdentifiedObject::create(properties);
+    auto obj = OperationParameter::create(properties);
     EXPECT_EQ(*(obj->name()->description()), "name");
     ASSERT_EQ(obj->identifiers().size(), 1);
     EXPECT_EQ(obj->identifiers()[0]->code(), "identifier_code");
@@ -107,7 +109,7 @@ TEST(common, identifiedobject) {
 TEST(common, identifiedobject_name_invalid_type_integer) {
     PropertyMap properties;
     properties.set(IdentifiedObject::NAME_KEY, 123);
-    ASSERT_THROW(IdentifiedObject::create(properties),
+    ASSERT_THROW(OperationParameter::create(properties),
                  InvalidValueTypeException);
 }
 
@@ -117,7 +119,7 @@ TEST(common, identifiedobject_name_invalid_type_citation) {
     PropertyMap properties;
     properties.set(IdentifiedObject::NAME_KEY,
                    nn_make_shared<Citation>("invalid"));
-    ASSERT_THROW(IdentifiedObject::create(properties),
+    ASSERT_THROW(OperationParameter::create(properties),
                  InvalidValueTypeException);
 }
 
@@ -126,7 +128,7 @@ TEST(common, identifiedobject_name_invalid_type_citation) {
 TEST(common, identifiedobject_identifier_invalid_type) {
     PropertyMap properties;
     properties.set(IdentifiedObject::IDENTIFIERS_KEY, "string not allowed");
-    ASSERT_THROW(IdentifiedObject::create(properties),
+    ASSERT_THROW(OperationParameter::create(properties),
                  InvalidValueTypeException);
 }
 
@@ -138,7 +140,7 @@ TEST(common, identifiedobject_identifier_array_of_identifier) {
     array->add(Identifier::create("identifier_code1"));
     array->add(Identifier::create("identifier_code2"));
     properties.set(IdentifiedObject::IDENTIFIERS_KEY, array);
-    auto obj = IdentifiedObject::create(properties);
+    auto obj = OperationParameter::create(properties);
     ASSERT_EQ(obj->identifiers().size(), 2);
     EXPECT_EQ(obj->identifiers()[0]->code(), "identifier_code1");
     EXPECT_EQ(obj->identifiers()[1]->code(), "identifier_code2");
@@ -151,7 +153,7 @@ TEST(common, identifiedobject_identifier_array_of_invalid_type) {
     auto array = ArrayOfBaseObject::create();
     array->add(nn_make_shared<Citation>("unexpected type"));
     properties.set(IdentifiedObject::IDENTIFIERS_KEY, array);
-    ASSERT_THROW(IdentifiedObject::create(properties),
+    ASSERT_THROW(OperationParameter::create(properties),
                  InvalidValueTypeException);
 }
 
@@ -161,7 +163,7 @@ TEST(common, identifiedobject_alias_array_of_string) {
     PropertyMap properties;
     properties.set(IdentifiedObject::ALIAS_KEY,
                    std::vector<std::string>{"alias1", "alias2"});
-    auto obj = IdentifiedObject::create(properties);
+    auto obj = OperationParameter::create(properties);
     ASSERT_EQ(obj->aliases().size(), 2);
     EXPECT_EQ(obj->aliases()[0]->toString(), "alias1");
     EXPECT_EQ(obj->aliases()[1]->toString(), "alias2");
@@ -173,7 +175,7 @@ TEST(common, identifiedobject_alias_invalid_type) {
     PropertyMap properties;
     properties.set(IdentifiedObject::ALIAS_KEY,
                    nn_make_shared<Citation>("unexpected type"));
-    ASSERT_THROW(IdentifiedObject::create(properties),
+    ASSERT_THROW(OperationParameter::create(properties),
                  InvalidValueTypeException);
 }
 
@@ -184,6 +186,6 @@ TEST(common, identifiedobject_alias_array_of_invalid_type) {
     auto array = ArrayOfBaseObject::create();
     array->add(nn_make_shared<Citation>("unexpected type"));
     properties.set(IdentifiedObject::ALIAS_KEY, array);
-    ASSERT_THROW(IdentifiedObject::create(properties),
+    ASSERT_THROW(OperationParameter::create(properties),
                  InvalidValueTypeException);
 }

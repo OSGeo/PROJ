@@ -123,7 +123,7 @@ using MeridianNNPtr = util::nn<MeridianPtr>;
  *
  * \remark Implements MERIDIAN from \ref WKT2
  */
-class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
+class Meridian : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Meridian() override;
@@ -165,8 +165,7 @@ using CoordinateSystemAxisNNPtr = util::nn<CoordinateSystemAxisPtr>;
  *
  * \remark Implements CoordinateSystemAxis from \ref ISO_19111_2018
  */
-class CoordinateSystemAxis final : public common::IdentifiedObject,
-                                   public io::IWKTExportable {
+class CoordinateSystemAxis final : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystemAxis() override;
@@ -229,8 +228,7 @@ class CoordinateSystemAxis final : public common::IdentifiedObject,
  *
  * \remark Implements CoordinateSystem from \ref ISO_19111_2018
  */
-class CoordinateSystem : public common::IdentifiedObject,
-                         public io::IWKTExportable {
+class CoordinateSystem : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystem() override;

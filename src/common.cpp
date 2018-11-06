@@ -546,20 +546,6 @@ IdentifiedObject::~IdentifiedObject() = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a new IdentifiedObject.
- *
- * @param properties See \ref general_properties.
- */
-IdentifiedObjectNNPtr IdentifiedObject::create(
-    const PropertyMap &properties) // throw(InvalidValueTypeException)
-{
-    auto id(IdentifiedObject::nn_make_shared<IdentifiedObject>());
-    id->setProperties(properties);
-    return id;
-}
-
-// ---------------------------------------------------------------------------
-
 /** \brief Return the name of the object.
  *
  * Generally, the only interesting field of the name will be

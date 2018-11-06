@@ -116,8 +116,7 @@ using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
  *
  * \remark Implements DatumEnsemble from \ref ISO_19111_2018
  */
-class DatumEnsemble final : public common::IdentifiedObject,
-                            public io::IWKTExportable {
+class DatumEnsemble final : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DatumEnsemble() override;
@@ -170,7 +169,6 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
  * \remark Implements PrimeMeridian from \ref ISO_19111_2018
  */
 class PrimeMeridian final : public common::IdentifiedObject,
-                            public io::IWKTExportable,
                             public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
@@ -241,7 +239,6 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
  * \remark Implements Ellipsoid from \ref ISO_19111_2018
  */
 class Ellipsoid final : public common::IdentifiedObject,
-                        public io::IWKTExportable,
                         public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
@@ -364,7 +361,7 @@ using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
  *
  * \remark Implements GeodeticReferenceFrame from \ref ISO_19111_2018
  */
-class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
+class GeodeticReferenceFrame : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeodeticReferenceFrame() override;
@@ -521,7 +518,7 @@ using VerticalReferenceFrameNNPtr = util::nn<VerticalReferenceFramePtr>;
 
  * \remark Implements VerticalReferenceFrame from \ref ISO_19111_2018
  */
-class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
+class VerticalReferenceFrame : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalReferenceFrame() override;
@@ -637,7 +634,7 @@ using TemporalDatumNNPtr = util::nn<TemporalDatumPtr>;
  *
  * \remark Implements TemporalDatum from \ref ISO_19111_2018
  */
-class TemporalDatum final : public Datum, public io::IWKTExportable {
+class TemporalDatum final : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalDatum() override;
@@ -690,7 +687,7 @@ using EngineeringDatumNNPtr = util::nn<EngineeringDatumPtr>;
  *
  * \remark Implements EngineeringDatum from \ref ISO_19111_2018
  */
-class EngineeringDatum final : public Datum, public io::IWKTExportable {
+class EngineeringDatum final : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~EngineeringDatum() override;
@@ -734,7 +731,7 @@ using ParametricDatumNNPtr = util::nn<ParametricDatumPtr>;
  *
  * \remark Implements ParametricDatum from \ref ISO_19111_2018
  */
-class ParametricDatum final : public Datum, public io::IWKTExportable {
+class ParametricDatum final : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParametricDatum() override;

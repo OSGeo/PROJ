@@ -757,7 +757,8 @@ const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static const char *getOptionValue(const char *option, const char *keyWithEqual) {
+static const char *getOptionValue(const char *option,
+                                  const char *keyWithEqual) {
     if (ci_starts_with(option, keyWithEqual)) {
         return option + strlen(keyWithEqual);
     }
@@ -793,12 +794,6 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
                             const char *const *options) {
     assert(obj);
     (void)options;
-    auto wktExportable = dynamic_cast<const IWKTExportable *>(obj->obj.get());
-    if (!wktExportable) {
-        proj_log_error(obj->ctx, __FUNCTION__,
-                       "Object type not exportable to WKT");
-        return nullptr;
-    }
     WKTFormatter::Convention convention = WKTFormatter::Convention::WKT2_2018;
     switch (type) {
     case PJ_WKT2_2018:
@@ -837,7 +832,7 @@ const char *proj_obj_as_wkt(PJ_OBJ *obj, PJ_WKT_TYPE type,
                 return nullptr;
             }
         }
-        auto wkt = wktExportable->exportToWKT(formatter.get());
+        auto wkt = obj->obj->exportToWKT(formatter.get());
         obj->lastWKT = wkt;
         return obj->lastWKT.c_str();
     } catch (const std::exception &e) {
