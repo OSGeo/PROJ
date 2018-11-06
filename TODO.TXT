@@ -1,18 +1,7 @@
 - Functional:
     - WKTv2 Bison based validator ?
     - test sphericalCS
-    - identification of CRS code from registry from name, etc
     - identify ? (cf OSRFindMatches)
-
-    - transformation with WEST longitude
-    GEOGCS["Mars2015",
-        DATUM["D_Mars_2015",
-            SPHEROID["Mars_2015_IAU_OCENTRIC",3396190,169.89444722360980],
-            TOWGS84[0,0,0]],
-        PRIMEM["Airy-0",0.0],
-        UNIT["Degree",0.017453292519943295],
-        AXIS["latitude",NORTH],
-        AXIS["longitude",WEST]]
     - We might currently create COMPOUNDCRS of horiz CRS + BoundCRS of VertCRS, which is apparently illegal
 
     - Time dependent stuff:

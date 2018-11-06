@@ -1129,7 +1129,7 @@ struct WKTParser::Private {
 
     GeodeticReferenceFrameNNPtr
     buildGeodeticReferenceFrame(const WKTNodeNNPtr &node,
-                                PrimeMeridianNNPtr primeMeridian,
+                                const PrimeMeridianNNPtr &primeMeridian,
                                 const WKTNodeNNPtr &dynamicNode);
 
     DatumEnsembleNNPtr buildDatumEnsemble(const WKTNodeNNPtr &node,
@@ -1725,6 +1725,26 @@ UnitOfMeasure WKTParser::Private::buildUnitInSubNode(const WKTNodeNNPtr &node,
 
 // ---------------------------------------------------------------------------
 
+static std::string _guessBodyName(const DatabaseContextPtr &dbContext,
+                                  double a) {
+    constexpr double relError = 0.005;
+    constexpr double earthMeanRadius = 6375000.0;
+    if (std::fabs(a - earthMeanRadius) < relError * earthMeanRadius) {
+        return Ellipsoid::EARTH;
+    }
+    if (dbContext) {
+        try {
+            auto factory =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
+            return factory->identifyBodyFromSemiMajorAxis(a, relError);
+        } catch (const std::exception &) {
+        }
+    }
+    return "Non-Earth body";
+}
+
+// ---------------------------------------------------------------------------
+
 EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
     const auto &children = node->GP()->children();
     if (children.size() < 3) {
@@ -1738,12 +1758,15 @@ EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
         }
         Length semiMajorAxis(asDouble(children[1]->GP()->value()), unit);
         Scale invFlattening(asDouble(children[2]->GP()->value()));
+        const auto celestialBody(
+            _guessBodyName(dbContext_, semiMajorAxis.getSIValue()));
         if (invFlattening.getSIValue() == 0) {
-            return Ellipsoid::createSphere(buildProperties(node),
-                                           semiMajorAxis);
+            return Ellipsoid::createSphere(buildProperties(node), semiMajorAxis,
+                                           celestialBody);
         } else {
             return Ellipsoid::createFlattenedSphere(
-                buildProperties(node), semiMajorAxis, invFlattening);
+                buildProperties(node), semiMajorAxis, invFlattening,
+                celestialBody);
         }
     } catch (const std::exception &e) {
         throw buildRethrow(__FUNCTION__, e);
@@ -1796,8 +1819,28 @@ optional<std::string> WKTParser::Private::getAnchor(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+static const PrimeMeridianNNPtr &createReferenceMeridian() {
+    static const PrimeMeridianNNPtr meridian = PrimeMeridian::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Reference meridian"),
+        common::Angle(0));
+    return meridian;
+}
+
+// ---------------------------------------------------------------------------
+
+static const PrimeMeridianNNPtr &
+fixupPrimeMeridan(const EllipsoidNNPtr &ellipsoid,
+                  const PrimeMeridianNNPtr &pm) {
+    return (ellipsoid->celestialBody() != Ellipsoid::EARTH &&
+            pm.get() == PrimeMeridian::GREENWICH.get())
+               ? createReferenceMeridian()
+               : pm;
+}
+
+// ---------------------------------------------------------------------------
+
 GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
-    const WKTNodeNNPtr &node, PrimeMeridianNNPtr primeMeridian,
+    const WKTNodeNNPtr &node, const PrimeMeridianNNPtr &primeMeridian,
     const WKTNodeNNPtr &dynamicNode) {
     auto &ellipsoidNode = node->GP()->lookForChild(WKTConstants::ELLIPSOID,
                                                    WKTConstants::SPHEROID);
@@ -1858,14 +1901,20 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     }
 
     auto ellipsoid = buildEllipsoid(ellipsoidNode);
+    const auto &primeMeridianModified =
+        fixupPrimeMeridan(ellipsoid, primeMeridian);
 
     auto &TOWGS84Node = node->GP()->lookForChild(WKTConstants::TOWGS84);
     if (TOWGS84Node != null_node) {
-        if (TOWGS84Node->GP()->childrenSize() == 7) {
+        const size_t TOWGS84Size = TOWGS84Node->GP()->childrenSize();
+        if (TOWGS84Size == 3 || TOWGS84Size == 7) {
             try {
                 for (const auto &child : TOWGS84Node->GP()->children()) {
                     toWGS84Parameters_.push_back(
                         asDouble(child->GP()->value()));
+                }
+                for (size_t i = TOWGS84Size; i < 7; ++i) {
+                    toWGS84Parameters_.push_back(0.0);
                 }
             } catch (const std::exception &) {
                 throw ParsingException("Invalid TOWGS84 node");
@@ -1888,13 +1937,13 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
         util::optional<std::string> modelName;
         parseDynamic(dynamicNode, frameReferenceEpoch, modelName);
         return DynamicGeodeticReferenceFrame::create(
-            properties, ellipsoid, getAnchor(node), primeMeridian,
+            properties, ellipsoid, getAnchor(node), primeMeridianModified,
             common::Measure(frameReferenceEpoch, common::UnitOfMeasure::YEAR),
             modelName);
     }
 
-    return GeodeticReferenceFrame::create(properties, ellipsoid,
-                                          getAnchor(node), primeMeridian);
+    return GeodeticReferenceFrame::create(
+        properties, ellipsoid, getAnchor(node), primeMeridianModified);
 }
 
 // ---------------------------------------------------------------------------
@@ -5114,6 +5163,7 @@ struct PROJStringParser::Private {
         return emptyString;
     }
 
+    // cppcheck-suppress functionStatic
     std::string guessBodyName(double a);
 
     PrimeMeridianNNPtr buildPrimeMeridian(const Step &step);
@@ -5410,20 +5460,7 @@ PROJStringParser::Private::buildPrimeMeridian(const Step &step) {
 // ---------------------------------------------------------------------------
 
 std::string PROJStringParser::Private::guessBodyName(double a) {
-    constexpr double relError = 0.005;
-    constexpr double earthMeanRadius = 6375000.0;
-    if (std::fabs(a - earthMeanRadius) < relError * earthMeanRadius) {
-        return Ellipsoid::EARTH;
-    }
-    if (dbContext_) {
-        try {
-            auto factory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                    std::string());
-            return factory->identifyBodyFromSemiMajorAxis(a, relError);
-        } catch (const std::exception &) {
-        }
-    }
-    return "Non-Earth body";
+    return _guessBodyName(dbContext_, a);
 }
 
 // ---------------------------------------------------------------------------
@@ -5549,7 +5586,7 @@ PROJStringParser::Private::buildDatum(const Step &step,
         return GeodeticReferenceFrame::create(
             grfMap.set(IdentifiedObject::NAME_KEY,
                        title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, pm);
+            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
     else if (!aStr.empty() && !rfStr.empty()) {
@@ -5572,7 +5609,7 @@ PROJStringParser::Private::buildDatum(const Step &step,
         return GeodeticReferenceFrame::create(
             grfMap.set(IdentifiedObject::NAME_KEY,
                        title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, pm);
+            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
     else if (!RStr.empty()) {
@@ -5587,7 +5624,7 @@ PROJStringParser::Private::buildDatum(const Step &step,
         return GeodeticReferenceFrame::create(
             grfMap.set(IdentifiedObject::NAME_KEY,
                        title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, pm);
+            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
     if (!aStr.empty() && bStr.empty() && rfStr.empty()) {

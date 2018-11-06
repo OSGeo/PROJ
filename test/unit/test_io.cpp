@@ -174,9 +174,24 @@ TEST(wkt_parse, datum_with_ANCHOR) {
         "    ANCHOR[\"My anchor\"]]");
     auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
     ASSERT_TRUE(datum != nullptr);
+    EXPECT_EQ(datum->ellipsoid()->celestialBody(), "Earth");
+    EXPECT_EQ(datum->primeMeridian()->nameStr(), "Greenwich");
     auto anchor = datum->anchorDefinition();
     EXPECT_TRUE(anchor.has_value());
     EXPECT_EQ(*anchor, "My anchor");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, datum_no_pm_not_earth) {
+    auto obj = WKTParser().createFromWKT(
+        "DATUM[\"unnamed\",\n"
+        "    ELLIPSOID[\"unnamed\",1,0,\n"
+        "        LENGTHUNIT[\"metre\",1]]]");
+    auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(datum != nullptr);
+    EXPECT_EQ(datum->ellipsoid()->celestialBody(), "Non-Earth body");
+    EXPECT_EQ(datum->primeMeridian()->nameStr(), "Reference meridian");
 }
 
 // ---------------------------------------------------------------------------
@@ -5167,7 +5182,7 @@ TEST(io, projparse_longlat_a_b) {
                     "    DATUM[\"unknown\",\n"
                     "        ELLIPSOID[\"unknown\",2,4,\n"
                     "            LENGTHUNIT[\"metre\",1]]],\n"
-                    "    PRIMEM[\"Greenwich\",0,\n"
+                    "    PRIMEM[\"Reference meridian\",0,\n"
                     "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
                     "    CS[ellipsoidal,2],\n"
                     "        AXIS[\"longitude\",east,\n"
@@ -5221,7 +5236,7 @@ TEST(io, projparse_longlat_a_rf) {
                     "    DATUM[\"unknown\",\n"
                     "        ELLIPSOID[\"unknown\",2,4,\n"
                     "            LENGTHUNIT[\"metre\",1]]],\n"
-                    "    PRIMEM[\"Greenwich\",0,\n"
+                    "    PRIMEM[\"Reference meridian\",0,\n"
                     "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
                     "    CS[ellipsoidal,2],\n"
                     "        AXIS[\"longitude\",east,\n"
@@ -5246,7 +5261,7 @@ TEST(io, projparse_longlat_R) {
                     "    DATUM[\"unknown\",\n"
                     "        ELLIPSOID[\"unknown\",2,0,\n"
                     "            LENGTHUNIT[\"metre\",1]]],\n"
-                    "    PRIMEM[\"Greenwich\",0,\n"
+                    "    PRIMEM[\"Reference meridian\",0,\n"
                     "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
                     "    CS[ellipsoidal,2],\n"
                     "        AXIS[\"longitude\",east,\n"
