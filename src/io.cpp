@@ -1114,6 +1114,7 @@ struct WKTParser::Private {
         delete[] properties_;
     }
     Private(const Private &) = delete;
+    Private& operator=(const Private&) = delete;
 
     void emitRecoverableAssertion(const std::string &errorMsg);
 
@@ -4309,7 +4310,7 @@ struct PROJStringFormatter::Private {
     std::string hDatumExtension_{};
 
     std::list<Step> steps_{};
-    std::vector<Step::KeyValue> globalParamValues_;
+    std::vector<Step::KeyValue> globalParamValues_{};
 
     struct InversionStackElt {
         std::list<Step>::iterator startIter{};
