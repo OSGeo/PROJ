@@ -208,11 +208,14 @@ getDBcontextNoException(PJ_CONTEXT *ctx, const char *function) {
  * @param dbPath Path to main database, or NULL for default.
  * @param auxDbPaths NULL-terminated list of auxiliary database filenames, or
  * NULL.
+ * @param options should be set to NULL for now
  * @return TRUE in case of success
  */
 int proj_context_set_database_path(PJ_CONTEXT *ctx, const char *dbPath,
-                                   const char *const *auxDbPaths) {
+                                   const char *const *auxDbPaths,
+                                   const char *const *options) {
     SANITIZE_CTX(ctx);
+    (void)options;
     delete ctx->cpp_context;
     ctx->cpp_context = nullptr;
     try {
@@ -283,12 +286,15 @@ PJ_GUESSED_WKT_DIALECT proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param text String (must not be NULL)
+ * @param options should be set to NULL for now
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL in
  * case of error.
  */
-PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text) {
+PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text,
+                                        const char *const *options) {
     SANITIZE_CTX(ctx);
     assert(text);
+    (void)options;
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
@@ -313,12 +319,15 @@ PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text) {
  *
  * @param ctx PROJ context, or NULL for default context
  * @param wkt WKT string (must not be NULL)
+ * @param options should be set to NULL for now
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL in
  * case of error.
  */
-PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt) {
+PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
+                                 const char *const *options) {
     SANITIZE_CTX(ctx);
     assert(wkt);
+    (void)options;
     try {
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
             WKTParser().createFromWKT(wkt));
@@ -342,12 +351,15 @@ PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt) {
  *
  * @param ctx PROJ context, or NULL for default context
  * @param proj_string PROJ string (must not be NULL)
+ * @param options should be set to NULL for now
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL in
  * case of error.
  */
 PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
-                                         const char *proj_string) {
+                                         const char *proj_string,
+                                         const char *const *options) {
     SANITIZE_CTX(ctx);
+    (void)options;
     assert(proj_string);
     try {
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
@@ -758,7 +770,7 @@ const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
 
 //! @cond Doxygen_Suppress
 static const char *getOptionValue(const char *option,
-                                  const char *keyWithEqual) {
+                                  const char *keyWithEqual) noexcept {
     if (ci_starts_with(option, keyWithEqual)) {
         return option + strlen(keyWithEqual);
     }
@@ -1058,12 +1070,12 @@ PJ_OBJ *proj_obj_crs_get_horizontal_datum(PJ_OBJ *crs) {
     if (!geodCRS) {
         return nullptr;
     }
-    auto datum = geodCRS->datum();
+    const auto &datum = geodCRS->datum();
     if (datum) {
         return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(datum));
     }
 
-    auto datumEnsemble = geodCRS->datumEnsemble();
+    const auto &datumEnsemble = geodCRS->datumEnsemble();
     if (datumEnsemble) {
         return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(datumEnsemble));
     }

@@ -445,7 +445,8 @@ typedef struct PJ_OBJ_LIST PJ_OBJ_LIST;
 
 int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
                                             const char *dbPath,
-                                            const char *const *auxDbPaths);
+                                            const char *const *auxDbPaths,
+                                            const char* const *options);
 
 const char PROJ_DLL *proj_context_get_database_path(PJ_CONTEXT *ctx);
 
@@ -472,12 +473,15 @@ PJ_GUESSED_WKT_DIALECT PROJ_DLL proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
                                                                const char *wkt);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_from_user_input(PJ_CONTEXT *ctx,
-                                                 const char *text);
+                                                 const char *text,
+                                                 const char* const *options);
 
-PJ_OBJ PROJ_DLL *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt);
+PJ_OBJ PROJ_DLL *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
+                                          const char* const *options);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
-                                                  const char *proj_string);
+                                                  const char *proj_string,
+                                                  const char* const *options);
 
 /** \brief Object category. */
 typedef enum
