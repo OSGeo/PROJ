@@ -1114,7 +1114,7 @@ struct WKTParser::Private {
         delete[] properties_;
     }
     Private(const Private &) = delete;
-    Private& operator=(const Private&) = delete;
+    Private &operator=(const Private &) = delete;
 
     void emitRecoverableAssertion(const std::string &errorMsg);
 
