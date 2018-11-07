@@ -32,6 +32,24 @@ elseif(USE_THREAD AND NOT Threads_FOUND)
   message(FATAL_ERROR "No thread library found and thread/mutex support is required by USE_THREAD option")
 endif()
 
+option(ENABLE_LTO "Build library with LTO optimization (if available)." ON)
+if(ENABLE_LTO)
+    if("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
+        include (CheckCXXSourceCompiles)
+        SET(CMAKE_REQUIRED_FLAGS "-Wl,-flto")
+        check_cxx_source_compiles("int main(){ return 0; }" COMPILER_SUPPORTS_FLTO_FLAG)
+        IF(COMPILER_SUPPORTS_FLTO_FLAG)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+        ENDIF()
+    else()
+        include(CheckCXXCompilerFlag)
+        CHECK_CXX_COMPILER_FLAG("-flto" COMPILER_SUPPORTS_FLTO_FLAG)
+        if(COMPILER_SUPPORTS_FLTO_FLAG)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+        endif()
+    endif()
+endif()
+
 
 ##############################################
 ###  library source list and include_list  ###

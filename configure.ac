@@ -143,10 +143,44 @@ fi
 
 AC_LANG_POP([C++])
 
+dnl ---------------------------------------------------------------------------
+dnl Check for --enable-lto
+dnl ---------------------------------------------------------------------------
+
+AC_MSG_CHECKING([to enable LTO (link time optimization) build])
+
+AC_ARG_ENABLE(lto,
+              AS_HELP_STRING([--enable-lto],
+                             [enable LTO(link time optimization) (enabled by default)]))
+
+FLTO_FLAG=""
+if test "x$enable_lto" = "xyes" -o "x$enable_lto" = "x"; then
+    AC_LANG_PUSH([C++])
+    AX_CHECK_COMPILE_FLAG([-flto], [FLTO_FLAG="-flto"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+    if test "$FLTO_FLAG" != ""; then
+        SAVED_CXXFLAGS=$CXXFLAGS
+        CXXFLAGS="$CXXFLAGS $FLTO_FLAG -Werror"
+        AC_MSG_CHECKING([if -flto is available at link time])
+        AC_LINK_IFELSE([AC_LANG_PROGRAM(
+        [[]])],
+        [AC_MSG_RESULT([yes])],
+        [FLTO_FLAG=""]
+        [AC_MSG_RESULT([no])])
+        CXXFLAGS="$SAVED_CXXFLAGS"
+    fi
+    AC_LANG_POP([C++])
+    AX_CHECK_COMPILE_FLAG([-Wodr], [CXX_WFLAGS="$CXX_WFLAGS -Wodr"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+else
+    AC_MSG_RESULT([no])
+fi
+AC_SUBST(FLTO_FLAG,$FLTO_FLAG)
+
+dnl Result in better inlining, but larger file
+dnl AX_CHECK_COMPILE_FLAG([-fno-semantic-interposition], [CFLAGS="$CFLAGS -fno-semantic-interposition" CXXFLAGS="$CXXFLAGS -fno-semantic-interposition"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+
 AC_SUBST(C_WFLAGS,$C_WFLAGS)
 AC_SUBST(CXX_WFLAGS,$CXX_WFLAGS)
 AC_SUBST(NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG,$NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
-
 
 dnl Checks for libraries.
 save_CFLAGS="$CFLAGS"
