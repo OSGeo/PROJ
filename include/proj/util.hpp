@@ -129,7 +129,14 @@ namespace proj {}
 // change if the arguments are the same, and their pointed value must not
 // be modified. So this is for getters of immutable objets. This is stronger
 // than PROJ_PURE_DECL.
+#if defined(__INTEL_COMPILER)
+// If using __attribute__((const)), ICC on an expression like
+// Angle(x).getSIValue() will create the object, destroy it and then call
+// getSIValue(). Fallback to ((pure)), which is weaker
+#define PROJ_CONST_DECL const noexcept __attribute__((pure))
+#else
 #define PROJ_CONST_DECL const noexcept __attribute__((const))
+#endif
 #else
 #define PROJ_NO_RETURN
 #define PROJ_NO_INLINE

@@ -8417,7 +8417,8 @@ std::set<GridDescription> ConcatenatedOperation::gridsNeeded(
     const io::DatabaseContextPtr &databaseContext) const {
     std::set<GridDescription> res;
     for (const auto &operation : operations()) {
-        for (const auto &gridDesc : operation->gridsNeeded(databaseContext)) {
+        const auto l_gridsNeeded = operation->gridsNeeded(databaseContext);
+        for (const auto &gridDesc : l_gridsNeeded) {
             res.insert(gridDesc);
         }
     }
@@ -9131,8 +9132,9 @@ struct FilterAndSort {
                 context->getGridAvailabilityUse() ==
                     CoordinateOperationContext::GridAvailabilityUse::
                         USE_FOR_SORTING) {
-                for (const auto &gridDesc : op->gridsNeeded(
-                         context->getAuthorityFactory()->databaseContext())) {
+                const auto gridsNeeded = op->gridsNeeded(
+                    context->getAuthorityFactory()->databaseContext());
+                for (const auto &gridDesc : gridsNeeded) {
                     hasGrids = true;
                     if (!gridDesc.available) {
                         gridsAvailable = false;
@@ -9204,8 +9206,9 @@ struct FilterAndSort {
             const auto curStepCount = getStepCount(op);
 
             if (context->getAuthorityFactory()) {
-                for (const auto &gridDesc : op->gridsNeeded(
-                         context->getAuthorityFactory()->databaseContext())) {
+                const auto gridsNeeded = op->gridsNeeded(
+                    context->getAuthorityFactory()->databaseContext());
+                for (const auto &gridDesc : gridsNeeded) {
                     curHasGrids = true;
                     curSetOfGrids.insert(gridDesc.shortName);
                     if (!gridDesc.available) {
@@ -10833,7 +10836,8 @@ std::set<GridDescription> PROJBasedOperation::gridsNeeded(
         auto formatterOut = io::PROJStringFormatter::create();
         auto formatter = io::PROJStringFormatter::create();
         formatter->ingestPROJString(exportToPROJString(formatterOut.get()));
-        for (const auto &shortName : formatter->getUsedGridNames()) {
+        const auto usedGridNames = formatter->getUsedGridNames();
+        for (const auto &shortName : usedGridNames) {
             GridDescription desc;
             desc.shortName = shortName;
             if (databaseContext) {

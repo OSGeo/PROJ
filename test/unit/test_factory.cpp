@@ -1296,7 +1296,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
     void createStructure() {
         auto referenceDb = DatabaseContext::create();
-        for (const auto &sql : referenceDb->getDatabaseStructure()) {
+        const auto dbStructure = referenceDb->getDatabaseStructure();
+        for (const auto &sql : dbStructure) {
             ASSERT_TRUE(execute(sql)) << last_error();
         }
         ASSERT_TRUE(execute("PRAGMA foreign_keys = 1;")) << last_error();
@@ -1475,8 +1476,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
     }
 
     void createSourceTargetPivotCRS() {
-        for (const auto &val :
-             std::vector<std::string>{"SOURCE", "TARGET", "PIVOT"}) {
+        const auto vals = std::vector<std::string>{"SOURCE", "TARGET", "PIVOT"};
+        for (const auto &val : vals) {
 
             ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
                                 "VALUES('NS_" +
@@ -2338,7 +2339,8 @@ TEST(factory, attachExtraDatabases_auxiliary) {
                     SQLITE_OK);
         {
             auto ctxt = DatabaseContext::create();
-            for (const auto &sql : ctxt->getDatabaseStructure()) {
+            const auto dbStructure = ctxt->getDatabaseStructure();
+            for (const auto &sql : dbStructure) {
                 if (sql.find("CREATE TRIGGER") == std::string::npos) {
                     ASSERT_TRUE(sqlite3_exec(dbAux, sql.c_str(), nullptr,
                                              nullptr, nullptr) == SQLITE_OK);

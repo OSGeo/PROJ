@@ -5925,7 +5925,8 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
     const auto &towgs84 = getParamValue(step, "towgs84");
     if (!towgs84.empty()) {
         std::vector<double> towgs84Values;
-        for (const auto &str : split(towgs84, ',')) {
+        const auto tokens = split(towgs84, ',');
+        for (const auto &str : tokens) {
             try {
                 towgs84Values.push_back(c_locale_stod(str));
             } catch (const std::invalid_argument &) {
