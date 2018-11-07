@@ -13,7 +13,7 @@ AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@ -DPROJ_COMPILATION
 include_HEADERS = proj.h proj_api.h geodesic.h \
 	org_proj4_PJ.h
 
-EXTRA_DIST = proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
+EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake bin_projinfo.cmake \
 			 lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c
 

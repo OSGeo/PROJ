@@ -142,6 +142,8 @@ extern "C" {
 #define PROJ_DLL __declspec(dllexport)
 #elif defined(PROJ_MSVC_DLL_IMPORT)
 #define PROJ_DLL __declspec(dllimport)
+#elif defined(__GNUC__)
+#define PROJ_DLL __attribute__ ((visibility("default")))
 #else
 #define PROJ_DLL
 #endif
@@ -152,7 +154,7 @@ extern "C" {
 #define PROJ_VERSION_MINOR 0
 #define PROJ_VERSION_PATCH 0
 
-extern char const pj_release[]; /* global release id string */
+extern char const PROJ_DLL pj_release[]; /* global release id string */
 
 /* first forward declare everything needed */
 
@@ -326,15 +328,15 @@ typedef struct projCtx_t PJ_CONTEXT;
 
 /* Functionality for handling thread contexts */
 #define PJ_DEFAULT_CTX 0
-PJ_CONTEXT *proj_context_create (void);
-PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx);
+PJ_CONTEXT PROJ_DLL *proj_context_create (void);
+PJ_CONTEXT PROJ_DLL*proj_context_destroy (PJ_CONTEXT *ctx);
 
 
 /* Manage the transformation definition object PJ */
-PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
-PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area);
-PJ  *proj_destroy (PJ *P);
+PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
+PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
+PJ PROJ_DLL *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area);
+PJ PROJ_DLL *proj_destroy (PJ *P);
 
 /* Setter-functions for the opaque PJ_AREA struct */
 /* Uncomment these when implementing support for area-based transformations.
@@ -351,13 +353,13 @@ enum PJ_DIRECTION {
 typedef enum PJ_DIRECTION PJ_DIRECTION;
 
 
-int proj_angular_input (PJ *P, enum PJ_DIRECTION dir);
-int proj_angular_output (PJ *P, enum PJ_DIRECTION dir);
+int PROJ_DLL proj_angular_input (PJ *P, enum PJ_DIRECTION dir);
+int PROJ_DLL proj_angular_output (PJ *P, enum PJ_DIRECTION dir);
 
 
-PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
-int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
-size_t proj_trans_generic (
+PJ_COORD PROJ_DLL proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
+int PROJ_DLL proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
+size_t PROJ_DLL proj_trans_generic (
     PJ *P,
     PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
@@ -368,66 +370,66 @@ size_t proj_trans_generic (
 
 
 /* Initializers */
-PJ_COORD proj_coord (double x, double y, double z, double t);
+PJ_COORD PROJ_DLL proj_coord (double x, double y, double z, double t);
 
 /* Measure internal consistency - in forward or inverse direction */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord);
+double PROJ_DLL proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord);
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double proj_lp_dist (const PJ *P, PJ_COORD a, PJ_COORD b);
+double PROJ_DLL proj_lp_dist (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 /* The geodesic distance AND the vertical offset */
-double proj_lpz_dist (const PJ *P, PJ_COORD a, PJ_COORD b);
+double PROJ_DLL proj_lpz_dist (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
-double proj_xy_dist (PJ_COORD a, PJ_COORD b);
+double PROJ_DLL proj_xy_dist (PJ_COORD a, PJ_COORD b);
 
 /* Euclidean distance between two points with linear 3D coordinates */
-double proj_xyz_dist (PJ_COORD a, PJ_COORD b);
+double PROJ_DLL proj_xyz_dist (PJ_COORD a, PJ_COORD b);
 
 /* Geodesic distance (in meter) + fwd and rev azimuth between two points on the ellipsoid */
-PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b);
+PJ_COORD PROJ_DLL proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 
 /* Set or read error level */
-int  proj_context_errno (PJ_CONTEXT *ctx);
-int  proj_errno (const PJ *P);
-int  proj_errno_set (const PJ *P, int err);
-int  proj_errno_reset (const PJ *P);
-int  proj_errno_restore (const PJ *P, int err);
-const char* proj_errno_string (int err);
+int  PROJ_DLL proj_context_errno (PJ_CONTEXT *ctx);
+int  PROJ_DLL proj_errno (const PJ *P);
+int  PROJ_DLL proj_errno_set (const PJ *P, int err);
+int  PROJ_DLL proj_errno_reset (const PJ *P);
+int  PROJ_DLL proj_errno_restore (const PJ *P, int err);
+const char PROJ_DLL * proj_errno_string (int err);
 
-PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level);
-void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf);
+PJ_LOG_LEVEL PROJ_DLL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level);
+void PROJ_DLL proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf);
 
 /* Scaling and angular distortion factors */
-PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp);
+PJ_FACTORS PROJ_DLL proj_factors(PJ *P, PJ_COORD lp);
 
 /* Info functions - get information about various PROJ.4 entities */
-PJ_INFO proj_info(void);
-PJ_PROJ_INFO proj_pj_info(PJ *P);
-PJ_GRID_INFO proj_grid_info(const char *gridname);
-PJ_INIT_INFO proj_init_info(const char *initname);
+PJ_INFO PROJ_DLL proj_info(void);
+PJ_PROJ_INFO PROJ_DLL proj_pj_info(PJ *P);
+PJ_GRID_INFO PROJ_DLL proj_grid_info(const char *gridname);
+PJ_INIT_INFO PROJ_DLL proj_init_info(const char *initname);
 
 /* List functions: */
 /* Get lists of operations, ellipsoids, units and prime meridians. */
-const PJ_OPERATIONS       *proj_list_operations(void);
-const PJ_ELLPS            *proj_list_ellps(void);
-const PJ_UNITS            *proj_list_units(void);
-const PJ_UNITS            *proj_list_angular_units(void);
-const PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
+const PJ_OPERATIONS       PROJ_DLL *proj_list_operations(void);
+const PJ_ELLPS            PROJ_DLL *proj_list_ellps(void);
+const PJ_UNITS            PROJ_DLL *proj_list_units(void);
+const PJ_UNITS            PROJ_DLL *proj_list_angular_units(void);
+const PJ_PRIME_MERIDIANS  PROJ_DLL *proj_list_prime_meridians(void);
 
 /* These are trivial, and while occasionally useful in real code, primarily here to      */
 /* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */
 /* angular units expected by classical proj, and by Charles Karney's geodesics subsystem */
-double proj_torad (double angle_in_degrees);
-double proj_todeg (double angle_in_radians);
+double PROJ_DLL proj_torad (double angle_in_degrees);
+double PROJ_DLL proj_todeg (double angle_in_radians);
 
 /* Geographical to geocentric latitude - another of the "simple, but useful" */
-PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
+PJ_COORD PROJ_DLL proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
-double proj_dmstor(const char *is, char **rs);
-char* proj_rtodms(char *s, double r, int pos, int neg);
+double PROJ_DLL proj_dmstor(const char *is, char **rs);
+char PROJ_DLL * proj_rtodms(char *s, double r, int pos, int neg);
 
 /*! @endcond */
 

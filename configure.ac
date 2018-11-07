@@ -182,6 +182,9 @@ AC_SUBST(C_WFLAGS,$C_WFLAGS)
 AC_SUBST(CXX_WFLAGS,$CXX_WFLAGS)
 AC_SUBST(NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG,$NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
 
+CFLAGS="${CFLAGS} -fvisibility=hidden"
+CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
+
 dnl Checks for libraries.
 save_CFLAGS="$CFLAGS"
 CFLAGS=`echo "$CFLAGS" | sed "s/-Werror/ /"`

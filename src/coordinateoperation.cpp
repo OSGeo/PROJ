@@ -805,6 +805,7 @@ void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool OperationMethod::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -826,6 +827,7 @@ bool OperationMethod::isEquivalentTo(
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1023,6 +1025,7 @@ bool OperationParameterValue::convertFromAbridged(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool OperationParameterValue::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1035,6 +1038,7 @@ bool OperationParameterValue::isEquivalentTo(
            d->parameterValue->isEquivalentTo(otherOPV->d->parameterValue.get(),
                                              criterion);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1101,6 +1105,7 @@ OperationParameter::create(const util::PropertyMap &properties) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool OperationParameter::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1108,6 +1113,7 @@ bool OperationParameter::isEquivalentTo(
     return otherOP != nullptr &&
            IdentifiedObject::isEquivalentTo(other, criterion);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1308,6 +1314,7 @@ static SingleOperationNNPtr createPROJBased(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool SingleOperation::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1330,6 +1337,7 @@ bool SingleOperation::isEquivalentTo(
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1586,6 +1594,7 @@ void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool ParameterValue::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1621,6 +1630,7 @@ bool ParameterValue::isEquivalentTo(
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -8391,6 +8401,7 @@ void ConcatenatedOperation::_exportToPROJString(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool ConcatenatedOperation::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -8410,6 +8421,7 @@ bool ConcatenatedOperation::isEquivalentTo(
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

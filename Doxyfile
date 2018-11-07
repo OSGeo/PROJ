@@ -2043,6 +2043,9 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             =    DOXYGEN_ENABLED \
                             PROJ_DLL= \
+                            PROJ_INTERNAL= \
+                            PROJ_GCC_DLL= \
+                            PROJ_MSVC_DLL= \
                             NS_PROJ_START="namespace osgeo { namespace proj {" \
                             NS_PROJ_END="} }" \
                             protected=private \

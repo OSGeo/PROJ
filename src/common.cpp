@@ -1100,6 +1100,7 @@ void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool ObjectUsage::isEquivalentTo(const util::IComparable *other,
                                  util::IComparable::Criterion criterion) const {
     auto otherObjUsage = dynamic_cast<const ObjectUsage *>(other);
@@ -1109,6 +1110,7 @@ bool ObjectUsage::isEquivalentTo(const util::IComparable *other,
     // TODO: incomplete
     return IdentifiedObject::isEquivalentTo(other, criterion);
 }
+//! @endcond
 
 } // namespace common
 NS_PROJ_END

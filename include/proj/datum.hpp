@@ -61,7 +61,7 @@ namespace datum {
  *
  * \remark Implements Datum from \ref ISO_19111_2018
  */
-class Datum : public common::ObjectUsage {
+class PROJ_GCC_DLL Datum : public common::ObjectUsage {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Datum() override;
@@ -72,9 +72,9 @@ class Datum : public common::ObjectUsage {
     PROJ_DLL const common::IdentifiedObjectPtr &conventionalRS() const;
 
   protected:
-    Datum();
+    PROJ_INTERNAL Datum();
 
-    bool _isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool _isEquivalentTo(const util::IComparable *other,
                          util::IComparable::Criterion criterion =
                              util::IComparable::Criterion::STRICT) const;
 
@@ -85,7 +85,7 @@ class Datum : public common::ObjectUsage {
 #endif
 
   protected:
-    void setAnchor(const util::optional<std::string> &anchor);
+    PROJ_INTERNAL void setAnchor(const util::optional<std::string> &anchor);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -116,7 +116,7 @@ using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
  *
  * \remark Implements DatumEnsemble from \ref ISO_19111_2018
  */
-class DatumEnsemble final : public common::IdentifiedObject {
+class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DatumEnsemble() override;
@@ -132,7 +132,7 @@ class DatumEnsemble final : public common::IdentifiedObject {
         const metadata::PositionalAccuracyNNPtr &accuracy); // throw(Exception)
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
                         //! @endcond
 
@@ -142,7 +142,7 @@ class DatumEnsemble final : public common::IdentifiedObject {
     PositionalAccuracy positionalAccuracy_;
 #endif
 
-    DatumEnsemble(const std::vector<DatumNNPtr> &datumsIn,
+    PROJ_INTERNAL DatumEnsemble(const std::vector<DatumNNPtr> &datumsIn,
                   const metadata::PositionalAccuracyNNPtr &accuracy);
     INLINED_MAKE_SHARED
 
@@ -168,7 +168,7 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
  *
  * \remark Implements PrimeMeridian from \ref ISO_19111_2018
  */
-class PrimeMeridian final : public common::IdentifiedObject,
+class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
                             public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
@@ -186,23 +186,25 @@ class PrimeMeridian final : public common::IdentifiedObject,
     PROJ_DLL static const PrimeMeridianNNPtr PARIS;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     PROJ_PRIVATE :
 
-        void
+        PROJ_INTERNAL void
         _exportToPROJString(io::PROJStringFormatter *formatter)
             const override; // throw(FormattingException)
 
     //! @cond Doxygen_Suppress
-    static std::string getPROJStringWellKnownName(const common::Angle &angle);
+    PROJ_INTERNAL static std::string getPROJStringWellKnownName(const common::Angle &angle);
     //! @endcond
 
   protected:
@@ -210,7 +212,7 @@ class PrimeMeridian final : public common::IdentifiedObject,
     Angle greenwichLongitude_;
 #endif
 
-    explicit PrimeMeridian(const common::Angle &angle = common::Angle());
+    PROJ_INTERNAL explicit PrimeMeridian(const common::Angle &angle = common::Angle());
     INLINED_MAKE_SHARED
 
   private:
@@ -218,8 +220,8 @@ class PrimeMeridian final : public common::IdentifiedObject,
     PrimeMeridian(const PrimeMeridian &other) = delete;
     PrimeMeridian &operator=(const PrimeMeridian &other) = delete;
 
-    static const PrimeMeridianNNPtr createGREENWICH();
-    static const PrimeMeridianNNPtr createPARIS();
+    PROJ_INTERNAL static const PrimeMeridianNNPtr createGREENWICH();
+    PROJ_INTERNAL static const PrimeMeridianNNPtr createPARIS();
 };
 
 // ---------------------------------------------------------------------------
@@ -238,7 +240,7 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
  *
  * \remark Implements Ellipsoid from \ref ISO_19111_2018
  */
-class Ellipsoid final : public common::IdentifiedObject,
+class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
                         public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
@@ -290,16 +292,19 @@ class Ellipsoid final : public common::IdentifiedObject,
     PROJ_DLL static const EllipsoidNNPtr GRS1980;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
-    PROJ_PRIVATE : void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_PRIVATE :
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
                        const override; // throw(FormattingException)
 
   protected:
@@ -311,24 +316,24 @@ class Ellipsoid final : public common::IdentifiedObject,
     common::Length *semiMedianAxis_;
 #endif
 
-    explicit Ellipsoid(const common::Length &radius,
+    PROJ_INTERNAL explicit Ellipsoid(const common::Length &radius,
                        const std::string &celestialBody);
 
-    Ellipsoid(const common::Length &semiMajorAxisIn,
+    PROJ_INTERNAL Ellipsoid(const common::Length &semiMajorAxisIn,
               const common::Scale &invFlattening,
               const std::string &celestialBody);
 
-    Ellipsoid(const common::Length &semiMajorAxisIn,
+    PROJ_INTERNAL Ellipsoid(const common::Length &semiMajorAxisIn,
               const common::Length &semiMinorAxisIn,
               const std::string &celestialBody);
 
-    Ellipsoid(const Ellipsoid &other);
+    PROJ_INTERNAL Ellipsoid(const Ellipsoid &other);
 
     INLINED_MAKE_SHARED
 
-    static const EllipsoidNNPtr createCLARKE_1866();
-    static const EllipsoidNNPtr createWGS84();
-    static const EllipsoidNNPtr createGRS1980();
+    PROJ_INTERNAL static const EllipsoidNNPtr createCLARKE_1866();
+    PROJ_INTERNAL static const EllipsoidNNPtr createWGS84();
+    PROJ_INTERNAL static const EllipsoidNNPtr createGRS1980();
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -361,7 +366,7 @@ using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
  *
  * \remark Implements GeodeticReferenceFrame from \ref ISO_19111_2018
  */
-class GeodeticReferenceFrame : public Datum {
+class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeodeticReferenceFrame() override;
@@ -386,14 +391,16 @@ class GeodeticReferenceFrame : public Datum {
     PROJ_DLL static const GeodeticReferenceFrameNNPtr EPSG_6326; // WGS 84
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -401,13 +408,13 @@ class GeodeticReferenceFrame : public Datum {
     Ellipsoid *ellipsoid_;
 #endif
 
-    GeodeticReferenceFrame(const EllipsoidNNPtr &ellipsoidIn,
+    PROJ_INTERNAL GeodeticReferenceFrame(const EllipsoidNNPtr &ellipsoidIn,
                            const PrimeMeridianNNPtr &primeMeridianIn);
     INLINED_MAKE_SHARED
 
-    static const GeodeticReferenceFrameNNPtr createEPSG_6267();
-    static const GeodeticReferenceFrameNNPtr createEPSG_6269();
-    static const GeodeticReferenceFrameNNPtr createEPSG_6326();
+    PROJ_INTERNAL static const GeodeticReferenceFrameNNPtr createEPSG_6267();
+    PROJ_INTERNAL static const GeodeticReferenceFrameNNPtr createEPSG_6269();
+    PROJ_INTERNAL static const GeodeticReferenceFrameNNPtr createEPSG_6326();
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -434,7 +441,7 @@ using DynamicGeodeticReferenceFrameNNPtr =
  *
  * \remark Implements DynamicGeodeticReferenceFrame from \ref ISO_19111_2018
  */
-class DynamicGeodeticReferenceFrame final : public GeodeticReferenceFrame {
+class PROJ_GCC_DLL DynamicGeodeticReferenceFrame final : public GeodeticReferenceFrame {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DynamicGeodeticReferenceFrame() override;
@@ -451,13 +458,15 @@ class DynamicGeodeticReferenceFrame final : public GeodeticReferenceFrame {
            const common::Measure &frameReferenceEpochIn,
            const util::optional<std::string> &deformationModelNameIn);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
                         //! @endcond
 
@@ -466,7 +475,7 @@ class DynamicGeodeticReferenceFrame final : public GeodeticReferenceFrame {
     Measure frameReferenceEpoch_;
 #endif
 
-    DynamicGeodeticReferenceFrame(
+    PROJ_INTERNAL DynamicGeodeticReferenceFrame(
         const EllipsoidNNPtr &ellipsoidIn,
         const PrimeMeridianNNPtr &primeMeridianIn,
         const common::Measure &frameReferenceEpochIn,
@@ -488,7 +497,7 @@ class DynamicGeodeticReferenceFrame final : public GeodeticReferenceFrame {
  *
  * \remark Implements RealizationMethod from \ref ISO_19111_2018
  */
-class RealizationMethod : public util::CodeList {
+class PROJ_GCC_DLL RealizationMethod : public util::CodeList {
   public:
     PROJ_DLL static const RealizationMethod LEVELLING;
     PROJ_DLL static const RealizationMethod GEOID;
@@ -518,7 +527,7 @@ using VerticalReferenceFrameNNPtr = util::nn<VerticalReferenceFramePtr>;
 
  * \remark Implements VerticalReferenceFrame from \ref ISO_19111_2018
  */
-class VerticalReferenceFrame : public Datum {
+class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalReferenceFrame() override;
@@ -527,7 +536,7 @@ class VerticalReferenceFrame : public Datum {
     PROJ_DLL const util::optional<RealizationMethod> &realizationMethod() const;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -539,17 +548,19 @@ class VerticalReferenceFrame : public Datum {
            const util::optional<RealizationMethod> &realizationMethodIn =
                util::optional<RealizationMethod>());
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
     RealizationMethod realizationMethod_;
 #endif
 
-    explicit VerticalReferenceFrame(
+    PROJ_INTERNAL explicit VerticalReferenceFrame(
         const util::optional<RealizationMethod> &realizationMethodIn);
     INLINED_MAKE_SHARED
 
@@ -575,7 +586,7 @@ using DynamicVerticalReferenceFrameNNPtr =
  *
  * \remark Implements DynamicVerticalReferenceFrame from \ref ISO_19111_2018
  */
-class DynamicVerticalReferenceFrame final : public VerticalReferenceFrame {
+class PROJ_GCC_DLL DynamicVerticalReferenceFrame final : public VerticalReferenceFrame {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DynamicVerticalReferenceFrame() override;
@@ -592,13 +603,15 @@ class DynamicVerticalReferenceFrame final : public VerticalReferenceFrame {
            const common::Measure &frameReferenceEpochIn,
            const util::optional<std::string> &deformationModelNameIn);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
                         //! @endcond
 
@@ -607,7 +620,7 @@ class DynamicVerticalReferenceFrame final : public VerticalReferenceFrame {
     Measure frameReferenceEpoch_;
 #endif
 
-    DynamicVerticalReferenceFrame(
+    PROJ_INTERNAL DynamicVerticalReferenceFrame(
         const util::optional<RealizationMethod> &realizationMethodIn,
         const common::Measure &frameReferenceEpochIn,
         const util::optional<std::string> &deformationModelNameIn);
@@ -634,7 +647,7 @@ using TemporalDatumNNPtr = util::nn<TemporalDatumPtr>;
  *
  * \remark Implements TemporalDatum from \ref ISO_19111_2018
  */
-class TemporalDatum final : public Datum {
+class PROJ_GCC_DLL TemporalDatum final : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalDatum() override;
@@ -644,7 +657,7 @@ class TemporalDatum final : public Datum {
     PROJ_DLL const std::string &calendar() const;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -656,13 +669,15 @@ class TemporalDatum final : public Datum {
            const common::DateTime &temporalOriginIn,
            const std::string &calendarIn);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
-    TemporalDatum(const common::DateTime &temporalOriginIn,
+    PROJ_INTERNAL TemporalDatum(const common::DateTime &temporalOriginIn,
                   const std::string &calendarIn);
     INLINED_MAKE_SHARED
 
@@ -687,14 +702,14 @@ using EngineeringDatumNNPtr = util::nn<EngineeringDatumPtr>;
  *
  * \remark Implements EngineeringDatum from \ref ISO_19111_2018
  */
-class EngineeringDatum final : public Datum {
+class PROJ_GCC_DLL EngineeringDatum final : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~EngineeringDatum() override;
     //! @endcond
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -704,13 +719,15 @@ class EngineeringDatum final : public Datum {
            const util::optional<std::string> &anchor =
                util::optional<std::string>());
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
-    EngineeringDatum();
+    PROJ_INTERNAL EngineeringDatum();
     INLINED_MAKE_SHARED
 
   private:
@@ -731,14 +748,14 @@ using ParametricDatumNNPtr = util::nn<ParametricDatumPtr>;
  *
  * \remark Implements ParametricDatum from \ref ISO_19111_2018
  */
-class ParametricDatum final : public Datum {
+class PROJ_GCC_DLL ParametricDatum final : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParametricDatum() override;
     //! @endcond
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -748,13 +765,15 @@ class ParametricDatum final : public Datum {
            const util::optional<std::string> &anchor =
                util::optional<std::string>());
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
-    ParametricDatum();
+    PROJ_INTERNAL ParametricDatum();
     INLINED_MAKE_SHARED
 
   private:

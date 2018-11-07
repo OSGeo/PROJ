@@ -62,7 +62,7 @@ namespace metadata {
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/citation/Citation.html)
  * from \ref GeoAPI
  */
-class Citation : public util::BaseObject {
+class PROJ_GCC_DLL Citation : public util::BaseObject {
   public:
     PROJ_DLL explicit Citation(const std::string &titleIn);
     //! @cond Doxygen_Suppress
@@ -95,7 +95,7 @@ using GeographicExtentNNPtr = util::nn<GeographicExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/GeographicExtent.html)
  * from \ref GeoAPI
  */
-class GeographicExtent : public util::BaseObject, public util::IComparable {
+class PROJ_GCC_DLL GeographicExtent : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeographicExtent() override;
@@ -104,10 +104,12 @@ class GeographicExtent : public util::BaseObject, public util::IComparable {
     // GeoAPI has a getInclusion() method. We assume that it is included for our
     // use
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
+    //! @endcond
 
     /** \brief Returns whether this extent contains the other one. */
     PROJ_DLL virtual bool
@@ -122,7 +124,7 @@ class GeographicExtent : public util::BaseObject, public util::IComparable {
     intersection(const GeographicExtentNNPtr &other) const = 0;
 
   protected:
-    GeographicExtent();
+    PROJ_INTERNAL GeographicExtent();
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -145,7 +147,7 @@ using GeographicBoundingBoxNNPtr = util::nn<GeographicBoundingBoxPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/GeographicBoundingBox.html)
  * from \ref GeoAPI
  */
-class GeographicBoundingBox : public GeographicExtent {
+class PROJ_GCC_DLL GeographicBoundingBox : public GeographicExtent {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeographicBoundingBox() override;
@@ -159,10 +161,12 @@ class GeographicBoundingBox : public GeographicExtent {
     PROJ_DLL static GeographicBoundingBoxNNPtr
     create(double west, double south, double east, double north);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     PROJ_DLL bool contains(const GeographicExtentNNPtr &other) const override;
 
@@ -172,7 +176,7 @@ class GeographicBoundingBox : public GeographicExtent {
     intersection(const GeographicExtentNNPtr &other) const override;
 
   protected:
-    GeographicBoundingBox(double west, double south, double east, double north);
+    PROJ_INTERNAL GeographicBoundingBox(double west, double south, double east, double north);
     INLINED_MAKE_SHARED
 
   private:
@@ -193,7 +197,7 @@ using TemporalExtentNNPtr = util::nn<TemporalExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/TemporalExtent.html)
  * from \ref GeoAPI
  */
-class TemporalExtent : public util::BaseObject, public util::IComparable {
+class PROJ_GCC_DLL TemporalExtent : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalExtent() override;
@@ -205,17 +209,19 @@ class TemporalExtent : public util::BaseObject, public util::IComparable {
     PROJ_DLL static TemporalExtentNNPtr create(const std::string &start,
                                                const std::string &stop);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     PROJ_DLL bool contains(const TemporalExtentNNPtr &other) const;
 
     PROJ_DLL bool intersects(const TemporalExtentNNPtr &other) const;
 
   protected:
-    TemporalExtent(const std::string &start, const std::string &stop);
+    PROJ_INTERNAL TemporalExtent(const std::string &start, const std::string &stop);
     INLINED_MAKE_SHARED
 
   private:
@@ -236,7 +242,7 @@ using VerticalExtentNNPtr = util::nn<VerticalExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/VerticalExtent.html)
  * from \ref GeoAPI
  */
-class VerticalExtent : public util::BaseObject, public util::IComparable {
+class PROJ_GCC_DLL VerticalExtent : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalExtent() override;
@@ -250,17 +256,19 @@ class VerticalExtent : public util::BaseObject, public util::IComparable {
     create(double minimumValue, double maximumValue,
            const common::UnitOfMeasureNNPtr &unitIn);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     PROJ_DLL bool contains(const VerticalExtentNNPtr &other) const;
 
     PROJ_DLL bool intersects(const VerticalExtentNNPtr &other) const;
 
   protected:
-    VerticalExtent(double minimumValue, double maximumValue,
+    PROJ_INTERNAL VerticalExtent(double minimumValue, double maximumValue,
                    const common::UnitOfMeasureNNPtr &unitIn);
     INLINED_MAKE_SHARED
 
@@ -282,7 +290,7 @@ using ExtentNNPtr = util::nn<ExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/Extent.html)
  * from \ref GeoAPI
  */
-class Extent : public util::BaseObject, public util::IComparable {
+class PROJ_GCC_DLL Extent : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL Extent(const Extent &other);
@@ -308,10 +316,12 @@ class Extent : public util::BaseObject, public util::IComparable {
                    const util::optional<std::string> &descriptionIn =
                        util::optional<std::string>());
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     PROJ_DLL bool contains(const ExtentNNPtr &other) const;
 
@@ -322,7 +332,7 @@ class Extent : public util::BaseObject, public util::IComparable {
     PROJ_DLL static const ExtentNNPtr WORLD;
 
   protected:
-    Extent();
+    PROJ_INTERNAL Extent();
     INLINED_MAKE_SHARED
 
   private:
@@ -343,7 +353,7 @@ using IdentifierNNPtr = util::nn<IdentifierPtr>;
  * \remark Implements Identifier as described in \ref ISO_19111_2018 but which
  * originates from \ref ISO_19115
  */
-class Identifier : public util::BaseObject, public io::IWKTExportable {
+class PROJ_GCC_DLL Identifier : public util::BaseObject, public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL Identifier(const Identifier &other);
@@ -379,16 +389,16 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        static std::string
+        PROJ_INTERNAL  static std::string
         canonicalizeName(const std::string &str);
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     //! @endcond
 
   protected:
-    explicit Identifier(const std::string &codeIn,
+    PROJ_INTERNAL explicit Identifier(const std::string &codeIn,
                         const util::PropertyMap &properties);
 
     PROJ_FRIEND_OPTIONAL(Identifier);
@@ -415,7 +425,7 @@ using PositionalAccuracyNNPtr = util::nn<PositionalAccuracyPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/quality/PositionalAccuracy.html)
  * from \ref GeoAPI, which originates from \ref ISO_19115
  */
-class PositionalAccuracy : public util::BaseObject {
+class PROJ_GCC_DLL PositionalAccuracy : public util::BaseObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PositionalAccuracy() override;
@@ -426,7 +436,7 @@ class PositionalAccuracy : public util::BaseObject {
     PROJ_DLL static PositionalAccuracyNNPtr create(const std::string &valueIn);
 
   protected:
-    explicit PositionalAccuracy(const std::string &valueIn);
+    PROJ_INTERNAL explicit PositionalAccuracy(const std::string &valueIn);
     INLINED_MAKE_SHARED
 
   private:

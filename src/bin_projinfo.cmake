@@ -11,3 +11,6 @@ target_link_libraries(binprojinfo ${PROJ_LIBRARIES})
 install(TARGETS binprojinfo 
         RUNTIME DESTINATION ${BINDIR})
 
+if(MSVC AND BUILD_LIBPROJ_SHARED)
+    target_compile_definitions(binprojinfo PRIVATE PROJ_MSVC_DLL_IMPORT=1)
+endif()

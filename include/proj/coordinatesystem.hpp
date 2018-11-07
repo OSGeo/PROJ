@@ -123,7 +123,7 @@ using MeridianNNPtr = util::nn<MeridianPtr>;
  *
  * \remark Implements MERIDIAN from \ref WKT2
  */
-class Meridian : public common::IdentifiedObject {
+class PROJ_GCC_DLL Meridian : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Meridian() override;
@@ -135,7 +135,7 @@ class Meridian : public common::IdentifiedObject {
     PROJ_DLL static MeridianNNPtr create(const common::Angle &longitudeIn);
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
                         //! @endcond
 
@@ -144,7 +144,7 @@ class Meridian : public common::IdentifiedObject {
     Angle angle_;
 #endif
 
-    explicit Meridian(const common::Angle &longitudeIn);
+    PROJ_INTERNAL explicit Meridian(const common::Angle &longitudeIn);
     INLINED_MAKE_SHARED
 
   private:
@@ -165,7 +165,7 @@ using CoordinateSystemAxisNNPtr = util::nn<CoordinateSystemAxisPtr>;
  *
  * \remark Implements CoordinateSystemAxis from \ref ISO_19111_2018
  */
-class CoordinateSystemAxis final : public common::IdentifiedObject {
+class PROJ_GCC_DLL CoordinateSystemAxis final : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystemAxis() override;
@@ -185,23 +185,25 @@ class CoordinateSystemAxis final : public common::IdentifiedObject {
            const common::UnitOfMeasure &unitIn,
            const MeridianPtr &meridianIn = nullptr);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter, int order,
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter, int order,
                       bool disableAbbrev) const;
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
-    static std::string normalizeAxisName(const std::string &str);
+    PROJ_INTERNAL static std::string normalizeAxisName(const std::string &str);
 
-    static CoordinateSystemAxisNNPtr
+    PROJ_INTERNAL static CoordinateSystemAxisNNPtr
     createLAT_NORTH(const common::UnitOfMeasure &unit);
-    static CoordinateSystemAxisNNPtr
+    PROJ_INTERNAL static CoordinateSystemAxisNNPtr
     createLONG_EAST(const common::UnitOfMeasure &unit);
 
     //! @endcond
@@ -228,7 +230,7 @@ class CoordinateSystemAxis final : public common::IdentifiedObject {
  *
  * \remark Implements CoordinateSystem from \ref ISO_19111_2018
  */
-class CoordinateSystem : public common::IdentifiedObject {
+class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystem() override;
@@ -239,19 +241,21 @@ class CoordinateSystem : public common::IdentifiedObject {
 
     //! @cond Doxygen_Suppress
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     PROJ_DLL virtual std::string getWKT2Type(bool) const = 0;
     //! @endcond
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
-    explicit CoordinateSystem(
+    PROJ_INTERNAL explicit CoordinateSystem(
         const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
 
   private:
@@ -282,7 +286,7 @@ using SphericalCSNNPtr = util::nn<SphericalCSPtr>;
  *
  * \remark Implements SphericalCS from \ref ISO_19111_2018
  */
-class SphericalCS final : public CoordinateSystem {
+class PROJ_GCC_DLL SphericalCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~SphericalCS() override;
@@ -297,10 +301,10 @@ class SphericalCS final : public CoordinateSystem {
            const CoordinateSystemAxisNNPtr &axis3);
 
   protected:
-    explicit SphericalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
+    PROJ_INTERNAL explicit SphericalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool) const override { return "spherical"; }
+    PROJ_INTERNAL std::string getWKT2Type(bool) const override { return "spherical"; }
 
   private:
     SphericalCS(const SphericalCS &other) = delete;
@@ -322,7 +326,7 @@ using EllipsoidalCSNNPtr = util::nn<EllipsoidalCSPtr>;
  *
  * \remark Implements EllipsoidalCS from \ref ISO_19111_2018
  */
-class EllipsoidalCS final : public CoordinateSystem {
+class PROJ_GCC_DLL EllipsoidalCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~EllipsoidalCS() override;
@@ -360,14 +364,14 @@ class EllipsoidalCS final : public CoordinateSystem {
         OTHER
     };
 
-    AxisOrder axisOrder() const;
+    PROJ_INTERNAL AxisOrder axisOrder() const;
 
   protected:
-    explicit EllipsoidalCS(
+    PROJ_INTERNAL explicit EllipsoidalCS(
         const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool) const override { return "ellipsoidal"; }
+    PROJ_INTERNAL std::string getWKT2Type(bool) const override { return "ellipsoidal"; }
 
   protected:
     EllipsoidalCS(const EllipsoidalCS &other) = delete;
@@ -389,7 +393,7 @@ using VerticalCSNNPtr = util::nn<VerticalCSPtr>;
  *
  * \remark Implements VerticalCS from \ref ISO_19111_2018
  */
-class VerticalCS final : public CoordinateSystem {
+class PROJ_GCC_DLL VerticalCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalCS() override;
@@ -403,10 +407,10 @@ class VerticalCS final : public CoordinateSystem {
     createGravityRelatedHeight(const common::UnitOfMeasure &unit);
 
   protected:
-    explicit VerticalCS(const CoordinateSystemAxisNNPtr &axisIn);
+    PROJ_INTERNAL explicit VerticalCS(const CoordinateSystemAxisNNPtr &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool) const override { return "vertical"; }
+    PROJ_INTERNAL std::string getWKT2Type(bool) const override { return "vertical"; }
 
   private:
     VerticalCS(const VerticalCS &other) = delete;
@@ -429,7 +433,7 @@ using CartesianCSNNPtr = util::nn<CartesianCSPtr>;
  *
  * \remark Implements CartesianCS from \ref ISO_19111_2018
  */
-class CartesianCS final : public CoordinateSystem {
+class PROJ_GCC_DLL CartesianCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CartesianCS() override;
@@ -450,10 +454,10 @@ class CartesianCS final : public CoordinateSystem {
     createGeocentric(const common::UnitOfMeasure &unit);
 
   protected:
-    explicit CartesianCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
+    PROJ_INTERNAL explicit CartesianCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool) const override {
+    PROJ_INTERNAL std::string getWKT2Type(bool) const override {
         return "Cartesian"; // uppercase is intended
     }
 
@@ -476,7 +480,7 @@ using OrdinalCSNNPtr = util::nn<OrdinalCSPtr>;
  *
  * \remark Implements OrdinalCS from \ref ISO_19111_2018
  */
-class OrdinalCS final : public CoordinateSystem {
+class PROJ_GCC_DLL OrdinalCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OrdinalCS() override;
@@ -487,10 +491,10 @@ class OrdinalCS final : public CoordinateSystem {
            const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
 
   protected:
-    explicit OrdinalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
+    PROJ_INTERNAL explicit OrdinalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool) const override { return "ordinal"; }
+    PROJ_INTERNAL std::string getWKT2Type(bool) const override { return "ordinal"; }
 
   private:
     OrdinalCS(const OrdinalCS &other) = delete;
@@ -509,7 +513,7 @@ using ParametricCSNNPtr = util::nn<ParametricCSPtr>;
  *
  * \remark Implements ParametricCS from \ref ISO_19111_2018
  */
-class ParametricCS final : public CoordinateSystem {
+class PROJ_GCC_DLL ParametricCS final : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParametricCS() override;
@@ -520,10 +524,10 @@ class ParametricCS final : public CoordinateSystem {
            const CoordinateSystemAxisNNPtr &axisIn);
 
   protected:
-    explicit ParametricCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
+    PROJ_INTERNAL explicit ParametricCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool) const override { return "parametric"; }
+    PROJ_INTERNAL std::string getWKT2Type(bool) const override { return "parametric"; }
 
   private:
     ParametricCS(const ParametricCS &other) = delete;
@@ -544,17 +548,17 @@ using TemporalCSNNPtr = util::nn<TemporalCSPtr>;
  *
  * \remark Implements TemporalCS from \ref ISO_19111_2018
  */
-class TemporalCS : public CoordinateSystem {
+class PROJ_GCC_DLL TemporalCS : public CoordinateSystem {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalCS() override;
     //! @endcond
 
   protected:
-    explicit TemporalCS(const CoordinateSystemAxisNNPtr &axis);
+    PROJ_INTERNAL explicit TemporalCS(const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool use2018Keywords) const override = 0;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override = 0;
 
   private:
     TemporalCS(const TemporalCS &other) = delete;
@@ -577,7 +581,7 @@ using DateTimeTemporalCSNNPtr = util::nn<DateTimeTemporalCSPtr>;
  *
  * \remark Implements DateTimeTemporalCS from \ref ISO_19111_2018
  */
-class DateTimeTemporalCS final : public TemporalCS {
+class PROJ_GCC_DLL DateTimeTemporalCS final : public TemporalCS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DateTimeTemporalCS() override;
@@ -588,10 +592,10 @@ class DateTimeTemporalCS final : public TemporalCS {
            const CoordinateSystemAxisNNPtr &axis);
 
   protected:
-    explicit DateTimeTemporalCS(const CoordinateSystemAxisNNPtr &axis);
+    PROJ_INTERNAL explicit DateTimeTemporalCS(const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
 
   private:
     DateTimeTemporalCS(const DateTimeTemporalCS &other) = delete;
@@ -612,7 +616,7 @@ using TemporalCountCSNNPtr = util::nn<TemporalCountCSPtr>;
  *
  * \remark Implements TemporalCountCS from \ref ISO_19111_2018
  */
-class TemporalCountCS final : public TemporalCS {
+class PROJ_GCC_DLL TemporalCountCS final : public TemporalCS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalCountCS() override;
@@ -623,10 +627,10 @@ class TemporalCountCS final : public TemporalCS {
            const CoordinateSystemAxisNNPtr &axis);
 
   protected:
-    explicit TemporalCountCS(const CoordinateSystemAxisNNPtr &axis);
+    PROJ_INTERNAL explicit TemporalCountCS(const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
 
   private:
     TemporalCountCS(const TemporalCountCS &other) = delete;
@@ -647,7 +651,7 @@ using TemporalMeasureCSNNPtr = util::nn<TemporalMeasureCSPtr>;
  *
  * \remark Implements TemporalMeasureCS from \ref ISO_19111_2018
  */
-class TemporalMeasureCS final : public TemporalCS {
+class PROJ_GCC_DLL TemporalMeasureCS final : public TemporalCS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalMeasureCS() override;
@@ -658,10 +662,10 @@ class TemporalMeasureCS final : public TemporalCS {
            const CoordinateSystemAxisNNPtr &axis);
 
   protected:
-    explicit TemporalMeasureCS(const CoordinateSystemAxisNNPtr &axis);
+    PROJ_INTERNAL explicit TemporalMeasureCS(const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
 
   private:
     TemporalMeasureCS(const TemporalMeasureCS &other) = delete;

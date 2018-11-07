@@ -145,10 +145,10 @@ using WKTFormatterNNPtr = util::nn<WKTFormatterPtr>;
  * An instance of this class can only be used by a single
  * thread at a time.
  */
-class WKTFormatter {
+class PROJ_GCC_DLL WKTFormatter {
   public:
     /** WKT variant. */
-    enum class PROJ_DLL Convention {
+    enum class PROJ_MSVC_DLL Convention {
         /** Full WKT2 string, conforming to ISO 19162:2015(E) / OGC 12-063r5
          * (\ref WKT2_2015) with all possible nodes and new keyword names.
          */
@@ -185,7 +185,7 @@ class WKTFormatter {
         WKT2_2018_SIMPLIFIED,
 
         /** WKT1 as traditionally output by GDAL, deriving from OGC 01-009.
-            A notable departure from WKT1_GDAL with respect to OGC 01-009 is
+            A notable departuPROJ_GCC_DLLre from WKT1_GDAL with respect to OGC 01-009 is
             that in WKT1_GDAL, the unit of the PRIMEM value is always degrees.
            */
         WKT1_GDAL,
@@ -216,88 +216,88 @@ class WKTFormatter {
         PROJ_DLL WKTFormatter &
         setOutputId(bool outputIdIn);
 
-    void enter();
-    void leave();
+    PROJ_INTERNAL void enter();
+    PROJ_INTERNAL void leave();
 
-    void startNode(const std::string &keyword, bool hasId);
-    void endNode();
+    PROJ_INTERNAL void startNode(const std::string &keyword, bool hasId);
+    PROJ_INTERNAL void endNode();
 
     PROJ_DLL WKTFormatter &simulCurNodeHasId();
 
-    void addQuotedString(const char *str);
-    void addQuotedString(const std::string &str);
-    void add(const std::string &str);
-    void add(int number);
-    void add(size_t number) = delete;
-    void add(double number, int precision = 15);
+    PROJ_INTERNAL void addQuotedString(const char *str);
+    PROJ_INTERNAL void addQuotedString(const std::string &str);
+    PROJ_INTERNAL void add(const std::string &str);
+    PROJ_INTERNAL void add(int number);
+    PROJ_INTERNAL void add(size_t number) = delete;
+    PROJ_INTERNAL void add(double number, int precision = 15);
 
-    void pushOutputUnit(bool outputUnitIn);
-    void popOutputUnit();
-    bool outputUnit() const;
+    PROJ_INTERNAL void pushOutputUnit(bool outputUnitIn);
+    PROJ_INTERNAL void popOutputUnit();
+    PROJ_INTERNAL bool outputUnit() const;
 
-    void pushOutputId(bool outputIdIn);
-    void popOutputId();
-    bool outputId() const;
+    PROJ_INTERNAL void pushOutputId(bool outputIdIn);
+    PROJ_INTERNAL void popOutputId();
+    PROJ_INTERNAL bool outputId() const;
 
-    void pushAxisLinearUnit(const common::UnitOfMeasureNNPtr &unit);
-    void popAxisLinearUnit();
-    const common::UnitOfMeasureNNPtr &axisLinearUnit() const;
+    PROJ_INTERNAL void pushAxisLinearUnit(const common::UnitOfMeasureNNPtr &unit);
+    PROJ_INTERNAL void popAxisLinearUnit();
+    PROJ_INTERNAL const common::UnitOfMeasureNNPtr &axisLinearUnit() const;
 
-    void pushAxisAngularUnit(const common::UnitOfMeasureNNPtr &unit);
-    void popAxisAngularUnit();
-    const common::UnitOfMeasureNNPtr &axisAngularUnit() const;
+    PROJ_INTERNAL void pushAxisAngularUnit(const common::UnitOfMeasureNNPtr &unit);
+    PROJ_INTERNAL void popAxisAngularUnit();
+    PROJ_INTERNAL const common::UnitOfMeasureNNPtr &axisAngularUnit() const;
 
-    void setAbridgedTransformation(bool abriged);
-    bool abridgedTransformation() const;
+    PROJ_INTERNAL void setAbridgedTransformation(bool abriged);
+    PROJ_INTERNAL bool abridgedTransformation() const;
 
-    void setUseDerivingConversion(bool useDerivingConversionIn);
-    bool useDerivingConversion() const;
+    PROJ_INTERNAL void setUseDerivingConversion(bool useDerivingConversionIn);
+    PROJ_INTERNAL bool useDerivingConversion() const;
 
-    void setTOWGS84Parameters(const std::vector<double> &params);
-    const std::vector<double> &getTOWGS84Parameters() const;
+    PROJ_INTERNAL void setTOWGS84Parameters(const std::vector<double> &params);
+    PROJ_INTERNAL const std::vector<double> &getTOWGS84Parameters() const;
 
-    void setVDatumExtension(const std::string &filename);
-    const std::string &getVDatumExtension() const;
+    PROJ_INTERNAL void setVDatumExtension(const std::string &filename);
+    PROJ_INTERNAL const std::string &getVDatumExtension() const;
 
-    void setHDatumExtension(const std::string &filename);
-    const std::string &getHDatumExtension() const;
+    PROJ_INTERNAL void setHDatumExtension(const std::string &filename);
+    PROJ_INTERNAL const std::string &getHDatumExtension() const;
 
-    static std::string morphNameToESRI(const std::string &name);
+    PROJ_INTERNAL static std::string morphNameToESRI(const std::string &name);
 
 #ifdef unused
-    void startInversion();
-    void stopInversion();
-    bool isInverted() const;
+    PROJ_INTERNAL void startInversion();
+    PROJ_INTERNAL void stopInversion();
+    PROJ_INTERNAL bool isInverted() const;
 #endif
 
-    bool outputAxis() const;
-    bool outputAxisOrder() const;
-    bool primeMeridianOmittedIfGreenwich() const;
-    bool ellipsoidUnitOmittedIfMetre() const;
-    bool forceUNITKeyword() const;
-    bool primeMeridianOrParameterUnitOmittedIfSameAsAxis() const;
-    bool primeMeridianInDegree() const;
-    bool outputCSUnitOnlyOnceIfSame() const;
+    PROJ_INTERNAL bool outputAxis() const;
+    PROJ_INTERNAL bool outputAxisOrder() const;
+    PROJ_INTERNAL bool primeMeridianOmittedIfGreenwich() const;
+    PROJ_INTERNAL bool ellipsoidUnitOmittedIfMetre() const;
+    PROJ_INTERNAL bool forceUNITKeyword() const;
+    PROJ_INTERNAL bool primeMeridianOrParameterUnitOmittedIfSameAsAxis() const;
+    PROJ_INTERNAL bool primeMeridianInDegree() const;
+    PROJ_INTERNAL bool outputCSUnitOnlyOnceIfSame() const;
 
     /** WKT version. */
-    enum class PROJ_DLL Version {
+    enum class Version {
         /** WKT1 */
         WKT1,
         /** WKT2 / ISO 19162 */
         WKT2
     };
 
-    Version version() const;
-    bool use2018Keywords() const;
-    bool useESRIDialect() const;
+    PROJ_INTERNAL Version version() const;
+    PROJ_INTERNAL bool use2018Keywords() const;
+    PROJ_INTERNAL bool useESRIDialect() const;
 
-    const DatabaseContextPtr &databaseContext() const;
+    PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
 
     //! @endcond
 
   protected:
     //! @cond Doxygen_Suppress
-    explicit WKTFormatter(Convention convention);
+    PROJ_INTERNAL explicit WKTFormatter(Convention convention);
     WKTFormatter(const WKTFormatter &other) = delete;
 
     INLINED_MAKE_UNIQUE
@@ -320,10 +320,10 @@ using PROJStringFormatterNNPtr = util::nn<PROJStringFormatterPtr>;
  * An instance of this class can only be used by a single
  * thread at a time.
  */
-class PROJStringFormatter {
+class PROJ_GCC_DLL PROJStringFormatter {
   public:
     /** PROJ variant. */
-    enum class PROJ_DLL Convention {
+    enum class PROJ_MSVC_DLL Convention {
         /** PROJ v5 (or later versions) string. */
         PROJ_5,
 
@@ -348,8 +348,8 @@ class PROJStringFormatter {
         PROJ_DLL void
         startInversion();
     PROJ_DLL void stopInversion();
-    bool isInverted() const;
-    bool getUseETMercForTMerc() const;
+    PROJ_INTERNAL bool isInverted() const;
+    PROJ_INTERNAL bool getUseETMercForTMerc() const;
 
     PROJ_DLL void
     ingestPROJString(const std::string &str); // throw ParsingException
@@ -370,32 +370,32 @@ class PROJStringFormatter {
     PROJ_DLL void addParam(const char *paramName,
                            const std::vector<double> &vals);
 
-    std::set<std::string> getUsedGridNames() const;
+    PROJ_INTERNAL std::set<std::string> getUsedGridNames() const;
 
-    void setTOWGS84Parameters(const std::vector<double> &params);
-    const std::vector<double> &getTOWGS84Parameters() const;
+    PROJ_INTERNAL void setTOWGS84Parameters(const std::vector<double> &params);
+    PROJ_INTERNAL const std::vector<double> &getTOWGS84Parameters() const;
 
-    void setVDatumExtension(const std::string &filename);
-    const std::string &getVDatumExtension() const;
+    PROJ_INTERNAL void setVDatumExtension(const std::string &filename);
+    PROJ_INTERNAL const std::string &getVDatumExtension() const;
 
-    void setHDatumExtension(const std::string &filename);
-    const std::string &getHDatumExtension() const;
+    PROJ_INTERNAL void setHDatumExtension(const std::string &filename);
+    PROJ_INTERNAL const std::string &getHDatumExtension() const;
 
-    void setOmitProjLongLatIfPossible(bool omit);
-    bool omitProjLongLatIfPossible() const;
+    PROJ_INTERNAL void setOmitProjLongLatIfPossible(bool omit);
+    PROJ_INTERNAL bool omitProjLongLatIfPossible() const;
 
-    void setOmitZUnitConversion(bool omit);
-    bool omitZUnitConversion() const;
+    PROJ_INTERNAL void setOmitZUnitConversion(bool omit);
+    PROJ_INTERNAL bool omitZUnitConversion() const;
 
-    const DatabaseContextPtr &databaseContext() const;
+    PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
 
-    Convention convention() const;
+    PROJ_INTERNAL Convention convention() const;
 
     //! @endcond
 
   protected:
     //! @cond Doxygen_Suppress
-    explicit PROJStringFormatter(Convention conventionIn,
+    PROJ_INTERNAL explicit PROJStringFormatter(Convention conventionIn,
                                  const DatabaseContextPtr &dbContext);
     PROJStringFormatter(const PROJStringFormatter &other) = delete;
 
@@ -410,7 +410,7 @@ class PROJStringFormatter {
 
 /** \brief Exception possibly thrown by IWKTExportable::exportToWKT() or
  * IPROJStringExportable::exportToPROJString(). */
-class FormattingException : public util::Exception {
+class PROJ_GCC_DLL FormattingException : public util::Exception {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL explicit FormattingException(const char *message);
@@ -418,8 +418,8 @@ class FormattingException : public util::Exception {
     PROJ_DLL FormattingException(const FormattingException &other);
     PROJ_DLL virtual ~FormattingException() override;
 
-    static void Throw(const char *msg) PROJ_NO_RETURN;
-    static void Throw(const std::string &msg) PROJ_NO_RETURN;
+    PROJ_INTERNAL static void Throw(const char *msg) PROJ_NO_RETURN;
+    PROJ_INTERNAL static void Throw(const std::string &msg) PROJ_NO_RETURN;
     //! @endcond
 };
 
@@ -427,7 +427,7 @@ class FormattingException : public util::Exception {
 
 /** \brief Exception possibly thrown by WKTNode::createFrom() or
  * WKTParser::createFromWKT(). */
-class ParsingException : public util::Exception {
+class PROJ_GCC_DLL ParsingException : public util::Exception {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL explicit ParsingException(const char *message);
@@ -440,7 +440,7 @@ class ParsingException : public util::Exception {
 // ---------------------------------------------------------------------------
 
 /** \brief Interface for an object that can be exported to WKT. */
-class IWKTExportable {
+class PROJ_GCC_DLL IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL virtual ~IWKTExportable();
@@ -453,7 +453,7 @@ class IWKTExportable {
     PROJ_PRIVATE :
 
         //! @cond Doxygen_Suppress
-        virtual void
+        PROJ_INTERNAL virtual void
         _exportToWKT(
             WKTFormatter *formatter) const = 0; // throw(FormattingException)
     //! @endcond
@@ -468,7 +468,7 @@ using IPROJStringExportablePtr = std::shared_ptr<IPROJStringExportable>;
 using IPROJStringExportableNNPtr = util::nn<IPROJStringExportablePtr>;
 
 /** \brief Interface for an object that can be exported to a PROJ string. */
-class IPROJStringExportable {
+class PROJ_GCC_DLL IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL virtual ~IPROJStringExportable();
@@ -526,7 +526,7 @@ class IPROJStringExportable {
     PROJ_PRIVATE :
 
         //! @cond Doxygen_Suppress
-        virtual void
+        PROJ_INTERNAL virtual void
         _exportToPROJString(PROJStringFormatter *formatter)
             const = 0; // throw(FormattingException)
     //! @endcond
@@ -542,7 +542,7 @@ using WKTNodeNNPtr = util::nn<WKTNodePtr>;
 
 /** \brief Node in the tree-splitted WKT representation.
  */
-class WKTNode {
+class PROJ_GCC_DLL WKTNode {
   public:
     PROJ_DLL explicit WKTNode(const std::string &valueIn);
     //! @cond Doxygen_Suppress
@@ -564,7 +564,7 @@ class WKTNode {
                                             size_t indexStart = 0);
 
   protected:
-    static WKTNodeNNPtr createFrom(const std::string &wkt, size_t indexStart,
+    PROJ_INTERNAL static WKTNodeNNPtr createFrom(const std::string &wkt, size_t indexStart,
                                    int recLevel,
                                    size_t &indexEnd); // throw(ParsingException)
 
@@ -583,7 +583,7 @@ createFromUserInput(const std::string &text,
 
 /** \brief Parse a WKT string into the appropriate suclass of util::BaseObject.
  */
-class WKTParser {
+class PROJ_GCC_DLL WKTParser {
   public:
     PROJ_DLL WKTParser();
     //! @cond Doxygen_Suppress
@@ -600,7 +600,7 @@ class WKTParser {
     createFromWKT(const std::string &wkt); // throw(ParsingException)
 
     /** Guessed WKT "dialect" */
-    enum class PROJ_DLL WKTGuessedDialect {
+    enum class PROJ_MSVC_DLL WKTGuessedDialect {
         /** \ref WKT2_2018 */
         WKT2_2018,
         /** \ref WKT2_2015 */
@@ -624,7 +624,7 @@ class WKTParser {
 
 /** \brief Parse a PROJ string into the appropriate suclass of util::BaseObject.
  */
-class PROJStringParser {
+class PROJ_GCC_DLL PROJStringParser {
   public:
     PROJ_DLL PROJStringParser();
     //! @cond Doxygen_Suppress
@@ -649,7 +649,7 @@ class PROJStringParser {
  *
  * A database context should be used only by one thread at a time.
  */
-class DatabaseContext {
+class PROJ_GCC_DLL DatabaseContext {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DatabaseContext();
@@ -677,9 +677,9 @@ class DatabaseContext {
 
     PROJ_DLL static DatabaseContextNNPtr create(void *sqlite_handle);
 
-    void attachPJContext(void *pjCtxt);
+    PROJ_INTERNAL void attachPJContext(void *pjCtxt);
 
-    bool lookForGridAlternative(const std::string &officialName,
+    PROJ_INTERNAL bool lookForGridAlternative(const std::string &officialName,
                                 std::string &projFilename,
                                 std::string &projFormat, bool &inverse) const;
 
@@ -689,17 +689,17 @@ class DatabaseContext {
                                   bool &directDownload, bool &openLicense,
                                   bool &gridAvailable) const;
 
-    std::string getAliasFromOfficialName(const std::string &officialName,
+    PROJ_INTERNAL std::string getAliasFromOfficialName(const std::string &officialName,
                                          const std::string &tableName,
                                          const std::string &source) const;
 
-    bool isKnownName(const std::string &name,
+    PROJ_INTERNAL bool isKnownName(const std::string &name,
                      const std::string &tableName) const;
 
     //! @endcond
 
   protected:
-    DatabaseContext();
+    PROJ_INTERNAL DatabaseContext();
     INLINED_MAKE_SHARED
     PROJ_FRIEND(AuthorityFactory);
 
@@ -725,7 +725,7 @@ using AuthorityFactoryNNPtr = util::nn<AuthorityFactoryPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/referencing/AuthorityFactory.html)
  * from \ref GeoAPI
  */
-class AuthorityFactory {
+class PROJ_GCC_DLL AuthorityFactory {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~AuthorityFactory();
@@ -881,16 +881,16 @@ class AuthorityFactory {
     //! @endcond
 
   protected:
-    AuthorityFactory(const DatabaseContextNNPtr &context,
+    PROJ_INTERNAL AuthorityFactory(const DatabaseContextNNPtr &context,
                      const std::string &authorityName);
 
-    crs::CRSNNPtr createCoordinateReferenceSystem(const std::string &code,
+    PROJ_INTERNAL crs::CRSNNPtr createCoordinateReferenceSystem(const std::string &code,
                                                   bool allowCompound) const;
 
-    crs::GeodeticCRSNNPtr createGeodeticCRS(const std::string &code,
+    PROJ_INTERNAL crs::GeodeticCRSNNPtr createGeodeticCRS(const std::string &code,
                                             bool geographicOnly) const;
 
-    operation::CoordinateOperationNNPtr
+    PROJ_INTERNAL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code, bool allowConcatenated,
                               bool usePROJAlternativeGridNames) const;
 
@@ -905,7 +905,7 @@ class AuthorityFactory {
 /** \brief Exception thrown when a factory can't create an instance of the
  * requested object.
  */
-class FactoryException : public util::Exception {
+class PROJ_GCC_DLL FactoryException : public util::Exception {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL explicit FactoryException(const char *message);
@@ -921,7 +921,7 @@ class FactoryException : public util::Exception {
 /** \brief Exception thrown when an authority factory can't find the requested
  * authority code.
  */
-class NoSuchAuthorityCodeException : public FactoryException {
+class PROJ_GCC_DLL NoSuchAuthorityCodeException : public FactoryException {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL explicit NoSuchAuthorityCodeException(const std::string &message,

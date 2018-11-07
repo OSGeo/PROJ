@@ -53,6 +53,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef PROJ_DLL
+#ifdef PROJ_MSVC_DLL_EXPORT
+#define PROJ_DLL __declspec(dllexport)
+#elif defined(PROJ_MSVC_DLL_IMPORT)
+#define PROJ_DLL __declspec(dllimport)
+#elif defined(__GNUC__)
+#define PROJ_DLL __attribute__ ((visibility("default")))
+#else
+#define PROJ_DLL
+#endif
+#endif
+
 #ifdef __cplusplus
 #define C_NAMESPACE extern "C"
 #define C_NAMESPACE_VAR extern "C"
@@ -690,20 +702,20 @@ typedef struct _PJ_GridCatalog {
 } PJ_GridCatalog;
 
 /* procedure prototypes */
-double dmstor(const char *, char **);
+double PROJ_DLL dmstor(const char *, char **);
 double dmstor_ctx(projCtx ctx, const char *, char **);
-void   set_rtodms(int, int);
-char  *rtodms(char *, double, int, int);
-double adjlon(double);
+void   PROJ_DLL set_rtodms(int, int);
+char  PROJ_DLL *rtodms(char *, double, int, int);
+double PROJ_DLL adjlon(double);
 double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(double, double);
 
-PROJVALUE pj_param(projCtx ctx, paralist *, const char *);
-paralist *pj_param_exists (paralist *list, const char *parameter);
-paralist *pj_mkparam(const char *);
+PROJVALUE PROJ_DLL pj_param(projCtx ctx, paralist *, const char *);
+paralist PROJ_DLL *pj_param_exists (paralist *list, const char *parameter);
+paralist PROJ_DLL *pj_mkparam(const char *);
 paralist *pj_mkparam_ws (const char *str);
 
 
-int pj_ell_set(projCtx ctx, paralist *, double *, double *);
+int PROJ_DLL pj_ell_set(projCtx ctx, paralist *, double *, double *);
 int pj_datum_set(projCtx,paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
 
@@ -721,7 +733,7 @@ double  pj_inv_mlfn(projCtx, double, double, double *);
 double  pj_qsfn(double, double, double);
 double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);
-double  pj_phi2(projCtx, double, double);
+double  PROJ_DLL pj_phi2(projCtx, double, double);
 double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
@@ -746,7 +758,7 @@ typedef struct {    /* Chebyshev or Power series structure */
     int power;      /* != 0 if power series, else Chebyshev */
 } Tseries;
 
-Tseries *mk_cheby(projUV, projUV, double, projUV *, projUV (*)(projUV), int, int, int);
+Tseries PROJ_DLL *mk_cheby(projUV, projUV, double, projUV *, projUV (*)(projUV), int, int, int);
 projUV   bpseval(projUV, Tseries *);
 projUV   bcheval(projUV, Tseries *);
 projUV   biveval(projUV, Tseries *);
@@ -783,7 +795,7 @@ int pj_apply_gridshift_3( projCtx ctx,
                           double *x, double *y, double *z );
 
 PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx, const char *, int * );
-void pj_deallocate_grids();
+void PROJ_DLL pj_deallocate_grids();
 
 PJ_GRIDINFO *pj_gridinfo_init( projCtx, const char * );
 int          pj_gridinfo_load( projCtx, PJ_GRIDINFO * );
@@ -814,13 +826,13 @@ void  *pj_gauss_ini(double, double, double *,double *);
 LP     pj_gauss(projCtx, LP, const void *);
 LP     pj_inv_gauss(projCtx, LP, const void *);
 
-extern char const pj_release[];
+extern char const PROJ_DLL pj_release[];
 
-struct PJ_DATUMS           *pj_get_datums_ref( void );
+struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
 
 void *pj_default_destructor (PJ *P, int errlev);
 
-double pj_atof( const char* nptr );
+double PROJ_DLL pj_atof( const char* nptr );
 double pj_strtod( const char *nptr, char **endptr );
 void   pj_freeup_plain (PJ *P);
 

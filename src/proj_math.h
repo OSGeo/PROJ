@@ -37,6 +37,18 @@ extern "C" {
 
 #if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
 
+#ifndef PROJ_DLL
+#ifdef PROJ_MSVC_DLL_EXPORT
+#define PROJ_DLL __declspec(dllexport)
+#elif defined(PROJ_MSVC_DLL_IMPORT)
+#define PROJ_DLL __declspec(dllimport)
+#elif defined(__GNUC__)
+#define PROJ_DLL __attribute__ ((visibility("default")))
+#else
+#define PROJ_DLL
+#endif
+#endif
+
 #ifndef NAN
 #ifdef _WIN32
 #define NAN sqrt(-1.0)
@@ -50,7 +62,7 @@ double  pj_log1p(double x);
 double  pj_asinh(double x);
 double  pj_round(double x);
 long    pj_lround(double x);
-int     pj_isnan(double x);
+int     PROJ_DLL pj_isnan(double x);
 
 #define hypot   pj_hypot
 #define log1p   pj_log1p

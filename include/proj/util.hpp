@@ -54,10 +54,38 @@ namespace proj {}
 #define PROJ_DLL __declspec(dllexport)
 #elif defined(PROJ_MSVC_DLL_IMPORT)
 #define PROJ_DLL __declspec(dllimport)
+#elif defined(__GNUC__)
+#define PROJ_DLL __attribute__ ((visibility("default")))
 #else
 #define PROJ_DLL
 #endif
 #endif
+
+
+#ifndef PROJ_MSVC_DLL
+#ifdef PROJ_MSVC_DLL_EXPORT
+#define PROJ_MSVC_DLL PROJ_DLL
+#define PROJ_GCC_DLL
+#define PROJ_INTERNAL
+#elif defined(PROJ_MSVC_DLL_IMPORT)
+#define PROJ_MSVC_DLL PROJ_DLL
+#define PROJ_GCC_DLL
+#define PROJ_INTERNAL
+#elif defined(__GNUC__)
+#define PROJ_MSVC_DLL
+#define PROJ_GCC_DLL PROJ_DLL
+#if !defined(__MINGW32__)
+#define PROJ_INTERNAL __attribute__ ((visibility("hidden")))
+#else
+#define PROJ_INTERNAL
+#endif
+#else
+#define PROJ_MSVC_DLL
+#define PROJ_GCC_DLL
+#define PROJ_INTERNAL
+#endif
+#endif
+
 
 #include "nn.hpp"
 
@@ -272,7 +300,7 @@ using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
 
 /** \brief Class that can be derived from, to emulate Java's Object behaviour.
  */
-class BaseObject {
+class PROJ_GCC_DLL BaseObject {
   public:
     //! @cond Doxygen_Suppress
     virtual PROJ_DLL ~BaseObject();
@@ -280,13 +308,12 @@ class BaseObject {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        PROJ_DLL BaseObjectNNPtr
-        shared_from_this() const;
+        BaseObjectNNPtr shared_from_this() const;
     //! @endcond
 
   protected:
-    PROJ_DLL BaseObject();
-    PROJ_DLL void assignSelf(const BaseObjectNNPtr &self);
+    BaseObject();
+    void assignSelf(const BaseObjectNNPtr &self);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -296,14 +323,14 @@ class BaseObject {
 
 /** \brief Interface for an object that can be compared to another.
  */
-class IComparable {
+class PROJ_GCC_DLL IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL virtual ~IComparable();
     //! @endcond
 
     /** \brief Comparison criterion. */
-    enum class PROJ_DLL Criterion {
+    enum class PROJ_MSVC_DLL Criterion {
         /** All attributes are identical. */
         STRICT,
         /** The objects are equivalent for coordinate operations. */
@@ -649,7 +676,7 @@ class CodeList {
 
 /** \brief Root exception class.
  */
-class Exception : public std::exception {
+class PROJ_GCC_DLL Exception : public std::exception {
     std::string msg_;
 
   public:
@@ -667,7 +694,7 @@ class Exception : public std::exception {
 /** \brief Exception thrown when an invalid value type is set as the value of
  * a key of a PropertyMap.
  */
-class InvalidValueTypeException : public Exception {
+class PROJ_GCC_DLL InvalidValueTypeException : public Exception {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL explicit InvalidValueTypeException(const char *message);
@@ -682,7 +709,7 @@ class InvalidValueTypeException : public Exception {
 /** \brief Exception Thrown to indicate that the requested operation is not
  * supported.
  */
-class UnsupportedOperationException : public Exception {
+class PROJ_GCC_DLL UnsupportedOperationException : public Exception {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL explicit UnsupportedOperationException(const char *message);

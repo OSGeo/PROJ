@@ -386,6 +386,7 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool CoordinateSystemAxis::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -410,6 +411,7 @@ bool CoordinateSystemAxis::isEquivalentTo(
 
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -516,6 +518,7 @@ void CoordinateSystem::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool CoordinateSystem::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -539,6 +542,7 @@ bool CoordinateSystem::isEquivalentTo(
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

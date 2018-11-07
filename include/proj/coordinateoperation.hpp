@@ -121,7 +121,7 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  *
  * \remark Implements CoordinateOperation from \ref ISO_19111_2018
  */
-class CoordinateOperation : public common::ObjectUsage,
+class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
                             public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
@@ -155,18 +155,18 @@ class CoordinateOperation : public common::ObjectUsage,
     isPROJInstanciable(const io::DatabaseContextPtr &databaseContext) const;
 
   protected:
-    CoordinateOperation();
-    CoordinateOperation(const CoordinateOperation &other);
+    PROJ_INTERNAL CoordinateOperation();
+    PROJ_INTERNAL CoordinateOperation(const CoordinateOperation &other);
 
     PROJ_FRIEND(crs::DerivedCRS);
     PROJ_FRIEND(io::AuthorityFactory);
     PROJ_FRIEND(CoordinateOperationFactory);
-    void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
+    PROJ_INTERNAL void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                                 std::weak_ptr<crs::CRS> targetCRSIn);
-    void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
+    PROJ_INTERNAL void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
                  const crs::CRSNNPtr &targetCRSIn,
                  const crs::CRSPtr &interpolationCRSIn);
-    void setAccuracies(
+    PROJ_INTERNAL void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
   private:
@@ -181,20 +181,22 @@ class CoordinateOperation : public common::ObjectUsage,
  *
  * \remark Implements GeneralOperationParameter from \ref ISO_19111_2018
  */
-class GeneralOperationParameter : public common::IdentifiedObject {
+class PROJ_GCC_DLL GeneralOperationParameter : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeneralOperationParameter() override;
     //! @endcond
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
+    //! @endcond
 
-  protected:
-    GeneralOperationParameter();
-    GeneralOperationParameter(const GeneralOperationParameter &other);
+protected:
+    PROJ_INTERNAL GeneralOperationParameter();
+    PROJ_INTERNAL GeneralOperationParameter(const GeneralOperationParameter &other);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -222,24 +224,26 @@ using OperationParameterNNPtr = util::nn<OperationParameterPtr>;
  *
  * \remark Implements OperationParameter from \ref ISO_19111_2018
  */
-class OperationParameter final : public GeneralOperationParameter {
+class PROJ_GCC_DLL OperationParameter final : public GeneralOperationParameter {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationParameter() override;
     //! @endcond
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     // non-standard
     PROJ_DLL static OperationParameterNNPtr
     create(const util::PropertyMap &properties);
 
   protected:
-    OperationParameter();
-    OperationParameter(const OperationParameter &other);
+    PROJ_INTERNAL OperationParameter();
+    PROJ_INTERNAL OperationParameter(const OperationParameter &other);
     INLINED_MAKE_SHARED
 
   private:
@@ -247,7 +251,7 @@ class OperationParameter final : public GeneralOperationParameter {
     OperationParameter &operator=(const OperationParameter &other) = delete;
 
     // cppcheck-suppress functionStatic
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 };
 
@@ -262,30 +266,30 @@ struct MethodMapping;
  *
  * \remark Implements GeneralParameterValue from \ref ISO_19111_2018
  */
-class GeneralParameterValue : public util::BaseObject,
+class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
                               public io::IWKTExportable,
                               public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeneralParameterValue() override;
 
-    void _exportToWKT(io::WKTFormatter *formatter) const override =
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter) const override =
         0; // throw(io::FormattingException)
-    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
+    //! @endcond
 
   protected:
     //! @cond Doxygen_Suppress
-    GeneralParameterValue();
-    GeneralParameterValue(const GeneralParameterValue &other);
+    PROJ_INTERNAL GeneralParameterValue();
+    PROJ_INTERNAL GeneralParameterValue(const GeneralParameterValue &other);
 
     friend class Conversion;
     friend class SingleOperation;
-    virtual void _exportToWKT(io::WKTFormatter *formatter,
+    PROJ_INTERNAL virtual void _exportToWKT(io::WKTFormatter *formatter,
                               const MethodMapping *mapping)
         const = 0; // throw(io::FormattingException)
                    //! @endcond
@@ -316,7 +320,7 @@ using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
  *
  * \remark Implements ParameterValue from \ref ISO_19111_2018
  */
-class ParameterValue final : public util::BaseObject,
+class PROJ_GCC_DLL ParameterValue final : public util::BaseObject,
                              public io::IWKTExportable,
                              public util::IComparable {
   public:
@@ -336,7 +340,7 @@ class ParameterValue final : public util::BaseObject,
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParameterValue() override;
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -357,16 +361,18 @@ class ParameterValue final : public util::BaseObject,
     PROJ_DLL int integerValue() PROJ_CONST_DECL;
     PROJ_DLL bool booleanValue() PROJ_CONST_DECL;
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
-    explicit ParameterValue(const common::Measure &measureIn);
-    explicit ParameterValue(const std::string &stringValueIn, Type typeIn);
-    explicit ParameterValue(int integerValueIn);
-    explicit ParameterValue(bool booleanValueIn);
+    PROJ_INTERNAL explicit ParameterValue(const common::Measure &measureIn);
+    PROJ_INTERNAL explicit ParameterValue(const std::string &stringValueIn, Type typeIn);
+    PROJ_INTERNAL explicit ParameterValue(int integerValueIn);
+    PROJ_INTERNAL explicit ParameterValue(bool booleanValueIn);
     INLINED_MAKE_SHARED
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -388,7 +394,7 @@ using OperationParameterValueNNPtr = util::nn<OperationParameterValuePtr>;
  *
  * \remark Implements OperationParameterValue from \ref ISO_19111_2018
  */
-class OperationParameterValue final : public GeneralParameterValue {
+class PROJ_GCC_DLL OperationParameterValue final : public GeneralParameterValue {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationParameterValue() override;
@@ -397,10 +403,12 @@ class OperationParameterValue final : public GeneralParameterValue {
     PROJ_DLL const OperationParameterNNPtr &parameter() PROJ_CONST_DECL;
     PROJ_DLL const ParameterValueNNPtr &parameterValue() PROJ_CONST_DECL;
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     PROJ_DLL static OperationParameterValueNNPtr
     create(const OperationParameterNNPtr &parameterIn,
@@ -408,23 +416,23 @@ class OperationParameterValue final : public GeneralParameterValue {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        static bool
+        PROJ_INTERNAL static bool
         convertFromAbridged(const std::string &paramName, double &val,
                             const common::UnitOfMeasure *&unit,
                             int &paramEPSGCode);
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     //! @endcond
 
   protected:
-    OperationParameterValue(const OperationParameterNNPtr &parameterIn,
+    PROJ_INTERNAL OperationParameterValue(const OperationParameterNNPtr &parameterIn,
                             const ParameterValueNNPtr &valueIn);
-    OperationParameterValue(const OperationParameterValue &other);
+    PROJ_INTERNAL OperationParameterValue(const OperationParameterValue &other);
     INLINED_MAKE_SHARED
 
-    void _exportToWKT(io::WKTFormatter *formatter,
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter,
                       const MethodMapping *mapping)
         const override; // throw(io::FormattingException)
 
@@ -450,7 +458,7 @@ using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
  *
  * \remark Implements OperationMethod from \ref ISO_19111_2018
  */
-class OperationMethod : public common::IdentifiedObject {
+class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationMethod() override;
@@ -463,7 +471,7 @@ class OperationMethod : public common::IdentifiedObject {
     parameters() PROJ_CONST_DECL;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -475,14 +483,16 @@ class OperationMethod : public common::IdentifiedObject {
     create(const util::PropertyMap &properties,
            const std::vector<OperationParameterNNPtr> &parameters);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
-    OperationMethod();
-    OperationMethod(const OperationMethod &other);
+    PROJ_INTERNAL OperationMethod();
+    PROJ_INTERNAL OperationMethod(const OperationMethod &other);
     INLINED_MAKE_SHARED
 
   private:
@@ -495,7 +505,7 @@ class OperationMethod : public common::IdentifiedObject {
 /** \brief Exception that can be thrown when an invalid operation is attempted
  * to be constructed.
  */
-class InvalidOperation : public util::Exception {
+class PROJ_GCC_DLL InvalidOperation : public util::Exception {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL explicit InvalidOperation(const char *message);
@@ -518,7 +528,7 @@ using SingleOperationNNPtr = util::nn<SingleOperationPtr>;
  *
  * \remark Implements SingleOperation from \ref ISO_19111_2018
  */
-class SingleOperation : virtual public CoordinateOperation {
+class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~SingleOperation() override;
@@ -541,17 +551,19 @@ class SingleOperation : virtual public CoordinateOperation {
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies =
             std::vector<metadata::PositionalAccuracyNNPtr>());
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     PROJ_DLL std::set<GridDescription>
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        double
+        PROJ_INTERNAL double
         parameterValueNumeric(const std::string &paramName, int epsg_code,
                               const common::UnitOfMeasure &targetUnit) const
         noexcept;
@@ -559,22 +571,22 @@ class SingleOperation : virtual public CoordinateOperation {
     parameterValueNumeric(const char *paramName, int epsg_code,
                           const common::UnitOfMeasure &targetUnit) const
         noexcept;
-    double parameterValueNumericAsSI(const std::string &paramName,
+    PROJ_INTERNAL double parameterValueNumericAsSI(const std::string &paramName,
                                      int epsg_code) const noexcept;
-    double parameterValueNumericAsSI(const char *paramName, int epsg_code) const
+    PROJ_INTERNAL double parameterValueNumericAsSI(const char *paramName, int epsg_code) const
         noexcept;
     //! @endcond
 
   protected:
-    explicit SingleOperation(const OperationMethodNNPtr &methodIn);
-    SingleOperation(const SingleOperation &other);
+    PROJ_INTERNAL explicit SingleOperation(const OperationMethodNNPtr &methodIn);
+    PROJ_INTERNAL SingleOperation(const SingleOperation &other);
 
-    void
+    PROJ_INTERNAL void
     setParameterValues(const std::vector<GeneralParameterValueNNPtr> &values);
 
-    void exportTransformationToWKT(io::WKTFormatter *formatter) const;
+    PROJ_INTERNAL void exportTransformationToWKT(io::WKTFormatter *formatter) const;
 
-    bool exportToPROJStringGeneric(io::PROJStringFormatter *formatter) const;
+    PROJ_INTERNAL bool exportToPROJStringGeneric(io::PROJStringFormatter *formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -792,20 +804,20 @@ EPSG:8833
 
 */
 
-class Conversion : public SingleOperation {
+class PROJ_GCC_DLL Conversion : public SingleOperation {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Conversion() override;
     //! @endcond
 
     //! @cond Doxygen_Suppress
-    ConversionNNPtr shallowClone() const;
+    PROJ_INTERNAL ConversionNNPtr shallowClone() const;
     //! @endcond
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -1258,27 +1270,28 @@ class Conversion : public SingleOperation {
 
     PROJ_DLL ConversionPtr convertToOtherMethod(int targetEPSGCode) const;
 
-    PROJ_PRIVATE : void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_PRIVATE :
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
                        const override; // throw(FormattingException)
 
   protected:
-    Conversion(const OperationMethodNNPtr &methodIn,
+    PROJ_INTERNAL Conversion(const OperationMethodNNPtr &methodIn,
                const std::vector<GeneralParameterValueNNPtr> &values);
-    Conversion(const Conversion &other);
+    PROJ_INTERNAL Conversion(const Conversion &other);
     INLINED_MAKE_SHARED
 
     PROJ_FRIEND(crs::ProjectedCRS);
-    void addWKTExtensionNode(io::WKTFormatter *formatter) const;
+    PROJ_INTERNAL void addWKTExtensionNode(io::WKTFormatter *formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     Conversion &operator=(const Conversion &other) = delete;
 
-    static ConversionNNPtr
+    PROJ_INTERNAL static ConversionNNPtr
     create(const util::PropertyMap &properties, int method_epsg_code,
            const std::vector<ParameterValueNNPtr> &values);
 
-    static ConversionNNPtr
+    PROJ_INTERNAL static ConversionNNPtr
     create(const util::PropertyMap &properties, const char *method_wkt2_name,
            const std::vector<ParameterValueNNPtr> &values);
 };
@@ -1305,7 +1318,7 @@ using TransformationNNPtr = util::nn<TransformationPtr>;
  *
  * \remark Implements Transformation from \ref ISO_19111_2018
  */
-class Transformation : public SingleOperation {
+class PROJ_GCC_DLL Transformation : public SingleOperation {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Transformation() override;
@@ -1451,20 +1464,20 @@ class Transformation : public SingleOperation {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        const std::string &
+        PROJ_INTERNAL const std::string &
         getNTv2Filename() const;
 
-    const std::string &getHeightToGeographic3DFilename() const;
+    PROJ_INTERNAL const std::string &getHeightToGeographic3DFilename() const;
 
-    bool isLongitudeRotation() const;
+    PROJ_INTERNAL bool isLongitudeRotation() const;
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     //! @endcond
 
   protected:
-    Transformation(
+    PROJ_INTERNAL Transformation(
         const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
         const crs::CRSPtr &interpolationCRSIn,
         const OperationMethodNNPtr &methodIn,
@@ -1472,10 +1485,10 @@ class Transformation : public SingleOperation {
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
     INLINED_MAKE_SHARED
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
-    TransformationNNPtr inverseAsTransformation() const;
+    PROJ_INTERNAL TransformationNNPtr inverseAsTransformation() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1498,7 +1511,7 @@ using PointMotionOperationNNPtr = util::nn<PointMotionOperationPtr>;
  *
  * \remark Implements PointMotionOperation from \ref ISO_19111_2018
  */
-class PointMotionOperation : public SingleOperation {
+class PROJ_GCC_DLL PointMotionOperation : public SingleOperation {
   public:
     // TODO
     //! @cond Doxygen_Suppress
@@ -1527,7 +1540,7 @@ using ConcatenatedOperationNNPtr = util::nn<ConcatenatedOperationPtr>;
  *
  * \remark Implements ConcatenatedOperation from \ref ISO_19111_2018
  */
-class ConcatenatedOperation final : public CoordinateOperation {
+class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ConcatenatedOperation() override;
@@ -1538,14 +1551,16 @@ class ConcatenatedOperation final : public CoordinateOperation {
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
     PROJ_DLL static ConcatenatedOperationNNPtr
     create(const util::PropertyMap &properties,
@@ -1561,10 +1576,10 @@ class ConcatenatedOperation final : public CoordinateOperation {
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
   protected:
-    explicit ConcatenatedOperation(
+    PROJ_INTERNAL explicit ConcatenatedOperation(
         const std::vector<CoordinateOperationNNPtr> &operationsIn);
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
@@ -1592,7 +1607,7 @@ using CoordinateOperationContextNNPtr = util::nn<CoordinateOperationContextPtr>;
  * Apache SIS
  */
 
-class CoordinateOperationContext {
+class PROJ_GCC_DLL CoordinateOperationContext {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL virtual ~CoordinateOperationContext();
@@ -1681,7 +1696,7 @@ class CoordinateOperationContext {
            const metadata::ExtentPtr &extent, double accuracy);
 
   protected:
-    CoordinateOperationContext();
+    PROJ_INTERNAL CoordinateOperationContext();
     INLINED_MAKE_UNIQUE
 
   private:
@@ -1705,7 +1720,7 @@ using CoordinateOperationFactoryNNPtr = util::nn<CoordinateOperationFactoryPtr>;
  * \remark Implements (partially) CoordinateOperationFactory from \ref
  * GeoAPI
  */
-class CoordinateOperationFactory {
+class PROJ_GCC_DLL CoordinateOperationFactory {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL virtual ~CoordinateOperationFactory();
@@ -1722,7 +1737,7 @@ class CoordinateOperationFactory {
     PROJ_DLL static CoordinateOperationFactoryNNPtr create();
 
   protected:
-    CoordinateOperationFactory();
+    PROJ_INTERNAL CoordinateOperationFactory();
     INLINED_MAKE_UNIQUE
 
   private:

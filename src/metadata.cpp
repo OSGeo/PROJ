@@ -235,6 +235,7 @@ GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool GeographicBoundingBox::isEquivalentTo(const util::IComparable *other,
                                            util::IComparable::Criterion) const {
     auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other);
@@ -245,6 +246,7 @@ bool GeographicBoundingBox::isEquivalentTo(const util::IComparable *other,
            d->east_ == otherExtent->d->east_ &&
            d->north_ == otherExtent->d->north_;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -498,6 +500,7 @@ VerticalExtent::create(double minimumIn, double maximumIn,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool VerticalExtent::isEquivalentTo(const util::IComparable *other,
                                     util::IComparable::Criterion) const {
     auto otherExtent = dynamic_cast<const VerticalExtent *>(other);
@@ -507,6 +510,7 @@ bool VerticalExtent::isEquivalentTo(const util::IComparable *other,
            d->maximum_ == otherExtent->d->maximum_ &&
            d->unit_ == otherExtent->d->unit_;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -581,6 +585,7 @@ TemporalExtentNNPtr TemporalExtent::create(const std::string &start,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool TemporalExtent::isEquivalentTo(const util::IComparable *other,
                                     util::IComparable::Criterion) const {
     auto otherExtent = dynamic_cast<const TemporalExtent *>(other);
@@ -588,6 +593,7 @@ bool TemporalExtent::isEquivalentTo(const util::IComparable *other,
         return false;
     return start() == otherExtent->start() && stop() == otherExtent->stop();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -726,6 +732,7 @@ Extent::createFromBBOX(double west, double south, double east, double north,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool Extent::isEquivalentTo(const util::IComparable *other,
                             util::IComparable::Criterion criterion) const {
     auto otherExtent = dynamic_cast<const Extent *>(other);
@@ -755,6 +762,7 @@ bool Extent::isEquivalentTo(const util::IComparable *other,
     }
     return ret;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

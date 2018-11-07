@@ -81,7 +81,7 @@ using CRSNNPtr = util::nn<CRSPtr>;
  *
  * \remark Implements CRS from \ref ISO_19111_2018
  */
-class CRS : public common::ObjectUsage {
+class PROJ_GCC_DLL CRS : public common::ObjectUsage {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CRS() override;
@@ -103,15 +103,15 @@ class CRS : public common::ObjectUsage {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        const GeodeticCRS *
+        PROJ_INTERNAL const GeodeticCRS *
         extractGeodeticCRSRaw() const;
     //! @endcond
 
   protected:
-    CRS();
-    CRS(const CRS &other);
+    PROJ_INTERNAL CRS();
+    PROJ_INTERNAL CRS(const CRS &other);
     friend class BoundCRS;
-    void setCanonicalBoundCRS(const BoundCRSNNPtr &boundCRS);
+    PROJ_INTERNAL void setCanonicalBoundCRS(const BoundCRSNNPtr &boundCRS);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -125,7 +125,7 @@ class CRS : public common::ObjectUsage {
  *
  * \remark Implements SingleCRS from \ref ISO_19111_2018
  */
-class SingleCRS : public CRS {
+class PROJ_GCC_DLL SingleCRS : public CRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~SingleCRS() override;
@@ -138,18 +138,18 @@ class SingleCRS : public CRS {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        void
+        PROJ_INTERNAL void
         exportDatumOrDatumEnsembleToWkt(io::WKTFormatter *formatter)
             const; // throw(io::FormattingException)
                    //! @endcond
 
   protected:
-    SingleCRS(const datum::DatumPtr &datumIn,
+    PROJ_INTERNAL SingleCRS(const datum::DatumPtr &datumIn,
               const datum::DatumEnsemblePtr &datumEnsembleIn,
               const cs::CoordinateSystemNNPtr &csIn);
-    SingleCRS(const SingleCRS &other);
+    PROJ_INTERNAL SingleCRS(const SingleCRS &other);
 
-    bool _isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool _isEquivalentTo(const util::IComparable *other,
                          util::IComparable::Criterion criterion =
                              util::IComparable::Criterion::STRICT) const;
 
@@ -180,7 +180,7 @@ using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
  *
  * \remark Implements GeodeticCRS from \ref ISO_19111_2018
  */
-class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
+class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeodeticCRS() override;
@@ -234,34 +234,34 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        void
+        PROJ_INTERNAL void
         addDatumInfoToPROJString(io::PROJStringFormatter *formatter) const;
 
-    void addGeocentricUnitConversionIntoPROJString(
+    PROJ_INTERNAL void addGeocentricUnitConversionIntoPROJString(
         io::PROJStringFormatter *formatter) const;
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     //! @endcond
 
   protected:
-    GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+    PROJ_INTERNAL GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::EllipsoidalCSNNPtr &csIn);
-    GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+    PROJ_INTERNAL GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::SphericalCSNNPtr &csIn);
-    GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+    PROJ_INTERNAL GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::CartesianCSNNPtr &csIn);
-    GeodeticCRS(const GeodeticCRS &other);
+    PROJ_INTERNAL GeodeticCRS(const GeodeticCRS &other);
     INLINED_MAKE_SHARED
 
-    static GeodeticCRSNNPtr createEPSG_4978();
+    PROJ_INTERNAL static GeodeticCRSNNPtr createEPSG_4978();
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -280,7 +280,7 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
  *
  * \remark Implements GeographicCRS from \ref ISO_19111_2018
  */
-class GeographicCRS : public GeodeticCRS {
+class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeographicCRS() override;
@@ -310,11 +310,11 @@ class GeographicCRS : public GeodeticCRS {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        void
+        PROJ_INTERNAL void
         addAngularUnitConvertAndAxisSwap(
             io::PROJStringFormatter *formatter) const;
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
@@ -323,18 +323,18 @@ class GeographicCRS : public GeodeticCRS {
     //! @endcond
 
   protected:
-    GeographicCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+    PROJ_INTERNAL GeographicCRS(const datum::GeodeticReferenceFramePtr &datumIn,
                   const datum::DatumEnsemblePtr &datumEnsembleIn,
                   const cs::EllipsoidalCSNNPtr &csIn);
-    GeographicCRS(const GeographicCRS &other);
+    PROJ_INTERNAL GeographicCRS(const GeographicCRS &other);
     INLINED_MAKE_SHARED
 
-    static GeographicCRSNNPtr createEPSG_4267();
-    static GeographicCRSNNPtr createEPSG_4269();
-    static GeographicCRSNNPtr createEPSG_4326();
-    static GeographicCRSNNPtr createOGC_CRS84();
-    static GeographicCRSNNPtr createEPSG_4807();
-    static GeographicCRSNNPtr createEPSG_4979();
+    PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4267();
+    PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4269();
+    PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4326();
+    PROJ_INTERNAL static GeographicCRSNNPtr createOGC_CRS84();
+    PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4807();
+    PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4979();
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -360,7 +360,7 @@ class GeographicCRS : public GeodeticCRS {
  *
  * \remark Implements VerticalCRS from \ref ISO_19111_2018
  */
-class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
+class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalCRS() override;
@@ -393,21 +393,21 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        void
+        PROJ_INTERNAL void
         addLinearUnitConvert(io::PROJStringFormatter *formatter) const;
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     //! @endcond
 
   protected:
-    VerticalCRS(const datum::VerticalReferenceFramePtr &datumIn,
+    PROJ_INTERNAL VerticalCRS(const datum::VerticalReferenceFramePtr &datumIn,
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::VerticalCSNNPtr &csIn);
-    VerticalCRS(const VerticalCRS &other);
+    PROJ_INTERNAL VerticalCRS(const VerticalCRS &other);
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
@@ -431,7 +431,7 @@ class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
  *
  * \remark Implements DerivedCRS from \ref ISO_19111_2018
  */
-class DerivedCRS : virtual public SingleCRS {
+class PROJ_GCC_DLL DerivedCRS : virtual public SingleCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedCRS() override;
@@ -451,17 +451,17 @@ class DerivedCRS : virtual public SingleCRS {
     //! @endcond
 
   protected:
-    DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
+    PROJ_INTERNAL DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
                const operation::ConversionNNPtr &derivingConversionIn,
                const cs::CoordinateSystemNNPtr &cs);
-    DerivedCRS(const DerivedCRS &other);
+    PROJ_INTERNAL DerivedCRS(const DerivedCRS &other);
 
-    void setDerivingConversionCRS();
+    PROJ_INTERNAL void setDerivingConversionCRS();
 
-    void baseExportToPROJString(
+    PROJ_INTERNAL void baseExportToPROJString(
         io::PROJStringFormatter *formatter) const; // throw(FormattingException)
 
-    void baseExportToWKT(
+    PROJ_INTERNAL void baseExportToWKT(
         io::WKTFormatter *&formatter, const std::string &keyword,
         const std::string &baseKeyword) const; // throw(FormattingException)
 
@@ -495,7 +495,7 @@ using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
  *
  * \remark Implements ProjectedCRS from \ref ISO_19111_2018
  */
-class ProjectedCRS final : public DerivedCRS, public io::IPROJStringExportable {
+class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ProjectedCRS() override;
@@ -519,22 +519,22 @@ class ProjectedCRS final : public DerivedCRS, public io::IPROJStringExportable {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        void
+        PROJ_INTERNAL void
         addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                                   bool axisSpecFound) const;
 
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     //! @endcond
 
   protected:
-    ProjectedCRS(const GeodeticCRSNNPtr &baseCRSIn,
+    PROJ_INTERNAL ProjectedCRS(const GeodeticCRSNNPtr &baseCRSIn,
                  const operation::ConversionNNPtr &derivingConversionIn,
                  const cs::CartesianCSNNPtr &csIn);
-    ProjectedCRS(const ProjectedCRS &other);
+    PROJ_INTERNAL ProjectedCRS(const ProjectedCRS &other);
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
@@ -557,7 +557,7 @@ using TemporalCRSNNPtr = util::nn<TemporalCRSPtr>;
  *
  * \remark Implements TemporalCRS from \ref ISO_19111_2018
  */
-class TemporalCRS : virtual public SingleCRS {
+class PROJ_GCC_DLL TemporalCRS : virtual public SingleCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalCRS() override;
@@ -573,7 +573,7 @@ class TemporalCRS : virtual public SingleCRS {
            const cs::TemporalCSNNPtr &csIn);
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -585,9 +585,9 @@ class TemporalCRS : virtual public SingleCRS {
     PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
-    TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
+    PROJ_INTERNAL TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
                 const cs::TemporalCSNNPtr &csIn);
-    TemporalCRS(const TemporalCRS &other);
+    PROJ_INTERNAL TemporalCRS(const TemporalCRS &other);
 
     INLINED_MAKE_SHARED
 
@@ -616,7 +616,7 @@ using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
  *
  * \remark Implements EngineeringCRS from \ref ISO_19111_2018
  */
-class EngineeringCRS : virtual public SingleCRS {
+class PROJ_GCC_DLL EngineeringCRS : virtual public SingleCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~EngineeringCRS() override;
@@ -630,7 +630,7 @@ class EngineeringCRS : virtual public SingleCRS {
            const cs::CoordinateSystemNNPtr &csIn);
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -642,9 +642,9 @@ class EngineeringCRS : virtual public SingleCRS {
     PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
-    EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
+    PROJ_INTERNAL EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
                    const cs::CoordinateSystemNNPtr &csIn);
-    EngineeringCRS(const EngineeringCRS &other);
+    PROJ_INTERNAL EngineeringCRS(const EngineeringCRS &other);
 
     INLINED_MAKE_SHARED
 
@@ -670,7 +670,7 @@ using ParametricCRSNNPtr = util::nn<ParametricCRSPtr>;
  *
  * \remark Implements ParametricCRS from \ref ISO_19111_2018
  */
-class ParametricCRS : virtual public SingleCRS {
+class PROJ_GCC_DLL ParametricCRS : virtual public SingleCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParametricCRS() override;
@@ -686,7 +686,7 @@ class ParametricCRS : virtual public SingleCRS {
            const cs::ParametricCSNNPtr &csIn);
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -698,9 +698,9 @@ class ParametricCRS : virtual public SingleCRS {
     PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
-    ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
+    PROJ_INTERNAL ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
                   const cs::ParametricCSNNPtr &csIn);
-    ParametricCRS(const ParametricCRS &other);
+    PROJ_INTERNAL ParametricCRS(const ParametricCRS &other);
 
     INLINED_MAKE_SHARED
 
@@ -730,7 +730,7 @@ using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
  *
  * \remark Implements CompoundCRS from \ref ISO_19111_2018
  */
-class CompoundCRS final : public CRS, public io::IPROJStringExportable {
+class PROJ_GCC_DLL CompoundCRS final : public CRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CompoundCRS() override;
@@ -740,7 +740,7 @@ class CompoundCRS final : public CRS, public io::IPROJStringExportable {
     componentReferenceSystems() PROJ_CONST_DECL;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -757,10 +757,10 @@ class CompoundCRS final : public CRS, public io::IPROJStringExportable {
 
   protected:
     // relaxed: standard say SingleCRSNNPtr
-    explicit CompoundCRS(const std::vector<CRSNNPtr> &components);
-    CompoundCRS(const CompoundCRS &other);
+    PROJ_INTERNAL explicit CompoundCRS(const std::vector<CRSNNPtr> &components);
+    PROJ_INTERNAL CompoundCRS(const CompoundCRS &other);
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
@@ -797,7 +797,7 @@ class CompoundCRS final : public CRS, public io::IPROJStringExportable {
  *
  * \remark Implements BoundCRS from \ref WKT2
  */
-class BoundCRS final : public CRS, public io::IPROJStringExportable {
+class PROJ_GCC_DLL BoundCRS final : public CRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~BoundCRS() override;
@@ -811,7 +811,7 @@ class BoundCRS final : public CRS, public io::IPROJStringExportable {
     transformation() PROJ_CONST_DECL;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -834,18 +834,18 @@ class BoundCRS final : public CRS, public io::IPROJStringExportable {
     PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
-    BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
+    PROJ_INTERNAL BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
              const operation::TransformationNNPtr &transformationIn);
-    BoundCRS(const BoundCRS &other);
+    PROJ_INTERNAL BoundCRS(const BoundCRS &other);
     INLINED_MAKE_SHARED
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
-    BoundCRSNNPtr shallowCloneAsBoundCRS() const;
-    bool isTOWGS84Compatible() const;
-    std::string getHDatumPROJ4GRIDS() const;
-    std::string getVDatumPROJ4GRIDS() const;
+    PROJ_INTERNAL BoundCRSNNPtr shallowCloneAsBoundCRS() const;
+    PROJ_INTERNAL bool isTOWGS84Compatible() const;
+    PROJ_INTERNAL std::string getHDatumPROJ4GRIDS() const;
+    PROJ_INTERNAL std::string getVDatumPROJ4GRIDS() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -867,7 +867,7 @@ using DerivedGeodeticCRSNNPtr = util::nn<DerivedGeodeticCRSPtr>;
  *
  * \remark Implements DerivedGeodeticCRS from \ref ISO_19111_2018
  */
-class DerivedGeodeticCRS final : public GeodeticCRS, public DerivedCRS {
+class PROJ_GCC_DLL DerivedGeodeticCRS final : public GeodeticCRS, public DerivedCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedGeodeticCRS() override;
@@ -900,15 +900,15 @@ class DerivedGeodeticCRS final : public GeodeticCRS, public DerivedCRS {
     PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
-    DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
+    PROJ_INTERNAL DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const cs::CartesianCSNNPtr &csIn);
-    DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
+    PROJ_INTERNAL DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const cs::SphericalCSNNPtr &csIn);
-    DerivedGeodeticCRS(const DerivedGeodeticCRS &other);
+    PROJ_INTERNAL DerivedGeodeticCRS(const DerivedGeodeticCRS &other);
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
@@ -935,7 +935,7 @@ using DerivedGeographicCRSNNPtr = util::nn<DerivedGeographicCRSPtr>;
  *
  * \remark Implements DerivedGeographicCRS from \ref ISO_19111_2018
  */
-class DerivedGeographicCRS final : public GeographicCRS, public DerivedCRS {
+class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS, public DerivedCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedGeographicCRS() override;
@@ -950,7 +950,7 @@ class DerivedGeographicCRS final : public GeographicCRS, public DerivedCRS {
            const cs::EllipsoidalCSNNPtr &csIn);
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -962,12 +962,12 @@ class DerivedGeographicCRS final : public GeographicCRS, public DerivedCRS {
     PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
-    DerivedGeographicCRS(const GeodeticCRSNNPtr &baseCRSIn,
+    PROJ_INTERNAL DerivedGeographicCRS(const GeodeticCRSNNPtr &baseCRSIn,
                          const operation::ConversionNNPtr &derivingConversionIn,
                          const cs::EllipsoidalCSNNPtr &csIn);
-    DerivedGeographicCRS(const DerivedGeographicCRS &other);
+    PROJ_INTERNAL DerivedGeographicCRS(const DerivedGeographicCRS &other);
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
@@ -994,7 +994,7 @@ using DerivedProjectedCRSNNPtr = util::nn<DerivedProjectedCRSPtr>;
  *
  * \remark Implements DerivedProjectedCRS from \ref ISO_19111_2018
  */
-class DerivedProjectedCRS final : public DerivedCRS,
+class PROJ_GCC_DLL DerivedProjectedCRS final : public DerivedCRS,
                                   public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
@@ -1010,7 +1010,7 @@ class DerivedProjectedCRS final : public DerivedCRS,
            const cs::CoordinateSystemNNPtr &csIn);
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -1022,12 +1022,12 @@ class DerivedProjectedCRS final : public DerivedCRS,
     PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
-    DerivedProjectedCRS(const ProjectedCRSNNPtr &baseCRSIn,
+    PROJ_INTERNAL DerivedProjectedCRS(const ProjectedCRSNNPtr &baseCRSIn,
                         const operation::ConversionNNPtr &derivingConversionIn,
                         const cs::CoordinateSystemNNPtr &csIn);
-    DerivedProjectedCRS(const DerivedProjectedCRS &other);
+    PROJ_INTERNAL DerivedProjectedCRS(const DerivedProjectedCRS &other);
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
@@ -1051,7 +1051,7 @@ using DerivedVerticalCRSNNPtr = util::nn<DerivedVerticalCRSPtr>;
  *
  * \remark Implements DerivedVerticalCRS from \ref ISO_19111_2018
  */
-class DerivedVerticalCRS final : public VerticalCRS, public DerivedCRS {
+class PROJ_GCC_DLL DerivedVerticalCRS final : public VerticalCRS, public DerivedCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedVerticalCRS() override;
@@ -1066,7 +1066,7 @@ class DerivedVerticalCRS final : public VerticalCRS, public DerivedCRS {
            const cs::VerticalCSNNPtr &csIn);
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
     //! @endcond
 
@@ -1078,12 +1078,12 @@ class DerivedVerticalCRS final : public VerticalCRS, public DerivedCRS {
     PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
-    DerivedVerticalCRS(const VerticalCRSNNPtr &baseCRSIn,
+    PROJ_INTERNAL DerivedVerticalCRS(const VerticalCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const cs::VerticalCSNNPtr &csIn);
-    DerivedVerticalCRS(const DerivedVerticalCRS &other);
+    PROJ_INTERNAL DerivedVerticalCRS(const DerivedVerticalCRS &other);
 
-    void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
@@ -1098,7 +1098,7 @@ class DerivedVerticalCRS final : public VerticalCRS, public DerivedCRS {
 /** \brief Template representing a derived coordinate reference system.
  */
 template <class DerivedCRSTraits>
-class DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
+class PROJ_GCC_DLL DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
                                  public DerivedCRS {
   protected:
     /** Base type */
@@ -1142,7 +1142,7 @@ class DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
            const CSNNPtr &csIn);
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     PROJ_DLL bool
@@ -1154,10 +1154,10 @@ class DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
     //! @endcond
 
   protected:
-    DerivedCRSTemplate(const BaseNNPtr &baseCRSIn,
+    PROJ_INTERNAL DerivedCRSTemplate(const BaseNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const CSNNPtr &csIn);
-    DerivedCRSTemplate(const DerivedCRSTemplate &other);
+    PROJ_INTERNAL DerivedCRSTemplate(const DerivedCRSTemplate &other);
 
     INLINED_MAKE_SHARED
 
@@ -1169,7 +1169,7 @@ class DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct DerivedEngineeringCRSTraits {
+struct PROJ_GCC_DLL DerivedEngineeringCRSTraits {
     typedef EngineeringCRS BaseType;
     typedef cs::CoordinateSystem CSType;
     // old x86_64-w64-mingw32-g++ has issues with static variables. use method
@@ -1207,7 +1207,7 @@ using DerivedEngineeringCRSNNPtr = util::nn<DerivedEngineeringCRSPtr>;
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct DerivedParametricCRSTraits {
+struct PROJ_GCC_DLL DerivedParametricCRSTraits {
     typedef ParametricCRS BaseType;
     typedef cs::ParametricCS CSType;
     // old x86_64-w64-mingw32-g++ has issues with static variables. use method
@@ -1244,7 +1244,7 @@ using DerivedParametricCRSNNPtr = util::nn<DerivedParametricCRSPtr>;
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct DerivedTemporalCRSTraits {
+struct PROJ_GCC_DLL DerivedTemporalCRSTraits {
     typedef TemporalCRS BaseType;
     typedef cs::TemporalCS CSType;
     // old x86_64-w64-mingw32-g++ has issues with static variables. use method

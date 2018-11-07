@@ -375,6 +375,7 @@ void PrimeMeridian::_exportToPROJString(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool PrimeMeridian::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -385,6 +386,7 @@ bool PrimeMeridian::isEquivalentTo(
     }
     return longitude().isEquivalentTo(otherPM->longitude(), criterion);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -818,6 +820,7 @@ EllipsoidNNPtr Ellipsoid::identify() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
                                util::IComparable::Criterion criterion) const {
     auto otherEllipsoid = dynamic_cast<const Ellipsoid *>(other);
@@ -876,6 +879,7 @@ bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1066,6 +1070,7 @@ void GeodeticReferenceFrame::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool GeodeticReferenceFrame::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1077,6 +1082,7 @@ bool GeodeticReferenceFrame::isEquivalentTo(
                                            criterion) &&
            ellipsoid()->isEquivalentTo(otherGRF->ellipsoid().get(), criterion);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1147,6 +1153,7 @@ DynamicGeodeticReferenceFrame::deformationModelName() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool DynamicGeodeticReferenceFrame::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1160,6 +1167,7 @@ bool DynamicGeodeticReferenceFrame::isEquivalentTo(
            metadata::Identifier::isEquivalentName(
                *deformationModelName(), *otherDGRF->deformationModelName());
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1491,6 +1499,7 @@ void VerticalReferenceFrame::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool VerticalReferenceFrame::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1510,6 +1519,7 @@ bool VerticalReferenceFrame::isEquivalentTo(
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1579,6 +1589,7 @@ DynamicVerticalReferenceFrame::deformationModelName() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool DynamicVerticalReferenceFrame::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1592,6 +1603,7 @@ bool DynamicVerticalReferenceFrame::isEquivalentTo(
            metadata::Identifier::isEquivalentName(
                *deformationModelName(), *otherDGRF->deformationModelName());
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1749,6 +1761,7 @@ void TemporalDatum::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool TemporalDatum::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1760,6 +1773,7 @@ bool TemporalDatum::isEquivalentTo(
                otherTD->temporalOrigin().toString() &&
            calendar() == otherTD->calendar();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1820,6 +1834,7 @@ void EngineeringDatum::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool EngineeringDatum::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1829,6 +1844,7 @@ bool EngineeringDatum::isEquivalentTo(
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1884,6 +1900,7 @@ void ParametricDatum::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool ParametricDatum::isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1893,6 +1910,7 @@ bool ParametricDatum::isEquivalentTo(
     }
     return true;
 }
+//! @endcond
 
 } // namespace datum
 NS_PROJ_END

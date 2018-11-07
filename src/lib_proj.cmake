@@ -308,9 +308,6 @@ endif(JNI_SUPPORT)
 #################################################
 set(ALL_LIBPROJ_SOURCES ${SRC_LIBPROJ_PJ} ${SRC_LIBPROJ_CORE} ${SRC_LIBPROJ_CPP})
 set(ALL_LIBPROJ_HEADERS ${HEADERS_LIBPROJ} )
-if(WIN32 AND BUILD_LIBPROJ_SHARED)
-    set(ALL_LIBPROJ_SOURCES ${ALL_LIBPROJ_SOURCES} proj.def )
-endif(WIN32 AND BUILD_LIBPROJ_SHARED)
 
 # Core targets configuration
 string(TOLOWER "${PROJECT_INTERN_NAME}" PROJECTNAMEL)
@@ -369,6 +366,10 @@ endif(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
 
 include_directories(${SQLITE3_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
+
+if(MSVC)
+    target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE PROJ_MSVC_DLL_EXPORT=1)
+endif()
 
 ##############################################
 # install

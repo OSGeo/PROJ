@@ -57,10 +57,10 @@ using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
  *
  * This is a mutable object.
  */
-class UnitOfMeasure : public util::BaseObject {
+class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
   public:
     /** \brief Type of unit of measure. */
-    enum class PROJ_DLL Type {
+    enum class PROJ_MSVC_DLL Type {
         /** Unknown unit of measure */
         UNKNOWN,
         /** No unit of measure */
@@ -86,7 +86,7 @@ class UnitOfMeasure : public util::BaseObject {
     PROJ_DLL UnitOfMeasure(const UnitOfMeasure &other);
     PROJ_DLL ~UnitOfMeasure() override;
     PROJ_DLL UnitOfMeasure &operator=(const UnitOfMeasure &other);
-    static UnitOfMeasureNNPtr create(const UnitOfMeasure &other);
+    PROJ_INTERNAL static UnitOfMeasureNNPtr create(const UnitOfMeasure &other);
     //! @endcond
 
     PROJ_DLL const std::string &name() PROJ_PURE_DECL;
@@ -100,11 +100,11 @@ class UnitOfMeasure : public util::BaseObject {
     PROJ_DLL bool operator!=(const UnitOfMeasure &other) PROJ_PURE_DECL;
 
     //! @cond Doxygen_Suppress
-    void _exportToWKT(io::WKTFormatter *formatter,
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter,
                       const std::string &unitType = std::string())
         const; // throw(io::FormattingException)
 
-    std::string exportToPROJString() const;
+    PROJ_INTERNAL std::string exportToPROJString() const;
     //! @endcond
 
     PROJ_DLL static const UnitOfMeasure NONE;
@@ -412,10 +412,12 @@ class ObjectUsage : public IdentifiedObject {
 
     PROJ_DLL static const std::string OBJECT_DOMAIN_KEY;
 
+    //! @cond Doxygen_Suppress
     bool
     isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
     ObjectUsage();
