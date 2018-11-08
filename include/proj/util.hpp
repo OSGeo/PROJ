@@ -55,12 +55,11 @@ namespace proj {}
 #elif defined(PROJ_MSVC_DLL_IMPORT)
 #define PROJ_DLL __declspec(dllimport)
 #elif defined(__GNUC__)
-#define PROJ_DLL __attribute__ ((visibility("default")))
+#define PROJ_DLL __attribute__((visibility("default")))
 #else
 #define PROJ_DLL
 #endif
 #endif
-
 
 #ifndef PROJ_MSVC_DLL
 
@@ -76,7 +75,7 @@ namespace proj {}
 #define PROJ_MSVC_DLL
 #define PROJ_GCC_DLL PROJ_DLL
 #if !defined(__MINGW32__)
-#define PROJ_INTERNAL __attribute__ ((visibility("hidden")))
+#define PROJ_INTERNAL __attribute__((visibility("hidden")))
 #else
 #define PROJ_INTERNAL
 #endif
@@ -89,7 +88,6 @@ namespace proj {}
 #define PROJ_FOR_TEST PROJ_DLL
 
 #endif
-
 
 #include "nn.hpp"
 
@@ -112,7 +110,9 @@ namespace proj {}
                                                                                \
   protected:                                                                   \
     PROJ_INTERNAL Private *getPrivate() noexcept { return d.get(); }           \
-    PROJ_INTERNAL const Private *getPrivate() const noexcept { return d.get(); } \
+    PROJ_INTERNAL const Private *getPrivate() const noexcept {                 \
+        return d.get();                                                        \
+    }                                                                          \
                                                                                \
   private:
 
@@ -312,7 +312,8 @@ class PROJ_GCC_DLL BaseObject {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        PROJ_INTERNAL BaseObjectNNPtr shared_from_this() const;
+        PROJ_INTERNAL BaseObjectNNPtr
+        shared_from_this() const;
     //! @endcond
 
   protected:
@@ -341,15 +342,15 @@ class PROJ_GCC_DLL IComparable {
         EQUIVALENT
     };
 
-    PROJ_DLL bool
-    isEquivalentTo(const IComparable *other,
-                   Criterion criterion = Criterion::STRICT) const;
+    PROJ_DLL bool isEquivalentTo(const IComparable *other,
+                                 Criterion criterion = Criterion::STRICT) const;
 
     PROJ_PRIVATE :
 
         //! @cond Doxygen_Suppress
-        PROJ_INTERNAL virtual bool _isEquivalentTo(const IComparable *other,
-                   Criterion criterion = Criterion::STRICT) const = 0;
+        PROJ_INTERNAL virtual bool
+        _isEquivalentTo(const IComparable *other,
+                        Criterion criterion = Criterion::STRICT) const = 0;
     //! @endcond
 };
 
@@ -704,7 +705,8 @@ class PROJ_GCC_DLL InvalidValueTypeException : public Exception {
   public:
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL explicit InvalidValueTypeException(const char *message);
-    PROJ_INTERNAL explicit InvalidValueTypeException(const std::string &message);
+    PROJ_INTERNAL explicit InvalidValueTypeException(
+        const std::string &message);
     PROJ_DLL InvalidValueTypeException(const InvalidValueTypeException &other);
     PROJ_DLL ~InvalidValueTypeException() override;
     //! @endcond
@@ -719,7 +721,8 @@ class PROJ_GCC_DLL UnsupportedOperationException : public Exception {
   public:
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL explicit UnsupportedOperationException(const char *message);
-    PROJ_INTERNAL explicit UnsupportedOperationException(const std::string &message);
+    PROJ_INTERNAL explicit UnsupportedOperationException(
+        const std::string &message);
     PROJ_DLL
     UnsupportedOperationException(const UnsupportedOperationException &other);
     PROJ_DLL ~UnsupportedOperationException() override;

@@ -185,7 +185,7 @@ void Datum::setAnchor(const util::optional<std::string> &anchor) {
 // ---------------------------------------------------------------------------
 
 bool Datum::__isEquivalentTo(const util::IComparable *other,
-                            util::IComparable::Criterion criterion) const {
+                             util::IComparable::Criterion criterion) const {
     auto otherDatum = dynamic_cast<const Datum *>(other);
     if (otherDatum == nullptr ||
         !ObjectUsage::_isEquivalentTo(other, criterion)) {
@@ -218,8 +218,8 @@ bool Datum::__isEquivalentTo(const util::IComparable *other,
             return false;
         }
         if (conventionalRS() && otherDatum->conventionalRS() &&
-            conventionalRS()->_isEquivalentTo(otherDatum->conventionalRS().get(),
-                                             criterion)) {
+            conventionalRS()->_isEquivalentTo(
+                otherDatum->conventionalRS().get(), criterion)) {
             return false;
         }
     }
@@ -826,14 +826,14 @@ EllipsoidNNPtr Ellipsoid::identify() const {
 
 //! @cond Doxygen_Suppress
 bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
-                               util::IComparable::Criterion criterion) const {
+                                util::IComparable::Criterion criterion) const {
     auto otherEllipsoid = dynamic_cast<const Ellipsoid *>(other);
     if (otherEllipsoid == nullptr ||
         !IdentifiedObject::_isEquivalentTo(other, criterion)) {
         return false;
     }
     if (!semiMajorAxis()._isEquivalentTo(otherEllipsoid->semiMajorAxis(),
-                                        criterion)) {
+                                         criterion)) {
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
@@ -844,7 +844,7 @@ bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
         }
         if (l_semiMinorAxis.has_value() && l_other_semiMinorAxis.has_value()) {
             if (!l_semiMinorAxis->_isEquivalentTo(*l_other_semiMinorAxis,
-                                                 criterion)) {
+                                                  criterion)) {
                 return false;
             }
         }
@@ -877,7 +877,7 @@ bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
     }
     if (l_semiMedianAxis.has_value() && l_other_semiMedianAxis.has_value()) {
         if (!l_semiMedianAxis->_isEquivalentTo(*l_other_semiMedianAxis,
-                                              criterion)) {
+                                               criterion)) {
             return false;
         }
     }
@@ -1083,7 +1083,7 @@ bool GeodeticReferenceFrame::_isEquivalentTo(
         return false;
     }
     return primeMeridian()->_isEquivalentTo(otherGRF->primeMeridian().get(),
-                                           criterion) &&
+                                            criterion) &&
            ellipsoid()->_isEquivalentTo(otherGRF->ellipsoid().get(), criterion);
 }
 //! @endcond

@@ -122,7 +122,7 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  * \remark Implements CoordinateOperation from \ref ISO_19111_2018
  */
 class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
-                            public io::IPROJStringExportable {
+                                         public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateOperation() override;
@@ -161,11 +161,12 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_FRIEND(crs::DerivedCRS);
     PROJ_FRIEND(io::AuthorityFactory);
     PROJ_FRIEND(CoordinateOperationFactory);
-    PROJ_INTERNAL void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
-                                std::weak_ptr<crs::CRS> targetCRSIn);
+    PROJ_INTERNAL void
+    setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
+                           std::weak_ptr<crs::CRS> targetCRSIn);
     PROJ_INTERNAL void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
-                 const crs::CRSNNPtr &targetCRSIn,
-                 const crs::CRSPtr &interpolationCRSIn);
+                               const crs::CRSNNPtr &targetCRSIn,
+                               const crs::CRSPtr &interpolationCRSIn);
     PROJ_INTERNAL void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
@@ -188,15 +189,16 @@ class PROJ_GCC_DLL GeneralOperationParameter : public common::IdentifiedObject {
     //! @endcond
 
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override = 0;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT) const override = 0;
     //! @endcond
 
-protected:
+  protected:
     PROJ_INTERNAL GeneralOperationParameter();
-    PROJ_INTERNAL GeneralOperationParameter(const GeneralOperationParameter &other);
+    PROJ_INTERNAL
+    GeneralOperationParameter(const GeneralOperationParameter &other);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -233,8 +235,8 @@ class PROJ_GCC_DLL OperationParameter final : public GeneralOperationParameter {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
     // non-standard
@@ -267,19 +269,19 @@ struct MethodMapping;
  * \remark Implements GeneralParameterValue from \ref ISO_19111_2018
  */
 class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
-                              public io::IWKTExportable,
-                              public util::IComparable {
+                                           public io::IWKTExportable,
+                                           public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeneralParameterValue() override;
 
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter) const override =
-        0; // throw(io::FormattingException)
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override = 0; // throw(io::FormattingException)
 
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override = 0;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT) const override = 0;
     //! @endcond
 
   protected:
@@ -290,7 +292,7 @@ class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
     friend class Conversion;
     friend class SingleOperation;
     PROJ_INTERNAL virtual void _exportToWKT(io::WKTFormatter *formatter,
-                              const MethodMapping *mapping)
+                                            const MethodMapping *mapping)
         const = 0; // throw(io::FormattingException)
                    //! @endcond
 
@@ -321,8 +323,8 @@ using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
  * \remark Implements ParameterValue from \ref ISO_19111_2018
  */
 class PROJ_GCC_DLL ParameterValue final : public util::BaseObject,
-                             public io::IWKTExportable,
-                             public util::IComparable {
+                                          public io::IWKTExportable,
+                                          public util::IComparable {
   public:
     /** Type of the value. */
     enum class Type {
@@ -364,13 +366,14 @@ class PROJ_GCC_DLL ParameterValue final : public util::BaseObject,
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
     PROJ_INTERNAL explicit ParameterValue(const common::Measure &measureIn);
-    PROJ_INTERNAL explicit ParameterValue(const std::string &stringValueIn, Type typeIn);
+    PROJ_INTERNAL explicit ParameterValue(const std::string &stringValueIn,
+                                          Type typeIn);
     PROJ_INTERNAL explicit ParameterValue(int integerValueIn);
     PROJ_INTERNAL explicit ParameterValue(bool booleanValueIn);
     INLINED_MAKE_SHARED
@@ -394,7 +397,8 @@ using OperationParameterValueNNPtr = util::nn<OperationParameterValuePtr>;
  *
  * \remark Implements OperationParameterValue from \ref ISO_19111_2018
  */
-class PROJ_GCC_DLL OperationParameterValue final : public GeneralParameterValue {
+class PROJ_GCC_DLL OperationParameterValue final
+    : public GeneralParameterValue {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationParameterValue() override;
@@ -419,18 +423,19 @@ class PROJ_GCC_DLL OperationParameterValue final : public GeneralParameterValue 
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
-    PROJ_INTERNAL OperationParameterValue(const OperationParameterNNPtr &parameterIn,
+    PROJ_INTERNAL
+    OperationParameterValue(const OperationParameterNNPtr &parameterIn,
                             const ParameterValueNNPtr &valueIn);
     PROJ_INTERNAL OperationParameterValue(const OperationParameterValue &other);
     INLINED_MAKE_SHARED
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter,
-                      const MethodMapping *mapping)
+                                    const MethodMapping *mapping)
         const override; // throw(io::FormattingException)
 
   private:
@@ -481,8 +486,8 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
@@ -560,26 +565,31 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
                           const common::UnitOfMeasure &targetUnit) const
         noexcept;
     PROJ_INTERNAL double parameterValueNumericAsSI(const std::string &paramName,
-                                     int epsg_code) const noexcept;
-    PROJ_INTERNAL double parameterValueNumericAsSI(const char *paramName, int epsg_code) const
+                                                   int epsg_code) const
+        noexcept;
+    PROJ_INTERNAL double parameterValueNumericAsSI(const char *paramName,
+                                                   int epsg_code) const
         noexcept;
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
-    PROJ_INTERNAL explicit SingleOperation(const OperationMethodNNPtr &methodIn);
+    PROJ_INTERNAL explicit SingleOperation(
+        const OperationMethodNNPtr &methodIn);
     PROJ_INTERNAL SingleOperation(const SingleOperation &other);
 
     PROJ_INTERNAL void
     setParameterValues(const std::vector<GeneralParameterValueNNPtr> &values);
 
-    PROJ_INTERNAL void exportTransformationToWKT(io::WKTFormatter *formatter) const;
+    PROJ_INTERNAL void
+    exportTransformationToWKT(io::WKTFormatter *formatter) const;
 
-    PROJ_INTERNAL bool exportToPROJStringGeneric(io::PROJStringFormatter *formatter) const;
+    PROJ_INTERNAL bool
+    exportToPROJStringGeneric(io::PROJStringFormatter *formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1263,12 +1273,13 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
 
     PROJ_DLL ConversionPtr convertToOtherMethod(int targetEPSGCode) const;
 
-    PROJ_PRIVATE :
-    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
+    PROJ_PRIVATE : PROJ_INTERNAL void
+                   _exportToPROJString(io::PROJStringFormatter *formatter)
                        const override; // throw(FormattingException)
 
   protected:
-    PROJ_INTERNAL Conversion(const OperationMethodNNPtr &methodIn,
+    PROJ_INTERNAL
+    Conversion(const OperationMethodNNPtr &methodIn,
                const std::vector<GeneralParameterValueNNPtr> &values);
     PROJ_INTERNAL Conversion(const Conversion &other);
     INLINED_MAKE_SHARED
@@ -1549,8 +1560,8 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
     PROJ_DLL static ConcatenatedOperationNNPtr

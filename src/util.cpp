@@ -656,7 +656,7 @@ IComparable::~IComparable() = default;
  * @param criterion comparaison criterion.
  * @return true if objects are equivalent.
  */
-bool IComparable::isEquivalentTo(const IComparable *other, 
+bool IComparable::isEquivalentTo(const IComparable *other,
                                  Criterion criterion) const {
     return _isEquivalentTo(other, criterion);
 }

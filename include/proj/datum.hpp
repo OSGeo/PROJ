@@ -74,9 +74,10 @@ class PROJ_GCC_DLL Datum : public common::ObjectUsage {
   protected:
     PROJ_INTERNAL Datum();
 
-    PROJ_INTERNAL bool __isEquivalentTo(const util::IComparable *other,
-                         util::IComparable::Criterion criterion =
-                             util::IComparable::Criterion::STRICT) const;
+    PROJ_INTERNAL bool
+    __isEquivalentTo(const util::IComparable *other,
+                     util::IComparable::Criterion criterion =
+                         util::IComparable::Criterion::STRICT) const;
 
 #ifdef DOXYGEN_ENABLED
     std::string *anchorDefinition_;
@@ -142,7 +143,8 @@ class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject {
     PositionalAccuracy positionalAccuracy_;
 #endif
 
-    PROJ_INTERNAL DatumEnsemble(const std::vector<DatumNNPtr> &datumsIn,
+    PROJ_INTERNAL
+    DatumEnsemble(const std::vector<DatumNNPtr> &datumsIn,
                   const metadata::PositionalAccuracyNNPtr &accuracy);
     INLINED_MAKE_SHARED
 
@@ -169,7 +171,7 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
  * \remark Implements PrimeMeridian from \ref ISO_19111_2018
  */
 class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
-                            public io::IPROJStringExportable {
+                                         public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PrimeMeridian() override;
@@ -187,7 +189,7 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
 
     PROJ_PRIVATE :
 
-    //! @cond Doxygen_Suppress
+        //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
         _exportToPROJString(io::PROJStringFormatter *formatter)
             const override; // throw(FormattingException)
@@ -197,10 +199,11 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
 
-    PROJ_INTERNAL static std::string getPROJStringWellKnownName(const common::Angle &angle);
+    PROJ_INTERNAL static std::string
+    getPROJStringWellKnownName(const common::Angle &angle);
     //! @endcond
 
   protected:
@@ -208,7 +211,8 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
     Angle greenwichLongitude_;
 #endif
 
-    PROJ_INTERNAL explicit PrimeMeridian(const common::Angle &angle = common::Angle());
+    PROJ_INTERNAL explicit PrimeMeridian(
+        const common::Angle &angle = common::Angle());
     INLINED_MAKE_SHARED
 
   private:
@@ -237,7 +241,7 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
  * \remark Implements Ellipsoid from \ref ISO_19111_2018
  */
 class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
-                        public io::IPROJStringExportable {
+                                     public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Ellipsoid() override;
@@ -287,20 +291,20 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
     PROJ_DLL static const EllipsoidNNPtr WGS84;
     PROJ_DLL static const EllipsoidNNPtr GRS1980;
 
-
     PROJ_PRIVATE :
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
-        const override; // throw(io::FormattingException)
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL void
+        _exportToWKT(io::WKTFormatter *formatter)
+            const override; // throw(io::FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
-                       const override; // throw(FormattingException)
-    //! @endcond
+        const override; // throw(FormattingException)
+                        //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -312,15 +316,15 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
 #endif
 
     PROJ_INTERNAL explicit Ellipsoid(const common::Length &radius,
-                       const std::string &celestialBody);
+                                     const std::string &celestialBody);
 
     PROJ_INTERNAL Ellipsoid(const common::Length &semiMajorAxisIn,
-              const common::Scale &invFlattening,
-              const std::string &celestialBody);
+                            const common::Scale &invFlattening,
+                            const std::string &celestialBody);
 
     PROJ_INTERNAL Ellipsoid(const common::Length &semiMajorAxisIn,
-              const common::Length &semiMinorAxisIn,
-              const std::string &celestialBody);
+                            const common::Length &semiMinorAxisIn,
+                            const std::string &celestialBody);
 
     PROJ_INTERNAL Ellipsoid(const Ellipsoid &other);
 
@@ -391,8 +395,8 @@ class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
@@ -401,7 +405,8 @@ class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
     Ellipsoid *ellipsoid_;
 #endif
 
-    PROJ_INTERNAL GeodeticReferenceFrame(const EllipsoidNNPtr &ellipsoidIn,
+    PROJ_INTERNAL
+    GeodeticReferenceFrame(const EllipsoidNNPtr &ellipsoidIn,
                            const PrimeMeridianNNPtr &primeMeridianIn);
     INLINED_MAKE_SHARED
 
@@ -434,7 +439,8 @@ using DynamicGeodeticReferenceFrameNNPtr =
  *
  * \remark Implements DynamicGeodeticReferenceFrame from \ref ISO_19111_2018
  */
-class PROJ_GCC_DLL DynamicGeodeticReferenceFrame final : public GeodeticReferenceFrame {
+class PROJ_GCC_DLL DynamicGeodeticReferenceFrame final
+    : public GeodeticReferenceFrame {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DynamicGeodeticReferenceFrame() override;
@@ -454,8 +460,8 @@ class PROJ_GCC_DLL DynamicGeodeticReferenceFrame final : public GeodeticReferenc
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
@@ -537,12 +543,12 @@ class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-    //! @endcond
+                        //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -575,7 +581,8 @@ using DynamicVerticalReferenceFrameNNPtr =
  *
  * \remark Implements DynamicVerticalReferenceFrame from \ref ISO_19111_2018
  */
-class PROJ_GCC_DLL DynamicVerticalReferenceFrame final : public VerticalReferenceFrame {
+class PROJ_GCC_DLL DynamicVerticalReferenceFrame final
+    : public VerticalReferenceFrame {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DynamicVerticalReferenceFrame() override;
@@ -595,8 +602,8 @@ class PROJ_GCC_DLL DynamicVerticalReferenceFrame final : public VerticalReferenc
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
@@ -657,13 +664,13 @@ class PROJ_GCC_DLL TemporalDatum final : public Datum {
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
     PROJ_INTERNAL TemporalDatum(const common::DateTime &temporalOriginIn,
-                  const std::string &calendarIn);
+                                const std::string &calendarIn);
     INLINED_MAKE_SHARED
 
   private:
@@ -705,8 +712,8 @@ class PROJ_GCC_DLL EngineeringDatum final : public Datum {
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
@@ -749,10 +756,9 @@ class PROJ_GCC_DLL ParametricDatum final : public Datum {
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
-
 
   protected:
     PROJ_INTERNAL ParametricDatum();

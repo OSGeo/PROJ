@@ -450,8 +450,9 @@ const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-bool SingleCRS::baseIsEquivalentTo(const util::IComparable *other,
-                                util::IComparable::Criterion criterion) const {
+bool SingleCRS::baseIsEquivalentTo(
+    const util::IComparable *other,
+    util::IComparable::Criterion criterion) const {
     auto otherSingleCRS = dynamic_cast<const SingleCRS *>(other);
     if (otherSingleCRS == nullptr ||
         !ObjectUsage::_isEquivalentTo(other, criterion)) {
@@ -916,8 +917,9 @@ void GeodeticCRS::addDatumInfoToPROJString(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool GeodeticCRS::_isEquivalentTo(const util::IComparable *other,
-                                 util::IComparable::Criterion criterion) const {
+bool GeodeticCRS::_isEquivalentTo(
+    const util::IComparable *other,
+    util::IComparable::Criterion criterion) const {
     auto otherGeodCRS = dynamic_cast<const GeodeticCRS *>(other);
     // TODO test velocityModel
     return otherGeodCRS != nullptr &&
@@ -1460,8 +1462,9 @@ VerticalCRS::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool VerticalCRS::_isEquivalentTo(const util::IComparable *other,
-                                 util::IComparable::Criterion criterion) const {
+bool VerticalCRS::_isEquivalentTo(
+    const util::IComparable *other,
+    util::IComparable::Criterion criterion) const {
     auto otherVertCRS = dynamic_cast<const VerticalCRS *>(other);
     // TODO test geoidModel and velocityModel
     return otherVertCRS != nullptr &&
@@ -1559,14 +1562,14 @@ DerivedCRS::derivingConversionRef() PROJ_CONST_DEFN {
 // ---------------------------------------------------------------------------
 
 bool DerivedCRS::_isEquivalentTo(const util::IComparable *other,
-                                util::IComparable::Criterion criterion) const {
+                                 util::IComparable::Criterion criterion) const {
     auto otherDerivedCRS = dynamic_cast<const DerivedCRS *>(other);
     if (otherDerivedCRS == nullptr ||
         !SingleCRS::baseIsEquivalentTo(other, criterion)) {
         return false;
     }
     return d->baseCRS_->_isEquivalentTo(otherDerivedCRS->d->baseCRS_.get(),
-                                       criterion) &&
+                                        criterion) &&
            d->derivingConversion_->_isEquivalentTo(
                otherDerivedCRS->d->derivingConversion_.get(), criterion);
 }
@@ -2047,8 +2050,9 @@ void CompoundCRS::_exportToPROJString(
 
 // ---------------------------------------------------------------------------
 
-bool CompoundCRS::_isEquivalentTo(const util::IComparable *other,
-                                 util::IComparable::Criterion criterion) const {
+bool CompoundCRS::_isEquivalentTo(
+    const util::IComparable *other,
+    util::IComparable::Criterion criterion) const {
     auto otherCompoundCRS = dynamic_cast<const CompoundCRS *>(other);
     if (otherCompoundCRS == nullptr ||
         !ObjectUsage::_isEquivalentTo(other, criterion)) {
@@ -2061,7 +2065,7 @@ bool CompoundCRS::_isEquivalentTo(const util::IComparable *other,
     }
     for (size_t i = 0; i < components.size(); i++) {
         if (!components[i]->_isEquivalentTo(otherComponents[i].get(),
-                                           criterion)) {
+                                            criterion)) {
             return false;
         }
     }
@@ -2369,16 +2373,16 @@ void BoundCRS::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool BoundCRS::_isEquivalentTo(const util::IComparable *other,
-                              util::IComparable::Criterion criterion) const {
+                               util::IComparable::Criterion criterion) const {
     auto otherBoundCRS = dynamic_cast<const BoundCRS *>(other);
     if (otherBoundCRS == nullptr ||
         !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
     }
     return d->baseCRS()->_isEquivalentTo(otherBoundCRS->d->baseCRS().get(),
-                                        criterion) &&
+                                         criterion) &&
            d->hubCRS()->_isEquivalentTo(otherBoundCRS->d->hubCRS().get(),
-                                       criterion) &&
+                                        criterion) &&
            d->transformation()->_isEquivalentTo(
                otherBoundCRS->d->transformation().get(), criterion);
 }
@@ -2910,8 +2914,9 @@ void TemporalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
-bool TemporalCRS::_isEquivalentTo(const util::IComparable *other,
-                                 util::IComparable::Criterion criterion) const {
+bool TemporalCRS::_isEquivalentTo(
+    const util::IComparable *other,
+    util::IComparable::Criterion criterion) const {
     auto otherTemporalCRS = dynamic_cast<const TemporalCRS *>(other);
     return otherTemporalCRS != nullptr &&
            SingleCRS::baseIsEquivalentTo(other, criterion);

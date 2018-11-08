@@ -185,7 +185,8 @@ class PROJ_GCC_DLL WKTFormatter {
         WKT2_2018_SIMPLIFIED,
 
         /** WKT1 as traditionally output by GDAL, deriving from OGC 01-009.
-            A notable departuPROJ_GCC_DLLre from WKT1_GDAL with respect to OGC 01-009 is
+            A notable departuPROJ_GCC_DLLre from WKT1_GDAL with respect to OGC
+           01-009 is
             that in WKT1_GDAL, the unit of the PRIMEM value is always degrees.
            */
         WKT1_GDAL,
@@ -239,11 +240,13 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL void popOutputId();
     PROJ_INTERNAL bool outputId() const;
 
-    PROJ_INTERNAL void pushAxisLinearUnit(const common::UnitOfMeasureNNPtr &unit);
+    PROJ_INTERNAL void
+    pushAxisLinearUnit(const common::UnitOfMeasureNNPtr &unit);
     PROJ_INTERNAL void popAxisLinearUnit();
     PROJ_INTERNAL const common::UnitOfMeasureNNPtr &axisLinearUnit() const;
 
-    PROJ_INTERNAL void pushAxisAngularUnit(const common::UnitOfMeasureNNPtr &unit);
+    PROJ_INTERNAL void
+    pushAxisAngularUnit(const common::UnitOfMeasureNNPtr &unit);
     PROJ_INTERNAL void popAxisAngularUnit();
     PROJ_INTERNAL const common::UnitOfMeasureNNPtr &axisAngularUnit() const;
 
@@ -395,8 +398,8 @@ class PROJ_GCC_DLL PROJStringFormatter {
 
   protected:
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL explicit PROJStringFormatter(Convention conventionIn,
-                                 const DatabaseContextPtr &dbContext);
+    PROJ_INTERNAL explicit PROJStringFormatter(
+        Convention conventionIn, const DatabaseContextPtr &dbContext);
     PROJStringFormatter(const PROJStringFormatter &other) = delete;
 
     INLINED_MAKE_UNIQUE
@@ -564,9 +567,9 @@ class PROJ_GCC_DLL WKTNode {
                                             size_t indexStart = 0);
 
   protected:
-    PROJ_INTERNAL static WKTNodeNNPtr createFrom(const std::string &wkt, size_t indexStart,
-                                   int recLevel,
-                                   size_t &indexEnd); // throw(ParsingException)
+    PROJ_INTERNAL static WKTNodeNNPtr
+    createFrom(const std::string &wkt, size_t indexStart, int recLevel,
+               size_t &indexEnd); // throw(ParsingException)
 
   private:
     friend class WKTParser;
@@ -680,8 +683,9 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_INTERNAL void attachPJContext(void *pjCtxt);
 
     PROJ_INTERNAL bool lookForGridAlternative(const std::string &officialName,
-                                std::string &projFilename,
-                                std::string &projFormat, bool &inverse) const;
+                                              std::string &projFilename,
+                                              std::string &projFormat,
+                                              bool &inverse) const;
 
     PROJ_DLL bool lookForGridInfo(const std::string &projFilename,
                                   std::string &fullFilename,
@@ -689,12 +693,13 @@ class PROJ_GCC_DLL DatabaseContext {
                                   bool &directDownload, bool &openLicense,
                                   bool &gridAvailable) const;
 
-    PROJ_INTERNAL std::string getAliasFromOfficialName(const std::string &officialName,
-                                         const std::string &tableName,
-                                         const std::string &source) const;
+    PROJ_INTERNAL std::string
+    getAliasFromOfficialName(const std::string &officialName,
+                             const std::string &tableName,
+                             const std::string &source) const;
 
     PROJ_INTERNAL bool isKnownName(const std::string &name,
-                     const std::string &tableName) const;
+                                   const std::string &tableName) const;
 
     //! @endcond
 
@@ -882,13 +887,14 @@ class PROJ_GCC_DLL AuthorityFactory {
 
   protected:
     PROJ_INTERNAL AuthorityFactory(const DatabaseContextNNPtr &context,
-                     const std::string &authorityName);
+                                   const std::string &authorityName);
 
-    PROJ_INTERNAL crs::CRSNNPtr createCoordinateReferenceSystem(const std::string &code,
-                                                  bool allowCompound) const;
+    PROJ_INTERNAL crs::CRSNNPtr
+    createCoordinateReferenceSystem(const std::string &code,
+                                    bool allowCompound) const;
 
-    PROJ_INTERNAL crs::GeodeticCRSNNPtr createGeodeticCRS(const std::string &code,
-                                            bool geographicOnly) const;
+    PROJ_INTERNAL crs::GeodeticCRSNNPtr
+    createGeodeticCRS(const std::string &code, bool geographicOnly) const;
 
     PROJ_INTERNAL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code, bool allowConcatenated,

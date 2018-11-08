@@ -101,8 +101,8 @@ std::unique_ptr<T> make_unique(Args &&... args) {
 }
 
 PROJ_FOR_TEST std::string replaceAll(const std::string &str,
-                                const std::string &before,
-                                const std::string &after);
+                                     const std::string &before,
+                                     const std::string &after);
 
 size_t ci_find(const std::string &osStr, const char *needle) noexcept;
 
@@ -136,7 +136,7 @@ PROJ_FOR_TEST std::string tolower(const std::string &osStr);
 std::string toupper(const std::string &osStr);
 
 PROJ_FOR_TEST std::vector<std::string> split(const std::string &osStr,
-                                        char separator);
+                                             char separator);
 
 bool ci_equal(const char *a, const char *b) noexcept;
 
@@ -146,7 +146,8 @@ bool ci_equal(const char *a, const std::string &b) = delete;
 
 PROJ_FOR_TEST bool ci_equal(const std::string &a, const char *b) noexcept;
 
-PROJ_FOR_TEST bool ci_equal(const std::string &a, const std::string &b) noexcept;
+PROJ_FOR_TEST bool ci_equal(const std::string &a,
+                            const std::string &b) noexcept;
 
 std::string stripQuotes(const std::string &osStr);
 

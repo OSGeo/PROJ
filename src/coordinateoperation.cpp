@@ -1034,9 +1034,9 @@ bool OperationParameterValue::_isEquivalentTo(
         return false;
     }
     return d->parameter->_isEquivalentTo(otherOPV->d->parameter.get(),
-                                        criterion) &&
+                                         criterion) &&
            d->parameterValue->_isEquivalentTo(otherOPV->d->parameterValue.get(),
-                                             criterion);
+                                              criterion);
 }
 //! @endcond
 
@@ -9825,7 +9825,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
         geogSrc->datum()->_isEquivalentTo(
             geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT) &&
         !srcCS->_isEquivalentTo(dstCS.get(),
-                               util::IComparable::Criterion::EQUIVALENT)) {
+                                util::IComparable::Criterion::EQUIVALENT)) {
         auto srcOrder = srcCS->axisOrder();
         auto dstOrder = dstCS->axisOrder();
         if ((srcOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST &&
@@ -10342,8 +10342,8 @@ CoordinateOperationFactory::Private::createOperations(
         const auto &hubSrc = boundSrc->hubCRS();
         auto hubSrcVert = dynamic_cast<const crs::VerticalCRS *>(hubSrc.get());
         if (baseSrcVert && hubSrcVert &&
-            vertDst->_isEquivalentTo(hubSrcVert,
-                                    util::IComparable::Criterion::EQUIVALENT)) {
+            vertDst->_isEquivalentTo(
+                hubSrcVert, util::IComparable::Criterion::EQUIVALENT)) {
             res.emplace_back(boundSrc->transformation());
             return res;
         }
@@ -10669,7 +10669,8 @@ bool InverseCoordinateOperation::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherICO = dynamic_cast<const InverseCoordinateOperation *>(other);
-    if (otherICO == nullptr || !ObjectUsage::_isEquivalentTo(other, criterion)) {
+    if (otherICO == nullptr ||
+        !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
     }
     return inverse()->_isEquivalentTo(otherICO->inverse().get(), criterion);

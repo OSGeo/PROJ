@@ -95,7 +95,8 @@ using GeographicExtentNNPtr = util::nn<GeographicExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/GeographicExtent.html)
  * from \ref GeoAPI
  */
-class PROJ_GCC_DLL GeographicExtent : public util::BaseObject, public util::IComparable {
+class PROJ_GCC_DLL GeographicExtent : public util::BaseObject,
+                                      public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeographicExtent() override;
@@ -105,10 +106,10 @@ class PROJ_GCC_DLL GeographicExtent : public util::BaseObject, public util::ICom
     // use
 
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override = 0;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT) const override = 0;
     //! @endcond
 
     /** \brief Returns whether this extent contains the other one. */
@@ -164,19 +165,22 @@ class PROJ_GCC_DLL GeographicBoundingBox : public GeographicExtent {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
-    PROJ_INTERNAL bool contains(const GeographicExtentNNPtr &other) const override;
+    PROJ_INTERNAL bool
+    contains(const GeographicExtentNNPtr &other) const override;
 
-    PROJ_INTERNAL bool intersects(const GeographicExtentNNPtr &other) const override;
+    PROJ_INTERNAL bool
+    intersects(const GeographicExtentNNPtr &other) const override;
 
     PROJ_INTERNAL GeographicExtentPtr
     intersection(const GeographicExtentNNPtr &other) const override;
 
   protected:
-    PROJ_INTERNAL GeographicBoundingBox(double west, double south, double east, double north);
+    PROJ_INTERNAL GeographicBoundingBox(double west, double south, double east,
+                                        double north);
     INLINED_MAKE_SHARED
 
   private:
@@ -197,7 +201,8 @@ using TemporalExtentNNPtr = util::nn<TemporalExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/TemporalExtent.html)
  * from \ref GeoAPI
  */
-class PROJ_GCC_DLL TemporalExtent : public util::BaseObject, public util::IComparable {
+class PROJ_GCC_DLL TemporalExtent : public util::BaseObject,
+                                    public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalExtent() override;
@@ -212,8 +217,8 @@ class PROJ_GCC_DLL TemporalExtent : public util::BaseObject, public util::ICompa
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
     PROJ_DLL bool contains(const TemporalExtentNNPtr &other) const;
@@ -221,7 +226,8 @@ class PROJ_GCC_DLL TemporalExtent : public util::BaseObject, public util::ICompa
     PROJ_DLL bool intersects(const TemporalExtentNNPtr &other) const;
 
   protected:
-    PROJ_INTERNAL TemporalExtent(const std::string &start, const std::string &stop);
+    PROJ_INTERNAL TemporalExtent(const std::string &start,
+                                 const std::string &stop);
     INLINED_MAKE_SHARED
 
   private:
@@ -242,7 +248,8 @@ using VerticalExtentNNPtr = util::nn<VerticalExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/VerticalExtent.html)
  * from \ref GeoAPI
  */
-class PROJ_GCC_DLL VerticalExtent : public util::BaseObject, public util::IComparable {
+class PROJ_GCC_DLL VerticalExtent : public util::BaseObject,
+                                    public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalExtent() override;
@@ -259,8 +266,8 @@ class PROJ_GCC_DLL VerticalExtent : public util::BaseObject, public util::ICompa
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
     PROJ_DLL bool contains(const VerticalExtentNNPtr &other) const;
@@ -269,7 +276,7 @@ class PROJ_GCC_DLL VerticalExtent : public util::BaseObject, public util::ICompa
 
   protected:
     PROJ_INTERNAL VerticalExtent(double minimumValue, double maximumValue,
-                   const common::UnitOfMeasureNNPtr &unitIn);
+                                 const common::UnitOfMeasureNNPtr &unitIn);
     INLINED_MAKE_SHARED
 
   private:
@@ -319,8 +326,8 @@ class PROJ_GCC_DLL Extent : public util::BaseObject, public util::IComparable {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
     PROJ_DLL bool contains(const ExtentNNPtr &other) const;
@@ -353,7 +360,8 @@ using IdentifierNNPtr = util::nn<IdentifierPtr>;
  * \remark Implements Identifier as described in \ref ISO_19111_2018 but which
  * originates from \ref ISO_19115
  */
-class PROJ_GCC_DLL Identifier : public util::BaseObject, public io::IWKTExportable {
+class PROJ_GCC_DLL Identifier : public util::BaseObject,
+                                public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL Identifier(const Identifier &other);
@@ -389,7 +397,7 @@ class PROJ_GCC_DLL Identifier : public util::BaseObject, public io::IWKTExportab
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        PROJ_INTERNAL  static std::string
+        PROJ_INTERNAL static std::string
         canonicalizeName(const std::string &str);
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
@@ -399,7 +407,7 @@ class PROJ_GCC_DLL Identifier : public util::BaseObject, public io::IWKTExportab
 
   protected:
     PROJ_INTERNAL explicit Identifier(const std::string &codeIn,
-                        const util::PropertyMap &properties);
+                                      const util::PropertyMap &properties);
 
     PROJ_FRIEND_OPTIONAL(Identifier);
     INLINED_MAKE_SHARED

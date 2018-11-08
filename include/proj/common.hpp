@@ -101,7 +101,7 @@ class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
 
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter,
-                      const std::string &unitType = std::string())
+                                    const std::string &unitType = std::string())
         const; // throw(io::FormattingException)
 
     PROJ_INTERNAL std::string exportToPROJString() const;
@@ -154,8 +154,8 @@ class Measure : public util::BaseObject {
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const Measure &other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -310,13 +310,13 @@ class IdentifiedObject : public util::BaseObject,
 
     bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
 
     bool
     _isEquivalentTo(const IdentifiedObject *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) PROJ_CONST_DECL;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) PROJ_CONST_DECL;
     //! @endcond
 
   protected:
@@ -362,15 +362,15 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
            const metadata::ExtentPtr &extent);
 
     PROJ_PRIVATE :
-    //! @cond Doxygen_Suppress
+        //! @cond Doxygen_Suppress
         void
         _exportToWKT(io::WKTFormatter *formatter)
             const; // throw(io::FormattingException)
 
     bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
@@ -415,8 +415,8 @@ class ObjectUsage : public IdentifiedObject {
     //! @cond Doxygen_Suppress
     bool
     _isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:

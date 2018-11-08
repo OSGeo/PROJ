@@ -360,7 +360,7 @@ bool Measure::operator==(const Measure &other) PROJ_CONST_DEFN {
  * @return true if objects are equivalent.
  */
 bool Measure::_isEquivalentTo(const Measure &other,
-                             util::IComparable::Criterion criterion) const {
+                              util::IComparable::Criterion criterion) const {
     if (criterion == util::IComparable::Criterion::STRICT) {
         return operator==(other);
     }
@@ -826,7 +826,7 @@ bool IdentifiedObject::_isEquivalentTo(
 // ---------------------------------------------------------------------------
 
 bool IdentifiedObject::_isEquivalentTo(const IdentifiedObject *otherIdObj,
-                                      util::IComparable::Criterion criterion)
+                                       util::IComparable::Criterion criterion)
     PROJ_CONST_DEFN {
     if (criterion == util::IComparable::Criterion::STRICT) {
         if (!ci_equal(nameStr(), otherIdObj->nameStr())) {
@@ -1103,8 +1103,9 @@ void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool ObjectUsage::_isEquivalentTo(const util::IComparable *other,
-                                 util::IComparable::Criterion criterion) const {
+bool ObjectUsage::_isEquivalentTo(
+    const util::IComparable *other,
+    util::IComparable::Criterion criterion) const {
     auto otherObjUsage = dynamic_cast<const ObjectUsage *>(other);
     if (!otherObjUsage)
         return false;
