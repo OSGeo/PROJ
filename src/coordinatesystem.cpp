@@ -387,7 +387,7 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool CoordinateSystemAxis::isEquivalentTo(
+bool CoordinateSystemAxis::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherCSA = dynamic_cast<const CoordinateSystemAxis *>(other);
@@ -400,7 +400,7 @@ bool CoordinateSystemAxis::isEquivalentTo(
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
-        if (!IdentifiedObject::isEquivalentTo(other, criterion)) {
+        if (!IdentifiedObject::_isEquivalentTo(other, criterion)) {
             return false;
         }
         if (abbreviation() != otherCSA->abbreviation()) {
@@ -519,12 +519,12 @@ void CoordinateSystem::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool CoordinateSystem::isEquivalentTo(
+bool CoordinateSystem::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherCS = dynamic_cast<const CoordinateSystem *>(other);
     if (otherCS == nullptr ||
-        !IdentifiedObject::isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
         return false;
     }
     const auto &list = axisList();
@@ -536,7 +536,7 @@ bool CoordinateSystem::isEquivalentTo(
         return false;
     }
     for (size_t i = 0; i < list.size(); i++) {
-        if (!list[i]->isEquivalentTo(otherList[i].get(), criterion)) {
+        if (!list[i]->_isEquivalentTo(otherList[i].get(), criterion)) {
             return false;
         }
     }
@@ -710,6 +710,7 @@ EllipsoidalCS::createLongitudeLatitude(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 /** \brief Return the axis order in an enumerated way. */
 EllipsoidalCS::AxisOrder EllipsoidalCS::axisOrder() const {
     const auto &l_axisList = CoordinateSystem::getPrivate()->axisList;
@@ -732,6 +733,7 @@ EllipsoidalCS::AxisOrder EllipsoidalCS::axisOrder() const {
 
     return AxisOrder::OTHER;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

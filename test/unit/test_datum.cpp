@@ -44,7 +44,7 @@ namespace {
 struct UnrelatedObject : public IComparable {
     UnrelatedObject() = default;
 
-    bool isEquivalentTo(const IComparable *, Criterion) const override {
+    bool _isEquivalentTo(const IComparable *, Criterion) const override {
         assert(false);
         return false;
     }

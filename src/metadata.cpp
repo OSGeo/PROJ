@@ -236,7 +236,7 @@ GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool GeographicBoundingBox::isEquivalentTo(const util::IComparable *other,
+bool GeographicBoundingBox::_isEquivalentTo(const util::IComparable *other,
                                            util::IComparable::Criterion) const {
     auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other);
     if (!otherExtent)
@@ -501,7 +501,7 @@ VerticalExtent::create(double minimumIn, double maximumIn,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool VerticalExtent::isEquivalentTo(const util::IComparable *other,
+bool VerticalExtent::_isEquivalentTo(const util::IComparable *other,
                                     util::IComparable::Criterion) const {
     auto otherExtent = dynamic_cast<const VerticalExtent *>(other);
     if (!otherExtent)
@@ -586,7 +586,7 @@ TemporalExtentNNPtr TemporalExtent::create(const std::string &start,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool TemporalExtent::isEquivalentTo(const util::IComparable *other,
+bool TemporalExtent::_isEquivalentTo(const util::IComparable *other,
                                     util::IComparable::Criterion) const {
     auto otherExtent = dynamic_cast<const TemporalExtent *>(other);
     if (!otherExtent)
@@ -733,7 +733,7 @@ Extent::createFromBBOX(double west, double south, double east, double north,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool Extent::isEquivalentTo(const util::IComparable *other,
+bool Extent::_isEquivalentTo(const util::IComparable *other,
                             util::IComparable::Criterion criterion) const {
     auto otherExtent = dynamic_cast<const Extent *>(other);
     bool ret =
@@ -748,15 +748,15 @@ bool Extent::isEquivalentTo(const util::IComparable *other,
              otherExtent->d->temporalElements_.size());
     if (ret) {
         for (size_t i = 0; ret && i < d->geographicElements_.size(); ++i) {
-            ret = d->geographicElements_[i]->isEquivalentTo(
+            ret = d->geographicElements_[i]->_isEquivalentTo(
                 otherExtent->d->geographicElements_[i].get(), criterion);
         }
         for (size_t i = 0; ret && i < d->verticalElements_.size(); ++i) {
-            ret = d->verticalElements_[i]->isEquivalentTo(
+            ret = d->verticalElements_[i]->_isEquivalentTo(
                 otherExtent->d->verticalElements_[i].get(), criterion);
         }
         for (size_t i = 0; ret && i < d->temporalElements_.size(); ++i) {
-            ret = d->temporalElements_[i]->isEquivalentTo(
+            ret = d->temporalElements_[i]->_isEquivalentTo(
                 otherExtent->d->temporalElements_[i].get(), criterion);
         }
     }

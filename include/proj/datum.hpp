@@ -74,7 +74,7 @@ class PROJ_GCC_DLL Datum : public common::ObjectUsage {
   protected:
     PROJ_INTERNAL Datum();
 
-    PROJ_INTERNAL bool _isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool __isEquivalentTo(const util::IComparable *other,
                          util::IComparable::Criterion criterion =
                              util::IComparable::Criterion::STRICT) const;
 
@@ -185,25 +185,21 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
     PROJ_DLL static const PrimeMeridianNNPtr GREENWICH;
     PROJ_DLL static const PrimeMeridianNNPtr PARIS;
 
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
-        const override; // throw(io::FormattingException)
-    //! @endcond
-
-    //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-    //! @endcond
-
     PROJ_PRIVATE :
 
+    //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
         _exportToPROJString(io::PROJStringFormatter *formatter)
             const override; // throw(FormattingException)
 
-    //! @cond Doxygen_Suppress
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
     PROJ_INTERNAL static std::string getPROJStringWellKnownName(const common::Angle &angle);
     //! @endcond
 
@@ -291,21 +287,20 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
     PROJ_DLL static const EllipsoidNNPtr WGS84;
     PROJ_DLL static const EllipsoidNNPtr GRS1980;
 
+
+    PROJ_PRIVATE :
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-    //! @endcond
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
-    //! @endcond
 
-    PROJ_PRIVATE :
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
                        const override; // throw(FormattingException)
+    //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -393,11 +388,9 @@ class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-    //! @endcond
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -459,13 +452,11 @@ class PROJ_GCC_DLL DynamicGeodeticReferenceFrame final : public GeodeticReferenc
            const util::optional<std::string> &deformationModelNameIn);
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
-    //! @endcond
 
-    //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
                         //! @endcond
@@ -535,11 +526,6 @@ class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
 
     PROJ_DLL const util::optional<RealizationMethod> &realizationMethod() const;
 
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
-        const override; // throw(io::FormattingException)
-    //! @endcond
-
     // non-standard
     PROJ_DLL static VerticalReferenceFrameNNPtr
     create(const util::PropertyMap &properties,
@@ -549,10 +535,13 @@ class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
                util::optional<RealizationMethod>());
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
     //! @endcond
 
   protected:
@@ -604,13 +593,11 @@ class PROJ_GCC_DLL DynamicVerticalReferenceFrame final : public VerticalReferenc
            const util::optional<std::string> &deformationModelNameIn);
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
-    //! @endcond
 
-    //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
                         //! @endcond
@@ -656,11 +643,6 @@ class PROJ_GCC_DLL TemporalDatum final : public Datum {
     PROJ_DLL const common::DateTime &temporalOrigin() const;
     PROJ_DLL const std::string &calendar() const;
 
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
-        const override; // throw(io::FormattingException)
-    //! @endcond
-
     PROJ_DLL static const std::string CALENDAR_PROLEPTIC_GREGORIAN;
 
     // non-standard
@@ -670,8 +652,11 @@ class PROJ_GCC_DLL TemporalDatum final : public Datum {
            const std::string &calendarIn);
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -708,11 +693,6 @@ class PROJ_GCC_DLL EngineeringDatum final : public Datum {
     PROJ_DLL ~EngineeringDatum() override;
     //! @endcond
 
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
-        const override; // throw(io::FormattingException)
-    //! @endcond
-
     // non-standard
     PROJ_DLL static EngineeringDatumNNPtr
     create(const util::PropertyMap &properties,
@@ -720,8 +700,11 @@ class PROJ_GCC_DLL EngineeringDatum final : public Datum {
                util::optional<std::string>());
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -754,11 +737,6 @@ class PROJ_GCC_DLL ParametricDatum final : public Datum {
     PROJ_DLL ~ParametricDatum() override;
     //! @endcond
 
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
-        const override; // throw(io::FormattingException)
-    //! @endcond
-
     // non-standard
     PROJ_DLL static ParametricDatumNNPtr
     create(const util::PropertyMap &properties,
@@ -766,11 +744,15 @@ class PROJ_GCC_DLL ParametricDatum final : public Datum {
                util::optional<std::string>());
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
+
 
   protected:
     PROJ_INTERNAL ParametricDatum();

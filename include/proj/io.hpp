@@ -413,8 +413,8 @@ class PROJ_GCC_DLL PROJStringFormatter {
 class PROJ_GCC_DLL FormattingException : public util::Exception {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL explicit FormattingException(const char *message);
-    PROJ_DLL explicit FormattingException(const std::string &message);
+    PROJ_INTERNAL explicit FormattingException(const char *message);
+    PROJ_INTERNAL explicit FormattingException(const std::string &message);
     PROJ_DLL FormattingException(const FormattingException &other);
     PROJ_DLL virtual ~FormattingException() override;
 
@@ -430,8 +430,8 @@ class PROJ_GCC_DLL FormattingException : public util::Exception {
 class PROJ_GCC_DLL ParsingException : public util::Exception {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL explicit ParsingException(const char *message);
-    PROJ_DLL explicit ParsingException(const std::string &message);
+    PROJ_INTERNAL explicit ParsingException(const char *message);
+    PROJ_INTERNAL explicit ParsingException(const std::string &message);
     PROJ_DLL ParsingException(const ParsingException &other);
     PROJ_DLL virtual ~ParsingException() override;
     //! @endcond

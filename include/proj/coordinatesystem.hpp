@@ -185,14 +185,14 @@ class PROJ_GCC_DLL CoordinateSystemAxis final : public common::IdentifiedObject 
            const common::UnitOfMeasure &unitIn,
            const MeridianPtr &meridianIn = nullptr);
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-    //! @endcond
+    PROJ_PRIVATE:
 
     //! @cond Doxygen_Suppress
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter, int order,
                       bool disableAbbrev) const;
 
@@ -213,7 +213,7 @@ class PROJ_GCC_DLL CoordinateSystemAxis final : public common::IdentifiedObject 
     CoordinateSystemAxis(const CoordinateSystemAxis &other) = delete;
     CoordinateSystemAxis &operator=(const CoordinateSystemAxis &other) = delete;
 
-    CoordinateSystemAxis();
+    PROJ_INTERNAL CoordinateSystemAxis();
     /* cppcheck-suppress unusedPrivateFunction */
     INLINED_MAKE_SHARED
 };
@@ -239,17 +239,16 @@ class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject {
     PROJ_DLL const std::vector<CoordinateSystemAxisNNPtr> &
     axisList() PROJ_CONST_DECL;
 
-    //! @cond Doxygen_Suppress
+    PROJ_PRIVATE:
 
+    //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
-    PROJ_DLL virtual std::string getWKT2Type(bool) const = 0;
-    //! @endcond
+    PROJ_INTERNAL virtual std::string getWKT2Type(bool) const = 0;
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -350,6 +349,8 @@ class PROJ_GCC_DLL EllipsoidalCS final : public CoordinateSystem {
     PROJ_DLL static EllipsoidalCSNNPtr
     createLongitudeLatitude(const common::UnitOfMeasure &unit);
 
+    //! @cond Doxygen_Suppress
+
     /** \brief Typical axis order. */
     enum class AxisOrder {
         /** Latitude(North), Longitude(East) */
@@ -365,6 +366,7 @@ class PROJ_GCC_DLL EllipsoidalCS final : public CoordinateSystem {
     };
 
     PROJ_INTERNAL AxisOrder axisOrder() const;
+    //! @endcond
 
   protected:
     PROJ_INTERNAL explicit EllipsoidalCS(

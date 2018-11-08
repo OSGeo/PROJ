@@ -96,8 +96,7 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
     createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const;
     PROJ_DLL CRSNNPtr stripVerticalComponent() const;
 
-    /** \brief Return a shallow clone of this object. */
-    PROJ_DLL virtual CRSNNPtr shallowClone() const = 0;
+    PROJ_DLL CRSNNPtr shallowClone() const;
 
     PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() PROJ_CONST_DECL;
 
@@ -112,6 +111,8 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
     PROJ_INTERNAL CRS(const CRS &other);
     friend class BoundCRS;
     PROJ_INTERNAL void setCanonicalBoundCRS(const BoundCRSNNPtr &boundCRS);
+
+    PROJ_INTERNAL virtual CRSNNPtr _shallowClone() const = 0;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -149,7 +150,7 @@ class PROJ_GCC_DLL SingleCRS : public CRS {
               const cs::CoordinateSystemNNPtr &csIn);
     PROJ_INTERNAL SingleCRS(const SingleCRS &other);
 
-    PROJ_INTERNAL bool _isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool baseIsEquivalentTo(const util::IComparable *other,
                          util::IComparable::Criterion criterion =
                              util::IComparable::Criterion::STRICT) const;
 
@@ -223,13 +224,6 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS, public io::IPROJStrin
            const datum::DatumEnsemblePtr &datumEnsemble,
            const cs::CartesianCSNNPtr &cs);
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
     PROJ_DLL static const GeodeticCRSNNPtr EPSG_4978; // WGS 84 Geocentric
 
     PROJ_PRIVATE :
@@ -246,6 +240,11 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS, public io::IPROJStrin
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
     //! @endcond
 
   protected:
@@ -259,9 +258,12 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS, public io::IPROJStrin
                 const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::CartesianCSNNPtr &csIn);
     PROJ_INTERNAL GeodeticCRS(const GeodeticCRS &other);
-    INLINED_MAKE_SHARED
 
     PROJ_INTERNAL static GeodeticCRSNNPtr createEPSG_4978();
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -306,8 +308,6 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4807; // NTF Paris
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4979; // WGS 84 3D
 
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
@@ -327,7 +327,6 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
                   const datum::DatumEnsemblePtr &datumEnsembleIn,
                   const cs::EllipsoidalCSNNPtr &csIn);
     PROJ_INTERNAL GeographicCRS(const GeographicCRS &other);
-    INLINED_MAKE_SHARED
 
     PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4267();
     PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4269();
@@ -335,6 +334,10 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
     PROJ_INTERNAL static GeographicCRSNNPtr createOGC_CRS84();
     PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4807();
     PROJ_INTERNAL static GeographicCRSNNPtr createEPSG_4979();
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -373,11 +376,6 @@ class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS, public io::IPROJStrin
     PROJ_DLL const std::vector<operation::PointMotionOperationNNPtr> &
     velocityModel() PROJ_CONST_DECL;
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
     PROJ_DLL static VerticalCRSNNPtr
     create(const util::PropertyMap &properties,
            const datum::VerticalReferenceFrameNNPtr &datumIn,
@@ -389,8 +387,6 @@ class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS, public io::IPROJStrin
            const datum::DatumEnsemblePtr &datumEnsembleIn,
            const cs::VerticalCSNNPtr &csIn);
 
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
@@ -398,6 +394,11 @@ class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS, public io::IPROJStrin
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     //! @endcond
 
@@ -411,6 +412,8 @@ class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS, public io::IPROJStrin
         const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -440,10 +443,6 @@ class PROJ_GCC_DLL DerivedCRS : virtual public SingleCRS {
     PROJ_DLL const SingleCRSNNPtr &baseCRS() PROJ_CONST_DECL;
     PROJ_DLL const operation::ConversionNNPtr derivingConversion() const;
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         const operation::ConversionNNPtr &
@@ -464,6 +463,11 @@ class PROJ_GCC_DLL DerivedCRS : virtual public SingleCRS {
     PROJ_INTERNAL void baseExportToWKT(
         io::WKTFormatter *&formatter, const std::string &keyword,
         const std::string &baseKeyword) const; // throw(FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -510,13 +514,6 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS, public io::IPROJStrin
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::CartesianCSNNPtr &csIn);
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
@@ -537,7 +534,14 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS, public io::IPROJStrin
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
     INLINED_MAKE_SHARED
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -577,19 +581,19 @@ class PROJ_GCC_DLL TemporalCRS : virtual public SingleCRS {
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
   protected:
     PROJ_INTERNAL TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
                 const cs::TemporalCSNNPtr &csIn);
     PROJ_INTERNAL TemporalCRS(const TemporalCRS &other);
 
     INLINED_MAKE_SHARED
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -634,17 +638,17 @@ class PROJ_GCC_DLL EngineeringCRS : virtual public SingleCRS {
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
   protected:
     PROJ_INTERNAL EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
                    const cs::CoordinateSystemNNPtr &csIn);
     PROJ_INTERNAL EngineeringCRS(const EngineeringCRS &other);
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     INLINED_MAKE_SHARED
 
@@ -690,17 +694,17 @@ class PROJ_GCC_DLL ParametricCRS : virtual public SingleCRS {
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
   protected:
     PROJ_INTERNAL ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
                   const cs::ParametricCSNNPtr &csIn);
     PROJ_INTERNAL ParametricCRS(const ParametricCRS &other);
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     INLINED_MAKE_SHARED
 
@@ -744,16 +748,9 @@ class PROJ_GCC_DLL CompoundCRS final : public CRS, public io::IPROJStringExporta
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
     PROJ_DLL static CompoundCRSNNPtr
     create(const util::PropertyMap &properties,
            const std::vector<CRSNNPtr> &components);
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
 
   protected:
     // relaxed: standard say SingleCRSNNPtr
@@ -762,6 +759,13 @@ class PROJ_GCC_DLL CompoundCRS final : public CRS, public io::IPROJStringExporta
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     INLINED_MAKE_SHARED
 
@@ -815,11 +819,6 @@ class PROJ_GCC_DLL BoundCRS final : public CRS, public io::IPROJStringExportable
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
     PROJ_DLL static BoundCRSNNPtr
     create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
            const operation::TransformationNNPtr &transformationIn);
@@ -831,21 +830,27 @@ class PROJ_GCC_DLL BoundCRS final : public CRS, public io::IPROJStringExportable
     PROJ_DLL static BoundCRSNNPtr
     createFromNadgrids(const CRSNNPtr &baseCRSIn, const std::string &filename);
 
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
   protected:
     PROJ_INTERNAL BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
              const operation::TransformationNNPtr &transformationIn);
     PROJ_INTERNAL BoundCRS(const BoundCRS &other);
-    INLINED_MAKE_SHARED
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     PROJ_INTERNAL BoundCRSNNPtr shallowCloneAsBoundCRS() const;
     PROJ_INTERNAL bool isTOWGS84Compatible() const;
     PROJ_INTERNAL std::string getHDatumPROJ4GRIDS() const;
     PROJ_INTERNAL std::string getVDatumPROJ4GRIDS() const;
+
+    INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -892,13 +897,6 @@ class PROJ_GCC_DLL DerivedGeodeticCRS final : public GeodeticCRS, public Derived
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
   protected:
     PROJ_INTERNAL DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
@@ -910,6 +908,13 @@ class PROJ_GCC_DLL DerivedGeodeticCRS final : public GeodeticCRS, public Derived
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     INLINED_MAKE_SHARED
 
@@ -954,13 +959,6 @@ class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS, public Der
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
   protected:
     PROJ_INTERNAL DerivedGeographicCRS(const GeodeticCRSNNPtr &baseCRSIn,
                          const operation::ConversionNNPtr &derivingConversionIn,
@@ -969,6 +967,13 @@ class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS, public Der
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     INLINED_MAKE_SHARED
 
@@ -1014,13 +1019,6 @@ class PROJ_GCC_DLL DerivedProjectedCRS final : public DerivedCRS,
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
   protected:
     PROJ_INTERNAL DerivedProjectedCRS(const ProjectedCRSNNPtr &baseCRSIn,
                         const operation::ConversionNNPtr &derivingConversionIn,
@@ -1029,6 +1027,13 @@ class PROJ_GCC_DLL DerivedProjectedCRS final : public DerivedCRS,
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     INLINED_MAKE_SHARED
 
@@ -1070,13 +1075,6 @@ class PROJ_GCC_DLL DerivedVerticalCRS final : public VerticalCRS, public Derived
         const override; // throw(io::FormattingException)
     //! @endcond
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
-
   protected:
     PROJ_INTERNAL DerivedVerticalCRS(const VerticalCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
@@ -1085,6 +1083,13 @@ class PROJ_GCC_DLL DerivedVerticalCRS final : public VerticalCRS, public Derived
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     INLINED_MAKE_SHARED
 
@@ -1144,13 +1149,6 @@ class PROJ_GCC_DLL DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
-    PROJ_DLL CRSNNPtr shallowClone() const override;
     //! @endcond
 
   protected:
@@ -1159,10 +1157,19 @@ class PROJ_GCC_DLL DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
                        const CSNNPtr &csIn);
     PROJ_INTERNAL DerivedCRSTemplate(const DerivedCRSTemplate &other);
 
+    PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
     INLINED_MAKE_SHARED
 
   private:
-    PROJ_OPAQUE_PRIVATE_DATA
+    struct PROJ_INTERNAL Private;
+    std::unique_ptr<Private> d;
+
     DerivedCRSTemplate &operator=(const DerivedCRSTemplate &other) = delete;
 };
 

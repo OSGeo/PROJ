@@ -152,8 +152,8 @@ class Measure : public util::BaseObject {
 
     PROJ_DLL bool operator==(const Measure &other) PROJ_CONST_DECL;
 
-    PROJ_DLL bool
-    isEquivalentTo(const Measure &other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const Measure &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const;
 
@@ -309,12 +309,12 @@ class IdentifiedObject : public util::BaseObject,
     void formatRemarks(io::WKTFormatter *formatter) const;
 
     bool
-    isEquivalentTo(const util::IComparable *other,
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
     bool
-    isEquivalentTo(const IdentifiedObject *other,
+    _isEquivalentTo(const IdentifiedObject *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) PROJ_CONST_DECL;
     //! @endcond
@@ -361,17 +361,17 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
     create(const util::optional<std::string> &scopeIn,
            const metadata::ExtentPtr &extent);
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-
     PROJ_PRIVATE :
-        //! @cond Doxygen_Suppress
+    //! @cond Doxygen_Suppress
         void
         _exportToWKT(io::WKTFormatter *formatter)
             const; // throw(io::FormattingException)
-                   //! @endcond
+
+    bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+    //! @endcond
 
   protected:
     //! @cond Doxygen_Suppress
@@ -414,7 +414,7 @@ class ObjectUsage : public IdentifiedObject {
 
     //! @cond Doxygen_Suppress
     bool
-    isEquivalentTo(const util::IComparable *other,
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond

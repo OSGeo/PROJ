@@ -651,5 +651,17 @@ IComparable::~IComparable() = default;
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns whether an object is equivalent to another one.
+ * @param other other object to compare to
+ * @param criterion comparaison criterion.
+ * @return true if objects are equivalent.
+ */
+bool IComparable::isEquivalentTo(const IComparable *other, 
+                                 Criterion criterion) const {
+    return _isEquivalentTo(other, criterion);
+}
+
+// ---------------------------------------------------------------------------
+
 } // namespace util
 NS_PROJ_END

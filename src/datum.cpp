@@ -184,11 +184,11 @@ void Datum::setAnchor(const util::optional<std::string> &anchor) {
 
 // ---------------------------------------------------------------------------
 
-bool Datum::_isEquivalentTo(const util::IComparable *other,
+bool Datum::__isEquivalentTo(const util::IComparable *other,
                             util::IComparable::Criterion criterion) const {
     auto otherDatum = dynamic_cast<const Datum *>(other);
     if (otherDatum == nullptr ||
-        !ObjectUsage::isEquivalentTo(other, criterion)) {
+        !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
@@ -218,7 +218,7 @@ bool Datum::_isEquivalentTo(const util::IComparable *other,
             return false;
         }
         if (conventionalRS() && otherDatum->conventionalRS() &&
-            conventionalRS()->isEquivalentTo(otherDatum->conventionalRS().get(),
+            conventionalRS()->_isEquivalentTo(otherDatum->conventionalRS().get(),
                                              criterion)) {
             return false;
         }
@@ -358,6 +358,7 @@ PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 void PrimeMeridian::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
@@ -372,19 +373,20 @@ void PrimeMeridian::_exportToPROJString(
         }
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool PrimeMeridian::isEquivalentTo(
+bool PrimeMeridian::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherPM = dynamic_cast<const PrimeMeridian *>(other);
     if (otherPM == nullptr ||
-        !IdentifiedObject::isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
         return false;
     }
-    return longitude().isEquivalentTo(otherPM->longitude(), criterion);
+    return longitude()._isEquivalentTo(otherPM->longitude(), criterion);
 }
 //! @endcond
 
@@ -768,6 +770,7 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 void Ellipsoid::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
@@ -793,6 +796,7 @@ void Ellipsoid::_exportToPROJString(
         }
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -821,14 +825,14 @@ EllipsoidNNPtr Ellipsoid::identify() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
+bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
                                util::IComparable::Criterion criterion) const {
     auto otherEllipsoid = dynamic_cast<const Ellipsoid *>(other);
     if (otherEllipsoid == nullptr ||
-        !IdentifiedObject::isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
         return false;
     }
-    if (!semiMajorAxis().isEquivalentTo(otherEllipsoid->semiMajorAxis(),
+    if (!semiMajorAxis()._isEquivalentTo(otherEllipsoid->semiMajorAxis(),
                                         criterion)) {
         return false;
     }
@@ -839,7 +843,7 @@ bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
             return false;
         }
         if (l_semiMinorAxis.has_value() && l_other_semiMinorAxis.has_value()) {
-            if (!l_semiMinorAxis->isEquivalentTo(*l_other_semiMinorAxis,
+            if (!l_semiMinorAxis->_isEquivalentTo(*l_other_semiMinorAxis,
                                                  criterion)) {
                 return false;
             }
@@ -854,13 +858,13 @@ bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
         }
         if (l_inverseFlattening.has_value() &&
             l_other_sinverseFlattening.has_value()) {
-            if (!l_inverseFlattening->isEquivalentTo(
+            if (!l_inverseFlattening->_isEquivalentTo(
                     *l_other_sinverseFlattening, criterion)) {
                 return false;
             }
         }
     } else {
-        if (!otherEllipsoid->computeSemiMinorAxis().isEquivalentTo(
+        if (!otherEllipsoid->computeSemiMinorAxis()._isEquivalentTo(
                 otherEllipsoid->computeSemiMinorAxis(), criterion)) {
             return false;
         }
@@ -872,7 +876,7 @@ bool Ellipsoid::isEquivalentTo(const util::IComparable *other,
         return false;
     }
     if (l_semiMedianAxis.has_value() && l_other_semiMedianAxis.has_value()) {
-        if (!l_semiMedianAxis->isEquivalentTo(*l_other_semiMedianAxis,
+        if (!l_semiMedianAxis->_isEquivalentTo(*l_other_semiMedianAxis,
                                               criterion)) {
             return false;
         }
@@ -1071,16 +1075,16 @@ void GeodeticReferenceFrame::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool GeodeticReferenceFrame::isEquivalentTo(
+bool GeodeticReferenceFrame::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherGRF = dynamic_cast<const GeodeticReferenceFrame *>(other);
-    if (otherGRF == nullptr || !Datum::isEquivalentTo(other, criterion)) {
+    if (otherGRF == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
         return false;
     }
-    return primeMeridian()->isEquivalentTo(otherGRF->primeMeridian().get(),
+    return primeMeridian()->_isEquivalentTo(otherGRF->primeMeridian().get(),
                                            criterion) &&
-           ellipsoid()->isEquivalentTo(otherGRF->ellipsoid().get(), criterion);
+           ellipsoid()->_isEquivalentTo(otherGRF->ellipsoid().get(), criterion);
 }
 //! @endcond
 
@@ -1154,15 +1158,15 @@ DynamicGeodeticReferenceFrame::deformationModelName() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool DynamicGeodeticReferenceFrame::isEquivalentTo(
+bool DynamicGeodeticReferenceFrame::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherDGRF = dynamic_cast<const DynamicGeodeticReferenceFrame *>(other);
     if (otherDGRF == nullptr ||
-        !GeodeticReferenceFrame::isEquivalentTo(other, criterion)) {
+        !GeodeticReferenceFrame::_isEquivalentTo(other, criterion)) {
         return false;
     }
-    return frameReferenceEpoch().isEquivalentTo(
+    return frameReferenceEpoch()._isEquivalentTo(
                otherDGRF->frameReferenceEpoch(), criterion) &&
            metadata::Identifier::isEquivalentName(
                *deformationModelName(), *otherDGRF->deformationModelName());
@@ -1362,12 +1366,12 @@ DatumEnsembleNNPtr DatumEnsemble::create(
                 throw util::Exception(
                     "ensemble should have consistent datum types");
             }
-            if (!grfFirst->ellipsoid()->isEquivalentTo(
+            if (!grfFirst->ellipsoid()->_isEquivalentTo(
                     grf->ellipsoid().get())) {
                 throw util::Exception(
                     "ensemble should have datums with identical ellipsoid");
             }
-            if (!grfFirst->primeMeridian()->isEquivalentTo(
+            if (!grfFirst->primeMeridian()->_isEquivalentTo(
                     grf->primeMeridian().get())) {
                 throw util::Exception(
                     "ensemble should have datums with identical "
@@ -1500,11 +1504,11 @@ void VerticalReferenceFrame::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool VerticalReferenceFrame::isEquivalentTo(
+bool VerticalReferenceFrame::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherVRF = dynamic_cast<const VerticalReferenceFrame *>(other);
-    if (otherVRF == nullptr || !Datum::isEquivalentTo(other, criterion)) {
+    if (otherVRF == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
         return false;
     }
     if ((realizationMethod().has_value() ^
@@ -1590,15 +1594,15 @@ DynamicVerticalReferenceFrame::deformationModelName() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool DynamicVerticalReferenceFrame::isEquivalentTo(
+bool DynamicVerticalReferenceFrame::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherDGRF = dynamic_cast<const DynamicVerticalReferenceFrame *>(other);
     if (otherDGRF == nullptr ||
-        !VerticalReferenceFrame::isEquivalentTo(other, criterion)) {
+        !VerticalReferenceFrame::_isEquivalentTo(other, criterion)) {
         return false;
     }
-    return frameReferenceEpoch().isEquivalentTo(
+    return frameReferenceEpoch()._isEquivalentTo(
                otherDGRF->frameReferenceEpoch(), criterion) &&
            metadata::Identifier::isEquivalentName(
                *deformationModelName(), *otherDGRF->deformationModelName());
@@ -1762,11 +1766,11 @@ void TemporalDatum::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool TemporalDatum::isEquivalentTo(
+bool TemporalDatum::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherTD = dynamic_cast<const TemporalDatum *>(other);
-    if (otherTD == nullptr || !Datum::isEquivalentTo(other, criterion)) {
+    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
         return false;
     }
     return temporalOrigin().toString() ==
@@ -1835,11 +1839,11 @@ void EngineeringDatum::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool EngineeringDatum::isEquivalentTo(
+bool EngineeringDatum::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherTD = dynamic_cast<const EngineeringDatum *>(other);
-    if (otherTD == nullptr || !Datum::isEquivalentTo(other, criterion)) {
+    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
         return false;
     }
     return true;
@@ -1901,11 +1905,11 @@ void ParametricDatum::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool ParametricDatum::isEquivalentTo(
+bool ParametricDatum::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherTD = dynamic_cast<const ParametricDatum *>(other);
-    if (otherTD == nullptr || !Datum::isEquivalentTo(other, criterion)) {
+    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
         return false;
     }
     return true;

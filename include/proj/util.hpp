@@ -63,6 +63,7 @@ namespace proj {}
 
 
 #ifndef PROJ_MSVC_DLL
+
 #ifdef PROJ_MSVC_DLL_EXPORT
 #define PROJ_MSVC_DLL PROJ_DLL
 #define PROJ_GCC_DLL
@@ -84,6 +85,9 @@ namespace proj {}
 #define PROJ_GCC_DLL
 #define PROJ_INTERNAL
 #endif
+
+#define PROJ_FOR_TEST PROJ_DLL
+
 #endif
 
 
@@ -103,12 +107,12 @@ namespace proj {}
 // Private-implementation (Pimpl) pattern
 #define PROJ_OPAQUE_PRIVATE_DATA                                               \
   private:                                                                     \
-    struct Private;                                                            \
+    struct PROJ_INTERNAL Private;                                              \
     std::unique_ptr<Private> d;                                                \
                                                                                \
   protected:                                                                   \
-    Private *getPrivate() noexcept { return d.get(); }                         \
-    const Private *getPrivate() const noexcept { return d.get(); }             \
+    PROJ_INTERNAL Private *getPrivate() noexcept { return d.get(); }           \
+    PROJ_INTERNAL const Private *getPrivate() const noexcept { return d.get(); } \
                                                                                \
   private:
 
@@ -308,12 +312,12 @@ class PROJ_GCC_DLL BaseObject {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        BaseObjectNNPtr shared_from_this() const;
+        PROJ_INTERNAL BaseObjectNNPtr shared_from_this() const;
     //! @endcond
 
   protected:
-    BaseObject();
-    void assignSelf(const BaseObjectNNPtr &self);
+    PROJ_INTERNAL BaseObject();
+    PROJ_INTERNAL void assignSelf(const BaseObjectNNPtr &self);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -337,14 +341,16 @@ class PROJ_GCC_DLL IComparable {
         EQUIVALENT
     };
 
-    /** \brief Returns whether an object is equivalent to another one.
-     * @param other other object to compare to
-     * @param criterion comparaison criterion.
-     * @return true if objects are equivalent.
-     */
-    PROJ_DLL virtual bool
+    PROJ_DLL bool
     isEquivalentTo(const IComparable *other,
+                   Criterion criterion = Criterion::STRICT) const;
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL virtual bool _isEquivalentTo(const IComparable *other,
                    Criterion criterion = Criterion::STRICT) const = 0;
+    //! @endcond
 };
 
 // ---------------------------------------------------------------------------
@@ -377,22 +383,22 @@ class BoxedValue final : public BaseObject {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        PROJ_DLL
+        PROJ_INTERNAL
         BoxedValue(const BoxedValue &other);
 
     PROJ_DLL ~BoxedValue() override;
 
-    PROJ_DLL const Type &type() const;
-    PROJ_DLL const std::string &stringValue() const;
-    PROJ_DLL int integerValue() const;
-    PROJ_DLL bool booleanValue() const;
+    PROJ_INTERNAL const Type &type() const;
+    PROJ_INTERNAL const std::string &stringValue() const;
+    PROJ_INTERNAL int integerValue() const;
+    PROJ_INTERNAL bool booleanValue() const;
     //! @endcond
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     BoxedValue &operator=(const BoxedValue &) = delete;
 
-    BoxedValue();
+    PROJ_INTERNAL BoxedValue();
 };
 
 /** Shared pointer of BoxedValue. */
@@ -681,8 +687,8 @@ class PROJ_GCC_DLL Exception : public std::exception {
 
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL explicit Exception(const char *message);
-    PROJ_DLL explicit Exception(const std::string &message);
+    PROJ_INTERNAL explicit Exception(const char *message);
+    PROJ_INTERNAL explicit Exception(const std::string &message);
     PROJ_DLL Exception(const Exception &other);
     PROJ_DLL ~Exception() override;
     //! @endcond
@@ -697,8 +703,8 @@ class PROJ_GCC_DLL Exception : public std::exception {
 class PROJ_GCC_DLL InvalidValueTypeException : public Exception {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL explicit InvalidValueTypeException(const char *message);
-    PROJ_DLL explicit InvalidValueTypeException(const std::string &message);
+    PROJ_INTERNAL explicit InvalidValueTypeException(const char *message);
+    PROJ_INTERNAL explicit InvalidValueTypeException(const std::string &message);
     PROJ_DLL InvalidValueTypeException(const InvalidValueTypeException &other);
     PROJ_DLL ~InvalidValueTypeException() override;
     //! @endcond
@@ -712,8 +718,8 @@ class PROJ_GCC_DLL InvalidValueTypeException : public Exception {
 class PROJ_GCC_DLL UnsupportedOperationException : public Exception {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL explicit UnsupportedOperationException(const char *message);
-    PROJ_DLL explicit UnsupportedOperationException(const std::string &message);
+    PROJ_INTERNAL explicit UnsupportedOperationException(const char *message);
+    PROJ_INTERNAL explicit UnsupportedOperationException(const std::string &message);
     PROJ_DLL
     UnsupportedOperationException(const UnsupportedOperationException &other);
     PROJ_DLL ~UnsupportedOperationException() override;

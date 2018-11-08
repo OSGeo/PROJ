@@ -188,8 +188,8 @@ class PROJ_GCC_DLL GeneralOperationParameter : public common::IdentifiedObject {
     //! @endcond
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
     //! @endcond
@@ -231,8 +231,8 @@ class PROJ_GCC_DLL OperationParameter final : public GeneralOperationParameter {
     //! @endcond
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -276,8 +276,8 @@ class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter) const override =
         0; // throw(io::FormattingException)
 
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
     //! @endcond
@@ -362,8 +362,8 @@ class PROJ_GCC_DLL ParameterValue final : public util::BaseObject,
     PROJ_DLL bool booleanValue() PROJ_CONST_DECL;
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -403,13 +403,6 @@ class PROJ_GCC_DLL OperationParameterValue final : public GeneralParameterValue 
     PROJ_DLL const OperationParameterNNPtr &parameter() PROJ_CONST_DECL;
     PROJ_DLL const ParameterValueNNPtr &parameterValue() PROJ_CONST_DECL;
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-    //! @endcond
-
     PROJ_DLL static OperationParameterValueNNPtr
     create(const OperationParameterNNPtr &parameterIn,
            const ParameterValueNNPtr &valueIn);
@@ -424,6 +417,10 @@ class PROJ_GCC_DLL OperationParameterValue final : public GeneralParameterValue 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
@@ -470,11 +467,6 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
     PROJ_DLL const std::vector<GeneralOperationParameterNNPtr> &
     parameters() PROJ_CONST_DECL;
 
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
-        const override; // throw(io::FormattingException)
-    //! @endcond
-
     PROJ_DLL static OperationMethodNNPtr
     create(const util::PropertyMap &properties,
            const std::vector<GeneralOperationParameterNNPtr> &parameters);
@@ -484,8 +476,11 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
            const std::vector<OperationParameterNNPtr> &parameters);
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -508,8 +503,8 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
 class PROJ_GCC_DLL InvalidOperation : public util::Exception {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL explicit InvalidOperation(const char *message);
-    PROJ_DLL explicit InvalidOperation(const std::string &message);
+    PROJ_INTERNAL explicit InvalidOperation(const char *message);
+    PROJ_INTERNAL explicit InvalidOperation(const std::string &message);
     PROJ_DLL InvalidOperation(const InvalidOperation &other);
     PROJ_DLL ~InvalidOperation() override;
     //! @endcond
@@ -551,13 +546,6 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies =
             std::vector<metadata::PositionalAccuracyNNPtr>());
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
-                   util::IComparable::Criterion criterion =
-                       util::IComparable::Criterion::STRICT) const override;
-    //! @endcond
-
     PROJ_DLL std::set<GridDescription>
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
@@ -575,6 +563,11 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
                                      int epsg_code) const noexcept;
     PROJ_INTERNAL double parameterValueNumericAsSI(const char *paramName, int epsg_code) const
         noexcept;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
   protected:
@@ -1329,9 +1322,6 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
-    PROJ_DLL std::vector<double>
-    getTOWGS84Parameters() const; // throw(io::FormattingException)
-
     PROJ_DLL static TransformationNNPtr
     create(const util::PropertyMap &properties,
            const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
@@ -1467,6 +1457,9 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
         PROJ_INTERNAL const std::string &
         getNTv2Filename() const;
 
+    PROJ_FOR_TEST std::vector<double>
+    getTOWGS84Parameters() const; // throw(io::FormattingException)
+
     PROJ_INTERNAL const std::string &getHeightToGeographic3DFilename() const;
 
     PROJ_INTERNAL bool isLongitudeRotation() const;
@@ -1553,11 +1546,9 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-    //! @endcond
 
-    //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond

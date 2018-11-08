@@ -100,7 +100,7 @@ std::unique_ptr<T> make_unique(Args &&... args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
-PROJ_DLL std::string replaceAll(const std::string &str,
+PROJ_FOR_TEST std::string replaceAll(const std::string &str,
                                 const std::string &before,
                                 const std::string &after);
 
@@ -131,11 +131,11 @@ bool ci_starts_with(const std::string &str, const std::string &prefix) noexcept;
 
 bool ends_with(const std::string &str, const std::string &suffix) noexcept;
 
-PROJ_DLL std::string tolower(const std::string &osStr);
+PROJ_FOR_TEST std::string tolower(const std::string &osStr);
 
 std::string toupper(const std::string &osStr);
 
-PROJ_DLL std::vector<std::string> split(const std::string &osStr,
+PROJ_FOR_TEST std::vector<std::string> split(const std::string &osStr,
                                         char separator);
 
 bool ci_equal(const char *a, const char *b) noexcept;
@@ -144,17 +144,17 @@ bool ci_equal(const char *a, const char *b) noexcept;
 bool ci_equal(const char *a, const std::string &b) = delete;
 #endif
 
-PROJ_DLL bool ci_equal(const std::string &a, const char *b) noexcept;
+PROJ_FOR_TEST bool ci_equal(const std::string &a, const char *b) noexcept;
 
-PROJ_DLL bool ci_equal(const std::string &a, const std::string &b) noexcept;
+PROJ_FOR_TEST bool ci_equal(const std::string &a, const std::string &b) noexcept;
 
 std::string stripQuotes(const std::string &osStr);
 
 std::string toString(int val);
 
-PROJ_DLL std::string toString(double val, int precision = 15);
+PROJ_FOR_TEST std::string toString(double val, int precision = 15);
 
-PROJ_DLL double
+PROJ_FOR_TEST double
 c_locale_stod(const std::string &s); // throw(std::invalid_argument)
 
 #ifdef SUPPORT_DELETED_FUNCTION

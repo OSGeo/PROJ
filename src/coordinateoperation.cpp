@@ -806,12 +806,12 @@ void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool OperationMethod::isEquivalentTo(
+bool OperationMethod::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherOM = dynamic_cast<const OperationMethod *>(other);
     if (otherOM == nullptr ||
-        !IdentifiedObject::isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
         return false;
     }
     // TODO test formula and formulaCitation
@@ -821,7 +821,7 @@ bool OperationMethod::isEquivalentTo(
         return false;
     }
     for (size_t i = 0; i < params.size(); i++) {
-        if (!params[i]->isEquivalentTo(otherParams[i].get(), criterion)) {
+        if (!params[i]->_isEquivalentTo(otherParams[i].get(), criterion)) {
             return false;
         }
     }
@@ -1026,16 +1026,16 @@ bool OperationParameterValue::convertFromAbridged(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool OperationParameterValue::isEquivalentTo(
+bool OperationParameterValue::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherOPV = dynamic_cast<const OperationParameterValue *>(other);
     if (otherOPV == nullptr) {
         return false;
     }
-    return d->parameter->isEquivalentTo(otherOPV->d->parameter.get(),
+    return d->parameter->_isEquivalentTo(otherOPV->d->parameter.get(),
                                         criterion) &&
-           d->parameterValue->isEquivalentTo(otherOPV->d->parameterValue.get(),
+           d->parameterValue->_isEquivalentTo(otherOPV->d->parameterValue.get(),
                                              criterion);
 }
 //! @endcond
@@ -1106,12 +1106,12 @@ OperationParameter::create(const util::PropertyMap &properties) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool OperationParameter::isEquivalentTo(
+bool OperationParameter::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherOP = dynamic_cast<const OperationParameter *>(other);
     return otherOP != nullptr &&
-           IdentifiedObject::isEquivalentTo(other, criterion);
+           IdentifiedObject::_isEquivalentTo(other, criterion);
 }
 //! @endcond
 
@@ -1315,14 +1315,14 @@ static SingleOperationNNPtr createPROJBased(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool SingleOperation::isEquivalentTo(
+bool SingleOperation::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherSO = dynamic_cast<const SingleOperation *>(other);
-    if (otherSO == nullptr || !ObjectUsage::isEquivalentTo(other, criterion)) {
+    if (otherSO == nullptr || !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
     }
-    if (!d->method_->isEquivalentTo(otherSO->d->method_.get(), criterion)) {
+    if (!d->method_->_isEquivalentTo(otherSO->d->method_.get(), criterion)) {
         return false;
     }
     const auto &values = d->parameterValues_;
@@ -1331,7 +1331,7 @@ bool SingleOperation::isEquivalentTo(
         return false;
     }
     for (size_t i = 0; i < values.size(); i++) {
-        if (!values[i]->isEquivalentTo(otherValues[i].get(), criterion)) {
+        if (!values[i]->_isEquivalentTo(otherValues[i].get(), criterion)) {
             return false;
         }
     }
@@ -1595,7 +1595,7 @@ void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool ParameterValue::isEquivalentTo(
+bool ParameterValue::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherPV = dynamic_cast<const ParameterValue *>(other);
@@ -1607,7 +1607,7 @@ bool ParameterValue::isEquivalentTo(
     }
     switch (type()) {
     case Type::MEASURE: {
-        return value().isEquivalentTo(otherPV->value(), criterion);
+        return value()._isEquivalentTo(otherPV->value(), criterion);
     }
 
     case Type::STRING:
@@ -5160,6 +5160,7 @@ const crs::CRSNNPtr &Transformation::targetCRS() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 /** \brief Return the TOWGS84 parameters of the transformation.
  *
  * If this transformation uses Coordinate Frame Rotation, Position Vector
@@ -5328,6 +5329,7 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
     throw io::FormattingException(
         "Transformation cannot be formatted as WKT1 TOWGS84 parameters");
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -8009,7 +8011,7 @@ void Transformation::_exportToPROJString(
                 concat("Can apply ", methodName + " only to GeographicCRS"));
         }
 
-        if (!sourceCRSGeog->ellipsoid()->isEquivalentTo(
+        if (!sourceCRSGeog->ellipsoid()->_isEquivalentTo(
                 targetCRSGeog->ellipsoid().get())) {
             // This is arguable if we should check this...
             throw io::FormattingException("Can apply Longitude rotation "
@@ -8223,7 +8225,7 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
                 *sourceCRSIds[0]->codeSpace() ==
                     *targetCRSIds[0]->codeSpace()) {
                 // same id --> ok
-            } else if (!l_sourceCRS->isEquivalentTo(
+            } else if (!l_sourceCRS->_isEquivalentTo(
                            lastTargetCRS.get(),
                            util::IComparable::Criterion::EQUIVALENT)) {
                 throw InvalidOperation(
@@ -8402,11 +8404,11 @@ void ConcatenatedOperation::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool ConcatenatedOperation::isEquivalentTo(
+bool ConcatenatedOperation::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherCO = dynamic_cast<const ConcatenatedOperation *>(other);
-    if (otherCO == nullptr || !ObjectUsage::isEquivalentTo(other, criterion)) {
+    if (otherCO == nullptr || !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
     }
     const auto &steps = operations();
@@ -8415,7 +8417,7 @@ bool ConcatenatedOperation::isEquivalentTo(
         return false;
     }
     for (size_t i = 0; i < steps.size(); i++) {
-        if (!steps[i]->isEquivalentTo(otherSteps[i].get(), criterion)) {
+        if (!steps[i]->_isEquivalentTo(otherSteps[i].get(), criterion)) {
             return false;
         }
     }
@@ -9236,7 +9238,7 @@ struct FilterAndSort {
                 lastGridsAvailable = curGridsAvailable;
                 first = false;
             } else {
-                if (lastOp->isEquivalentTo(op.get())) {
+                if (lastOp->_isEquivalentTo(op.get())) {
                     continue;
                 }
                 const bool sameExtent =
@@ -9483,7 +9485,7 @@ createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
     const auto &targetCRSExtent = getExtent(targetCRS);
     const bool sameExtent =
         sourceCRSExtent && targetCRSExtent &&
-        sourceCRSExtent->isEquivalentTo(
+        sourceCRSExtent->_isEquivalentTo(
             targetCRSExtent.get(), util::IComparable::Criterion::EQUIVALENT);
 
     util::PropertyMap map;
@@ -9797,7 +9799,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
 
     // Do they differ by vertical units ?
     if (vconvSrc != vconvDst &&
-        geogSrc->ellipsoid()->isEquivalentTo(
+        geogSrc->ellipsoid()->_isEquivalentTo(
             geogDst->ellipsoid().get(),
             util::IComparable::Criterion::EQUIVALENT)) {
         if (offset_pm.value() == 0) {
@@ -9820,9 +9822,9 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
 
     // Do the CRS differ only by their axis order ?
     if (geogSrc->datum() != nullptr && geogDst->datum() != nullptr &&
-        geogSrc->datum()->isEquivalentTo(
+        geogSrc->datum()->_isEquivalentTo(
             geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT) &&
-        !srcCS->isEquivalentTo(dstCS.get(),
+        !srcCS->_isEquivalentTo(dstCS.get(),
                                util::IComparable::Criterion::EQUIVALENT)) {
         auto srcOrder = srcCS->axisOrder();
         auto dstOrder = dstCS->axisOrder();
@@ -9854,7 +9856,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     // If both are geographic and only differ by their prime
     // meridian,
     // apply a longitude rotation transformation.
-    if (geogSrc->ellipsoid()->isEquivalentTo(
+    if (geogSrc->ellipsoid()->_isEquivalentTo(
             geogDst->ellipsoid().get(),
             util::IComparable::Criterion::EQUIVALENT) &&
         src_pm.getSIValue() != dst_pm.getSIValue()) {
@@ -10098,15 +10100,15 @@ CoordinateOperationFactory::Private::createOperations(
     auto derivedDst = dynamic_cast<const crs::DerivedCRS *>(targetCRS.get());
     if (context.context->getAuthorityFactory() &&
         (derivedSrc == nullptr ||
-         !derivedSrc->baseCRS()->isEquivalentTo(
+         !derivedSrc->baseCRS()->_isEquivalentTo(
              targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) &&
         (derivedDst == nullptr ||
-         !derivedDst->baseCRS()->isEquivalentTo(
+         !derivedDst->baseCRS()->_isEquivalentTo(
              sourceCRS.get(), util::IComparable::Criterion::EQUIVALENT))) {
 
         bool doFilterAndCheckPerfectOp = true;
         res = findOpsInRegistryDirect(sourceCRS, targetCRS, context.context);
-        if (!sourceCRS->isEquivalentTo(targetCRS.get())) {
+        if (!sourceCRS->_isEquivalentTo(targetCRS.get())) {
             auto resFromInverse = applyInverse(
                 findOpsInRegistryDirect(targetCRS, sourceCRS, context.context));
             res.insert(res.end(), resFromInverse.begin(), resFromInverse.end());
@@ -10201,7 +10203,7 @@ CoordinateOperationFactory::Private::createOperations(
             geodSrc->datum() != nullptr && geodDst->datum() != nullptr) {
 
             // Same datum ?
-            if (geodSrc->datum()->isEquivalentTo(
+            if (geodSrc->datum()->_isEquivalentTo(
                     geodDst->datum().get(),
                     util::IComparable::Criterion::EQUIVALENT)) {
                 res.emplace_back(
@@ -10252,7 +10254,7 @@ CoordinateOperationFactory::Private::createOperations(
         auto opFirst = derivedSrc->derivingConversion()->inverse();
         // Small optimization if the targetCRS is the baseCRS of the source
         // derivedCRS.
-        if (derivedSrc->baseCRS()->isEquivalentTo(
+        if (derivedSrc->baseCRS()->_isEquivalentTo(
                 targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
             res.emplace_back(opFirst);
             return res;
@@ -10284,7 +10286,7 @@ CoordinateOperationFactory::Private::createOperations(
         auto geogCRSOfBaseOfBoundSrc =
             boundSrc->baseCRS()->extractGeographicCRS();
         if (hubSrcGeog &&
-            (hubSrcGeog->isEquivalentTo(
+            (hubSrcGeog->_isEquivalentTo(
                  geogDst, util::IComparable::Criterion::EQUIVALENT) ||
              hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst))) &&
             geogCRSOfBaseOfBoundSrc) {
@@ -10314,7 +10316,7 @@ CoordinateOperationFactory::Private::createOperations(
         }
 
         if (hubSrcGeog &&
-            hubSrcGeog->isEquivalentTo(
+            hubSrcGeog->_isEquivalentTo(
                 geogDst, util::IComparable::Criterion::EQUIVALENT) &&
             dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get())) {
             res.emplace_back(boundSrc->transformation());
@@ -10340,7 +10342,7 @@ CoordinateOperationFactory::Private::createOperations(
         const auto &hubSrc = boundSrc->hubCRS();
         auto hubSrcVert = dynamic_cast<const crs::VerticalCRS *>(hubSrc.get());
         if (baseSrcVert && hubSrcVert &&
-            vertDst->isEquivalentTo(hubSrcVert,
+            vertDst->_isEquivalentTo(hubSrcVert,
                                     util::IComparable::Criterion::EQUIVALENT)) {
             res.emplace_back(boundSrc->transformation());
             return res;
@@ -10359,7 +10361,7 @@ CoordinateOperationFactory::Private::createOperations(
         const auto &srcDatum = vertSrc->datum();
         const auto &dstDatum = vertDst->datum();
         if (srcDatum && dstDatum &&
-            srcDatum->isEquivalentTo(
+            srcDatum->_isEquivalentTo(
                 dstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
             const double convSrc = vertSrc->coordinateSystem()
                                        ->axisList()[0]
@@ -10425,13 +10427,13 @@ CoordinateOperationFactory::Private::createOperations(
         auto geogCRSOfBaseOfBoundDst =
             boundDst->baseCRS()->extractGeographicCRS();
         if (hubSrcGeog && hubDstGeog &&
-            hubSrcGeog->isEquivalentTo(
+            hubSrcGeog->_isEquivalentTo(
                 hubDstGeog, util::IComparable::Criterion::EQUIVALENT) &&
             geogCRSOfBaseOfBoundSrc && geogCRSOfBaseOfBoundDst) {
-            const bool firstIsNoOp = geogCRSOfBaseOfBoundSrc->isEquivalentTo(
+            const bool firstIsNoOp = geogCRSOfBaseOfBoundSrc->_isEquivalentTo(
                 boundSrc->baseCRS().get(),
                 util::IComparable::Criterion::EQUIVALENT);
-            const bool lastIsNoOp = geogCRSOfBaseOfBoundDst->isEquivalentTo(
+            const bool lastIsNoOp = geogCRSOfBaseOfBoundDst->_isEquivalentTo(
                 boundDst->baseCRS().get(),
                 util::IComparable::Criterion::EQUIVALENT);
             auto opsFirst =
@@ -10663,14 +10665,14 @@ void InverseCoordinateOperation::_exportToPROJString(
 
 // ---------------------------------------------------------------------------
 
-bool InverseCoordinateOperation::isEquivalentTo(
+bool InverseCoordinateOperation::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherICO = dynamic_cast<const InverseCoordinateOperation *>(other);
-    if (otherICO == nullptr || !ObjectUsage::isEquivalentTo(other, criterion)) {
+    if (otherICO == nullptr || !ObjectUsage::_isEquivalentTo(other, criterion)) {
         return false;
     }
-    return inverse()->isEquivalentTo(otherICO->inverse().get(), criterion);
+    return inverse()->_isEquivalentTo(otherICO->inverse().get(), criterion);
 }
 
 // ---------------------------------------------------------------------------

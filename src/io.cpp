@@ -5669,7 +5669,7 @@ PROJStringParser::Private::buildDatum(const Step &step,
         throw ParsingException("rf found, but a missing");
     }
 
-    if (pm->isEquivalentTo(PrimeMeridian::GREENWICH.get())) {
+    if (pm->_isEquivalentTo(PrimeMeridian::GREENWICH.get())) {
         return GeodeticReferenceFrame::EPSG_6326;
     } else {
         return GeodeticReferenceFrame::create(
@@ -6015,7 +6015,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     const auto &title = title_;
 
-    if (!buildPrimeMeridian(step)->isEquivalentTo(
+    if (!buildPrimeMeridian(step)->_isEquivalentTo(
             geogCRS->primeMeridian().get())) {
         throw ParsingException("inconsistant pm values between projectedCRS "
                                "and its base geographicalCRS");

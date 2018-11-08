@@ -75,7 +75,7 @@ class PROJ_GCC_DLL Citation : public util::BaseObject {
 
   protected:
     PROJ_FRIEND_OPTIONAL(Citation);
-    Citation &operator=(const Citation &other);
+    PROJ_INTERNAL Citation &operator=(const Citation &other);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -105,8 +105,8 @@ class PROJ_GCC_DLL GeographicExtent : public util::BaseObject, public util::ICom
     // use
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
     //! @endcond
@@ -162,17 +162,17 @@ class PROJ_GCC_DLL GeographicBoundingBox : public GeographicExtent {
     create(double west, double south, double east, double north);
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
 
-    PROJ_DLL bool contains(const GeographicExtentNNPtr &other) const override;
+    PROJ_INTERNAL bool contains(const GeographicExtentNNPtr &other) const override;
 
-    PROJ_DLL bool intersects(const GeographicExtentNNPtr &other) const override;
+    PROJ_INTERNAL bool intersects(const GeographicExtentNNPtr &other) const override;
 
-    PROJ_DLL GeographicExtentPtr
+    PROJ_INTERNAL GeographicExtentPtr
     intersection(const GeographicExtentNNPtr &other) const override;
 
   protected:
@@ -210,8 +210,8 @@ class PROJ_GCC_DLL TemporalExtent : public util::BaseObject, public util::ICompa
                                                const std::string &stop);
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -257,8 +257,8 @@ class PROJ_GCC_DLL VerticalExtent : public util::BaseObject, public util::ICompa
            const common::UnitOfMeasureNNPtr &unitIn);
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond
@@ -317,8 +317,8 @@ class PROJ_GCC_DLL Extent : public util::BaseObject, public util::IComparable {
                        util::optional<std::string>());
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL bool
-    isEquivalentTo(const util::IComparable *other,
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
     //! @endcond

@@ -359,7 +359,7 @@ bool Measure::operator==(const Measure &other) PROJ_CONST_DEFN {
  * @param criterion comparaison criterion.
  * @return true if objects are equivalent.
  */
-bool Measure::isEquivalentTo(const Measure &other,
+bool Measure::_isEquivalentTo(const Measure &other,
                              util::IComparable::Criterion criterion) const {
     if (criterion == util::IComparable::Criterion::STRICT) {
         return operator==(other);
@@ -814,18 +814,18 @@ void IdentifiedObject::formatRemarks(WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
-bool IdentifiedObject::isEquivalentTo(
+bool IdentifiedObject::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherIdObj = dynamic_cast<const IdentifiedObject *>(other);
     if (!otherIdObj)
         return false;
-    return isEquivalentTo(otherIdObj, criterion);
+    return _isEquivalentTo(otherIdObj, criterion);
 }
 
 // ---------------------------------------------------------------------------
 
-bool IdentifiedObject::isEquivalentTo(const IdentifiedObject *otherIdObj,
+bool IdentifiedObject::_isEquivalentTo(const IdentifiedObject *otherIdObj,
                                       util::IComparable::Criterion criterion)
     PROJ_CONST_DEFN {
     if (criterion == util::IComparable::Criterion::STRICT) {
@@ -964,7 +964,8 @@ void ObjectDomain::_exportToWKT(WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
-bool ObjectDomain::isEquivalentTo(
+//! @cond Doxygen_Suppress
+bool ObjectDomain::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherDomain = dynamic_cast<const ObjectDomain *>(other);
@@ -978,9 +979,10 @@ bool ObjectDomain::isEquivalentTo(
         (otherDomain->domainOfValidity().get() != nullptr))
         return false;
     return domainOfValidity().get() == nullptr ||
-           domainOfValidity()->isEquivalentTo(
+           domainOfValidity()->_isEquivalentTo(
                otherDomain->domainOfValidity().get(), criterion);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1101,14 +1103,14 @@ void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool ObjectUsage::isEquivalentTo(const util::IComparable *other,
+bool ObjectUsage::_isEquivalentTo(const util::IComparable *other,
                                  util::IComparable::Criterion criterion) const {
     auto otherObjUsage = dynamic_cast<const ObjectUsage *>(other);
     if (!otherObjUsage)
         return false;
 
     // TODO: incomplete
-    return IdentifiedObject::isEquivalentTo(other, criterion);
+    return IdentifiedObject::_isEquivalentTo(other, criterion);
 }
 //! @endcond
 
