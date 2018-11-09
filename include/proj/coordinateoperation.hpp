@@ -161,7 +161,10 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_INTERNAL void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
                                const crs::CRSNNPtr &targetCRSIn,
                                const crs::CRSPtr &interpolationCRSIn);
-    PROJ_INTERNAL void setAccuracies(
+    PROJ_INTERNAL void setCRSs(const CoordinateOperation *in,
+                               bool inverseSourceTarget);
+    PROJ_INTERNAL
+    void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
   private:

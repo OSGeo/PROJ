@@ -1789,7 +1789,7 @@ struct EngineeringDatum::Private {};
 
 // ---------------------------------------------------------------------------
 
-EngineeringDatum::EngineeringDatum() : d(internal::make_unique<Private>()) {}
+EngineeringDatum::EngineeringDatum() : d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1860,7 +1860,7 @@ struct ParametricDatum::Private {};
 
 // ---------------------------------------------------------------------------
 
-ParametricDatum::ParametricDatum() : d(internal::make_unique<Private>()) {}
+ParametricDatum::ParametricDatum() : d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 

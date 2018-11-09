@@ -638,6 +638,22 @@ void CoordinateOperation::setCRSs(const crs::CRSNNPtr &sourceCRSIn,
     d->targetCRSWeak_ = targetCRSIn.as_nullable();
     d->interpolationCRS_ = interpolationCRSIn;
 }
+// ---------------------------------------------------------------------------
+
+void CoordinateOperation::setCRSs(const CoordinateOperation *in,
+                                  bool inverseSourceTarget) {
+    auto l_sourceCRS = in->sourceCRS();
+    auto l_targetCRS = in->targetCRS();
+    if (l_sourceCRS && l_targetCRS) {
+        auto nn_sourceCRS = NN_NO_CHECK(l_sourceCRS);
+        auto nn_targetCRS = NN_NO_CHECK(l_targetCRS);
+        if (inverseSourceTarget) {
+            setCRSs(nn_targetCRS, nn_sourceCRS, in->interpolationCRS());
+        } else {
+            setCRSs(nn_sourceCRS, nn_targetCRS, in->interpolationCRS());
+        }
+    }
+}
 
 // ---------------------------------------------------------------------------
 
@@ -878,13 +894,12 @@ struct GeneralParameterValue::Private {};
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-GeneralParameterValue::GeneralParameterValue()
-    : d(internal::make_unique<Private>()) {}
+GeneralParameterValue::GeneralParameterValue() : d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
-GeneralParameterValue::GeneralParameterValue(const GeneralParameterValue &other)
-    : d(internal::make_unique<Private>(*other.d)) {}
+GeneralParameterValue::GeneralParameterValue(const GeneralParameterValue &)
+    : d(nullptr) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -932,10 +947,8 @@ OperationParameterValue::OperationParameterValue(
 OperationParameterValueNNPtr
 OperationParameterValue::create(const OperationParameterNNPtr &parameterIn,
                                 const ParameterValueNNPtr &valueIn) {
-    OperationParameterValueNNPtr opv(
-        OperationParameterValue::nn_make_shared<OperationParameterValue>(
-            parameterIn, valueIn));
-    return opv;
+    return OperationParameterValue::nn_make_shared<OperationParameterValue>(
+        parameterIn, valueIn);
 }
 
 // ---------------------------------------------------------------------------
@@ -1088,14 +1101,13 @@ struct GeneralOperationParameter::Private {};
 
 // ---------------------------------------------------------------------------
 
-GeneralOperationParameter::GeneralOperationParameter()
-    : d(internal::make_unique<Private>()) {}
+GeneralOperationParameter::GeneralOperationParameter() : d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 GeneralOperationParameter::GeneralOperationParameter(
     const GeneralOperationParameter &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+    : IdentifiedObject(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1111,14 +1123,12 @@ struct OperationParameter::Private {};
 
 // ---------------------------------------------------------------------------
 
-OperationParameter::OperationParameter()
-    : d(internal::make_unique<Private>()) {}
+OperationParameter::OperationParameter() : d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
 OperationParameter::OperationParameter(const OperationParameter &other)
-    : GeneralOperationParameter(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : GeneralOperationParameter(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1763,15 +1773,14 @@ struct Conversion::Private {};
 
 Conversion::Conversion(const OperationMethodNNPtr &methodIn,
                        const std::vector<GeneralParameterValueNNPtr> &values)
-    : SingleOperation(methodIn), d(internal::make_unique<Private>()) {
+    : SingleOperation(methodIn), d(nullptr) {
     setParameterValues(values);
 }
 
 // ---------------------------------------------------------------------------
 
 Conversion::Conversion(const Conversion &other)
-    : CoordinateOperation(other), SingleOperation(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : CoordinateOperation(other), SingleOperation(other), d(nullptr) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1785,12 +1794,7 @@ Conversion::~Conversion() = default;
 ConversionNNPtr Conversion::shallowClone() const {
     auto conv = Conversion::nn_make_shared<Conversion>(*this);
     conv->assignSelf(conv);
-    auto l_sourceCRS = sourceCRS();
-    auto l_targetCRS = targetCRS();
-    if (l_sourceCRS && l_targetCRS) {
-        conv->setCRSs(NN_NO_CHECK(l_sourceCRS), NN_NO_CHECK(l_targetCRS),
-                      interpolationCRS());
-    }
+    conv->setCRSs(this, false);
     return conv;
 }
 //! @endcond
@@ -4080,12 +4084,7 @@ CoordinateOperationNNPtr Conversion::inverse() const {
         auto conv = createChangeVerticalUnit(
             createPropertiesForInverse(this, false, false),
             common::Scale(1.0 / convFactor));
-        auto l_sourceCRS = sourceCRS();
-        auto l_targetCRS = targetCRS();
-        if (l_sourceCRS && l_targetCRS) {
-            conv->setCRSs(NN_NO_CHECK(l_targetCRS), NN_NO_CHECK(l_sourceCRS),
-                          nullptr);
-        }
+        conv->setCRSs(this, true);
         return conv;
     }
 
@@ -4093,12 +4092,7 @@ CoordinateOperationNNPtr Conversion::inverse() const {
     const bool l_isAxisOrderReversal3D = isAxisOrderReversal3D(methodEPSGCode);
     if (l_isAxisOrderReversal2D || l_isAxisOrderReversal3D) {
         auto conv = createAxisOrderReversal(l_isAxisOrderReversal3D);
-        auto l_sourceCRS = sourceCRS();
-        auto l_targetCRS = targetCRS();
-        if (l_sourceCRS && l_targetCRS) {
-            conv->setCRSs(NN_NO_CHECK(l_targetCRS), NN_NO_CHECK(l_sourceCRS),
-                          nullptr);
-        }
+        conv->setCRSs(this, true);
         return conv;
     }
 
@@ -4106,12 +4100,7 @@ CoordinateOperationNNPtr Conversion::inverse() const {
 
         auto conv = createGeographicGeocentric(
             createPropertiesForInverse(this, false, false));
-        auto l_sourceCRS = sourceCRS();
-        auto l_targetCRS = targetCRS();
-        if (l_sourceCRS && l_targetCRS) {
-            conv->setCRSs(NN_NO_CHECK(l_targetCRS), NN_NO_CHECK(l_sourceCRS),
-                          nullptr);
-        }
+        conv->setCRSs(this, true);
         return conv;
     }
 
@@ -10472,9 +10461,7 @@ void InverseCoordinateOperation::setPropertiesFromForward() {
         createPropertiesForInverse(forwardOperation_.get(), false, false));
     setAccuracies(forwardOperation_->coordinateOperationAccuracies());
     if (forwardOperation_->sourceCRS() && forwardOperation_->targetCRS()) {
-        setCRSs(NN_NO_CHECK(forwardOperation_->targetCRS()),
-                NN_NO_CHECK(forwardOperation_->sourceCRS()),
-                forwardOperation_->interpolationCRS());
+        setCRSs(forwardOperation_.get(), true);
     }
 }
 
