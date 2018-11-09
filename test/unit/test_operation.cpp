@@ -42,6 +42,8 @@
 
 #include "proj/internal/internal.hpp"
 
+#include "proj_constants.h"
+
 #include <string>
 #include <vector>
 
@@ -89,6 +91,40 @@ TEST(operation, method) {
         std::vector<OperationParameterNNPtr>{OperationParameter::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName2"))});
     EXPECT_FALSE(otherMethod->isEquivalentTo(otherMethod2.get()));
+    EXPECT_FALSE(otherMethod->isEquivalentTo(
+        otherMethod2.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, method_parameter_different_order) {
+
+    auto method1 = OperationMethod::create(
+        PropertyMap(), std::vector<OperationParameterNNPtr>{
+                           OperationParameter::create(PropertyMap().set(
+                               IdentifiedObject::NAME_KEY, "paramName")),
+                           OperationParameter::create(PropertyMap().set(
+                               IdentifiedObject::NAME_KEY, "paramName2"))});
+
+    auto method2 = OperationMethod::create(
+        PropertyMap(), std::vector<OperationParameterNNPtr>{
+                           OperationParameter::create(PropertyMap().set(
+                               IdentifiedObject::NAME_KEY, "paramName2")),
+                           OperationParameter::create(PropertyMap().set(
+                               IdentifiedObject::NAME_KEY, "paramName"))});
+
+    auto method3 = OperationMethod::create(
+        PropertyMap(), std::vector<OperationParameterNNPtr>{
+                           OperationParameter::create(PropertyMap().set(
+                               IdentifiedObject::NAME_KEY, "paramName3")),
+                           OperationParameter::create(PropertyMap().set(
+                               IdentifiedObject::NAME_KEY, "paramName"))});
+
+    EXPECT_FALSE(method1->isEquivalentTo(method2.get()));
+    EXPECT_TRUE(method1->isEquivalentTo(method2.get(),
+                                        IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(method1->isEquivalentTo(method3.get(),
+                                         IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
@@ -211,6 +247,59 @@ TEST(operation, SingleOperation) {
         std::vector<PositionalAccuracyNNPtr>{
             PositionalAccuracy::create("0.1")});
     EXPECT_FALSE(sop1->isEquivalentTo(sop4.get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, SingleOperation_different_order) {
+
+    auto sop1 = Transformation::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "ignored1"),
+        GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4807, nullptr,
+        PropertyMap(),
+        std::vector<OperationParameterNNPtr>{
+            OperationParameter::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName")),
+            OperationParameter::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName2"))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename("foo.bin"),
+            ParameterValue::createFilename("foo2.bin")},
+        {});
+
+    auto sop2 = Transformation::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "ignored2"),
+        GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4807, nullptr,
+        PropertyMap(),
+        std::vector<OperationParameterNNPtr>{
+            OperationParameter::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName2")),
+            OperationParameter::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName"))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename("foo2.bin"),
+            ParameterValue::createFilename("foo.bin")},
+        {});
+
+    auto sop3 = Transformation::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "ignored3"),
+        GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4807, nullptr,
+        PropertyMap(),
+        std::vector<OperationParameterNNPtr>{
+            OperationParameter::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName")),
+            OperationParameter::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName2"))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename("foo2.bin"),
+            ParameterValue::createFilename("foo.bin")},
+        {});
+
+    EXPECT_FALSE(sop1->isEquivalentTo(sop2.get()));
+    EXPECT_TRUE(
+        sop1->isEquivalentTo(sop2.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(
+        sop1->isEquivalentTo(sop3.get(), IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
@@ -5589,18 +5678,19 @@ TEST(operation, mercator_variant_A_to_variant_B) {
         EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
     ASSERT_TRUE(targetConv);
     EXPECT_EQ(
-        targetConv->parameterValueNumeric("Latitude of 1st standard parallel",
-                                          8823, UnitOfMeasure::DEGREE),
+        targetConv
+            ->parameterValueNumeric(/*"Latitude of 1st standard parallel",*/
+                                    8823, UnitOfMeasure::DEGREE),
         25.917499691810534)
-        << targetConv->parameterValueNumeric(
-            "Latitude of 1st standard parallel", 8823, UnitOfMeasure::DEGREE);
-    EXPECT_EQ(targetConv->parameterValueNumeric("Longitude of natural origin",
-                                                8802, UnitOfMeasure::DEGREE),
-              1);
-    EXPECT_EQ(targetConv->parameterValueNumeric("False easting", 8806,
+        << targetConv->parameterValueNumeric(8823, UnitOfMeasure::DEGREE);
+    EXPECT_EQ(
+        targetConv->parameterValueNumeric(/*"Longitude of natural origin",*/
+                                          8802, UnitOfMeasure::DEGREE),
+        1);
+    EXPECT_EQ(targetConv->parameterValueNumeric(/*"False easting", */ 8806,
                                                 UnitOfMeasure::METRE),
               3);
-    EXPECT_EQ(targetConv->parameterValueNumeric("False northing", 8807,
+    EXPECT_EQ(targetConv->parameterValueNumeric(/*"False northing", */ 8807,
                                                 UnitOfMeasure::METRE),
               4);
 }
@@ -5618,11 +5708,11 @@ TEST(operation, mercator_variant_A_to_variant_B_scale_1) {
         EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
     ASSERT_TRUE(targetConv);
     EXPECT_EQ(
-        targetConv->parameterValueNumeric("Latitude of 1st standard parallel",
-                                          8823, UnitOfMeasure::DEGREE),
+        targetConv
+            ->parameterValueNumeric(/*"Latitude of 1st standard parallel",*/
+                                    8823, UnitOfMeasure::DEGREE),
         0.0)
-        << targetConv->parameterValueNumeric(
-            "Latitude of 1st standard parallel", 8823, UnitOfMeasure::DEGREE);
+        << targetConv->parameterValueNumeric(8823, UnitOfMeasure::DEGREE);
 }
 
 // ---------------------------------------------------------------------------
@@ -5662,22 +5752,25 @@ TEST(operation, mercator_variant_B_to_variant_A) {
         EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
     ASSERT_TRUE(targetConv);
 
-    EXPECT_EQ(targetConv->parameterValueNumeric("Latitude of natural origin",
-                                                8801, UnitOfMeasure::DEGREE),
-              0);
-    EXPECT_EQ(targetConv->parameterValueNumeric("Longitude of natural origin",
-                                                8802, UnitOfMeasure::DEGREE),
-              1);
     EXPECT_EQ(
-        targetConv->parameterValueNumeric("Scale factor at natural origin",
+        targetConv->parameterValueNumeric(/*"Latitude of natural origin",*/
+                                          8801, UnitOfMeasure::DEGREE),
+        0);
+    EXPECT_EQ(
+        targetConv->parameterValueNumeric(/*"Longitude of natural origin",*/
+                                          8802, UnitOfMeasure::DEGREE),
+        1);
+    EXPECT_EQ(
+        targetConv->parameterValueNumeric(/*"Scale factor at natural origin",*/
                                           8805, UnitOfMeasure::SCALE_UNITY),
         0.9)
-        << targetConv->parameterValueNumeric("Scale factor at natural origin",
-                                             8805, UnitOfMeasure::SCALE_UNITY);
-    EXPECT_EQ(targetConv->parameterValueNumeric("False easting", 8806,
+        << targetConv
+               ->parameterValueNumeric(/*"Scale factor at natural origin",*/
+                                       8805, UnitOfMeasure::SCALE_UNITY);
+    EXPECT_EQ(targetConv->parameterValueNumeric(/*"False easting",*/ 8806,
                                                 UnitOfMeasure::METRE),
               3);
-    EXPECT_EQ(targetConv->parameterValueNumeric("False northing", 8807,
+    EXPECT_EQ(targetConv->parameterValueNumeric(/*"False northing",*/ 8807,
                                                 UnitOfMeasure::METRE),
               4);
 }

@@ -54,6 +54,8 @@
 #include <sstream> // std::ostringstream
 #include <string>
 
+#include "proj_constants.h"
+
 // PROJ include order is sensitive
 // clang-format off
 #include "proj.h"
@@ -2224,8 +2226,9 @@ static util::PropertyMap createMapNameEPSGCode(const std::string &name,
 
 // ---------------------------------------------------------------------------
 
-static operation::OperationParameterNNPtr
-createOpParamNameEPSGCode(const std::string &name, int code) {
+static operation::OperationParameterNNPtr createOpParamNameEPSGCode(int code) {
+    const char *name = operation::OperationParameter::getNameForEPSGCode(code);
+    assert(name);
     return operation::OperationParameter::create(
         createMapNameEPSGCode(name, code));
 }
@@ -2278,8 +2281,6 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
     }
 
     if (type == "helmert_transformation") {
-
-#include "proj/internal/helmert_constants.hpp"
 
         res = d->runWithCodeParam(
             "SELECT name, method_auth_name, method_code, method_name, "
@@ -2379,17 +2380,14 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             std::vector<operation::ParameterValueNNPtr> values;
 
             parameters.emplace_back(createOpParamNameEPSGCode(
-                EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
                 EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION));
             values.emplace_back(createLength(tx, uom_translation));
 
             parameters.emplace_back(createOpParamNameEPSGCode(
-                EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
                 EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION));
             values.emplace_back(createLength(ty, uom_translation));
 
             parameters.emplace_back(createOpParamNameEPSGCode(
-                EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
                 EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION));
             values.emplace_back(createLength(tz, uom_translation));
 
@@ -2399,17 +2397,14 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     rotation_uom_auth_name, rotation_uom_code);
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
                     EPSG_CODE_PARAMETER_X_AXIS_ROTATION));
                 values.emplace_back(createAngle(rx, uom_rotation));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
                     EPSG_CODE_PARAMETER_Y_AXIS_ROTATION));
                 values.emplace_back(createAngle(ry, uom_rotation));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
                     EPSG_CODE_PARAMETER_Z_AXIS_ROTATION));
                 values.emplace_back(createAngle(rz, uom_rotation));
 
@@ -2420,7 +2415,6 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                                                  scale_difference_uom_code);
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
                     EPSG_CODE_PARAMETER_SCALE_DIFFERENCE));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Scale(c_locale_stod(scale_difference),
@@ -2434,19 +2428,16 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     rate_translation_uom_auth_name, rate_translation_uom_code);
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION,
                     EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION));
                 values.emplace_back(
                     createLength(rate_tx, uom_rate_translation));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION,
                     EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION));
                 values.emplace_back(
                     createLength(rate_ty, uom_rate_translation));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION,
                     EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION));
                 values.emplace_back(
                     createLength(rate_tz, uom_rate_translation));
@@ -2455,17 +2446,14 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     rate_rotation_uom_auth_name, rate_rotation_uom_code);
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION,
                     EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION));
                 values.emplace_back(createAngle(rate_rx, uom_rate_rotation));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION,
                     EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION));
                 values.emplace_back(createAngle(rate_ry, uom_rate_rotation));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION,
                     EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION));
                 values.emplace_back(createAngle(rate_rz, uom_rate_rotation));
 
@@ -2473,27 +2461,18 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     d->createUnitOfMeasure(rate_scale_difference_uom_auth_name,
                                            rate_scale_difference_uom_code);
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE,
                     EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Scale(c_locale_stod(rate_scale_difference),
                                   uom_rate_scale_difference)));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_REFERENCE_EPOCH,
                     EPSG_CODE_PARAMETER_REFERENCE_EPOCH));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Measure(c_locale_stod(epoch), uom_epoch)));
             } else if (uom_epoch != common::UnitOfMeasure::NONE) {
                 // Helmert 8-parameter
-                constexpr int
-                    EPSG_CODE_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH = 1049;
-                static const std::string
-                    EPSG_NAME_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH(
-                        "Transformation reference epoch");
-
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH,
                     EPSG_CODE_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH));
                 values.emplace_back(operation::ParameterValue::create(
                     common::Measure(c_locale_stod(epoch), uom_epoch)));
@@ -2503,17 +2482,14 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     d->createUnitOfMeasure(pivot_uom_auth_name, pivot_uom_code);
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_ORDINATE_1_EVAL_POINT,
                     EPSG_CODE_PARAMETER_ORDINATE_1_EVAL_POINT));
                 values.emplace_back(createLength(px, uom_pivot));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_ORDINATE_2_EVAL_POINT,
                     EPSG_CODE_PARAMETER_ORDINATE_2_EVAL_POINT));
                 values.emplace_back(createLength(py, uom_pivot));
 
                 parameters.emplace_back(createOpParamNameEPSGCode(
-                    EPSG_NAME_PARAMETER_ORDINATE_3_EVAL_POINT,
                     EPSG_CODE_PARAMETER_ORDINATE_3_EVAL_POINT));
                 values.emplace_back(createLength(pz, uom_pivot));
             }
@@ -2770,10 +2746,9 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     .set(metadata::Identifier::CODE_KEY, method_code)
                     .set(common::IdentifiedObject::NAME_KEY, method_name);
 
-            if (operation::isAxisOrderReversal(
-                    method_name, method_auth_name == metadata::Identifier::EPSG
-                                     ? std::atoi(method_code.c_str())
-                                     : 0)) {
+            if (method_auth_name == metadata::Identifier::EPSG &&
+                operation::isAxisOrderReversal(
+                    std::atoi(method_code.c_str()))) {
                 auto op = operation::Conversion::create(props, propsMethod,
                                                         parameters, values);
                 op->setCRSs(sourceCRS, targetCRS, nullptr);

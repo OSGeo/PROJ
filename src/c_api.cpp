@@ -1477,10 +1477,8 @@ int proj_coordoperation_get_param_index(PJ_OBJ *coordoperation,
         return -1;
     }
     int index = 0;
-    const std::string nameStr(name);
     for (const auto &genParam : op->method()->parameters()) {
-        if (Identifier::isEquivalentName(*genParam->name()->description(),
-                                         nameStr)) {
+        if (Identifier::isEquivalentName(genParam->nameStr().c_str(), name)) {
             return index;
         }
         index++;

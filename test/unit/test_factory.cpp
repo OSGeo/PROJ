@@ -497,7 +497,7 @@ TEST(factory, AuthorityFactory_createConversion) {
         const auto &paramName =
             *(opParamvalue->parameter()->name()->description());
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8801));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8801);
         EXPECT_EQ(paramName, "Latitude of natural origin");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
@@ -511,7 +511,7 @@ TEST(factory, AuthorityFactory_createConversion) {
         const auto &paramName =
             *(opParamvalue->parameter()->name()->description());
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8802));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8802);
         EXPECT_EQ(paramName, "Longitude of natural origin");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
@@ -1705,8 +1705,8 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
             factory->createFromCoordinateReferenceSystemCodes("4209", "4326");
         EXPECT_TRUE(!res.empty());
         for (const auto &conv : res) {
-            EXPECT_TRUE(conv->sourceCRS()->isEPSG(4209));
-            EXPECT_TRUE(conv->targetCRS()->isEPSG(4326));
+            EXPECT_TRUE(conv->sourceCRS()->getEPSGCode() == 4209);
+            EXPECT_TRUE(conv->targetCRS()->getEPSGCode() == 4326);
             EXPECT_FALSE(conv->isDeprecated());
         }
     }
@@ -1739,8 +1739,8 @@ TEST(
             "EPSG", "4209", "EPSG", "4326", false, false);
         EXPECT_TRUE(!res.empty());
         for (const auto &conv : res) {
-            EXPECT_TRUE(conv->sourceCRS()->isEPSG(4209));
-            EXPECT_TRUE(conv->targetCRS()->isEPSG(4326));
+            EXPECT_TRUE(conv->sourceCRS()->getEPSGCode() == 4209);
+            EXPECT_TRUE(conv->targetCRS()->getEPSGCode() == 4326);
             EXPECT_FALSE(conv->isDeprecated());
         }
     }

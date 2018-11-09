@@ -60,11 +60,10 @@ struct MethodMapping {
     const ParamMapping *const *params;
 };
 
-const MethodMapping *getMapping(int epsg_code);
-const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name);
-const MethodMapping *getMapping(const char *wkt2_name);
-const MethodMapping *getMapping(const std::string &wkt2_name);
-const MethodMapping *getMapping(const OperationMethod *method);
+const MethodMapping *getMapping(int epsg_code) noexcept;
+const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) noexcept;
+const MethodMapping *getMapping(const char *wkt2_name) noexcept;
+const MethodMapping *getMapping(const OperationMethod *method) noexcept;
 std::vector<const MethodMapping *>
 getMappingsFromPROJName(const std::string &projName);
 const ParamMapping *getMapping(const MethodMapping *mapping,
@@ -92,7 +91,7 @@ getMappingsFromESRI(const std::string &esri_name);
 
 // ---------------------------------------------------------------------------
 
-bool isAxisOrderReversal(const std::string &methodName, int methodEPSGCode);
+bool isAxisOrderReversal(int methodEPSGCode);
 
 // ---------------------------------------------------------------------------
 

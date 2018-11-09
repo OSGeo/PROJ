@@ -1169,7 +1169,8 @@ bool DynamicGeodeticReferenceFrame::_isEquivalentTo(
     return frameReferenceEpoch()._isEquivalentTo(
                otherDGRF->frameReferenceEpoch(), criterion) &&
            metadata::Identifier::isEquivalentName(
-               *deformationModelName(), *otherDGRF->deformationModelName());
+               deformationModelName()->c_str(),
+               otherDGRF->deformationModelName()->c_str());
 }
 //! @endcond
 
@@ -1605,7 +1606,8 @@ bool DynamicVerticalReferenceFrame::_isEquivalentTo(
     return frameReferenceEpoch()._isEquivalentTo(
                otherDGRF->frameReferenceEpoch(), criterion) &&
            metadata::Identifier::isEquivalentName(
-               *deformationModelName(), *otherDGRF->deformationModelName());
+               deformationModelName()->c_str(),
+               otherDGRF->deformationModelName()->c_str());
 }
 //! @endcond
 

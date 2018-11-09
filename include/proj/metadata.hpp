@@ -390,10 +390,8 @@ class PROJ_GCC_DLL Identifier : public util::BaseObject,
     PROJ_DLL const util::optional<std::string> &description() PROJ_CONST_DECL;
     PROJ_DLL const util::optional<std::string> &uri() PROJ_CONST_DECL;
 
-    PROJ_DLL static bool isEquivalentName(const char *a, const std::string &b);
-
-    PROJ_DLL static bool isEquivalentName(const std::string &a,
-                                          const std::string &b);
+    PROJ_DLL static bool isEquivalentName(const char *a,
+                                          const char *b) noexcept;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

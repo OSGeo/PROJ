@@ -265,6 +265,7 @@ set(SRC_LIBPROJ_CPP
 set(HEADERS_LIBPROJ
         proj_api.h
         proj.h
+        proj_constants.h
         geodesic.h
 )
 

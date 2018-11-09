@@ -1097,13 +1097,21 @@ void Identifier::_exportToWKT(WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+static bool isIgnoredChar(char ch) {
+    return ch == ' ' || ch == '_' || ch == '-' || ch == '/' || ch == '(' ||
+           ch == ')';
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::string Identifier::canonicalizeName(const std::string &str) {
     std::string res;
     res.resize(str.size());
     size_t iInsert = 0;
     for (const char ch : str) {
-        if (!(ch == ' ' || ch == '_' || ch == '-' || ch == '/' || ch == '(' ||
-              ch == ')')) {
+        if (!isIgnoredChar(ch)) {
             res[iInsert] = static_cast<char>(::tolower(static_cast<int>(ch)));
             iInsert++;
         }
@@ -1118,21 +1126,35 @@ std::string Identifier::canonicalizeName(const std::string &str) {
 /** \brief Returns whether two names are considered equivalent.
  *
  * Two names are equivalent by removing any space, underscore, dash, slash,
- * { or } character from them, and comparing ina case insensitive way.
+ * { or } character from them, and comparing in a case insensitive way.
  */
-bool Identifier::isEquivalentName(const char *a, const std::string &b) {
-    return isEquivalentName(std::string(a), b);
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Returns whether two names are considered equivalent.
- *
- * Two names are equivalent by removing any space, underscore, dash, slash,
- * { or } character from them, and comparing ina case insensitive way.
- */
-bool Identifier::isEquivalentName(const std::string &a, const std::string &b) {
-    return canonicalizeName(a) == canonicalizeName(b);
+bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
+    size_t i = 0;
+    size_t j = 0;
+    while (a[i] != 0 && b[j] != 0) {
+        const char aCh = a[i];
+        const char bCh = b[j];
+        if (isIgnoredChar(aCh)) {
+            ++i;
+            continue;
+        }
+        if (isIgnoredChar(bCh)) {
+            ++j;
+            continue;
+        }
+        if (::tolower(aCh) != ::tolower(bCh)) {
+            return false;
+        }
+        ++i;
+        ++j;
+    }
+    while (a[i] != 0 && isIgnoredChar(a[i])) {
+        ++i;
+    }
+    while (b[j] != 0 && isIgnoredChar(b[j])) {
+        ++j;
+    }
+    return a[i] == b[j];
 }
 
 // ---------------------------------------------------------------------------

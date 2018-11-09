@@ -1798,7 +1798,7 @@ TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8666));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8666);
         EXPECT_EQ(paramName, "Geoid (height correction) model file");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::FILENAME);
         EXPECT_EQ(parameterValue->valueFile(), "egm08_25.gtx");
@@ -1850,7 +1850,7 @@ TEST(wkt_parse, WKT1_DATUM_EXTENSION) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8656));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8656);
         EXPECT_EQ(paramName, "Latitude and longitude difference file");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::FILENAME);
         EXPECT_EQ(parameterValue->valueFile(), "nzgd2kgrid0005.gsb");

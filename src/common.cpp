@@ -614,14 +614,6 @@ int IdentifiedObject::getEPSGCode() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return whether the object has a identifiers() in the EPSG code space.
- */
-bool IdentifiedObject::isEPSG(int code) PROJ_CONST_DEFN {
-    return getEPSGCode() == code;
-}
-
-// ---------------------------------------------------------------------------
-
 /** \brief Return the remarks.
  */
 const std::string &IdentifiedObject::remarks() PROJ_CONST_DEFN {
@@ -834,8 +826,8 @@ bool IdentifiedObject::_isEquivalentTo(const IdentifiedObject *otherIdObj,
         }
         // TODO test id etc
     } else {
-        if (!metadata::Identifier::isEquivalentName(nameStr(),
-                                                    otherIdObj->nameStr())) {
+        if (!metadata::Identifier::isEquivalentName(
+                nameStr().c_str(), otherIdObj->nameStr().c_str())) {
             return false;
         }
     }

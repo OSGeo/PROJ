@@ -96,14 +96,15 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
     createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const;
     PROJ_DLL CRSNNPtr stripVerticalComponent() const;
 
-    PROJ_DLL CRSNNPtr shallowClone() const;
-
     PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() PROJ_CONST_DECL;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL const GeodeticCRS *
         extractGeodeticCRSRaw() const;
+
+    PROJ_FOR_TEST CRSNNPtr shallowClone() const;
+
     //! @endcond
 
   protected:

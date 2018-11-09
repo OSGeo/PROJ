@@ -2287,7 +2287,7 @@ TEST(crs, boundCRS_to_WKT2) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8605));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8605);
         EXPECT_EQ(paramName, "X-axis translation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
@@ -2300,7 +2300,7 @@ TEST(crs, boundCRS_to_WKT2) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8606));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8606);
         EXPECT_EQ(paramName, "Y-axis translation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
@@ -2313,7 +2313,7 @@ TEST(crs, boundCRS_to_WKT2) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8607));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8607);
         EXPECT_EQ(paramName, "Z-axis translation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
@@ -2326,7 +2326,7 @@ TEST(crs, boundCRS_to_WKT2) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8608));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8608);
         EXPECT_EQ(paramName, "X-axis rotation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
@@ -2339,7 +2339,7 @@ TEST(crs, boundCRS_to_WKT2) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8609));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8609);
         EXPECT_EQ(paramName, "Y-axis rotation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
@@ -2352,7 +2352,7 @@ TEST(crs, boundCRS_to_WKT2) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8610));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8610);
         EXPECT_EQ(paramName, "Z-axis rotation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
@@ -2365,7 +2365,7 @@ TEST(crs, boundCRS_to_WKT2) {
         ASSERT_TRUE(opParamvalue);
         const auto &paramName = opParamvalue->parameter()->nameStr();
         const auto &parameterValue = opParamvalue->parameterValue();
-        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8611));
+        EXPECT_TRUE(opParamvalue->parameter()->getEPSGCode() == 8611);
         EXPECT_EQ(paramName, "Scale difference");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();

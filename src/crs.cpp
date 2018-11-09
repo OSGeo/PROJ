@@ -373,8 +373,12 @@ CRSNNPtr CRS::stripVerticalComponent() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
 /** \brief Return a shallow clone of this object. */
 CRSNNPtr CRS::shallowClone() const { return _shallowClone(); }
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -455,19 +459,25 @@ bool SingleCRS::baseIsEquivalentTo(
     util::IComparable::Criterion criterion) const {
     auto otherSingleCRS = dynamic_cast<const SingleCRS *>(other);
     if (otherSingleCRS == nullptr ||
-        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        (criterion == util::IComparable::Criterion::STRICT &&
+         !ObjectUsage::_isEquivalentTo(other, criterion))) {
         return false;
     }
-    if ((datum() != nullptr) ^ (otherSingleCRS->datum() != nullptr)) {
-        return false;
+    const auto &thisDatum = d->datum;
+    const auto &otherDatum = otherSingleCRS->d->datum;
+    if (thisDatum) {
+        if (!thisDatum->_isEquivalentTo(otherDatum.get(), criterion)) {
+            return false;
+        }
+    } else {
+        if (otherDatum) {
+            return false;
+        }
     }
-    if (datum() &&
-        !datum()->_isEquivalentTo(otherSingleCRS->datum().get(), criterion))
-        return false;
 
     // TODO test DatumEnsemble
-    return coordinateSystem()->_isEquivalentTo(
-        otherSingleCRS->coordinateSystem().get(), criterion);
+    return d->coordinateSystem->_isEquivalentTo(
+        otherSingleCRS->d->coordinateSystem.get(), criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -476,15 +486,11 @@ bool SingleCRS::baseIsEquivalentTo(
 void SingleCRS::exportDatumOrDatumEnsembleToWkt(
     io::WKTFormatter *formatter) const // throw(io::FormattingException)
 {
-    const auto &l_datum = datum();
+    const auto &l_datum = d->datum;
     if (l_datum) {
-        auto exportable =
-            dynamic_cast<const io::IWKTExportable *>(l_datum.get());
-        if (exportable) {
-            exportable->_exportToWKT(formatter);
-        }
+        l_datum->_exportToWKT(formatter);
     } else {
-        const auto &l_datumEnsemble = datumEnsemble();
+        const auto &l_datumEnsemble = d->datumEnsemble;
         assert(l_datumEnsemble);
         l_datumEnsemble->_exportToWKT(formatter);
     }

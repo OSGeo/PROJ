@@ -300,7 +300,6 @@ class IdentifiedObject : public util::BaseObject,
     // Non-standard
     PROJ_DLL std::string alias() PROJ_CONST_DECL;
     PROJ_DLL int getEPSGCode() PROJ_CONST_DECL;
-    PROJ_DLL bool isEPSG(int code) PROJ_CONST_DECL;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

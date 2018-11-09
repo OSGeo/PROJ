@@ -59,12 +59,6 @@ class ProjectedCRS;
 */
 namespace operation {
 
-/** EPSG code of projection method "Mercator (variant A)" / "Mercator_1SP" */
-constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_A = 9804;
-
-/** EPSG code of projection method "Mercator (variant B)" / "Mercator_2SP" */
-constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_B = 9805;
-
 // ---------------------------------------------------------------------------
 
 /** \brief Grid description */
@@ -242,6 +236,10 @@ class PROJ_GCC_DLL OperationParameter final : public GeneralOperationParameter {
     // non-standard
     PROJ_DLL static OperationParameterNNPtr
     create(const util::PropertyMap &properties);
+
+    PROJ_DLL int getEPSGCode() PROJ_CONST_DECL;
+
+    PROJ_DLL static const char *getNameForEPSGCode(int epsg_code) noexcept;
 
   protected:
     PROJ_INTERNAL OperationParameter();
@@ -480,6 +478,8 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
     create(const util::PropertyMap &properties,
            const std::vector<OperationParameterNNPtr> &parameters);
 
+    PROJ_DLL int getEPSGCode() PROJ_CONST_DECL;
+
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
@@ -541,8 +541,15 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
     PROJ_DLL const ParameterValuePtr &
     parameterValue(const std::string &paramName, int epsg_code = 0) const
         noexcept;
+
+    PROJ_DLL const ParameterValuePtr &parameterValue(int epsg_code) const
+        noexcept;
+
     PROJ_DLL const common::Measure &
     parameterValueMeasure(const std::string &paramName, int epsg_code = 0) const
+        noexcept;
+
+    PROJ_DLL const common::Measure &parameterValueMeasure(int epsg_code) const
         noexcept;
 
     PROJ_DLL static SingleOperationNNPtr createPROJBased(
@@ -556,19 +563,13 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        PROJ_INTERNAL double
-        parameterValueNumeric(const std::string &paramName, int epsg_code,
+
+        PROJ_DLL double
+        parameterValueNumeric(int epsg_code,
                               const common::UnitOfMeasure &targetUnit) const
         noexcept;
-    PROJ_DLL double
-    parameterValueNumeric(const char *paramName, int epsg_code,
-                          const common::UnitOfMeasure &targetUnit) const
-        noexcept;
-    PROJ_INTERNAL double parameterValueNumericAsSI(const std::string &paramName,
-                                                   int epsg_code) const
-        noexcept;
-    PROJ_INTERNAL double parameterValueNumericAsSI(const char *paramName,
-                                                   int epsg_code) const
+
+    PROJ_INTERNAL double parameterValueNumericAsSI(int epsg_code) const
         noexcept;
 
     PROJ_INTERNAL bool

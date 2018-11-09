@@ -58,6 +58,8 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
+#include "proj_constants.h"
+
 // PROJ include order is sensitive
 // clang-format off
 #include "proj.h"
@@ -75,8 +77,6 @@ using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
 
 //! @cond Doxygen_Suppress
-constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
-constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A = 9810;
 static const std::string emptyString{};
 //! @endcond
 
@@ -2808,7 +2808,7 @@ bool WKTParser::Private::hasWebMercPROJ4String(
 
     auto &extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
 
-    if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
+    if (metadata::Identifier::isEquivalentName(wkt1ProjectionName.c_str(),
                                                "Mercator_1SP") &&
         projCRSNode->countChildrenOfName("center_latitude") == 0) {
 
@@ -2929,15 +2929,10 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
 
-    constexpr int EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL = 1028;
-    constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A = 9812;
-    constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B = 9815;
     if (wkt2_mapping->epsg_code == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL &&
         ci_equal(esriProjectionName, "Plate_Carree")) {
         // Add a fixed  Latitude of 1st parallel = 0 so as to have all
         // parameters expected by Equidistant Cylindrical.
-        static const char *EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL(
-            "Latitude of 1st standard parallel");
         mapWKT2NameToESRIName[EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL] =
             "Standard_Parallel_1";
         mapParamNameToValue["Standard_Parallel_1"] = "0";
@@ -2951,8 +2946,6 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
                          "Rectified_Skew_Orthomorphic_Center")) {
         // ESRI WKT lacks the angle to skew grid
         // Take it from the azimuth value
-        static const char *EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID(
-            "Angle from Rectified to Skew Grid");
         mapWKT2NameToESRIName
             [EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID] = "Azimuth";
     }
@@ -3030,7 +3023,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     auto &extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
     const auto &extensionChildren = extensionNode->GP()->children();
 
-    if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
+    if (metadata::Identifier::isEquivalentName(wkt1ProjectionName.c_str(),
                                                "Mercator_1SP") &&
         projCRSNode->countChildrenOfName("center_latitude") == 0) {
 
@@ -3048,8 +3041,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
         values.push_back(
             ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
 
-    } else if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
-                                                      "Polar_Stereographic")) {
+    } else if (metadata::Identifier::isEquivalentName(
+                   wkt1ProjectionName.c_str(), "Polar_Stereographic")) {
         std::map<std::string, Measure> mapParameters;
         for (const auto &childNode : projCRSNode->GP()->children()) {
             const auto &childNodeChildren = childNode->GP()->children();
@@ -3258,11 +3251,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
             // EPSG:32761 (UPS South) uses the easting-northing order, instead
             // of the EPSG northing-easting order.
-            static const char *EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN(
-                "Latitude of natural origin");
-            constexpr int EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN = 8801;
             const double lat0 = conversion->parameterValueNumeric(
-                EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
                 EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
                 common::UnitOfMeasure::DEGREE);
             if (std::fabs(lat0 - 90) < 1e-10) {
@@ -6024,12 +6013,9 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     auto axisType = AxisType::REGULAR;
 
     if (step.name == "tmerc" && getParamValue(step, "axis") == "wsu") {
-        constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED =
-            9808;
         mapping =
             getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED);
     } else if (step.name == "etmerc") {
-        constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR = 9807;
         mapping = getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
         // TODO: we loose the link to the proj etmerc method here. Add some
         // property to Conversion to keep it ?
@@ -6041,60 +6027,40 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         const auto &k = getParamValue(step, "k");
         if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
             getAngularValue(lat_0) == getAngularValue(lat_1)) {
-            constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP = 9801;
             mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
         } else if ((!k_0.empty() && getNumericValue(k_0) != 1.0) ||
                    (!k.empty() && getNumericValue(k) != 1.0)) {
-            constexpr int
-                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN = 1051;
             mapping = getMapping(
                 EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN);
         } else {
-            constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP = 9802;
             mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
         }
     } else if (step.name == "aeqd" && hasParamValue(step, "guam")) {
-        constexpr int EPSG_CODE_METHOD_GUAM_PROJECTION = 9831;
         mapping = getMapping(EPSG_CODE_METHOD_GUAM_PROJECTION);
     } else if (step.name == "cea" &&
                !geogCRS->datum()->ellipsoid()->isSphere()) {
-        constexpr int EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA = 9835;
         mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
     } else if (step.name == "geos" && getParamValue(step, "sweep") == "x") {
-        static const char
-            *PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X(
-                "Geostationary Satellite (Sweep X)");
         mapping =
             getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X);
     } else if (step.name == "geos") {
-        static const char
-            *PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y(
-                "Geostationary Satellite (Sweep Y)");
         mapping =
             getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y);
     } else if (step.name == "omerc") {
         if (hasParamValue(step, "no_uoff") || hasParamValue(step, "no_off")) {
-            constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A =
-                9812;
             mapping =
                 getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A);
         } else if (hasParamValue(step, "lat_1") &&
                    hasParamValue(step, "lon_1") &&
                    hasParamValue(step, "lat_2") &&
                    hasParamValue(step, "lon_2")) {
-            static const char *
-                PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN(
-                    "Hotine Oblique Mercator Two Point Natural Origin");
             mapping = getMapping(
                 PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN);
         } else {
-            constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B =
-                9815;
             mapping =
                 getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B);
         }
     } else if (step.name == "somerc") {
-        constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B = 9815;
         mapping =
             getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B);
         step.paramValues.emplace_back(Step::KeyValue("alpha", "90"));
@@ -6111,8 +6077,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             (!hasParamValue(step, "k") ||
              getNumericValue(getParamValue(step, "k")) == 1.0) &&
             getParamValue(step, "nadgrids") == "@null") {
-            constexpr int
-                EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR = 1024;
             mapping = getMapping(
                 EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR);
             for (size_t i = 0; i < step.paramValues.size(); ++i) {
@@ -6137,8 +6101,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 axisType = AxisType::SOUTH_POLE;
             }
             if (hasParamValue(step, "lat_ts")) {
-                constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B =
-                    9829;
                 mapping =
                     getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B);
             } else {
@@ -6146,8 +6108,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A);
             }
         } else {
-            static const char *PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC(
-                "Stereographic");
             mapping = getMapping(PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC);
         }
     }
@@ -6206,12 +6166,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                         value = getAngularValue(*paramValue);
                     }
                 } else if (step.name == "krovak") {
-                    constexpr int EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS =
-                        1036;
-                    constexpr int
-                        EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL =
-                            8818;
-
                     if (param->epsg_code ==
                         EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
                         value = 30.2881397222222;
