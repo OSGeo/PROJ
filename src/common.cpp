@@ -364,7 +364,8 @@ bool Measure::_isEquivalentTo(const Measure &other,
     if (criterion == util::IComparable::Criterion::STRICT) {
         return operator==(other);
     }
-    return std::fabs(getSIValue() - other.getSIValue()) <= 1e-10 * getSIValue();
+    return std::fabs(getSIValue() - other.getSIValue()) <=
+           1e-10 * std::fabs(getSIValue());
 }
 
 // ---------------------------------------------------------------------------

@@ -137,11 +137,20 @@ TEST(operation, ParameterValue) {
     EXPECT_FALSE(valStr1->isEquivalentTo(createUnrelatedObject().get()));
     EXPECT_FALSE(valStr1->isEquivalentTo(valStr2.get()));
 
-    auto valMeasure1 = ParameterValue::create(Angle(90.0));
-    auto valMeasure2 = ParameterValue::create(Angle(89.0));
+    auto valMeasure1 = ParameterValue::create(Angle(-90.0));
+    auto valMeasure1Eps = ParameterValue::create(Angle(-90.0 - 1e-11));
+    auto valMeasure2 = ParameterValue::create(Angle(-89.0));
     EXPECT_TRUE(valMeasure1->isEquivalentTo(valMeasure1.get()));
+    EXPECT_TRUE(valMeasure1->isEquivalentTo(
+        valMeasure1.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(valMeasure1->isEquivalentTo(valMeasure1Eps.get()));
+    EXPECT_TRUE(valMeasure1->isEquivalentTo(
+        valMeasure1Eps.get(), IComparable::Criterion::EQUIVALENT));
+
     EXPECT_FALSE(valMeasure1->isEquivalentTo(valStr1.get()));
     EXPECT_FALSE(valMeasure1->isEquivalentTo(valMeasure2.get()));
+    EXPECT_FALSE(valMeasure1->isEquivalentTo(
+        valMeasure2.get(), IComparable::Criterion::EQUIVALENT));
 
     auto valInt1 = ParameterValue::create(1);
     auto valInt2 = ParameterValue::create(2);
