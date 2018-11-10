@@ -175,6 +175,7 @@ struct WKTFormatter::Private {
  * @return new formatter.
  */
 WKTFormatterNNPtr WKTFormatter::create(Convention convention,
+                                       // cppcheck-suppress passedByValue
                                        DatabaseContextPtr dbContext) {
     auto ret = NN_NO_CHECK(WKTFormatter::make_unique<WKTFormatter>(convention));
     ret->d->dbContext_ = dbContext;
@@ -4262,7 +4263,7 @@ struct Step {
         std::string key{};
         std::string value{};
 
-        KeyValue(const std::string &keyIn) : key(keyIn) {}
+        explicit KeyValue(const std::string &keyIn) : key(keyIn) {}
 
         KeyValue(const char *keyIn, const std::string &valueIn);
 

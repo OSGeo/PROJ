@@ -1761,7 +1761,7 @@ bool ParameterValue::booleanValue() PROJ_CONST_DEFN { return d->booleanValue_; }
 void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
-    const auto l_type = type();
+    const auto &l_type = type();
     const auto &l_value = value();
     if (formatter->abridgedTransformation() && l_type == Type::MEASURE) {
         const auto &unit = l_value.unit();
@@ -2082,7 +2082,8 @@ Conversion::create(const util::PropertyMap &properties,
 
 struct VectorOfParameters : public std::vector<OperationParameterNNPtr> {
     VectorOfParameters() : std::vector<OperationParameterNNPtr>() {}
-    VectorOfParameters(std::initializer_list<OperationParameterNNPtr> list)
+    explicit VectorOfParameters(
+        std::initializer_list<OperationParameterNNPtr> list)
         : std::vector<OperationParameterNNPtr>(list) {}
     VectorOfParameters(const VectorOfParameters &) = delete;
 
@@ -2094,10 +2095,10 @@ VectorOfParameters::~VectorOfParameters() = default;
 
 struct VectorOfValues : public std::vector<ParameterValueNNPtr> {
     VectorOfValues() : std::vector<ParameterValueNNPtr>() {}
-    VectorOfValues(std::initializer_list<ParameterValueNNPtr> list)
+    explicit VectorOfValues(std::initializer_list<ParameterValueNNPtr> list)
         : std::vector<ParameterValueNNPtr>(list) {}
 
-    VectorOfValues(std::initializer_list<common::Measure> list);
+    explicit VectorOfValues(std::initializer_list<common::Measure> list);
     VectorOfValues(const VectorOfValues &) = delete;
     VectorOfValues(VectorOfValues &&) = default;
 
@@ -9977,7 +9978,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     struct CreateOperationsWithDatumPivotAntiRecursion {
         Context &context;
 
-        CreateOperationsWithDatumPivotAntiRecursion(Context &contextIn)
+        explicit CreateOperationsWithDatumPivotAntiRecursion(Context &contextIn)
             : context(contextIn) {
             assert(!context.inCreateOperationsWithDatumPivotAntiRecursion);
             context.inCreateOperationsWithDatumPivotAntiRecursion = true;

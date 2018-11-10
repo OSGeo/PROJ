@@ -285,9 +285,12 @@ struct BaseObjectNNPtr : public util::nn<BaseObjectPtr> {
     // cppcheck-suppress noExplicitConstructor
     BaseObjectNNPtr(const util::nn<std::shared_ptr<T>> &x)
         : util::nn<BaseObjectPtr>(x) {}
+
     template <class T>
+    // cppcheck-suppress noExplicitConstructor
     BaseObjectNNPtr(util::nn<std::shared_ptr<T>> &&x) noexcept
         : util::nn<BaseObjectPtr>(NN_NO_CHECK(std::move(x.as_nullable()))) {}
+
     explicit BaseObjectNNPtr(::dropbox::oxygen::i_promise_i_checked_for_null_t,
                              BaseObjectPtr &&arg) noexcept
         : util::nn<BaseObjectPtr>(i_promise_i_checked_for_null,
