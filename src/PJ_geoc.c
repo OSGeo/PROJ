@@ -31,18 +31,19 @@
 #include <math.h>
 
 #include "proj.h"
+#include "proj_internal.h"
 #include "projects.h"
 
 PROJ_HEAD(geoc, "Geocentric Latitude");
 
 /* Geographical to geocentric */
 static PJ_COORD forward(PJ_COORD coo, PJ *P) {
-    return proj_geocentric_latitude (P, PJ_FWD, coo);
+    return pj_geocentric_latitude (P, PJ_FWD, coo);
 }
 
 /* Geocentric to geographical */
 static PJ_COORD inverse(PJ_COORD coo, PJ *P) {
-    return proj_geocentric_latitude (P, PJ_INV, coo);
+    return pj_geocentric_latitude (P, PJ_INV, coo);
 }
 
 

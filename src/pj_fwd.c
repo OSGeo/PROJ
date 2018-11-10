@@ -66,7 +66,7 @@ static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
 
         /* If input latitude is geocentrical, convert to geographical */
         if (P->geoc)
-            coo = proj_geocentric_latitude (P, PJ_INV, coo);
+            coo = pj_geocentric_latitude (P, PJ_INV, coo);
 
         /* Ensure longitude is in the -pi:pi range */
         if (0==P->over)

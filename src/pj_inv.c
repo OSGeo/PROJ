@@ -125,7 +125,7 @@ static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
 
         /* If input latitude was geocentrical, convert back to geocentrical */
         if (P->geoc)
-            coo = proj_geocentric_latitude (P, PJ_FWD, coo);
+            coo = pj_geocentric_latitude (P, PJ_FWD, coo);
     }
 
     return coo;
