@@ -1009,14 +1009,17 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
         auto searchByDatum = [this, &authorityFactory, &res, &thisDatum]() {
             for (const auto &id : thisDatum->identifiers()) {
-                auto tempRes = authorityFactory->createGeodeticCRSFromDatum(
-                    *id->codeSpace(), id->code());
-                for (const auto &crs : tempRes) {
-                    if (_isEquivalentTo(
-                            crs.get(),
-                            util::IComparable::Criterion::EQUIVALENT)) {
-                        res.emplace_back(crs, 70.0);
+                try {
+                    auto tempRes = authorityFactory->createGeodeticCRSFromDatum(
+                        *id->codeSpace(), id->code());
+                    for (const auto &crs : tempRes) {
+                        if (_isEquivalentTo(
+                                crs.get(),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+                            res.emplace_back(crs, 70.0);
+                        }
                     }
+                } catch (const std::exception &) {
                 }
             }
         };
@@ -1025,24 +1028,28 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         auto searchByEllipsoid = [this, &authorityFactory, &res, &thisDatum,
                                   &thisEllipsoid]() {
             for (const auto &id : thisEllipsoid->identifiers()) {
-                auto tempRes = authorityFactory->createGeodeticCRSFromEllipsoid(
-                    *id->codeSpace(), id->code());
-                for (const auto &crs : tempRes) {
-                    const auto &crsDatum(crs->datum());
-                    if (crsDatum &&
-                        crsDatum->ellipsoid()->_isEquivalentTo(
-                            thisEllipsoid.get(),
-                            util::IComparable::Criterion::EQUIVALENT) &&
-                        crsDatum->primeMeridian()->_isEquivalentTo(
-                            thisDatum->primeMeridian().get(),
-                            util::IComparable::Criterion::EQUIVALENT) &&
-                        coordinateSystem()->_isEquivalentTo(
-                            crs->coordinateSystem().get(),
-                            util::IComparable::Criterion::EQUIVALENT)
+                try {
+                    auto tempRes =
+                        authorityFactory->createGeodeticCRSFromEllipsoid(
+                            *id->codeSpace(), id->code());
+                    for (const auto &crs : tempRes) {
+                        const auto &crsDatum(crs->datum());
+                        if (crsDatum &&
+                            crsDatum->ellipsoid()->_isEquivalentTo(
+                                thisEllipsoid.get(),
+                                util::IComparable::Criterion::EQUIVALENT) &&
+                            crsDatum->primeMeridian()->_isEquivalentTo(
+                                thisDatum->primeMeridian().get(),
+                                util::IComparable::Criterion::EQUIVALENT) &&
+                            coordinateSystem()->_isEquivalentTo(
+                                crs->coordinateSystem().get(),
+                                util::IComparable::Criterion::EQUIVALENT)
 
-                            ) {
-                        res.emplace_back(crs, 60.0);
+                                ) {
+                            res.emplace_back(crs, 60.0);
+                        }
                     }
+                } catch (const std::exception &) {
                 }
             }
         };
@@ -1063,14 +1070,17 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                auto crs =
-                    io::AuthorityFactory::create(
-                        authorityFactory->databaseContext(), *id->codeSpace())
-                        ->createGeodeticCRS(id->code());
-                bool match = _isEquivalentTo(
-                    crs.get(), util::IComparable::Criterion::EQUIVALENT);
-                res.emplace_back(crs, match ? 100.0 : 25.0);
-                return res;
+                try {
+                    auto crs = io::AuthorityFactory::create(
+                                   authorityFactory->databaseContext(),
+                                   *id->codeSpace())
+                                   ->createGeodeticCRS(id->code());
+                    bool match = _isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
+                    res.emplace_back(crs, match ? 100.0 : 25.0);
+                    return res;
+                } catch (const std::exception &) {
+                }
             }
         } else {
             for (int ipass = 0; ipass < 2; ipass++) {

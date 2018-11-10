@@ -1365,6 +1365,19 @@ TEST(crs, geodeticcrs_identify_db) {
         EXPECT_EQ(res.front().first->identifiers()[0]->code(), "104105");
         EXPECT_EQ(res.front().second, 100.0);
     }
+    {
+        // Identification by non-existing code
+        auto res =
+            GeographicCRS::create(
+                PropertyMap()
+                    .set(IdentifiedObject::NAME_KEY, "NAD83")
+                    .set(Identifier::CODESPACE_KEY, "EPSG")
+                    .set(Identifier::CODE_KEY, "i_dont_exist"),
+                GeodeticReferenceFrame::EPSG_6269, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 0);
+    }
 }
 
 // ---------------------------------------------------------------------------

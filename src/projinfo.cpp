@@ -860,21 +860,27 @@ int main(int argc, char **argv) {
         if (identify) {
             auto geodCRS = dynamic_cast<GeodeticCRS *>(obj.get());
             if (geodCRS) {
-                auto res = geodCRS->identify(
-                    dbContext
-                        ? AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                   authority)
-                              .as_nullable()
-                        : nullptr);
-                std::cout << std::endl;
-                std::cout << "Identification match count: " << res.size()
-                          << std::endl;
-                for (const auto &pair : res) {
-                    const auto &crs = pair.first;
-                    const auto &ids = crs->identifiers();
-                    assert(!ids.empty());
-                    std::cout << *ids[0]->codeSpace() << ":" << ids[0]->code()
-                              << ": " << pair.second << " %" << std::endl;
+                try {
+                    auto res = geodCRS->identify(
+                        dbContext
+                            ? AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                       authority)
+                                  .as_nullable()
+                            : nullptr);
+                    std::cout << std::endl;
+                    std::cout << "Identification match count: " << res.size()
+                              << std::endl;
+                    for (const auto &pair : res) {
+                        const auto &crs = pair.first;
+                        const auto &ids = crs->identifiers();
+                        assert(!ids.empty());
+                        std::cout << *ids[0]->codeSpace() << ":"
+                                  << ids[0]->code() << ": " << pair.second
+                                  << " %" << std::endl;
+                    }
+                } catch (const std::exception &e) {
+                    std::cerr << "Identification failed: " << e.what()
+                              << std::endl;
                 }
             }
         }
