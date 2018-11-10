@@ -160,12 +160,12 @@ static void process(FILE *fid) {
             }
         } else {    /* x-y or decimal degree ascii output, scale if warranted by output units */
             if (inverse) {
-                if (Proj->left == PJ_IO_UNITS_ANGULAR) {
+                if (proj_angular_input(Proj, PJ_FWD)) {
                     data.uv.v *= RAD_TO_DEG;
                     data.uv.u *= RAD_TO_DEG;
                 }
             } else {
-                if (Proj->right == PJ_IO_UNITS_ANGULAR) {
+                if (proj_angular_output(Proj, PJ_FWD)) {
                     data.uv.v *= RAD_TO_DEG;
                     data.uv.u *= RAD_TO_DEG;
                 }
@@ -266,12 +266,6 @@ static void vprocess(FILE *fid) {
             }
             dat_xy = pj_fwd(dat_ll, Proj);
             if (postscale) { dat_xy.x *= fscale; dat_xy.y *= fscale; }
-        }
-
-        /* apply rad->deg scaling in case the output from a pipeline has degrees as units */
-        if (!inverse && Proj->right == PJ_IO_UNITS_ANGULAR) {
-            dat_xy.x *= RAD_TO_DEG;
-            dat_xy.y *= RAD_TO_DEG;
         }
 
         /* For some reason pj_errno does not work as expected in some   */
@@ -501,10 +495,14 @@ int main(int argc, char **argv) {
         emess(3,"projection initialization failure\ncause: %s",
               pj_strerrno(pj_errno));
 
-    if( pj_is_latlong( Proj ) )
-    {
-        emess( 3, "+proj=latlong unsuitable for use with proj program." );
-        exit( 0 );
+    if (!proj_angular_input(Proj, PJ_FWD)) {
+        emess(3, "can't initialize operations that take angular input coordinates");
+        exit(0);
+    }
+
+    if (proj_angular_output(Proj, PJ_FWD)) {
+        emess(3, "can't initialize operations that produce angular output coordinates");
+        exit(0);
     }
 
     if (inverse) {
