@@ -2365,8 +2365,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                       unit, isGeocentric, i + 1));
     };
 
-    const PropertyMap &csMap =
-        !isNull(node) ? buildProperties(node) : emptyPropertyMap;
+    const PropertyMap &csMap = emptyPropertyMap;
     if (ci_equal(csType, "ellipsoidal")) {
         if (axisCount == 2) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1]);

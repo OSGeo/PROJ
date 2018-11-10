@@ -883,6 +883,14 @@ class PROJ_GCC_DLL AuthorityFactory {
         //! @cond Doxygen_Suppress
         PROJ_DLL std::vector<crs::GeodeticCRSNNPtr>
         findGeodCRSUsingDatum(const std::string &datumCode) const;
+
+    PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
+    createGeodeticCRSFromDatum(const std::string &datum_auth_name,
+                               const std::string &datum_code) const;
+
+    PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
+    createGeodeticCRSFromEllipsoid(const std::string &ellipsoid_auth_name,
+                                   const std::string &ellipsoid_code) const;
     //! @endcond
 
   protected:

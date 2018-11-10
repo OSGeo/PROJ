@@ -92,8 +92,8 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
     PROJ_DLL GeodeticCRSPtr extractGeodeticCRS() const;
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
     PROJ_DLL VerticalCRSPtr extractVerticalCRS() const;
-    PROJ_DLL CRSNNPtr
-    createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const;
+    PROJ_DLL CRSNNPtr createBoundCRSToWGS84IfPossible(
+        const io::DatabaseContextPtr &dbContext) const;
     PROJ_DLL CRSNNPtr stripVerticalComponent() const;
 
     PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() PROJ_CONST_DECL;
@@ -228,6 +228,9 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
            const cs::CartesianCSNNPtr &cs);
 
     PROJ_DLL static const GeodeticCRSNNPtr EPSG_4978; // WGS 84 Geocentric
+
+    PROJ_DLL std::list<std::pair<GeodeticCRSNNPtr, double>>
+    identify(const io::AuthorityFactoryPtr &authorityFactory) const;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

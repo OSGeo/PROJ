@@ -85,6 +85,7 @@ static void usage() {
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
+        << "                [--identify]" << std::endl
         << "                {object_definition} | (-s {srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
@@ -555,6 +556,7 @@ int main(int argc, char **argv) {
     std::vector<std::string> auxDBPath;
     bool guessDialect = false;
     std::string authority;
+    bool identify = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -772,6 +774,8 @@ int main(int argc, char **argv) {
         } else if (arg == "--authority" && i + 1 < argc) {
             i++;
             authority = argv[i];
+        } else if (arg == "--identify") {
+            identify = true;
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {
@@ -853,6 +857,27 @@ int main(int argc, char **argv) {
             std::cout << std::endl;
         }
         outputObject(dbContext, obj, outputOpt);
+        if (identify) {
+            auto geodCRS = dynamic_cast<GeodeticCRS *>(obj.get());
+            if (geodCRS) {
+                auto res = geodCRS->identify(
+                    dbContext
+                        ? AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                   authority)
+                              .as_nullable()
+                        : nullptr);
+                std::cout << std::endl;
+                std::cout << "Identification match count: " << res.size()
+                          << std::endl;
+                for (const auto &pair : res) {
+                    const auto &crs = pair.first;
+                    const auto &ids = crs->identifiers();
+                    assert(!ids.empty());
+                    std::cout << *ids[0]->codeSpace() << ":" << ids[0]->code()
+                              << ": " << pair.second << " %" << std::endl;
+                }
+            }
+        }
     } else {
         outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
                          spatialCriterion, crsExtentUse, gridAvailabilityUse,

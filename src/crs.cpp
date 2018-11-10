@@ -232,8 +232,8 @@ VerticalCRSPtr CRS::extractVerticalCRS() const {
  *
  * @return a CRS.
  */
-CRSNNPtr
-CRS::createBoundCRSToWGS84IfPossible(io::DatabaseContextPtr dbContext) const {
+CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
+    const io::DatabaseContextPtr &dbContext) const {
     auto thisAsCRS = NN_NO_CHECK(
         std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
     auto boundCRS = util::nn_dynamic_pointer_cast<BoundCRS>(thisAsCRS);
@@ -951,6 +951,266 @@ GeodeticCRSNNPtr GeodeticCRS::createEPSG_4978() {
         createMapNameEPSGCode("WGS 84", 4978),
         datum::GeodeticReferenceFrame::EPSG_6326,
         cs::CartesianCS::createGeocentric(common::UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Identify the CRS with reference CRSs.
+ *
+ * The candidate CRSs are either hard-coded, or looked in the database when
+ * authorityFactory is not null.
+ *
+ * The method returns a list of matching reference CRS, and the percentage
+ * (0-100) of confidence in the match.
+ * 100% means that the name of the reference entry
+ * perfectly matches the CRS name, and both are equivalent. In which case a
+ * single result is returned.
+ * 90% means that CRS are equivalent, but the names are not exactly the same.
+ * 70% means that CRS are equivalent (equivalent datum and coordinate system),
+ * but the names do not match at all.
+ * 60% means that ellipsoid, prime meridian and coordinate systems are
+ * equivalent, but the CRS and datum names do not match.
+ * 25% means that the CRS are not equivalent, but there is some similarity in
+ * the names.
+ *
+ * @param authorityFactory Authority factory (or null, but degraded
+ * functionality)
+ * @return a list of matching reference CRS, and the percentage (0-100) of
+ * confidence in the match.
+ */
+std::list<std::pair<GeodeticCRSNNPtr, double>>
+GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<GeodeticCRSNNPtr, double> Pair;
+    std::list<Pair> res;
+    const auto &thisName(nameStr());
+
+    const bool nameEquivalent4326 = metadata::Identifier::isEquivalentName(
+        thisName.c_str(), GeographicCRS::EPSG_4326->nameStr().c_str());
+    const bool nameEqual4326 = thisName == GeographicCRS::EPSG_4326->nameStr();
+    const bool isEq4326 =
+        _isEquivalentTo(GeographicCRS::EPSG_4326.get(),
+                        util::IComparable::Criterion::EQUIVALENT);
+    if (nameEquivalent4326 && isEq4326 &&
+        (!authorityFactory || nameEqual4326)) {
+        res.emplace_back(
+            util::nn_static_pointer_cast<GeodeticCRS>(GeographicCRS::EPSG_4326),
+            nameEqual4326 ? 100.0 : 90.0);
+        return res;
+    } else if (nameEqual4326 && !isEq4326 && !authorityFactory) {
+        res.emplace_back(
+            util::nn_static_pointer_cast<GeodeticCRS>(GeographicCRS::EPSG_4326),
+            25.0);
+        return res;
+    }
+
+    if (authorityFactory) {
+
+        const auto &thisDatum(datum());
+
+        auto searchByDatum = [this, &authorityFactory, &res, &thisDatum]() {
+            for (const auto &id : thisDatum->identifiers()) {
+                auto tempRes = authorityFactory->createGeodeticCRSFromDatum(
+                    *id->codeSpace(), id->code());
+                for (const auto &crs : tempRes) {
+                    if (_isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        res.emplace_back(crs, 70.0);
+                    }
+                }
+            }
+        };
+
+        const auto &thisEllipsoid(ellipsoid());
+        auto searchByEllipsoid = [this, &authorityFactory, &res, &thisDatum,
+                                  &thisEllipsoid]() {
+            for (const auto &id : thisEllipsoid->identifiers()) {
+                auto tempRes = authorityFactory->createGeodeticCRSFromEllipsoid(
+                    *id->codeSpace(), id->code());
+                for (const auto &crs : tempRes) {
+                    const auto &crsDatum(crs->datum());
+                    if (crsDatum &&
+                        crsDatum->ellipsoid()->_isEquivalentTo(
+                            thisEllipsoid.get(),
+                            util::IComparable::Criterion::EQUIVALENT) &&
+                        crsDatum->primeMeridian()->_isEquivalentTo(
+                            thisDatum->primeMeridian().get(),
+                            util::IComparable::Criterion::EQUIVALENT) &&
+                        coordinateSystem()->_isEquivalentTo(
+                            crs->coordinateSystem().get(),
+                            util::IComparable::Criterion::EQUIVALENT)
+
+                            ) {
+                        res.emplace_back(crs, 60.0);
+                    }
+                }
+            }
+        };
+
+        const bool unsignificantName = thisName.empty() ||
+                                       ci_equal(thisName, "unknown") ||
+                                       ci_equal(thisName, "unnamed");
+
+        if (unsignificantName) {
+            if (thisDatum) {
+                if (!thisDatum->identifiers().empty()) {
+                    searchByDatum();
+                } else if (!thisEllipsoid->identifiers().empty()) {
+                    searchByEllipsoid();
+                }
+            }
+        } else if (!identifiers().empty()) {
+            // If the CRS has already an id, check in the database for the
+            // official object, and verify that they are equivalent.
+            for (const auto &id : identifiers()) {
+                auto crs =
+                    io::AuthorityFactory::create(
+                        authorityFactory->databaseContext(), *id->codeSpace())
+                        ->createGeodeticCRS(id->code());
+                bool match = _isEquivalentTo(
+                    crs.get(), util::IComparable::Criterion::EQUIVALENT);
+                res.emplace_back(crs, match ? 100.0 : 25.0);
+                return res;
+            }
+        } else {
+            for (int ipass = 0; ipass < 2; ipass++) {
+                const bool approximateMatch = ipass == 1;
+                auto objects = authorityFactory->createObjectsFromName(
+                    thisName, {io::AuthorityFactory::ObjectType::GEODETIC_CRS},
+                    approximateMatch);
+                for (const auto &obj : objects) {
+                    auto crs = util::nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+                    assert(crs);
+                    auto crsNN = NN_NO_CHECK(crs);
+                    if (_isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        if (crs->nameStr() == thisName) {
+                            res.clear();
+                            res.emplace_back(crsNN, 100.0);
+                            return res;
+                        }
+                        res.emplace_back(crsNN, 90.0);
+                    } else {
+                        res.emplace_back(crsNN, 25.0);
+                    }
+                }
+                if (!res.empty()) {
+                    break;
+                }
+            }
+            if (res.empty() && thisDatum) {
+                if (!thisDatum->identifiers().empty()) {
+                    searchByDatum();
+                } else if (!thisEllipsoid->identifiers().empty()) {
+                    searchByEllipsoid();
+                }
+            }
+        }
+
+        const auto &thisCS(coordinateSystem());
+        // Sort results
+        res.sort([&thisName, &thisDatum, &thisCS](const Pair &a,
+                                                  const Pair &b) {
+            // First consider confidence
+            if (a.second > b.second) {
+                return true;
+            }
+            if (a.second < b.second) {
+                return false;
+            }
+
+            // Then consider exact name matching
+            const auto &aName(a.first->nameStr());
+            const auto &bName(b.first->nameStr());
+            if (aName == thisName && bName != thisName) {
+                return true;
+            }
+            if (bName == thisName && aName != thisName) {
+                return false;
+            }
+
+            // Then datum matching
+            const auto &aDatum(a.first->datum());
+            const auto &bDatum(b.first->datum());
+            if (thisDatum && aDatum && bDatum) {
+                const auto thisEquivADatum(thisDatum->_isEquivalentTo(
+                    aDatum.get(), util::IComparable::Criterion::EQUIVALENT));
+                const auto thisEquivBDatum(thisDatum->_isEquivalentTo(
+                    bDatum.get(), util::IComparable::Criterion::EQUIVALENT));
+
+                if (thisEquivADatum && !thisEquivBDatum) {
+                    return true;
+                }
+                if (!thisEquivADatum && thisEquivBDatum) {
+                    return false;
+                }
+            }
+
+            // Then coordinate system matching
+            const auto &aCS(a.first->coordinateSystem());
+            const auto &bCS(b.first->coordinateSystem());
+            const auto thisEquivACs(thisCS->_isEquivalentTo(
+                aCS.get(), util::IComparable::Criterion::EQUIVALENT));
+            const auto thisEquivBCs(thisCS->_isEquivalentTo(
+                bCS.get(), util::IComparable::Criterion::EQUIVALENT));
+            if (thisEquivACs && !thisEquivBCs) {
+                return true;
+            }
+            if (!thisEquivACs && thisEquivBCs) {
+                return false;
+            }
+
+            // Then dimension of the coordinate system matching
+            const auto thisCSAxisListSize = thisCS->axisList().size();
+            const auto aCSAxistListSize = aCS->axisList().size();
+            const auto bCSAxistListSize = bCS->axisList().size();
+            if (thisCSAxisListSize == aCSAxistListSize &&
+                thisCSAxisListSize != bCSAxistListSize) {
+                return true;
+            }
+            if (thisCSAxisListSize != aCSAxistListSize &&
+                thisCSAxisListSize == bCSAxistListSize) {
+                return false;
+            }
+
+            if (aDatum && bDatum) {
+                // Favor the CRS whole ellipsoid names matches the ellipsoid
+                // name (WGS84...)
+                const bool aEllpsNameEqCRSName =
+                    metadata::Identifier::isEquivalentName(
+                        aDatum->ellipsoid()->nameStr().c_str(),
+                        a.first->nameStr().c_str());
+                const bool bEllpsNameEqCRSName =
+                    metadata::Identifier::isEquivalentName(
+                        bDatum->ellipsoid()->nameStr().c_str(),
+                        b.first->nameStr().c_str());
+                if (aEllpsNameEqCRSName && !bEllpsNameEqCRSName) {
+                    return true;
+                }
+                if (bEllpsNameEqCRSName && !aEllpsNameEqCRSName) {
+                    return false;
+                }
+            }
+
+            // Arbitrary final sorting criterion
+            return aName < bName;
+        });
+
+        // If there are results with 90% confidence, only keep those
+        if (res.size() >= 2 && res.front().second == 90.0) {
+            std::list<Pair> newRes;
+            for (const auto &pair : res) {
+                if (pair.second == 90.0) {
+                    newRes.push_back(pair);
+                } else {
+                    break;
+                }
+            }
+            return newRes;
+        }
+    }
+    return res;
 }
 
 // ---------------------------------------------------------------------------

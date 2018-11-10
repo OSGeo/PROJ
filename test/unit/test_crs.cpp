@@ -1119,6 +1119,256 @@ TEST(crs, geocentricCRS_unsupported_unit_as_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, geodeticcrs_identify_no_db) {
+    {
+        auto res =
+            GeodeticCRS::create(
+                PropertyMap(), GeodeticReferenceFrame::EPSG_6326, nullptr,
+                CartesianCS::createGeocentric(UnitOfMeasure::METRE))
+                ->identify(nullptr);
+        ASSERT_EQ(res.size(), 0);
+    }
+    {
+        auto res = GeographicCRS::EPSG_4326->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+    {
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS 84"),
+                GeodeticReferenceFrame::EPSG_6326, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+    {
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS84"),
+                GeodeticReferenceFrame::EPSG_6326, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
+        EXPECT_EQ(res.front().second, 90.0);
+    }
+    {
+        // Long Lat order
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS 84"),
+                GeodeticReferenceFrame::EPSG_6326, nullptr,
+                EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE))
+                ->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
+        EXPECT_EQ(res.front().second, 25.0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, geodeticcrs_identify_db) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    {
+        // No match
+        auto res =
+            GeographicCRS::create(
+                PropertyMap(),
+                GeodeticReferenceFrame::create(
+                    PropertyMap(),
+                    Ellipsoid::createFlattenedSphere(
+                        PropertyMap(), Length(6378137), Scale(10)),
+                    optional<std::string>(), PrimeMeridian::GREENWICH),
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(nullptr);
+        ASSERT_EQ(res.size(), 0);
+    }
+    {
+        // Identify by datum code
+        auto res =
+            GeodeticCRS::create(
+                PropertyMap(), GeodeticReferenceFrame::EPSG_6326, nullptr,
+                CartesianCS::createGeocentric(UnitOfMeasure::METRE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4978);
+        EXPECT_EQ(res.front().second, 70.0);
+    }
+    {
+        // Identify by datum code
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                GeodeticReferenceFrame::EPSG_6326, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 70.0);
+    }
+    {
+        // Identify by datum code (as a fallback)
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "foobar"),
+                GeodeticReferenceFrame::EPSG_6326, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 70.0);
+    }
+    {
+        // Perfect match, and ID available. Hardcoded case
+        auto res = GeographicCRS::EPSG_4326->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+    {
+        // Perfect match, but no ID available. Hardcoded case
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS 84"),
+                GeodeticReferenceFrame::EPSG_6326, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+    {
+        // Perfect match, but no ID available
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "NAD83"),
+                GeodeticReferenceFrame::EPSG_6269, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4269);
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+    {
+        // Perfect match, and ID available
+        auto res =
+            GeographicCRS::create(
+                PropertyMap()
+                    .set(IdentifiedObject::NAME_KEY, "NAD83")
+                    .set(Identifier::CODESPACE_KEY, "EPSG")
+                    .set(Identifier::CODE_KEY, 4269),
+                GeodeticReferenceFrame::EPSG_6269, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4269);
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+    {
+        // The object has a unreliable ID
+        auto res =
+            GeographicCRS::create(
+                PropertyMap()
+                    .set(IdentifiedObject::NAME_KEY, "WGS 84")
+                    .set(Identifier::CODESPACE_KEY, "EPSG")
+                    .set(Identifier::CODE_KEY, 4326),
+                GeodeticReferenceFrame::EPSG_6269, nullptr, // NAD83 !!!
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 25.0);
+    }
+    {
+        // Approximate match by name
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS84"),
+                GeodeticReferenceFrame::EPSG_6326, nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 90.0);
+    }
+    {
+        // Long Lat order
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS 84"),
+                GeodeticReferenceFrame::EPSG_6326, nullptr,
+                EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 3);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 25.0);
+    }
+    {
+        // Identify by ellipsoid code
+        auto res =
+            GeographicCRS::create(
+                PropertyMap(),
+                GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                               optional<std::string>(),
+                                               PrimeMeridian::GREENWICH),
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_GT(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 60.0);
+    }
+    {
+        // Identify by ellipsoid code (as a fallback)
+        auto res =
+            GeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                               optional<std::string>(),
+                                               PrimeMeridian::GREENWICH),
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                ->identify(factory);
+        ASSERT_GT(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 60.0);
+    }
+    {
+        // Identify by name, without any code
+        auto wkt =
+            "GEODCRS[\"GCS_Datum_Lisboa_Bessel\",\n"
+            "    DATUM[\"D_Datum_Lisboa_Bessel\",\n"
+            "        ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+            "            LENGTHUNIT[\"metre\",1]]],\n"
+            "    PRIMEM[\"Greenwich\",0,\n"
+            "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "    CS[ellipsoidal,2],\n"
+            "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+            "            ORDER[1],\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+            "            ORDER[2],\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        ASSERT_TRUE(!res.front().first->identifiers().empty());
+        EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "ESRI");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "104105");
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static ProjectedCRSNNPtr createProjected() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")

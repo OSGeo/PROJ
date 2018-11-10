@@ -1108,15 +1108,19 @@ static bool isIgnoredChar(char ch) {
 //! @cond Doxygen_Suppress
 std::string Identifier::canonicalizeName(const std::string &str) {
     std::string res;
-    res.resize(str.size());
-    size_t iInsert = 0;
-    for (const char ch : str) {
+    const char *c_str = str.c_str();
+    for (size_t i = 0; c_str[i] != 0; ++i) {
+        const auto ch = c_str[i];
+        if (ch == '1' && !res.empty() &&
+            !(res.back() >= '0' && res.back() <= '9') && c_str[i + 1] == '9' &&
+            c_str[i + 2] >= '0' && c_str[i + 2] <= '9') {
+            ++i;
+            continue;
+        }
         if (!isIgnoredChar(ch)) {
-            res[iInsert] = static_cast<char>(::tolower(static_cast<int>(ch)));
-            iInsert++;
+            res.push_back(static_cast<char>(::tolower(ch)));
         }
     }
-    res.resize(iInsert);
     return res;
 }
 //! @endcond
@@ -1131,6 +1135,8 @@ std::string Identifier::canonicalizeName(const std::string &str) {
 bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
     size_t i = 0;
     size_t j = 0;
+    char lastValidA = 0;
+    char lastValidB = 0;
     while (a[i] != 0 && b[j] != 0) {
         const char aCh = a[i];
         const char bCh = b[j];
@@ -1142,9 +1148,23 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
             ++j;
             continue;
         }
+        if (aCh == '1' && !(lastValidA >= '0' && lastValidA <= '9') &&
+            a[i + 1] == '9' && a[i + 2] >= '0' && a[i + 2] <= '9') {
+            i += 2;
+            lastValidA = '9';
+            continue;
+        }
+        if (bCh == '1' && !(lastValidB >= '0' && lastValidB <= '9') &&
+            b[j + 1] == '9' && b[j + 2] >= '0' && b[j + 2] <= '9') {
+            j += 2;
+            lastValidB = '9';
+            continue;
+        }
         if (::tolower(aCh) != ::tolower(bCh)) {
             return false;
         }
+        lastValidA = aCh;
+        lastValidB = bCh;
         ++i;
         ++j;
     }

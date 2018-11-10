@@ -3629,27 +3629,8 @@ AuthorityFactory::createObjectsFromName(
             searchedNameWithoutDeprecated.size() - strlen(" (deprecated)"));
     }
 
-    const auto canonicalize = [](const std::string &in) {
-        std::string ret;
-        for (size_t i = 0; i < in.size(); ++i) {
-            const auto ch = in[i];
-            // Strip 19 from 19xx numbers
-            if (ch == '1' && i + 3 < in.size() && in[i + 1] == '9' &&
-                in[i + 2] >= '0' && in[i + 2] <= '9' && in[i + 3] >= '0' &&
-                in[i + 3] <= '9') {
-                ++i;
-                continue;
-            }
-            if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
-                (ch >= '0' && ch <= '9')) {
-                ret += ch;
-            }
-        }
-        return ret;
-    };
-
     const std::string canonicalizedSearchedName(
-        canonicalize(searchedNameWithoutDeprecated));
+        metadata::Identifier::canonicalizeName(searchedNameWithoutDeprecated));
     if (canonicalizedSearchedName.size() <= 1) {
         return {};
     }
@@ -3783,7 +3764,8 @@ AuthorityFactory::createObjectsFromName(
             bool match = ci_find(name, searchedNameWithoutDeprecated) !=
                          std::string::npos;
             if (!match) {
-                const auto canonicalizedName(canonicalize(name));
+                const auto canonicalizedName(
+                    metadata::Identifier::canonicalizeName(name));
                 match = ci_find(canonicalizedName, canonicalizedSearchedName) !=
                         std::string::npos;
             }
@@ -3872,6 +3854,62 @@ AuthorityFactory::createObjectsFromName(
 
     return res;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
+    const std::string &datum_auth_name, const std::string &datum_code) const {
+    std::string sql(
+        "SELECT auth_name, code FROM geodetic_crs WHERE "
+        "datum_auth_name = ? AND datum_code = ? AND deprecated = 0");
+    std::vector<SQLValues> params{datum_auth_name, datum_code};
+    if (!getAuthority().empty()) {
+        sql += " AND auth_name = ?";
+        params.emplace_back(getAuthority());
+    }
+    auto sqlRes = d->run(sql, params);
+    std::list<crs::GeodeticCRSNNPtr> res;
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(d->createFactory(auth_name)->createGeodeticCRS(code));
+    }
+    return res;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+std::list<crs::GeodeticCRSNNPtr>
+AuthorityFactory::createGeodeticCRSFromEllipsoid(
+    const std::string &ellipsoid_auth_name,
+    const std::string &ellipsoid_code) const {
+    std::string sql(
+        "SELECT geodetic_crs.auth_name, geodetic_crs.code FROM geodetic_crs "
+        "JOIN geodetic_datum ON "
+        "geodetic_crs.datum_auth_name = geodetic_datum.auth_name AND "
+        "geodetic_crs.datum_code = geodetic_datum.code WHERE "
+        "geodetic_datum.ellipsoid_auth_name = ? AND "
+        "geodetic_datum.ellipsoid_code = ? AND "
+        "geodetic_datum.deprecated = 0 AND "
+        "geodetic_crs.deprecated = 0");
+    std::vector<SQLValues> params{ellipsoid_auth_name, ellipsoid_code};
+    if (!getAuthority().empty()) {
+        sql += " AND geodetic_crs.auth_name = ?";
+        params.emplace_back(getAuthority());
+    }
+    auto sqlRes = d->run(sql, params);
+    std::list<crs::GeodeticCRSNNPtr> res;
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(d->createFactory(auth_name)->createGeodeticCRS(code));
+    }
+    return res;
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
