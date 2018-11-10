@@ -514,8 +514,8 @@ Ellipsoid::semiMinorAxis() PROJ_CONST_DEFN {
  * @return true if the ellipsoid is spherical.
  */
 bool Ellipsoid::isSphere() PROJ_CONST_DEFN {
-    if (inverseFlattening().has_value()) {
-        return inverseFlattening()->value() == 0;
+    if (d->inverseFlattening_.has_value()) {
+        return d->inverseFlattening_->value() == 0;
     }
 
     if (semiMinorAxis().has_value()) {
@@ -547,18 +547,31 @@ Ellipsoid::semiMedianAxis() PROJ_CONST_DEFN {
  *
  * @return the inverse flattening value of the ellipsoid, or 0 for a sphere.
  */
-common::Scale Ellipsoid::computeInverseFlattening() const {
-    if (inverseFlattening().has_value()) {
-        return *inverseFlattening();
+double Ellipsoid::computedInverseFlattening() PROJ_CONST_DEFN {
+    if (d->inverseFlattening_.has_value()) {
+        return d->inverseFlattening_->getSIValue();
     }
 
-    if (semiMinorAxis().has_value()) {
-        const double a = semiMajorAxis().value();
-        const double b = semiMinorAxis()->value();
-        return common::Scale((a == b) ? 0.0 : a / (a - b));
+    if (d->semiMinorAxis_.has_value()) {
+        const double a = d->semiMajorAxis_.getSIValue();
+        const double b = d->semiMinorAxis_->getSIValue();
+        return (a == b) ? 0.0 : a / (a - b);
     }
 
-    return common::Scale(0.0);
+    return 0.0;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the squared eccentricity of the ellipsoid.
+ *
+ * @return the squared eccentricity, or a negative value if invalid.
+ */
+double Ellipsoid::squaredEccentricity() PROJ_CONST_DEFN {
+    const double rf = computedInverseFlattening();
+    const double f = rf != 0.0 ? 1. / rf : 0.0;
+    const double e2 = f * (2 - f);
+    return e2;
 }
 
 // ---------------------------------------------------------------------------
@@ -571,17 +584,18 @@ common::Scale Ellipsoid::computeInverseFlattening() const {
  * @return the semi-minor axis of the ellipsoid.
  */
 common::Length Ellipsoid::computeSemiMinorAxis() const {
-    if (semiMinorAxis().has_value()) {
-        return *semiMinorAxis();
+    if (d->semiMinorAxis_.has_value()) {
+        return *d->semiMinorAxis_;
     }
 
     if (inverseFlattening().has_value()) {
-        return common::Length((1.0 - 1.0 / inverseFlattening()->getSIValue()) *
-                                  semiMajorAxis().value(),
-                              semiMajorAxis().unit());
+        return common::Length(
+            (1.0 - 1.0 / d->inverseFlattening_->getSIValue()) *
+                d->semiMajorAxis_.value(),
+            d->semiMajorAxis_.unit());
     }
 
-    return semiMajorAxis();
+    return d->semiMajorAxis_;
 }
 
 // ---------------------------------------------------------------------------
@@ -720,7 +734,7 @@ void Ellipsoid::_exportToWKT(
         } else {
             formatter->add(semiMajor.getSIValue());
         }
-        formatter->add(computeInverseFlattening().value());
+        formatter->add(computedInverseFlattening());
         const auto &unit = semiMajor.unit();
         if (isWKT2 &&
             !(formatter->ellipsoidUnitOmittedIfMetre() &&
@@ -741,7 +755,7 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
                                           std::string &ellpsName) const {
     const double a = semiMajorAxis().getSIValue();
     const double b = computeSemiMinorAxis().getSIValue();
-    const double rf = computeInverseFlattening().getSIValue();
+    const double rf = computedInverseFlattening();
     auto proj_ellps = proj_list_ellps();
     for (int i = 0; proj_ellps[i].id != nullptr; i++) {
         assert(strncmp(proj_ellps[i].major, "a=", 2) == 0);
@@ -788,7 +802,7 @@ void Ellipsoid::_exportToPROJString(
     } else {
         formatter->addParam("a", a);
         if (inverseFlattening().has_value()) {
-            const double rf = computeInverseFlattening().getSIValue();
+            const double rf = computedInverseFlattening();
             formatter->addParam("rf", rf);
         } else {
             const double b = computeSemiMinorAxis().getSIValue();

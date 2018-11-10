@@ -4201,20 +4201,17 @@ CoordinateOperationNNPtr Conversion::inverse() const {
 
 //! @cond Doxygen_Suppress
 
-static double msfn(double phi, double ec) {
+static double msfn(double phi, double e2) {
     const double sinphi = std::sin(phi);
     const double cosphi = std::cos(phi);
-    const double sinphi_ec = sinphi * ec;
-    return cosphi / std::sqrt(1.0 - sinphi_ec * sinphi_ec);
+    return pj_msfn(sinphi, cosphi, e2);
 }
 
 // ---------------------------------------------------------------------------
 
 static double tsfn(double phi, double ec) {
     const double sinphi = std::sin(phi);
-    const double sinphi_ec = sinphi * ec;
-    return tan(0.5 * (M_PI / 2 - phi)) /
-           std::pow((1.0 - sinphi_ec) / (1.0 + sinphi_ec), 0.5 * ec);
+    return pj_tsfn(phi, sinphi, ec);
 }
 
 // ---------------------------------------------------------------------------
@@ -4265,8 +4262,8 @@ static double find_zero_lcc_1sp_to_2sp_f(double sinphi0, bool bNorth, double K,
     return (a + b) / 2;
 }
 
-static double DegToRad(double x) { return x / 180.0 * M_PI; }
-static double RadToDeg(double x) { return x / M_PI * 180.0; }
+static inline double DegToRad(double x) { return x / 180.0 * M_PI; }
+static inline double RadToDeg(double x) { return x / M_PI * 180.0; }
 
 //! @endcond
 
@@ -4301,6 +4298,11 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
         return nullptr;
     }
 
+    const double e2 = geogCRS->ellipsoid()->squaredEccentricity();
+    if (e2 < 0) {
+        return nullptr;
+    }
+
     if (current_epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_A &&
         targetEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
         parameterValueNumericAsSI(
@@ -4308,12 +4310,6 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
         const double k0 = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN);
         if (!(k0 > 0 && k0 <= 1.0 + 1e-10))
-            return nullptr;
-        const double rf =
-            geogCRS->ellipsoid()->computeInverseFlattening().value();
-        const double f = rf != 0.0 ? 1. / rf : 0.0;
-        const double e2 = 2 * f - f * f;
-        if (e2 < 0)
             return nullptr;
         const double dfStdP1Lat =
             (k0 >= 1.0)
@@ -4339,16 +4335,9 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
         targetEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_A) {
         const double phi1 = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL);
-        if (!(fabs(phi1) < M_PI / 2))
+        if (!(std::fabs(phi1) < M_PI / 2))
             return nullptr;
-        const double rf =
-            geogCRS->ellipsoid()->computeInverseFlattening().value();
-        const double f = rf != 0.0 ? 1. / rf : 0.0;
-        const double e2 = 2 * f - f * f;
-        if (e2 < 0)
-            return nullptr;
-        const double ec = std::sqrt(e2);
-        const double k0 = msfn(phi1, ec);
+        const double k0 = msfn(phi1, e2);
         auto conv = createMercatorVariantA(
             util::PropertyMap(),
             common::Angle(0.0, common::UnitOfMeasure::DEGREE),
@@ -4378,14 +4367,8 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             return nullptr;
         if (!(k0 > 0 && k0 <= 1.0 + 1e-10))
             return nullptr;
-        const double rf =
-            geogCRS->ellipsoid()->computeInverseFlattening().value();
-        const double f = rf != 0.0 ? 1. / rf : 0.0;
-        const double e2 = 2 * f - f * f;
-        if (e2 < 0)
-            return nullptr;
         const double ec = std::sqrt(e2);
-        const double m0 = msfn(phi0, ec);
+        const double m0 = msfn(phi0, e2);
         const double t0 = tsfn(phi0, ec);
         const double n = sin(phi0);
         if (std::fabs(n) < 1e-10)
@@ -4432,7 +4415,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                           std::floor(latitudeOfOriginDeg * 2 + 0.5)) < 0.2) {
                 const double dfRoundedLatOfOrig =
                     std::floor(latitudeOfOriginDeg * 2 + 0.5) / 2;
-                const double m1 = msfn(phi1, ec);
+                const double m1 = msfn(phi1, e2);
                 const double t1 = tsfn(phi1, ec);
                 const double F = m1 / (n * std::pow(t1, n));
                 const double a =
@@ -4496,15 +4479,9 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             return nullptr;
         if (!(std::fabs(phi2) < M_PI / 2))
             return nullptr;
-        const double rf =
-            geogCRS->ellipsoid()->computeInverseFlattening().value();
-        const double f = rf != 0.0 ? 1. / rf : 0.0;
-        const double e2 = 2 * f - f * f;
-        if (e2 < 0)
-            return nullptr;
         const double ec = std::sqrt(e2);
-        const double m1 = msfn(phi1, ec);
-        const double m2 = msfn(phi2, ec);
+        const double m1 = msfn(phi1, e2);
+        const double m2 = msfn(phi2, e2);
         const double t1 = tsfn(phi1, ec);
         const double t2 = tsfn(phi2, ec);
         const double n_denom = std::log(t1) - std::log(t2);
@@ -4515,7 +4492,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             return nullptr;
         const double F = m1 / (n * std::pow(t1, n));
         const double phi0 = std::asin(n);
-        const double m0 = msfn(phi0, ec);
+        const double m0 = msfn(phi0, e2);
         const double t0 = tsfn(phi0, ec);
         const double F0 = m0 / (n * std::pow(t0, n));
         const double k0 = F / F0;
@@ -8746,6 +8723,10 @@ struct CoordinateOperationFactory::Private {
         const crs::GeodeticCRS *geodSrc, const crs::GeodeticCRS *geodDst,
         Context &context);
 
+    static bool
+    hasPerfectAccuracyResult(const std::vector<CoordinateOperationNNPtr> &res,
+                             const Context &context);
+
     static ConversionNNPtr
     createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
                                const crs::CRSNNPtr &targetCRS);
@@ -9772,8 +9753,8 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     assert(targetCRS.get() == geogDst);
     const bool allowEmptyIntersection = true;
 
-    auto src_pm = geogSrc->primeMeridian()->longitude();
-    auto dst_pm = geogDst->primeMeridian()->longitude();
+    const auto &src_pm = geogSrc->primeMeridian()->longitude();
+    const auto &dst_pm = geogDst->primeMeridian()->longitude();
     auto offset_pm =
         (src_pm.unit() == dst_pm.unit())
             ? common::Angle(src_pm.value() - dst_pm.value(), src_pm.unit())
@@ -9963,7 +9944,7 @@ findCandidateGeodCRSForDatum(const io::DatabaseContextNNPtr &dbContext,
     std::vector<crs::CRSNNPtr> candidates;
     for (const auto &id : datum->identifiers()) {
         const auto &authName = *(id->codeSpace());
-        const auto code = id->code();
+        const auto &code = id->code();
         if (!authName.empty()) {
             auto l_candidates =
                 io::AuthorityFactory::create(dbContext, authName)
@@ -10084,6 +10065,26 @@ createNullGeocentricTranslation(const crs::CRSNNPtr &sourceCRS,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+bool CoordinateOperationFactory::Private::hasPerfectAccuracyResult(
+    const std::vector<CoordinateOperationNNPtr> &res, const Context &context) {
+    auto resTmp = FilterAndSort(res, context.context, context.sourceCRS,
+                                context.targetCRS, true)
+                      .getRes();
+    for (const auto &op : resTmp) {
+        const double acc = getAccuracy(op);
+        if (acc == 0.0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperations(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
@@ -10115,15 +10116,10 @@ CoordinateOperationFactory::Private::createOperations(
 
             // If we get at least a result with perfect accuracy, do not
             // bother generating synthetic transforms.
-            auto resTmp = FilterAndSort(res, context.context, context.sourceCRS,
-                                        context.targetCRS, true)
-                              .getRes();
-            for (const auto &op : resTmp) {
-                const double acc = getAccuracy(op);
-                if (acc == 0.0) {
-                    return res;
-                }
+            if (hasPerfectAccuracyResult(res, context)) {
+                return res;
             }
+
             doFilterAndCheckPerfectOp = false;
 
             // NAD27 to NAD83 has tens of results already. No need to look
@@ -10163,14 +10159,8 @@ CoordinateOperationFactory::Private::createOperations(
         if (doFilterAndCheckPerfectOp) {
             // If we get at least a result with perfect accuracy, do not bother
             // generating synthetic transforms.
-            auto resTmp = FilterAndSort(res, context.context, context.sourceCRS,
-                                        context.targetCRS, true)
-                              .getRes();
-            for (const auto &op : resTmp) {
-                const double acc = getAccuracy(op);
-                if (acc == 0.0) {
-                    return res;
-                }
+            if (hasPerfectAccuracyResult(res, context)) {
+                return res;
             }
         }
     }

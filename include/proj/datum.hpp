@@ -261,7 +261,8 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
 
     // non-standard
 
-    PROJ_DLL common::Scale computeInverseFlattening() const;
+    PROJ_DLL double computedInverseFlattening() PROJ_CONST_DECL;
+    PROJ_DLL double squaredEccentricity() PROJ_CONST_DECL;
     PROJ_DLL common::Length computeSemiMinorAxis() const;
 
     PROJ_DLL const std::string &celestialBody() PROJ_CONST_DECL;

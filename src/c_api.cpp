@@ -1122,8 +1122,7 @@ int proj_obj_ellipsoid_get_parameters(PJ_OBJ *ellipsoid,
         *pIsSemiMinorComputed = !(l_ellipsoid->semiMinorAxis().has_value());
     }
     if (pInverseFlattening) {
-        *pInverseFlattening =
-            l_ellipsoid->computeInverseFlattening().getSIValue();
+        *pInverseFlattening = l_ellipsoid->computedInverseFlattening();
     }
     return TRUE;
 }

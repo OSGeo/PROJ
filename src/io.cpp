@@ -6317,6 +6317,13 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
 // ---------------------------------------------------------------------------
 
+static bool isDatumDefiningParam(const std::string &param) {
+    return (param == "datum" || param == "ellps" || param == "a" ||
+            param == "b" || param == "rf" || param == "R");
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
     int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
@@ -6386,8 +6393,7 @@ CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     };
 
     for (const auto &param : step.paramValues) {
-        if (param.key == "datum" || param.key == "ellps" || param.key == "a" ||
-            param.key == "b" || param.key == "R") {
+        if (isDatumDefiningParam(param.key)) {
             continue;
         }
         if (param.key == "convention") {
@@ -6489,8 +6495,7 @@ PROJStringParser::Private::buildMolodenskyTransformation(
     bool abridged = false;
 
     for (const auto &param : step.paramValues) {
-        if (param.key == "datum" || param.key == "ellps" || param.key == "a" ||
-            param.key == "b" || param.key == "R") {
+        if (isDatumDefiningParam(param.key)) {
             continue;
         } else if (param.key == "abridged") {
             abridged = true;
@@ -6519,7 +6524,7 @@ PROJStringParser::Private::buildMolodenskyTransformation(
 
     const auto &ellps = sourceCRS->ellipsoid();
     const double a = ellps->semiMajorAxis().getSIValue();
-    const double rf = ellps->computeInverseFlattening().getSIValue();
+    const double rf = ellps->computedInverseFlattening();
     const double target_a = a + da;
     const double target_rf = 1.0 / (1.0 / rf + df);
 

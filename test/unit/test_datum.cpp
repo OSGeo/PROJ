@@ -68,7 +68,7 @@ TEST(datum, ellipsoid_from_sphere) {
     EXPECT_EQ(ellipsoid->celestialBody(), "Earth");
 
     EXPECT_EQ(ellipsoid->computeSemiMinorAxis(), Length(6378137));
-    EXPECT_EQ(ellipsoid->computeInverseFlattening(), Scale(0));
+    EXPECT_EQ(ellipsoid->computedInverseFlattening(), 0);
 
     EXPECT_EQ(
         ellipsoid->exportToPROJString(PROJStringFormatter::create().get()),
@@ -104,7 +104,7 @@ TEST(datum, ellipsoid_from_inverse_flattening) {
               ellipsoid->semiMajorAxis().unit());
     EXPECT_NEAR(ellipsoid->computeSemiMinorAxis().value(),
                 Length(6356752.31424518).value(), 1e-9);
-    EXPECT_EQ(ellipsoid->computeInverseFlattening(), Scale(298.257223563));
+    EXPECT_EQ(ellipsoid->computedInverseFlattening(), 298.257223563);
 
     EXPECT_EQ(
         ellipsoid->exportToPROJString(PROJStringFormatter::create().get()),
@@ -136,8 +136,7 @@ TEST(datum, ellipsoid_from_semi_minor_axis) {
     EXPECT_EQ(*ellipsoid->semiMinorAxis(), Length(6356752.31424518));
 
     EXPECT_EQ(ellipsoid->computeSemiMinorAxis(), Length(6356752.31424518));
-    EXPECT_NEAR(ellipsoid->computeInverseFlattening().value(),
-                Scale(298.257223563).value(), 1e-10);
+    EXPECT_NEAR(ellipsoid->computedInverseFlattening(), 298.257223563, 1e-10);
 
     EXPECT_EQ(
         ellipsoid->exportToPROJString(PROJStringFormatter::create().get()),
