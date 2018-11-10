@@ -491,7 +491,7 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
         "GEOGCS[\"NTF (Paris)\",\n"
         "    DATUM[\"Nouvelle_Triangulation_Francaise_Paris\",\n"
         "        SPHEROID[\"Clarke 1880 (IGN)\",6378249.2,293.466021293627,\n"
-        "            AUTHORITY[\"EPSG\",\"6807\"]],\n"
+        "            AUTHORITY[\"EPSG\",\"7011\"]],\n"
         "        AUTHORITY[\"EPSG\",\"6807\"]],\n"
         "    PRIMEM[\"Paris\",2.33722917,\n" /* WKT1_GDAL weirdness: PRIMEM is
                                                 converted to degree */

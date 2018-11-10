@@ -1377,7 +1377,7 @@ GeographicCRSNNPtr GeographicCRS::createOGC_CRS84() {
     propertiesCRS
         .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::OGC)
         .set(metadata::Identifier::CODE_KEY, "CRS84")
-        .set(common::IdentifiedObject::NAME_KEY, "WGS 84");
+        .set(common::IdentifiedObject::NAME_KEY, "WGS 84 (CRS84)");
     return create(propertiesCRS, datum::GeodeticReferenceFrame::EPSG_6326,
                   cs::EllipsoidalCS::createLongitudeLatitude( // Long Lat !
                       common::UnitOfMeasure::DEGREE));
@@ -1397,29 +1397,17 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4979() {
 
 GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     auto ellps(datum::Ellipsoid::createFlattenedSphere(
-        createMapNameEPSGCode("Clarke 1880 (IGN)", 6807),
+        createMapNameEPSGCode("Clarke 1880 (IGN)", 7011),
         common::Length(6378249.2), common::Scale(293.4660212936269)));
 
-    auto axisLat(cs::CoordinateSystemAxis::create(
-        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                cs::AxisName::Latitude),
-        cs::AxisAbbreviation::lat, cs::AxisDirection::NORTH,
+    auto cs(cs::EllipsoidalCS::createLatitudeLongitude(
         common::UnitOfMeasure::GRAD));
-
-    auto axisLong(cs::CoordinateSystemAxis::create(
-        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                cs::AxisName::Longitude),
-        cs::AxisAbbreviation::lon, cs::AxisDirection::EAST,
-        common::UnitOfMeasure::GRAD));
-
-    auto cs(cs::EllipsoidalCS::create(util::PropertyMap(), axisLat, axisLong));
 
     auto datum(datum::GeodeticReferenceFrame::create(
         createMapNameEPSGCode("Nouvelle Triangulation Francaise (Paris)", 6807),
         ellps, util::optional<std::string>(), datum::PrimeMeridian::PARIS));
 
-    auto gcrs(create(createMapNameEPSGCode("NTF (Paris)", 4807), datum, cs));
-    return gcrs;
+    return create(createMapNameEPSGCode("NTF (Paris)", 4807), datum, cs);
 }
 
 // ---------------------------------------------------------------------------
