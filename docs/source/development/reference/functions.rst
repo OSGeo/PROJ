@@ -551,19 +551,6 @@ Various
     :returns: :c:type:`char*` Pointer to output buffer (same as :c:data:`s`)
 
 
-.. c:function:: PJ_COORD proj_geocentric_latitude(const PJ *P, PJ_DIRECTION direction, PJ_COORD coord)
-
-    Convert from geographical latitude to geocentric latitude.
-
-    :param `P`: Transformation object
-    :type `P`: const PJ*
-    :param `direction`: Starting direction of transformation
-    :type `direction`: PJ_DIRECTION
-    :param `coord`: Coordinate
-    :type `coord`: PJ_COORD
-    :returns: :c:type:`PJ_COORD` Converted coordinate
-
-
 .. c:function:: int proj_angular_input (PJ *P, enum PJ_DIRECTION dir)
 
     Check if a operation expects angular input.

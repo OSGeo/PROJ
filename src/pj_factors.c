@@ -1,6 +1,7 @@
 /* projection scale factors */
 #define PJ_LIB__
 #include "proj.h"
+#include "proj_internal.h"
 #include "proj_math.h"
 #include "projects.h"
 
@@ -48,7 +49,7 @@ int pj_factors(LP lp, const PJ *P, double h, struct FACTORS *fac) {
 
     /* If input latitudes are geocentric, convert to geographic */
     if (P->geoc)
-        lp = proj_geocentric_latitude (P, PJ_INV, coo).lp;
+        lp = pj_geocentric_latitude (P, PJ_INV, coo).lp;
 
     /* If latitude + one step overshoots the pole, move it slightly inside, */
     /* so the numerical derivative still exists */

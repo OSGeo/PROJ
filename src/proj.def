@@ -135,7 +135,6 @@ EXPORTS
 
     proj_torad                     @128
     proj_todeg                     @129
-    proj_geocentric_latitude       @130
     proj_rtodms                    @131
     proj_dmstor                    @132
 
