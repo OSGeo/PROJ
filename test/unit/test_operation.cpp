@@ -1724,6 +1724,27 @@ TEST(operation, lcc2sp_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, lcc2sp_isEquivalentTo_parallels_switched) {
+    auto conv1 = Conversion::createLambertConicConformal_2SP(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
+        Length(6));
+    auto conv2 = Conversion::createLambertConicConformal_2SP(
+        PropertyMap(), Angle(1), Angle(2), Angle(4), Angle(3), Length(5),
+        Length(6));
+
+    EXPECT_TRUE(
+        conv1->isEquivalentTo(conv2.get(), IComparable::Criterion::EQUIVALENT));
+
+    auto conv3 = Conversion::createLambertConicConformal_2SP(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(3), Length(5),
+        Length(6));
+
+    EXPECT_FALSE(
+        conv1->isEquivalentTo(conv3.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, lcc2sp_michigan_export) {
     auto conv = Conversion::createLambertConicConformal_2SP_Michigan(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
@@ -5669,13 +5690,14 @@ TEST(operation, mercator_variant_A_to_variant_B) {
                                            Scale(0.9), Length(3), Length(4)),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
-    auto sameConv = projCRS->derivingConversion()->convertToOtherMethod(
-        EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
+    auto conv = projCRS->derivingConversion();
+    auto sameConv =
+        conv->convertToOtherMethod(EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
     ASSERT_TRUE(sameConv);
-    EXPECT_TRUE(sameConv->isEquivalentTo(projCRS->derivingConversion().get()));
+    EXPECT_TRUE(sameConv->isEquivalentTo(conv.get()));
 
-    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
-        EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+    auto targetConv =
+        conv->convertToOtherMethod(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
     ASSERT_TRUE(targetConv);
     EXPECT_EQ(
         targetConv
@@ -5693,6 +5715,13 @@ TEST(operation, mercator_variant_A_to_variant_B) {
     EXPECT_EQ(targetConv->parameterValueNumeric(/*"False northing", */ 8807,
                                                 UnitOfMeasure::METRE),
               4);
+
+    EXPECT_FALSE(
+        conv->isEquivalentTo(targetConv.get(), IComparable::Criterion::STRICT));
+    EXPECT_TRUE(conv->isEquivalentTo(targetConv.get(),
+                                     IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(targetConv->isEquivalentTo(conv.get(),
+                                           IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
@@ -5741,6 +5770,32 @@ TEST(operation, mercator_variant_A_to_variant_B_invalid_scale) {
 
 // ---------------------------------------------------------------------------
 
+static GeographicCRSNNPtr geographicCRSInvalidEccentricity() {
+    return GeographicCRS::create(
+        PropertyMap(),
+        GeodeticReferenceFrame::create(
+            PropertyMap(), Ellipsoid::createFlattenedSphere(
+                               PropertyMap(), Length(6378137), Scale(0.1)),
+            optional<std::string>(), PrimeMeridian::GREENWICH),
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_A_to_variant_B_invalid_eccentricity) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), geographicCRSInvalidEccentricity(),
+        Conversion::createMercatorVariantA(PropertyMap(), Angle(0), Angle(1),
+                                           Scale(1.0), Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, mercator_variant_B_to_variant_A) {
     auto projCRS = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,
@@ -5773,4 +5828,415 @@ TEST(operation, mercator_variant_B_to_variant_A) {
     EXPECT_EQ(targetConv->parameterValueNumeric(/*"False northing",*/ 8807,
                                                 UnitOfMeasure::METRE),
               4);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_B_to_variant_A_invalid_std1) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createMercatorVariantB(PropertyMap(), Angle(100), Angle(1),
+                                           Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_B_to_variant_A_invalid_eccentricity) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), geographicCRSInvalidEccentricity(),
+        Conversion::createMercatorVariantB(PropertyMap(), Angle(0), Angle(1),
+                                           Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp) {
+    // equivalent to EPSG:2154
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4269, // something using GRS80
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(46.5), Angle(3), Angle(49), Angle(44),
+            Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto conv = projCRS->derivingConversion();
+    auto targetConv = conv->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    ASSERT_TRUE(targetConv);
+
+    {
+        auto lat_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_0, 46.519430223986866, 1e-12) << lat_0;
+
+        auto lon_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lon_0, 3.0, 1e-15) << lon_0;
+
+        auto k_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+            UnitOfMeasure::SCALE_UNITY);
+        EXPECT_NEAR(k_0, 0.9990510286374692, 1e-15) << k_0;
+
+        auto x_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_FALSE_EASTING, UnitOfMeasure::METRE);
+        EXPECT_NEAR(x_0, 700000, 1e-15) << x_0;
+
+        auto y_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_FALSE_NORTHING, UnitOfMeasure::METRE);
+        EXPECT_NEAR(y_0, 6602157.8388103368, 1e-7) << y_0;
+    }
+
+    auto _2sp_from_1sp = targetConv->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+    ASSERT_TRUE(_2sp_from_1sp);
+
+    {
+        auto lat_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_FALSE_ORIGIN, UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_0, 46.5, 1e-15) << lat_0;
+
+        auto lon_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN, UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lon_0, 3, 1e-15) << lon_0;
+
+        auto lat_1 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_1, 49, 1e-15) << lat_1;
+
+        auto lat_2 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_2, 44, 1e-15) << lat_2;
+
+        auto x_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN, UnitOfMeasure::METRE);
+        EXPECT_NEAR(x_0, 700000, 1e-15) << x_0;
+
+        auto y_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN, UnitOfMeasure::METRE);
+        EXPECT_NEAR(y_0, 6600000, 1e-15) << y_0;
+    }
+
+    EXPECT_FALSE(
+        conv->isEquivalentTo(targetConv.get(), IComparable::Criterion::STRICT));
+    EXPECT_TRUE(conv->isEquivalentTo(targetConv.get(),
+                                     IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(targetConv->isEquivalentTo(conv.get(),
+                                           IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp_phi0_eq_phi1_eq_phi2) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4269, // something using GRS80
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(46.5), Angle(3), Angle(46.5), Angle(46.5),
+            Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto conv = projCRS->derivingConversion();
+    auto targetConv = conv->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    ASSERT_TRUE(targetConv);
+
+    {
+        auto lat_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_0, 46.5, 1e-15) << lat_0;
+
+        auto lon_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lon_0, 3.0, 1e-15) << lon_0;
+
+        auto k_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+            UnitOfMeasure::SCALE_UNITY);
+        EXPECT_NEAR(k_0, 1.0, 1e-15) << k_0;
+
+        auto x_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_FALSE_EASTING, UnitOfMeasure::METRE);
+        EXPECT_NEAR(x_0, 700000, 1e-15) << x_0;
+
+        auto y_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_FALSE_NORTHING, UnitOfMeasure::METRE);
+        EXPECT_NEAR(y_0, 6600000, 1e-15) << y_0;
+    }
+
+    auto _2sp_from_1sp = targetConv->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+    ASSERT_TRUE(_2sp_from_1sp);
+
+    {
+        auto lat_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_FALSE_ORIGIN, UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_0, 46.5, 1e-15) << lat_0;
+
+        auto lon_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN, UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lon_0, 3, 1e-15) << lon_0;
+
+        auto lat_1 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_1, 46.5, 1e-15) << lat_1;
+
+        auto lat_2 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_2, 46.5, 1e-15) << lat_2;
+
+        auto x_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN, UnitOfMeasure::METRE);
+        EXPECT_NEAR(x_0, 700000, 1e-15) << x_0;
+
+        auto y_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN, UnitOfMeasure::METRE);
+        EXPECT_NEAR(y_0, 6600000, 1e-15) << y_0;
+    }
+
+    EXPECT_TRUE(conv->isEquivalentTo(targetConv.get(),
+                                     IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(targetConv->isEquivalentTo(conv.get(),
+                                           IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp_phi0_diff_phi1_and_phi1_eq_phi2) {
+
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4269, // something using GRS80
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(46.123), Angle(3), Angle(46.4567),
+            Angle(46.4567), Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto conv = projCRS->derivingConversion();
+    auto targetConv = conv->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    ASSERT_TRUE(targetConv);
+
+    {
+        auto lat_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_0, 46.4567, 1e-14) << lat_0;
+
+        auto lon_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lon_0, 3.0, 1e-15) << lon_0;
+
+        auto k_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+            UnitOfMeasure::SCALE_UNITY);
+        EXPECT_NEAR(k_0, 1.0, 1e-15) << k_0;
+
+        auto x_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_FALSE_EASTING, UnitOfMeasure::METRE);
+        EXPECT_NEAR(x_0, 700000, 1e-15) << x_0;
+
+        auto y_0 = targetConv->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_FALSE_NORTHING, UnitOfMeasure::METRE);
+        EXPECT_NEAR(y_0, 6637093.292952879, 1e-8) << y_0;
+    }
+
+    auto _2sp_from_1sp = targetConv->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+    ASSERT_TRUE(_2sp_from_1sp);
+
+    {
+        auto lat_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_FALSE_ORIGIN, UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_0, 46.4567, 1e-14) << lat_0;
+
+        auto lon_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN, UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lon_0, 3, 1e-15) << lon_0;
+
+        auto lat_1 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_1, 46.4567, 1e-14) << lat_1;
+
+        auto lat_2 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL,
+            UnitOfMeasure::DEGREE);
+        EXPECT_NEAR(lat_2, 46.4567, 1e-14) << lat_2;
+
+        auto x_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN, UnitOfMeasure::METRE);
+        EXPECT_NEAR(x_0, 700000, 1e-15) << x_0;
+
+        auto y_0 = _2sp_from_1sp->parameterValueNumeric(
+            EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN, UnitOfMeasure::METRE);
+        EXPECT_NEAR(y_0, 6637093.292952879, 1e-8) << y_0;
+    }
+
+    EXPECT_TRUE(conv->isEquivalentTo(targetConv.get(),
+                                     IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(targetConv->isEquivalentTo(conv.get(),
+                                           IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_TRUE(_2sp_from_1sp->isEquivalentTo(
+        targetConv.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(targetConv->isEquivalentTo(_2sp_from_1sp.get(),
+                                           IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_TRUE(conv->isEquivalentTo(_2sp_from_1sp.get(),
+                                     IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc1sp_to_lcc2sp_invalid_eccentricity) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), geographicCRSInvalidEccentricity(),
+        Conversion::createLambertConicConformal_1SP(PropertyMap(), Angle(40),
+                                                    Angle(1), Scale(0.99),
+                                                    Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc1sp_to_lcc2sp_invalid_scale) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createLambertConicConformal_1SP(
+            PropertyMap(), Angle(40), Angle(1), Scale(0), Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc1sp_to_lcc2sp_invalid_lat0) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createLambertConicConformal_1SP(PropertyMap(), Angle(100),
+                                                    Angle(1), Scale(0.99),
+                                                    Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc1sp_to_lcc2sp_null_lat0) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createLambertConicConformal_1SP(PropertyMap(), Angle(0),
+                                                    Angle(1), Scale(0.99),
+                                                    Length(3), Length(4)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp_invalid_lat0) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(100), Angle(3), Angle(44), Angle(49),
+            Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp_invalid_lat1) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(46.5), Angle(3), Angle(100), Angle(49),
+            Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp_invalid_lat2) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(46.5), Angle(3), Angle(44), Angle(100),
+            Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp_invalid_lat1_opposite_lat2) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(46.5), Angle(3), Angle(-49), Angle(49),
+            Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp_invalid_lat1_and_lat2_close_to_zero) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(46.5), Angle(3), Angle(.0000000000000001),
+            Angle(.0000000000000002), Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    EXPECT_FALSE(targetConv != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_to_lcc1sp_invalid_eccentricity) {
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap(), geographicCRSInvalidEccentricity(),
+        Conversion::createLambertConicConformal_2SP(
+            PropertyMap(), Angle(46.5), Angle(3), Angle(44), Angle(49),
+            Length(700000), Length(6600000)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
+        EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+    EXPECT_FALSE(targetConv != nullptr);
 }

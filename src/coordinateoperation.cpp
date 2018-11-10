@@ -1428,9 +1428,45 @@ bool SingleOperation::_isEquivalentTo(
          !ObjectUsage::_isEquivalentTo(other, criterion))) {
         return false;
     }
+
+    const int methodEPSGCode = d->method_->getEPSGCode();
     if (!d->method_->_isEquivalentTo(otherSO->d->method_.get(), criterion)) {
+        if (criterion == util::IComparable::Criterion::EQUIVALENT) {
+            // _1SP methods can sometimes be equivalent to _2SP ones
+            // Check it by using convertToOtherMethod()
+
+            const int otherMethodEPSGCode = otherSO->d->method_->getEPSGCode();
+            if (methodEPSGCode ==
+                    EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP &&
+                otherMethodEPSGCode ==
+                    EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
+                // Convert from 2SP to 1SP as the other direction has more
+                // degree of liberties.
+                return otherSO->_isEquivalentTo(this, criterion);
+            } else if ((methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_A &&
+                        otherMethodEPSGCode ==
+                            EPSG_CODE_METHOD_MERCATOR_VARIANT_B) ||
+                       (methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
+                        otherMethodEPSGCode ==
+                            EPSG_CODE_METHOD_MERCATOR_VARIANT_A) ||
+                       (methodEPSGCode ==
+                            EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP &&
+                        otherMethodEPSGCode ==
+                            EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP)) {
+                auto conv = dynamic_cast<const Conversion *>(this);
+                if (conv) {
+                    auto eqConv =
+                        conv->convertToOtherMethod(otherMethodEPSGCode);
+                    if (eqConv) {
+                        return eqConv->_isEquivalentTo(other, criterion);
+                    }
+                }
+            }
+        }
+
         return false;
     }
+
     const auto &values = d->parameterValues_;
     const auto &otherValues = otherSO->d->parameterValues_;
     const auto valuesSize = values.size();
@@ -1443,30 +1479,83 @@ bool SingleOperation::_isEquivalentTo(
                 return false;
             }
         }
-    } else {
-        std::vector<bool> candidateIndices(valuesSize, true);
-        bool sameButInDifferentOrder = true;
-        for (size_t i = 0; i < valuesSize; i++) {
-            bool found = false;
-            for (size_t j = 0; j < valuesSize; j++) {
-                if (candidateIndices[j] &&
-                    values[i]->_isEquivalentTo(otherValues[j].get(),
-                                               criterion)) {
-                    candidateIndices[j] = false;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                sameButInDifferentOrder = false;
+        return true;
+    }
+
+    std::vector<bool> candidateIndices(valuesSize, true);
+    bool equivalent = true;
+    for (size_t i = 0; i < valuesSize; i++) {
+        bool found = false;
+        for (size_t j = 0; j < valuesSize; j++) {
+            if (candidateIndices[j] &&
+                values[i]->_isEquivalentTo(otherValues[j].get(), criterion)) {
+                candidateIndices[j] = false;
+                found = true;
                 break;
             }
         }
-        if (!sameButInDifferentOrder) {
+        if (!found) {
+            equivalent = false;
+            if (methodEPSGCode ==
+                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
+                // For LCC_2SP, the standard parallels can be switched and
+                // this will result in the same result.
+                auto opParamvalue =
+                    dynamic_cast<const OperationParameterValue *>(
+                        values[i].get());
+                if (opParamvalue) {
+                    const int paramEPSGCode =
+                        opParamvalue->parameter()->getEPSGCode();
+                    if (paramEPSGCode ==
+                            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL ||
+                        paramEPSGCode ==
+                            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL) {
+                        auto value_1st = parameterValue(
+                            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL);
+                        auto value_2nd = parameterValue(
+                            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL);
+                        if (value_1st && value_2nd) {
+                            equivalent =
+                                value_1st->_isEquivalentTo(
+                                    otherSO
+                                        ->parameterValue(
+                                            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL)
+                                        .get(),
+                                    criterion) &&
+                                value_2nd->_isEquivalentTo(
+                                    otherSO
+                                        ->parameterValue(
+                                            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL)
+                                        .get(),
+                                    criterion);
+                        }
+                    }
+                }
+            }
+            if (!equivalent) {
+                break;
+            }
         }
-        return sameButInDifferentOrder;
     }
-    return true;
+
+    // Equivalent formulations of 2SP can have different parameters
+    // Then convert to 1SP and compare.
+    if (!equivalent &&
+        methodEPSGCode == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
+        auto conv = dynamic_cast<const Conversion *>(this);
+        auto otherConv = dynamic_cast<const Conversion *>(other);
+        if (conv && otherConv) {
+            auto thisAs1SP = conv->convertToOtherMethod(
+                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+            auto otherAs1SP = otherConv->convertToOtherMethod(
+                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+            if (thisAs1SP && otherAs1SP) {
+                equivalent =
+                    thisAs1SP->_isEquivalentTo(otherAs1SP.get(), criterion);
+            }
+        }
+    }
+    return equivalent;
 }
 //! @endcond
 
@@ -4119,6 +4208,66 @@ static double msfn(double phi, double ec) {
     return cosphi / std::sqrt(1.0 - sinphi_ec * sinphi_ec);
 }
 
+// ---------------------------------------------------------------------------
+
+static double tsfn(double phi, double ec) {
+    const double sinphi = std::sin(phi);
+    const double sinphi_ec = sinphi * ec;
+    return tan(0.5 * (M_PI / 2 - phi)) /
+           std::pow((1.0 - sinphi_ec) / (1.0 + sinphi_ec), 0.5 * ec);
+}
+
+// ---------------------------------------------------------------------------
+
+// Function whose zeroes are the sin of the standard parallels of LCC_2SP
+static double lcc_1sp_to_2sp_f(double sinphi, double K, double ec, double n) {
+    const double x = sinphi;
+    const double ecx = ec * x;
+    return (1 - x * x) / (1 - ecx * ecx) -
+           K * K * std::pow((1.0 - x) / (1.0 + x) *
+                                std::pow((1.0 + ecx) / (1.0 - ecx), ec),
+                            n);
+}
+
+// ---------------------------------------------------------------------------
+
+// Find the sin of the standard parallels of LCC_2SP
+static double find_zero_lcc_1sp_to_2sp_f(double sinphi0, bool bNorth, double K,
+                                         double ec) {
+    double a, b;
+    double f_a;
+    if (bNorth) {
+        // Look for zero above phi0
+        a = sinphi0;
+        b = 1.0;   // sin(North pole)
+        f_a = 1.0; // some positive value, but we only care about the sign
+    } else {
+        // Look for zero below phi0
+        a = -1.0; // sin(South pole)
+        b = sinphi0;
+        f_a = -1.0; // minus infinity in fact, but we only care about the sign
+    }
+    // We use dichotomy search. lcc_1sp_to_2sp_f() is positive at sinphi_init,
+    // has a zero in ]-1,sinphi0[ and ]sinphi0,1[ ranges
+    for (int N = 0; N < 100; N++) {
+        double c = (a + b) / 2;
+        double f_c = lcc_1sp_to_2sp_f(c, K, ec, sinphi0);
+        if (f_c == 0.0 || (b - a) < 1e-18) {
+            return c;
+        }
+        if ((f_c > 0 && f_a > 0) || (f_c < 0 && f_a < 0)) {
+            a = c;
+            f_a = f_c;
+        } else {
+            b = c;
+        }
+    }
+    return (a + b) / 2;
+}
+
+static double DegToRad(double x) { return x / 180.0 * M_PI; }
+static double RadToDeg(double x) { return x / M_PI * 180.0; }
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -4132,6 +4281,10 @@ static double msfn(double phi, double ec) {
  * EPSG_CODE_METHOD_MERCATOR_VARIANT_B (2SP)</li>
  * <li>EPSG_CODE_METHOD_MERCATOR_VARIANT_B (2SP) to
  * EPSG_CODE_METHOD_MERCATOR_VARIANT_A (1SP)</li>
+ * <li>EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP to
+ * EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP</li>
+ * <li>EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP to
+ * EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP</li>
  * </ul>
  *
  * @param targetEPSGCode EPSG code of the target method.
@@ -4170,7 +4323,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Angle(dfStdP1Lat, common::UnitOfMeasure::RADIAN)
                 .convertToUnit(common::UnitOfMeasure::DEGREE),
             common::UnitOfMeasure::DEGREE);
-        return createMercatorVariantB(
+        auto conv = createMercatorVariantB(
             util::PropertyMap(), latitudeFirstParallel,
             common::Angle(parameterValueMeasure(
                 EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)),
@@ -4178,6 +4331,8 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                 parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_EASTING)),
             common::Length(
                 parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
+        conv->setCRSs(this, false);
+        return conv;
     }
 
     if (current_epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
@@ -4194,7 +4349,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             return nullptr;
         const double ec = std::sqrt(e2);
         const double k0 = msfn(phi1, ec);
-        return createMercatorVariantA(
+        auto conv = createMercatorVariantA(
             util::PropertyMap(),
             common::Angle(0.0, common::UnitOfMeasure::DEGREE),
             common::Angle(parameterValueMeasure(
@@ -4204,165 +4359,191 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                 parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_EASTING)),
             common::Length(
                 parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
+        conv->setCRSs(this, false);
+        return conv;
     }
 
-#if 0
- * <li>EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP to
- * EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP</li>
- * <li>EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP to
- * EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP</li>
-
-    if( EQUAL(pszProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_1SP) &&
-        EQUAL(pszTargetProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_2SP) )
-    {
+    if (current_epsg_code == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP &&
+        targetEPSGCode == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
         // Notations m0, t0, n, m1, t1, F are those of the EPSG guidance
         // "1.3.1.1 Lambert Conic Conformal (2SP)" and
         // "1.3.1.2 Lambert Conic Conformal (1SP)" and
         // or Snyder pages 106-109
-        const double dfLatitudeOfOrigin =
-            GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0);
-        const double phi0 = DegToRad(dfLatitudeOfOrigin);
-        const double k0 = GetNormProjParm(SRS_PP_SCALE_FACTOR, 1.0);
-        if( !(fabs(phi0) < M_PI / 2) )
+        auto latitudeOfOrigin = common::Angle(parameterValueMeasure(
+            EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN));
+        const double phi0 = latitudeOfOrigin.getSIValue();
+        const double k0 = parameterValueNumericAsSI(
+            EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN);
+        if (!(std::fabs(phi0) < M_PI / 2))
             return nullptr;
-        if( !(k0 > 0 && k0 <= 1.0+ 1e-10) )
+        if (!(k0 > 0 && k0 <= 1.0 + 1e-10))
             return nullptr;
-        const double ec = GetEccentricity();
-        if( ec < 0 )
+        const double rf =
+            geogCRS->ellipsoid()->computeInverseFlattening().value();
+        const double f = rf != 0.0 ? 1. / rf : 0.0;
+        const double e2 = 2 * f - f * f;
+        if (e2 < 0)
             return nullptr;
+        const double ec = std::sqrt(e2);
         const double m0 = msfn(phi0, ec);
         const double t0 = tsfn(phi0, ec);
         const double n = sin(phi0);
-        if( fabs(n) < 1e-10 )
+        if (std::fabs(n) < 1e-10)
             return nullptr;
-        OGRSpatialReference* poLCC2SP = new OGRSpatialReference();
-        poLCC2SP->CopyGeogCSFrom(this);
-        if( fabs(k0 - 1.0) <= 1e-10 )
-        {
-            poLCC2SP->SetLCC( dfLatitudeOfOrigin,
-                              dfLatitudeOfOrigin,
-                              dfLatitudeOfOrigin,
-                              GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0),
-                              GetNormProjParm(SRS_PP_FALSE_EASTING, 0.0),
-                              GetNormProjParm(SRS_PP_FALSE_NORTHING, 0.0) );
-        }
-        else
-        {
-            const double K = k0 * m0 / pow(t0, n);
+        if (fabs(k0 - 1.0) <= 1e-10) {
+            auto conv = createLambertConicConformal_2SP(
+                util::PropertyMap(), latitudeOfOrigin,
+                common::Angle(parameterValueMeasure(
+                    EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)),
+                latitudeOfOrigin, latitudeOfOrigin,
+                common::Length(
+                    parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_EASTING)),
+                common::Length(
+                    parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
+            conv->setCRSs(this, false);
+            return conv;
+        } else {
+            const double K = k0 * m0 / std::pow(t0, n);
             const double phi1 =
-                asin(find_zero_lcc_1sp_to_2sp_f(n, true, K, ec));
+                std::asin(find_zero_lcc_1sp_to_2sp_f(n, true, K, ec));
             const double phi2 =
-                asin(find_zero_lcc_1sp_to_2sp_f(n, false, K, ec));
+                std::asin(find_zero_lcc_1sp_to_2sp_f(n, false, K, ec));
             double phi1Deg = RadToDeg(phi1);
             double phi2Deg = RadToDeg(phi2);
 
             // Try to round to hundreth of degree if very close to it
-            if( fabs(phi1Deg * 1000 - floor(phi1Deg * 1000 + 0.5)) < 1e-8 )
+            if (std::fabs(phi1Deg * 1000 - std::floor(phi1Deg * 1000 + 0.5)) <
+                1e-8)
                 phi1Deg = floor(phi1Deg * 1000 + 0.5) / 1000;
-            if( fabs(phi2Deg * 1000 - floor(phi2Deg * 1000 + 0.5)) < 1e-8 )
-                phi2Deg = floor(phi2Deg * 1000 + 0.5) / 1000;
+            if (std::fabs(phi2Deg * 1000 - std::floor(phi2Deg * 1000 + 0.5)) <
+                1e-8)
+                phi2Deg = std::floor(phi2Deg * 1000 + 0.5) / 1000;
 
             // The following improvement is too turn the LCC1SP equivalent of
             // EPSG:2154 to the real LCC2SP
             // If the computed latitude of origin is close to .0 or .5 degrees
             // then check if rounding it to it will get a false northing
             // close to an integer
-            const double FN = GetNormProjParm(SRS_PP_FALSE_NORTHING, 0.0);
-            if( fabs(dfLatitudeOfOrigin * 2 -
-                     floor(dfLatitudeOfOrigin * 2 + 0.5)) < 0.2 )
-            {
+            const double FN =
+                parameterValueNumericAsSI(EPSG_CODE_PARAMETER_FALSE_NORTHING);
+            const double latitudeOfOriginDeg =
+                latitudeOfOrigin.convertToUnit(common::UnitOfMeasure::DEGREE);
+            if (std::fabs(latitudeOfOriginDeg * 2 -
+                          std::floor(latitudeOfOriginDeg * 2 + 0.5)) < 0.2) {
                 const double dfRoundedLatOfOrig =
-                    floor(dfLatitudeOfOrigin * 2 + 0.5) / 2;
+                    std::floor(latitudeOfOriginDeg * 2 + 0.5) / 2;
                 const double m1 = msfn(phi1, ec);
                 const double t1 = tsfn(phi1, ec);
-                const double F = m1 / (n * pow(t1, n));
-                const double a = GetSemiMajor();
+                const double F = m1 / (n * std::pow(t1, n));
+                const double a =
+                    geogCRS->ellipsoid()->semiMajorAxis().getSIValue();
                 const double tRoundedLatOfOrig =
                     tsfn(DegToRad(dfRoundedLatOfOrig), ec);
                 const double FN_correction =
-                    a * F * (pow(tRoundedLatOfOrig, n) - pow(t0, n));
+                    a * F * (std::pow(tRoundedLatOfOrig, n) - std::pow(t0, n));
                 const double FN_corrected = FN - FN_correction;
-                const double FN_corrected_rounded = floor(FN_corrected + 0.5);
-                if( fabs(FN_corrected - FN_corrected_rounded) < 1e-8 )
-                {
-                    poLCC2SP->SetLCC(
-                              phi1Deg,
-                              phi2Deg,
-                              dfRoundedLatOfOrig,
-                              GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0),
-                              GetNormProjParm(SRS_PP_FALSE_EASTING, 0.0),
-                              FN_corrected_rounded );
-                    return poLCC2SP;
+                const double FN_corrected_rounded =
+                    std::floor(FN_corrected + 0.5);
+                if (std::fabs(FN_corrected - FN_corrected_rounded) < 1e-8) {
+                    auto conv = createLambertConicConformal_2SP(
+                        util::PropertyMap(),
+                        common::Angle(dfRoundedLatOfOrig,
+                                      common::UnitOfMeasure::DEGREE),
+                        common::Angle(parameterValueMeasure(
+                            EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)),
+                        common::Angle(phi1Deg, common::UnitOfMeasure::DEGREE),
+                        common::Angle(phi2Deg, common::UnitOfMeasure::DEGREE),
+                        common::Length(parameterValueMeasure(
+                            EPSG_CODE_PARAMETER_FALSE_EASTING)),
+                        common::Length(FN_corrected_rounded));
+                    conv->setCRSs(this, false);
+                    return conv;
                 }
             }
 
-            poLCC2SP->SetLCC( phi1Deg,
-                              phi2Deg,
-                              dfLatitudeOfOrigin,
-                              GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0),
-                              GetNormProjParm(SRS_PP_FALSE_EASTING, 0.0),
-                              FN );
+            auto conv = createLambertConicConformal_2SP(
+                util::PropertyMap(), latitudeOfOrigin,
+                common::Angle(parameterValueMeasure(
+                    EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)),
+                common::Angle(phi1Deg, common::UnitOfMeasure::DEGREE),
+                common::Angle(phi2Deg, common::UnitOfMeasure::DEGREE),
+                common::Length(
+                    parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_EASTING)),
+                common::Length(FN));
+            conv->setCRSs(this, false);
+            return conv;
         }
-        return poLCC2SP;
     }
 
-    if( EQUAL(pszProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_2SP) &&
-        EQUAL(pszTargetProjection, SRS_PT_LAMBERT_CONFORMAL_CONIC_1SP) )
-    {
+    if (current_epsg_code == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP &&
+        targetEPSGCode == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP) {
         // Notations m0, t0, m1, t1, m2, t2 n, F are those of the EPSG guidance
         // "1.3.1.1 Lambert Conic Conformal (2SP)" and
         // "1.3.1.2 Lambert Conic Conformal (1SP)" and
         // or Snyder pages 106-109
         const double phiF =
-            DegToRad(GetNormProjParm(SRS_PP_LATITUDE_OF_ORIGIN, 0.0));
+            parameterValueMeasure(EPSG_CODE_PARAMETER_LATITUDE_FALSE_ORIGIN)
+                .getSIValue();
         const double phi1 =
-            DegToRad(GetNormProjParm(SRS_PP_STANDARD_PARALLEL_1, 0.0));
+            parameterValueMeasure(EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL)
+                .getSIValue();
         const double phi2 =
-            DegToRad(GetNormProjParm(SRS_PP_STANDARD_PARALLEL_2, 0.0));
-        if( !(fabs(phiF) < M_PI / 2) )
+            parameterValueMeasure(EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL)
+                .getSIValue();
+        if (!(std::fabs(phiF) < M_PI / 2))
             return nullptr;
-        if( !(fabs(phi1) < M_PI / 2) )
+        if (!(std::fabs(phi1) < M_PI / 2))
             return nullptr;
-        if( !(fabs(phi2) < M_PI / 2) )
+        if (!(std::fabs(phi2) < M_PI / 2))
             return nullptr;
-        const double ec = GetEccentricity();
-        if( ec < 0 )
+        const double rf =
+            geogCRS->ellipsoid()->computeInverseFlattening().value();
+        const double f = rf != 0.0 ? 1. / rf : 0.0;
+        const double e2 = 2 * f - f * f;
+        if (e2 < 0)
             return nullptr;
+        const double ec = std::sqrt(e2);
         const double m1 = msfn(phi1, ec);
         const double m2 = msfn(phi2, ec);
         const double t1 = tsfn(phi1, ec);
         const double t2 = tsfn(phi2, ec);
-        const double n_denom = log(t1) - log(t2);
-        const double n = (fabs(n_denom) < 1e-10) ? sin(phi1) :
-                                (log(m1) - log(m2)) / n_denom;
-        if( fabs(n) < 1e-10 )
+        const double n_denom = std::log(t1) - std::log(t2);
+        const double n = (std::fabs(n_denom) < 1e-10)
+                             ? std::sin(phi1)
+                             : (std::log(m1) - std::log(m2)) / n_denom;
+        if (std::fabs(n) < 1e-10)
             return nullptr;
-        const double F = m1 / (n * pow(t1, n));
-        const double phi0 = asin(n);
+        const double F = m1 / (n * std::pow(t1, n));
+        const double phi0 = std::asin(n);
         const double m0 = msfn(phi0, ec);
         const double t0 = tsfn(phi0, ec);
-        const double F0 = m0 / (n * pow(t0, n));
+        const double F0 = m0 / (n * std::pow(t0, n));
         const double k0 = F / F0;
-        const double a = GetSemiMajor();
+        const double a = geogCRS->ellipsoid()->semiMajorAxis().getSIValue();
         const double tF = tsfn(phiF, ec);
-        const double FN_correction = a * F * (pow(tF, n) - pow(t0, n));
+        const double FN_correction =
+            a * F * (std::pow(tF, n) - std::pow(t0, n));
 
-        OGRSpatialReference* poLCC1SP = new OGRSpatialReference();
-        poLCC1SP->CopyGeogCSFrom(this);
         double phi0Deg = RadToDeg(phi0);
         // Try to round to thousandth of degree if very close to it
-        if( fabs(phi0Deg * 1000 - floor(phi0Deg * 1000 + 0.5)) < 1e-8 )
-            phi0Deg = floor(phi0Deg * 1000 + 0.5) / 1000;
-        poLCC1SP->SetLCC1SP(
-                phi0Deg,
-                GetNormProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0),
-                k0,
-                GetNormProjParm(SRS_PP_FALSE_EASTING, 0.0),
-                GetNormProjParm(SRS_PP_FALSE_NORTHING, 0.0) +
-                    (fabs(FN_correction) > 1e-8 ? FN_correction : 0) );
-        return poLCC1SP;
+        if (std::fabs(phi0Deg * 1000 - std::floor(phi0Deg * 1000 + 0.5)) < 1e-8)
+            phi0Deg = std::floor(phi0Deg * 1000 + 0.5) / 1000;
+
+        auto conv = createLambertConicConformal_1SP(
+            util::PropertyMap(),
+            common::Angle(phi0Deg, common::UnitOfMeasure::DEGREE),
+            common::Angle(parameterValueMeasure(
+                EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN)),
+            common::Scale(k0), common::Length(parameterValueMeasure(
+                                   EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN)),
+            common::Length(
+                parameterValueNumericAsSI(
+                    EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN) +
+                (std::fabs(FN_correction) > 1e-8 ? FN_correction : 0)));
+        conv->setCRSs(this, false);
+        return conv;
     }
-#endif
+
     return nullptr;
 }
 
