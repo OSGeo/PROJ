@@ -5699,21 +5699,22 @@ TEST(operation, mercator_variant_A_to_variant_B) {
     auto targetConv =
         conv->convertToOtherMethod(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
     ASSERT_TRUE(targetConv);
-    EXPECT_EQ(
-        targetConv
-            ->parameterValueNumeric(/*"Latitude of 1st standard parallel",*/
-                                    8823, UnitOfMeasure::DEGREE),
-        25.917499691810534)
-        << targetConv->parameterValueNumeric(8823, UnitOfMeasure::DEGREE);
-    EXPECT_EQ(
-        targetConv->parameterValueNumeric(/*"Longitude of natural origin",*/
-                                          8802, UnitOfMeasure::DEGREE),
-        1);
-    EXPECT_EQ(targetConv->parameterValueNumeric(/*"False easting", */ 8806,
-                                                UnitOfMeasure::METRE),
+
+    auto lat_1 = targetConv->parameterValueNumeric(
+        EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL, UnitOfMeasure::DEGREE);
+    EXPECT_EQ(lat_1, 25.917499691810534) << lat_1;
+
+    EXPECT_EQ(targetConv->parameterValueNumeric(
+                  EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+                  UnitOfMeasure::DEGREE),
+              1);
+
+    EXPECT_EQ(targetConv->parameterValueNumeric(
+                  EPSG_CODE_PARAMETER_FALSE_EASTING, UnitOfMeasure::METRE),
               3);
-    EXPECT_EQ(targetConv->parameterValueNumeric(/*"False northing", */ 8807,
-                                                UnitOfMeasure::METRE),
+
+    EXPECT_EQ(targetConv->parameterValueNumeric(
+                  EPSG_CODE_PARAMETER_FALSE_NORTHING, UnitOfMeasure::METRE),
               4);
 
     EXPECT_FALSE(
@@ -5736,12 +5737,10 @@ TEST(operation, mercator_variant_A_to_variant_B_scale_1) {
     auto targetConv = projCRS->derivingConversion()->convertToOtherMethod(
         EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
     ASSERT_TRUE(targetConv);
-    EXPECT_EQ(
-        targetConv
-            ->parameterValueNumeric(/*"Latitude of 1st standard parallel",*/
-                                    8823, UnitOfMeasure::DEGREE),
-        0.0)
-        << targetConv->parameterValueNumeric(8823, UnitOfMeasure::DEGREE);
+
+    auto lat_1 = targetConv->parameterValueNumeric(
+        EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL, UnitOfMeasure::DEGREE);
+    EXPECT_EQ(lat_1, 0.0) << lat_1;
 }
 
 // ---------------------------------------------------------------------------
@@ -5807,26 +5806,27 @@ TEST(operation, mercator_variant_B_to_variant_A) {
         EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
     ASSERT_TRUE(targetConv);
 
-    EXPECT_EQ(
-        targetConv->parameterValueNumeric(/*"Latitude of natural origin",*/
-                                          8801, UnitOfMeasure::DEGREE),
-        0);
-    EXPECT_EQ(
-        targetConv->parameterValueNumeric(/*"Longitude of natural origin",*/
-                                          8802, UnitOfMeasure::DEGREE),
-        1);
-    EXPECT_EQ(
-        targetConv->parameterValueNumeric(/*"Scale factor at natural origin",*/
-                                          8805, UnitOfMeasure::SCALE_UNITY),
-        0.9)
-        << targetConv
-               ->parameterValueNumeric(/*"Scale factor at natural origin",*/
-                                       8805, UnitOfMeasure::SCALE_UNITY);
-    EXPECT_EQ(targetConv->parameterValueNumeric(/*"False easting",*/ 8806,
-                                                UnitOfMeasure::METRE),
+    EXPECT_EQ(targetConv->parameterValueNumeric(
+                  EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+                  UnitOfMeasure::DEGREE),
+              0);
+
+    EXPECT_EQ(targetConv->parameterValueNumeric(
+                  EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+                  UnitOfMeasure::DEGREE),
+              1);
+
+    auto k_0 = targetConv->parameterValueNumeric(
+        EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+        UnitOfMeasure::SCALE_UNITY);
+    EXPECT_EQ(k_0, 0.9) << k_0;
+
+    EXPECT_EQ(targetConv->parameterValueNumeric(
+                  EPSG_CODE_PARAMETER_FALSE_EASTING, UnitOfMeasure::METRE),
               3);
-    EXPECT_EQ(targetConv->parameterValueNumeric(/*"False northing",*/ 8807,
-                                                UnitOfMeasure::METRE),
+
+    EXPECT_EQ(targetConv->parameterValueNumeric(
+                  EPSG_CODE_PARAMETER_FALSE_NORTHING, UnitOfMeasure::METRE),
               4);
 }
 
