@@ -1495,8 +1495,9 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         ASSERT_TRUE(execute(
             "INSERT INTO helmert_transformation "
             "VALUES('OTHER','" +
-            src + "_" + dst + "','name',NULL,NULL,'EPSG','9603','"
-                              "Geocentric translations (geog2D domain)','NS_" +
+            src + "_" + dst + "','Transformation from " + src + " to " + dst +
+            "',NULL,NULL,'EPSG','9603','"
+            "Geocentric translations (geog2D domain)','NS_" +
             src + "','" + src + "','NS_" + dst + "','" + dst +
             "','EPSG'"
             ",'1262',1.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
@@ -2504,15 +2505,6 @@ TEST_F(FactoryWithTmpDatabase,
     ASSERT_EQ(list.size(), 2);
     EXPECT_EQ(list[0]->nameStr(), "WHOLE_AREA_APPROX_ACCURACY");
     EXPECT_EQ(list[1]->nameStr(), "PARTIAL_AREA_PERFECT_ACCURACY");
-}
-
-// ---------------------------------------------------------------------------
-
-TEST(factory, findGeodCRSUsingDatum) {
-    auto ctxt = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(ctxt, "EPSG");
-    auto res = factory->findGeodCRSUsingDatum("6326");
-    EXPECT_EQ(res.size(), 3);
 }
 
 // ---------------------------------------------------------------------------

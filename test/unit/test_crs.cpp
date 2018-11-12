@@ -98,12 +98,26 @@ TEST(crs, EPSG_4326_get_components) {
 TEST(crs, GeographicCRS_isEquivalentTo) {
     auto crs = GeographicCRS::EPSG_4326;
     EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(
+        crs->isEquivalentTo(crs.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(crs->isEquivalentTo(
+        crs.get(),
+        IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS));
     EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
 
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
     EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::EPSG_4979.get()));
     EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::EPSG_4979.get(),
                                      IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_FALSE(crs->isEquivalentTo(GeographicCRS::OGC_CRS84.get(),
+                                     IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(crs->isEquivalentTo(
+        GeographicCRS::OGC_CRS84.get(),
+        IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS));
+    EXPECT_TRUE(GeographicCRS::OGC_CRS84->isEquivalentTo(
+        crs.get(),
+        IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS));
 
     EXPECT_FALSE(
         GeographicCRS::create(
@@ -1132,7 +1146,15 @@ TEST(crs, geodeticcrs_identify_no_db) {
         auto res = GeographicCRS::EPSG_4326->identify(nullptr);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
-        EXPECT_EQ(res.front().second, 100.0);
+        EXPECT_EQ(res.front().second, 100);
+    }
+    {
+        // Using virtual method
+        auto res = static_cast<const CRS *>(GeographicCRS::EPSG_4326.get())
+                       ->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
+        EXPECT_EQ(res.front().second, 100);
     }
     {
         auto res =
@@ -1143,7 +1165,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
                 ->identify(nullptr);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
-        EXPECT_EQ(res.front().second, 100.0);
+        EXPECT_EQ(res.front().second, 100);
     }
     {
         auto res =
@@ -1154,7 +1176,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
                 ->identify(nullptr);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
-        EXPECT_EQ(res.front().second, 90.0);
+        EXPECT_EQ(res.front().second, 90);
     }
     {
         // Long Lat order
@@ -1166,7 +1188,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
                 ->identify(nullptr);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
-        EXPECT_EQ(res.front().second, 25.0);
+        EXPECT_EQ(res.front().second, 25);
     }
 }
 
@@ -1198,7 +1220,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4978);
-        EXPECT_EQ(res.front().second, 70.0);
+        EXPECT_EQ(res.front().second, 70);
     }
     {
         // Identify by datum code
@@ -1210,7 +1232,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
-        EXPECT_EQ(res.front().second, 70.0);
+        EXPECT_EQ(res.front().second, 70);
     }
     {
         // Identify by datum code (as a fallback)
@@ -1222,14 +1244,14 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
-        EXPECT_EQ(res.front().second, 70.0);
+        EXPECT_EQ(res.front().second, 70);
     }
     {
         // Perfect match, and ID available. Hardcoded case
         auto res = GeographicCRS::EPSG_4326->identify(factory);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
-        EXPECT_EQ(res.front().second, 100.0);
+        EXPECT_EQ(res.front().second, 100);
     }
     {
         // Perfect match, but no ID available. Hardcoded case
@@ -1241,34 +1263,26 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
-        EXPECT_EQ(res.front().second, 100.0);
+        EXPECT_EQ(res.front().second, 100);
     }
     {
         // Perfect match, but no ID available
         auto res =
             GeographicCRS::create(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "NAD83"),
-                GeodeticReferenceFrame::EPSG_6269, nullptr,
-                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "NTF (Paris)"),
+                GeographicCRS::EPSG_4807->datum(), nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::GRAD))
                 ->identify(factory);
         ASSERT_EQ(res.size(), 1);
-        EXPECT_EQ(res.front().first->getEPSGCode(), 4269);
-        EXPECT_EQ(res.front().second, 100.0);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4807);
+        EXPECT_EQ(res.front().second, 100);
     }
     {
         // Perfect match, and ID available
-        auto res =
-            GeographicCRS::create(
-                PropertyMap()
-                    .set(IdentifiedObject::NAME_KEY, "NAD83")
-                    .set(Identifier::CODESPACE_KEY, "EPSG")
-                    .set(Identifier::CODE_KEY, 4269),
-                GeodeticReferenceFrame::EPSG_6269, nullptr,
-                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
-                ->identify(factory);
+        auto res = GeographicCRS::EPSG_4807->identify(factory);
         ASSERT_EQ(res.size(), 1);
-        EXPECT_EQ(res.front().first->getEPSGCode(), 4269);
-        EXPECT_EQ(res.front().second, 100.0);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4807);
+        EXPECT_EQ(res.front().second, 100);
     }
     {
         // The object has a unreliable ID
@@ -1283,7 +1297,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
-        EXPECT_EQ(res.front().second, 25.0);
+        EXPECT_EQ(res.front().second, 25);
     }
     {
         // Approximate match by name
@@ -1295,7 +1309,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
-        EXPECT_EQ(res.front().second, 90.0);
+        EXPECT_EQ(res.front().second, 90);
     }
     {
         // Long Lat order
@@ -1307,7 +1321,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 3);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
-        EXPECT_EQ(res.front().second, 25.0);
+        EXPECT_EQ(res.front().second, 25);
     }
     {
         // Identify by ellipsoid code
@@ -1363,17 +1377,22 @@ TEST(crs, geodeticcrs_identify_db) {
         ASSERT_TRUE(!res.front().first->identifiers().empty());
         EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "ESRI");
         EXPECT_EQ(res.front().first->identifiers()[0]->code(), "104105");
-        EXPECT_EQ(res.front().second, 100.0);
+        EXPECT_EQ(res.front().second, 100);
     }
     {
         // Identification by non-existing code
         auto res =
             GeographicCRS::create(
                 PropertyMap()
-                    .set(IdentifiedObject::NAME_KEY, "NAD83")
+                    .set(IdentifiedObject::NAME_KEY, "foobar")
                     .set(Identifier::CODESPACE_KEY, "EPSG")
                     .set(Identifier::CODE_KEY, "i_dont_exist"),
-                GeodeticReferenceFrame::EPSG_6269, nullptr,
+                GeodeticReferenceFrame::create(
+                    PropertyMap(),
+                    Ellipsoid::createFlattenedSphere(
+                        PropertyMap(), Length(6378137), Scale(10)),
+                    optional<std::string>(), PrimeMeridian::GREENWICH),
+                nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(factory);
         ASSERT_EQ(res.size(), 0);
@@ -1613,6 +1632,198 @@ TEST(crs, projectedCRS_as_PROJ_string) {
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
         "+proj=utm +zone=31 +datum=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_identify_no_db) {
+    {
+        // Hard-coded case: WGS 84 / UTM. No name
+        auto res = ProjectedCRS::create(
+                       PropertyMap(), GeographicCRS::EPSG_4326,
+                       Conversion::createUTM(PropertyMap(), 1, true),
+                       CartesianCS::createEastingNorthing(UnitOfMeasure::METRE))
+                       ->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 32601);
+        EXPECT_EQ(res.front().second, 70);
+        EXPECT_TRUE(res.front().first->isEquivalentTo(
+            AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+                ->createProjectedCRS("32601")
+                .get(),
+            IComparable::Criterion::EQUIVALENT));
+    }
+    {
+        // Hard-coded case: WGS 84 / UTM (south). Exact name.
+        // Using virtual method
+        auto crs = ProjectedCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "WGS 84 / UTM zone 60S"),
+            GeographicCRS::EPSG_4326,
+            Conversion::createUTM(PropertyMap(), 60, false),
+            CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+        auto res = static_cast<const CRS *>(crs.get())->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 32760);
+        EXPECT_EQ(res.front().second, 100);
+        EXPECT_TRUE(res.front().first->isEquivalentTo(
+            AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+                ->createProjectedCRS("32760")
+                .get(),
+            IComparable::Criterion::EQUIVALENT));
+    }
+    {
+        // Hard-coded case: NAD27 / UTM. Approximate name.
+        auto res = ProjectedCRS::create(
+                       PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                         "NAD27_UTM_zone_11N"),
+                       GeographicCRS::EPSG_4267,
+                       Conversion::createUTM(PropertyMap(), 11, true),
+                       CartesianCS::createEastingNorthing(UnitOfMeasure::METRE))
+                       ->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 26711);
+        EXPECT_EQ(res.front().second, 90);
+        EXPECT_TRUE(res.front().first->isEquivalentTo(
+            AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+                ->createProjectedCRS("26711")
+                .get(),
+            IComparable::Criterion::EQUIVALENT));
+    }
+    {
+        // Hard-coded case: NAD83 / UTM
+        auto res = ProjectedCRS::create(
+                       PropertyMap(), GeographicCRS::EPSG_4269,
+                       Conversion::createUTM(PropertyMap(), 11, true),
+                       CartesianCS::createEastingNorthing(UnitOfMeasure::METRE))
+                       ->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 26911);
+        EXPECT_EQ(res.front().second, 70);
+        EXPECT_TRUE(res.front().first->isEquivalentTo(
+            AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+                ->createProjectedCRS("26911")
+                .get(),
+            IComparable::Criterion::EQUIVALENT));
+    }
+    {
+        // Tolerance on axis order
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=utm +zone=31 +datum=WGS84");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(nullptr);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
+        EXPECT_EQ(res.front().second, 70);
+        EXPECT_TRUE(res.front().first->isEquivalentTo(
+            crs.get(),
+            IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_identify_db) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    {
+        // Identify by existing code
+        auto res = factory->createProjectedCRS("2172")->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+        EXPECT_EQ(res.front().second, 100);
+    }
+    {
+        // Identify by exact name
+        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto crs = ProjectedCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "Pulkovo 1942(58) / Poland zone II"),
+            sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+        EXPECT_EQ(res.front().second, 100);
+    }
+    {
+        // Identify by equivalent name
+        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto crs = ProjectedCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "Pulkovo_1942_58_Poland_zone_II"),
+            sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+        EXPECT_EQ(res.front().second, 90);
+    }
+    {
+        // Identify by properties
+        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto crs = ProjectedCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "i am a faked name"),
+            sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+        EXPECT_EQ(res.front().second, 70);
+    }
+    {
+        // Identify by name, but objects aren't equivalent
+        auto sourceCRS = factory->createProjectedCRS("3375");
+        auto crs = ProjectedCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "Pulkovo 1942(58) / Poland zone II"),
+            sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+        EXPECT_EQ(res.front().second, 25);
+    }
+    {
+        // Identify from a PROJ string
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=omerc "
+            "+no_uoff +lat_0=4 +lonc=102.25 +alpha=323.025796388889 "
+            "+gamma=323.130102222222 +k=0.99984 +x_0=804671 +y_0=0 "
+            "+ellps=GRS80");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 3375);
+        EXPECT_EQ(res.front().second, 70);
+    }
+    {
+        // Identify from a PROJ string (with "wrong" axis order for the geodetic
+        // part)
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=omerc +no_uoff +lat_0=4 +lonc=102.25 "
+            "+alpha=323.025796388889 +gamma=323.130102222222 +k=0.99984 "
+            "+x_0=804671 +y_0=0 +ellps=GRS80");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 3375);
+        EXPECT_EQ(res.front().second, 70);
+    }
+    {
+        // No equivalent CRS to input one in result set
+        auto obj =
+            PROJStringParser().createFromPROJString("+proj=tmerc +datum=WGS84");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        ASSERT_GT(res.size(), 1U);
+        EXPECT_EQ(res.front().second, 25);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2060,7 +2271,7 @@ TEST(datum, cs_with_MERIDIAN) {
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "Easting"), "X",
             AxisDirection::SOUTH, UnitOfMeasure::METRE,
-            Meridian::create(Angle(90.0))),
+            Meridian::create(Angle(90))),
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "Northing"), "Y",
             AxisDirection::SOUTH, UnitOfMeasure::METRE,
@@ -3077,7 +3288,7 @@ static DerivedGeographicCRSNNPtr createDerivedGeographicCRS() {
         std::vector<ParameterValueNNPtr>{
             ParameterValue::create(Angle(52.0)),
             ParameterValue::create(Angle(-30.0)),
-            ParameterValue::create(Angle(-25.0)),
+            ParameterValue::create(Angle(-25)),
         });
 
     return DerivedGeographicCRS::create(
@@ -3698,6 +3909,12 @@ static ParametricCRSNNPtr createParametricCRS() {
     return ParametricCRS::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "Parametric CRS"), datum,
         createParametricCS());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, default_identify_method) {
+    EXPECT_TRUE(createParametricCRS()->identify(nullptr).empty());
 }
 
 // ---------------------------------------------------------------------------

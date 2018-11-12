@@ -9940,16 +9940,15 @@ static bool hasIdentifiers(const CoordinateOperationNNPtr &op) {
 //! @cond Doxygen_Suppress
 
 static std::vector<crs::CRSNNPtr>
-findCandidateGeodCRSForDatum(const io::DatabaseContextNNPtr &dbContext,
+findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
                              const datum::GeodeticReferenceFramePtr &datum) {
     std::vector<crs::CRSNNPtr> candidates;
     for (const auto &id : datum->identifiers()) {
         const auto &authName = *(id->codeSpace());
         const auto &code = id->code();
         if (!authName.empty()) {
-            auto l_candidates =
-                io::AuthorityFactory::create(dbContext, authName)
-                    ->findGeodCRSUsingDatum(code);
+            auto l_candidates = authFactory->createGeodeticCRSFromDatum(
+                authName, code, std::string());
             for (const auto &candidate : l_candidates) {
                 candidates.emplace_back(candidate);
             }
@@ -9990,17 +9989,16 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     };
     CreateOperationsWithDatumPivotAntiRecursion guard(context);
 
-    const auto &dbContext =
-        context.context->getAuthorityFactory()->databaseContext();
+    const auto &authFactory = context.context->getAuthorityFactory();
     const auto candidatesSrcGeod(
-        findCandidateGeodCRSForDatum(dbContext, geodSrc->datum()));
+        findCandidateGeodCRSForDatum(authFactory, geodSrc->datum()));
     const auto candidatesDstGeod(
-        findCandidateGeodCRSForDatum(dbContext, geodDst->datum()));
+        findCandidateGeodCRSForDatum(authFactory, geodDst->datum()));
 
     for (const auto &candidateSrcGeod : candidatesSrcGeod) {
         const auto opsFirst =
             createOperations(sourceCRS, candidateSrcGeod, context);
-        assert(opsFirst.size() == 1);
+        assert(!opsFirst.empty());
         const bool isNullFirst = isNullTransformation(opsFirst[0]->nameStr());
 
         for (const auto &candidateDstGeod : candidatesDstGeod) {
@@ -10008,10 +10006,18 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                 createOperations(candidateSrcGeod, candidateDstGeod, context);
             const auto opsThird =
                 createOperations(candidateDstGeod, targetCRS, context);
-            assert(opsThird.size() == 1);
+            assert(!opsThird.empty());
 
             for (auto &opSecond : opsSecond) {
+                // Check that it is not a transformation synthetized by
+                // ourselves
                 if (!hasIdentifiers(opSecond)) {
+                    continue;
+                }
+                // And even if it is a referenced transformation, check that
+                // it is not a trivial one
+                auto so = dynamic_cast<const SingleOperation *>(opSecond.get());
+                if (so && isAxisOrderReversal(so->method()->getEPSGCode())) {
                     continue;
                 }
 

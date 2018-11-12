@@ -1320,4 +1320,40 @@ TEST_F(CApi, proj_obj_create_from_name) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_identify) {
+    auto obj = proj_obj_create_from_wkt(
+        m_ctxt,
+        GeographicCRS::EPSG_4807->exportToWKT(WKTFormatter::create().get())
+            .c_str(),
+        nullptr);
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+    {
+        auto res = proj_obj_identify(obj, nullptr, nullptr, nullptr);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_obj_list_get_count(res), 1);
+    }
+    {
+        int *confidence = nullptr;
+        auto res = proj_obj_identify(obj, "EPSG", nullptr, &confidence);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_obj_list_get_count(res), 1);
+        EXPECT_EQ(confidence[0], 100);
+        proj_free_int_list(confidence);
+    }
+    {
+        auto objEllps = proj_obj_create_from_wkt(
+            m_ctxt,
+            Ellipsoid::GRS1980->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr);
+        ObjectKeeper keeperEllps(objEllps);
+        auto res = proj_obj_identify(objEllps, nullptr, nullptr, nullptr);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(res, nullptr);
+    }
+}
+
 } // namespace

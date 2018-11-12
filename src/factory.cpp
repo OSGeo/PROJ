@@ -854,6 +854,9 @@ struct AuthorityFactory::Private {
         thisFactory_ = factory.as_nullable();
     }
 
+    // cppcheck-suppress functionStatic
+    AuthorityFactoryPtr getSharedFromThis() { return thisFactory_.lock(); }
+
     AuthorityFactoryNNPtr createFactory(const std::string &auth_name);
 
     // cppcheck-suppress functionStatic
@@ -3559,32 +3562,6 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-/** \brief Return the list of GeodeticCRS using the specified datum.
- *
- * @throw FactoryException
- */
-std::vector<crs::GeodeticCRSNNPtr>
-AuthorityFactory::findGeodCRSUsingDatum(const std::string &datumCode) const {
-    std::string sql(
-        "SELECT auth_name, code FROM geodetic_crs WHERE datum_code = ? "
-        "AND deprecated = 0 ");
-    auto params = std::vector<SQLValues>{datumCode};
-    if (!getAuthority().empty()) {
-        sql += " AND auth_name = ?";
-        params.emplace_back(getAuthority());
-    }
-    auto sqlRes = d->run(sql, params);
-    std::vector<crs::GeodeticCRSNNPtr> res;
-    for (const auto &row : sqlRes) {
-        res.emplace_back(d->createFactory(row[0])->createGeodeticCRS(row[1]));
-    }
-    return res;
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
 
 static void addToListString(std::string &out, const char *in) {
     if (!out.empty()) {
@@ -3859,7 +3836,8 @@ AuthorityFactory::createObjectsFromName(
 
 //! @cond Doxygen_Suppress
 std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
-    const std::string &datum_auth_name, const std::string &datum_code) const {
+    const std::string &datum_auth_name, const std::string &datum_code,
+    const std::string &geodetic_crs_type) const {
     std::string sql(
         "SELECT auth_name, code FROM geodetic_crs WHERE "
         "datum_auth_name = ? AND datum_code = ? AND deprecated = 0");
@@ -3867,6 +3845,10 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
     if (!getAuthority().empty()) {
         sql += " AND auth_name = ?";
         params.emplace_back(getAuthority());
+    }
+    if (!geodetic_crs_type.empty()) {
+        sql += " AND type = ?";
+        params.emplace_back(geodetic_crs_type);
     }
     auto sqlRes = d->run(sql, params);
     std::list<crs::GeodeticCRSNNPtr> res;
@@ -3884,8 +3866,8 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
 //! @cond Doxygen_Suppress
 std::list<crs::GeodeticCRSNNPtr>
 AuthorityFactory::createGeodeticCRSFromEllipsoid(
-    const std::string &ellipsoid_auth_name,
-    const std::string &ellipsoid_code) const {
+    const std::string &ellipsoid_auth_name, const std::string &ellipsoid_code,
+    const std::string &geodetic_crs_type) const {
     std::string sql(
         "SELECT geodetic_crs.auth_name, geodetic_crs.code FROM geodetic_crs "
         "JOIN geodetic_datum ON "
@@ -3900,6 +3882,10 @@ AuthorityFactory::createGeodeticCRSFromEllipsoid(
         sql += " AND geodetic_crs.auth_name = ?";
         params.emplace_back(getAuthority());
     }
+    if (!geodetic_crs_type.empty()) {
+        sql += " AND geodetic_crs.type = ?";
+        params.emplace_back(geodetic_crs_type);
+    }
     auto sqlRes = d->run(sql, params);
     std::list<crs::GeodeticCRSNNPtr> res;
     for (const auto &row : sqlRes) {
@@ -3910,6 +3896,99 @@ AuthorityFactory::createGeodeticCRSFromEllipsoid(
     return res;
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+std::list<crs::ProjectedCRSNNPtr>
+AuthorityFactory::createProjectedCRSFromExisting(
+    const crs::ProjectedCRSNNPtr &crs) const {
+    std::list<crs::ProjectedCRSNNPtr> res;
+
+    const auto &conv = crs->derivingConversionRef();
+    const auto methodEPSGCode = conv->method()->getEPSGCode();
+    if (methodEPSGCode == 0) {
+        return res;
+    }
+
+    auto lockedThisFactory(d->getSharedFromThis());
+    assert(lockedThisFactory);
+    const auto &baseCRS(crs->baseCRS());
+    auto candidatesGeodCRS = baseCRS->identify(lockedThisFactory);
+    auto geogCRS = dynamic_cast<const crs::GeographicCRS *>(baseCRS.get());
+    if (geogCRS) {
+        const auto axisOrder = geogCRS->coordinateSystem()->axisOrder();
+        if (axisOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH ||
+            axisOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST) {
+            const auto &unit =
+                geogCRS->coordinateSystem()->axisList()[0]->unit();
+            auto otherOrderGeogCRS = crs::GeographicCRS::create(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        geogCRS->nameStr()),
+                geogCRS->datum(), geogCRS->datumEnsemble(),
+                axisOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH
+                    ? cs::EllipsoidalCS::createLatitudeLongitude(unit)
+                    : cs::EllipsoidalCS::createLongitudeLatitude(unit));
+            auto otherCandidatesGeodCRS =
+                otherOrderGeogCRS->identify(lockedThisFactory);
+            candidatesGeodCRS.insert(candidatesGeodCRS.end(),
+                                     otherCandidatesGeodCRS.begin(),
+                                     otherCandidatesGeodCRS.end());
+        }
+    }
+
+    std::string sql(
+        "SELECT projected_crs.auth_name, projected_crs.code FROM projected_crs "
+        "JOIN conversion ON "
+        "projected_crs.conversion_auth_name = conversion.auth_name AND "
+        "projected_crs.conversion_code = conversion.code WHERE ");
+    std::vector<SQLValues> params;
+    if (!candidatesGeodCRS.empty()) {
+        sql += '(';
+        std::set<std::string> geodCRSAuthorities;
+        for (const auto &geodCRS : candidatesGeodCRS) {
+            const auto &ids = geodCRS.first->identifiers();
+            if (!ids.empty()) {
+                geodCRSAuthorities.insert(*(ids[0]->codeSpace()));
+            }
+        }
+        bool firstGeodCRSAuth = true;
+        for (const auto &geodCRSAuth : geodCRSAuthorities) {
+            if (!firstGeodCRSAuth) {
+                sql += " OR ";
+            }
+            firstGeodCRSAuth = false;
+            sql += "(projected_crs.geodetic_crs_auth_name = ? AND "
+                   "projected_crs.geodetic_crs_code IN (";
+            params.emplace_back(geodCRSAuth);
+            bool firstGeodCRSForAuth = true;
+            for (const auto &geodCRS : candidatesGeodCRS) {
+                const auto &ids = geodCRS.first->identifiers();
+                if (!ids.empty() && *(ids[0]->codeSpace()) == geodCRSAuth) {
+                    if (!firstGeodCRSForAuth) {
+                        sql += ',';
+                    }
+                    firstGeodCRSForAuth = false;
+                    sql += '?';
+                    params.emplace_back(ids[0]->code());
+                }
+            }
+            sql += "))";
+        }
+        sql += ") AND ";
+    }
+    sql += "conversion.method_auth_name = 'EPSG' AND "
+           "conversion.method_code = ?";
+    params.emplace_back(toString(methodEPSGCode));
+
+    auto sqlRes = d->run(sql, params);
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(d->createFactory(auth_name)->createProjectedCRS(code));
+    }
+    return res;
+}
 
 // ---------------------------------------------------------------------------
 

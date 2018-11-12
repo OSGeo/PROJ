@@ -98,6 +98,9 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
 
     PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() PROJ_CONST_DECL;
 
+    PROJ_DLL std::list<std::pair<CRSNNPtr, int>>
+    identify(const io::AuthorityFactoryPtr &authorityFactory) const;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL const GeodeticCRS *
@@ -114,6 +117,9 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
     PROJ_INTERNAL void setCanonicalBoundCRS(const BoundCRSNNPtr &boundCRS);
 
     PROJ_INTERNAL virtual CRSNNPtr _shallowClone() const = 0;
+
+    PROJ_INTERNAL virtual std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -229,7 +235,7 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
 
     PROJ_DLL static const GeodeticCRSNNPtr EPSG_4978; // WGS 84 Geocentric
 
-    PROJ_DLL std::list<std::pair<GeodeticCRSNNPtr, double>>
+    PROJ_DLL std::list<std::pair<GeodeticCRSNNPtr, int>>
     identify(const io::AuthorityFactoryPtr &authorityFactory) const;
 
     PROJ_PRIVATE :
@@ -268,6 +274,9 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
     PROJ_INTERNAL static GeodeticCRSNNPtr createEPSG_4978();
 
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
+
+    PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
 
     INLINED_MAKE_SHARED
 
@@ -325,6 +334,11 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
 
     PROJ_DLL bool
     is2DPartOf3D(util::nn<const GeographicCRS *> other) PROJ_CONST_DECL;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
 
     //! @endcond
 
@@ -523,6 +537,9 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::CartesianCSNNPtr &csIn);
 
+    PROJ_DLL std::list<std::pair<ProjectedCRSNNPtr, int>>
+    identify(const io::AuthorityFactoryPtr &authorityFactory) const;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
@@ -548,6 +565,9 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
 
     INLINED_MAKE_SHARED
 
@@ -932,6 +952,9 @@ class PROJ_GCC_DLL DerivedGeodeticCRS final : public GeodeticCRS,
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
+
     INLINED_MAKE_SHARED
 
   private:
@@ -992,6 +1015,9 @@ class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS,
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
 
     INLINED_MAKE_SHARED
 

@@ -858,10 +858,10 @@ int main(int argc, char **argv) {
         }
         outputObject(dbContext, obj, outputOpt);
         if (identify) {
-            auto geodCRS = dynamic_cast<GeodeticCRS *>(obj.get());
-            if (geodCRS) {
+            auto crs = dynamic_cast<CRS *>(obj.get());
+            if (crs) {
                 try {
-                    auto res = geodCRS->identify(
+                    auto res = crs->identify(
                         dbContext
                             ? AuthorityFactory::create(NN_NO_CHECK(dbContext),
                                                        authority)
@@ -871,8 +871,8 @@ int main(int argc, char **argv) {
                     std::cout << "Identification match count: " << res.size()
                               << std::endl;
                     for (const auto &pair : res) {
-                        const auto &crs = pair.first;
-                        const auto &ids = crs->identifiers();
+                        const auto &identifiedCRS = pair.first;
+                        const auto &ids = identifiedCRS->identifiers();
                         assert(!ids.empty());
                         std::cout << *ids[0]->codeSpace() << ":"
                                   << ids[0]->code() << ": " << pair.second

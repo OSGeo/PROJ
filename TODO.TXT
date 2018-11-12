@@ -1,7 +1,6 @@
 - Functional:
     - WKTv2 Bison based validator ?
     - test sphericalCS
-    - identify ? (cf OSRFindMatches)
     - We might currently create COMPOUNDCRS of horiz CRS + BoundCRS of VertCRS, which is apparently illegal
 
     - Time dependent stuff:

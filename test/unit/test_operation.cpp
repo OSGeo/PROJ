@@ -4459,6 +4459,26 @@ TEST(operation, geocentricCRS_to_geogCRS_same_datum_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geocentricCRS_to_geogCRS_same_datum_context_all_auth) {
+    // This is to check we don't use OGC:CRS84 as a pivot
+    auto authFactoryEPSG =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto authFactoryAll =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt =
+        CoordinateOperationContext::create(authFactoryAll, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactoryEPSG->createCoordinateReferenceSystem("4326"),
+        // WGS84 geocentric
+        authFactoryEPSG->createCoordinateReferenceSystem("4978"), ctxt);
+    ASSERT_EQ(list.size(), 1);
+
+    EXPECT_EQ(list[0]->nameStr(),
+              "Conversion from WGS 84 (geog2D) to WGS 84 (geocentric)");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geocentricCRS_to_geocentricCRS_different_datum_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");

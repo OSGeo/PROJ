@@ -62,6 +62,7 @@ using namespace NS_PROJ::internal;
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
+using namespace NS_PROJ;
 
 // ---------------------------------------------------------------------------
 
@@ -1261,6 +1262,84 @@ PJ_OBJ *proj_obj_get_target_crs(PJ_OBJ *obj) {
                    "Object is not a BoundCRS or a CoordinateOperation");
     return nullptr;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Identify the CRS with reference CRSs.
+ *
+ * The candidate CRSs are either hard-coded, or looked in the database when
+ * authorityFactory is not null.
+ *
+ * The method returns a list of matching reference CRS, and the percentage
+ * (0-100) of confidence in the match.
+ * 100% means that the name of the reference entry
+ * perfectly matches the CRS name, and both are equivalent. In which case a
+ * single result is returned.
+ * 90% means that CRS are equivalent, but the names are not exactly the same.
+ * 70% means that CRS are equivalent), but the names do not match at all.
+ * 25% means that the CRS are not equivalent, but there is some similarity in
+ * the names.
+ * Other confidence values may be returned by some specialized implementations.
+ *
+ * This is only implemented for GeodeticCRS and ProjectedCRS for now.
+ *
+ * @param obj Object of type CRS. Must not be NULL
+ * @param auth_name Authority name, or NULL for all authorities
+ * @param options Placeholder for future options. Should be set to NULL.
+ * @param confidence Output parameter. Pointer to an array of integers that will
+ * be allocated by the function and filled with the confidence values
+ * (0-100). There are as many elements in this array as
+ * proj_obj_list_get_count()
+ * returns on the return value of this function. *confidence should be
+ * released with proj_free_int_list().
+ * @return a list of matching reference CRS, or nullptr in case of error.
+ */
+PJ_OBJ_LIST *proj_obj_identify(PJ_OBJ *obj, const char *auth_name,
+                               const char *const *options, int **confidence) {
+    assert(obj);
+    (void)options;
+    if (confidence) {
+        *confidence = nullptr;
+    }
+    auto ptr = obj->obj.get();
+    auto crs = dynamic_cast<const CRS *>(ptr);
+    if (!crs) {
+        proj_log_error(obj->ctx, __FUNCTION__, "Object is not a CRS");
+    } else {
+        int *confidenceTemp = nullptr;
+        try {
+            auto factory = AuthorityFactory::create(getDBcontext(obj->ctx),
+                                                    auth_name ? auth_name : "");
+            auto res = crs->identify(factory);
+            std::vector<IdentifiedObjectNNPtr> objects;
+            confidenceTemp = confidence ? new int[res.size()] : nullptr;
+            size_t i = 0;
+            for (const auto &pair : res) {
+                objects.push_back(pair.first);
+                if (confidenceTemp) {
+                    confidenceTemp[i] = pair.second;
+                    ++i;
+                }
+            }
+            auto ret = internal::make_unique<PJ_OBJ_LIST>(obj->ctx,
+                                                          std::move(objects));
+            if (confidence) {
+                *confidence = confidenceTemp;
+                confidenceTemp = nullptr;
+            }
+            return ret.release();
+        } catch (const std::exception &e) {
+            delete[] confidenceTemp;
+            proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Free an array of integer. */
+void proj_free_int_list(int *list) { delete[] list; }
 
 // ---------------------------------------------------------------------------
 

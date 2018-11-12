@@ -339,10 +339,23 @@ class PROJ_GCC_DLL IComparable {
 
     /** \brief Comparison criterion. */
     enum class PROJ_MSVC_DLL Criterion {
-        /** All attributes are identical. */
+        /** All properties are identical. */
         STRICT,
-        /** The objects are equivalent for coordinate operations. */
-        EQUIVALENT
+
+        /** The objects are equivalent for the purpose of coordinate
+         * operations. They can differ by the name of their objects,
+         * identifiers, other metadata.
+         * Parameters may be expressed in different units, provided that the
+         * value is (with some tolerance) the same once expressed in a
+         * common unit.
+         */
+        EQUIVALENT,
+
+        /** Same as EQUIVALENT, relaxed with an exception that the axis order
+         * of the base CRS of a DerivedCRS/ProjectedCRS or the axis order of
+         * a GeographicCRS is ignored. Only to be used
+         * with DerivedCRS/ProjectedCRS/GeographicCRS */
+        EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
     };
 
     PROJ_DLL bool isEquivalentTo(const IComparable *other,

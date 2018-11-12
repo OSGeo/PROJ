@@ -329,7 +329,7 @@ typedef struct projCtx_t PJ_CONTEXT;
 /* Functionality for handling thread contexts */
 #define PJ_DEFAULT_CTX 0
 PJ_CONTEXT PROJ_DLL *proj_context_create (void);
-PJ_CONTEXT PROJ_DLL*proj_context_destroy (PJ_CONTEXT *ctx);
+PJ_CONTEXT PROJ_DLL *proj_context_destroy (PJ_CONTEXT *ctx);
 
 
 /* Manage the transformation definition object PJ */
@@ -554,18 +554,6 @@ PJ_OBJ_TYPE PROJ_DLL proj_obj_get_type(PJ_OBJ *obj);
 
 int PROJ_DLL proj_obj_is_deprecated(PJ_OBJ *obj);
 
-/** \brief Type representing a NULL terminated list of NUL-terminate strings. */
-typedef char **PROJ_STRING_LIST;
-
-PROJ_STRING_LIST PROJ_DLL proj_get_authorities_from_database(PJ_CONTEXT *ctx);
-
-PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
-                                             const char *auth_name,
-                                             PJ_OBJ_TYPE type,
-                                             int allow_deprecated);
-
-void PROJ_DLL proj_free_string_list(PROJ_STRING_LIST list);
-
 int PROJ_DLL proj_obj_is_crs(PJ_OBJ *obj);
 
 const char PROJ_DLL* proj_obj_get_name(PJ_OBJ *obj);
@@ -611,7 +599,29 @@ PJ_OBJ PROJ_DLL *proj_obj_get_source_crs(PJ_OBJ *obj);
 
 PJ_OBJ PROJ_DLL *proj_obj_get_target_crs(PJ_OBJ *obj);
 
+PJ_OBJ_LIST PROJ_DLL *proj_obj_identify(PJ_OBJ* obj,
+                                        const char *auth_name,
+                                        const char* const *options,
+                                        int **confidence);
+
+void PROJ_DLL proj_free_int_list(int* list);
+
 /* ------------------------------------------------------------------------- */
+
+/** \brief Type representing a NULL terminated list of NUL-terminate strings. */
+typedef char **PROJ_STRING_LIST;
+
+PROJ_STRING_LIST PROJ_DLL proj_get_authorities_from_database(PJ_CONTEXT *ctx);
+
+PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
+                                             const char *auth_name,
+                                             PJ_OBJ_TYPE type,
+                                             int allow_deprecated);
+
+void PROJ_DLL proj_free_string_list(PROJ_STRING_LIST list);
+
+/* ------------------------------------------------------------------------- */
+
 
 /*! @cond Doxygen_Suppress */
 typedef struct PJ_OPERATION_FACTORY_CONTEXT PJ_OPERATION_FACTORY_CONTEXT;

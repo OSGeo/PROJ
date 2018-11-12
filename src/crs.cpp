@@ -382,6 +382,47 @@ CRSNNPtr CRS::shallowClone() const { return _shallowClone(); }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Identify the CRS with reference CRSs.
+ *
+ * The candidate CRSs are either hard-coded, or looked in the database when
+ * authorityFactory is not null.
+ *
+ * The method returns a list of matching reference CRS, and the percentage
+ * (0-100) of confidence in the match.
+ * 100% means that the name of the reference entry
+ * perfectly matches the CRS name, and both are equivalent. In which case a
+ * single result is returned.
+ * 90% means that CRS are equivalent, but the names are not exactly the same.
+ * 70% means that CRS are equivalent), but the names do not match at all.
+ * 25% means that the CRS are not equivalent, but there is some similarity in
+ * the names.
+ * Other confidence values may be returned by some specialized implementations.
+ *
+ * This is only implemented for GeodeticCRS and ProjectedCRS for now.
+ *
+ * @param authorityFactory Authority factory (or null, but degraded
+ * functionality)
+ * @return a list of matching reference CRS, and the percentage (0-100) of
+ * confidence in the match.
+ */
+std::list<std::pair<CRSNNPtr, int>>
+CRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    return _identify(authorityFactory);
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+CRS::_identify(const io::AuthorityFactoryPtr &) const {
+    return {};
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct SingleCRS::Private {
     datum::DatumPtr datum{};
@@ -923,13 +964,26 @@ void GeodeticCRS::addDatumInfoToPROJString(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+static util::IComparable::Criterion
+getStandardCriterion(util::IComparable::Criterion criterion) {
+    return criterion == util::IComparable::Criterion::
+                            EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS
+               ? util::IComparable::Criterion::EQUIVALENT
+               : criterion;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 bool GeodeticCRS::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
+    const auto standardCriterion = getStandardCriterion(criterion);
     auto otherGeodCRS = dynamic_cast<const GeodeticCRS *>(other);
     // TODO test velocityModel
     return otherGeodCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, criterion);
+           SingleCRS::baseIsEquivalentTo(other, standardCriterion);
 }
 //! @endcond
 
@@ -978,45 +1032,65 @@ GeodeticCRSNNPtr GeodeticCRS::createEPSG_4978() {
  * @return a list of matching reference CRS, and the percentage (0-100) of
  * confidence in the match.
  */
-std::list<std::pair<GeodeticCRSNNPtr, double>>
+std::list<std::pair<GeodeticCRSNNPtr, int>>
 GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
-    typedef std::pair<GeodeticCRSNNPtr, double> Pair;
+    typedef std::pair<GeodeticCRSNNPtr, int> Pair;
     std::list<Pair> res;
     const auto &thisName(nameStr());
 
-    const bool nameEquivalent4326 = metadata::Identifier::isEquivalentName(
-        thisName.c_str(), GeographicCRS::EPSG_4326->nameStr().c_str());
-    const bool nameEqual4326 = thisName == GeographicCRS::EPSG_4326->nameStr();
-    const bool isEq4326 =
-        _isEquivalentTo(GeographicCRS::EPSG_4326.get(),
-                        util::IComparable::Criterion::EQUIVALENT);
-    if (nameEquivalent4326 && isEq4326 &&
-        (!authorityFactory || nameEqual4326)) {
-        res.emplace_back(
-            util::nn_static_pointer_cast<GeodeticCRS>(GeographicCRS::EPSG_4326),
-            nameEqual4326 ? 100.0 : 90.0);
-        return res;
-    } else if (nameEqual4326 && !isEq4326 && !authorityFactory) {
-        res.emplace_back(
-            util::nn_static_pointer_cast<GeodeticCRS>(GeographicCRS::EPSG_4326),
-            25.0);
-        return res;
+    const GeographicCRSNNPtr candidatesCRS[] = {GeographicCRS::EPSG_4326,
+                                                GeographicCRS::EPSG_4267,
+                                                GeographicCRS::EPSG_4269};
+    for (const auto &crs : candidatesCRS) {
+        const bool nameEquivalent = metadata::Identifier::isEquivalentName(
+            thisName.c_str(), crs->nameStr().c_str());
+        const bool nameEqual = thisName == crs->nameStr();
+        const bool isEq = _isEquivalentTo(
+            crs.get(), util::IComparable::Criterion::EQUIVALENT);
+        if (nameEquivalent && isEq && (!authorityFactory || nameEqual)) {
+            res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
+                             nameEqual ? 100 : 90);
+            return res;
+        } else if (nameEqual && !isEq && !authorityFactory) {
+            res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
+                             25);
+            return res;
+        } else if (isEq && !authorityFactory) {
+            res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
+                             70);
+            return res;
+        }
+    }
+
+    std::string geodetic_crs_type;
+    if (isGeocentric()) {
+        geodetic_crs_type = "geocentric";
+    } else {
+        auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
+        if (geogCRS) {
+            if (coordinateSystem()->axisList().size() == 2) {
+                geodetic_crs_type = "geographic 2D";
+            } else {
+                geodetic_crs_type = "geographic 3D";
+            }
+        }
     }
 
     if (authorityFactory) {
 
         const auto &thisDatum(datum());
 
-        auto searchByDatum = [this, &authorityFactory, &res, &thisDatum]() {
+        auto searchByDatum = [this, &authorityFactory, &res, &thisDatum,
+                              &geodetic_crs_type]() {
             for (const auto &id : thisDatum->identifiers()) {
                 try {
                     auto tempRes = authorityFactory->createGeodeticCRSFromDatum(
-                        *id->codeSpace(), id->code());
+                        *id->codeSpace(), id->code(), geodetic_crs_type);
                     for (const auto &crs : tempRes) {
                         if (_isEquivalentTo(
                                 crs.get(),
                                 util::IComparable::Criterion::EQUIVALENT)) {
-                            res.emplace_back(crs, 70.0);
+                            res.emplace_back(crs, 70);
                         }
                     }
                 } catch (const std::exception &) {
@@ -1026,12 +1100,12 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
         const auto &thisEllipsoid(ellipsoid());
         auto searchByEllipsoid = [this, &authorityFactory, &res, &thisDatum,
-                                  &thisEllipsoid]() {
+                                  &thisEllipsoid, &geodetic_crs_type]() {
             for (const auto &id : thisEllipsoid->identifiers()) {
                 try {
                     auto tempRes =
                         authorityFactory->createGeodeticCRSFromEllipsoid(
-                            *id->codeSpace(), id->code());
+                            *id->codeSpace(), id->code(), geodetic_crs_type);
                     for (const auto &crs : tempRes) {
                         const auto &crsDatum(crs->datum());
                         if (crsDatum &&
@@ -1046,7 +1120,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                 util::IComparable::Criterion::EQUIVALENT)
 
                                 ) {
-                            res.emplace_back(crs, 60.0);
+                            res.emplace_back(crs, 60);
                         }
                     }
                 } catch (const std::exception &) {
@@ -1077,7 +1151,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                    ->createGeodeticCRS(id->code());
                     bool match = _isEquivalentTo(
                         crs.get(), util::IComparable::Criterion::EQUIVALENT);
-                    res.emplace_back(crs, match ? 100.0 : 25.0);
+                    res.emplace_back(crs, match ? 100 : 25);
                     return res;
                 } catch (const std::exception &) {
                 }
@@ -1097,12 +1171,12 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             util::IComparable::Criterion::EQUIVALENT)) {
                         if (crs->nameStr() == thisName) {
                             res.clear();
-                            res.emplace_back(crsNN, 100.0);
+                            res.emplace_back(crsNN, 100);
                             return res;
                         }
-                        res.emplace_back(crsNN, 90.0);
+                        res.emplace_back(crsNN, 90);
                     } else {
-                        res.emplace_back(crsNN, 25.0);
+                        res.emplace_back(crsNN, 25);
                     }
                 }
                 if (!res.empty()) {
@@ -1208,10 +1282,10 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         });
 
         // If there are results with 90% confidence, only keep those
-        if (res.size() >= 2 && res.front().second == 90.0) {
+        if (res.size() >= 2 && res.front().second == 90) {
             std::list<Pair> newRes;
             for (const auto &pair : res) {
-                if (pair.second == 90.0) {
+                if (pair.second == 90) {
                     newRes.push_back(pair);
                 } else {
                     break;
@@ -1222,6 +1296,23 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     }
     return res;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+GeodeticCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<CRSNNPtr, int> Pair;
+    std::list<Pair> res;
+    auto resTemp = identify(authorityFactory);
+    for (const auto &pair : resTemp) {
+        res.emplace_back(pair.first, pair.second);
+    }
+    return res;
+}
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1351,6 +1442,42 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
     return false;
 }
 
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+bool GeographicCRS::_isEquivalentTo(
+    const util::IComparable *other,
+    util::IComparable::Criterion criterion) const {
+    auto otherGeogCRS = dynamic_cast<const GeographicCRS *>(other);
+    if (otherGeogCRS == nullptr) {
+        return false;
+    }
+    const auto standardCriterion = getStandardCriterion(criterion);
+    if (GeodeticCRS::_isEquivalentTo(other, standardCriterion)) {
+        return true;
+    }
+    if (criterion !=
+        util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS) {
+        return false;
+    }
+    const auto axisOrder = coordinateSystem()->axisOrder();
+    if (axisOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH ||
+        axisOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST) {
+        const auto &unit = coordinateSystem()->axisList()[0]->unit();
+        return GeographicCRS::create(
+                   util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                           nameStr()),
+                   datum(), datumEnsemble(),
+                   axisOrder ==
+                           cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH
+                       ? cs::EllipsoidalCS::createLatitudeLongitude(unit)
+                       : cs::EllipsoidalCS::createLongitudeLatitude(unit))
+            ->GeodeticCRS::_isEquivalentTo(other, standardCriterion);
+    }
+    return false;
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -1828,14 +1955,16 @@ DerivedCRS::derivingConversionRef() PROJ_CONST_DEFN {
 bool DerivedCRS::_isEquivalentTo(const util::IComparable *other,
                                  util::IComparable::Criterion criterion) const {
     auto otherDerivedCRS = dynamic_cast<const DerivedCRS *>(other);
+    const auto standardCriterion = getStandardCriterion(criterion);
     if (otherDerivedCRS == nullptr ||
-        !SingleCRS::baseIsEquivalentTo(other, criterion)) {
+        !SingleCRS::baseIsEquivalentTo(other, standardCriterion)) {
         return false;
     }
     return d->baseCRS_->_isEquivalentTo(otherDerivedCRS->d->baseCRS_.get(),
                                         criterion) &&
            d->derivingConversion_->_isEquivalentTo(
-               otherDerivedCRS->d->derivingConversion_.get(), criterion);
+               otherDerivedCRS->d->derivingConversion_.get(),
+               standardCriterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -2198,6 +2327,255 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
         }
     }
 }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Identify the CRS with reference CRSs.
+ *
+ * The candidate CRSs are either hard-coded, or looked in the database when
+ * authorityFactory is not null.
+ *
+ * The method returns a list of matching reference CRS, and the percentage
+ * (0-100) of confidence in the match.
+ * 100% means that the name of the reference entry
+ * perfectly matches the CRS name, and both are equivalent. In which case a
+ * single result is returned.
+ * 90% means that CRS are equivalent, but the names are not exactly the same.
+ * 70% means that CRS are equivalent (equivalent base CRS, conversion and
+ * coordinate system), but the names do not match at all.
+ * 25% means that the CRS are not equivalent, but there is some similarity in
+ * the names.
+ *
+ * For the purpose of this function, equivalence is tested with the
+ * util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS, that is
+ * to say that the axis order of the base GeographicCRS is ignored.
+ *
+ * @param authorityFactory Authority factory (or null, but degraded
+ * functionality)
+ * @return a list of matching reference CRS, and the percentage (0-100) of
+ * confidence in the match.
+ */
+std::list<std::pair<ProjectedCRSNNPtr, int>>
+ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<ProjectedCRSNNPtr, int> Pair;
+    std::list<Pair> res;
+
+    const auto &thisName(nameStr());
+
+    std::list<std::pair<GeodeticCRSNNPtr, int>> baseRes;
+    const auto &l_baseCRS(baseCRS());
+    auto geogCRS = dynamic_cast<const GeographicCRS *>(l_baseCRS.get());
+    if (geogCRS &&
+        geogCRS->coordinateSystem()->axisOrder() ==
+            cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH) {
+        baseRes =
+            GeographicCRS::create(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        geogCRS->nameStr()),
+                geogCRS->datum(), geogCRS->datumEnsemble(),
+                cs::EllipsoidalCS::createLatitudeLongitude(
+                    geogCRS->coordinateSystem()->axisList()[0]->unit()))
+                ->identify(authorityFactory);
+    } else {
+        baseRes = l_baseCRS->identify(authorityFactory);
+    }
+
+    int zone = 0;
+    bool north = false;
+
+    auto computeConfidence = [&thisName](const std::string &crsName) {
+        return crsName == thisName ? 100
+                                   : metadata::Identifier::isEquivalentName(
+                                         crsName.c_str(), thisName.c_str())
+                                         ? 90
+                                         : 70;
+    };
+    auto computeUTMCRSName = [](const char *base, int l_zone, bool l_north) {
+        return base + toString(l_zone) + (l_north ? "N" : "S");
+    };
+
+    const auto &conv = derivingConversionRef();
+    const auto &cs = coordinateSystem();
+    if (baseRes.size() == 1 && baseRes.front().second >= 70 &&
+        conv->isUTM(zone, north) &&
+        cs->_isEquivalentTo(
+            cs::CartesianCS::createEastingNorthing(common::UnitOfMeasure::METRE)
+                .get())) {
+        if (baseRes.front().first->_isEquivalentTo(
+                GeographicCRS::EPSG_4326.get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
+            std::string crsName(
+                computeUTMCRSName("WGS 84 / UTM zone ", zone, north));
+            res.emplace_back(
+                ProjectedCRS::create(
+                    createMapNameEPSGCode(crsName.c_str(),
+                                          (north ? 32600 : 32700) + zone),
+                    GeographicCRS::EPSG_4326, conv->identify(), cs),
+                computeConfidence(crsName));
+            return res;
+        } else if (((zone >= 1 && zone <= 22) || zone == 59 || zone == 60) &&
+                   north &&
+                   baseRes.front().first->_isEquivalentTo(
+                       GeographicCRS::EPSG_4267.get(),
+                       util::IComparable::Criterion::EQUIVALENT)) {
+            std::string crsName(
+                computeUTMCRSName("NAD27 / UTM zone ", zone, north));
+            res.emplace_back(
+                ProjectedCRS::create(
+                    createMapNameEPSGCode(crsName.c_str(),
+                                          (zone >= 59) ? 3370 + zone - 59
+                                                       : 26700 + zone),
+                    GeographicCRS::EPSG_4267, conv->identify(), cs),
+                computeConfidence(crsName));
+            return res;
+        } else if (((zone >= 1 && zone <= 23) || zone == 59 || zone == 60) &&
+                   north &&
+                   baseRes.front().first->_isEquivalentTo(
+                       GeographicCRS::EPSG_4269.get(),
+                       util::IComparable::Criterion::EQUIVALENT)) {
+            std::string crsName(
+                computeUTMCRSName("NAD83 / UTM zone ", zone, north));
+            res.emplace_back(
+                ProjectedCRS::create(
+                    createMapNameEPSGCode(crsName.c_str(),
+                                          (zone >= 59) ? 3372 + zone - 59
+                                                       : 26900 + zone),
+                    GeographicCRS::EPSG_4269, conv->identify(), cs),
+                computeConfidence(crsName));
+            return res;
+        }
+    }
+
+    if (authorityFactory) {
+
+        const bool unsignificantName = thisName.empty() ||
+                                       ci_equal(thisName, "unknown") ||
+                                       ci_equal(thisName, "unnamed");
+        if (!identifiers().empty()) {
+            // If the CRS has already an id, check in the database for the
+            // official object, and verify that they are equivalent.
+            for (const auto &id : identifiers()) {
+                try {
+                    auto crs = io::AuthorityFactory::create(
+                                   authorityFactory->databaseContext(),
+                                   *id->codeSpace())
+                                   ->createProjectedCRS(id->code());
+                    bool match = _isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
+                    res.emplace_back(crs, match ? 100 : 25);
+                    return res;
+                } catch (const std::exception &) {
+                }
+            }
+        } else if (!unsignificantName) {
+            for (int ipass = 0; ipass < 2; ipass++) {
+                const bool approximateMatch = ipass == 1;
+                auto objects = authorityFactory->createObjectsFromName(
+                    thisName, {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
+                    approximateMatch);
+                for (const auto &obj : objects) {
+                    auto crs = util::nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+                    assert(crs);
+                    auto crsNN = NN_NO_CHECK(crs);
+                    if (_isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        if (crs->nameStr() == thisName) {
+                            res.clear();
+                            res.emplace_back(crsNN, 100);
+                            return res;
+                        }
+                        res.emplace_back(crsNN, 90);
+                    } else {
+                        res.emplace_back(crsNN, 25);
+                    }
+                }
+                if (!res.empty()) {
+                    break;
+                }
+            }
+        }
+
+        if (res.empty()) {
+            auto self = NN_NO_CHECK(std::dynamic_pointer_cast<ProjectedCRS>(
+                shared_from_this().as_nullable()));
+            auto candidates =
+                authorityFactory->createProjectedCRSFromExisting(self);
+            for (const auto &crs : candidates) {
+                if (_isEquivalentTo(crs.get(),
+                                    util::IComparable::Criterion::EQUIVALENT)) {
+                    res.emplace_back(crs, unsignificantName ? 90 : 70);
+                } else if (coordinateSystem()->_isEquivalentTo(
+                               crs->coordinateSystem().get(),
+                               util::IComparable::Criterion::EQUIVALENT) &&
+                           derivingConversionRef()->_isEquivalentTo(
+                               crs->derivingConversionRef().get(),
+                               util::IComparable::Criterion::EQUIVALENT)) {
+                    res.emplace_back(crs, 70);
+                } else {
+                    res.emplace_back(crs, 25);
+                }
+            }
+        }
+
+        // Sort results
+        res.sort([&thisName](const Pair &a, const Pair &b) {
+            // First consider confidence
+            if (a.second > b.second) {
+                return true;
+            }
+            if (a.second < b.second) {
+                return false;
+            }
+
+            // Then consider exact name matching
+            const auto &aName(a.first->nameStr());
+            const auto &bName(b.first->nameStr());
+            if (aName == thisName && bName != thisName) {
+                return true;
+            }
+            if (bName == thisName && aName != thisName) {
+                return false;
+            }
+
+            // Arbitrary final sorting criterion
+            return aName < bName;
+        });
+
+        // Keep only results of the highest confidence
+        if (res.size() >= 2) {
+            const auto highestConfidence = res.front().second;
+            std::list<Pair> newRes;
+            for (const auto &pair : res) {
+                if (pair.second == highestConfidence) {
+                    newRes.push_back(pair);
+                } else {
+                    break;
+                }
+            }
+            return newRes;
+        }
+    }
+
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+ProjectedCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<CRSNNPtr, int> Pair;
+    std::list<Pair> res;
+    auto resTemp = identify(authorityFactory);
+    for (const auto &pair : resTemp) {
+        res.emplace_back(pair.first, pair.second);
+    }
+    return res;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -2819,6 +3197,17 @@ bool DerivedGeodeticCRS::_isEquivalentTo(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+DerivedGeodeticCRS::_identify(const io::AuthorityFactoryPtr &factory) const {
+    return CRS::_identify(factory);
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct DerivedGeographicCRS::Private {};
 //! @endcond
 
@@ -2941,6 +3330,17 @@ bool DerivedGeographicCRS::_isEquivalentTo(
     return otherDerivedCRS != nullptr &&
            DerivedCRS::_isEquivalentTo(other, criterion);
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+DerivedGeographicCRS::_identify(const io::AuthorityFactoryPtr &factory) const {
+    return CRS::_identify(factory);
+}
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
