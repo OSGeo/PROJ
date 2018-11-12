@@ -887,7 +887,7 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
                           const common::Angle &latitudeFirstParallel,
                           const common::Angle &latitudeSecondParallel,
                           const common::Length &eastingFalseOrigin,
-                          const common::Length &eastingNorthOrigin);
+                          const common::Length &northingFalseOrigin);
 
     PROJ_DLL static ConversionNNPtr createLambertConicConformal_1SP(
         const util::PropertyMap &properties, const common::Angle &centerLat,
@@ -902,7 +902,7 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
                                     const common::Angle &latitudeFirstParallel,
                                     const common::Angle &latitudeSecondParallel,
                                     const common::Length &eastingFalseOrigin,
-                                    const common::Length &eastingNorthOrigin);
+                                    const common::Length &northingFalseOrigin);
 
     PROJ_DLL static ConversionNNPtr createLambertConicConformal_2SP_Michigan(
         const util::PropertyMap &properties,
@@ -911,7 +911,7 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         const common::Angle &latitudeFirstParallel,
         const common::Angle &latitudeSecondParallel,
         const common::Length &eastingFalseOrigin,
-        const common::Length &eastingNorthOrigin,
+        const common::Length &northingFalseOrigin,
         const common::Scale &ellipsoidScalingFactor);
 
     PROJ_DLL static ConversionNNPtr createLambertConicConformal_2SP_Belgium(
@@ -921,7 +921,7 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         const common::Angle &latitudeFirstParallel,
         const common::Angle &latitudeSecondParallel,
         const common::Length &eastingFalseOrigin,
-        const common::Length &eastingNorthOrigin);
+        const common::Length &northingFalseOrigin);
 
     PROJ_DLL static ConversionNNPtr
     createAzimuthalEquidistant(const util::PropertyMap &properties,
