@@ -46,6 +46,10 @@
 #  endif
 #endif
 
+#ifdef PROJ_RENAME_SYMBOLS
+#include "proj_symbol_rename.h"
+#endif
+
 /* standard inclusions */
 #include <limits.h>
 #include <math.h>

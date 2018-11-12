@@ -123,6 +123,10 @@
 #error proj.h must be included before proj_api.h
 #endif
 
+#ifdef PROJ_RENAME_SYMBOLS
+#include "proj_symbol_rename.h"
+#endif
+
 #ifndef PROJ_H
 #define PROJ_H
 #ifdef __cplusplus

@@ -41,6 +41,10 @@
 #define PJ_VERSION 600
 #endif
 
+#ifdef PROJ_RENAME_SYMBOLS
+#include "proj_symbol_rename.h"
+#endif
+
 
 /* If we're not asked for PJ_VERSION only, give them everything */
 #ifndef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY

@@ -49,6 +49,10 @@ extern "C" {
 #endif
 #endif
 
+#ifdef PROJ_RENAME_SYMBOLS
+#include "proj_symbol_rename.h"
+#endif
+
 #ifndef NAN
 #ifdef _WIN32
 #define NAN sqrt(-1.0)

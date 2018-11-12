@@ -167,6 +167,10 @@
 #endif
 #endif
 
+#ifdef PROJ_RENAME_SYMBOLS
+#include "proj_symbol_rename.h"
+#endif
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
