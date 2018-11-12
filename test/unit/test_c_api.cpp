@@ -1356,4 +1356,94 @@ TEST_F(CApi, proj_obj_identify) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_get_area_of_use) {
+    {
+        auto crs = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "4326", PJ_OBJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+        EXPECT_TRUE(proj_obj_get_area_of_use(crs, nullptr, nullptr, nullptr,
+                                             nullptr, nullptr));
+        const char *name = nullptr;
+        double w;
+        double s;
+        double e;
+        double n;
+        EXPECT_TRUE(proj_obj_get_area_of_use(crs, &w, &s, &e, &n, &name));
+        EXPECT_EQ(w, -180);
+        EXPECT_EQ(s, -90);
+        EXPECT_EQ(e, 180);
+        EXPECT_EQ(n, 90);
+        ASSERT_TRUE(name != nullptr);
+        EXPECT_EQ(std::string(name), "World");
+    }
+    {
+        auto obj =
+            proj_obj_create_from_user_input(m_ctxt, "+proj=longlat", nullptr);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+        EXPECT_FALSE(proj_obj_get_area_of_use(obj, nullptr, nullptr, nullptr,
+                                              nullptr, nullptr));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_coordoperation_get_accuracy) {
+    {
+        auto crs = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "4326", PJ_OBJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+        EXPECT_EQ(proj_coordoperation_get_accuracy(crs), -1.0);
+    }
+    {
+        auto obj = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "1170", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, false,
+            nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        EXPECT_EQ(proj_coordoperation_get_accuracy(obj), 16.0);
+    }
+    {
+        auto obj =
+            proj_obj_create_from_user_input(m_ctxt, "+proj=helmert", nullptr);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+        EXPECT_EQ(proj_coordoperation_get_accuracy(obj), -1.0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_geographic_crs) {
+    {
+        auto obj = proj_obj_create_geographic_crs(
+            m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
+            298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433,
+            true);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+
+        auto objRef = proj_obj_create_from_user_input(
+            m_ctxt,
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr);
+        ObjectKeeper keeperobjRef(objRef);
+        EXPECT_NE(objRef, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(obj, objRef, PJ_COMP_EQUIVALENT));
+    }
+    {
+        auto obj = proj_obj_create_geographic_crs(m_ctxt, nullptr, nullptr,
+                                                  nullptr, 1.0, 0.0, nullptr,
+                                                  0.0, nullptr, 0.0, false);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+    }
+}
+
 } // namespace

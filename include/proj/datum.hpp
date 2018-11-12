@@ -307,6 +307,9 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
         const override; // throw(FormattingException)
                         //! @endcond
 
+    PROJ_INTERNAL static std::string
+    guessBodyName(const io::DatabaseContextPtr &dbContext, double a);
+
   protected:
 #ifdef DOXYGEN_ENABLED
     common::Length semiMajorAxis_;

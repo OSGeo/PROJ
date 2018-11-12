@@ -105,6 +105,12 @@ class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
         const; // throw(io::FormattingException)
 
     PROJ_INTERNAL std::string exportToPROJString() const;
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const UnitOfMeasure &other,
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const;
+
     //! @endcond
 
     PROJ_DLL static const UnitOfMeasure NONE;

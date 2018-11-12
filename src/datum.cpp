@@ -46,6 +46,8 @@
 #include "proj_api.h"
 // clang-format on
 
+#include <cmath>
+#include <cstdlib>
 #include <memory>
 #include <string>
 
@@ -898,6 +900,26 @@ bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
     return true;
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+std::string Ellipsoid::guessBodyName(const io::DatabaseContextPtr &dbContext,
+                                     double a) {
+    constexpr double relError = 0.005;
+    constexpr double earthMeanRadius = 6375000.0;
+    if (std::fabs(a - earthMeanRadius) < relError * earthMeanRadius) {
+        return Ellipsoid::EARTH;
+    }
+    if (dbContext) {
+        try {
+            auto factory = io::AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                        std::string());
+            return factory->identifyBodyFromSemiMajorAxis(a, relError);
+        } catch (const std::exception &) {
+        }
+    }
+    return "Non-Earth body";
+}
 
 // ---------------------------------------------------------------------------
 

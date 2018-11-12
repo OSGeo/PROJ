@@ -396,7 +396,7 @@ bool CoordinateSystemAxis::_isEquivalentTo(
     }
     // For approximate comparison, only care about axis direction and unit.
     if (!(*(d->direction) == *(otherCSA->d->direction) &&
-          d->unit == otherCSA->d->unit)) {
+          d->unit._isEquivalentTo(otherCSA->d->unit, criterion))) {
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {

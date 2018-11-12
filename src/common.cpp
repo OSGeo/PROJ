@@ -285,6 +285,19 @@ std::string UnitOfMeasure::exportToPROJString() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+bool UnitOfMeasure::_isEquivalentTo(
+    const UnitOfMeasure &other, util::IComparable::Criterion criterion) const {
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        return operator==(other);
+    }
+    return std::fabs(conversionToSI() - other.conversionToSI()) <=
+           1e-10 * std::fabs(conversionToSI());
+}
+
+//! @endcond
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct Measure::Private {
     double value_ = 0.0;
     UnitOfMeasure unit_{};

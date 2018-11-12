@@ -1760,26 +1760,6 @@ UnitOfMeasure WKTParser::Private::buildUnitInSubNode(const WKTNodeNNPtr &node,
 
 // ---------------------------------------------------------------------------
 
-static std::string _guessBodyName(const DatabaseContextPtr &dbContext,
-                                  double a) {
-    constexpr double relError = 0.005;
-    constexpr double earthMeanRadius = 6375000.0;
-    if (std::fabs(a - earthMeanRadius) < relError * earthMeanRadius) {
-        return Ellipsoid::EARTH;
-    }
-    if (dbContext) {
-        try {
-            auto factory =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
-            return factory->identifyBodyFromSemiMajorAxis(a, relError);
-        } catch (const std::exception &) {
-        }
-    }
-    return "Non-Earth body";
-}
-
-// ---------------------------------------------------------------------------
-
 EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     const auto &children = nodeP->children();
@@ -1795,7 +1775,7 @@ EllipsoidNNPtr WKTParser::Private::buildEllipsoid(const WKTNodeNNPtr &node) {
         Length semiMajorAxis(asDouble(children[1]), unit);
         Scale invFlattening(asDouble(children[2]));
         const auto celestialBody(
-            _guessBodyName(dbContext_, semiMajorAxis.getSIValue()));
+            Ellipsoid::guessBodyName(dbContext_, semiMajorAxis.getSIValue()));
         if (invFlattening.getSIValue() == 0) {
             return Ellipsoid::createSphere(buildProperties(node), semiMajorAxis,
                                            celestialBody);
@@ -5479,7 +5459,7 @@ PROJStringParser::Private::buildPrimeMeridian(const Step &step) {
 // ---------------------------------------------------------------------------
 
 std::string PROJStringParser::Private::guessBodyName(double a) {
-    return _guessBodyName(dbContext_, a);
+    return Ellipsoid::guessBodyName(dbContext_, a);
 }
 
 // ---------------------------------------------------------------------------

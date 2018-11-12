@@ -694,6 +694,46 @@ int proj_obj_is_deprecated(PJ_OBJ *obj) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether two objects are equivalent.
+ *
+ * @param obj Object (must not be NULL)
+ * @param other Other object (must not be NULL)
+ * @param criterion Comparison criterion
+ * @return TRUE if they are equivalent
+ */
+int proj_obj_is_equivalent_to(PJ_OBJ *obj, PJ_OBJ *other,
+                              PJ_COMPARISON_CRITERION criterion) {
+    assert(obj);
+    assert(other);
+
+    // Make sure that the C and C++ enumerations match
+    static_assert(static_cast<int>(PJ_COMP_STRICT) ==
+                      static_cast<int>(IComparable::Criterion::STRICT),
+                  "");
+    static_assert(static_cast<int>(PJ_COMP_EQUIVALENT) ==
+                      static_cast<int>(IComparable::Criterion::EQUIVALENT),
+                  "");
+    static_assert(
+        static_cast<int>(PJ_COMP_EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS) ==
+            static_cast<int>(
+                IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS),
+        "");
+
+    // Make sure we enumerate all values. If adding a new value, as we
+    // don't have a default clause, the compiler will warn.
+    switch (criterion) {
+    case PJ_COMP_STRICT:
+    case PJ_COMP_EQUIVALENT:
+    case PJ_COMP_EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS:
+        break;
+    }
+    const IComparable::Criterion cppCriterion =
+        static_cast<IComparable::Criterion>(criterion);
+    return obj->obj->isEquivalentTo(other->obj.get(), cppCriterion);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return whether an object is a CRS
  *
  * @param obj Object (must not be NULL)
@@ -928,6 +968,86 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
         proj_log_error(obj->ctx, __FUNCTION__, e.what());
         return nullptr;
     }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the area of use of an object.
+ *
+ * @param obj Object (must not be NULL)
+ * @param p_west_lon Pointer to a double to receive the west longitude (in
+ * degrees). Or NULL. If the returned value is -1000, the bounding box is
+ * unknown.
+ * @param p_south_lat Pointer to a double to receive the south latitude (in
+ * degrees). Or NULL. If the returned value is -1000, the bounding box is
+ * unknown.
+  * @param p_east_lon Pointer to a double to receive the east longitude (in
+ * degrees). Or NULL. If the returned value is -1000, the bounding box is
+ * unknown.
+ * @param p_north_lat Pointer to a double to receive the north latitude (in
+ * degrees). Or NULL. If the returned value is -1000, the bounding box is
+ * unknown.
+ * @param p_area_name Pointer to a string to receive the name of the area of
+ * use. Or NULL. *p_area_name is valid while obj is valid itself.
+ * @return TRUE in case of success, FALSE in case of error or if the area
+ * of use is unknown.
+ */
+int proj_obj_get_area_of_use(PJ_OBJ *obj, double *p_west_lon,
+                             double *p_south_lat, double *p_east_lon,
+                             double *p_north_lat, const char **p_area_name) {
+    if (p_area_name) {
+        *p_area_name = nullptr;
+    }
+    auto objectUsage = dynamic_cast<const ObjectUsage *>(obj->obj.get());
+    if (!objectUsage) {
+        return false;
+    }
+    const auto &domains = objectUsage->domains();
+    if (domains.empty()) {
+        return false;
+    }
+    const auto &extent = domains[0]->domainOfValidity();
+    if (!extent) {
+        return false;
+    }
+    const auto &desc = extent->description();
+    if (desc.has_value() && p_area_name) {
+        *p_area_name = desc->c_str();
+    }
+
+    const auto &geogElements = extent->geographicElements();
+    if (!geogElements.empty()) {
+        auto bbox =
+            dynamic_cast<const GeographicBoundingBox *>(geogElements[0].get());
+        if (bbox) {
+            if (p_west_lon) {
+                *p_west_lon = bbox->westBoundLongitude();
+            }
+            if (p_south_lat) {
+                *p_south_lat = bbox->southBoundLatitude();
+            }
+            if (p_east_lon) {
+                *p_east_lon = bbox->eastBoundLongitude();
+            }
+            if (p_north_lat) {
+                *p_north_lat = bbox->northBoundLatitude();
+            }
+            return true;
+        }
+    }
+    if (p_west_lon) {
+        *p_west_lon = -1000;
+    }
+    if (p_south_lat) {
+        *p_south_lat = -1000;
+    }
+    if (p_east_lon) {
+        *p_east_lon = -1000;
+    }
+    if (p_north_lat) {
+        *p_north_lat = -1000;
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -1485,6 +1605,88 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_OBJ *crs, const char **pMethodName,
         }
     }
     return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(co));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Create a GeographicCRS 2D from its definition.
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param geogName Name of the GeographicCRS. Or NULL
+ * @param datumName Name of the GeodeticReferenceFrame. Or NULL
+ * @param ellipsoidName Name of the Ellipsoid. Or NULL
+ * @param semiMajorMetre Ellipsoid semi-major axis, in metres.
+ * @param invFlattening Ellipsoid inverse flattening. Or 0 for a sphere.
+ * @param primeMeridianName Name of the PrimeMeridian. Or NULL
+ * @param primeMeridianOffset Offset of the prime meridian, expressed in the
+ * specified angular units.
+ * @param angularUnits Name of the angular units. Or NULL for Degree
+ * @param angularUnitsConv Conversion factor from the angular unit to radian. Or
+ * 0 for Degree if angularUnits == NULL. Otherwise should be not NULL
+ * @param latLongOrder TRUE for Latitude Longitude axis order.
+ *
+ * @return Object of type GeographicCRS that must be unreferenced with
+ * proj_obj_unref(), or NULL in case of error.
+ */
+PJ_OBJ *proj_obj_create_geographic_crs(
+    PJ_CONTEXT *ctx, const char *geogName, const char *datumName,
+    const char *ellipsoidName, double semiMajorMetre, double invFlattening,
+    const char *primeMeridianName, double primeMeridianOffset,
+    const char *angularUnits, double angularUnitsConv, int latLongOrder) {
+
+    auto getName = [](const char *name) { return name ? name : "unnamed"; };
+
+    SANITIZE_CTX(ctx);
+    try {
+        UnitOfMeasure angUnit(
+            angularUnits
+                ? (ci_equal(angularUnits, "degree")
+                       ? UnitOfMeasure::DEGREE
+                       : ci_equal(angularUnits, "grad")
+                             ? UnitOfMeasure::GRAD
+                             : UnitOfMeasure(angularUnits, angularUnitsConv))
+                : UnitOfMeasure::DEGREE);
+        auto dbContext = getDBcontext(ctx);
+        auto body = Ellipsoid::guessBodyName(dbContext, semiMajorMetre);
+        auto ellpsName = PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                           getName(ellipsoidName));
+        auto ellps =
+            invFlattening != 0.0
+                ? Ellipsoid::createFlattenedSphere(ellpsName,
+                                                   Length(semiMajorMetre),
+                                                   Scale(invFlattening), body)
+                : Ellipsoid::createSphere(ellpsName, Length(semiMajorMetre),
+                                          body);
+        auto pm = PrimeMeridian::create(
+            PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY,
+                primeMeridianName
+                    ? primeMeridianName
+                    : primeMeridianOffset == 0.0
+                          ? (ellps->celestialBody() == Ellipsoid::EARTH
+                                 ? "Greenwich"
+                                 : "Reference meridian")
+                          : "unnamed"),
+            Angle(primeMeridianOffset, angUnit));
+        auto datum = GeodeticReferenceFrame::create(
+            PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                              getName(datumName)),
+            ellps, util::optional<std::string>(), pm);
+        auto geogCRS = GeographicCRS::create(
+            PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                              getName(geogName)),
+            datum,
+            latLongOrder ? cs::EllipsoidalCS::createLatitudeLongitude(angUnit)
+                         : cs::EllipsoidalCS::createLongitudeLatitude(angUnit));
+        return PJ_OBJ::create(ctx, geogCRS);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -2143,3 +2345,29 @@ PJ_OBJ *proj_obj_list_get(PJ_OBJ_LIST *result, int index) {
  * @param result Object, or NULL.
  */
 void proj_obj_list_unref(PJ_OBJ_LIST *result) { delete result; }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the accuracy (in metre) of a coordinate operation.
+ *
+ * @return the accuracy, or a negative value if unknown or in case of error.
+ */
+double proj_coordoperation_get_accuracy(PJ_OBJ *coordoperation) {
+    assert(coordoperation);
+    auto co =
+        dynamic_cast<const CoordinateOperation *>(coordoperation->obj.get());
+    if (!co) {
+        proj_log_error(coordoperation->ctx, __FUNCTION__,
+                       "Object is not a CoordinateOperation");
+        return -1;
+    }
+    const auto &accuracies = co->coordinateOperationAccuracies();
+    if (accuracies.empty()) {
+        return -1;
+    }
+    try {
+        return c_locale_stod(accuracies[0]->value());
+    } catch (const std::exception &) {
+    }
+    return -1;
+}
