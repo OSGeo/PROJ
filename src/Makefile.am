@@ -48,6 +48,7 @@ libproj_la_LIBADD = @SQLITE3_LDFLAGS@
 
 libproj_la_SOURCES = \
 	pj_list.h proj_internal.h proj_math.h projects.h\
+	proj_symbol_rename.h \
 	static.cpp util.cpp metadata.cpp common.cpp crs.cpp datum.cpp coordinatesystem.cpp coordinateoperation.cpp io.cpp \
 	internal.cpp factory.cpp c_api.cpp \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
