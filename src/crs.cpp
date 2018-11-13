@@ -398,7 +398,8 @@ CRSNNPtr CRS::shallowClone() const { return _shallowClone(); }
  * the names.
  * Other confidence values may be returned by some specialized implementations.
  *
- * This is only implemented for GeodeticCRS and ProjectedCRS for now.
+ * This is implemented for GeodeticCRS, ProjectedCRS, VerticalCRS and
+ * CompoundCRS.
  *
  * @param authorityFactory Authority factory (or null, but degraded
  * functionality)
@@ -1174,7 +1175,10 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             res.emplace_back(crsNN, 100);
                             return res;
                         }
-                        res.emplace_back(crsNN, 90);
+                        const bool eqName =
+                            metadata::Identifier::isEquivalentName(
+                                thisName.c_str(), crs->nameStr().c_str());
+                        res.emplace_back(crsNN, eqName ? 90 : 70);
                     } else {
                         res.emplace_back(crsNN, 25);
                     }
@@ -1865,6 +1869,145 @@ bool VerticalCRS::_isEquivalentTo(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Identify the CRS with reference CRSs.
+ *
+ * The candidate CRSs are looked in the database when
+ * authorityFactory is not null.
+ *
+ * The method returns a list of matching reference CRS, and the percentage
+ * (0-100) of confidence in the match.
+ * 100% means that the name of the reference entry
+ * perfectly matches the CRS name, and both are equivalent. In which case a
+ * single result is returned.
+ * 90% means that CRS are equivalent, but the names are not exactly the same.
+ * 70% means that CRS are equivalent (equivalent datum and coordinate system),
+ * but the names do not match at all.
+ * 25% means that the CRS are not equivalent, but there is some similarity in
+ * the names.
+ *
+ * @param authorityFactory Authority factory (if null, will return an empty
+ * list)
+ * @return a list of matching reference CRS, and the percentage (0-100) of
+ * confidence in the match.
+ */
+std::list<std::pair<VerticalCRSNNPtr, int>>
+VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<VerticalCRSNNPtr, int> Pair;
+    std::list<Pair> res;
+
+    const auto &thisName(nameStr());
+
+    if (authorityFactory) {
+
+        const bool unsignificantName = thisName.empty() ||
+                                       ci_equal(thisName, "unknown") ||
+                                       ci_equal(thisName, "unnamed");
+        if (!identifiers().empty()) {
+            // If the CRS has already an id, check in the database for the
+            // official object, and verify that they are equivalent.
+            for (const auto &id : identifiers()) {
+                try {
+                    auto crs = io::AuthorityFactory::create(
+                                   authorityFactory->databaseContext(),
+                                   *id->codeSpace())
+                                   ->createVerticalCRS(id->code());
+                    bool match = _isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
+                    res.emplace_back(crs, match ? 100 : 25);
+                    return res;
+                } catch (const std::exception &) {
+                }
+            }
+        } else if (!unsignificantName) {
+            for (int ipass = 0; ipass < 2; ipass++) {
+                const bool approximateMatch = ipass == 1;
+                auto objects = authorityFactory->createObjectsFromName(
+                    thisName, {io::AuthorityFactory::ObjectType::VERTICAL_CRS},
+                    approximateMatch);
+                for (const auto &obj : objects) {
+                    auto crs = util::nn_dynamic_pointer_cast<VerticalCRS>(obj);
+                    assert(crs);
+                    auto crsNN = NN_NO_CHECK(crs);
+                    if (_isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        if (crs->nameStr() == thisName) {
+                            res.clear();
+                            res.emplace_back(crsNN, 100);
+                            return res;
+                        }
+                        res.emplace_back(crsNN, 90);
+                    } else {
+                        res.emplace_back(crsNN, 25);
+                    }
+                }
+                if (!res.empty()) {
+                    break;
+                }
+            }
+        }
+
+        // Sort results
+        res.sort([&thisName](const Pair &a, const Pair &b) {
+            // First consider confidence
+            if (a.second > b.second) {
+                return true;
+            }
+            if (a.second < b.second) {
+                return false;
+            }
+
+            // Then consider exact name matching
+            const auto &aName(a.first->nameStr());
+            const auto &bName(b.first->nameStr());
+            if (aName == thisName && bName != thisName) {
+                return true;
+            }
+            if (bName == thisName && aName != thisName) {
+                return false;
+            }
+
+            // Arbitrary final sorting criterion
+            return aName < bName;
+        });
+
+        // Keep only results of the highest confidence
+        if (res.size() >= 2) {
+            const auto highestConfidence = res.front().second;
+            std::list<Pair> newRes;
+            for (const auto &pair : res) {
+                if (pair.second == highestConfidence) {
+                    newRes.push_back(pair);
+                } else {
+                    break;
+                }
+            }
+            return newRes;
+        }
+    }
+
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+VerticalCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<CRSNNPtr, int> Pair;
+    std::list<Pair> res;
+    auto resTemp = identify(authorityFactory);
+    for (const auto &pair : resTemp) {
+        res.emplace_back(pair.first, pair.second);
+    }
+    return res;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct DerivedCRS::Private {
     SingleCRSNNPtr baseCRS_;
@@ -2452,6 +2595,8 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const bool unsignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
+        bool foundEquivalentName = false;
+
         if (!identifiers().empty()) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
@@ -2478,6 +2623,9 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     auto crs = util::nn_dynamic_pointer_cast<ProjectedCRS>(obj);
                     assert(crs);
                     auto crsNN = NN_NO_CHECK(crs);
+                    const bool eqName = metadata::Identifier::isEquivalentName(
+                        thisName.c_str(), crs->nameStr().c_str());
+                    foundEquivalentName |= eqName;
                     if (_isEquivalentTo(
                             crs.get(),
                             util::IComparable::Criterion::EQUIVALENT)) {
@@ -2486,7 +2634,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             res.emplace_back(crsNN, 100);
                             return res;
                         }
-                        res.emplace_back(crsNN, 90);
+                        res.emplace_back(crsNN, eqName ? 90 : 70);
                     } else {
                         res.emplace_back(crsNN, 25);
                     }
@@ -2497,30 +2645,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
         }
 
-        if (res.empty()) {
-            auto self = NN_NO_CHECK(std::dynamic_pointer_cast<ProjectedCRS>(
-                shared_from_this().as_nullable()));
-            auto candidates =
-                authorityFactory->createProjectedCRSFromExisting(self);
-            for (const auto &crs : candidates) {
-                if (_isEquivalentTo(crs.get(),
-                                    util::IComparable::Criterion::EQUIVALENT)) {
-                    res.emplace_back(crs, unsignificantName ? 90 : 70);
-                } else if (coordinateSystem()->_isEquivalentTo(
-                               crs->coordinateSystem().get(),
-                               util::IComparable::Criterion::EQUIVALENT) &&
-                           derivingConversionRef()->_isEquivalentTo(
-                               crs->derivingConversionRef().get(),
-                               util::IComparable::Criterion::EQUIVALENT)) {
-                    res.emplace_back(crs, 70);
-                } else {
-                    res.emplace_back(crs, 25);
-                }
-            }
-        }
-
-        // Sort results
-        res.sort([&thisName](const Pair &a, const Pair &b) {
+        const auto lambdaSort = [&thisName](const Pair &a, const Pair &b) {
             // First consider confidence
             if (a.second > b.second) {
                 return true;
@@ -2541,7 +2666,51 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
             // Arbitrary final sorting criterion
             return aName < bName;
-        });
+        };
+
+        // Sort results
+        res.sort(lambdaSort);
+
+        if (identifiers().empty() && !foundEquivalentName &&
+            (res.empty() || res.front().second < 50)) {
+            std::set<std::pair<std::string, std::string>> alreadyKnown;
+            for (const auto &pair : res) {
+                const auto &ids = pair.first->identifiers();
+                assert(!ids.empty());
+                alreadyKnown.insert(std::pair<std::string, std::string>(
+                    *(ids[0]->codeSpace()), ids[0]->code()));
+            }
+
+            auto self = NN_NO_CHECK(std::dynamic_pointer_cast<ProjectedCRS>(
+                shared_from_this().as_nullable()));
+            auto candidates =
+                authorityFactory->createProjectedCRSFromExisting(self);
+            for (const auto &crs : candidates) {
+                const auto &ids = crs->identifiers();
+                assert(!ids.empty());
+                if (alreadyKnown.find(std::pair<std::string, std::string>(
+                        *(ids[0]->codeSpace()), ids[0]->code())) !=
+                    alreadyKnown.end()) {
+                    continue;
+                }
+
+                if (_isEquivalentTo(crs.get(),
+                                    util::IComparable::Criterion::EQUIVALENT)) {
+                    res.emplace_back(crs, unsignificantName ? 90 : 70);
+                } else if (coordinateSystem()->_isEquivalentTo(
+                               crs->coordinateSystem().get(),
+                               util::IComparable::Criterion::EQUIVALENT) &&
+                           derivingConversionRef()->_isEquivalentTo(
+                               crs->derivingConversionRef().get(),
+                               util::IComparable::Criterion::EQUIVALENT)) {
+                    res.emplace_back(crs, 70);
+                } else {
+                    res.emplace_back(crs, 25);
+                }
+            }
+
+            res.sort(lambdaSort);
+        }
 
         // Keep only results of the highest confidence
         if (res.size() >= 2) {
@@ -2697,7 +2866,8 @@ bool CompoundCRS::_isEquivalentTo(
     util::IComparable::Criterion criterion) const {
     auto otherCompoundCRS = dynamic_cast<const CompoundCRS *>(other);
     if (otherCompoundCRS == nullptr ||
-        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        (criterion == util::IComparable::Criterion::STRICT &&
+         !ObjectUsage::_isEquivalentTo(other, criterion))) {
         return false;
     }
     const auto &components = componentReferenceSystems();
@@ -2713,6 +2883,186 @@ bool CompoundCRS::_isEquivalentTo(
     }
     return true;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Identify the CRS with reference CRSs.
+ *
+ * The candidate CRSs are looked in the database when
+ * authorityFactory is not null.
+ *
+ * The method returns a list of matching reference CRS, and the percentage
+ * (0-100) of confidence in the match.
+ * 100% means that the name of the reference entry
+ * perfectly matches the CRS name, and both are equivalent. In which case a
+ * single result is returned.
+ * 90% means that CRS are equivalent, but the names are not exactly the same.
+ * 70% means that CRS are equivalent (equivalent horizontal and vertical CRS),
+ * but the names do not match at all.
+ * 25% means that the CRS are not equivalent, but there is some similarity in
+ * the names.
+ *
+ * @param authorityFactory Authority factory (if null, will return an empty
+ * list)
+ * @return a list of matching reference CRS, and the percentage (0-100) of
+ * confidence in the match.
+ */
+std::list<std::pair<CompoundCRSNNPtr, int>>
+CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<CompoundCRSNNPtr, int> Pair;
+    std::list<Pair> res;
+
+    const auto &thisName(nameStr());
+
+    if (authorityFactory) {
+
+        const bool unsignificantName = thisName.empty() ||
+                                       ci_equal(thisName, "unknown") ||
+                                       ci_equal(thisName, "unnamed");
+        bool foundEquivalentName = false;
+
+        if (!identifiers().empty()) {
+            // If the CRS has already an id, check in the database for the
+            // official object, and verify that they are equivalent.
+            for (const auto &id : identifiers()) {
+                try {
+                    auto crs = io::AuthorityFactory::create(
+                                   authorityFactory->databaseContext(),
+                                   *id->codeSpace())
+                                   ->createCompoundCRS(id->code());
+                    bool match = _isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
+                    res.emplace_back(crs, match ? 100 : 25);
+                    return res;
+                } catch (const std::exception &) {
+                }
+            }
+        } else if (!unsignificantName) {
+            for (int ipass = 0; ipass < 2; ipass++) {
+                const bool approximateMatch = ipass == 1;
+                auto objects = authorityFactory->createObjectsFromName(
+                    thisName, {io::AuthorityFactory::ObjectType::COMPOUND_CRS},
+                    approximateMatch);
+                for (const auto &obj : objects) {
+                    auto crs = util::nn_dynamic_pointer_cast<CompoundCRS>(obj);
+                    assert(crs);
+                    auto crsNN = NN_NO_CHECK(crs);
+                    const bool eqName = metadata::Identifier::isEquivalentName(
+                        thisName.c_str(), crs->nameStr().c_str());
+                    foundEquivalentName |= eqName;
+                    if (_isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        if (crs->nameStr() == thisName) {
+                            res.clear();
+                            res.emplace_back(crsNN, 100);
+                            return res;
+                        }
+                        res.emplace_back(crsNN, eqName ? 90 : 70);
+                    } else {
+                        res.emplace_back(crsNN, 25);
+                    }
+                }
+                if (!res.empty()) {
+                    break;
+                }
+            }
+        }
+
+        const auto lambdaSort = [&thisName](const Pair &a, const Pair &b) {
+            // First consider confidence
+            if (a.second > b.second) {
+                return true;
+            }
+            if (a.second < b.second) {
+                return false;
+            }
+
+            // Then consider exact name matching
+            const auto &aName(a.first->nameStr());
+            const auto &bName(b.first->nameStr());
+            if (aName == thisName && bName != thisName) {
+                return true;
+            }
+            if (bName == thisName && aName != thisName) {
+                return false;
+            }
+
+            // Arbitrary final sorting criterion
+            return aName < bName;
+        };
+
+        // Sort results
+        res.sort(lambdaSort);
+
+        if (identifiers().empty() && !foundEquivalentName &&
+            (res.empty() || res.front().second < 50)) {
+            std::set<std::pair<std::string, std::string>> alreadyKnown;
+            for (const auto &pair : res) {
+                const auto &ids = pair.first->identifiers();
+                assert(!ids.empty());
+                alreadyKnown.insert(std::pair<std::string, std::string>(
+                    *(ids[0]->codeSpace()), ids[0]->code()));
+            }
+
+            auto self = NN_NO_CHECK(std::dynamic_pointer_cast<CompoundCRS>(
+                shared_from_this().as_nullable()));
+            auto candidates =
+                authorityFactory->createCompoundCRSFromExisting(self);
+            for (const auto &crs : candidates) {
+                const auto &ids = crs->identifiers();
+                assert(!ids.empty());
+                if (alreadyKnown.find(std::pair<std::string, std::string>(
+                        *(ids[0]->codeSpace()), ids[0]->code())) !=
+                    alreadyKnown.end()) {
+                    continue;
+                }
+
+                if (_isEquivalentTo(crs.get(),
+                                    util::IComparable::Criterion::EQUIVALENT)) {
+                    res.emplace_back(crs, unsignificantName ? 90 : 70);
+                } else {
+                    res.emplace_back(crs, 25);
+                }
+            }
+
+            res.sort(lambdaSort);
+        }
+
+        // Keep only results of the highest confidence
+        if (res.size() >= 2) {
+            const auto highestConfidence = res.front().second;
+            std::list<Pair> newRes;
+            for (const auto &pair : res) {
+                if (pair.second == highestConfidence) {
+                    newRes.push_back(pair);
+                } else {
+                    break;
+                }
+            }
+            return newRes;
+        }
+    }
+
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+CompoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<CRSNNPtr, int> Pair;
+    std::list<Pair> res;
+    auto resTemp = identify(authorityFactory);
+    for (const auto &pair : resTemp) {
+        res.emplace_back(pair.first, pair.second);
+    }
+    return res;
+}
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -3881,6 +4231,17 @@ bool DerivedVerticalCRS::_isEquivalentTo(
     return otherDerivedCRS != nullptr &&
            DerivedCRS::_isEquivalentTo(other, criterion);
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+DerivedVerticalCRS::_identify(const io::AuthorityFactoryPtr &factory) const {
+    return CRS::_identify(factory);
+}
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

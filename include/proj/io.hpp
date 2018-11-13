@@ -894,6 +894,9 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_INTERNAL std::list<crs::ProjectedCRSNNPtr>
     createProjectedCRSFromExisting(const crs::ProjectedCRSNNPtr &crs) const;
+
+    PROJ_INTERNAL std::list<crs::CompoundCRSNNPtr>
+    createCompoundCRSFromExisting(const crs::CompoundCRSNNPtr &crs) const;
     //! @endcond
 
   protected:

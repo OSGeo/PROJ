@@ -408,6 +408,9 @@ class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS,
            const datum::DatumEnsemblePtr &datumEnsembleIn,
            const cs::VerticalCSNNPtr &csIn);
 
+    PROJ_DLL std::list<std::pair<VerticalCRSNNPtr, int>>
+    identify(const io::AuthorityFactoryPtr &authorityFactory) const;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
@@ -431,6 +434,9 @@ class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS,
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
 
     INLINED_MAKE_SHARED
 
@@ -774,6 +780,9 @@ class PROJ_GCC_DLL CompoundCRS final : public CRS,
     PROJ_DLL const std::vector<CRSNNPtr> &
     componentReferenceSystems() PROJ_CONST_DECL;
 
+    PROJ_DLL std::list<std::pair<CompoundCRSNNPtr, int>>
+    identify(const io::AuthorityFactoryPtr &authorityFactory) const;
+
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
@@ -797,6 +806,9 @@ class PROJ_GCC_DLL CompoundCRS final : public CRS,
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
 
     INLINED_MAKE_SHARED
 
@@ -1138,6 +1150,9 @@ class PROJ_GCC_DLL DerivedVerticalCRS final : public VerticalCRS,
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
 
     INLINED_MAKE_SHARED
 

@@ -1401,7 +1401,8 @@ PJ_OBJ *proj_obj_get_target_crs(PJ_OBJ *obj) {
  * the names.
  * Other confidence values may be returned by some specialized implementations.
  *
- * This is only implemented for GeodeticCRS and ProjectedCRS for now.
+ * This is implemented for GeodeticCRS, ProjectedCRS, VerticalCRS and
+ * CompoundCRS.
  *
  * @param obj Object of type CRS. Must not be NULL
  * @param auth_name Authority name, or NULL for all authorities

@@ -3900,6 +3900,52 @@ AuthorityFactory::createGeodeticCRSFromEllipsoid(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+static std::string buildSqlLookForAuthNameCode(
+    const std::list<std::pair<crs::CRSNNPtr, int>> &list,
+    std::vector<SQLValues> &params, const char *prefixField) {
+    std::string sql("(");
+
+    std::set<std::string> authorities;
+    for (const auto &crs : list) {
+        const auto &ids = crs.first->identifiers();
+        if (!ids.empty()) {
+            authorities.insert(*(ids[0]->codeSpace()));
+        }
+    }
+    bool firstAuth = true;
+    for (const auto &auth_name : authorities) {
+        if (!firstAuth) {
+            sql += " OR ";
+        }
+        firstAuth = false;
+        sql += "( ";
+        sql += prefixField;
+        sql += "auth_name = ? AND ";
+        sql += prefixField;
+        sql += "code IN (";
+        params.emplace_back(auth_name);
+        bool firstGeodCRSForAuth = true;
+        for (const auto &crs : list) {
+            const auto &ids = crs.first->identifiers();
+            if (!ids.empty() && *(ids[0]->codeSpace()) == auth_name) {
+                if (!firstGeodCRSForAuth) {
+                    sql += ',';
+                }
+                firstGeodCRSForAuth = false;
+                sql += '?';
+                params.emplace_back(ids[0]->code());
+            }
+        }
+        sql += "))";
+    }
+    sql += ')';
+    return sql;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::list<crs::ProjectedCRSNNPtr>
 AuthorityFactory::createProjectedCRSFromExisting(
     const crs::ProjectedCRSNNPtr &crs) const {
@@ -3914,7 +3960,7 @@ AuthorityFactory::createProjectedCRSFromExisting(
     auto lockedThisFactory(d->getSharedFromThis());
     assert(lockedThisFactory);
     const auto &baseCRS(crs->baseCRS());
-    auto candidatesGeodCRS = baseCRS->identify(lockedThisFactory);
+    auto candidatesGeodCRS = baseCRS->crs::CRS::identify(lockedThisFactory);
     auto geogCRS = dynamic_cast<const crs::GeographicCRS *>(baseCRS.get());
     if (geogCRS) {
         const auto axisOrder = geogCRS->coordinateSystem()->axisOrder();
@@ -3930,7 +3976,7 @@ AuthorityFactory::createProjectedCRSFromExisting(
                     ? cs::EllipsoidalCS::createLatitudeLongitude(unit)
                     : cs::EllipsoidalCS::createLongitudeLatitude(unit));
             auto otherCandidatesGeodCRS =
-                otherOrderGeogCRS->identify(lockedThisFactory);
+                otherOrderGeogCRS->crs::CRS::identify(lockedThisFactory);
             candidatesGeodCRS.insert(candidatesGeodCRS.end(),
                                      otherCandidatesGeodCRS.begin(),
                                      otherCandidatesGeodCRS.end());
@@ -3944,48 +3990,76 @@ AuthorityFactory::createProjectedCRSFromExisting(
         "projected_crs.conversion_code = conversion.code WHERE ");
     std::vector<SQLValues> params;
     if (!candidatesGeodCRS.empty()) {
-        sql += '(';
-        std::set<std::string> geodCRSAuthorities;
-        for (const auto &geodCRS : candidatesGeodCRS) {
-            const auto &ids = geodCRS.first->identifiers();
-            if (!ids.empty()) {
-                geodCRSAuthorities.insert(*(ids[0]->codeSpace()));
-            }
-        }
-        bool firstGeodCRSAuth = true;
-        for (const auto &geodCRSAuth : geodCRSAuthorities) {
-            if (!firstGeodCRSAuth) {
-                sql += " OR ";
-            }
-            firstGeodCRSAuth = false;
-            sql += "(projected_crs.geodetic_crs_auth_name = ? AND "
-                   "projected_crs.geodetic_crs_code IN (";
-            params.emplace_back(geodCRSAuth);
-            bool firstGeodCRSForAuth = true;
-            for (const auto &geodCRS : candidatesGeodCRS) {
-                const auto &ids = geodCRS.first->identifiers();
-                if (!ids.empty() && *(ids[0]->codeSpace()) == geodCRSAuth) {
-                    if (!firstGeodCRSForAuth) {
-                        sql += ',';
-                    }
-                    firstGeodCRSForAuth = false;
-                    sql += '?';
-                    params.emplace_back(ids[0]->code());
-                }
-            }
-            sql += "))";
-        }
-        sql += ") AND ";
+        sql += buildSqlLookForAuthNameCode(candidatesGeodCRS, params,
+                                           "projected_crs.geodetic_crs_");
+        sql += " AND ";
     }
     sql += "conversion.method_auth_name = 'EPSG' AND "
            "conversion.method_code = ?";
     params.emplace_back(toString(methodEPSGCode));
+    if (!getAuthority().empty()) {
+        sql += " AND projected_crs.auth_name = ?";
+        params.emplace_back(getAuthority());
+    }
 
     auto sqlRes = d->run(sql, params);
     for (const auto &row : sqlRes) {
         const auto &auth_name = row[0];
         const auto &code = row[1];
         res.emplace_back(d->createFactory(auth_name)->createProjectedCRS(code));
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+std::list<crs::CompoundCRSNNPtr>
+AuthorityFactory::createCompoundCRSFromExisting(
+    const crs::CompoundCRSNNPtr &crs) const {
+    std::list<crs::CompoundCRSNNPtr> res;
+
+    auto lockedThisFactory(d->getSharedFromThis());
+    assert(lockedThisFactory);
+
+    const auto &components = crs->componentReferenceSystems();
+    if (components.size() != 2) {
+        return res;
+    }
+    auto candidatesHorizCRS = components[0]->identify(lockedThisFactory);
+    auto candidatesVertCRS = components[1]->identify(lockedThisFactory);
+    if (candidatesHorizCRS.empty() && candidatesVertCRS.empty()) {
+        return res;
+    }
+
+    std::string sql("SELECT auth_name, code FROM compound_crs WHERE ");
+    std::vector<SQLValues> params;
+    bool addAnd = false;
+    if (!candidatesHorizCRS.empty()) {
+        sql += buildSqlLookForAuthNameCode(candidatesHorizCRS, params,
+                                           "horiz_crs_");
+        addAnd = true;
+    }
+    if (!candidatesVertCRS.empty()) {
+        if (addAnd) {
+            sql += " AND ";
+        }
+        sql += buildSqlLookForAuthNameCode(candidatesVertCRS, params,
+                                           "vertical_crs_");
+        addAnd = true;
+    }
+    if (!getAuthority().empty()) {
+        if (addAnd) {
+            sql += " AND ";
+        }
+        sql += "auth_name = ?";
+        params.emplace_back(getAuthority());
+    }
+
+    auto sqlRes = d->run(sql, params);
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(d->createFactory(auth_name)->createCompoundCRS(code));
     }
     return res;
 }

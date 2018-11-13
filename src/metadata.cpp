@@ -1111,6 +1111,10 @@ std::string Identifier::canonicalizeName(const std::string &str) {
     const char *c_str = str.c_str();
     for (size_t i = 0; c_str[i] != 0; ++i) {
         const auto ch = c_str[i];
+        if (ch == ' ' && c_str[i + 1] == '+' && c_str[i + 2] == ' ') {
+            i += 2;
+            continue;
+        }
         if (ch == '1' && !res.empty() &&
             !(res.back() >= '0' && res.back() <= '9') && c_str[i + 1] == '9' &&
             c_str[i + 2] >= '0' && c_str[i + 2] <= '9') {
@@ -1140,6 +1144,14 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
     while (a[i] != 0 && b[j] != 0) {
         const char aCh = a[i];
         const char bCh = b[j];
+        if (aCh == ' ' && a[i + 1] == '+' && a[i + 2] == ' ') {
+            i += 3;
+            continue;
+        }
+        if (bCh == ' ' && b[j + 1] == '+' && b[j + 2] == ' ') {
+            j += 3;
+            continue;
+        }
         if (isIgnoredChar(aCh)) {
             ++i;
             continue;

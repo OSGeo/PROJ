@@ -1285,15 +1285,28 @@ TEST(crs, geodeticcrs_identify_db) {
         EXPECT_EQ(res.front().second, 100);
     }
     {
+        // The object has an unexisting ID
+        auto res =
+            GeographicCRS::create(
+                PropertyMap()
+                    .set(IdentifiedObject::NAME_KEY, "NTF (Paris)")
+                    .set(Identifier::CODESPACE_KEY, "EPSG")
+                    .set(Identifier::CODE_KEY, 1),
+                GeographicCRS::EPSG_4807->datum(), nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::GRAD))
+                ->identify(factory);
+        ASSERT_EQ(res.size(), 0);
+    }
+    {
         // The object has a unreliable ID
         auto res =
             GeographicCRS::create(
                 PropertyMap()
-                    .set(IdentifiedObject::NAME_KEY, "WGS 84")
+                    .set(IdentifiedObject::NAME_KEY, "NTF (Paris)")
                     .set(Identifier::CODESPACE_KEY, "EPSG")
                     .set(Identifier::CODE_KEY, 4326),
-                GeodeticReferenceFrame::EPSG_6269, nullptr, // NAD83 !!!
-                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
+                GeographicCRS::EPSG_4807->datum(), nullptr,
+                EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::GRAD))
                 ->identify(factory);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
@@ -1733,6 +1746,36 @@ TEST(crs, projectedCRS_identify_db) {
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 100);
+    }
+    {
+        // Non-existing code
+        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto crs = ProjectedCRS::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     "Pulkovo 1942(58) / Poland zone II")
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, 1),
+            sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        EXPECT_EQ(res.size(), 0);
+    }
+    {
+        // Existing code, but not matching content
+        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto crs = ProjectedCRS::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     "Pulkovo 1942(58) / Poland zone II")
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, 32631),
+            sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
+        EXPECT_EQ(res.front().second, 25);
     }
     {
         // Identify by exact name
@@ -2503,6 +2546,97 @@ TEST(crs, verticalCRS_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, verticalCRS_identify_db) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    {
+        // Identify by existing code
+        auto res = factory->createVerticalCRS("7651")->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 7651);
+        EXPECT_EQ(res.front().second, 100);
+
+        // Test with null
+        EXPECT_TRUE(
+            factory->createVerticalCRS("7651")->identify(nullptr).empty());
+    }
+    {
+        // Non-existing code
+        auto sourceCRS = factory->createVerticalCRS("7651");
+        auto crs = VerticalCRS::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, sourceCRS->nameStr())
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, 1),
+            sourceCRS->datum(), sourceCRS->datumEnsemble(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        EXPECT_EQ(res.size(), 0);
+    }
+    {
+        // Existing code, but not matching content
+        auto sourceCRS = factory->createVerticalCRS("7651");
+        auto crs = VerticalCRS::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, sourceCRS->nameStr())
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, 7652),
+            sourceCRS->datum(), sourceCRS->datumEnsemble(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 7652);
+        EXPECT_EQ(res.front().second, 25);
+    }
+    {
+        // Identify by exact name
+        auto sourceCRS = factory->createVerticalCRS("7651");
+        auto crs = VerticalCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, sourceCRS->nameStr()),
+            sourceCRS->datum(), sourceCRS->datumEnsemble(),
+            sourceCRS->coordinateSystem());
+        auto res = static_cast<const CRS *>(crs.get())->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 7651);
+        EXPECT_EQ(res.front().second, 100);
+    }
+    {
+        // Identify by equivalent name
+        auto sourceCRS = factory->createVerticalCRS("7651");
+        auto crs = VerticalCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Kumul_34_height"),
+            sourceCRS->datum(), sourceCRS->datumEnsemble(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 7651);
+        EXPECT_EQ(res.front().second, 90);
+    }
+    {
+        // Identify by name, but objects aren't equivalent
+        auto sourceCRS = factory->createVerticalCRS("7652");
+        auto crs = VerticalCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Kumul_34_height"),
+            sourceCRS->datum(), sourceCRS->datumEnsemble(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 7651);
+        EXPECT_EQ(res.front().second, 25);
+    }
+    {
+        auto sourceCRS = factory->createVerticalCRS("7651");
+        auto crs = VerticalCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "no match"),
+            sourceCRS->datum(), sourceCRS->datumEnsemble(),
+            sourceCRS->coordinateSystem());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, verticalCRS_datum_ensemble) {
     auto ensemble = DatumEnsemble::create(
         PropertyMap(),
@@ -2723,6 +2857,99 @@ TEST(crs, compoundCRS_no_name_provided) {
         PropertyMap(),
         std::vector<CRSNNPtr>{createProjected(), createVerticalCRS()});
     EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N + ODN height");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, compoundCRS_identify_db) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    {
+        // Identify by existing code
+        auto res = factory->createCompoundCRS("8769")->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
+        EXPECT_EQ(res.front().second, 100);
+
+        // Test with null
+        EXPECT_TRUE(
+            factory->createCompoundCRS("8769")->identify(nullptr).empty());
+    }
+    {
+        // Non-existing code
+        auto sourceCRS = factory->createCompoundCRS("8769");
+        auto crs = CompoundCRS::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, sourceCRS->nameStr())
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, 1),
+            sourceCRS->componentReferenceSystems());
+        auto res = crs->identify(factory);
+        EXPECT_EQ(res.size(), 0);
+    }
+    {
+        // Existing code, but not matching content
+        auto sourceCRS = factory->createCompoundCRS("8769");
+        auto crs = CompoundCRS::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, sourceCRS->nameStr())
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, 8770),
+            sourceCRS->componentReferenceSystems());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 8770);
+        EXPECT_EQ(res.front().second, 25);
+    }
+    {
+        // Identify by exact name
+        auto sourceCRS = factory->createCompoundCRS("8769");
+        auto crs = CompoundCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, sourceCRS->nameStr()),
+            sourceCRS->componentReferenceSystems());
+        auto res = static_cast<const CRS *>(crs.get())->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
+        EXPECT_EQ(res.front().second, 100);
+    }
+    {
+        EXPECT_TRUE(Identifier::isEquivalentName(
+            "NAD83_Ohio_North_ftUS_NAVD88_height_ftUS",
+            "NAD83 / Ohio North (ftUS) + NAVD88 height (ftUS)"));
+
+        // Identify by equivalent name
+        auto sourceCRS = factory->createCompoundCRS("8769");
+        auto crs = CompoundCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "NAD83_Ohio_North_ftUS_NAVD88_height_ftUS"),
+            sourceCRS->componentReferenceSystems());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
+        EXPECT_EQ(res.front().second, 90);
+    }
+    {
+        // Identify by name, but objects aren't equivalent
+        auto sourceCRS = factory->createCompoundCRS("8770");
+        auto crs = CompoundCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "NAD83_Ohio_North_ftUS_NAVD88_height_ftUS"),
+            sourceCRS->componentReferenceSystems());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
+        EXPECT_EQ(res.front().second, 25);
+    }
+    {
+        auto sourceCRS = factory->createCompoundCRS("8769");
+        auto crs = CompoundCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unrelated name"),
+            sourceCRS->componentReferenceSystems());
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
+        EXPECT_EQ(res.front().second, 70);
+    }
 }
 
 // ---------------------------------------------------------------------------
