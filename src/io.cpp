@@ -5984,8 +5984,9 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     const auto &title = title_;
 
-    if (!buildPrimeMeridian(step)->_isEquivalentTo(
-            geogCRS->primeMeridian().get())) {
+    if (!buildPrimeMeridian(step)->longitude()._isEquivalentTo(
+            geogCRS->primeMeridian()->longitude(),
+            util::IComparable::Criterion::EQUIVALENT)) {
         throw ParsingException("inconsistant pm values between projectedCRS "
                                "and its base geographicalCRS");
     }

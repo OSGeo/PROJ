@@ -6211,6 +6211,20 @@ TEST(io, projparse_utm_south) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_non_earth_ellipsoid) {
+    std::string input("+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +R=1");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        input);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_axisswap_unitconvert_longlat_proj) {
     std::string input =
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -7005,6 +7019,11 @@ TEST(io, projparse_projected_errors) {
     EXPECT_THROW(
         PROJStringParser().createFromPROJString("+proj=tmerc +lat_0=foo"),
         ParsingException);
+    // Inconsitent pm values between geogCRS and projectedCRS
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=pipeline +step +proj=longlat +ellps=WGS84 "
+                     "+proj=tmerc +ellps=WGS84  +lat_0=foo +pm=paris"),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------
