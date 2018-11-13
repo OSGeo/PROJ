@@ -6092,6 +6092,41 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         }
     }
 
+    UnitOfMeasure unit = buildUnit(step, "units", "to_meter");
+    if (iUnitConvert >= 0) {
+        const auto &stepUnitConvert = steps_[iUnitConvert];
+        const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
+        const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
+        if (stepUnitConvert.inverted) {
+            std::swap(xy_in, xy_out);
+        }
+        if (xy_in->empty() || xy_out->empty() || *xy_in != "m") {
+            if (step.name != "ob_tran") {
+                throw ParsingException(
+                    "unhandled values for xy_in and/or xy_out");
+            }
+        }
+
+        const LinearUnitDesc *unitsMatch = nullptr;
+        try {
+            double to_meter_value = c_locale_stod(*xy_out);
+            unitsMatch = getLinearUnits(to_meter_value);
+            if (unitsMatch == nullptr) {
+                unit = _buildUnit(to_meter_value);
+            }
+        } catch (const std::invalid_argument &) {
+            unitsMatch = getLinearUnits(*xy_out);
+            if (!unitsMatch) {
+                if (step.name != "ob_tran") {
+                    throw ParsingException(
+                        "unhandled values for xy_in and/or xy_out");
+                }
+            } else {
+                unit = _buildUnit(unitsMatch);
+            }
+        }
+    }
+
     ConversionPtr conv;
 
     auto mapWithUnknownName = createMapWithUnknownName();
@@ -6168,14 +6203,20 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             parameters.push_back(
                 OperationParameter::create(propertiesParameter));
             // In PROJ convention, angular parameters are always in degree
-            // and
-            // linear parameters always in metre.
+            // and linear parameters always in metre.
+            double valRounded =
+                param->unit_type == UnitOfMeasure::Type::LINEAR
+                    ? Length(value, UnitOfMeasure::METRE).convertToUnit(unit)
+                    : value;
+            if (std::fabs(valRounded - std::round(valRounded)) < 1e-8) {
+                valRounded = std::round(valRounded);
+            }
             values.push_back(ParameterValue::create(Measure(
-                value,
+                valRounded,
                 param->unit_type == UnitOfMeasure::Type::ANGULAR
                     ? UnitOfMeasure::DEGREE
                     : param->unit_type == UnitOfMeasure::Type::LINEAR
-                          ? UnitOfMeasure::METRE
+                          ? unit
                           : param->unit_type == UnitOfMeasure::Type::SCALE
                                 ? UnitOfMeasure::SCALE_UNITY
                                 : UnitOfMeasure::NONE)));
@@ -6236,35 +6277,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 geogCRS, NN_NO_CHECK(conv),
                 buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false,
                                    false));
-        }
-    }
-
-    UnitOfMeasure unit = buildUnit(step, "units", "to_meter");
-    if (iUnitConvert >= 0) {
-        const auto &stepUnitConvert = steps_[iUnitConvert];
-        const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
-        const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
-        if (stepUnitConvert.inverted) {
-            std::swap(xy_in, xy_out);
-        }
-        if (xy_in->empty() || xy_out->empty() || *xy_in != "m") {
-            throw ParsingException("unhandled values for xy_in and/or xy_out");
-        }
-
-        const LinearUnitDesc *unitsMatch = nullptr;
-        try {
-            double to_meter_value = c_locale_stod(*xy_out);
-            unitsMatch = getLinearUnits(to_meter_value);
-            if (unitsMatch == nullptr) {
-                unit = _buildUnit(to_meter_value);
-            }
-        } catch (const std::invalid_argument &) {
-            unitsMatch = getLinearUnits(*xy_out);
-            if (!unitsMatch) {
-                throw ParsingException(
-                    "unhandled values for xy_in and/or xy_out");
-            }
-            unit = _buildUnit(unitsMatch);
         }
     }
 

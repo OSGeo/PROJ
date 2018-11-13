@@ -6284,8 +6284,8 @@ TEST(io, projparse_axisswap_unitconvert_proj_unitconvert_numeric_axisswap) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_projected_units) {
-    auto obj =
-        PROJStringParser().createFromPROJString("+proj=tmerc +units=us-ft");
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=tmerc +x_0=0.304800609601219 +units=us-ft");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     WKTFormatterNNPtr f(WKTFormatter::create());
@@ -6293,9 +6293,8 @@ TEST(io, projparse_projected_units) {
     f->setMultiLine(false);
     crs->exportToWKT(f.get());
     auto wkt = f->toString();
-    EXPECT_TRUE(
-        wkt.find("PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1]") !=
-        std::string::npos)
+    EXPECT_TRUE(wkt.find("PARAMETER[\"False easting\",1,LENGTHUNIT[\"US survey "
+                         "foot\",0.304800609601219]") != std::string::npos)
         << wkt;
     EXPECT_TRUE(wkt.find("AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"US survey "
                          "foot\",0.304800609601219]") != std::string::npos)
@@ -6314,9 +6313,8 @@ TEST(io, projparse_projected_to_meter_known) {
     f->setMultiLine(false);
     crs->exportToWKT(f.get());
     auto wkt = f->toString();
-    EXPECT_TRUE(
-        wkt.find("PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1]") !=
-        std::string::npos)
+    EXPECT_TRUE(wkt.find("PARAMETER[\"False easting\",0,LENGTHUNIT[\"US survey "
+                         "foot\",0.304800609601219]") != std::string::npos)
         << wkt;
     EXPECT_TRUE(wkt.find("AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"US survey "
                          "foot\",0.304800609601219]") != std::string::npos)
@@ -6336,7 +6334,8 @@ TEST(io, projparse_projected_to_meter_unknown) {
     crs->exportToWKT(f.get());
     auto wkt = f->toString();
     EXPECT_TRUE(
-        wkt.find("PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1]") !=
+        wkt.find(
+            "PARAMETER[\"False easting\",0,LENGTHUNIT[\"unknown\",0.1234]") !=
         std::string::npos)
         << wkt;
     EXPECT_TRUE(
