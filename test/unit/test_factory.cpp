@@ -2260,6 +2260,47 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
                         "'+proj=longlat',0);"))
         << last_error();
 
+    // Unknown ellipsoid
+    ASSERT_TRUE(execute("INSERT INTO projected_crs "
+                        "VALUES('TEST_NS','TEST_MERC','merc',NULL,NULL,NULL,"
+                        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                        "'+proj=merc +x_0=0 +R=1',0);"))
+        << last_error();
+
+    // Well-known ellipsoid
+    ASSERT_TRUE(execute("INSERT INTO projected_crs "
+                        "VALUES('TEST_NS','TEST_MERC2','merc2',NULL,NULL,NULL,"
+                        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                        "'+proj=merc +x_0=0 +ellps=GRS80',0);"))
+        << last_error();
+
+    // WKT1_GDAL
+    ASSERT_TRUE(
+        execute("INSERT INTO projected_crs "
+                "VALUES('TEST_NS','TEST_WKT1_GDAL','WKT1_GDAL',NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "'"
+                "PROJCS[\"unknown\",\n"
+                "    GEOGCS[\"unknown\",\n"
+                "        DATUM[\"Unknown_based_on_WGS84_ellipsoid\",\n"
+                "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                "                AUTHORITY[\"EPSG\",\"7030\"]]],\n"
+                "        PRIMEM[\"Greenwich\",0,\n"
+                "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                "        UNIT[\"degree\",0.0174532925199433,\n"
+                "            AUTHORITY[\"EPSG\",\"9122\"]]],\n"
+                "    PROJECTION[\"Mercator_1SP\"],\n"
+                "    PARAMETER[\"central_meridian\",0],\n"
+                "    PARAMETER[\"scale_factor\",1],\n"
+                "    PARAMETER[\"false_easting\",0],\n"
+                "    PARAMETER[\"false_northing\",0],\n"
+                "    UNIT[\"metre\",1,\n"
+                "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+                "    AXIS[\"Easting\",EAST],\n"
+                "    AXIS[\"Northing\",NORTH]]"
+                "',0);"))
+        << last_error();
+
     auto factory =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
     {
@@ -2286,6 +2327,54 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     }
 
     EXPECT_THROW(factory->createProjectedCRS("TEST_WRONG"), FactoryException);
+
+    {
+        auto obj =
+            PROJStringParser().createFromPROJString("+proj=merc +a=1 +b=1");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        EXPECT_EQ(res.size(), 1);
+        if (!res.empty()) {
+            EXPECT_EQ(res.front().first->nameStr(), "merc");
+        }
+    }
+
+    {
+        auto obj =
+            PROJStringParser().createFromPROJString("+proj=merc +ellps=GRS80");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        EXPECT_EQ(res.size(), 1);
+        if (!res.empty()) {
+            EXPECT_EQ(res.front().first->nameStr(), "merc2");
+        }
+    }
+
+    {
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=merc +a=6378137 +rf=298.257222101");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        EXPECT_EQ(res.size(), 1);
+        if (!res.empty()) {
+            EXPECT_EQ(res.front().first->nameStr(), "merc2");
+        }
+    }
+
+    {
+        auto obj =
+            PROJStringParser().createFromPROJString("+proj=merc +ellps=WGS84");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        EXPECT_EQ(res.size(), 1);
+        if (!res.empty()) {
+            EXPECT_EQ(res.front().first->nameStr(), "WKT1_GDAL");
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

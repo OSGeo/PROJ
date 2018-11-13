@@ -4528,6 +4528,119 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+static void getESRIMethodNameAndParams(const Conversion *conv,
+                                       const std::string &methodName,
+                                       int methodEPSGCode,
+                                       const char *&esriMethodName,
+                                       const ESRIParamMapping *&esriParams) {
+    esriParams = nullptr;
+    esriMethodName = nullptr;
+    const auto *esriMapping = getESRIMapping(methodName, methodEPSGCode);
+    const auto l_targetCRS = conv->targetCRS();
+    if (esriMapping) {
+        esriParams = esriMapping->params;
+        esriMethodName = esriMapping->esri_name;
+        if (esriMapping->epsg_code ==
+                EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL ||
+            esriMapping->epsg_code ==
+                EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL) {
+            if (l_targetCRS &&
+                ci_find(l_targetCRS->nameStr(), "Plate Carree") !=
+                    std::string::npos &&
+                conv->parameterValueNumericAsSI(
+                    EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) == 0.0) {
+                esriParams = paramsESRI_Plate_Carree;
+                esriMethodName = "Plate_Carree";
+            } else {
+                esriParams = paramsESRI_Equidistant_Cylindrical;
+                esriMethodName = "Equidistant_Cylindrical";
+            }
+        } else if (esriMapping->epsg_code ==
+                   EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
+            if (l_targetCRS &&
+                (ci_find(l_targetCRS->nameStr(), "Gauss") !=
+                     std::string::npos ||
+                 ci_find(l_targetCRS->nameStr(), "GK_") != std::string::npos)) {
+                esriParams = paramsESRI_Gauss_Kruger;
+                esriMethodName = "Gauss_Kruger";
+            } else {
+                esriParams = paramsESRI_Transverse_Mercator;
+                esriMethodName = "Transverse_Mercator";
+            }
+        } else if (esriMapping->epsg_code ==
+                   EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
+            if (conv->parameterValueNumericAsSI(
+                    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) ==
+                conv->parameterValueNumericAsSI(
+                    EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) {
+                esriParams =
+                    paramsESRI_Hotine_Oblique_Mercator_Azimuth_Natural_Origin;
+                esriMethodName =
+                    "Hotine_Oblique_Mercator_Azimuth_Natural_Origin";
+            } else {
+                esriParams =
+                    paramsESRI_Rectified_Skew_Orthomorphic_Natural_Origin;
+                esriMethodName = "Rectified_Skew_Orthomorphic_Natural_Origin";
+            }
+        } else if (esriMapping->epsg_code ==
+                   EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) {
+            if (conv->parameterValueNumericAsSI(
+                    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) ==
+                conv->parameterValueNumericAsSI(
+                    EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) {
+                esriParams = paramsESRI_Hotine_Oblique_Mercator_Azimuth_Center;
+                esriMethodName = "Hotine_Oblique_Mercator_Azimuth_Center";
+            } else {
+                esriParams = paramsESRI_Rectified_Skew_Orthomorphic_Center;
+                esriMethodName = "Rectified_Skew_Orthomorphic_Center";
+            }
+        } else if (esriMapping->epsg_code ==
+                   EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
+            if (conv->parameterValueNumericAsSI(
+                    EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL) > 0) {
+                esriMethodName = "Stereographic_North_Pole";
+            } else {
+                esriMethodName = "Stereographic_South_Pole";
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+const char *Conversion::getESRIMethodName() const {
+    const auto &l_method = method();
+    const auto &methodName = l_method->nameStr();
+    const auto methodEPSGCode = l_method->getEPSGCode();
+    const ESRIParamMapping *esriParams = nullptr;
+    const char *esriMethodName = nullptr;
+    getESRIMethodNameAndParams(this, methodName, methodEPSGCode, esriMethodName,
+                               esriParams);
+    return esriMethodName;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+const char *Conversion::getWKT1GDALMethodName() const {
+    const auto &l_method = method();
+    const auto methodEPSGCode = l_method->getEPSGCode();
+    if (methodEPSGCode ==
+        EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) {
+        return "Mercator_1SP";
+    }
+    const MethodMapping *mapping = getMapping(l_method.get());
+    return mapping ? mapping->wkt1_name : nullptr;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     const auto &l_method = method();
     const auto &methodName = l_method->nameStr();
@@ -4561,79 +4674,8 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     if (!isWKT2 && formatter->useESRIDialect()) {
         const ESRIParamMapping *esriParams = nullptr;
         const char *esriMethodName = nullptr;
-        const auto *esriMapping = getESRIMapping(methodName, methodEPSGCode);
-        if (esriMapping) {
-            esriParams = esriMapping->params;
-            esriMethodName = esriMapping->esri_name;
-            auto l_targetCRS = targetCRS();
-            if (esriMapping->epsg_code ==
-                    EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL ||
-                esriMapping->epsg_code ==
-                    EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL) {
-                if (l_targetCRS &&
-                    ci_find(l_targetCRS->nameStr(), "Plate Carree") !=
-                        std::string::npos &&
-                    parameterValueNumericAsSI(
-                        EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) ==
-                        0.0) {
-                    esriParams = paramsESRI_Plate_Carree;
-                    esriMethodName = "Plate_Carree";
-                } else {
-                    esriParams = paramsESRI_Equidistant_Cylindrical;
-                    esriMethodName = "Equidistant_Cylindrical";
-                }
-            } else if (esriMapping->epsg_code ==
-                       EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
-                if (l_targetCRS && (ci_find(l_targetCRS->nameStr(), "Gauss") !=
-                                        std::string::npos ||
-                                    ci_find(l_targetCRS->nameStr(), "GK_") !=
-                                        std::string::npos)) {
-                    esriParams = paramsESRI_Gauss_Kruger;
-                    esriMethodName = "Gauss_Kruger";
-                } else {
-                    esriParams = paramsESRI_Transverse_Mercator;
-                    esriMethodName = "Transverse_Mercator";
-                }
-            } else if (esriMapping->epsg_code ==
-                       EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
-                if (parameterValueNumericAsSI(
-                        EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) ==
-                    parameterValueNumericAsSI(
-                        EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) {
-                    esriParams =
-                        paramsESRI_Hotine_Oblique_Mercator_Azimuth_Natural_Origin;
-                    esriMethodName =
-                        "Hotine_Oblique_Mercator_Azimuth_Natural_Origin";
-                } else {
-                    esriParams =
-                        paramsESRI_Rectified_Skew_Orthomorphic_Natural_Origin;
-                    esriMethodName =
-                        "Rectified_Skew_Orthomorphic_Natural_Origin";
-                }
-            } else if (esriMapping->epsg_code ==
-                       EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) {
-                if (parameterValueNumericAsSI(
-                        EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) ==
-                    parameterValueNumericAsSI(
-                        EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) {
-                    esriParams =
-                        paramsESRI_Hotine_Oblique_Mercator_Azimuth_Center;
-                    esriMethodName = "Hotine_Oblique_Mercator_Azimuth_Center";
-                } else {
-                    esriParams = paramsESRI_Rectified_Skew_Orthomorphic_Center;
-                    esriMethodName = "Rectified_Skew_Orthomorphic_Center";
-                }
-            } else if (esriMapping->epsg_code ==
-                       EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
-                if (parameterValueNumericAsSI(
-                        EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL) > 0) {
-                    esriMethodName = "Stereographic_North_Pole";
-                } else {
-                    esriMethodName = "Stereographic_South_Pole";
-                }
-            }
-        }
-
+        getESRIMethodNameAndParams(this, methodName, methodEPSGCode,
+                                   esriMethodName, esriParams);
         if (esriMethodName && esriParams) {
             formatter->startNode(io::WKTConstants::PROJECTION, false);
             formatter->addQuotedString(esriMethodName);
@@ -4890,6 +4932,7 @@ void Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 void Conversion::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(FormattingException)
 {
@@ -5189,6 +5232,7 @@ void Conversion::_exportToPROJString(
         }
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

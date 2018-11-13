@@ -1277,9 +1277,16 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
 
     PROJ_DLL ConversionPtr convertToOtherMethod(int targetEPSGCode) const;
 
-    PROJ_PRIVATE : PROJ_INTERNAL void
-                   _exportToPROJString(io::PROJStringFormatter *formatter)
-                       const override; // throw(FormattingException)
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL void
+        _exportToPROJString(io::PROJStringFormatter *formatter)
+            const override; // throw(FormattingException)
+
+    PROJ_INTERNAL const char *getESRIMethodName() const;
+
+    PROJ_INTERNAL const char *getWKT1GDALMethodName() const;
+    //! @endcond
 
   protected:
     PROJ_INTERNAL

@@ -882,10 +882,14 @@ class PROJ_GCC_DLL AuthorityFactory {
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
 
-        PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
-        createGeodeticCRSFromDatum(const std::string &datum_auth_name,
-                                   const std::string &datum_code,
-                                   const std::string &geodetic_crs_type) const;
+        PROJ_INTERNAL std::list<datum::EllipsoidNNPtr>
+        createEllipsoidFromExisting(
+            const datum::EllipsoidNNPtr &ellipsoid) const;
+
+    PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
+    createGeodeticCRSFromDatum(const std::string &datum_auth_name,
+                               const std::string &datum_code,
+                               const std::string &geodetic_crs_type) const;
 
     PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
     createGeodeticCRSFromEllipsoid(const std::string &ellipsoid_auth_name,

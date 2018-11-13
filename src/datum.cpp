@@ -768,6 +768,9 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
                 if (::fabs(b - b_iter) < 1e-10 * b_iter) {
                     projEllpsName = proj_ellps[i].id;
                     ellpsName = proj_ellps[i].name;
+                    if (ellpsName.find("GRS 1980") == 0) {
+                        ellpsName = "GRS 1980";
+                    }
                     return true;
                 }
             } else {
@@ -776,6 +779,9 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
                 if (::fabs(rf - rf_iter) < 1e-10 * rf_iter) {
                     projEllpsName = proj_ellps[i].id;
                     ellpsName = proj_ellps[i].name;
+                    if (ellpsName.find("GRS 1980") == 0) {
+                        ellpsName = "GRS 1980";
+                    }
                     return true;
                 }
             }
@@ -845,40 +851,45 @@ bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
                                 util::IComparable::Criterion criterion) const {
     auto otherEllipsoid = dynamic_cast<const Ellipsoid *>(other);
     if (otherEllipsoid == nullptr ||
-        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        (criterion == util::IComparable::Criterion::STRICT &&
+         !IdentifiedObject::_isEquivalentTo(other, criterion))) {
         return false;
     }
     if (!semiMajorAxis()._isEquivalentTo(otherEllipsoid->semiMajorAxis(),
                                          criterion)) {
         return false;
     }
+
+    const auto &l_semiMinorAxis = semiMinorAxis();
+    const auto &l_other_semiMinorAxis = otherEllipsoid->semiMinorAxis();
+    if (l_semiMinorAxis.has_value() && l_other_semiMinorAxis.has_value()) {
+        if (!l_semiMinorAxis->_isEquivalentTo(*l_other_semiMinorAxis,
+                                              criterion)) {
+            return false;
+        }
+    }
+
+    const auto &l_inverseFlattening = inverseFlattening();
+    const auto &l_other_sinverseFlattening =
+        otherEllipsoid->inverseFlattening();
+    if (l_inverseFlattening.has_value() &&
+        l_other_sinverseFlattening.has_value()) {
+        if (!l_inverseFlattening->_isEquivalentTo(*l_other_sinverseFlattening,
+                                                  criterion)) {
+            return false;
+        }
+    }
+
     if (criterion == util::IComparable::Criterion::STRICT) {
-        const auto &l_semiMinorAxis = semiMinorAxis();
-        const auto &l_other_semiMinorAxis = otherEllipsoid->semiMinorAxis();
         if ((l_semiMinorAxis.has_value() ^ l_other_semiMinorAxis.has_value())) {
             return false;
         }
-        if (l_semiMinorAxis.has_value() && l_other_semiMinorAxis.has_value()) {
-            if (!l_semiMinorAxis->_isEquivalentTo(*l_other_semiMinorAxis,
-                                                  criterion)) {
-                return false;
-            }
-        }
 
-        const auto &l_inverseFlattening = inverseFlattening();
-        const auto &l_other_sinverseFlattening =
-            otherEllipsoid->inverseFlattening();
         if ((l_inverseFlattening.has_value() ^
              l_other_sinverseFlattening.has_value())) {
             return false;
         }
-        if (l_inverseFlattening.has_value() &&
-            l_other_sinverseFlattening.has_value()) {
-            if (!l_inverseFlattening->_isEquivalentTo(
-                    *l_other_sinverseFlattening, criterion)) {
-                return false;
-            }
-        }
+
     } else {
         if (!otherEllipsoid->computeSemiMinorAxis()._isEquivalentTo(
                 otherEllipsoid->computeSemiMinorAxis(), criterion)) {

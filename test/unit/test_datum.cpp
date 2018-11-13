@@ -120,6 +120,9 @@ TEST(datum, ellipsoid_from_inverse_flattening) {
                                  Length(6356752.31424518))
             .get(),
         IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_FALSE(Ellipsoid::WGS84->isEquivalentTo(
+        Ellipsoid::GRS1980.get(), IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------

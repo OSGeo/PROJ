@@ -310,6 +310,9 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
     PROJ_INTERNAL static std::string
     guessBodyName(const io::DatabaseContextPtr &dbContext, double a);
 
+    PROJ_INTERNAL bool lookForProjWellKnownEllps(std::string &projEllpsName,
+                                                 std::string &ellpsName) const;
+
   protected:
 #ifdef DOXYGEN_ENABLED
     common::Length semiMajorAxis_;
@@ -341,9 +344,6 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     Ellipsoid &operator=(const Ellipsoid &other) = delete;
-
-    bool lookForProjWellKnownEllps(std::string &projEllpsName,
-                                   std::string &ellpsName) const;
 };
 
 // ---------------------------------------------------------------------------

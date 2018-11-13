@@ -1102,29 +1102,37 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const auto &thisEllipsoid(ellipsoid());
         auto searchByEllipsoid = [this, &authorityFactory, &res, &thisDatum,
                                   &thisEllipsoid, &geodetic_crs_type]() {
-            for (const auto &id : thisEllipsoid->identifiers()) {
-                try {
-                    auto tempRes =
-                        authorityFactory->createGeodeticCRSFromEllipsoid(
-                            *id->codeSpace(), id->code(), geodetic_crs_type);
-                    for (const auto &crs : tempRes) {
-                        const auto &crsDatum(crs->datum());
-                        if (crsDatum &&
-                            crsDatum->ellipsoid()->_isEquivalentTo(
-                                thisEllipsoid.get(),
-                                util::IComparable::Criterion::EQUIVALENT) &&
-                            crsDatum->primeMeridian()->_isEquivalentTo(
-                                thisDatum->primeMeridian().get(),
-                                util::IComparable::Criterion::EQUIVALENT) &&
-                            coordinateSystem()->_isEquivalentTo(
-                                crs->coordinateSystem().get(),
-                                util::IComparable::Criterion::EQUIVALENT)
+            const auto ellipsoids =
+                thisEllipsoid->identifiers().empty()
+                    ? authorityFactory->createEllipsoidFromExisting(
+                          thisEllipsoid)
+                    : std::list<datum::EllipsoidNNPtr>{thisEllipsoid};
+            for (const auto &ellps : ellipsoids) {
+                for (const auto &id : ellps->identifiers()) {
+                    try {
+                        auto tempRes =
+                            authorityFactory->createGeodeticCRSFromEllipsoid(
+                                *id->codeSpace(), id->code(),
+                                geodetic_crs_type);
+                        for (const auto &crs : tempRes) {
+                            const auto &crsDatum(crs->datum());
+                            if (crsDatum &&
+                                crsDatum->ellipsoid()->_isEquivalentTo(
+                                    ellps.get(),
+                                    util::IComparable::Criterion::EQUIVALENT) &&
+                                crsDatum->primeMeridian()->_isEquivalentTo(
+                                    thisDatum->primeMeridian().get(),
+                                    util::IComparable::Criterion::EQUIVALENT) &&
+                                coordinateSystem()->_isEquivalentTo(
+                                    crs->coordinateSystem().get(),
+                                    util::IComparable::Criterion::EQUIVALENT)
 
-                                ) {
-                            res.emplace_back(crs, 60);
+                                    ) {
+                                res.emplace_back(crs, 60);
+                            }
                         }
+                    } catch (const std::exception &) {
                     }
-                } catch (const std::exception &) {
                 }
             }
         };
@@ -1137,7 +1145,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             if (thisDatum) {
                 if (!thisDatum->identifiers().empty()) {
                     searchByDatum();
-                } else if (!thisEllipsoid->identifiers().empty()) {
+                } else {
                     searchByEllipsoid();
                 }
             }
@@ -1190,7 +1198,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             if (res.empty() && thisDatum) {
                 if (!thisDatum->identifiers().empty()) {
                     searchByDatum();
-                } else if (!thisEllipsoid->identifiers().empty()) {
+                } else {
                     searchByEllipsoid();
                 }
             }
@@ -2685,6 +2693,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 shared_from_this().as_nullable()));
             auto candidates =
                 authorityFactory->createProjectedCRSFromExisting(self);
+            const auto &ellipsoid = l_baseCRS->ellipsoid();
             for (const auto &crs : candidates) {
                 const auto &ids = crs->identifiers();
                 assert(!ids.empty());
@@ -2697,7 +2706,10 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 if (_isEquivalentTo(crs.get(),
                                     util::IComparable::Criterion::EQUIVALENT)) {
                     res.emplace_back(crs, unsignificantName ? 90 : 70);
-                } else if (coordinateSystem()->_isEquivalentTo(
+                } else if (ellipsoid->_isEquivalentTo(
+                               crs->baseCRS()->ellipsoid().get(),
+                               util::IComparable::Criterion::EQUIVALENT) &&
+                           coordinateSystem()->_isEquivalentTo(
                                crs->coordinateSystem().get(),
                                util::IComparable::Criterion::EQUIVALENT) &&
                            derivingConversionRef()->_isEquivalentTo(

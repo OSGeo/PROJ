@@ -3835,6 +3835,32 @@ AuthorityFactory::createObjectsFromName(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+std::list<datum::EllipsoidNNPtr> AuthorityFactory::createEllipsoidFromExisting(
+    const datum::EllipsoidNNPtr &ellipsoid) const {
+    std::string sql(
+        "SELECT auth_name, code FROM ellipsoid WHERE "
+        "abs(semi_major_axis - ?) < 1e-10 * abs(semi_major_axis) AND "
+        "((semi_minor_axis IS NOT NULL AND "
+        "abs(semi_minor_axis - ?) < 1e-10 * abs(semi_minor_axis)) OR "
+        "((inv_flattening IS NOT NULL AND "
+        "abs(inv_flattening - ?) < 1e-10 * abs(inv_flattening))))");
+    std::vector<SQLValues> params{
+        ellipsoid->semiMajorAxis().getSIValue(),
+        ellipsoid->computeSemiMinorAxis().getSIValue(),
+        ellipsoid->computedInverseFlattening()};
+    auto sqlRes = d->run(sql, params);
+    std::list<datum::EllipsoidNNPtr> res;
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(d->createFactory(auth_name)->createEllipsoid(code));
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
     const std::string &datum_auth_name, const std::string &datum_code,
     const std::string &geodetic_crs_type) const {
@@ -3952,7 +3978,8 @@ AuthorityFactory::createProjectedCRSFromExisting(
     std::list<crs::ProjectedCRSNNPtr> res;
 
     const auto &conv = crs->derivingConversionRef();
-    const auto methodEPSGCode = conv->method()->getEPSGCode();
+    const auto &method = conv->method();
+    const auto methodEPSGCode = method->getEPSGCode();
     if (methodEPSGCode == 0) {
         return res;
     }
@@ -3987,7 +4014,8 @@ AuthorityFactory::createProjectedCRSFromExisting(
         "SELECT projected_crs.auth_name, projected_crs.code FROM projected_crs "
         "JOIN conversion ON "
         "projected_crs.conversion_auth_name = conversion.auth_name AND "
-        "projected_crs.conversion_code = conversion.code WHERE ");
+        "projected_crs.conversion_code = conversion.code WHERE "
+        "projected_crs.deprecated = 0 AND ");
     std::vector<SQLValues> params;
     if (!candidatesGeodCRS.empty()) {
         sql += buildSqlLookForAuthNameCode(candidatesGeodCRS, params,
@@ -4003,11 +4031,159 @@ AuthorityFactory::createProjectedCRSFromExisting(
     }
 
     auto sqlRes = d->run(sql, params);
-    for (const auto &row : sqlRes) {
-        const auto &auth_name = row[0];
-        const auto &code = row[1];
-        res.emplace_back(d->createFactory(auth_name)->createProjectedCRS(code));
+
+    params.clear();
+
+    sql = "SELECT auth_name, code FROM projected_crs WHERE "
+          "deprecated = 0 AND conversion_auth_name IS NULL AND ";
+    if (!candidatesGeodCRS.empty()) {
+        sql += buildSqlLookForAuthNameCode(candidatesGeodCRS, params,
+                                           "geodetic_crs_");
+        sql += " AND ";
     }
+
+    const auto escapeLikeStr = [](const std::string &str) {
+        return replaceAll(replaceAll(replaceAll(str, "\\", "\\\\"), "_", "\\_"),
+                          "%", "\\%");
+    };
+
+    const auto ellpsSemiMajorStr =
+        toString(baseCRS->ellipsoid()->semiMajorAxis().getSIValue(), 10);
+
+    sql += "(text_definition LIKE ? ESCAPE '\\'";
+
+    // WKT2 definition
+    {
+        std::string patternVal("%");
+
+        patternVal += ',';
+        patternVal += ellpsSemiMajorStr;
+        patternVal += '%';
+
+        patternVal += escapeLikeStr(method->nameStr());
+        patternVal += '%';
+
+        params.emplace_back(patternVal);
+    }
+
+    const auto *mapping = getMapping(method.get());
+    if (mapping && mapping->proj_name_main) {
+        sql += " OR (text_definition LIKE ? AND (text_definition LIKE ?";
+
+        std::string patternVal("%");
+        patternVal += "proj=";
+        patternVal += mapping->proj_name_main;
+        patternVal += '%';
+        params.emplace_back(patternVal);
+
+        // could be a= or R=
+        patternVal = "%=";
+        patternVal += ellpsSemiMajorStr;
+        patternVal += '%';
+        params.emplace_back(patternVal);
+
+        std::string projEllpsName;
+        std::string ellpsName;
+        if (baseCRS->ellipsoid()->lookForProjWellKnownEllps(projEllpsName,
+                                                            ellpsName)) {
+            sql += " OR text_definition LIKE ?";
+            // Could be ellps= or datum=
+            patternVal = "%=";
+            patternVal += projEllpsName;
+            patternVal += '%';
+            params.emplace_back(patternVal);
+        }
+
+        sql += "))";
+    }
+
+    // WKT1_GDAL definition
+    const char *wkt1GDALMethodName = conv->getWKT1GDALMethodName();
+    if (wkt1GDALMethodName) {
+        sql += " OR text_definition LIKE ? ESCAPE '\\'";
+        std::string patternVal("%");
+
+        patternVal += ',';
+        patternVal += ellpsSemiMajorStr;
+        patternVal += '%';
+
+        patternVal += escapeLikeStr(wkt1GDALMethodName);
+        patternVal += '%';
+
+        params.emplace_back(patternVal);
+    }
+
+    // WKT1_ESRI definition
+    const char *esriMethodName = conv->getESRIMethodName();
+    if (esriMethodName) {
+        sql += " OR text_definition LIKE ? ESCAPE '\\'";
+        std::string patternVal("%");
+
+        patternVal += ',';
+        patternVal += ellpsSemiMajorStr;
+        patternVal += '%';
+
+        patternVal += escapeLikeStr(esriMethodName);
+        patternVal += '%';
+
+        auto fe =
+            &conv->parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_EASTING);
+        if (*fe == Measure()) {
+            fe = &conv->parameterValueMeasure(
+                EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN);
+        }
+        if (!(*fe == Measure())) {
+            patternVal += "PARAMETER[\"False\\_Easting\",";
+            patternVal +=
+                toString(fe->convertToUnit(
+                             crs->coordinateSystem()->axisList()[0]->unit()),
+                         10);
+            patternVal += '%';
+        }
+
+        auto lat = &conv->parameterValueMeasure(
+            EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
+        if (*lat == Measure()) {
+            lat = &conv->parameterValueMeasure(
+                EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN);
+        }
+        if (!(*lat == Measure())) {
+            patternVal += "PARAMETER[\"Latitude\\_Of\\_Origin\",";
+            const auto &angularUnit =
+                dynamic_cast<crs::GeographicCRS *>(crs->baseCRS().get())
+                    ? crs->baseCRS()->coordinateSystem()->axisList()[0]->unit()
+                    : UnitOfMeasure::DEGREE;
+            patternVal += toString(lat->convertToUnit(angularUnit), 10);
+            patternVal += '%';
+        }
+
+        params.emplace_back(patternVal);
+    }
+    sql += ")";
+    if (!getAuthority().empty()) {
+        sql += " AND auth_name = ?";
+        params.emplace_back(getAuthority());
+    }
+
+    auto sqlRes2 = d->run(sql, params);
+
+    if (sqlRes.size() <= 200) {
+        for (const auto &row : sqlRes) {
+            const auto &auth_name = row[0];
+            const auto &code = row[1];
+            res.emplace_back(
+                d->createFactory(auth_name)->createProjectedCRS(code));
+        }
+    }
+    if (sqlRes2.size() <= 200) {
+        for (const auto &row : sqlRes2) {
+            const auto &auth_name = row[0];
+            const auto &code = row[1];
+            res.emplace_back(
+                d->createFactory(auth_name)->createProjectedCRS(code));
+        }
+    }
+
     return res;
 }
 
@@ -4031,7 +4207,8 @@ AuthorityFactory::createCompoundCRSFromExisting(
         return res;
     }
 
-    std::string sql("SELECT auth_name, code FROM compound_crs WHERE ");
+    std::string sql("SELECT auth_name, code FROM compound_crs WHERE "
+                    "deprecated = 0 AND ");
     std::vector<SQLValues> params;
     bool addAnd = false;
     if (!candidatesHorizCRS.empty()) {

@@ -1365,6 +1365,16 @@ TEST(crs, geodeticcrs_identify_db) {
         EXPECT_EQ(res.front().second, 60.0);
     }
     {
+        // Identify by ellipsoid description
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=longlat +a=6378521.049 +rf=298.257222100883 +axis=neu");
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        EXPECT_EQ(res.size(), 5);
+    }
+    {
         // Identify by name, without any code
         auto wkt =
             "GEODCRS[\"GCS_Datum_Lisboa_Bessel\",\n"
@@ -1739,17 +1749,18 @@ TEST(crs, projectedCRS_identify_no_db) {
 
 TEST(crs, projectedCRS_identify_db) {
     auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
     {
         // Identify by existing code
-        auto res = factory->createProjectedCRS("2172")->identify(factory);
+        auto res =
+            factoryEPSG->createProjectedCRS("2172")->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 100);
     }
     {
         // Non-existing code
-        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto sourceCRS = factoryEPSG->createProjectedCRS("2172");
         auto crs = ProjectedCRS::create(
             PropertyMap()
                 .set(IdentifiedObject::NAME_KEY,
@@ -1758,12 +1769,12 @@ TEST(crs, projectedCRS_identify_db) {
                 .set(Identifier::CODE_KEY, 1),
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         EXPECT_EQ(res.size(), 0);
     }
     {
         // Existing code, but not matching content
-        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto sourceCRS = factoryEPSG->createProjectedCRS("2172");
         auto crs = ProjectedCRS::create(
             PropertyMap()
                 .set(IdentifiedObject::NAME_KEY,
@@ -1772,58 +1783,58 @@ TEST(crs, projectedCRS_identify_db) {
                 .set(Identifier::CODE_KEY, 32631),
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
         EXPECT_EQ(res.front().second, 25);
     }
     {
         // Identify by exact name
-        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto sourceCRS = factoryEPSG->createProjectedCRS("2172");
         auto crs = ProjectedCRS::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY,
                               "Pulkovo 1942(58) / Poland zone II"),
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 100);
     }
     {
         // Identify by equivalent name
-        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto sourceCRS = factoryEPSG->createProjectedCRS("2172");
         auto crs = ProjectedCRS::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY,
                               "Pulkovo_1942_58_Poland_zone_II"),
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 90);
     }
     {
         // Identify by properties
-        auto sourceCRS = factory->createProjectedCRS("2172");
+        auto sourceCRS = factoryEPSG->createProjectedCRS("2172");
         auto crs = ProjectedCRS::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "i am a faked name"),
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 70);
     }
     {
         // Identify by name, but objects aren't equivalent
-        auto sourceCRS = factory->createProjectedCRS("3375");
+        auto sourceCRS = factoryEPSG->createProjectedCRS("3375");
         auto crs = ProjectedCRS::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY,
                               "Pulkovo 1942(58) / Poland zone II"),
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 25);
@@ -1838,7 +1849,7 @@ TEST(crs, projectedCRS_identify_db) {
             "+ellps=GRS80");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 3375);
         EXPECT_EQ(res.front().second, 70);
@@ -1852,7 +1863,7 @@ TEST(crs, projectedCRS_identify_db) {
             "+x_0=804671 +y_0=0 +ellps=GRS80");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1);
         EXPECT_EQ(res.front().first->getEPSGCode(), 3375);
         EXPECT_EQ(res.front().second, 70);
@@ -1863,9 +1874,34 @@ TEST(crs, projectedCRS_identify_db) {
             PROJStringParser().createFromPROJString("+proj=tmerc +datum=WGS84");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        auto res = crs->identify(factory);
+        auto res = crs->identify(factoryEPSG);
         ASSERT_GT(res.size(), 1U);
         EXPECT_EQ(res.front().second, 25);
+    }
+    {
+        // ESRI:103729 definition as a PROJ string
+        auto obj =
+            PROJStringParser()
+                .attachDatabaseContext(dbContext)
+                .createFromPROJString(
+                    "+proj=lcc +lat_0=43.5 +lon_0=-93.95 "
+                    "+lat_1=43.5666666666667 "
+                    "+lat_2=43.8 +x_0=152400.30480061 +y_0=30480.0609601219 "
+                    "+a=6378521.049 +rf=298.257222100883 +units=us-ft");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        EXPECT_GE(res.size(), 1U);
+        bool found = false;
+        for (const auto &pair : res) {
+            if (pair.first->identifiers()[0]->code() == "103729") {
+                found = true;
+                EXPECT_EQ(pair.second, 70);
+                break;
+            }
+        }
+        EXPECT_TRUE(found);
     }
 }
 
