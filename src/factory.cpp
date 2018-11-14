@@ -1356,20 +1356,22 @@ static void normalizeMeasure(const std::string &uom_code,
                              double &normalized_value) {
     normalized_uom_code = uom_code;
     normalized_value = c_locale_stod(value);
-    if (uom_code == "9110") // DDD.MMSSsss
+    if (uom_code == "9110") // DDD.MMSSsss.....
     {
         std::ostringstream buffer;
         buffer.imbue(std::locale::classic());
-        buffer << std::fixed << std::setprecision(7) << normalized_value;
+        constexpr size_t precision = 12;
+        buffer << std::fixed << std::setprecision(precision) << normalized_value;
         auto formatted = buffer.str();
         size_t dotPos = formatted.find('.');
-        assert(dotPos + 1 + 7 == formatted.size());
-        auto MM = formatted.substr(dotPos + 1, 2);
-        auto SSsss = formatted.substr(dotPos + 3, 2 + 3);
+        assert(dotPos + 1 + precision == formatted.size());
+        auto minutes = formatted.substr(dotPos + 1, 2);
+        auto seconds = formatted.substr(dotPos + 3);
+        assert(seconds.size() == precision - 2);
         normalized_value =
             (normalized_value < 0 ? -1.0 : 1.0) *
-            (int(std::fabs(normalized_value)) + c_locale_stod(MM) / 60. +
-             (c_locale_stod(SSsss) / 1000.0) / 3600.);
+            (int(std::fabs(normalized_value)) + c_locale_stod(minutes) / 60. +
+             (c_locale_stod(seconds) / std::pow(10, seconds.size() - 2)) / 3600.);
         normalized_uom_code = common::UnitOfMeasure::DEGREE.code();
     }
 }

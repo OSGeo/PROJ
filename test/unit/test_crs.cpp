@@ -1844,8 +1844,8 @@ TEST(crs, projectedCRS_identify_db) {
         auto obj = PROJStringParser().createFromPROJString(
             "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
             "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=omerc "
-            "+no_uoff +lat_0=4 +lonc=102.25 +alpha=323.025796388889 "
-            "+gamma=323.130102222222 +k=0.99984 +x_0=804671 +y_0=0 "
+            "+no_uoff +lat_0=4 +lonc=102.25 +alpha=323.025796466667 "
+            "+gamma=323.130102361111 +k=0.99984 +x_0=804671 +y_0=0 "
             "+ellps=GRS80");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
@@ -1859,7 +1859,7 @@ TEST(crs, projectedCRS_identify_db) {
         // part)
         auto obj = PROJStringParser().createFromPROJString(
             "+proj=omerc +no_uoff +lat_0=4 +lonc=102.25 "
-            "+alpha=323.025796388889 +gamma=323.130102222222 +k=0.99984 "
+            "+alpha=323.025796466667 +gamma=323.130102361111 +k=0.99984 "
             "+x_0=804671 +y_0=0 +ellps=GRS80");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
