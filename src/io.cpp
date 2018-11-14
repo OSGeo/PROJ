@@ -4360,10 +4360,17 @@ const std::string &PROJStringFormatter::toString() const {
     for (auto iter = d->steps_.begin(); iter != d->steps_.end();) {
         // Remove no-op helmert
         auto &step = *iter;
-        if (step.name == "helmert" && step.paramValues.size() == 3 &&
+        const auto paramCount = step.paramValues.size();
+        if (step.name == "helmert" && (paramCount == 3 || paramCount == 8) &&
             step.paramValues[0].equals("x", "0") &&
             step.paramValues[1].equals("y", "0") &&
-            step.paramValues[2].equals("z", "0")) {
+            step.paramValues[2].equals("z", "0") &&
+            (paramCount == 3 ||
+             (step.paramValues[3].equals("rx", "0") &&
+              step.paramValues[4].equals("ry", "0") &&
+              step.paramValues[5].equals("rz", "0") &&
+              step.paramValues[6].equals("s", "0") &&
+              step.paramValues[7].keyEquals("convention")))) {
             iter = d->steps_.erase(iter);
         } else {
             ++iter;
@@ -4375,15 +4382,17 @@ const std::string &PROJStringFormatter::toString() const {
             continue;
         }
 
+        const auto paramCount = step.paramValues.size();
+
         // axisswap order=2,1 is its own inverse
-        if (step.name == "axisswap" && step.paramValues.size() == 1 &&
+        if (step.name == "axisswap" && paramCount == 1 &&
             step.paramValues[0].equals("order", "2,1")) {
             step.inverted = false;
             continue;
         }
 
         // handle unitconvert inverse
-        if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
+        if (step.name == "unitconvert" && paramCount == 2 &&
             step.paramValues[0].keyEquals("xy_in") &&
             step.paramValues[1].keyEquals("xy_out")) {
             std::swap(step.paramValues[0].value, step.paramValues[1].value);
@@ -4391,7 +4400,7 @@ const std::string &PROJStringFormatter::toString() const {
             continue;
         }
 
-        if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
+        if (step.name == "unitconvert" && paramCount == 2 &&
             step.paramValues[0].keyEquals("z_in") &&
             step.paramValues[1].keyEquals("z_out")) {
             std::swap(step.paramValues[0].value, step.paramValues[1].value);
@@ -4399,7 +4408,7 @@ const std::string &PROJStringFormatter::toString() const {
             continue;
         }
 
-        if (step.name == "unitconvert" && step.paramValues.size() == 4 &&
+        if (step.name == "unitconvert" && paramCount == 4 &&
             step.paramValues[0].keyEquals("xy_in") &&
             step.paramValues[1].keyEquals("z_in") &&
             step.paramValues[2].keyEquals("xy_out") &&
@@ -4425,10 +4434,13 @@ const std::string &PROJStringFormatter::toString() const {
             auto &prevStep = *iterPrev;
             auto &curStep = *iterCur;
 
+            const auto curStepParamCount = curStep.paramValues.size();
+            const auto prevStepParamCount = prevStep.paramValues.size();
+
             // longlat (or its inverse) with ellipsoid only is a no-op
             // do that only for an internal step
             if (i + 1 < d->steps_.size() && curStep.name == "longlat" &&
-                curStep.paramValues.size() == 1 &&
+                curStepParamCount == 1 &&
                 curStep.paramValues[0].keyEquals("ellps")) {
                 d->steps_.erase(iterCur);
                 changeDone = true;
@@ -4438,8 +4450,8 @@ const std::string &PROJStringFormatter::toString() const {
             // unitconvert (xy) followed by its inverse is a no-op
             if (curStep.name == "unitconvert" &&
                 prevStep.name == "unitconvert" && !curStep.inverted &&
-                !prevStep.inverted && curStep.paramValues.size() == 2 &&
-                prevStep.paramValues.size() == 2 &&
+                !prevStep.inverted && curStepParamCount == 2 &&
+                prevStepParamCount == 2 &&
                 curStep.paramValues[0].keyEquals("xy_in") &&
                 prevStep.paramValues[0].keyEquals("xy_in") &&
                 curStep.paramValues[1].keyEquals("xy_out") &&
@@ -4455,8 +4467,8 @@ const std::string &PROJStringFormatter::toString() const {
             // unitconvert (z) followed by its inverse is a no-op
             if (curStep.name == "unitconvert" &&
                 prevStep.name == "unitconvert" && !curStep.inverted &&
-                !prevStep.inverted && curStep.paramValues.size() == 2 &&
-                prevStep.paramValues.size() == 2 &&
+                !prevStep.inverted && curStepParamCount == 2 &&
+                prevStepParamCount == 2 &&
                 curStep.paramValues[0].keyEquals("z_in") &&
                 prevStep.paramValues[0].keyEquals("z_in") &&
                 curStep.paramValues[1].keyEquals("z_out") &&
@@ -4472,8 +4484,8 @@ const std::string &PROJStringFormatter::toString() const {
             // unitconvert (xyz) followed by its inverse is a no-op
             if (curStep.name == "unitconvert" &&
                 prevStep.name == "unitconvert" && !curStep.inverted &&
-                !prevStep.inverted && curStep.paramValues.size() == 4 &&
-                prevStep.paramValues.size() == 4 &&
+                !prevStep.inverted && curStepParamCount == 4 &&
+                prevStepParamCount == 4 &&
                 curStep.paramValues[0].keyEquals("xy_in") &&
                 prevStep.paramValues[0].keyEquals("xy_in") &&
                 curStep.paramValues[1].keyEquals("z_in") &&
@@ -4568,8 +4580,7 @@ const std::string &PROJStringFormatter::toString() const {
 
             // axisswap order=2,1 followed by itself is a no-op
             if (curStep.name == "axisswap" && prevStep.name == "axisswap" &&
-                curStep.paramValues.size() == 1 &&
-                prevStep.paramValues.size() == 1 &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
                 curStep.paramValues[0].equals("order", "2,1") &&
                 prevStep.paramValues[0].equals("order", "2,1")) {
                 ++iterCur;
@@ -4585,8 +4596,7 @@ const std::string &PROJStringFormatter::toString() const {
             // and actually IGNF uses the GRS80 definition for the WGS84 datum
             if (curStep.name == "cart" && prevStep.name == "cart" &&
                 curStep.inverted == !prevStep.inverted &&
-                curStep.paramValues.size() == 1 &&
-                prevStep.paramValues.size() == 1 &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
                 ((curStep.paramValues[0].equals("ellps", "WGS84") &&
                   prevStep.paramValues[0].equals("ellps", "GRS80")) ||
                  (curStep.paramValues[0].equals("ellps", "GRS80") &&
@@ -4599,8 +4609,8 @@ const std::string &PROJStringFormatter::toString() const {
 
             if (curStep.name == "helmert" && prevStep.name == "helmert" &&
                 !curStep.inverted && !prevStep.inverted &&
-                curStep.paramValues.size() == 3 &&
-                curStep.paramValues.size() == prevStep.paramValues.size()) {
+                curStepParamCount == 3 &&
+                curStepParamCount == prevStepParamCount) {
                 std::map<std::string, double> leftParamsMap;
                 std::map<std::string, double> rightParamsMap;
                 try {
@@ -4647,7 +4657,7 @@ const std::string &PROJStringFormatter::toString() const {
             // hermert followed by its inverse is a no-op
             if (curStep.name == "helmert" && prevStep.name == "helmert" &&
                 !curStep.inverted && !prevStep.inverted &&
-                curStep.paramValues.size() == prevStep.paramValues.size()) {
+                curStepParamCount == prevStepParamCount) {
                 std::set<std::string> leftParamsSet;
                 std::set<std::string> rightParamsSet;
                 std::map<std::string, std::string> leftParamsMap;
@@ -4692,9 +4702,9 @@ const std::string &PROJStringFormatter::toString() const {
             // detect a step and its inverse
             if (curStep.inverted != prevStep.inverted &&
                 curStep.name == prevStep.name &&
-                curStep.paramValues.size() == prevStep.paramValues.size()) {
+                curStepParamCount == prevStepParamCount) {
                 bool allSame = true;
-                for (size_t j = 0; j < curStep.paramValues.size(); j++) {
+                for (size_t j = 0; j < curStepParamCount; j++) {
                     if (curStep.paramValues[j] != prevStep.paramValues[j]) {
                         allSame = false;
                         break;

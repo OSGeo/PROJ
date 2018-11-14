@@ -4976,6 +4976,33 @@ TEST(io, projstringformatter) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_helmert_3_param_noop) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->addStep("helmert");
+    fmt->addParam("x", 0);
+    fmt->addParam("y", 0);
+    fmt->addParam("z", 0);
+    EXPECT_EQ(fmt->toString(), "");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter_helmert_7_param_noop) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->addStep("helmert");
+    fmt->addParam("x", 0);
+    fmt->addParam("y", 0);
+    fmt->addParam("z", 0);
+    fmt->addParam("rx", 0);
+    fmt->addParam("ry", 0);
+    fmt->addParam("rz", 0);
+    fmt->addParam("s", 0);
+    fmt->addParam("convention", "position_vector");
+    EXPECT_EQ(fmt->toString(), "");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projstringformatter_merge_consecutive_helmert_3_param) {
     auto fmt = PROJStringFormatter::create();
     fmt->addStep("helmert");

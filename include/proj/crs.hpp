@@ -895,6 +895,9 @@ class PROJ_GCC_DLL BoundCRS final : public CRS,
     PROJ_INTERNAL std::string getHDatumPROJ4GRIDS() const;
     PROJ_INTERNAL std::string getVDatumPROJ4GRIDS() const;
 
+    PROJ_INTERNAL virtual std::list<std::pair<CRSNNPtr, int>>
+    _identify(const io::AuthorityFactoryPtr &authorityFactory) const;
+
     INLINED_MAKE_SHARED
 
   private:

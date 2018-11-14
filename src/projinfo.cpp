@@ -873,10 +873,27 @@ int main(int argc, char **argv) {
                     for (const auto &pair : res) {
                         const auto &identifiedCRS = pair.first;
                         const auto &ids = identifiedCRS->identifiers();
-                        assert(!ids.empty());
-                        std::cout << *ids[0]->codeSpace() << ":"
-                                  << ids[0]->code() << ": " << pair.second
-                                  << " %" << std::endl;
+                        if (!ids.empty()) {
+                            std::cout << *ids[0]->codeSpace() << ":"
+                                      << ids[0]->code() << ": " << pair.second
+                                      << " %" << std::endl;
+                        } else {
+                            auto boundCRS =
+                                dynamic_cast<BoundCRS *>(identifiedCRS.get());
+                            if (boundCRS &&
+                                !boundCRS->baseCRS()->identifiers().empty()) {
+                                const auto &idsBase =
+                                    boundCRS->baseCRS()->identifiers();
+                                std::cout << "BoundCRS of "
+                                          << *idsBase[0]->codeSpace() << ":"
+                                          << idsBase[0]->code() << ": "
+                                          << pair.second << " %" << std::endl;
+                            } else {
+                                std::cout
+                                    << "un-identifier CRS: " << pair.second
+                                    << " %" << std::endl;
+                            }
+                        }
                     }
                 } catch (const std::exception &e) {
                     std::cerr << "Identification failed: " << e.what()

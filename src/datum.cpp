@@ -855,6 +855,20 @@ bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
          !IdentifiedObject::_isEquivalentTo(other, criterion))) {
         return false;
     }
+
+    // PROJ "clrk80" name is "Clarke 1880 mod." and GDAL tends to
+    // export to it a number of Clarke 1880 variants, so be lax
+    if (criterion != util::IComparable::Criterion::STRICT &&
+        (nameStr() == "Clarke 1880 mod." ||
+         otherEllipsoid->nameStr() == "Clarke 1880 mod.")) {
+        return std::fabs(semiMajorAxis().getSIValue() -
+                         otherEllipsoid->semiMajorAxis().getSIValue()) <
+                   1e-8 * semiMajorAxis().getSIValue() &&
+               std::fabs(computedInverseFlattening() -
+                         otherEllipsoid->computedInverseFlattening()) <
+                   1e-5 * computedInverseFlattening();
+    }
+
     if (!semiMajorAxis()._isEquivalentTo(otherEllipsoid->semiMajorAxis(),
                                          criterion)) {
         return false;

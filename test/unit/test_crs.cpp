@@ -1875,8 +1875,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_GT(res.size(), 1U);
-        EXPECT_EQ(res.front().second, 25);
+        ASSERT_EQ(res.size(), 0);
     }
     {
         // ESRI:103729 definition as a PROJ string
@@ -1902,6 +1901,37 @@ TEST(crs, projectedCRS_identify_db) {
             }
         }
         EXPECT_TRUE(found);
+    }
+    {
+        // EPSG:2327 as PROJ.4 string (so with easting, northing order whereas
+        // official CRS is northing, easting)
+        auto obj =
+            PROJStringParser()
+                .attachDatabaseContext(dbContext)
+                .createFromPROJString(
+                    "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=13500000 +y_0=0 "
+                    "+a=6378140 +b=6356755.288157528 +units=m");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        EXPECT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2327);
+        EXPECT_EQ(res.front().second, 50);
+    }
+    {
+        // EPSG:6646 as PROJ.4 string, using clrk80 which is pretty generic
+        auto obj =
+            PROJStringParser()
+                .attachDatabaseContext(dbContext)
+                .createFromPROJString(
+                    "+proj=tmerc +lat_0=29.02626833333333 +lon_0=46.5 "
+                    "+k=0.9994 +x_0=800000 +y_0=0 +ellps=clrk80 +units=m");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        EXPECT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 6646);
+        EXPECT_EQ(res.front().second, 70);
     }
 }
 
@@ -3333,6 +3363,32 @@ TEST(crs, boundCRS_projectedCRS_to_PROJ_string) {
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
         "+proj=utm +zone=31 +ellps=WGS84 +towgs84=1,2,3,4,5,6,7");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, boundCRS_identify_db) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    {
+        auto obj =
+            PROJStringParser()
+                .attachDatabaseContext(dbContext)
+                .createFromPROJString("+proj=tmerc +lat_0=-37.76111111111111 "
+                                      "+lon_0=176.4661111111111 +k=1 "
+                                      "+x_0=400000 +y_0=800000 +ellps=GRS80 "
+                                      "+towgs84=0,0,0,0,0,0,0 +units=m");
+        auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1);
+        auto boundCRS = dynamic_cast<const BoundCRS *>(res.front().first.get());
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 2106);
+        EXPECT_EQ(boundCRS->transformation()->nameStr(),
+                  "NZGD2000 to WGS 84 (1)");
+        EXPECT_EQ(res.front().second, 50);
+    }
 }
 
 // ---------------------------------------------------------------------------

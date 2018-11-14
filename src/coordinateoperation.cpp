@@ -5262,7 +5262,7 @@ bool Conversion::isUTM(int &zone, bool &north) const {
                 const auto epsg_code = opParamvalue->parameter()->getEPSGCode();
                 const auto &l_parameterValue = opParamvalue->parameterValue();
                 if (l_parameterValue->type() == ParameterValue::Type::MEASURE) {
-                    auto measure = l_parameterValue->value();
+                    const auto &measure = l_parameterValue->value();
                     if (epsg_code ==
                             EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN &&
                         measure.value() == UTM_LATITUDE_OF_NATURAL_ORIGIN) {
@@ -5475,7 +5475,7 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                 const auto epsg_code = parameter->getEPSGCode();
                 const auto &l_parameterValue = opParamvalue->parameterValue();
                 if (l_parameterValue->type() == ParameterValue::Type::MEASURE) {
-                    auto measure = l_parameterValue->value();
+                    const auto &measure = l_parameterValue->value();
                     if (epsg_code == EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION) {
                         params[0] = measure.getSIValue();
                         foundX = true;

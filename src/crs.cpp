@@ -2495,6 +2495,9 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
  * 90% means that CRS are equivalent, but the names are not exactly the same.
  * 70% means that CRS are equivalent (equivalent base CRS, conversion and
  * coordinate system), but the names do not match at all.
+ * 50% means that CRS have similarity (equivalent base CRS and conversion),
+ * but the coordinate system do not match (e.g. different axis ordering or
+ * axis unit).
  * 25% means that the CRS are not equivalent, but there is some similarity in
  * the names.
  *
@@ -2709,13 +2712,16 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 } else if (ellipsoid->_isEquivalentTo(
                                crs->baseCRS()->ellipsoid().get(),
                                util::IComparable::Criterion::EQUIVALENT) &&
-                           coordinateSystem()->_isEquivalentTo(
-                               crs->coordinateSystem().get(),
-                               util::IComparable::Criterion::EQUIVALENT) &&
                            derivingConversionRef()->_isEquivalentTo(
                                crs->derivingConversionRef().get(),
                                util::IComparable::Criterion::EQUIVALENT)) {
-                    res.emplace_back(crs, 70);
+                    if (coordinateSystem()->_isEquivalentTo(
+                            crs->coordinateSystem().get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        res.emplace_back(crs, 70);
+                    } else {
+                        res.emplace_back(crs, 50);
+                    }
                 } else {
                     res.emplace_back(crs, 25);
                 }
@@ -3346,7 +3352,7 @@ void BoundCRS::_exportToPROJString(
     }
 
     auto crs_exportable =
-        dynamic_cast<const io::IPROJStringExportable *>(d->baseCRS().get());
+        dynamic_cast<const io::IPROJStringExportable *>(d->baseCRS_.get());
     if (!crs_exportable) {
         io::FormattingException::Throw(
             "baseCRS of BoundCRS cannot be exported as a PROJ string");
@@ -3380,15 +3386,82 @@ bool BoundCRS::_isEquivalentTo(const util::IComparable *other,
                                util::IComparable::Criterion criterion) const {
     auto otherBoundCRS = dynamic_cast<const BoundCRS *>(other);
     if (otherBoundCRS == nullptr ||
-        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        (criterion == util::IComparable::Criterion::STRICT &&
+         !ObjectUsage::_isEquivalentTo(other, criterion))) {
         return false;
     }
-    return d->baseCRS()->_isEquivalentTo(otherBoundCRS->d->baseCRS().get(),
-                                         criterion) &&
-           d->hubCRS()->_isEquivalentTo(otherBoundCRS->d->hubCRS().get(),
+    return d->baseCRS_->_isEquivalentTo(otherBoundCRS->d->baseCRS_.get(),
                                         criterion) &&
-           d->transformation()->_isEquivalentTo(
-               otherBoundCRS->d->transformation().get(), criterion);
+           d->hubCRS_->_isEquivalentTo(otherBoundCRS->d->hubCRS_.get(),
+                                       criterion) &&
+           d->transformation_->_isEquivalentTo(
+               otherBoundCRS->d->transformation_.get(), criterion);
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::list<std::pair<CRSNNPtr, int>>
+BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
+    typedef std::pair<CRSNNPtr, int> Pair;
+    std::list<Pair> res;
+    if (authorityFactory &&
+        d->hubCRS_->_isEquivalentTo(GeographicCRS::EPSG_4326.get(),
+                                    util::IComparable::Criterion::EQUIVALENT)) {
+        auto resTemp = d->baseCRS_->identify(authorityFactory);
+        for (const auto &pair : resTemp) {
+            const auto &candidateBaseCRS = pair.first;
+            auto projCRS =
+                dynamic_cast<const ProjectedCRS *>(candidateBaseCRS.get());
+            auto geodCRS = projCRS ? projCRS->baseCRS().as_nullable()
+                                   : util::nn_dynamic_pointer_cast<GeodeticCRS>(
+                                         candidateBaseCRS);
+            if (geodCRS) {
+                auto context = operation::CoordinateOperationContext::create(
+                    authorityFactory, nullptr, 0.0);
+                auto ops =
+                    operation::CoordinateOperationFactory::create()
+                        ->createOperations(NN_NO_CHECK(geodCRS),
+                                           GeographicCRS::EPSG_4326, context);
+                std::string refTransfPROJString;
+                bool refTransfPROJStringValid = false;
+                try {
+                    refTransfPROJString =
+                        d->transformation_->exportToPROJString(
+                            io::PROJStringFormatter::create().get());
+                    refTransfPROJStringValid = true;
+                    if (refTransfPROJString == "+proj=axisswap +order=2,1") {
+                        refTransfPROJString.clear();
+                    }
+                } catch (const std::exception &) {
+                }
+                for (const auto &op : ops) {
+                    std::string opTransfPROJString;
+                    bool opTransfPROJStringValid = false;
+                    try {
+                        opTransfPROJString = op->exportToPROJString(
+                            io::PROJStringFormatter::create().get());
+                        opTransfPROJStringValid = true;
+                    } catch (const std::exception &) {
+                    }
+                    if ((refTransfPROJStringValid && opTransfPROJStringValid &&
+                         refTransfPROJString == opTransfPROJString) ||
+                        op->_isEquivalentTo(
+                            d->transformation_.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        res.emplace_back(
+                            create(candidateBaseCRS, d->hubCRS_,
+                                   NN_NO_CHECK(util::nn_dynamic_pointer_cast<
+                                               operation::Transformation>(op))),
+                            pair.second);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return res;
 }
 
 // ---------------------------------------------------------------------------

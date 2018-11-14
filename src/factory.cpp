@@ -1361,7 +1361,8 @@ static void normalizeMeasure(const std::string &uom_code,
         std::ostringstream buffer;
         buffer.imbue(std::locale::classic());
         constexpr size_t precision = 12;
-        buffer << std::fixed << std::setprecision(precision) << normalized_value;
+        buffer << std::fixed << std::setprecision(precision)
+               << normalized_value;
         auto formatted = buffer.str();
         size_t dotPos = formatted.find('.');
         assert(dotPos + 1 + precision == formatted.size());
@@ -1371,7 +1372,8 @@ static void normalizeMeasure(const std::string &uom_code,
         normalized_value =
             (normalized_value < 0 ? -1.0 : 1.0) *
             (int(std::fabs(normalized_value)) + c_locale_stod(minutes) / 60. +
-             (c_locale_stod(seconds) / std::pow(10, seconds.size() - 2)) / 3600.);
+             (c_locale_stod(seconds) / std::pow(10, seconds.size() - 2)) /
+                 3600.);
         normalized_uom_code = common::UnitOfMeasure::DEGREE.code();
     }
 }
@@ -4032,6 +4034,41 @@ AuthorityFactory::createProjectedCRSFromExisting(
         params.emplace_back(getAuthority());
     }
 
+    int iParam = 1;
+    for (const auto &genOpParamvalue : conv->parameterValues()) {
+        auto opParamvalue =
+            dynamic_cast<const operation::OperationParameterValue *>(
+                genOpParamvalue.get());
+        if (!opParamvalue) {
+            break;
+        }
+        const auto paramEPSGCode = opParamvalue->parameter()->getEPSGCode();
+        const auto &parameterValue = opParamvalue->parameterValue();
+        if (!(paramEPSGCode > 0 &&
+              parameterValue->type() ==
+                  operation::ParameterValue::Type::MEASURE)) {
+            break;
+        }
+        const auto &measure = parameterValue->value();
+        const auto &unit = measure.unit();
+        if (unit == common::UnitOfMeasure::DEGREE &&
+            geogCRS->coordinateSystem()->axisList()[0]->unit() == unit) {
+            const auto iParamAsStr(toString(iParam));
+            sql += " AND conversion.param";
+            sql += iParamAsStr;
+            sql += "_code = ? AND conversion.param";
+            sql += iParamAsStr;
+            sql += "_auth_name = 'EPSG' AND conversion.param";
+            sql += iParamAsStr;
+            sql += "_value BETWEEN ? AND ?";
+            // As angles might be expressed with the odd unit EPSG:9110
+            // "sexagesimal DMS", we have to provide a broad range
+            params.emplace_back(toString(paramEPSGCode));
+            params.emplace_back(measure.value() - 1);
+            params.emplace_back(measure.value() + 1);
+        }
+        iParam++;
+    }
     auto sqlRes = d->run(sql, params);
 
     params.clear();
