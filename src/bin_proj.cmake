@@ -4,10 +4,6 @@ set(PROJ_SRC proj.c
 
 source_group("Source Files\\Bin" FILES ${PROJ_SRC})
 
-if(WIN32)
-    set(PROJ_SRC ${PROJ_SRC} emess.c)
-endif(WIN32)
-    
 #Executable
 add_executable(binproj ${PROJ_SRC})
 set_target_properties(binproj
@@ -17,3 +13,6 @@ target_link_libraries(binproj ${PROJ_LIBRARIES})
 install(TARGETS binproj 
         RUNTIME DESTINATION ${BINDIR})
 
+if(MSVC AND BUILD_LIBPROJ_SHARED)
+    target_compile_definitions(binproj PRIVATE PROJ_MSVC_DLL_IMPORT=1)
+endif()

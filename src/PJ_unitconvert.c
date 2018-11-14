@@ -382,18 +382,6 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     return out;
 }
 
-/* M_PI / 200 */
-#define GRAD_TO_RAD 0.015707963267948967
-
-static const struct PJ_UNITS
-pj_angular_units[] = {
-    {"rad",         "1.0",                   "Radian", 1.0},
-    {"deg",         "0.017453292519943296",  "Degree", DEG_TO_RAD},
-    {"grad",        "0.015707963267948967",  "Grad",   GRAD_TO_RAD},
-    {NULL,          NULL,                     NULL,    0.0}
-};
-
-
 /***********************************************************************/
 static double get_unit_conversion_factor(const char* name,
                                          int* p_is_linear,
@@ -419,15 +407,16 @@ static double get_unit_conversion_factor(const char* name,
     }
 
     /* And then angular units */
-    for (i = 0; (s = pj_angular_units[i].id) ; ++i) {
+    units = proj_list_angular_units();
+    for (i = 0; (s = units[i].id) ; ++i) {
         if ( strcmp(s, name) == 0 ) {
             if( p_normalized_name ) {
-                *p_normalized_name = pj_angular_units[i].name;
+                *p_normalized_name = units[i].name;
             }
             if( p_is_linear ) {
                 *p_is_linear = 0;
             }
-            return pj_angular_units[i].factor;
+            return units[i].factor;
         }
     }
     if( p_normalized_name ) {

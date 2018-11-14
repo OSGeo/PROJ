@@ -44,6 +44,10 @@
 #error proj_internal.h must be included before proj_api.h
 #endif
 
+#ifdef PROJ_RENAME_SYMBOLS
+#include "proj_symbol_rename.h"
+#endif
+
 #ifndef PROJ_INTERNAL_H
 #define PROJ_INTERNAL_H
 #ifdef __cplusplus
@@ -79,17 +83,21 @@ enum pj_io_units {
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
 
-PJ_COORD proj_coord_error (void);
+PJ_COORD PROJ_DLL proj_coord_error (void);
 
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
-void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
+void PROJ_DLL proj_context_set (PJ *P, PJ_CONTEXT *ctx);
 void proj_context_inherit (PJ *parent, PJ *child);
+
+struct projCppContext;
+/* not sure why we need to export it, but mingw needs it */
+void PROJ_DLL proj_context_delete_cpp_context(struct projCppContext* cppContext);
 
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 
-PJ_COORD pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
-PJ_COORD pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
+PJ_COORD PROJ_DLL pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
+PJ_COORD PROJ_DLL pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 
 
 /* Grid functionality */
@@ -99,7 +107,7 @@ double          proj_vgrid_value(PJ *P, PJ_LP lp);
 PJ_LP           proj_hgrid_value(PJ *P, PJ_LP lp);
 PJ_LP           proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction);
 
-void proj_log_error (PJ *P, const char *fmt, ...);
+void PROJ_DLL proj_log_error (PJ *P, const char *fmt, ...);
 void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
 
@@ -111,8 +119,8 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es);
 /* Geographical to geocentric latitude - another of the "simple, but useful" */
 PJ_COORD pj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
-char  *pj_chomp (char *c);
-char  *pj_shrink (char *c);
+char  PROJ_DLL *pj_chomp (char *c);
+char  PROJ_DLL *pj_shrink (char *c);
 size_t pj_trim_argc (char *args);
 char **pj_trim_argv (size_t argc, char *args);
 char  *pj_make_args (size_t argc, char **argv);
