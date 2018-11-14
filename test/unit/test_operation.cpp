@@ -1391,10 +1391,10 @@ TEST(operation, tmg_export) {
               "    PARAMETER[\"Longitude of false origin\",2,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8822]],\n"
-              "    PARAMETER[\"Easting of false origin\",3,\n"
+              "    PARAMETER[\"Easting at false origin\",3,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8826]],\n"
-              "    PARAMETER[\"Northing of false origin\",4,\n"
+              "    PARAMETER[\"Northing at false origin\",4,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]]]");
 
@@ -1434,10 +1434,10 @@ TEST(operation, aea_export) {
               "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8824]],\n"
-              "    PARAMETER[\"Easting of false origin\",5,\n"
+              "    PARAMETER[\"Easting at false origin\",5,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8826]],\n"
-              "    PARAMETER[\"Northing of false origin\",6,\n"
+              "    PARAMETER[\"Northing at false origin\",6,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]]]");
 
@@ -1712,10 +1712,10 @@ TEST(operation, lcc2sp_export) {
               "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8824]],\n"
-              "    PARAMETER[\"Easting of false origin\",5,\n"
+              "    PARAMETER[\"Easting at false origin\",5,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8826]],\n"
-              "    PARAMETER[\"Northing of false origin\",6,\n"
+              "    PARAMETER[\"Northing at false origin\",6,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]]]");
 
@@ -1778,10 +1778,10 @@ TEST(operation, lcc2sp_michigan_export) {
               "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8824]],\n"
-              "    PARAMETER[\"Easting of false origin\",5,\n"
+              "    PARAMETER[\"Easting at false origin\",5,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8826]],\n"
-              "    PARAMETER[\"Northing of false origin\",6,\n"
+              "    PARAMETER[\"Northing at false origin\",6,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]],\n"
               "    PARAMETER[\"Ellipsoid scaling factor\",7,\n"
@@ -1819,10 +1819,10 @@ TEST(operation, lcc2sp_belgium_export) {
               "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
               "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
               "        ID[\"EPSG\",8824]],\n"
-              "    PARAMETER[\"Easting of false origin\",5,\n"
+              "    PARAMETER[\"Easting at false origin\",5,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8826]],\n"
-              "    PARAMETER[\"Northing of false origin\",6,\n"
+              "    PARAMETER[\"Northing at false origin\",6,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8827]]]");
 

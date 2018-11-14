@@ -2754,8 +2754,8 @@ static const struct {
          {"Longitude of false origin", 3},
          {"Latitude of 1st standard parallel", 4},
          {"Latitude of 2nd standard parallel", 5},
-         {"Easting of false origin", 1},
-         {"Northing of false origin", 2},
+         {"Easting at false origin", 1},
+         {"Northing at false origin", 2},
      }},
 
     {"Sinusoidal",
@@ -2855,8 +2855,8 @@ static const struct {
          {"Longitude of false origin", 3},
          {"Latitude of 1st standard parallel", 4},
          {"Latitude of 2nd standard parallel", 5},
-         {"Easting of false origin", 1},
-         {"Northing of false origin", 2},
+         {"Easting at false origin", 1},
+         {"Northing at false origin", 2},
      }},
 
     // Unusual variant of above with Scale_Factor=1
@@ -2874,8 +2874,8 @@ static const struct {
          {"Longitude of false origin", 3},
          {"Latitude of 1st standard parallel", 4},
          {"Latitude of 2nd standard parallel", 5},
-         {"Easting of false origin", 1},
-         {"Northing of false origin", 2},
+         {"Easting at false origin", 1},
+         {"Northing at false origin", 2},
      }},
 
     {"Polyconic",
