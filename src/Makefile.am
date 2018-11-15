@@ -1,23 +1,24 @@
 AM_CFLAGS = @C_WFLAGS@
-AM_CXXFLAGS = @CXX_WFLAGS@
 
-bin_PROGRAMS =	proj nad2bin geod cs2cs gie cct
+bin_PROGRAMS =	proj nad2bin geod cs2cs gie cct projinfo
 EXTRA_PROGRAMS = multistresstest test228
 
 TESTS = geodtest
 check_PROGRAMS = geodtest
 
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
-		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
+		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@ -I$(top_srcdir)/include @SQLITE3_FLAGS@
+AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@ -DPROJ_COMPILATION
 
-include_HEADERS = proj.h proj_api.h geodesic.h \
-	org_proj4_PJ.h
+include_HEADERS = proj.h proj_constants.h proj_api.h geodesic.h \
+	org_proj4_PJ.h proj_symbol_rename.h
 
-EXTRA_DIST = proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
-			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
+EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
+			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake bin_projinfo.cmake \
 			 lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
+projinfo_SOURCES = projinfo.cpp
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 cct_SOURCES = cct.c proj_strtod.c proj_strtod.h optargpm.h
 nad2bin_SOURCES = nad2bin.c
@@ -32,6 +33,7 @@ cct_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
 geod_LDADD = libproj.la
 proj_LDADD = libproj.la
+projinfo_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 
 gie_LDADD = libproj.la
@@ -42,9 +44,12 @@ geodtest_LDADD = libproj.la
 lib_LTLIBRARIES = libproj.la
 
 libproj_la_LDFLAGS = -no-undefined -version-info 14:1:1
+libproj_la_LIBADD = @SQLITE3_LDFLAGS@
 
 libproj_la_SOURCES = \
 	pj_list.h proj_internal.h proj_math.h projects.h\
+	static.cpp util.cpp metadata.cpp common.cpp crs.cpp datum.cpp coordinatesystem.cpp coordinateoperation.cpp io.cpp \
+	internal.cpp factory.cpp c_api.cpp \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c PJ_ccon.c\

@@ -9,6 +9,7 @@ option(BUILD_GEOD    "Build geod (computation of geodesic lines)" ON)
 option(BUILD_GIE     "Build gie (geospatial integrity investigation environment - a PROJ.4 test tool)" ON)
 option(BUILD_NAD2BIN "Build nad2bin (format conversion tool)" ON)
 option(BUILD_PROJ    "Build proj (cartographic projection tool : latlong <-> projected coordinates)" ON)
+option(BUILD_PROJINFO "Build projinfo (SRS and coordinate operation metadata/query tool)" ON)
 
 if(NOT MSVC)
 
@@ -58,6 +59,11 @@ if(BUILD_PROJ)
   include(bin_proj.cmake)
   set(BIN_TARGETS ${BIN_TARGETS} binproj)
 endif(BUILD_PROJ)
+
+if(BUILD_PROJINFO)
+  include(bin_projinfo.cmake)
+  set(BIN_TARGETS ${BIN_TARGETS} binprojinfo)
+endif(BUILD_PROJINFO)
 
 if(BUILD_GIE)
  include(bin_gie.cmake)

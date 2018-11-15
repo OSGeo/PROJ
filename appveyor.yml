@@ -17,19 +17,28 @@ shallow_clone: true
 
 build_script:
   - echo build_script
+  - vcpkg install sqlite3:"%platform%"-windows
+  - ps: |
+        appveyor DownloadFile https://sqlite.org/2018/sqlite-tools-win32-x86-3250100.zip
+        7z x sqlite-tools-win32-x86-3250100.zip
+        copy sqlite-tools-win32-x86-3250100/sqlite3.exe .
   - if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
   - if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
   - echo "%VS_FULL%"
 #
   - if "%platform%" == "x64" mkdir build_dll
   - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX"
+  - if "%platform%" == "x64" copy ..\sqlite3.exe .
+  - if "%platform%" == "x64" copy c:\tools\vcpkg\installed\x64-windows\bin\sqlite3.dll .
+  - if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
   - if "%platform%" == "x64" cmake --build . --config Release
   - if "%platform%" == "x64" cd ..
 #
   - if "%platform%" == "x86" mkdir build_static
   - if "%platform%" == "x86" cd build_static
-  - if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX"
+  - if "%platform%" == "x86" copy ..\sqlite3.exe .
+  - if "%platform%" == "x86" copy c:\tools\vcpkg\installed\x86-windows\bin\sqlite3.dll .
+  - if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
   - if "%platform%" == "x86" cmake --build . --config Release
   - if "%platform%" == "x86" cd ..
 
@@ -45,11 +54,11 @@ test_script:
   - cd %CURDIR%
 #
   - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x64" ctest -C Release
+  - if "%platform%" == "x64" ctest -V -C Release
   - if "%platform%" == "x64" cd ..
 #
   - if "%platform%" == "x86" cd build_static
-  - if "%platform%" == "x86" ctest -C Release
+  - if "%platform%" == "x86" ctest -V -C Release
   - if "%platform%" == "x86" cd ..
 
 deploy: off

@@ -50,6 +50,14 @@ unset(_save_cxx_flags)
 #
 # Build PROJ unit tests
 #
+
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC" AND BUILD_LIBPROJ_SHARED)
+add_definitions(-DPROJ_MSVC_DLL_IMPORT=1)
+endif()
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${SQLITE3_INCLUDE_DIR})
+
 add_executable(proj_test_unit
   main.cpp
   basic_test.cpp)
@@ -78,3 +86,20 @@ target_link_libraries(pj_phi2_test
         ${PROJ_LIBRARIES})
 add_test(NAME pj_phi2_test COMMAND pj_phi2_test)
 endif()
+
+add_executable(proj_test_cpp_api
+  main.cpp
+  test_util.cpp
+  test_common.cpp
+  test_crs.cpp
+  test_metadata.cpp
+  test_io.cpp
+  test_operation.cpp
+  test_datum.cpp
+  test_factory.cpp
+  test_c_api.cpp)
+target_link_libraries(proj_test_cpp_api
+  gtest
+  ${PROJ_LIBRARIES}
+  ${SQLITE3_LIBRARY})
+add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)

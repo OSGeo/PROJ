@@ -10,3 +10,7 @@ target_link_libraries(geodtest ${PROJ_LIBRARIES})
 
 # Instead run as a test
 add_test (NAME geodesic-test COMMAND geodtest)
+
+if(MSVC AND BUILD_LIBPROJ_SHARED)
+    target_compile_definitions(geodtest PRIVATE PROJ_MSVC_DLL_IMPORT=1)
+endif()

@@ -126,6 +126,11 @@ fi
 dnl Clang enables -Woverloaded-virtual if -Wall is defined, but not GCC
 AX_CHECK_COMPILE_FLAG([-Woverloaded-virtual], [CXX_WFLAGS="$CXX_WFLAGS -Woverloaded-virtual"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
+AX_CHECK_COMPILE_FLAG([-Wweak-vtables], [CXX_WFLAGS="$CXX_WFLAGS -Wweak-vtables"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+AX_CHECK_COMPILE_FLAG([-Wdeprecated], [CXX_WFLAGS="$CXX_WFLAGS -Wdeprecated"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+AX_CHECK_COMPILE_FLAG([-Wabstract-vbase-init], [CXX_WFLAGS="$CXX_WFLAGS -Wabstract-vbase-init"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+AX_CHECK_COMPILE_FLAG([-Winconsistent-missing-destructor-override], [CXX_WFLAGS="$CXX_WFLAGS -Winconsistent-missing-destructor-override"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+
 dnl Forbid use of 'or', 'and', ... alias operators
 AX_CHECK_COMPILE_FLAG([-fno-operator-names], [CXX_WFLAGS="$CXX_WFLAGS -fno-operator-names"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
@@ -138,10 +143,47 @@ fi
 
 AC_LANG_POP([C++])
 
+dnl ---------------------------------------------------------------------------
+dnl Check for --enable-lto
+dnl ---------------------------------------------------------------------------
+
+AC_MSG_CHECKING([to enable LTO (link time optimization) build])
+
+AC_ARG_ENABLE(lto,
+              AS_HELP_STRING([--enable-lto],
+                             [enable LTO(link time optimization) (enabled by default)]))
+
+FLTO_FLAG=""
+if test "x$enable_lto" = "xyes" -o "x$enable_lto" = "x"; then
+    AC_LANG_PUSH([C++])
+    AX_CHECK_COMPILE_FLAG([-flto], [FLTO_FLAG="-flto"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+    if test "$FLTO_FLAG" != ""; then
+        SAVED_CXXFLAGS=$CXXFLAGS
+        CXXFLAGS="$CXXFLAGS $FLTO_FLAG -Werror"
+        AC_MSG_CHECKING([if -flto is available at link time])
+        AC_LINK_IFELSE([AC_LANG_PROGRAM(
+        [[]])],
+        [AC_MSG_RESULT([yes])],
+        [FLTO_FLAG=""]
+        [AC_MSG_RESULT([no])])
+        CXXFLAGS="$SAVED_CXXFLAGS"
+    fi
+    AC_LANG_POP([C++])
+    AX_CHECK_COMPILE_FLAG([-Wodr], [CXX_WFLAGS="$CXX_WFLAGS -Wodr"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+else
+    AC_MSG_RESULT([no])
+fi
+AC_SUBST(FLTO_FLAG,$FLTO_FLAG)
+
+dnl Result in better inlining, but larger file
+dnl AX_CHECK_COMPILE_FLAG([-fno-semantic-interposition], [CFLAGS="$CFLAGS -fno-semantic-interposition" CXXFLAGS="$CXXFLAGS -fno-semantic-interposition"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+
 AC_SUBST(C_WFLAGS,$C_WFLAGS)
 AC_SUBST(CXX_WFLAGS,$CXX_WFLAGS)
 AC_SUBST(NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG,$NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
 
+CFLAGS="${CFLAGS} -fvisibility=hidden"
+CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
 
 dnl Checks for libraries.
 save_CFLAGS="$CFLAGS"
@@ -263,7 +305,52 @@ fi
 AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
-AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile
+dnl ---------------------------------------------------------------------------
+dnl Check for sqlite3 library and binary
+dnl ---------------------------------------------------------------------------
+
+AC_ARG_WITH(sqlite3-include,
+    [  --with-sqlite3-include=ARG sqlite3 include directory],,,)
+
+if test "x$with_sqlite3_include" = "x" ; then
+SQLITE3_FLAGS=""
+if test -z "`uname | grep Darwin`" ; then
+    AC_CHECK_HEADERS([sqlite3.h])
+    if test "$ac_cv_header_sqlite3_h" = "no" ; then
+        AC_MSG_ERROR([Please install sqlite3 development package.])
+    fi
+fi
+else
+    SQLITE3_FLAGS="-I$with_sqlite3_include"
+fi
+AC_SUBST(SQLITE3_FLAGS,$SQLITE3_FLAGS)
+
+AC_ARG_WITH(sqlite3-ldflags,
+      [  --with-sqlite3-ldflags=ARG   sqlite3 link flags (i.e. -L/xxx -lsqlite3)],,,)
+
+SQLITE3_LDFLAGS=""
+if test "x$with_sqlite3_ldflags" = "x" ; then
+    AC_CHECK_LIB(sqlite3,sqlite3_open,SQLITE3_LIB_FOUND=yes,SQLITE3_LIB_FOUND=no,)
+    if test x"$SQLITE3_LIB_FOUND" != x"yes"; then
+        AC_MSG_ERROR([Please install sqlite3 development package.])
+    fi
+    SQLITE3_LDFLAGS="-lsqlite3"
+else
+    SQLITE3_LDFLAGS="$with_sqlite3_ldflags"
+fi
+AC_SUBST(SQLITE3_LDFLAGS,$SQLITE3_LDFLAGS)
+
+
+AC_CHECK_PROG(SQLITE3_CHECK,sqlite3,yes)
+if test x"$SQLITE3_CHECK" != x"yes" ; then
+    AC_MSG_ERROR([Please install sqlite3 binary.])
+fi
+
+dnl ---------------------------------------------------------------------------
+dnl Generate files
+dnl ---------------------------------------------------------------------------
+
+AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
                  test/Makefile test/old/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
                  test/googletest/Makefile test/googletest/include/Makefile
                  test/googletest/include/gtest/Makefile

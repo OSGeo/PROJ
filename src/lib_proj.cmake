@@ -32,6 +32,24 @@ elseif(USE_THREAD AND NOT Threads_FOUND)
   message(FATAL_ERROR "No thread library found and thread/mutex support is required by USE_THREAD option")
 endif()
 
+option(ENABLE_LTO "Build library with LTO optimization (if available)." ON)
+if(ENABLE_LTO)
+    if("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
+        include (CheckCXXSourceCompiles)
+        SET(CMAKE_REQUIRED_FLAGS "-Wl,-flto")
+        check_cxx_source_compiles("int main(){ return 0; }" COMPILER_SUPPORTS_FLTO_FLAG)
+        IF(COMPILER_SUPPORTS_FLTO_FLAG)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+        ENDIF()
+    else()
+        include(CheckCXXCompilerFlag)
+        CHECK_CXX_COMPILER_FLAG("-flto" COMPILER_SUPPORTS_FLTO_FLAG)
+        if(COMPILER_SUPPORTS_FLTO_FLAG)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+        endif()
+    endif()
+endif()
+
 
 ##############################################
 ###  library source list and include_list  ###
@@ -227,11 +245,27 @@ SET(SRC_LIBPROJ_CORE
         vector1.c
         pj_strtod.c
         ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
- )
+)
+
+set(SRC_LIBPROJ_CPP
+        static.cpp
+        common.cpp
+        coordinateoperation.cpp
+        coordinatesystem.cpp
+        crs.cpp
+        datum.cpp
+        io.cpp
+        metadata.cpp
+        util.cpp
+        internal.cpp
+        factory.cpp
+        c_api.cpp
+)
 
 set(HEADERS_LIBPROJ
         proj_api.h
         proj.h
+        proj_constants.h
         geodesic.h
 )
 
@@ -239,6 +273,10 @@ set(HEADERS_LIBPROJ
 source_group("Header Files" FILES ${HEADERS_LIBPROJ})
 source_group("Source Files\\Core" FILES ${SRC_LIBPROJ_CORE})
 source_group("Source Files\\PJ" FILES ${SRC_LIBPROJ_PJ})
+source_group("Source Files\\C++" FILES ${SRC_LIBPROJ_CPP})
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
 include_directories( ${CMAKE_CURRENT_BINARY_DIR})
 source_group("CMake Files" FILES CMakeLists.txt)
 
@@ -269,11 +307,8 @@ endif(JNI_SUPPORT)
 #################################################
 ## targets: libproj and proj_config.h
 #################################################
-set(ALL_LIBPROJ_SOURCES ${SRC_LIBPROJ_PJ} ${SRC_LIBPROJ_CORE})
+set(ALL_LIBPROJ_SOURCES ${SRC_LIBPROJ_PJ} ${SRC_LIBPROJ_CORE} ${SRC_LIBPROJ_CPP})
 set(ALL_LIBPROJ_HEADERS ${HEADERS_LIBPROJ} )
-if(WIN32 AND BUILD_LIBPROJ_SHARED)
-    set(ALL_LIBPROJ_SOURCES ${ALL_LIBPROJ_SOURCES} proj.def )
-endif(WIN32 AND BUILD_LIBPROJ_SHARED)
 
 # Core targets configuration
 string(TOLOWER "${PROJECT_INTERN_NAME}" PROJECTNAMEL)
@@ -313,7 +348,7 @@ endif()
 
 set_target_properties(${PROJ_CORE_TARGET}
     PROPERTIES
-    LINKER_LANGUAGE C)
+    LINKER_LANGUAGE CXX)
 
 ##############################################
 # Link properties
@@ -330,6 +365,12 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
    TARGET_LINK_LIBRARIES(${PROJ_CORE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
 endif(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
 
+include_directories(${SQLITE3_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
+
+if(MSVC)
+    target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE PROJ_MSVC_DLL_EXPORT=1)
+endif()
 
 ##############################################
 # install

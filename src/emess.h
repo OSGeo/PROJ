@@ -11,7 +11,7 @@ struct EMESS {
 
 #ifdef EMESS_ROUTINE	/* use type */
 /* for emess procedure */
-struct EMESS emess_dat = { (char *)0, (char *)0, 0 };
+struct EMESS PROJ_DLL emess_dat = { (char *)0, (char *)0, 0 };
 
 #ifdef sun /* Archaic SunOs 4.1.1, etc. */
 extern char *sys_errlist[];
@@ -20,10 +20,10 @@ extern char *sys_errlist[];
 
 #else	/* for for calling procedures */
 
-extern struct EMESS emess_dat;
+extern struct EMESS PROJ_DLL emess_dat;
 
 #endif /* use type */
 
-void emess(int, const char *, ...);
+void PROJ_DLL emess(int, const char *, ...);
 
 #endif /* end EMESS_H */

@@ -19,19 +19,20 @@ if (NOT CMAKE_VERSION VERSION_LESS 3.1)
   cmake_policy(SET CMP0054 NEW)
 endif ()
 
+add_definitions(-DPROJ_COMPILATION=1)
+
 # Set warnings
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   # Suppress warning 4706 about assignment within conditional expression
   # Suppress warning 4996 about sprintf, etc., being unsafe
-  # Suppress warning 4589 about Constructor of abstract class...ignores initializer for virtual base class (see https://github.com/weidai11/cryptopp/issues/214#issuecomment-230283061)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /wd4706 /wd4996 /wd4589 /D_CRT_SECURE_NO_WARNINGS")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -std=c++11 -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security")
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -std=c++11 -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion")
 endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to
@@ -43,8 +44,8 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:precise")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd=c++11")
   else ()
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fp-model precise")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fp-model precise")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -std=c++11")
   endif ()
 endif ()
 
@@ -74,6 +75,20 @@ include(ProjSystemInfo)
 include(ProjConfig)
 include(ProjMac)
 include(policies)
+
+#################################################################################
+# Check for sqlite3
+#################################################################################
+find_program(EXE_SQLITE3 sqlite3)
+if (NOT EXE_SQLITE3)
+MESSAGE (SEND_ERROR "sqlite3 binary not found!")
+ENDIF (NOT EXE_SQLITE3)
+
+FIND_PACKAGE(Sqlite3)
+IF (NOT SQLITE3_FOUND)
+MESSAGE (SEND_ERROR "sqlite3 dependency not found!")
+ENDIF (NOT SQLITE3_FOUND)
+
 
 #################################################################################
 # threading configuration
@@ -172,6 +187,7 @@ include_directories(${PROJ4_SOURCE_DIR}/src)
 
 message(STATUS "")
 add_subdirectory(data)
+add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(man)
 add_subdirectory(cmake)

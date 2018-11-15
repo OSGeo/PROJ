@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "proj_internal.h"
 #include "projects.h"
 
 static projCtx_t default_context;
@@ -83,6 +84,7 @@ projCtx pj_get_default_ctx()
         default_context.logger = pj_stderr_logger;
         default_context.app_data = NULL;
         default_context.fileapi = pj_get_default_fileapi();
+        default_context.cpp_context = NULL;
 
         if( getenv("PROJ_DEBUG") != NULL )
         {
@@ -111,6 +113,7 @@ projCtx pj_ctx_alloc()
         return 0;
     memcpy( ctx, pj_get_default_ctx(), sizeof(projCtx_t) );
     ctx->last_errno = 0;
+    ctx->cpp_context = NULL;
 
     return ctx;
 }
@@ -122,6 +125,7 @@ projCtx pj_ctx_alloc()
 void pj_ctx_free( projCtx ctx )
 
 {
+    proj_context_delete_cpp_context( ctx->cpp_context );
     pj_dealloc( ctx );
 }
 
