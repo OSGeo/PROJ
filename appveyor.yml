@@ -30,16 +30,16 @@ build_script:
   - if "%platform%" == "x64" cd build_dll
   - if "%platform%" == "x64" copy ..\sqlite3.exe .
   - if "%platform%" == "x64" copy c:\tools\vcpkg\installed\x64-windows\bin\sqlite3.dll .
-  - if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  - if "%platform%" == "x64" cmake --build . --config Release
+  - if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%CD%/install"
+  - if "%platform%" == "x64" cmake --build . --config Release --target install
   - if "%platform%" == "x64" cd ..
 #
   - if "%platform%" == "x86" mkdir build_static
   - if "%platform%" == "x86" cd build_static
   - if "%platform%" == "x86" copy ..\sqlite3.exe .
   - if "%platform%" == "x86" copy c:\tools\vcpkg\installed\x86-windows\bin\sqlite3.dll .
-  - if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  - if "%platform%" == "x86" cmake --build . --config Release
+  - if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%CD%/install"
+  - if "%platform%" == "x86" cmake --build . --config Release --target install
   - if "%platform%" == "x86" cd ..
 
 test_script:
