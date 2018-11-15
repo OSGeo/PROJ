@@ -26,7 +26,7 @@ make -j3
 make install
 make dist-all
 find /tmp/proj_autoconf_install
-#make check
+(cd test; make -j3)
 test/unit/test_cpp_api.exe
 cd ..
 # Now with grids
