@@ -4329,7 +4329,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Length(
                 parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
         conv->setCRSs(this, false);
-        return conv;
+        return std::move(conv);
     }
 
     if (current_epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
@@ -4350,7 +4350,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Length(
                 parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
         conv->setCRSs(this, false);
-        return conv;
+        return std::move(conv);
     }
 
     if (current_epsg_code == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP &&
@@ -4385,7 +4385,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                 common::Length(
                     parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
             conv->setCRSs(this, false);
-            return conv;
+            return std::move(conv);
         } else {
             const double K = k0 * m0 / std::pow(t0, n);
             const double phi1 =
@@ -4441,7 +4441,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                             EPSG_CODE_PARAMETER_FALSE_EASTING)),
                         common::Length(FN_corrected_rounded));
                     conv->setCRSs(this, false);
-                    return conv;
+                    return std::move(conv);
                 }
             }
 
@@ -4455,7 +4455,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                     parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_EASTING)),
                 common::Length(FN));
             conv->setCRSs(this, false);
-            return conv;
+            return std::move(conv);
         }
     }
 
@@ -4519,7 +4519,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                     EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN) +
                 (std::fabs(FN_correction) > 1e-8 ? FN_correction : 0)));
         conv->setCRSs(this, false);
-        return conv;
+        return std::move(conv);
     }
 
     return nullptr;
