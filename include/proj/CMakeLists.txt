@@ -1,4 +1,4 @@
-set(installdest include/proj)
+set(installdest ${INCLUDEDIR}/proj)
 
 install(
   FILES util.hpp metadata.hpp common.hpp crs.hpp datum.hpp
