@@ -70,6 +70,8 @@ const ParamMapping *getMapping(const MethodMapping *mapping,
                                const OperationParameterValue *param);
 const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
                                        const std::string &wkt1_name);
+bool areEquivalentParameters(const std::string &a, const std::string &b);
+
 // ---------------------------------------------------------------------------
 
 struct ESRIParamMapping {

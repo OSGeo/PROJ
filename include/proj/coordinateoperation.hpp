@@ -497,6 +497,7 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
     PROJ_INTERNAL OperationMethod();
     PROJ_INTERNAL OperationMethod(const OperationMethod &other);
     INLINED_MAKE_SHARED
+    friend class Conversion;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1296,7 +1297,7 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     INLINED_MAKE_SHARED
 
     PROJ_FRIEND(crs::ProjectedCRS);
-    PROJ_INTERNAL void addWKTExtensionNode(io::WKTFormatter *formatter) const;
+    PROJ_INTERNAL bool addWKTExtensionNode(io::WKTFormatter *formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

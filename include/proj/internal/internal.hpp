@@ -125,6 +125,8 @@ inline bool starts_with(const std::string &str, const char *prefix) noexcept {
     return std::memcmp(str.c_str(), prefix, prefixSize) == 0;
 }
 
+bool ci_less(const std::string &a, const std::string &b) noexcept;
+
 bool ci_starts_with(const char *str, const char *prefix) noexcept;
 
 bool ci_starts_with(const std::string &str, const std::string &prefix) noexcept;

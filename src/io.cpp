@@ -128,7 +128,7 @@ struct WKTFormatter::Private {
         bool primeMeridianInDegree_ = false;
         bool use2018Keywords_ = false;
         bool useESRIDialect_ = false;
-        bool outputAxis_ = true;
+        OutputAxisRule outputAxis_ = WKTFormatter::OutputAxisRule::YES;
     };
     Params params_{};
     DatabaseContextPtr dbContext_{};
@@ -225,10 +225,9 @@ WKTFormatter &WKTFormatter::setIndentationWidth(int width) noexcept {
 // ---------------------------------------------------------------------------
 
 /** \brief Set whether AXIS nodes should be output.
- *
- * This can typically be set to false for some variants of WKT1_GDAL.
  */
-WKTFormatter &WKTFormatter::setOutputAxis(bool outputAxisIn) noexcept {
+WKTFormatter &
+WKTFormatter::setOutputAxis(OutputAxisRule outputAxisIn) noexcept {
     d->params_.outputAxis_ = outputAxisIn;
     return *this;
 }
@@ -308,6 +307,8 @@ WKTFormatter::WKTFormatter(Convention convention)
         d->params_.outputAxisOrder_ = false;
         d->params_.forceUNITKeyword_ = true;
         d->params_.primeMeridianInDegree_ = true;
+        d->params_.outputAxis_ =
+            WKTFormatter::OutputAxisRule::WKT1_GDAL_EPSG_STYLE;
         break;
 
     case Convention::WKT1_ESRI:
@@ -317,7 +318,7 @@ WKTFormatter::WKTFormatter(Convention convention)
         d->params_.primeMeridianInDegree_ = true;
         d->params_.useESRIDialect_ = true;
         d->params_.multiLine_ = false;
-        d->params_.outputAxis_ = false;
+        d->params_.outputAxis_ = WKTFormatter::OutputAxisRule::NO;
         break;
 
     default:
@@ -568,7 +569,9 @@ const UnitOfMeasureNNPtr &WKTFormatter::axisAngularUnit() const {
 
 // ---------------------------------------------------------------------------
 
-bool WKTFormatter::outputAxis() const { return d->params_.outputAxis_; }
+WKTFormatter::OutputAxisRule WKTFormatter::outputAxis() const {
+    return d->params_.outputAxis_;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1185,12 +1188,18 @@ struct WKTParser::Private {
                            const UnitOfMeasure &defaultLinearUnit,
                            const UnitOfMeasure &defaultAngularUnit);
 
+    static void addExtensionProj4ToProp(const WKTNode::Private *nodeP,
+                                        PropertyMap &props);
+
     ConversionNNPtr buildConversion(const WKTNodeNNPtr &node,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
 
     static bool hasWebMercPROJ4String(const WKTNodeNNPtr &projCRSNode,
                                       const WKTNodeNNPtr &projectionNode);
+
+    static bool projectionHasParameter(const WKTNodeNNPtr &projCRSNode,
+                                       const char *paramName);
 
     ConversionNNPtr buildProjection(const WKTNodeNNPtr &projCRSNode,
                                     const WKTNodeNNPtr &projectionNode,
@@ -1940,6 +1949,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             throw ParsingException("Invalid TOWGS84 node");
         }
     }
+
     auto &extensionNode = nodeP->lookForChild(WKTConstants::EXTENSION);
     const auto &extensionChildren = extensionNode->GP()->children();
     if (extensionChildren.size() == 2) {
@@ -2403,6 +2413,19 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
 
 // ---------------------------------------------------------------------------
 
+void WKTParser::Private::addExtensionProj4ToProp(const WKTNode::Private *nodeP,
+                                                 PropertyMap &props) {
+    auto &extensionNode = nodeP->lookForChild(WKTConstants::EXTENSION);
+    const auto &extensionChildren = extensionNode->GP()->children();
+    if (extensionChildren.size() == 2) {
+        if (ci_equal(stripQuotes(extensionChildren[0]), "PROJ4")) {
+            props.set("EXTENSION_PROJ4", stripQuotes(extensionChildren[1]));
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 GeodeticCRSNNPtr
 WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
@@ -2450,6 +2473,9 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
         angularUnit = primeMeridian->longitude().unit();
     }
 
+    auto props = buildProperties(node);
+    addExtensionProj4ToProp(nodeP, props);
+
     auto datum =
         !isNull(datumNode)
             ? buildGeodeticReferenceFrame(datumNode, primeMeridian, dynamicNode)
@@ -2465,8 +2491,7 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     if (ellipsoidalCS) {
         assert(!ci_equal(nodeName, WKTConstants::GEOCCS));
         try {
-            return GeographicCRS::create(buildProperties(node), datum,
-                                         datumEnsemble,
+            return GeographicCRS::create(props, datum, datumEnsemble,
                                          NN_NO_CHECK(ellipsoidalCS));
         } catch (const util::Exception &e) {
             throw ParsingException(std::string("buildGeodeticCRS: ") +
@@ -2487,8 +2512,8 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
                 "Cartesian CS for a GeodeticCRS should have 3 axis");
         }
         try {
-            return GeodeticCRS::create(buildProperties(node), datum,
-                                       datumEnsemble, NN_NO_CHECK(cartesianCS));
+            return GeodeticCRS::create(props, datum, datumEnsemble,
+                                       NN_NO_CHECK(cartesianCS));
         } catch (const util::Exception &e) {
             throw ParsingException(std::string("buildGeodeticCRS: ") +
                                    e.what());
@@ -2498,8 +2523,8 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     auto sphericalCS = nn_dynamic_pointer_cast<SphericalCS>(cs);
     if (sphericalCS) {
         try {
-            return GeodeticCRS::create(buildProperties(node), datum,
-                                       datumEnsemble, NN_NO_CHECK(sphericalCS));
+            return GeodeticCRS::create(props, datum, datumEnsemble,
+                                       NN_NO_CHECK(sphericalCS));
         } catch (const util::Exception &e) {
             throw ParsingException(std::string("buildGeodeticCRS: ") +
                                    e.what());
@@ -2582,7 +2607,8 @@ UnitOfMeasure WKTParser::Private::guessUnitForParameter(
                ci_find(paramName, "meridian") != std::string::npos ||
                ci_find(paramName, "parallel") != std::string::npos ||
                ci_find(paramName, "azimuth") != std::string::npos ||
-               ci_find(paramName, "angle") != std::string::npos) {
+               ci_find(paramName, "angle") != std::string::npos ||
+               ci_find(paramName, "heading") != std::string::npos) {
         unit = defaultAngularUnit;
     } else if (ci_find(paramName, "easting") != std::string::npos ||
                ci_find(paramName, "northing") != std::string::npos ||
@@ -2839,8 +2865,15 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
                                        defaultLinearUnit, defaultAngularUnit);
     }
 
+    struct ci_less_struct {
+        bool operator()(const std::string &lhs, const std::string &rhs) const
+            noexcept {
+            return ci_less(lhs, rhs);
+        }
+    };
+
     // Build a map of present parameters
-    std::map<std::string, std::string> mapParamNameToValue;
+    std::map<std::string, std::string, ci_less_struct> mapParamNameToValue;
     for (const auto &childNode : projCRSNode->GP()->children()) {
         if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
             const auto &childNodeChildren = childNode->GP()->children();
@@ -2888,7 +2921,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
 
     const auto *wkt2_mapping = getMapping(esriMapping->wkt2_name);
     assert(wkt2_mapping);
-    if (esriProjectionName == "Stereographic") {
+    if (ci_equal(esriProjectionName, "Stereographic")) {
         try {
             if (std::fabs(io::asDouble(
                     mapParamNameToValue["Latitude_Of_Origin"])) == 90.0) {
@@ -2937,9 +2970,20 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
         if (iter == mapWKT2NameToESRIName.end()) {
             continue;
         }
-        auto iter2 = mapParamNameToValue.find(iter->second);
-        if (iter2 == mapParamNameToValue.end()) {
-            continue;
+        const auto &esriParamName = iter->second;
+        auto iter2 = mapParamNameToValue.find(esriParamName);
+        auto mapParamNameToValueEnd = mapParamNameToValue.end();
+        if (iter2 == mapParamNameToValueEnd) {
+            // In case we don't find a direct match, try the aliases
+            for (iter2 = mapParamNameToValue.begin();
+                 iter2 != mapParamNameToValueEnd; ++iter2) {
+                if (areEquivalentParameters(iter2->first, esriParamName)) {
+                    break;
+                }
+            }
+            if (iter2 == mapParamNameToValueEnd) {
+                continue;
+            }
         }
 
         PropertyMap propertiesParameter;
@@ -2987,13 +3031,31 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
     return buildProjectionStandard(projCRSNode, projectionNode,
                                    defaultLinearUnit, defaultAngularUnit);
 }
+
+// ---------------------------------------------------------------------------
+
+bool WKTParser::Private::projectionHasParameter(const WKTNodeNNPtr &projCRSNode,
+                                                const char *paramName) {
+    for (const auto &childNode : projCRSNode->GP()->children()) {
+        if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
+            const auto &childNodeChildren = childNode->GP()->children();
+            if (childNodeChildren.size() == 2 &&
+                metadata::Identifier::isEquivalentName(
+                    stripQuotes(childNodeChildren[0]).c_str(), paramName)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode,
     const UnitOfMeasure &defaultLinearUnit,
     const UnitOfMeasure &defaultAngularUnit) {
-    const std::string wkt1ProjectionName =
+    std::string wkt1ProjectionName =
         stripQuotes(projectionNode->GP()->children()[0]);
 
     std::vector<OperationParameterNNPtr> parameters;
@@ -3003,23 +3065,32 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     auto &extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
     const auto &extensionChildren = extensionNode->GP()->children();
 
+    bool gdal_3026_hack = false;
     if (metadata::Identifier::isEquivalentName(wkt1ProjectionName.c_str(),
                                                "Mercator_1SP") &&
-        projCRSNode->countChildrenOfName("center_latitude") == 0) {
+        !projectionHasParameter(projCRSNode, "center_latitude")) {
 
-        // The latitude of origin, which should always be zero, is
-        // missing
-        // in GDAL WKT1, but provisionned in the EPSG Mercator_1SP
-        // definition,
-        // so add it manually.
-        PropertyMap propertiesParameter;
-        propertiesParameter.set(IdentifiedObject::NAME_KEY,
-                                "Latitude of natural origin");
-        propertiesParameter.set(Identifier::CODE_KEY, 8801);
-        propertiesParameter.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
-        parameters.push_back(OperationParameter::create(propertiesParameter));
-        values.push_back(
-            ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
+        // Hack for https://trac.osgeo.org/gdal/ticket/3026
+        if (projectionHasParameter(projCRSNode, "latitude_of_origin")) {
+            wkt1ProjectionName = "Mercator_2SP";
+            gdal_3026_hack = true;
+        } else {
+            // The latitude of origin, which should always be zero, is
+            // missing
+            // in GDAL WKT1, but provisionned in the EPSG Mercator_1SP
+            // definition,
+            // so add it manually.
+            PropertyMap propertiesParameter;
+            propertiesParameter.set(IdentifiedObject::NAME_KEY,
+                                    "Latitude of natural origin");
+            propertiesParameter.set(Identifier::CODE_KEY, 8801);
+            propertiesParameter.set(Identifier::CODESPACE_KEY,
+                                    Identifier::EPSG);
+            parameters.push_back(
+                OperationParameter::create(propertiesParameter));
+            values.push_back(
+                ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
+        }
 
     } else if (metadata::Identifier::isEquivalentName(
                    wkt1ProjectionName.c_str(), "Polar_Stereographic")) {
@@ -3036,7 +3107,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                                                       defaultLinearUnit,
                                                       defaultAngularUnit);
                     mapParameters.insert(std::pair<std::string, Measure>(
-                        wkt1ParameterName, Measure(val, unit)));
+                        tolower(wkt1ParameterName), Measure(val, unit)));
                 } catch (const std::exception &) {
                 }
             }
@@ -3051,6 +3122,16 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
         Measure falseEasting = mapParameters["false_easting"];
         Measure falseNorthing = mapParameters["false_northing"];
         if (latitudeOfOrigin.unit() != UnitOfMeasure::NONE &&
+            scaleFactor.getSIValue() == 1.0) {
+            return Conversion::createPolarStereographicVariantB(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                Angle(latitudeOfOrigin.value(), latitudeOfOrigin.unit()),
+                Angle(centralMeridian.value(), centralMeridian.unit()),
+                Length(falseEasting.value(), falseEasting.unit()),
+                Length(falseNorthing.value(), falseNorthing.unit()));
+        }
+
+        if (latitudeOfOrigin.unit() != UnitOfMeasure::NONE &&
             std::fabs(std::fabs(latitudeOfOrigin.convertToUnit(
                           UnitOfMeasure::DEGREE)) -
                       90.0) < 1e-10) {
@@ -3061,15 +3142,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                 Scale(scaleFactor.value(), scaleFactor.unit()),
                 Length(falseEasting.value(), falseEasting.unit()),
                 Length(falseNorthing.value(), falseNorthing.unit()));
-        } else if (latitudeOfOrigin.unit() != UnitOfMeasure::NONE &&
-                   scaleFactor.getSIValue() == 1.0) {
-            return Conversion::createPolarStereographicVariantB(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
-                Angle(latitudeOfOrigin.value(), latitudeOfOrigin.unit()),
-                Angle(centralMeridian.value(), centralMeridian.unit()),
-                Length(falseEasting.value(), falseEasting.unit()),
-                Length(falseNorthing.value(), falseNorthing.unit()));
         }
+
         tryToIdentifyWKT1Method = false;
         // Import GDAL PROJ4 extension nodes
     } else if (extensionChildren.size() == 2 &&
@@ -3124,13 +3198,32 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
             if (childNodeChildren.size() < 2) {
                 ThrowNotEnoughChildren(WKTConstants::PARAMETER);
             }
+            const auto &paramValue = childNodeChildren[1]->GP()->value();
+
             PropertyMap propertiesParameter;
             const std::string wkt1ParameterName(
                 stripQuotes(childNodeChildren[0]));
             std::string parameterName(wkt1ParameterName);
+            if (gdal_3026_hack) {
+                if (ci_equal(parameterName, "latitude_of_origin")) {
+                    parameterName = "standard_parallel_1";
+                } else if (ci_equal(parameterName, "scale_factor") &&
+                           paramValue == "1") {
+                    continue;
+                }
+            }
             const auto *paramMapping =
                 mapping ? getMappingFromWKT1(mapping, parameterName) : nullptr;
-            if (paramMapping) {
+            if (mapping &&
+                mapping->epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
+                ci_equal(parameterName, "latitude_of_origin")) {
+                parameterName = EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN;
+                propertiesParameter.set(
+                    Identifier::CODE_KEY,
+                    EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
+                propertiesParameter.set(Identifier::CODESPACE_KEY,
+                                        Identifier::EPSG);
+            } else if (paramMapping) {
                 parameterName = paramMapping->wkt2_name;
                 if (paramMapping->epsg_code != 0) {
                     propertiesParameter.set(Identifier::CODE_KEY,
@@ -3142,7 +3235,6 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
             propertiesParameter.set(IdentifiedObject::NAME_KEY, parameterName);
             parameters.push_back(
                 OperationParameter::create(propertiesParameter));
-            const auto &paramValue = childNodeChildren[1]->GP()->value();
             try {
                 double val = io::asDouble(paramValue);
                 auto unit = guessUnitForParameter(
@@ -3301,6 +3393,8 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             }
         }
     }
+
+    addExtensionProj4ToProp(nodeP, props);
 
     return ProjectedCRS::create(props, baseGeodCRS, conversion,
                                 NN_NO_CHECK(cartesianCS));
@@ -4226,6 +4320,14 @@ IPROJStringExportable::~IPROJStringExportable() = default;
 std::string IPROJStringExportable::exportToPROJString(
     PROJStringFormatter *formatter) const {
     _exportToPROJString(formatter);
+    if (formatter->getAddNoDefs() &&
+        formatter->convention() ==
+            io::PROJStringFormatter::Convention::PROJ_4 &&
+        dynamic_cast<const crs::CRS *>(this)) {
+        if (!formatter->hasParam("no_defs")) {
+            formatter->addParam("no_defs");
+        }
+    }
     return formatter->toString();
 }
 //! @endcond
@@ -4291,6 +4393,8 @@ struct PROJStringFormatter::Private {
     bool omitZUnitConversion_ = false;
     DatabaseContextPtr dbContext_{};
     bool useETMercForTMerc_ = false;
+    bool useETMercForTMercSet_ = false;
+    bool addNoDefs_ = true;
 
     std::string result_{};
 
@@ -4346,6 +4450,7 @@ PROJStringFormatter::create(Convention conventionIn,
  * instead of tmerc */
 void PROJStringFormatter::setUseETMercForTMerc(bool flag) {
     d->useETMercForTMerc_ = flag;
+    d->useETMercForTMercSet_ = true;
 }
 
 // ---------------------------------------------------------------------------
@@ -4768,7 +4873,8 @@ PROJStringFormatter::Convention PROJStringFormatter::convention() const {
 
 // ---------------------------------------------------------------------------
 
-bool PROJStringFormatter::getUseETMercForTMerc() const {
+bool PROJStringFormatter::getUseETMercForTMerc(bool &settingSetOut) const {
+    settingSetOut = d->useETMercForTMercSet_;
     return d->useETMercForTMerc_;
 }
 
@@ -4962,6 +5068,27 @@ void PROJStringFormatter::setCurrentStepInverted(bool inverted) {
 
 // ---------------------------------------------------------------------------
 
+bool PROJStringFormatter::hasParam(const char *paramName) const {
+    if (!d->steps_.empty()) {
+        for (const auto &paramValue : d->steps_.back().paramValues) {
+            if (paramValue.keyEquals(paramName)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addNoDefs(bool b) { d->addNoDefs_ = b; }
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::getAddNoDefs() const { return d->addNoDefs_; }
+
+// ---------------------------------------------------------------------------
+
 void PROJStringFormatter::addParam(const std::string &paramName) {
     if (d->steps_.empty()) {
         d->addStep();
@@ -5136,6 +5263,8 @@ struct PROJStringParser::Private {
     DatabaseContextPtr dbContext_{};
     std::vector<std::string> warningList_{};
 
+    std::string projString_{};
+
     std::vector<Step> steps_{};
     std::vector<Step::KeyValue> globalParamValues_{};
     std::string title_{};
@@ -5166,6 +5295,16 @@ struct PROJStringParser::Private {
         }
         for (const auto &pair : step.paramValues) {
             if (ci_equal(pair.key, key)) {
+                return pair.value;
+            }
+        }
+        return emptyString;
+    }
+
+    // cppcheck-suppress functionStatic
+    const std::string &getParamValueK(const Step &step) {
+        for (const auto &pair : step.paramValues) {
+            if (ci_equal(pair.key, "k") || ci_equal(pair.key, "k_0")) {
                 return pair.value;
             }
         }
@@ -5383,7 +5522,7 @@ static const struct DatumDesc {
 
 // ---------------------------------------------------------------------------
 
-static bool isGeodeticStep(const std::string &name) {
+static bool isGeographicStep(const std::string &name) {
     return name == "longlat" || name == "lonlat" || name == "latlong" ||
            name == "latlon";
 }
@@ -5483,19 +5622,38 @@ PROJStringParser::Private::buildDatum(const Step &step,
     const auto &aStr = getParamValue(step, "a");
     const auto &bStr = getParamValue(step, "b");
     const auto &rfStr = getParamValue(step, "rf");
+    const auto &fStr = getParamValue(step, "f");
     const auto &RStr = getParamValue(step, "R");
     const util::optional<std::string> optionalEmptyString{};
 
     PrimeMeridianNNPtr pm(buildPrimeMeridian(step));
     PropertyMap grfMap;
 
+    // It is arguable that we allow the prime meridian of a datum defined by
+    // its name to be overriden, but this is found at least in a regression test
+    // of GDAL. So let's keep the ellipsoid part of the datum in that case and
+    // use the specified prime meridian.
+    const auto overridePmIfNeeded =
+        [&pm](const GeodeticReferenceFrameNNPtr &grf) {
+            if (pm->_isEquivalentTo(PrimeMeridian::GREENWICH.get())) {
+                return grf;
+            } else {
+                return GeodeticReferenceFrame::create(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                      "Unknown based on " +
+                                          grf->ellipsoid()->nameStr() +
+                                          " ellipsoid"),
+                    grf->ellipsoid(), grf->anchorDefinition(), pm);
+            }
+        };
+
     if (!datumStr.empty()) {
         if (datumStr == "WGS84") {
-            return GeodeticReferenceFrame::EPSG_6326;
+            return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6326);
         } else if (datumStr == "NAD83") {
-            return GeodeticReferenceFrame::EPSG_6269;
+            return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6269);
         } else if (datumStr == "NAD27") {
-            return GeodeticReferenceFrame::EPSG_6267;
+            return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6267);
         } else {
 
             for (const auto &datumDesc : datumDescs) {
@@ -5621,6 +5779,29 @@ PROJStringParser::Private::buildDatum(const Step &step,
             ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
+    else if (!aStr.empty() && !fStr.empty()) {
+        double a;
+        try {
+            a = c_locale_stod(aStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid a value");
+        }
+        double f;
+        try {
+            f = c_locale_stod(fStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid f value");
+        }
+        auto ellipsoid = Ellipsoid::createFlattenedSphere(
+                             createMapWithUnknownName(), Length(a),
+                             Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
+                             ->identify();
+        return GeodeticReferenceFrame::create(
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       title.empty() ? "unknown" : title.c_str()),
+            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+    }
+
     else if (!RStr.empty()) {
         double R;
         try {
@@ -5637,7 +5818,7 @@ PROJStringParser::Private::buildDatum(const Step &step,
     }
 
     if (!aStr.empty() && bStr.empty() && rfStr.empty()) {
-        throw ParsingException("a found, but b or rf missing");
+        throw ParsingException("a found, but b, f or rf missing");
     }
 
     if (!bStr.empty() && aStr.empty()) {
@@ -5648,14 +5829,11 @@ PROJStringParser::Private::buildDatum(const Step &step,
         throw ParsingException("rf found, but a missing");
     }
 
-    if (pm->_isEquivalentTo(PrimeMeridian::GREENWICH.get())) {
-        return GeodeticReferenceFrame::EPSG_6326;
-    } else {
-        return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       "Unknown based on WGS84 ellipsoid"),
-            Ellipsoid::WGS84, optionalEmptyString, pm);
+    if (!fStr.empty() && aStr.empty()) {
+        throw ParsingException("f found, but a missing");
     }
+
+    return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6326);
 }
 
 // ---------------------------------------------------------------------------
@@ -5830,15 +6008,20 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
                                               bool ignorePROJAxis) {
     const auto &step = steps_[iStep];
 
-    const auto &title = isGeodeticStep(step.name) ? title_ : emptyString;
+    const bool l_isGeographicStep = isGeographicStep(step.name);
+    const auto &title = l_isGeographicStep ? title_ : emptyString;
 
     auto datum = buildDatum(step, title);
 
+    auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                   title.empty() ? "unknown" : title);
+    if (l_isGeographicStep && hasParamValue(step, "wktext")) {
+        props.set("EXTENSION_PROJ4", projString_);
+    }
+
     return GeographicCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                          title.empty() ? "unknown" : title),
-        datum, buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignoreVUnits,
-                                  ignorePROJAxis));
+        props, datum, buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap,
+                                         ignoreVUnits, ignorePROJAxis));
 }
 
 // ---------------------------------------------------------------------------
@@ -5889,11 +6072,14 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
         }
     }
 
+    auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                   title.empty() ? "unknown" : title);
+    if (hasParamValue(step, "wktext")) {
+        props.set("EXTENSION_PROJ4", projString_);
+    }
+
     auto cs = CartesianCS::createGeocentric(unit);
-    return GeodeticCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                          title.empty() ? "unknown" : title),
-        datum, cs);
+    return GeodeticCRS::create(props, datum, cs);
 }
 
 // ---------------------------------------------------------------------------
@@ -5997,30 +6183,29 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     if (!buildPrimeMeridian(step)->longitude()._isEquivalentTo(
             geogCRS->primeMeridian()->longitude(),
             util::IComparable::Criterion::EQUIVALENT)) {
-        throw ParsingException("inconsistant pm values between projectedCRS "
+        throw ParsingException("inconsistent pm values between projectedCRS "
                                "and its base geographicalCRS");
     }
 
     auto axisType = AxisType::REGULAR;
 
-    if (step.name == "tmerc" && getParamValue(step, "axis") == "wsu") {
+    if (step.name == "tmerc" &&
+        ((getParamValue(step, "axis") == "wsu" && iAxisSwap < 0) ||
+         (iAxisSwap > 0 &&
+          getParamValue(steps_[iAxisSwap], "order") == "-1,-2"))) {
         mapping =
             getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED);
     } else if (step.name == "etmerc") {
         mapping = getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
-        // TODO: we loose the link to the proj etmerc method here. Add some
-        // property to Conversion to keep it ?
     } else if (step.name == "lcc") {
         const auto &lat_0 = getParamValue(step, "lat_0");
         const auto &lat_1 = getParamValue(step, "lat_1");
         const auto &lat_2 = getParamValue(step, "lat_2");
-        const auto &k_0 = getParamValue(step, "k_0");
-        const auto &k = getParamValue(step, "k");
+        const auto &k = getParamValueK(step);
         if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
             getAngularValue(lat_0) == getAngularValue(lat_1)) {
             mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
-        } else if ((!k_0.empty() && getNumericValue(k_0) != 1.0) ||
-                   (!k.empty() && getNumericValue(k) != 1.0)) {
+        } else if (!k.empty() && getNumericValue(k) != 1.0) {
             mapping = getMapping(
                 EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN);
         } else {
@@ -6058,15 +6243,17 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         step.paramValues.emplace_back(Step::KeyValue("gamma", "90"));
         step.paramValues.emplace_back(
             Step::KeyValue("lonc", getParamValue(step, "lon_0")));
-    } else if (step.name == "krovak" && getParamValue(step, "axis") == "swu") {
+    } else if (step.name == "krovak" &&
+               ((getParamValue(step, "axis") == "swu" && iAxisSwap < 0) ||
+                (iAxisSwap > 0 &&
+                 getParamValue(steps_[iAxisSwap], "order") == "-2,-1"))) {
         mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
     } else if (step.name == "merc") {
         if (hasParamValue(step, "a") && hasParamValue(step, "b") &&
             getParamValue(step, "a") == getParamValue(step, "b") &&
             (!hasParamValue(step, "lat_ts") ||
              getAngularValue(getParamValue(step, "lat_ts")) == 0.0) &&
-            (!hasParamValue(step, "k") ||
-             getNumericValue(getParamValue(step, "k")) == 1.0) &&
+            getNumericValue(getParamValueK(step)) == 1.0 &&
             getParamValue(step, "nadgrids") == "@null") {
             mapping = getMapping(
                 EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR);
@@ -6091,7 +6278,16 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             } else {
                 axisType = AxisType::SOUTH_POLE;
             }
-            if (hasParamValue(step, "lat_ts")) {
+            const auto &lat_ts = getParamValue(step, "lat_ts");
+            const auto &k = getParamValueK(step);
+            if (!lat_ts.empty() &&
+                std::fabs(getAngularValue(lat_ts) - lat_0) > 1e-10 &&
+                !k.empty() && std::fabs(getNumericValue(k) - 1) > 1e-10) {
+                throw ParsingException("lat_ts != lat_0 and k != 1 not "
+                                       "supported for Polar Stereographic");
+            }
+            if (!lat_ts.empty() &&
+                (k.empty() || std::fabs(getNumericValue(k) - 1) < 1e-10)) {
                 mapping =
                     getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B);
             } else {
@@ -6161,14 +6357,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             const auto *param = mapping->params[i];
             std::string proj_name(param->proj_name ? param->proj_name : "");
             const std::string *paramValue =
-                !proj_name.empty() ? &getParamValue(step, proj_name)
-                                   : &emptyString;
-            // k and k_0 may be used indifferently
-            if (paramValue->empty() && proj_name == "k") {
-                paramValue = &getParamValue(step, "k_0");
-            } else if (paramValue->empty() && proj_name == "k_0") {
-                paramValue = &getParamValue(step, "k");
-            }
+                (proj_name == "k" || proj_name == "k_0")
+                    ? &getParamValueK(step)
+                    : !proj_name.empty() ? &getParamValue(step, proj_name)
+                                         : &emptyString;
             double value = 0;
             if (!paramValue->empty()) {
                 bool hasError = false;
@@ -6231,6 +6423,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                           : param->unit_type == UnitOfMeasure::Type::SCALE
                                 ? UnitOfMeasure::SCALE_UNITY
                                 : UnitOfMeasure::NONE)));
+        }
+
+        if (step.name == "etmerc") {
+            methodMap.set("proj_method", "etmerc");
         }
 
         conv = Conversion::create(mapWithUnknownName, methodMap, parameters,
@@ -6296,10 +6492,14 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     auto cs = CartesianCS::create(emptyPropertyMap, axis[0], axis[1]);
 
-    CRSNNPtr crs = ProjectedCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                          title.empty() ? "unknown" : title),
-        geogCRS, NN_NO_CHECK(conv), cs);
+    auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                   title.empty() ? "unknown" : title);
+
+    if (hasParamValue(step, "wktext")) {
+        props.set("EXTENSION_PROJ4", projString_);
+    }
+
+    CRSNNPtr crs = ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
 
     if (!hasParamValue(step, "geoidgrids") &&
         (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter"))) {
@@ -6322,7 +6522,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
 static bool isDatumDefiningParam(const std::string &param) {
     return (param == "datum" || param == "ellps" || param == "a" ||
-            param == "b" || param == "rf" || param == "R");
+            param == "b" || param == "rf" || param == "f" || param == "R");
 }
 
 // ---------------------------------------------------------------------------
@@ -6585,6 +6785,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     std::string vunits;
     std::string vto_meter;
 
+    d->projString_ = projString;
     PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_,
                            d->title_, vunits, vto_meter);
 
@@ -6613,10 +6814,11 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     if ((d->steps_.size() == 1 ||
          (d->steps_.size() == 2 && d->steps_[1].name == "unitconvert")) &&
         isGeocentricStep(d->steps_[0].name)) {
-        return d->buildGeocentricCRS(
-            0, (d->steps_.size() == 2 && d->steps_[1].name == "unitconvert")
-                   ? 1
-                   : -1);
+        return d->buildBoundOrCompoundCRSIfNeeded(
+            0, d->buildGeocentricCRS(0, (d->steps_.size() == 2 &&
+                                         d->steps_[1].name == "unitconvert")
+                                            ? 1
+                                            : -1));
     }
 
     int iFirstGeogStep = -1;
@@ -6633,7 +6835,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     bool unexpectedStructure = false;
     for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
         const auto &stepName = d->steps_[i].name;
-        if (isGeodeticStep(stepName)) {
+        if (isGeographicStep(stepName)) {
             if (iFirstGeogStep < 0) {
                 iFirstGeogStep = i;
             } else if (iSecondGeogStep < 0) {

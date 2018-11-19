@@ -88,6 +88,11 @@ static const ParamMapping paramScaleFactor = {
     EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
     common::UnitOfMeasure::Type::SCALE, k_0};
 
+static const ParamMapping paramScaleFactorK = {
+    EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+    EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
+    common::UnitOfMeasure::Type::SCALE, k};
+
 static const ParamMapping paramFalseEasting = {
     EPSG_NAME_PARAMETER_FALSE_EASTING, EPSG_CODE_PARAMETER_FALSE_EASTING,
     WKT1_FALSE_EASTING, common::UnitOfMeasure::Type::LINEAR, x_0};
@@ -128,6 +133,10 @@ static const ParamMapping paramLatitude2ndStdParallel = {
 
 static const ParamMapping *const paramsNatOriginScale[] = {
     &paramLatitudeNatOrigin, &paramLongitudeNatOrigin, &paramScaleFactor,
+    &paramFalseEasting,      &paramFalseNorthing,      nullptr};
+
+static const ParamMapping *const paramsNatOriginScaleK[] = {
+    &paramLatitudeNatOrigin, &paramLongitudeNatOrigin, &paramScaleFactorK,
     &paramFalseEasting,      &paramFalseNorthing,      nullptr};
 
 static const ParamMapping paramLatFirstPoint = {
@@ -243,9 +252,11 @@ static const ParamMapping *const paramsEQDC[] = {&paramLatNatLatCenter,
 static const ParamMapping *const paramsLonNatOrigin[] = {
     &paramLongitudeNatOrigin, &paramFalseEasting, &paramFalseNorthing, nullptr};
 
-static const ParamMapping *const paramsEqc[] = // same as paramsCEA
-    {&paramLat1stParallelLatTs, &paramLongitudeNatOrigin, &paramFalseEasting,
-     &paramFalseNorthing, nullptr};
+static const ParamMapping *const paramsEqc[] = {
+    &paramLat1stParallelLatTs,
+    &paramLatitudeNatOrigin, // extension of EPSG, but used by GDAL / PROJ
+    &paramLongitudeNatOrigin,  &paramFalseEasting,
+    &paramFalseNorthing,       nullptr};
 
 static const ParamMapping paramSatelliteHeight = {
     "Satellite Height", 0, "satellite_height",
@@ -331,7 +342,7 @@ static const ParamMapping paramLonPoint2 = {
     common::UnitOfMeasure::Type::ANGULAR, lon_2};
 
 static const ParamMapping *const paramsHomTwoPoint[] = {
-    &paramLatCentreLatOrigin,
+    &paramLatCentreLatCenter,
     &paramLatPoint1,
     &paramLonPoint1,
     &paramLatPoint2,
@@ -342,9 +353,8 @@ static const ParamMapping *const paramsHomTwoPoint[] = {
     nullptr};
 
 static const ParamMapping *const paramsIMWP[] = {
-    &paramLongitudeNatOrigin,     &paramLatitude1stStdParallel,
-    &paramLatitude2ndStdParallel, &paramFalseEasting,
-    &paramFalseNorthing,          nullptr};
+    &paramLongitudeNatOrigin, &paramLatFirstPoint, &paramLatSecondPoint,
+    &paramFalseEasting,       &paramFalseNorthing, nullptr};
 
 static const ParamMapping paramLonCentreLonCenter = {
     EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN,
@@ -355,7 +365,7 @@ static const ParamMapping paramColatitudeConeAxis = {
     EPSG_NAME_PARAMETER_COLATITUDE_CONE_AXIS,
     EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS, WKT1_AZIMUTH,
     common::UnitOfMeasure::Type::ANGULAR,
-    nullptr}; /* ignored by PROJ currently */
+    "alpha"}; /* ignored by PROJ currently */
 
 static const ParamMapping paramLatitudePseudoStdParallel = {
     EPSG_NAME_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL,
@@ -392,11 +402,6 @@ static const ParamMapping paramLatMerc1SP = {
     nullptr, // always set to zero, not to be exported in WKT1
     common::UnitOfMeasure::Type::ANGULAR,
     nullptr}; // always set to zero, not to be exported in PROJ strings
-
-static const ParamMapping paramScaleFactorK = {
-    EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
-    EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
-    common::UnitOfMeasure::Type::SCALE, k};
 
 static const ParamMapping *const paramsMerc1SP[] = {
     &paramLatMerc1SP,   &paramLongitudeNatOrigin, &paramScaleFactorK,
@@ -492,12 +497,12 @@ static const ParamMapping *const paramsLabordeObliqueMercator[] = {
 
 static const MethodMapping methodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
-     "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScale},
+     "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
 
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
      EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
      "Transverse_Mercator_South_Orientated", "tmerc", "axis=wsu",
-     paramsNatOriginScale},
+     paramsNatOriginScaleK},
 
     {PROJ_WKT2_NAME_METHOD_TWO_POINT_EQUIDISTANT, 0, "Two_Point_Equidistant",
      "tpeqd", nullptr, paramsTPEQD},
@@ -605,7 +610,7 @@ static const MethodMapping methodMappings[] = {
     {PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE, 0,
      "Interrupted_Goode_Homolosine", "igh", nullptr, paramsLonNatOrigin},
 
-    // No WKT1 representation fr sweep=x
+    // No proper WKT1 representation fr sweep=x
     {PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X, 0, nullptr, "geos",
      "sweep=x", paramsGeos},
 

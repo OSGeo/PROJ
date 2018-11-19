@@ -143,7 +143,7 @@ static std::set<std::string> buildSetEquivalentParameters() {
 
     std::set<std::string> set;
 
-    const char *const listOfEquivalentParameterNames[][5] = {
+    const char *const listOfEquivalentParameterNames[][7] = {
         {"latitude_of_point_1", "Latitude_Of_1st_Point", nullptr},
         {"longitude_of_point_1", "Longitude_Of_1st_Point", nullptr},
         {"latitude_of_point_2", "Latitude_Of_2nd_Point", nullptr},
@@ -157,11 +157,13 @@ static std::set<std::string> buildSetEquivalentParameters() {
          EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN,
          EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE, nullptr},
 
-        {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+        {WKT1_LATITUDE_OF_ORIGIN, WKT1_LATITUDE_OF_CENTER,
+         EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
          EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN,
          EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE, nullptr},
 
-        {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+        {WKT1_CENTRAL_MERIDIAN, WKT1_LONGITUDE_OF_CENTER,
+         EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
          EPSG_NAME_PARAMETER_LONGITUDE_FALSE_ORIGIN,
          EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
          EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN, nullptr},
@@ -179,8 +181,7 @@ static std::set<std::string> buildSetEquivalentParameters() {
     return set;
 }
 
-static bool areEquivalentParameters(const std::string &a,
-                                    const std::string &b) {
+bool areEquivalentParameters(const std::string &a, const std::string &b) {
 
     static const std::set<std::string> setEquivalentParameters =
         buildSetEquivalentParameters();
@@ -690,6 +691,7 @@ struct OperationMethod::Private {
     util::optional<std::string> formula_{};
     util::optional<metadata::Citation> formulaCitation_{};
     std::vector<GeneralOperationParameterNNPtr> parameters_{};
+    std::string projMethodOverride_{};
 };
 //! @endcond
 
@@ -767,6 +769,7 @@ OperationMethodNNPtr OperationMethod::create(
     method->assignSelf(method);
     method->setProperties(properties);
     method->d->parameters_ = parameters;
+    properties.getStringValue("proj_method", method->d->projMethodOverride_);
     return method;
 }
 
@@ -823,12 +826,17 @@ void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
         if (mapping == nullptr) {
             l_name = replaceAll(l_name, " ", "_");
         } else {
-            if (mapping->wkt1_name == nullptr) {
-                throw io::FormattingException(
-                    std::string("Unsupported conversion method: ") +
-                    mapping->wkt2_name);
+            if (l_name ==
+                PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X) {
+                l_name = "Geostationary_Satellite";
+            } else {
+                if (mapping->wkt1_name == nullptr) {
+                    throw io::FormattingException(
+                        std::string("Unsupported conversion method: ") +
+                        mapping->wkt2_name);
+                }
+                l_name = mapping->wkt1_name;
             }
-            l_name = mapping->wkt1_name;
         }
     }
     formatter->addQuotedString(l_name);
@@ -2870,7 +2878,7 @@ ConversionNNPtr Conversion::createEquidistantCylindrical(
     const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
     const common::Length &falseNorthing) {
     return create(properties, EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL,
-                  createParams(latitudeFirstParallel, longitudeNatOrigin,
+                  createParams(latitudeFirstParallel, 0.0, longitudeNatOrigin,
                                falseEasting, falseNorthing));
 }
 
@@ -2905,7 +2913,7 @@ ConversionNNPtr Conversion::createEquidistantCylindricalSpherical(
     const common::Length &falseNorthing) {
     return create(properties,
                   EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL,
-                  createParams(latitudeFirstParallel, longitudeNatOrigin,
+                  createParams(latitudeFirstParallel, 0.0, longitudeNatOrigin,
                                falseEasting, falseNorthing));
 }
 
@@ -4781,8 +4789,30 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
 
         const MethodMapping *mapping =
             !isWKT2 ? getMapping(l_method.get()) : nullptr;
-        for (const auto &paramValue : parameterValues()) {
-            paramValue->_exportToWKT(formatter, mapping);
+        for (const auto &genOpParamvalue : parameterValues()) {
+
+            // EPSG has normally no Latitude of natural origin for Equidistant
+            // Cylindrical but PROJ can handle it, so output the parameter if
+            // not zero
+            if ((methodEPSGCode == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL ||
+                 methodEPSGCode ==
+                     EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL)) {
+                auto opParamvalue =
+                    dynamic_cast<const OperationParameterValue *>(
+                        genOpParamvalue.get());
+                if (opParamvalue &&
+                    opParamvalue->parameter()->getEPSGCode() ==
+                        EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) {
+                    const auto &paramValue = opParamvalue->parameterValue();
+                    if (paramValue->type() == ParameterValue::Type::MEASURE) {
+                        const auto &measure = paramValue->value();
+                        if (measure.getSIValue() == 0) {
+                            continue;
+                        }
+                    }
+                }
+            }
+            genOpParamvalue->_exportToWKT(formatter, mapping);
         }
     }
 
@@ -4899,14 +4929,29 @@ createPROJExtensionFromCustomProj(const Conversion *conv,
 
 // ---------------------------------------------------------------------------
 
-void Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
+bool Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
-        const auto &methodName = method()->nameStr();
-        const int methodEPSGCode = method()->getEPSGCode();
-        if (methodEPSGCode ==
-                EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR ||
-            nameStr() == "Popular Visualisation Mercator") {
+        const auto &l_method = method();
+        const auto &methodName = l_method->nameStr();
+        const int methodEPSGCode = l_method->getEPSGCode();
+        int zone = 0;
+        bool north = true;
+        if (l_method->getPrivate()->projMethodOverride_ == "etmerc" &&
+            !isUTM(zone, north)) {
+            auto projFormatter = io::PROJStringFormatter::create(
+                io::PROJStringFormatter::Convention::PROJ_4);
+            projFormatter->setUseETMercForTMerc(true);
+            formatter->startNode(io::WKTConstants::EXTENSION, false);
+            formatter->addQuotedString("PROJ4");
+            _exportToPROJString(projFormatter.get());
+            projFormatter->addParam("no_defs");
+            formatter->addQuotedString(projFormatter->toString());
+            formatter->endNode();
+            return true;
+        } else if (methodEPSGCode ==
+                       EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR ||
+                   nameStr() == "Popular Visualisation Mercator") {
 
             auto projFormatter = io::PROJStringFormatter::create(
                 io::PROJStringFormatter::Convention::PROJ_4);
@@ -4915,6 +4960,7 @@ void Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
                 formatter->addQuotedString("PROJ4");
                 formatter->addQuotedString(projFormatter->toString());
                 formatter->endNode();
+                return true;
             }
         } else if (starts_with(methodName, "PROJ ")) {
             auto projFormatter = io::PROJStringFormatter::create(
@@ -4925,9 +4971,22 @@ void Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
                 formatter->addQuotedString("PROJ4");
                 formatter->addQuotedString(projFormatter->toString());
                 formatter->endNode();
+                return true;
             }
+        } else if (methodName ==
+                   PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X) {
+            auto projFormatter = io::PROJStringFormatter::create(
+                io::PROJStringFormatter::Convention::PROJ_4);
+            formatter->startNode(io::WKTConstants::EXTENSION, false);
+            formatter->addQuotedString("PROJ4");
+            _exportToPROJString(projFormatter.get());
+            projFormatter->addParam("no_defs");
+            formatter->addQuotedString(projFormatter->toString());
+            formatter->endNode();
+            return true;
         }
     }
+    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -4981,15 +5040,16 @@ void Conversion::_exportToPROJString(
         // Check for UTM
         int zone = 0;
         bool north = true;
-        if (isUTM(zone, north)) {
+        bool etMercSettingSet = false;
+        useETMerc = formatter->getUseETMercForTMerc(etMercSettingSet) ||
+                    l_method->getPrivate()->projMethodOverride_ == "etmerc";
+        if (isUTM(zone, north) && !(etMercSettingSet && !useETMerc)) {
             bConversionDone = true;
             formatter->addStep("utm");
             formatter->addParam("zone", zone);
             if (!north) {
                 formatter->addParam("south");
             }
-        } else {
-            useETMerc = formatter->getUseETMercForTMerc();
         }
     } else if (methodEPSGCode ==
                EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
@@ -5069,6 +5129,21 @@ void Conversion::_exportToPROJString(
                 EPSG_NAME_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL);
         }
     } else if (methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_A) {
+        double latitudeOrigin = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+            common::UnitOfMeasure::DEGREE);
+        if (latitudeOrigin != 0) {
+            throw io::FormattingException(
+                std::string("Unsupported value for ") +
+                EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
+        }
+    } else if (methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_B) {
+        const auto &scaleFactor = parameterValueMeasure(WKT1_SCALE_FACTOR, 0);
+        if (scaleFactor.unit().type() != common::UnitOfMeasure::Type::UNKNOWN &&
+            std::fabs(scaleFactor.getSIValue() - 1.0) > 1e-10) {
+            throw io::FormattingException(
+                "Unexpected presence of scale factor in Mercator (variant B)");
+        }
         double latitudeOrigin = parameterValueNumeric(
             EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
             common::UnitOfMeasure::DEGREE);
@@ -5265,12 +5340,15 @@ bool Conversion::isUTM(int &zone, bool &north) const {
                     const auto &measure = l_parameterValue->value();
                     if (epsg_code ==
                             EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN &&
-                        measure.value() == UTM_LATITUDE_OF_NATURAL_ORIGIN) {
+                        std::fabs(measure.value() -
+                                  UTM_LATITUDE_OF_NATURAL_ORIGIN) < 1e-10) {
                         bLatitudeNatOriginUTM = true;
                     } else if (
                         epsg_code ==
                             EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN &&
-                        measure.unit() == common::UnitOfMeasure::DEGREE) {
+                        measure.unit()._isEquivalentTo(
+                            common::UnitOfMeasure::DEGREE,
+                            util::IComparable::Criterion::EQUIVALENT)) {
                         double dfZone = (measure.value() + 183.0) / 6.0;
                         if (dfZone > 0.9 && dfZone < 60.1 &&
                             std::abs(dfZone - std::round(dfZone)) < 1e-10) {
@@ -5279,20 +5357,29 @@ bool Conversion::isUTM(int &zone, bool &north) const {
                     } else if (
                         epsg_code ==
                             EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN &&
-                        measure.value() == UTM_SCALE_FACTOR) {
+                        measure.unit()._isEquivalentTo(
+                            common::UnitOfMeasure::SCALE_UNITY,
+                            util::IComparable::Criterion::EQUIVALENT) &&
+                        std::fabs(measure.value() - UTM_SCALE_FACTOR) < 1e-10) {
                         bScaleFactorUTM = true;
                     } else if (epsg_code == EPSG_CODE_PARAMETER_FALSE_EASTING &&
                                measure.value() == UTM_FALSE_EASTING &&
-                               measure.unit() == common::UnitOfMeasure::METRE) {
+                               measure.unit()._isEquivalentTo(
+                                   common::UnitOfMeasure::METRE,
+                                   util::IComparable::Criterion::EQUIVALENT)) {
                         bFalseEastingUTM = true;
                     } else if (epsg_code ==
                                    EPSG_CODE_PARAMETER_FALSE_NORTHING &&
-                               measure.unit() == common::UnitOfMeasure::METRE) {
-                        if (measure.value() == UTM_NORTH_FALSE_NORTHING) {
+                               measure.unit()._isEquivalentTo(
+                                   common::UnitOfMeasure::METRE,
+                                   util::IComparable::Criterion::EQUIVALENT)) {
+                        if (std::fabs(measure.value() -
+                                      UTM_NORTH_FALSE_NORTHING) < 1e-10) {
                             bFalseNorthingUTM = true;
                             north = true;
-                        } else if (measure.value() ==
-                                   UTM_SOUTH_FALSE_NORTHING) {
+                        } else if (std::fabs(measure.value() -
+                                             UTM_SOUTH_FALSE_NORTHING) <
+                                   1e-10) {
                             bFalseNorthingUTM = true;
                             north = false;
                         }
@@ -6197,32 +6284,36 @@ TransformationNNPtr Transformation::createTOWGS84(
             "Invalid number of elements in TOWGS84Parameters");
     }
 
-    crs::CRSPtr transformSourceCRS = sourceCRSIn->extractGeographicCRS();
+    crs::CRSPtr transformSourceCRS = sourceCRSIn->extractGeodeticCRS();
     if (!transformSourceCRS) {
         throw InvalidOperation(
-            "Cannot find GeographicCRS in sourceCRS of TOWGS84 transformation");
+            "Cannot find GeodeticCRS in sourceCRS of TOWGS84 transformation");
     }
+
+    util::PropertyMap properties;
+    properties.set(common::IdentifiedObject::NAME_KEY,
+                   concat("Transformation from ", transformSourceCRS->nameStr(),
+                          " to WGS84"));
+
+    auto targetCRS =
+        dynamic_cast<const crs::GeographicCRS *>(transformSourceCRS.get())
+            ? util::nn_static_pointer_cast<crs::CRS>(
+                  crs::GeographicCRS::EPSG_4326)
+            : util::nn_static_pointer_cast<crs::CRS>(
+                  crs::GeodeticCRS::EPSG_4978);
 
     if (TOWGS84Parameters.size() == 3) {
         return createGeocentricTranslations(
-            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                    concat("Transformation from ",
-                                           transformSourceCRS->nameStr(),
-                                           " to WGS84")),
-            NN_NO_CHECK(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
+            properties, NN_NO_CHECK(transformSourceCRS), targetCRS,
             TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
             {});
     }
 
-    return createPositionVector(
-        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                concat("Transformation from ",
-                                       transformSourceCRS->nameStr(),
-                                       " to WGS84")),
-        NN_NO_CHECK(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
-        TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
-        TOWGS84Parameters[3], TOWGS84Parameters[4], TOWGS84Parameters[5],
-        TOWGS84Parameters[6], {});
+    return createPositionVector(properties, NN_NO_CHECK(transformSourceCRS),
+                                targetCRS, TOWGS84Parameters[0],
+                                TOWGS84Parameters[1], TOWGS84Parameters[2],
+                                TOWGS84Parameters[3], TOWGS84Parameters[4],
+                                TOWGS84Parameters[5], TOWGS84Parameters[6], {});
 }
 
 // ---------------------------------------------------------------------------

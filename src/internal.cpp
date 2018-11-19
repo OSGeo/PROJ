@@ -107,6 +107,16 @@ bool ci_equal(const char *a, const char *b) noexcept {
 
 // ---------------------------------------------------------------------------
 
+bool ci_less(const std::string &a, const std::string &b) noexcept {
+#ifdef _MSC_VER
+    return _stricmp(a.c_str(), b.c_str()) < 0;
+#else
+    return strcasecmp(a.c_str(), b.c_str()) < 0;
+#endif
+}
+
+// ---------------------------------------------------------------------------
+
 /**
  * Convert to lower case.
  */

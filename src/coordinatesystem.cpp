@@ -460,7 +460,7 @@ CoordinateSystem::axisList() PROJ_CONST_DEFN {
 void CoordinateSystem::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
-    if (!formatter->outputAxis()) {
+    if (formatter->outputAxis() != io::WKTFormatter::OutputAxisRule::YES) {
         return;
     }
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;

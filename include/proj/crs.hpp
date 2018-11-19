@@ -472,7 +472,7 @@ class PROJ_GCC_DLL DerivedCRS : virtual public SingleCRS {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        const operation::ConversionNNPtr &
+        PROJ_INTERNAL const operation::ConversionNNPtr &
         derivingConversionRef() PROJ_CONST_DECL;
     //! @endcond
 

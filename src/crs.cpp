@@ -87,6 +87,7 @@ namespace crs {
 //! @cond Doxygen_Suppress
 struct CRS::Private {
     BoundCRSPtr canonicalBoundCRS_{};
+    std::string extensionProj4_{};
 };
 //! @endcond
 
@@ -745,6 +746,8 @@ GeodeticCRS::create(const util::PropertyMap &properties,
         GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(crs);
     crs->setProperties(properties);
+    properties.getStringValue("EXTENSION_PROJ4",
+                              crs->CRS::getPrivate()->extensionProj4_);
     return crs;
 }
 
@@ -789,6 +792,8 @@ GeodeticCRS::create(const util::PropertyMap &properties,
         GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(crs);
     crs->setProperties(properties);
+    properties.getStringValue("EXTENSION_PROJ4",
+                              crs->CRS::getPrivate()->extensionProj4_);
     return crs;
 }
 
@@ -850,6 +855,17 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     }
     cs->_exportToWKT(formatter);
     ObjectUsage::baseExportToWKT(formatter);
+
+    if (!isWKT2 && !formatter->useESRIDialect()) {
+        const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
+        if (!extensionProj4.empty()) {
+            formatter->startNode(io::WKTConstants::EXTENSION, false);
+            formatter->addQuotedString("PROJ4");
+            formatter->addQuotedString(extensionProj4);
+            formatter->endNode();
+        }
+    }
+
     formatter->endNode();
 }
 //! @endcond
@@ -862,7 +878,8 @@ void GeodeticCRS::addGeocentricUnitConversionIntoPROJString(
 
     const auto &axisList = coordinateSystem()->axisList();
     const auto &unit = axisList[0]->unit();
-    if (unit != common::UnitOfMeasure::METRE) {
+    if (!unit._isEquivalentTo(common::UnitOfMeasure::METRE,
+                              util::IComparable::Criterion::EQUIVALENT)) {
         if (formatter->convention() ==
             io::PROJStringFormatter::Convention::PROJ_4) {
             io::FormattingException::Throw("GeodeticCRS::exportToPROJString(): "
@@ -885,6 +902,9 @@ void GeodeticCRS::addGeocentricUnitConversionIntoPROJString(
         const auto &toSI = unit.conversionToSI();
         formatter->addParam("xy_out", toSI);
         formatter->addParam("z_out", toSI);
+    } else if (formatter->convention() ==
+               io::PROJStringFormatter::Convention::PROJ_4) {
+        formatter->addParam("units", "m");
     }
 }
 //! @endcond
@@ -895,6 +915,16 @@ void GeodeticCRS::addGeocentricUnitConversionIntoPROJString(
 void GeodeticCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_4) {
+        const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
+        if (!extensionProj4.empty()) {
+            formatter->ingestPROJString(extensionProj4);
+            formatter->addNoDefs(false);
+            return;
+        }
+    }
+
     if (!isGeocentric()) {
         io::FormattingException::Throw(
             "GeodeticCRS::exportToPROJString() only "
@@ -907,14 +937,7 @@ void GeodeticCRS::_exportToPROJString(
     } else {
         formatter->addStep("cart");
     }
-    ellipsoid()->_exportToPROJString(formatter);
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_4) {
-        const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
-        if (TOWGS84Params.size() == 7) {
-            formatter->addParam("towgs84", TOWGS84Params);
-        }
-    }
+    addDatumInfoToPROJString(formatter);
     addGeocentricUnitConversionIntoPROJString(formatter);
 }
 //! @endcond
@@ -1421,6 +1444,8 @@ GeographicCRS::create(const util::PropertyMap &properties,
         GeographicCRS::nn_make_shared<GeographicCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(crs);
     crs->setProperties(properties);
+    properties.getStringValue("EXTENSION_PROJ4",
+                              crs->CRS::getPrivate()->extensionProj4_);
     return crs;
 }
 
@@ -1626,6 +1651,16 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
 void GeographicCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_4) {
+        const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
+        if (!extensionProj4.empty()) {
+            formatter->ingestPROJString(extensionProj4);
+            formatter->addNoDefs(false);
+            return;
+        }
+    }
+
     if (!formatter->omitProjLongLatIfPossible() ||
         primeMeridian()->longitude().getSIValue() != 0.0 ||
         !formatter->getTOWGS84Parameters().empty() ||
@@ -1763,7 +1798,15 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (!isWKT2) {
         axisList[0]->unit()._exportToWKT(formatter);
     }
+
+    const auto oldAxisOutputRule = formatter->outputAxis();
+    if (oldAxisOutputRule ==
+        io::WKTFormatter::OutputAxisRule::WKT1_GDAL_EPSG_STYLE) {
+        formatter->setOutputAxis(io::WKTFormatter::OutputAxisRule::YES);
+    }
     cs->_exportToWKT(formatter);
+    formatter->setOutputAxis(oldAxisOutputRule);
+
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
 }
@@ -2231,6 +2274,22 @@ const cs::CartesianCSNNPtr &ProjectedCRS::coordinateSystem() PROJ_CONST_DEFN {
 void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
+    const auto &l_coordinateSystem = d->coordinateSystem();
+    const auto &axisList = l_coordinateSystem->axisList();
+
+    const auto exportAxis = [&l_coordinateSystem, &axisList, &formatter]() {
+        const auto oldAxisOutputRule = formatter->outputAxis();
+        if (oldAxisOutputRule ==
+            io::WKTFormatter::OutputAxisRule::WKT1_GDAL_EPSG_STYLE) {
+            if (&axisList[0]->direction() == &cs::AxisDirection::EAST &&
+                &axisList[1]->direction() == &cs::AxisDirection::NORTH) {
+                formatter->setOutputAxis(io::WKTFormatter::OutputAxisRule::YES);
+            }
+        }
+        l_coordinateSystem->_exportToWKT(formatter);
+        formatter->setOutputAxis(oldAxisOutputRule);
+    };
+
     if (!isWKT2 && !formatter->useESRIDialect() &&
         starts_with(nameStr(), "Popular Visualisation CRS / Mercator")) {
         formatter->startNode(io::WKTConstants::PROJCS, !identifiers().empty());
@@ -2263,9 +2322,8 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->add(0.0);
         formatter->endNode();
 
-        const auto &axisList = d->coordinateSystem()->axisList();
         axisList[0]->unit()._exportToWKT(formatter);
-        d->coordinateSystem()->_exportToWKT(formatter);
+        exportAxis();
         derivingConversionRef()->addWKTExtensionNode(formatter);
         ObjectUsage::baseExportToWKT(formatter);
         formatter->endNode();
@@ -2321,7 +2379,6 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         l_baseCRS->_exportToWKT(formatter);
     }
 
-    const auto &axisList = d->coordinateSystem()->axisList();
     formatter->pushAxisLinearUnit(
         common::UnitOfMeasure::create(axisList[0]->unit()));
 
@@ -2338,10 +2395,18 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         axisList[0]->unit()._exportToWKT(formatter);
     }
 
-    d->coordinateSystem()->_exportToWKT(formatter);
+    exportAxis();
 
     if (!isWKT2 && !formatter->useESRIDialect()) {
-        derivingConversionRef()->addWKTExtensionNode(formatter);
+        const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
+        if (!extensionProj4.empty()) {
+            formatter->startNode(io::WKTConstants::EXTENSION, false);
+            formatter->addQuotedString("PROJ4");
+            formatter->addQuotedString(extensionProj4);
+            formatter->endNode();
+        } else {
+            derivingConversionRef()->addWKTExtensionNode(formatter);
+        }
     }
 
     ObjectUsage::baseExportToWKT(formatter);
@@ -2355,6 +2420,16 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 void ProjectedCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_4) {
+        const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
+        if (!extensionProj4.empty()) {
+            formatter->ingestPROJString(extensionProj4);
+            formatter->addNoDefs(false);
+            return;
+        }
+    }
+
     baseExportToPROJString(formatter);
 }
 
@@ -2384,6 +2459,8 @@ ProjectedCRS::create(const util::PropertyMap &properties,
     crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
+    properties.getStringValue("EXTENSION_PROJ4",
+                              crs->CRS::getPrivate()->extensionProj4_);
     return crs;
 }
 
@@ -2404,7 +2481,8 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                                              bool axisSpecFound) const {
     const auto &axisList = d->coordinateSystem()->axisList();
     const auto &unit = axisList[0]->unit();
-    if (unit != common::UnitOfMeasure::METRE) {
+    if (!unit._isEquivalentTo(common::UnitOfMeasure::METRE,
+                              util::IComparable::Criterion::EQUIVALENT)) {
         auto projUnit = unit.exportToPROJString();
         const double toSI = unit.conversionToSI();
         if (formatter->convention() ==
@@ -2425,6 +2503,12 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
             } else {
                 formatter->addParam("units", projUnit);
             }
+        }
+    } else if (formatter->convention() ==
+               io::PROJStringFormatter::Convention::PROJ_4) {
+        // could come from the hardcoded def of webmerc
+        if (!formatter->hasParam("units")) {
+            formatter->addParam("units", "m");
         }
     }
 
@@ -3234,8 +3318,17 @@ BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
 BoundCRSNNPtr
 BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
                             const std::vector<double> &TOWGS84Parameters) {
+
+    auto geodCRS = baseCRSIn->extractGeodeticCRS();
+    auto targetCRS =
+        geodCRS.get() == nullptr ||
+                dynamic_cast<const crs::GeographicCRS *>(geodCRS.get())
+            ? util::nn_static_pointer_cast<crs::CRS>(
+                  crs::GeographicCRS::EPSG_4326)
+            : util::nn_static_pointer_cast<crs::CRS>(
+                  crs::GeodeticCRS::EPSG_4978);
     return create(
-        baseCRSIn, GeographicCRS::EPSG_4326,
+        baseCRSIn, targetCRS,
         operation::Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters));
 }
 
