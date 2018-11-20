@@ -324,3 +324,276 @@ INSERT INTO grid_alternatives(original_grid_name,
                               NULL, NULL, NULL, NULL);
 
 
+----------------------------
+-- French vertical grids
+----------------------------
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('RAF09.mnt',
+                              'RAF09.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('RAC09.mnt',
+                              'RAC09.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggm00.txt',
+                            'ggm00v2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggg00.txt',
+                            'ggg00v2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggg00_mg.txt',
+                            'ggg00_mgv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggg00_sm.txt',
+                            'ggg00_smv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggg00_ls.txt',
+                            'ggg00_lsv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggg00_ld.txt',
+                            'RALDW842016.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggg00_sb.txt',
+                            'ggg00_sbv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_mart.txt',
+                            'RAMART2016.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_gtbt.txt',
+                            'RAGTBT2016.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_mg.txt',
+                            'RAMG2016.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_sm.txt',
+                            'gg10_smv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_ls.txt',
+                            'RALS2016.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_ld.txt',
+                            'RALD2016.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_sb.txt',
+                            'gg10_sbv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggguy00.txt',
+                            'ggguy15.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('ggr99.txt',
+                            'RAR07_bl.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
