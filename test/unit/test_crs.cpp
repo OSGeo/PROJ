@@ -4604,14 +4604,14 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_4)
                           .get()),
-                  "+proj=stere +lat_0=-90 +lat_ts=-67 +lon_0=140 +x_0=300000 "
-                  "+y_0=-2299363.482 +ellps=intl "
-                  "+towgs84=324.912,153.282,172.026,0,0,0,0 +units=m +no_defs");
+                  "+proj=stere +lat_0=-90 +lon_0=140 +k=0.960272946 "
+                  "+x_0=300000 +y_0=-2299363.482 +ellps=intl "
+                  "+towgs84=324.8,153.6,172.1,0,0,0,0 +units=m +no_defs");
     }
     {
         auto factoryIGNF =
             AuthorityFactory::create(DatabaseContext::create(), "IGNF");
-        auto crs = factoryIGNF->createCoordinateReferenceSystem("AMST63");
+        auto crs = factoryIGNF->createCoordinateReferenceSystem("PGP50");
         auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
@@ -4621,8 +4621,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                           PROJStringFormatter::Convention::PROJ_4)
                           .get()),
                   "+proj=geocent +ellps=intl "
-                  "+towgs84=109.753,-528.133,-362.244,0,0,0,0 +units=m "
-                  "+no_defs");
+                  "+towgs84=324.8,153.6,172.1,0,0,0,0 +units=m +no_defs");
     }
 }
 
