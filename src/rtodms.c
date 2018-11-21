@@ -66,6 +66,13 @@ rtodms(char *s, double r, int pos, int neg) {
 		size_t suffix_len = sign ? 3 : 2;
 
 		(void)sprintf(ss,format,deg,min,sec,sign);
+                /* Replace potential decimal comma by decimal point for non C locale */
+                for( p = ss; *p != '\0'; ++p ) {
+                    if( *p == ',' ) {
+                        *p = '.';
+                        break;
+                    }
+                }
 		for (q = p = ss + strlen(ss) - suffix_len; *p == '0'; --p) ;
 		if (*p != '.')
 			++p;
