@@ -4093,9 +4093,23 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
         if (!dbContext) {
             throw ParsingException("no database context specified");
         }
-        auto factory =
-            AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[0]);
-        return factory->createCoordinateReferenceSystem(tokens[1]);
+        DatabaseContextNNPtr dbContextNNPtr(NN_NO_CHECK(dbContext));
+        const auto &authName = tokens[0];
+        const auto &code = tokens[1];
+        auto factory = AuthorityFactory::create(dbContextNNPtr, authName);
+        try {
+            return factory->createCoordinateReferenceSystem(code);
+        } catch (...) {
+            const auto authorities = dbContextNNPtr->getAuthorities();
+            for (const auto &authCandidate : authorities) {
+                if (ci_equal(authCandidate, authName)) {
+                    return AuthorityFactory::create(dbContextNNPtr,
+                                                    authCandidate)
+                        ->createCoordinateReferenceSystem(code);
+                }
+            }
+            throw;
+        }
     }
 
     // urn:ogc:def:crs:EPSG::4326

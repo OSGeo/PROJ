@@ -7607,6 +7607,7 @@ TEST(io, createFromUserInput) {
 
     EXPECT_NO_THROW(createFromUserInput("+proj=longlat", nullptr));
     EXPECT_NO_THROW(createFromUserInput("EPSG:4326", dbContext));
+    EXPECT_NO_THROW(createFromUserInput("epsg:4326", dbContext));
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:crs:EPSG::4326", dbContext));
     EXPECT_NO_THROW(createFromUserInput(
