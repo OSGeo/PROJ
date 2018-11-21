@@ -103,3 +103,11 @@ target_link_libraries(proj_test_cpp_api
   ${PROJ_LIBRARIES}
   ${SQLITE3_LIBRARY})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
+
+add_executable(gie_self_tests
+  main.cpp
+  gie_self_tests.cpp)
+target_link_libraries(gie_self_tests
+  gtest
+  ${PROJ_LIBRARIES})
+add_test(NAME gie_self_tests COMMAND gie_self_tests)

@@ -709,11 +709,4 @@ direction reverse
 accept    0 0 0 0
 expect    failure
 
--------------------------------------------------------------------------------
-run the few gie-builtin tests, which are currently either awkward or impossible
-to express in the gie command set
--------------------------------------------------------------------------------
-builtins
--------------------------------------------------------------------------------
-
 </gie>

@@ -13,12 +13,10 @@ noinst_PROGRAMS = basic_test
 noinst_PROGRAMS += pj_phi2_test
 noinst_PROGRAMS += proj_errno_string_test
 noinst_PROGRAMS += test_cpp_api
+noinst_PROGRAMS += gie_self_tests
 
 basic_test_SOURCES = basic_test.cpp main.cpp
 basic_test_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la
-
-test_cpp_api_SOURCES = test_util.cpp test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp test_datum.cpp test_factory.cpp test_c_api.cpp main.cpp
-test_cpp_api_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la @SQLITE3_LDFLAGS@
 
 basic_test-check: basic_test
 	./basic_test
@@ -35,10 +33,16 @@ proj_errno_string_test_LDADD= ../../src/libproj.la ../../test/googletest/libgtes
 proj_errno_string_test-check: proj_errno_string_test
 	./proj_errno_string_test
 
-check-local: basic_test-check
-check-local: pj_phi2_test-check proj_errno_string_test-check
+test_cpp_api_SOURCES = test_util.cpp test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp test_datum.cpp test_factory.cpp test_c_api.cpp main.cpp
+test_cpp_api_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la @SQLITE3_LDFLAGS@
 
 test_cpp_api-check: test_cpp_api
 	PROJ_LIB=$(PROJ_LIB) ./test_cpp_api
 
-check-local: basic_test-check test_cpp_api-check
+gie_self_tests_SOURCES = gie_self_tests.cpp main.cpp
+gie_self_tests_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la @SQLITE3_LDFLAGS@
+
+gie_self_tests-check: gie_self_tests
+	PROJ_LIB=$(PROJ_LIB) ./gie_self_tests
+
+check-local: basic_test-check pj_phi2_test-check proj_errno_string_test-check test_cpp_api-check gie_self_tests-check
