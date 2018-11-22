@@ -19,7 +19,7 @@ EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 projinfo_SOURCES = projinfo.cpp
-cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
+cs2cs_SOURCES = cs2cs.cpp gen_cheb.c p_series.c
 cct_SOURCES = cct.c proj_strtod.c proj_strtod.h optargpm.h
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h

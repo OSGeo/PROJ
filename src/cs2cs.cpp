@@ -47,11 +47,11 @@ reversein = 0,	/* != 0 reverse input arguments */
 reverseout = 0,	/* != 0 reverse output arguments */
 echoin = 0,	/* echo input data to output line */
 tag = '#';	/* beginning of line tag character */
-	static char
-*oform = (char *)0,	/* output format for x-y or decimal degrees */
- oform_buffer[16],	/* buffer for oform when using -d */
-*oterr = "*\t*",	/* output line for unprojectable input */
-*usage =
+
+static const char *oform = nullptr; /* output format for x-y or decimal degrees */
+static char oform_buffer[16]; /* buffer for oform when using -d */
+static const char *oterr = "*\t*"; /* output line for unprojectable input */
+static const char *usage =
 "%s\nusage: %s [ -dDeEfIlrstvwW [args] ] [ +opts[=arg] ]\n"
 "                   [+to [+opts[=arg] [ files ]\n";
 
@@ -150,7 +150,7 @@ static void process(FILE *fid)
         }
 
         putchar(' ');
-        if( oform != NULL )
+        if( oform != nullptr )
             printf( oform, z );
         else
             printf( "%.3f", z );
@@ -167,7 +167,10 @@ static void process(FILE *fid)
 
 int main(int argc, char **argv) 
 {
-    char *arg, **eargv = argv, *from_argv[MAX_PARGS], *to_argv[MAX_PARGS];
+    char *arg;
+    char **eargv = argv;
+    char *from_argv[MAX_PARGS];
+    char *to_argv[MAX_PARGS];
     FILE *fid;
     int from_argc=0, to_argc=0, eargc = 0, mon = 0;
     int have_to_flag = 0, inverse = 0, i;
@@ -175,10 +178,10 @@ int main(int argc, char **argv)
 
     /* This is just to check that pj_init() is locale-safe */
     /* Used by nad/testvarious */
-    if( getenv("PROJ_USE_ENV_LOCALE") != NULL )
+    if( getenv("PROJ_USE_ENV_LOCALE") != nullptr )
         use_env_locale = 1;
 
-    if ((emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
+    if ((emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != nullptr)
         ++emess_dat.Prog_name;
     else emess_dat.Prog_name = *argv;
     inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
@@ -191,7 +194,7 @@ int main(int argc, char **argv)
         if(**++argv == '-') for(arg = *argv;;) {
             switch(*++arg) {
               case '\0': /* position of "stdin" */
-                if (arg[-1] == '-') eargv[eargc++] = "-";
+                if (arg[-1] == '-') eargv[eargc++] = const_cast<char*>("-");
                 break;
               case 'v': /* monitor dump of initialization */
                 mon = 1;
@@ -253,7 +256,7 @@ int main(int argc, char **argv)
                     {
                         printf("%12s %-12s %-30s\n",
                                ld->id, ld->ellipse_id, ld->defn);
-                        if( ld->comments != NULL && strlen(ld->comments) > 0 )
+                        if( ld->comments != nullptr && strlen(ld->comments) > 0 )
                             printf( "%25s %s\n", " ", ld->comments );
                     }
                 } else if( arg[1] == 'm') { /* list prime meridians */
@@ -331,7 +334,7 @@ int main(int argc, char **argv)
             eargv[eargc++] = *argv;
     }
     if (eargc == 0 ) /* if no specific files force sysin */
-        eargv[eargc++] = "-";
+        eargv[eargc++] = const_cast<char*>("-");
 
     /* 
      * If the user has requested inverse, then just reverse the
@@ -398,7 +401,7 @@ int main(int argc, char **argv)
               pj_strerrno(pj_errno));
     }
 
-    if( from_argc == 0 && toProj != NULL) 
+    if( from_argc == 0 && toProj != nullptr)
     {
         if (!(fromProj = pj_latlong_from_proj( toProj )))
         {
@@ -439,10 +442,10 @@ int main(int argc, char **argv)
     for ( ; eargc-- ; ++eargv) {
         if (**eargv == '-') {
             fid = stdin;
-            emess_dat.File_name = "<stdin>";
+            emess_dat.File_name = const_cast<char*>("<stdin>");
 
         } else {
-            if ((fid = fopen(*eargv, "rt")) == NULL) {
+            if ((fid = fopen(*eargv, "rt")) == nullptr) {
                 emess(-2, *eargv, "input file");
                 continue;
             }
@@ -451,7 +454,7 @@ int main(int argc, char **argv)
         emess_dat.File_line = 0;
         process(fid);
         fclose(fid);
-        emess_dat.File_name = 0;
+        emess_dat.File_name = nullptr;
     }
 
     pj_free( fromProj );
