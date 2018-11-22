@@ -1142,6 +1142,36 @@ TEST(operation, transformation_createTOWGS84) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createAxisOrderReversal) {
+
+    auto latLongDeg = GeographicCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+    auto longLatDeg = GeographicCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
+        EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE));
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            latLongDeg, longLatDeg);
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=axisswap +order=2,1");
+    }
+    {
+        auto longLatRad = GeographicCRS::create(
+            PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
+            EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::RADIAN));
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            longLatRad, latLongDeg);
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, utm_export) {
     auto conv = Conversion::createUTM(PropertyMap(), 1, false);
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),

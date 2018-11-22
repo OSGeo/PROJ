@@ -5381,6 +5381,20 @@ TEST(io, projstringformatter_cart_grs80_wgs84) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_axisswap_unitconvert_axisswap) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->addStep("axisswap");
+    fmt->addParam("order", "2,1");
+    fmt->addStep("unitconvert");
+    fmt->addParam("xy_in", "rad");
+    fmt->addParam("xy_out", "deg");
+    fmt->addStep("axisswap");
+    fmt->addParam("order", "2,1");
+    EXPECT_EQ(fmt->toString(), "+proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat) {
 
     auto expected = "GEODCRS[\"unknown\",\n"

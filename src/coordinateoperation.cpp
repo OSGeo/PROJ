@@ -8220,6 +8220,32 @@ bool SingleOperation::exportToPROJStringGeneric(
     if (isAxisOrderReversal(methodEPSGCode)) {
         formatter->addStep("axisswap");
         formatter->addParam("order", "2,1");
+        auto sourceCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+        auto targetCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+        if (sourceCRSGeog && targetCRSGeog) {
+            const auto &unitSrc =
+                sourceCRSGeog->coordinateSystem()->axisList()[0]->unit();
+            const auto &unitDst =
+                targetCRSGeog->coordinateSystem()->axisList()[0]->unit();
+            if (!unitSrc._isEquivalentTo(
+                    unitDst, util::IComparable::Criterion::EQUIVALENT)) {
+                formatter->addStep("unitconvert");
+                auto projUnit = unitSrc.exportToPROJString();
+                if (projUnit.empty()) {
+                    formatter->addParam("xy_in", unitSrc.conversionToSI());
+                } else {
+                    formatter->addParam("xy_in", projUnit);
+                }
+                projUnit = unitDst.exportToPROJString();
+                if (projUnit.empty()) {
+                    formatter->addParam("xy_out", unitDst.conversionToSI());
+                } else {
+                    formatter->addParam("xy_out", projUnit);
+                }
+            }
+        }
         return true;
     }
 

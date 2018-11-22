@@ -4708,6 +4708,24 @@ const std::string &PROJStringFormatter::toString() const {
                 break;
             }
 
+            // axisswap order=2,1, unitconvert, axisswap order=2,1 -> can
+            // suppress axisswap
+            if (i + 1 < d->steps_.size() && prevStep.name == "axisswap" &&
+                curStep.name == "unitconvert" && prevStepParamCount == 1 &&
+                prevStep.paramValues[0].equals("order", "2,1")) {
+                auto iterNext = iterCur;
+                ++iterNext;
+                auto &nextStep = *iterNext;
+                if (nextStep.name == "axisswap" &&
+                    nextStep.paramValues.size() == 1 &&
+                    nextStep.paramValues[0].equals("order", "2,1")) {
+                    d->steps_.erase(iterPrev);
+                    d->steps_.erase(iterNext);
+                    changeDone = true;
+                    break;
+                }
+            }
+
             // for practical purposes WGS84 and GRS80 ellipsoids are
             // equivalents (cartesian transform between both lead to differences
             // of the order of 1e-14 deg..).
