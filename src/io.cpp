@@ -4066,10 +4066,22 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
  *     determine the appropriate best match.</li>
  * </ul>
  *
+ * @param text One of the above mentionned text format
+ * @param dbContext Database context, or nullptr (in which case database
+ * lookups will not work)
+ * @param usePROJ4InitRules When set to true,
+ * init=epsg:XXXX syntax will be allowed and will be interpreted according to
+ * PROJ.4 and PROJ.5 rules, that is geodeticCRS will have longitude, latitude
+ * order and will expect/output coordinates in radians. ProjectedCRS will have
+ * easting, northing axis order (except the ones with Transverse Mercator South
+ * Orientated projection). In that mode, the epsg:XXXX syntax will be also
+ * interprated the same way.
  * @throw ParsingException
  */
 BaseObjectNNPtr createFromUserInput(const std::string &text,
-                                    const DatabaseContextPtr &dbContext) {
+                                    const DatabaseContextPtr &dbContext,
+                                    bool usePROJ4InitRules) {
+
     for (const auto &wktConstants : WKTConstants::constants()) {
         if (ci_starts_with(text, wktConstants)) {
             return WKTParser().attachDatabaseContext(dbContext).createFromWKT(
@@ -4085,6 +4097,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
         strncmp(textWithoutPlusPrefix, "title=", strlen("title=")) == 0) {
         return PROJStringParser()
             .attachDatabaseContext(dbContext)
+            .setUsePROJ4InitRules(usePROJ4InitRules)
             .createFromPROJString(text);
     }
 
@@ -5293,6 +5306,7 @@ const DatabaseContextPtr &PROJStringFormatter::databaseContext() const {
 
 struct PROJStringParser::Private {
     DatabaseContextPtr dbContext_{};
+    bool usePROJ4InitRules_ = false;
     std::vector<std::string> warningList_{};
 
     std::string projString_{};
@@ -5395,6 +5409,22 @@ PROJStringParser::~PROJStringParser() = default;
 PROJStringParser &
 PROJStringParser::attachDatabaseContext(const DatabaseContextPtr &dbContext) {
     d->dbContext_ = dbContext;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set how init=epsg:XXXX syntax should be interpreted.
+ *
+ * @param enable When set to true,
+ * init=epsg:XXXX syntax will be allowed and will be interpreted according to
+ * PROJ.4 and PROJ.5 rules, that is geodeticCRS will have longitude, latitude
+ * order and will expect/output coordinates in radians. ProjectedCRS will have
+ * easting, northing axis order (except the ones with Transverse Mercator South
+ * Orientated projection).
+ */
+PROJStringParser &PROJStringParser::setUsePROJ4InitRules(bool enable) {
+    d->usePROJ4InitRules_ = enable;
     return *this;
 }
 
@@ -6817,6 +6847,9 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     std::string vunits;
     std::string vto_meter;
 
+    d->steps_.clear();
+    d->title_.clear();
+    d->globalParamValues_.clear();
     d->projString_ = projString;
     PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_,
                            d->title_, vunits, vto_meter);
@@ -6851,6 +6884,99 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                                          d->steps_[1].name == "unitconvert")
                                             ? 1
                                             : -1));
+    }
+
+    // +init=xxxx:yyyy syntax
+    if (d->steps_.size() == 1 && d->steps_[0].isInit &&
+        d->steps_[0].paramValues.size() == 0) {
+
+        // Those used to come from a text init file
+        // We only support them in compatibility mode
+        if (ci_starts_with(d->steps_[0].name, "epsg:") ||
+            ci_starts_with(d->steps_[0].name, "IGNF:")) {
+            bool usePROJ4InitRules = d->usePROJ4InitRules_;
+            if (!usePROJ4InitRules) {
+                PJ_CONTEXT *ctx = proj_context_create();
+                if (ctx) {
+                    usePROJ4InitRules =
+                        proj_context_get_use_proj4_init_rules(ctx) == TRUE;
+                    proj_context_destroy(ctx);
+                }
+            }
+            if (!usePROJ4InitRules) {
+                throw ParsingException("init=epsg:/init=IGNF: syntax not "
+                                       "supported in non-PROJ4 emulation mode");
+            }
+            auto obj =
+                createFromUserInput(d->steps_[0].name, d->dbContext_, true);
+            auto geogCRS = dynamic_cast<GeographicCRS *>(obj.get());
+            if (geogCRS) {
+                // Override with longitude latitude in radian
+                return GeographicCRS::create(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                      geogCRS->nameStr()),
+                    geogCRS->datum(), geogCRS->datumEnsemble(),
+                    EllipsoidalCS::createLongitudeLatitude(
+                        UnitOfMeasure::RADIAN));
+            }
+            auto projCRS = dynamic_cast<ProjectedCRS *>(obj.get());
+            if (projCRS) {
+                // Override with easting northing orer
+                auto conv = projCRS->derivingConversionRef();
+                if (conv->method()->getEPSGCode() !=
+                    EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
+                    return ProjectedCRS::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          projCRS->nameStr()),
+                        projCRS->baseCRS(), conv,
+                        CartesianCS::createEastingNorthing(
+                            projCRS->coordinateSystem()
+                                ->axisList()[0]
+                                ->unit()));
+                }
+            }
+            return obj;
+        }
+
+        paralist *init = pj_mkparam(("init=" + d->steps_[0].name).c_str());
+        if (!init) {
+            throw ParsingException("out of memory");
+        }
+        PJ_CONTEXT *ctx = proj_context_create();
+        if (!ctx) {
+            pj_dealloc(init);
+            throw ParsingException("out of memory");
+        }
+        paralist *list = pj_expand_init(ctx, init);
+        proj_context_destroy(ctx);
+        if (!list) {
+            pj_dealloc(init);
+            throw ParsingException("cannot expand " + projString);
+        }
+        std::string expanded;
+        bool first = true;
+        bool has_init_term = false;
+        for (auto t = list; t;) {
+            if (!expanded.empty()) {
+                expanded += ' ';
+            }
+            if (first) {
+                // first parameter is the init= itself
+                first = false;
+            } else if (starts_with(t->param, "init=")) {
+                has_init_term = true;
+            } else {
+                expanded += t->param;
+            }
+
+            auto n = t->next;
+            pj_dealloc(t);
+            t = n;
+        }
+
+        if (!has_init_term) {
+            return createFromPROJString(expanded);
+        }
     }
 
     int iFirstGeogStep = -1;

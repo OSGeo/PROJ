@@ -7448,12 +7448,43 @@ TEST(io, projparse_projected_title) {
 
 TEST(io, projparse_init) {
 
+    // Not allowed in non-compatibillity mode
+    EXPECT_THROW(PROJStringParser().createFromPROJString("init=epsg:4326"),
+                 ParsingException);
+
     {
-        auto obj = PROJStringParser().createFromPROJString("init=epsg:4326");
+        // EPSG:4326 is normally latitude-longitude order with degree,
+        // but in compatibillity mode it will be long-lat radian
+        auto dbContext = DatabaseContext::create();
+        auto obj = createFromUserInput("init=epsg:4326", dbContext, true);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
+            EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::RADIAN)
+                .get()));
+    }
+
+    {
+        // EPSG:3040 is normally northing-easting order, but in compatibillity
+        // mode it will be easting-northing
+        auto dbContext = DatabaseContext::create();
+        auto obj = createFromUserInput("init=epsg:3040", dbContext, true);
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
+            CartesianCS::createEastingNorthing(UnitOfMeasure::METRE).get()));
+    }
+
+    {
+        auto obj =
+            PROJStringParser().createFromPROJString("init=ITRF2000:ITRF2005");
         auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
         ASSERT_TRUE(co != nullptr);
         EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+init=epsg:4326");
+                  "+proj=helmert +x=-0.0001 +y=0.0008 +z=0.0058 +rx=0 +ry=0 "
+                  "+rz=0 +s=-0.0004 +dx=0.0002 +dy=-0.0001 +dz=0.0018 +drx=0 "
+                  "+dry=0 +drz=0 +ds=-8e-06 +t_epoch=2000 "
+                  "+convention=position_vector");
     }
 
     {

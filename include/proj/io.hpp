@@ -597,7 +597,8 @@ class PROJ_GCC_DLL WKTNode {
 
 PROJ_DLL util::BaseObjectNNPtr
 createFromUserInput(const std::string &text,
-                    const DatabaseContextPtr &dbContext);
+                    const DatabaseContextPtr &dbContext,
+                    bool usePROJ4InitRules = false);
 
 // ---------------------------------------------------------------------------
 
@@ -653,6 +654,8 @@ class PROJ_GCC_DLL PROJStringParser {
 
     PROJ_DLL PROJStringParser &
     attachDatabaseContext(const DatabaseContextPtr &dbContext);
+
+    PROJ_DLL PROJStringParser &setUsePROJ4InitRules(bool enable);
 
     PROJ_DLL std::vector<std::string> warningList() const;
 

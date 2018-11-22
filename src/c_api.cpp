@@ -276,6 +276,18 @@ PJ_GUESSED_WKT_DIALECT proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static const char *getOptionValue(const char *option,
+                                  const char *keyWithEqual) noexcept {
+    if (ci_starts_with(option, keyWithEqual)) {
+        return option + strlen(keyWithEqual);
+    }
+    return nullptr;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate an object from a WKT string, PROJ string or object code
  * (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
  * "urn:ogc:def:coordinateOperation:EPSG::1671").
@@ -287,7 +299,17 @@ PJ_GUESSED_WKT_DIALECT proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param text String (must not be NULL)
- * @param options should be set to NULL for now
+ * @param options null-terminated list of options, or NULL. Currently
+ * supported options are:
+ * <ul>
+ * <li>USE_PROJ4_INIT_RULES=YES/NO. Defaults to NO. When set to YES,
+ * init=epsg:XXXX syntax will be allowed and will be interpreted according to
+ * PROJ.4 and PROJ.5 rules, that is geodeticCRS will have longitude, latitude
+ * order and will expect/output coordinates in radians. ProjectedCRS will have
+ * easting, northing axis order (except the ones with Transverse Mercator South
+ * Orientated projection). In that mode, the epsg:XXXX syntax will be also
+ * interprated the same way.</li>
+ * </ul>
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL in
  * case of error.
  */
@@ -298,8 +320,20 @@ PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text,
     (void)options;
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
+        bool usePROJ4InitRules = false;
+        for (auto iter = options; iter && iter[0]; ++iter) {
+            const char *value;
+            if ((value = getOptionValue(*iter, "USE_PROJ4_INIT_RULES="))) {
+                usePROJ4InitRules = ci_equal(value, "YES");
+            } else {
+                std::string msg("Unknown option :");
+                msg += *iter;
+                proj_log_error(ctx, __FUNCTION__, msg.c_str());
+                return nullptr;
+            }
+        }
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
-            createFromUserInput(text, dbContext));
+            createFromUserInput(text, dbContext, usePROJ4InitRules));
         if (identifiedObject) {
             return PJ_OBJ::create(ctx, NN_NO_CHECK(identifiedObject));
         }
@@ -809,18 +843,6 @@ const char *proj_obj_get_id_code(PJ_OBJ *obj, int index) {
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
-static const char *getOptionValue(const char *option,
-                                  const char *keyWithEqual) noexcept {
-    if (ci_starts_with(option, keyWithEqual)) {
-        return option + strlen(keyWithEqual);
-    }
-    return nullptr;
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
 /** \brief Get a WKT representation of an object.
  *
  * The returned string is valid while the input obj parameter is valid,
@@ -986,26 +1008,28 @@ const char *proj_obj_as_proj_string(PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
 /** \brief Return the area of use of an object.
  *
  * @param obj Object (must not be NULL)
- * @param p_west_lon Pointer to a double to receive the west longitude (in
- * degrees). Or NULL. If the returned value is -1000, the bounding box is
+ * @param p_west_lon_degree Pointer to a double to receive the west longitude
+ * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
  * unknown.
- * @param p_south_lat Pointer to a double to receive the south latitude (in
- * degrees). Or NULL. If the returned value is -1000, the bounding box is
+ * @param p_south_lat_degree Pointer to a double to receive the south latitude
+ * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
  * unknown.
-  * @param p_east_lon Pointer to a double to receive the east longitude (in
- * degrees). Or NULL. If the returned value is -1000, the bounding box is
+ * @param p_east_lon_degree Pointer to a double to receive the east longitude
+ * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
  * unknown.
- * @param p_north_lat Pointer to a double to receive the north latitude (in
- * degrees). Or NULL. If the returned value is -1000, the bounding box is
+ * @param p_north_lat_degree Pointer to a double to receive the north latitude
+ * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
  * unknown.
  * @param p_area_name Pointer to a string to receive the name of the area of
  * use. Or NULL. *p_area_name is valid while obj is valid itself.
  * @return TRUE in case of success, FALSE in case of error or if the area
  * of use is unknown.
  */
-int proj_obj_get_area_of_use(PJ_OBJ *obj, double *p_west_lon,
-                             double *p_south_lat, double *p_east_lon,
-                             double *p_north_lat, const char **p_area_name) {
+int proj_obj_get_area_of_use(PJ_OBJ *obj, double *p_west_lon_degree,
+                             double *p_south_lat_degree,
+                             double *p_east_lon_degree,
+                             double *p_north_lat_degree,
+                             const char **p_area_name) {
     if (p_area_name) {
         *p_area_name = nullptr;
     }
@@ -1031,32 +1055,32 @@ int proj_obj_get_area_of_use(PJ_OBJ *obj, double *p_west_lon,
         auto bbox =
             dynamic_cast<const GeographicBoundingBox *>(geogElements[0].get());
         if (bbox) {
-            if (p_west_lon) {
-                *p_west_lon = bbox->westBoundLongitude();
+            if (p_west_lon_degree) {
+                *p_west_lon_degree = bbox->westBoundLongitude();
             }
-            if (p_south_lat) {
-                *p_south_lat = bbox->southBoundLatitude();
+            if (p_south_lat_degree) {
+                *p_south_lat_degree = bbox->southBoundLatitude();
             }
-            if (p_east_lon) {
-                *p_east_lon = bbox->eastBoundLongitude();
+            if (p_east_lon_degree) {
+                *p_east_lon_degree = bbox->eastBoundLongitude();
             }
-            if (p_north_lat) {
-                *p_north_lat = bbox->northBoundLatitude();
+            if (p_north_lat_degree) {
+                *p_north_lat_degree = bbox->northBoundLatitude();
             }
             return true;
         }
     }
-    if (p_west_lon) {
-        *p_west_lon = -1000;
+    if (p_west_lon_degree) {
+        *p_west_lon_degree = -1000;
     }
-    if (p_south_lat) {
-        *p_south_lat = -1000;
+    if (p_south_lat_degree) {
+        *p_south_lat_degree = -1000;
     }
-    if (p_east_lon) {
-        *p_east_lon = -1000;
+    if (p_east_lon_degree) {
+        *p_east_lon_degree = -1000;
     }
-    if (p_north_lat) {
-        *p_north_lat = -1000;
+    if (p_north_lat_degree) {
+        *p_north_lat_degree = -1000;
     }
     return true;
 }
@@ -3743,21 +3767,21 @@ void proj_operation_factory_context_set_desired_accuracy(
 /** \brief Set the desired area of interest for the resulting coordinate
  * transformations.
  *
- * For an area of interest crossing the anti-meridian, west_lon will be
- * greater than east_lon.
+ * For an area of interest crossing the anti-meridian, west_lon_degree will be
+ * greater than east_lon_degree.
  *
  * @param ctxt Operation factory context. must not be NULL
- * @param west_lon West longitude (in degrees).
- * @param south_lat South latitude (in degrees).
- * @param east_lon East longitude (in degrees).
- * @param north_lat North latitude (in degrees).
+ * @param west_lon_degree West longitude (in degrees).
+ * @param south_lat_degree South latitude (in degrees).
+ * @param east_lon_degree East longitude (in degrees).
+ * @param north_lat_degree North latitude (in degrees).
  */
 void proj_operation_factory_context_set_area_of_interest(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, double west_lon, double south_lat,
-    double east_lon, double north_lat) {
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt, double west_lon_degree,
+    double south_lat_degree, double east_lon_degree, double north_lat_degree) {
     assert(ctxt);
-    ctxt->operationContext->setAreaOfInterest(
-        Extent::createFromBBOX(west_lon, south_lat, east_lon, north_lat));
+    ctxt->operationContext->setAreaOfInterest(Extent::createFromBBOX(
+        west_lon_degree, south_lat_degree, east_lon_degree, north_lat_degree));
 }
 
 // ---------------------------------------------------------------------------

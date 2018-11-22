@@ -335,6 +335,8 @@ typedef struct projCtx_t PJ_CONTEXT;
 PJ_CONTEXT PROJ_DLL *proj_context_create (void);
 PJ_CONTEXT PROJ_DLL *proj_context_destroy (PJ_CONTEXT *ctx);
 
+void PROJ_DLL proj_context_use_proj4_init_rules(PJ_CONTEXT *ctx, int enable);
+int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx);
 
 /* Manage the transformation definition object PJ */
 PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
@@ -342,11 +344,14 @@ PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
 PJ PROJ_DLL *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area);
 PJ PROJ_DLL *proj_destroy (PJ *P);
 
-/* Setter-functions for the opaque PJ_AREA struct */
-/* Uncomment these when implementing support for area-based transformations.
-void proj_area_bbox(PJ_AREA *area, LP ll, LP ur);
-void proj_area_description(PJ_AREA *area, const char *descr);
-*/
+
+PJ_AREA PROJ_DLL *proj_area_create(void);
+void PROJ_DLL proj_area_set_bbox(PJ_AREA *area,
+                                 double west_lon_degree,
+                                 double south_lat_degree,
+                                 double east_lon_degree,
+                                 double north_lat_degree);
+void PROJ_DLL proj_area_destroy(PJ_AREA* area);
 
 /* Apply transformation to observation - in forward or inverse direction */
 enum PJ_DIRECTION {
@@ -1194,10 +1199,10 @@ const char PROJ_DLL* proj_obj_get_id_auth_name(PJ_OBJ *obj, int index);
 const char PROJ_DLL* proj_obj_get_id_code(PJ_OBJ *obj, int index);
 
 int PROJ_DLL proj_obj_get_area_of_use(PJ_OBJ *obj,
-                                      double* p_west_lon,
-                                      double* p_south_lat,
-                                      double* p_east_lon,
-                                      double* p_north_lat,
+                                      double* p_west_lon_degree,
+                                      double* p_south_lat_degree,
+                                      double* p_east_lon_degree,
+                                      double* p_north_lat_degree,
                                       const char **p_area_name);
 
 /** \brief WKT version. */
@@ -1278,10 +1283,10 @@ void PROJ_DLL proj_operation_factory_context_set_desired_accuracy(
 
 void PROJ_DLL proj_operation_factory_context_set_area_of_interest(
                                             PJ_OPERATION_FACTORY_CONTEXT *ctxt,
-                                            double west_lon,
-                                            double south_lat,
-                                            double east_lon,
-                                            double north_lat);
+                                            double west_lon_degree,
+                                            double south_lat_degree,
+                                            double east_lon_degree,
+                                            double north_lat_degree);
 
 /** Specify how source and target CRS extent should be used to restrict
   * candidate operations (only taken into account if no explicit area of

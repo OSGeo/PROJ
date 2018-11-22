@@ -32,6 +32,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _MSC_VER
+#include <strings.h>
+#endif
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -634,6 +637,75 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
     return P;
 }
 
+/** Create an area of use */
+PJ_AREA * proj_area_create(void) {
+    return pj_calloc(1, sizeof(PJ_AREA));
+}
+
+/** Assign a bounding box to an area of use. */
+void proj_area_set_bbox(PJ_AREA *area,
+                                 double west_lon_degree,
+                                 double south_lat_degree,
+                                 double east_lon_degree,
+                                 double north_lat_degree) {
+    area->bbox_set = TRUE;
+    area->west_lon_degree = west_lon_degree;
+    area->south_lat_degree = south_lat_degree;
+    area->east_lon_degree = east_lon_degree;
+    area->north_lat_degree = north_lat_degree;
+}
+
+/** Free an area of use */
+void proj_area_destroy(PJ_AREA* area) {
+    pj_dealloc(area);
+}
+
+/************************************************************************/
+/*                  proj_context_use_proj4_init_rules()                 */
+/************************************************************************/
+
+void proj_context_use_proj4_init_rules(PJ_CONTEXT *ctx, int enable) {
+    if( ctx == NULL ) {
+        ctx = pj_get_default_ctx();
+    }
+    ctx->use_proj4_init_rules = enable;
+}
+
+/************************************************************************/
+/*                              EQUAL()                                 */
+/************************************************************************/
+
+static int EQUAL(const char* a, const char* b) {
+#ifdef _MSC_VER
+    return _stricmp(a, b) == 0;
+#else
+    return strcasecmp(a, b) == 0;
+#endif
+}
+
+/************************************************************************/
+/*                  proj_context_get_use_proj4_init_rules()             */
+/************************************************************************/
+
+int proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx) {
+    const char* val = getenv("PROJ_USE_PROJ4_INIT_RULES");
+
+    if( ctx == NULL ) {
+        ctx = pj_get_default_ctx();
+    }
+
+    if( val ) {
+        if( EQUAL(val, "yes") || EQUAL(val, "on") || EQUAL(val, "true") ) {
+            return TRUE;
+        }
+        if( EQUAL(val, "no") || EQUAL(val, "off") || EQUAL(val, "false") ) {
+            return FALSE;
+        }
+        pj_log(ctx, PJ_LOG_ERROR, "Invalid value for PROJ_USE_PROJ4_INIT_RULES");
+    }
+
+    return ctx->use_proj4_init_rules;
+}
 
 
 /*****************************************************************************/
@@ -643,42 +715,88 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
     systems.
 
     srid_from and srid_to should be the value part of a +init=... parameter
-    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that
+    set, i.e. "EPSG:25833" or "IGNF:AMST63". Any projection definition that
     can be found in a init-file in PROJ_LIB is a valid input to this function.
 
-    For now the function mimics the cs2cs app: An input and an output CRS is
-    given and coordinates are transformed via a hub datum (WGS84). This
-    transformation strategy is referred to as "early-binding" by the EPSG. The
-    function can be extended to support "late-binding" transformations in the
-    future without affecting users of the function.
-
-    An "area of use" can be specified in area. In the current version of this
-    function is has no function, but is added in anticipation of a
-    "late-binding" implementation in the future. The idea being, that if a user
-    supplies an area of use, the more accurate transformation between two given
-    systems can be chosen.
+    An "area of use" can be specified in area. When it is supplied, the more
+    accurate transformation between two given systems can be chosen.
 
     Example call:
 
-        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833", NULL);
+        PJ *P = proj_create_crs_to_crs(0, "EPSG:25832", "EPSG:25833", NULL);
 
 ******************************************************************************/
     PJ *P;
-    char buffer[512];
-    size_t len;
+    PJ_OBJ* src;
+    PJ_OBJ* dst;
+    PJ_OPERATION_FACTORY_CONTEXT* operation_ctx;
+    PJ_OBJ_LIST* op_list;
+    PJ_OBJ* op;
+    const char* proj_string;
+    const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", NULL };
+    const char* const* optionsImportCRS =
+        proj_context_get_use_proj4_init_rules(ctx) ? optionsProj4Mode : NULL;
 
-    /* area not in use yet, suppressing warning */
-    (void)area;
+    src = proj_obj_create_from_user_input(ctx, srid_from, optionsImportCRS);
+    if( !src ) {
+        return NULL;
+    }
 
-    strcpy(buffer, "+proj=pipeline +step +init=");
-    len = strlen(buffer);
-    strncat(buffer + len, srid_from, sizeof(buffer)-1-len);
-    len += strlen(buffer + len);
-    strncat(buffer + len, " +inv +step +init=", sizeof(buffer)-1-len);
-    len += strlen(buffer + len);
-    strncat(buffer + len, srid_to, sizeof(buffer)-1-len);
+    dst = proj_obj_create_from_user_input(ctx, srid_to, optionsImportCRS);
+    if( !dst ) {
+        proj_obj_unref(src);
+        return NULL;
+    }
 
-    P = proj_create(ctx, buffer);
+    operation_ctx = proj_create_operation_factory_context(ctx, NULL);
+    if( !operation_ctx ) {
+        proj_obj_unref(src);
+        proj_obj_unref(dst);
+        return NULL;
+    }
+
+    if( area && area->bbox_set ) {
+        proj_operation_factory_context_set_area_of_interest(
+                                            operation_ctx,
+                                            area->west_lon_degree,
+                                            area->south_lat_degree,
+                                            area->east_lon_degree,
+                                            area->north_lat_degree);
+    }
+
+    proj_operation_factory_context_set_grid_availability_use(
+        operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+
+    op_list = proj_obj_create_operations(src, dst, operation_ctx);
+
+    proj_operation_factory_context_unref(operation_ctx);
+    proj_obj_unref(src);
+    proj_obj_unref(dst);
+
+    if( !op_list ) {
+        return NULL;
+    }
+
+    if( proj_obj_list_get_count(op_list) == 0 ) {
+        proj_obj_list_unref(op_list);
+        return NULL;
+    }
+
+    op = proj_obj_list_get(op_list, 0);
+    proj_obj_list_unref(op_list);
+    if( !op ) {
+        return NULL;
+    }
+
+    proj_string = proj_obj_as_proj_string(op, PJ_PROJ_5, NULL);
+    if( !proj_string) {
+        proj_obj_unref(op);
+        return NULL;
+    }
+
+    P = proj_create(ctx, proj_string);
+
+    proj_obj_unref(op);
 
     return P;
 }

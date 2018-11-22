@@ -49,24 +49,11 @@ TEST( gie, cart_selftest ) {
     PJ_COORD a, b, obs[2];
     PJ_COORD coord[2];
 
-    PJ_INFO info;
-    PJ_PROJ_INFO pj_info;
-    PJ_GRID_INFO grid_info;
-    PJ_INIT_INFO init_info;
-
-    PJ_FACTORS factors;
-
-    const PJ_OPERATIONS *oper_list;
-    const PJ_ELLPS *ellps_list;
-    const PJ_UNITS *unit_list;
-    const PJ_PRIME_MERIDIANS *pm_list;
-
     int err;
     size_t n, sz;
     double dist, h, t;
     const char * const args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
     char arg[50] = {"+proj=utm; +zone=32; +ellps=GRS80"};
-    char buf[40];
 
     /* An utm projection on the GRS80 ellipsoid */
     P = proj_create (PJ_DEFAULT_CTX, arg);
@@ -246,10 +233,32 @@ TEST( gie, cart_selftest ) {
 
     /* Clean up  after proj_trans_* tests */
     proj_destroy (P);
+}
 
+// ---------------------------------------------------------------------------
+
+class gieTest : public ::testing::Test {
+
+    static void DummyLogFunction(void *, int, const char *) {}
+
+  protected:
+    void SetUp() override {
+        m_ctxt = proj_context_create();
+        proj_log_func(m_ctxt, nullptr, DummyLogFunction);
+    }
+
+    void TearDown() override { proj_context_destroy(m_ctxt); }
+
+    PJ_CONTEXT *m_ctxt = nullptr;
+};
+
+// ---------------------------------------------------------------------------
+
+TEST_F( gieTest, proj_create_crs_to_crs ) {
     /* test proj_create_crs_to_crs() */
-    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "epsg:25832", "epsg:25833", NULL);
+    auto P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "epsg:25832", "epsg:25833", NULL);
     ASSERT_TRUE( P != nullptr );
+    PJ_COORD a, b;
 
     a.xy.x =  700000.0;
     a.xy.y = 6000000.0;
@@ -257,13 +266,38 @@ TEST( gie, cart_selftest ) {
     b.xy.y = 5999669.3036037628;
 
     a = proj_trans(P, PJ_FWD, a);
-    ASSERT_LE(dist, 1e-7);
+    EXPECT_NEAR( a.xy.x, b.xy.x, 1e-9);
+    EXPECT_NEAR( a.xy.y, b.xy.y, 1e-9);
     proj_destroy(P);
 
-    /* let's make sure that only entries in init-files results in a usable PJ */
+    /* we can also allow PROJ strings as a usable PJ */
     P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84", NULL);
-    ASSERT_TRUE( P == nullptr );
+    ASSERT_TRUE( P != nullptr );
     proj_destroy(P);
+
+    EXPECT_TRUE( proj_create_crs_to_crs(m_ctxt, "invalid", "EPSG:25833", NULL) == nullptr );
+    EXPECT_TRUE( proj_create_crs_to_crs(m_ctxt, "EPSG:25832", "invalid", NULL) == nullptr );
+}
+
+// ---------------------------------------------------------------------------
+
+TEST( gie, info_functions ) {
+    PJ_INFO info;
+    PJ_PROJ_INFO pj_info;
+    PJ_GRID_INFO grid_info;
+    PJ_INIT_INFO init_info;
+
+    PJ_FACTORS factors;
+
+    const PJ_OPERATIONS *oper_list;
+    const PJ_ELLPS *ellps_list;
+    const PJ_UNITS *unit_list;
+    const PJ_PRIME_MERIDIANS *pm_list;
+
+    char buf[40];
+    PJ *P;
+    char arg[50] = {"+proj=utm; +zone=32; +ellps=GRS80"};
+    PJ_COORD a;
 
     /* ********************************************************************** */
     /*                          Test info functions                           */
@@ -345,7 +379,7 @@ TEST( gie, cart_selftest ) {
     proj_destroy(P);
 
     /* Check that proj_list_* functions work by looping through them */
-    n = 0;
+    size_t n = 0;
     for (oper_list = proj_list_operations(); oper_list->id; ++oper_list) n++;
     ASSERT_NE(n, 0U);
 
@@ -361,11 +395,15 @@ TEST( gie, cart_selftest ) {
     for (pm_list = proj_list_prime_meridians(); pm_list->id; ++pm_list) n++;
     ASSERT_NE(n, 0U);
 
+}
 
+// ---------------------------------------------------------------------------
+
+TEST( gie, io_predicates ) {
     /* check io-predicates */
 
     /* angular in on fwd, linear out */
-    P = proj_create (PJ_DEFAULT_CTX, "+proj=cart +ellps=GRS80");
+    auto P = proj_create (PJ_DEFAULT_CTX, "+proj=cart +ellps=GRS80");
     ASSERT_TRUE( P != nullptr );
     ASSERT_TRUE(proj_angular_input (P, PJ_FWD));
     ASSERT_FALSE(proj_angular_input (P, PJ_INV));
@@ -425,7 +463,7 @@ TEST( gie, cart_selftest ) {
     /* Test that pj_fwd* and pj_inv* returns NaNs when receiving NaN input */
     P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
     ASSERT_TRUE( P != nullptr );
-    a = proj_coord(NAN, NAN, NAN, NAN);
+    auto a = proj_coord(NAN, NAN, NAN, NAN);
     a = proj_trans(P, PJ_FWD, a);
     ASSERT_TRUE ( ( std::isnan(a.v[0]) && std::isnan(a.v[1]) && std::isnan(a.v[2]) && std::isnan(a.v[3]) ) );
 

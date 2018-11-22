@@ -85,6 +85,7 @@ projCtx pj_get_default_ctx()
         default_context.app_data = NULL;
         default_context.fileapi = pj_get_default_fileapi();
         default_context.cpp_context = NULL;
+        default_context.use_proj4_init_rules = FALSE;
 
         if( getenv("PROJ_DEBUG") != NULL )
         {
@@ -114,6 +115,7 @@ projCtx pj_ctx_alloc()
     memcpy( ctx, pj_get_default_ctx(), sizeof(projCtx_t) );
     ctx->last_errno = 0;
     ctx->cpp_context = NULL;
+    ctx->use_proj4_init_rules = FALSE;
 
     return ctx;
 }

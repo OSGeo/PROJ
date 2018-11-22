@@ -224,10 +224,11 @@ struct PJ_REGION_S {
 };
 
 struct PJ_AREA {
-    int     id;         /* Area ID in the EPSG database */
-    LP      ll;         /* Lower left corner of bounding box */
-    LP      ur;         /* Upper right corner of bounding box */
-    char    descr[64];  /* text representation of area */
+    int     bbox_set;
+    double  west_lon_degree;
+    double  south_lat_degree;
+    double  east_lon_degree;
+    double  north_lat_degree;
 };
 
 struct projCtx_t;
@@ -596,6 +597,7 @@ struct projCtx_t {
     void    *app_data;
     struct projFileAPI_t *fileapi;
     struct projCppContext* cpp_context; /* internal context for C++ code */
+    int     use_proj4_init_rules;
 };
 
 /* classic public API */
