@@ -4477,6 +4477,38 @@ TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_init_IGNF_to_init_IGNF_context) {
+
+    auto dbContext = DatabaseContext::create();
+
+    auto sourceCRS_obj = PROJStringParser()
+                             .attachDatabaseContext(dbContext)
+                             .setUsePROJ4InitRules(true)
+                             .createFromPROJString("+init=IGNF:NTFG");
+    auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceCRS_obj);
+    ASSERT_TRUE(sourceCRS != nullptr);
+
+    auto targetCRS_obj = PROJStringParser()
+                             .attachDatabaseContext(dbContext)
+                             .setUsePROJ4InitRules(true)
+                             .createFromPROJString("+init=IGNF:RGF93G");
+    auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetCRS_obj);
+    ASSERT_TRUE(targetCRS != nullptr);
+
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS), ctxt);
+    ASSERT_EQ(list.size(), 1);
+
+    EXPECT_EQ(list[0]->nameStr(),
+              "NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=hgridshift +grids=ntf_r93.gsb");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_3D) {
 
     auto geogcrs_m_obj =
@@ -5106,6 +5138,83 @@ TEST(operation, boundCRS_of_geogCRS_to_unrelated_geogCRS) {
                   ->createOperation(GeographicCRS::EPSG_4807,
                                     GeographicCRS::EPSG_4269)
                   ->exportToPROJString(PROJStringFormatter::create().get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_boundCRS_identified_by_datum) {
+    auto objSrc =
+        PROJStringParser().createFromPROJString("+proj=longlat +datum=WGS84");
+    auto src = nn_dynamic_pointer_cast<GeographicCRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=32 +a=6378249.2 +b=6356515 "
+        "+towgs84=-263.0,6.0,431.0 +no_defs");
+    auto dest = nn_dynamic_pointer_cast<BoundCRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=helmert +x=263 +y=-6 +z=-431 "
+              "+step +inv +proj=cart +ellps=clrk80ign "
+              "+step +proj=utm +zone=32 +ellps=clrk80ign");
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_TRUE(list[0]->isEquivalentTo(op.get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, boundCRS_of_clrk_66_geogCRS_to_nad83_geogCRS) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=latlong +ellps=clrk66 +nadgrids=ntv1_can.dat,conus");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest =
+        PROJStringParser().createFromPROJString("+proj=latlong +datum=NAD83");
+    auto dest = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=hgridshift +grids=ntv1_can.dat,conus "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, boundCRS_of_clrk_66_projCRS_to_nad83_geogCRS) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=17 +ellps=clrk66 +nadgrids=ntv1_can.dat,conus");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest =
+        PROJStringParser().createFromPROJString("+proj=latlong +datum=NAD83");
+    auto dest = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=utm +zone=17 +ellps=clrk66 "
+              "+step +proj=hgridshift +grids=ntv1_can.dat,conus "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------
@@ -5860,6 +5969,25 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
             EXPECT_EQ(wkt1, wkt2);
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_fallback_to_proj4_strings) {
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +ellps=WGS84");
+    auto dest = nn_dynamic_pointer_cast<GeographicCRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4326, NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=longlat +datum=WGS84 "
+              "+step +proj=longlat +geoc +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------

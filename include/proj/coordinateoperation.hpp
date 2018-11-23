@@ -818,10 +818,6 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     PROJ_DLL ~Conversion() override;
     //! @endcond
 
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL ConversionNNPtr shallowClone() const;
-    //! @endcond
-
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
     //! @cond Doxygen_Suppress
@@ -1287,6 +1283,9 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     PROJ_INTERNAL const char *getESRIMethodName() const;
 
     PROJ_INTERNAL const char *getWKT1GDALMethodName() const;
+
+    PROJ_INTERNAL ConversionNNPtr shallowClone() const;
+
     //! @endcond
 
   protected:
@@ -1490,6 +1489,8 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL TransformationNNPtr shallowClone() const;
+
     //! @endcond
 
   protected:
@@ -1499,6 +1500,7 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
         const OperationMethodNNPtr &methodIn,
         const std::vector<GeneralParameterValueNNPtr> &values,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+    PROJ_INTERNAL Transformation(const Transformation &other);
     INLINED_MAKE_SHARED
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
@@ -1508,7 +1510,6 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    Transformation(const Transformation &) = delete;
 };
 
 // ---------------------------------------------------------------------------

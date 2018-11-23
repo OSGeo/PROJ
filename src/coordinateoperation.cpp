@@ -5471,6 +5471,12 @@ Transformation::~Transformation() = default;
 
 // ---------------------------------------------------------------------------
 
+Transformation::Transformation(const Transformation &other)
+    : CoordinateOperation(other), SingleOperation(other),
+      d(internal::make_unique<Private>(*other.d)) {}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the source crs::CRS of the transformation.
  *
  * @return the source CRS.
@@ -5488,6 +5494,17 @@ const crs::CRSNNPtr &Transformation::sourceCRS() PROJ_CONST_DEFN {
 const crs::CRSNNPtr &Transformation::targetCRS() PROJ_CONST_DEFN {
     return CoordinateOperation::getPrivate()->strongRef_->targetCRS_;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+TransformationNNPtr Transformation::shallowClone() const {
+    auto conv = Transformation::nn_make_shared<Transformation>(*this);
+    conv->assignSelf(conv);
+    conv->setCRSs(this, false);
+    return conv;
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -7594,6 +7611,8 @@ void Transformation::_exportToPROJString(
         throw io::FormattingException(
             "Transformation cannot be exported as a PROJ.4 string");
     }
+
+    formatter->setCoordinateOperationOptimizations(true);
 
     bool positionVectorConvention = true;
     bool sevenParamsTransform = false;
@@ -10156,6 +10175,72 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     const auto candidatesDstGeod(
         findCandidateGeodCRSForDatum(authFactory, geodDst->datum()));
 
+    auto createTransformations = [&](const crs::CRSNNPtr &candidateSrcGeod,
+                                     const crs::CRSNNPtr &candidateDstGeod,
+                                     const CoordinateOperationNNPtr &opFirst,
+                                     bool isNullFirst) {
+        const auto opsSecond =
+            createOperations(candidateSrcGeod, candidateDstGeod, context);
+        const auto opsThird =
+            createOperations(candidateDstGeod, targetCRS, context);
+        assert(!opsThird.empty());
+
+        for (auto &opSecond : opsSecond) {
+            // Check that it is not a transformation synthetized by
+            // ourselves
+            if (!hasIdentifiers(opSecond)) {
+                continue;
+            }
+            // And even if it is a referenced transformation, check that
+            // it is not a trivial one
+            auto so = dynamic_cast<const SingleOperation *>(opSecond.get());
+            if (so && isAxisOrderReversal(so->method()->getEPSGCode())) {
+                continue;
+            }
+
+            std::vector<CoordinateOperationNNPtr> subOps;
+            if (isNullFirst) {
+                opSecond->setCRSs(
+                    sourceCRS, NN_CHECK_ASSERT(opSecond->targetCRS()), nullptr);
+            } else {
+                subOps.emplace_back(opFirst);
+            }
+            if (isNullTransformation(opsThird[0]->nameStr())) {
+                opSecond->setCRSs(NN_CHECK_ASSERT(opSecond->sourceCRS()),
+                                  targetCRS, nullptr);
+                subOps.emplace_back(opSecond);
+            } else {
+                subOps.emplace_back(opSecond);
+                subOps.emplace_back(opsThird[0]);
+            }
+            res.emplace_back(ConcatenatedOperation::createComputeMetadata(
+                subOps, !allowEmptyIntersection));
+        }
+    };
+
+    // Start in priority with candidates that have exactly the same name as
+    // the sourcCRS and targetCRS. Typically for the case of init=IGNF:XXXX
+    for (const auto &candidateSrcGeod : candidatesSrcGeod) {
+        if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
+            for (const auto &candidateDstGeod : candidatesDstGeod) {
+                if (candidateDstGeod->nameStr() == targetCRS->nameStr()) {
+                    const auto opsFirst =
+                        createOperations(sourceCRS, candidateSrcGeod, context);
+                    assert(!opsFirst.empty());
+                    const bool isNullFirst =
+                        isNullTransformation(opsFirst[0]->nameStr());
+                    createTransformations(candidateSrcGeod, candidateDstGeod,
+                                          opsFirst[0], isNullFirst);
+                    if (!res.empty()) {
+                        return;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+    }
+
     for (const auto &candidateSrcGeod : candidatesSrcGeod) {
         const auto opsFirst =
             createOperations(sourceCRS, candidateSrcGeod, context);
@@ -10163,44 +10248,8 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
         const bool isNullFirst = isNullTransformation(opsFirst[0]->nameStr());
 
         for (const auto &candidateDstGeod : candidatesDstGeod) {
-            const auto opsSecond =
-                createOperations(candidateSrcGeod, candidateDstGeod, context);
-            const auto opsThird =
-                createOperations(candidateDstGeod, targetCRS, context);
-            assert(!opsThird.empty());
-
-            for (auto &opSecond : opsSecond) {
-                // Check that it is not a transformation synthetized by
-                // ourselves
-                if (!hasIdentifiers(opSecond)) {
-                    continue;
-                }
-                // And even if it is a referenced transformation, check that
-                // it is not a trivial one
-                auto so = dynamic_cast<const SingleOperation *>(opSecond.get());
-                if (so && isAxisOrderReversal(so->method()->getEPSGCode())) {
-                    continue;
-                }
-
-                std::vector<CoordinateOperationNNPtr> subOps;
-                if (isNullFirst) {
-                    opSecond->setCRSs(sourceCRS,
-                                      NN_CHECK_ASSERT(opSecond->targetCRS()),
-                                      nullptr);
-                } else {
-                    subOps.emplace_back(opsFirst[0]);
-                }
-                if (isNullTransformation(opsThird[0]->nameStr())) {
-                    opSecond->setCRSs(NN_CHECK_ASSERT(opSecond->sourceCRS()),
-                                      targetCRS, nullptr);
-                    subOps.emplace_back(opSecond);
-                } else {
-                    subOps.emplace_back(opSecond);
-                    subOps.emplace_back(opsThird[0]);
-                }
-                res.emplace_back(ConcatenatedOperation::createComputeMetadata(
-                    subOps, !allowEmptyIntersection));
-            }
+            createTransformations(candidateSrcGeod, candidateDstGeod,
+                                  opsFirst[0], isNullFirst);
         }
         if (!res.empty()) {
             return;
@@ -10261,6 +10310,56 @@ CoordinateOperationFactory::Private::createOperations(
     std::vector<CoordinateOperationNNPtr> res;
     const bool allowEmptyIntersection = true;
 
+    const auto &sourceProj4Ext = sourceCRS->getExtensionProj4();
+    const auto &targetProj4Ext = targetCRS->getExtensionProj4();
+    if (!sourceProj4Ext.empty() || !targetProj4Ext.empty()) {
+
+        auto sourceProjExportable =
+            dynamic_cast<io::IPROJStringExportable *>(sourceCRS.get());
+        auto targetProjExportable =
+            dynamic_cast<io::IPROJStringExportable *>(targetCRS.get());
+        if (!sourceProjExportable) {
+            throw InvalidOperation("Source CRS is not PROJ exportable");
+        }
+        if (!targetProjExportable) {
+            throw InvalidOperation("Target CRS is not PROJ exportable");
+        }
+        auto projFormatter = io::PROJStringFormatter::create(
+            io::PROJStringFormatter::Convention::PROJ_4);
+        projFormatter->startInversion();
+        sourceProjExportable->_exportToPROJString(projFormatter.get());
+
+        auto geogSrc =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
+        if (geogSrc) {
+            auto proj5Formatter = io::PROJStringFormatter::create(
+                io::PROJStringFormatter::Convention::PROJ_5);
+            geogSrc->addAngularUnitConvertAndAxisSwap(proj5Formatter.get());
+            projFormatter->ingestPROJString(proj5Formatter->toString());
+        }
+
+        projFormatter->stopInversion();
+
+        targetProjExportable->_exportToPROJString(projFormatter.get());
+
+        auto geogDst =
+            dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
+        if (geogDst) {
+            auto proj5Formatter = io::PROJStringFormatter::create(
+                io::PROJStringFormatter::Convention::PROJ_5);
+            geogDst->addAngularUnitConvertAndAxisSwap(proj5Formatter.get());
+            projFormatter->ingestPROJString(proj5Formatter->toString());
+        }
+
+        const auto PROJString = projFormatter->toString();
+        auto properties = util::PropertyMap().set(
+            common::IdentifiedObject::NAME_KEY,
+            buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr()));
+        res.emplace_back(SingleOperation::createPROJBased(
+            properties, PROJString, sourceCRS, targetCRS, {}));
+        return res;
+    }
+
     auto geodSrc = dynamic_cast<const crs::GeodeticCRS *>(sourceCRS.get());
     auto geodDst = dynamic_cast<const crs::GeodeticCRS *>(targetCRS.get());
 
@@ -10317,7 +10416,9 @@ CoordinateOperationFactory::Private::createOperations(
             const auto &dstDatum = geodDst->datum();
             const bool dstHasDatumWithId =
                 dstDatum && !dstDatum->identifiers().empty();
-            if (srcHasDatumWithId && dstHasDatumWithId) {
+            if (srcHasDatumWithId && dstHasDatumWithId &&
+                !srcDatum->_isEquivalentTo(
+                    dstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
                 createOperationsWithDatumPivot(res, sourceCRS, targetCRS,
                                                geodSrc, geodDst, context);
                 doFilterAndCheckPerfectOp = !res.empty();
@@ -10443,11 +10544,10 @@ CoordinateOperationFactory::Private::createOperations(
             dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
         auto geogCRSOfBaseOfBoundSrc =
             boundSrc->baseCRS()->extractGeographicCRS();
-        if (hubSrcGeog &&
+        if (hubSrcGeog && geogCRSOfBaseOfBoundSrc &&
             (hubSrcGeog->_isEquivalentTo(
                  geogDst, util::IComparable::Criterion::EQUIVALENT) ||
-             hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst))) &&
-            geogCRSOfBaseOfBoundSrc) {
+             hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst)))) {
             if (boundSrc->baseCRS() == geogCRSOfBaseOfBoundSrc) {
                 // Optimization to avoid creating a useless concatenated
                 // operation
@@ -10469,6 +10569,86 @@ CoordinateOperationFactory::Private::createOperations(
                 }
                 if (!res.empty()) {
                     return res;
+                }
+            }
+            // If the datum are equivalent, this is also fine
+        } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog->datum() &&
+                   geogDst->datum() &&
+                   hubSrcGeog->datum()->_isEquivalentTo(
+                       geogDst->datum().get(),
+                       util::IComparable::Criterion::EQUIVALENT)) {
+            auto opsFirst =
+                createOperations(boundSrc->baseCRS(),
+                                 NN_NO_CHECK(geogCRSOfBaseOfBoundSrc), context);
+            auto opsLast = createOperations(hubSrc, targetCRS, context);
+            if (!opsFirst.empty() && !opsLast.empty()) {
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opLast : opsLast) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opFirst, boundSrc->transformation(),
+                                     opLast},
+                                    !allowEmptyIntersection));
+                        } catch (const InvalidOperationEmptyIntersection &) {
+                        }
+                    }
+                }
+                if (!res.empty()) {
+                    return res;
+                }
+            }
+            // Consider WGS 84 and NAD83 as equivalent in that context if the
+            // geogCRSOfBaseOfBoundSrc ellipsoid is Clarke66 (for NAD27)
+            // Case of "+proj=latlong +ellps=clrk66
+            // +nadgrids=ntv1_can.dat,conus"
+            // to "+proj=latlong +datum=NAD83"
+        } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog->datum() &&
+                   geogDst->datum() &&
+                   geogCRSOfBaseOfBoundSrc->ellipsoid()->_isEquivalentTo(
+                       datum::Ellipsoid::CLARKE_1866.get(),
+                       util::IComparable::Criterion::EQUIVALENT) &&
+                   hubSrcGeog->datum()->_isEquivalentTo(
+                       datum::GeodeticReferenceFrame::EPSG_6326.get(),
+                       util::IComparable::Criterion::EQUIVALENT) &&
+                   geogDst->datum()->_isEquivalentTo(
+                       datum::GeodeticReferenceFrame::EPSG_6269.get(),
+                       util::IComparable::Criterion::EQUIVALENT)) {
+            auto nnGeogCRSOfBaseOfBoundSrc =
+                NN_NO_CHECK(geogCRSOfBaseOfBoundSrc);
+            if (boundSrc->baseCRS()->_isEquivalentTo(
+                    nnGeogCRSOfBaseOfBoundSrc.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto transf = boundSrc->transformation()->shallowClone();
+                transf->setProperties(util::PropertyMap().set(
+                    common::IdentifiedObject::NAME_KEY,
+                    buildTransfName(boundSrc->baseCRS()->nameStr(),
+                                    targetCRS->nameStr())));
+                transf->setCRSs(boundSrc->baseCRS(), targetCRS, nullptr);
+                res.emplace_back(transf);
+                return res;
+            } else {
+                auto opsFirst = createOperations(
+                    boundSrc->baseCRS(), nnGeogCRSOfBaseOfBoundSrc, context);
+                auto transf = boundSrc->transformation()->shallowClone();
+                transf->setProperties(util::PropertyMap().set(
+                    common::IdentifiedObject::NAME_KEY,
+                    buildTransfName(nnGeogCRSOfBaseOfBoundSrc->nameStr(),
+                                    targetCRS->nameStr())));
+                transf->setCRSs(nnGeogCRSOfBaseOfBoundSrc, targetCRS, nullptr);
+                if (!opsFirst.empty()) {
+                    for (const auto &opFirst : opsFirst) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opFirst, transf},
+                                    !allowEmptyIntersection));
+                        } catch (const InvalidOperationEmptyIntersection &) {
+                        }
+                    }
+                    if (!res.empty()) {
+                        return res;
+                    }
                 }
             }
         }

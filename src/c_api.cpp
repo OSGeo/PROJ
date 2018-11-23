@@ -39,6 +39,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
 #include "proj/io.hpp"
@@ -56,6 +57,7 @@
 
 using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;
+using namespace NS_PROJ::cs;
 using namespace NS_PROJ::datum;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::internal;
@@ -1354,8 +1356,8 @@ int proj_obj_prime_meridian_get_parameters(PJ_OBJ *prime_meridian,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return the base CRS of a BoundCRS or the source CRS of a
- * CoordinateOperation.
+/** \brief Return the base CRS of a BoundCRS or a DerivedCRS/ProjectedCRS, or
+ * the source CRS of a CoordinateOperation.
  *
  * The returned object must be unreferenced with proj_obj_unref() after
  * use.
@@ -1371,6 +1373,10 @@ PJ_OBJ *proj_obj_get_source_crs(PJ_OBJ *obj) {
     auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
         return PJ_OBJ::create(obj->ctx, boundCRS->baseCRS());
+    }
+    auto derivedCRS = dynamic_cast<const DerivedCRS *>(ptr);
+    if (derivedCRS) {
+        return PJ_OBJ::create(obj->ctx, derivedCRS->baseCRS());
     }
     auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
@@ -4070,4 +4076,141 @@ double proj_coordoperation_get_accuracy(PJ_OBJ *coordoperation) {
     } catch (const std::exception &) {
     }
     return -1;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the coordinate system of a SingleCRS.
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param crs Objet of type SingleCRS (must not be NULL)
+ * @return Object that must be unreferenced with proj_obj_unref(), or NULL
+ * in case of error.
+ */
+PJ_OBJ *proj_obj_crs_get_coordinate_system(PJ_OBJ *crs) {
+    assert(crs);
+    auto l_crs = dynamic_cast<const SingleCRS *>(crs->obj.get());
+    if (!l_crs) {
+        proj_log_error(crs->ctx, __FUNCTION__, "Object is not a SingleCRS");
+        return nullptr;
+    }
+    return PJ_OBJ::create(crs->ctx, l_crs->coordinateSystem());
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the type of the coordinate system.
+ *
+ * @param cs Objet of type CoordinateSystem (must not be NULL)
+ * @return type, or NULL in case of error.
+ */
+const char *proj_obj_cs_get_type(PJ_OBJ *cs) {
+    assert(cs);
+    auto l_cs = dynamic_cast<const CoordinateSystem *>(cs->obj.get());
+    if (!l_cs) {
+        proj_log_error(cs->ctx, __FUNCTION__,
+                       "Object is not a CoordinateSystem");
+        return nullptr;
+    }
+    if (dynamic_cast<const CartesianCS *>(l_cs)) {
+        return "Cartesian";
+    }
+    if (dynamic_cast<const EllipsoidalCS *>(l_cs)) {
+        return "Ellipsoidal";
+    }
+    if (dynamic_cast<const VerticalCS *>(l_cs)) {
+        return "Vertical";
+    }
+    if (dynamic_cast<const SphericalCS *>(l_cs)) {
+        return "Spherical";
+    }
+    if (dynamic_cast<const OrdinalCS *>(l_cs)) {
+        return "Ordinal";
+    }
+    if (dynamic_cast<const ParametricCS *>(l_cs)) {
+        return "Parametric";
+    }
+    if (dynamic_cast<const DateTimeTemporalCS *>(l_cs)) {
+        return "DateTimeTemporal";
+    }
+    if (dynamic_cast<const TemporalCountCS *>(l_cs)) {
+        return "TemporalCount";
+    }
+    if (dynamic_cast<const TemporalMeasureCS *>(l_cs)) {
+        return "TemporalMeasure";
+    }
+    return "unknown";
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the number of axis of the coordinate system.
+ *
+ * @param cs Objet of type CoordinateSystem (must not be NULL)
+ * @return number of axis, or -1 in case of error.
+ */
+int proj_obj_cs_get_axis_count(PJ_OBJ *cs) {
+    assert(cs);
+    auto l_cs = dynamic_cast<const CoordinateSystem *>(cs->obj.get());
+    if (!l_cs) {
+        proj_log_error(cs->ctx, __FUNCTION__,
+                       "Object is not a CoordinateSystem");
+        return -1;
+    }
+    return static_cast<int>(l_cs->axisList().size());
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns information on an axis
+ *
+ * @param cs Objet of type CoordinateSystem (must not be NULL)
+ * @param index Index of the coordinate system (between 0 and
+ * proj_obj_cs_get_axis_count() - 1)
+ * @param pName Pointer to a string value to store the axis name. or NULL
+ * @param pAbbrev Pointer to a string value to store the axis abbreviation. or
+ * NULL
+ * @param pDirection Pointer to a string value to store the axis direction. or
+ * NULL
+ * @param pUnitConvFactor Pointer to a double value to store the axis
+ * unit conversion factor. or NULL
+ * @param pUnitName Pointer to a string value to store the axis
+ * unit name. or NULL
+ * @return TRUE in case of success
+ */
+int proj_obj_cs_get_axis_info(PJ_OBJ *cs, int index, const char **pName,
+                              const char **pAbbrev, const char **pDirection,
+                              double *pUnitConvFactor, const char **pUnitName) {
+    assert(cs);
+    auto l_cs = dynamic_cast<const CoordinateSystem *>(cs->obj.get());
+    if (!l_cs) {
+        proj_log_error(cs->ctx, __FUNCTION__,
+                       "Object is not a CoordinateSystem");
+        return false;
+    }
+    const auto &axisList = l_cs->axisList();
+    if (index < 0 || static_cast<size_t>(index) >= axisList.size()) {
+        proj_log_error(cs->ctx, __FUNCTION__, "Invalid index");
+        return false;
+    }
+    const auto &axis = axisList[index];
+    if (pName) {
+        *pName = axis->nameStr().c_str();
+    }
+    if (pAbbrev) {
+        *pAbbrev = axis->abbreviation().c_str();
+    }
+    if (pDirection) {
+        *pDirection = axis->direction().toString().c_str();
+    }
+    if (pUnitConvFactor) {
+        *pUnitConvFactor = axis->unit().conversionToSI();
+    }
+    if (pUnitName) {
+        *pUnitName = axis->unit().name().c_str();
+    }
+    return true;
 }

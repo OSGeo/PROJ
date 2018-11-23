@@ -103,7 +103,6 @@ static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
 }
 
 
-
 static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
 
     switch (OUTPUT_UNITS) {
@@ -138,6 +137,14 @@ static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
 
     case PJ_IO_UNITS_ANGULAR:
         coo.lpz.z = P->vfr_meter * (coo.lpz.z + P->z0);
+
+        if( P->is_long_wrap_set ) {
+            if( coo.lpz.lam != HUGE_VAL ) {
+                coo.lpz.lam  = P->long_wrap_center +
+                               adjlon(coo.lpz.lam - P->long_wrap_center);
+            }
+        }
+
         break;
     }
 

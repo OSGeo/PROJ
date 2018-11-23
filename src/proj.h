@@ -1381,6 +1381,19 @@ PJ_OBJ PROJ_DLL *proj_obj_crs_get_sub_crs(PJ_OBJ *crs, int index);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_create_bound_crs_to_WGS84(PJ_OBJ *crs);
 
+PJ_OBJ PROJ_DLL *proj_obj_crs_get_coordinate_system(PJ_OBJ *crs);
+
+const char PROJ_DLL *proj_obj_cs_get_type(PJ_OBJ* cs);
+
+int PROJ_DLL proj_obj_cs_get_axis_count(PJ_OBJ *cs);
+
+int PROJ_DLL proj_obj_cs_get_axis_info(PJ_OBJ *cs, int index,
+                                       const char **pName,
+                                       const char **pAbbrev,
+                                       const char **pDirection,
+                                       double *pUnitConvFactor,
+                                       const char **pUnitName);
+
 PJ_OBJ PROJ_DLL *proj_obj_get_ellipsoid(PJ_OBJ *obj);
 
 int PROJ_DLL proj_obj_ellipsoid_get_parameters(PJ_OBJ *ellipsoid,

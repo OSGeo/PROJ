@@ -794,7 +794,12 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
         return NULL;
     }
 
-    P = proj_create(ctx, proj_string);
+    if( proj_string[0] == '\0' ) {
+        /* Null transform ? */
+        P = proj_create(ctx, "proj=affine");
+    } else {
+        P = proj_create(ctx, proj_string);
+    }
 
     proj_obj_unref(op);
 

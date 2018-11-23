@@ -4422,6 +4422,7 @@ struct PROJStringFormatter::Private {
     bool useETMercForTMerc_ = false;
     bool useETMercForTMercSet_ = false;
     bool addNoDefs_ = true;
+    bool coordOperationOptimizations_ = false;
 
     std::string result_{};
 
@@ -4503,6 +4504,12 @@ const std::string &PROJStringFormatter::toString() const {
               step.paramValues[5].equals("rz", "0") &&
               step.paramValues[6].equals("s", "0") &&
               step.paramValues[7].keyEquals("convention")))) {
+            iter = d->steps_.erase(iter);
+        } else if (d->coordOperationOptimizations_ &&
+                   step.name == "unitconvert" && paramCount == 2 &&
+                   step.paramValues[0].keyEquals("xy_in") &&
+                   step.paramValues[1].keyEquals("xy_out") &&
+                   step.paramValues[0].value == step.paramValues[1].value) {
             iter = d->steps_.erase(iter);
         } else {
             ++iter;
@@ -4925,6 +4932,12 @@ bool PROJStringFormatter::getUseETMercForTMerc(bool &settingSetOut) const {
 
 // ---------------------------------------------------------------------------
 
+void PROJStringFormatter::setCoordinateOperationOptimizations(bool enable) {
+    d->coordOperationOptimizations_ = enable;
+}
+
+// ---------------------------------------------------------------------------
+
 void PROJStringFormatter::Private::appendToResult(const char *str) {
     if (!result_.empty()) {
         result_ += " ";
@@ -4984,11 +4997,13 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             }
             prevWasStep = false;
         } else if (starts_with(word, "proj=")) {
-            if (prevWasInit) {
-                throw ParsingException("+init= found at unexpected place");
-            }
             auto stepName = word.substr(strlen("proj="));
-            steps.push_back(Step());
+            if (prevWasInit) {
+                steps.back() = Step();
+                prevWasInit = false;
+            } else {
+                steps.push_back(Step());
+            }
             steps.back().name = stepName;
             steps.back().inverted = inverted;
             prevWasStep = false;
@@ -5041,7 +5056,7 @@ void PROJStringFormatter::ingestPROJString(
     std::string vto_meter;
     PROJStringSyntaxParser(str, steps, d->globalParamValues_, title, vunits,
                            vto_meter);
-    d->steps_.insert(d->steps_.begin(), steps.begin(), steps.end());
+    d->steps_.insert(d->steps_.end(), steps.begin(), steps.end());
 }
 
 // ---------------------------------------------------------------------------
@@ -5633,11 +5648,12 @@ PROJStringParser::Private::buildPrimeMeridian(const Step &step) {
     PrimeMeridianNNPtr pm = PrimeMeridian::GREENWICH;
     const auto &pmStr = getParamValue(step, "pm");
     if (!pmStr.empty()) {
-        try {
-            double pmValue = c_locale_stod(pmStr);
+        char *end;
+        double pmValue = dmstor(pmStr.c_str(), &end) * RAD_TO_DEG;
+        if (pmValue != HUGE_VAL && *end == '\0') {
             pm = PrimeMeridian::create(createMapWithUnknownName(),
                                        Angle(pmValue));
-        } catch (const std::invalid_argument &) {
+        } else {
             bool found = false;
             if (pmStr == "paris") {
                 found = true;
@@ -5650,9 +5666,8 @@ PROJStringParser::Private::buildPrimeMeridian(const Step &step) {
                     found = true;
                     std::string name = static_cast<char>(::toupper(pmStr[0])) +
                                        pmStr.substr(1);
-                    double pmValue =
-                        dmstor(proj_prime_meridians[i].defn, nullptr) *
-                        RAD_TO_DEG;
+                    pmValue = dmstor(proj_prime_meridians[i].defn, nullptr) *
+                              RAD_TO_DEG;
                     pm = PrimeMeridian::create(
                         PropertyMap().set(IdentifiedObject::NAME_KEY, name),
                         Angle(pmValue));
@@ -5681,12 +5696,20 @@ PROJStringParser::Private::buildDatum(const Step &step,
 
     const auto &ellpsStr = getParamValue(step, "ellps");
     const auto &datumStr = getParamValue(step, "datum");
+    const auto &RStr = getParamValue(step, "R");
     const auto &aStr = getParamValue(step, "a");
     const auto &bStr = getParamValue(step, "b");
     const auto &rfStr = getParamValue(step, "rf");
     const auto &fStr = getParamValue(step, "f");
-    const auto &RStr = getParamValue(step, "R");
+    const auto &esStr = getParamValue(step, "es");
+    const auto &eStr = getParamValue(step, "e");
+    double a = -1.0;
+    double b = -1.0;
+    double rf = -1.0;
     const util::optional<std::string> optionalEmptyString{};
+    const bool numericParamPresent =
+        !RStr.empty() || !aStr.empty() || !bStr.empty() || !rfStr.empty() ||
+        !fStr.empty() || !esStr.empty() || !eStr.empty();
 
     PrimeMeridianNNPtr pm(buildPrimeMeridian(step));
     PropertyMap grfMap;
@@ -5709,104 +5732,151 @@ PROJStringParser::Private::buildDatum(const Step &step,
             }
         };
 
-    if (!datumStr.empty()) {
-        if (datumStr == "WGS84") {
-            return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6326);
-        } else if (datumStr == "NAD83") {
-            return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6269);
-        } else if (datumStr == "NAD27") {
-            return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6267);
-        } else {
+    // R take precedence
+    if (!RStr.empty()) {
+        double R;
+        try {
+            R = c_locale_stod(RStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid R value");
+        }
+        auto ellipsoid = Ellipsoid::createSphere(createMapWithUnknownName(),
+                                                 Length(R), guessBodyName(R));
+        return GeodeticReferenceFrame::create(
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       title.empty() ? "unknown" : title.c_str()),
+            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+    }
 
-            for (const auto &datumDesc : datumDescs) {
-                if (datumStr == datumDesc.projName) {
-                    (void)datumDesc.gcsName; // to please cppcheck
-                    (void)datumDesc.gcsCode; // to please cppcheck
-                    auto ellipsoid = Ellipsoid::createFlattenedSphere(
-                        grfMap
-                            .set(IdentifiedObject::NAME_KEY,
-                                 datumDesc.ellipsoidName)
-                            .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
-                            .set(Identifier::CODE_KEY, datumDesc.ellipsoidCode),
-                        Length(datumDesc.a), Scale(datumDesc.rf));
-                    return GeodeticReferenceFrame::create(
-                        grfMap
-                            .set(IdentifiedObject::NAME_KEY,
-                                 datumDesc.datumName)
-                            .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
-                            .set(Identifier::CODE_KEY, datumDesc.datumCode),
-                        ellipsoid, optionalEmptyString, pm);
+    if (!datumStr.empty()) {
+        auto l_datum = [&datumStr, &overridePmIfNeeded, &grfMap,
+                        &optionalEmptyString, &pm]() {
+            if (datumStr == "WGS84") {
+                return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6326);
+            } else if (datumStr == "NAD83") {
+                return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6269);
+            } else if (datumStr == "NAD27") {
+                return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6267);
+            } else {
+
+                for (const auto &datumDesc : datumDescs) {
+                    if (datumStr == datumDesc.projName) {
+                        (void)datumDesc.gcsName; // to please cppcheck
+                        (void)datumDesc.gcsCode; // to please cppcheck
+                        auto ellipsoid = Ellipsoid::createFlattenedSphere(
+                            grfMap
+                                .set(IdentifiedObject::NAME_KEY,
+                                     datumDesc.ellipsoidName)
+                                .set(Identifier::CODESPACE_KEY,
+                                     Identifier::EPSG)
+                                .set(Identifier::CODE_KEY,
+                                     datumDesc.ellipsoidCode),
+                            Length(datumDesc.a), Scale(datumDesc.rf));
+                        return GeodeticReferenceFrame::create(
+                            grfMap
+                                .set(IdentifiedObject::NAME_KEY,
+                                     datumDesc.datumName)
+                                .set(Identifier::CODESPACE_KEY,
+                                     Identifier::EPSG)
+                                .set(Identifier::CODE_KEY, datumDesc.datumCode),
+                            ellipsoid, optionalEmptyString, pm);
+                    }
                 }
             }
+            throw ParsingException("unknown datum " + datumStr);
+        }();
+        if (!numericParamPresent) {
+            return l_datum;
         }
-        throw ParsingException("unknown datum " + datumStr);
+        a = l_datum->ellipsoid()->semiMajorAxis().getSIValue();
+        rf = l_datum->ellipsoid()->computedInverseFlattening();
     }
 
     else if (!ellpsStr.empty()) {
-        if (ellpsStr == "WGS84") {
-            return GeodeticReferenceFrame::create(
-                grfMap.set(IdentifiedObject::NAME_KEY,
-                           title.empty() ? "Unknown based on WGS84 ellipsoid"
-                                         : title.c_str()),
-                Ellipsoid::WGS84, optionalEmptyString, pm);
-        } else if (ellpsStr == "GRS80") {
-            return GeodeticReferenceFrame::create(
-                grfMap.set(IdentifiedObject::NAME_KEY,
-                           title.empty() ? "Unknown based on GRS80 ellipsoid"
-                                         : title.c_str()),
-                Ellipsoid::GRS1980, optionalEmptyString, pm);
-        } else {
-            auto proj_ellps = proj_list_ellps();
-            for (int i = 0; proj_ellps[i].id != nullptr; i++) {
-                if (ellpsStr == proj_ellps[i].id) {
-                    assert(strncmp(proj_ellps[i].major, "a=", 2) == 0);
-                    const double a_iter =
-                        c_locale_stod(proj_ellps[i].major + 2);
-                    EllipsoidPtr ellipsoid;
-                    PropertyMap ellpsMap;
-                    if (strncmp(proj_ellps[i].ell, "b=", 2) == 0) {
-                        const double b_iter =
-                            c_locale_stod(proj_ellps[i].ell + 2);
-                        ellipsoid = Ellipsoid::createTwoAxis(
-                                        ellpsMap.set(IdentifiedObject::NAME_KEY,
-                                                     proj_ellps[i].name),
-                                        Length(a_iter), Length(b_iter))
-                                        .as_nullable();
-                    } else {
-                        assert(strncmp(proj_ellps[i].ell, "rf=", 3) == 0);
-                        const double rf_iter =
-                            c_locale_stod(proj_ellps[i].ell + 3);
-                        ellipsoid = Ellipsoid::createFlattenedSphere(
-                                        ellpsMap.set(IdentifiedObject::NAME_KEY,
-                                                     proj_ellps[i].name),
-                                        Length(a_iter), Scale(rf_iter))
-                                        .as_nullable();
+        auto l_datum = [&ellpsStr, &title, &grfMap, &optionalEmptyString,
+                        &pm]() {
+            if (ellpsStr == "WGS84") {
+                return GeodeticReferenceFrame::create(
+                    grfMap.set(IdentifiedObject::NAME_KEY,
+                               title.empty()
+                                   ? "Unknown based on WGS84 ellipsoid"
+                                   : title.c_str()),
+                    Ellipsoid::WGS84, optionalEmptyString, pm);
+            } else if (ellpsStr == "GRS80") {
+                return GeodeticReferenceFrame::create(
+                    grfMap.set(IdentifiedObject::NAME_KEY,
+                               title.empty()
+                                   ? "Unknown based on GRS80 ellipsoid"
+                                   : title.c_str()),
+                    Ellipsoid::GRS1980, optionalEmptyString, pm);
+            } else {
+                auto proj_ellps = proj_list_ellps();
+                for (int i = 0; proj_ellps[i].id != nullptr; i++) {
+                    if (ellpsStr == proj_ellps[i].id) {
+                        assert(strncmp(proj_ellps[i].major, "a=", 2) == 0);
+                        const double a_iter =
+                            c_locale_stod(proj_ellps[i].major + 2);
+                        EllipsoidPtr ellipsoid;
+                        PropertyMap ellpsMap;
+                        if (strncmp(proj_ellps[i].ell, "b=", 2) == 0) {
+                            const double b_iter =
+                                c_locale_stod(proj_ellps[i].ell + 2);
+                            ellipsoid =
+                                Ellipsoid::createTwoAxis(
+                                    ellpsMap.set(IdentifiedObject::NAME_KEY,
+                                                 proj_ellps[i].name),
+                                    Length(a_iter), Length(b_iter))
+                                    .as_nullable();
+                        } else {
+                            assert(strncmp(proj_ellps[i].ell, "rf=", 3) == 0);
+                            const double rf_iter =
+                                c_locale_stod(proj_ellps[i].ell + 3);
+                            ellipsoid =
+                                Ellipsoid::createFlattenedSphere(
+                                    ellpsMap.set(IdentifiedObject::NAME_KEY,
+                                                 proj_ellps[i].name),
+                                    Length(a_iter), Scale(rf_iter))
+                                    .as_nullable();
+                        }
+                        return GeodeticReferenceFrame::create(
+                            grfMap.set(IdentifiedObject::NAME_KEY,
+                                       title.empty()
+                                           ? std::string("Unknown based on ") +
+                                                 proj_ellps[i].name +
+                                                 " ellipsoid"
+                                           : title),
+                            NN_NO_CHECK(ellipsoid), optionalEmptyString, pm);
                     }
-                    return GeodeticReferenceFrame::create(
-                        grfMap.set(IdentifiedObject::NAME_KEY,
-                                   title.empty()
-                                       ? std::string("Unknown based on ") +
-                                             proj_ellps[i].name + " ellipsoid"
-                                       : title),
-                        NN_NO_CHECK(ellipsoid), optionalEmptyString, pm);
                 }
+                throw ParsingException("unknown ellipsoid " + ellpsStr);
             }
-            throw ParsingException("unknown ellipsoid " + ellpsStr);
+        }();
+        if (!numericParamPresent) {
+            return l_datum;
+        }
+        a = l_datum->ellipsoid()->semiMajorAxis().getSIValue();
+        if (l_datum->ellipsoid()->semiMinorAxis().has_value()) {
+            b = l_datum->ellipsoid()->semiMinorAxis()->getSIValue();
+        } else {
+            rf = l_datum->ellipsoid()->computedInverseFlattening();
         }
     }
 
-    else if (!aStr.empty() && !bStr.empty()) {
-        double a;
+    if (!aStr.empty()) {
         try {
             a = c_locale_stod(aStr);
         } catch (const std::invalid_argument &) {
             throw ParsingException("Invalid a value");
         }
-        double b;
-        try {
-            b = c_locale_stod(bStr);
-        } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid b value");
+    }
+
+    if (a > 0 && (b > 0 || !bStr.empty())) {
+        if (!bStr.empty()) {
+            try {
+                b = c_locale_stod(bStr);
+            } catch (const std::invalid_argument &) {
+                throw ParsingException("Invalid b value");
+            }
         }
         auto ellipsoid =
             Ellipsoid::createTwoAxis(createMapWithUnknownName(), Length(a),
@@ -5818,18 +5888,13 @@ PROJStringParser::Private::buildDatum(const Step &step,
             ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
-    else if (!aStr.empty() && !rfStr.empty()) {
-        double a;
-        try {
-            a = c_locale_stod(aStr);
-        } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid a value");
-        }
-        double rf;
-        try {
-            rf = c_locale_stod(rfStr);
-        } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid rf value");
+    else if (a > 0 && (rf >= 0 || !rfStr.empty())) {
+        if (!rfStr.empty()) {
+            try {
+                rf = c_locale_stod(rfStr);
+            } catch (const std::invalid_argument &) {
+                throw ParsingException("Invalid rf value");
+            }
         }
         auto ellipsoid = Ellipsoid::createFlattenedSphere(
                              createMapWithUnknownName(), Length(a), Scale(rf),
@@ -5841,13 +5906,7 @@ PROJStringParser::Private::buildDatum(const Step &step,
             ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
-    else if (!aStr.empty() && !fStr.empty()) {
-        double a;
-        try {
-            a = c_locale_stod(aStr);
-        } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid a value");
-        }
+    else if (a > 0 && !fStr.empty()) {
         double f;
         try {
             f = c_locale_stod(fStr);
@@ -5864,23 +5923,52 @@ PROJStringParser::Private::buildDatum(const Step &step,
             ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
-    else if (!RStr.empty()) {
-        double R;
+    else if (a > 0 && !eStr.empty()) {
+        double e;
         try {
-            R = c_locale_stod(RStr);
+            e = c_locale_stod(eStr);
         } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid R value");
+            throw ParsingException("Invalid e value");
         }
-        auto ellipsoid = Ellipsoid::createSphere(createMapWithUnknownName(),
-                                                 Length(R), guessBodyName(R));
+        double alpha = asin(e);    /* angular eccentricity */
+        double f = 1 - cos(alpha); /* = 1 - sqrt (1 - es); */
+        auto ellipsoid = Ellipsoid::createFlattenedSphere(
+                             createMapWithUnknownName(), Length(a),
+                             Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
+                             ->identify();
         return GeodeticReferenceFrame::create(
             grfMap.set(IdentifiedObject::NAME_KEY,
                        title.empty() ? "unknown" : title.c_str()),
             ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
-    if (!aStr.empty() && bStr.empty() && rfStr.empty()) {
-        throw ParsingException("a found, but b, f or rf missing");
+    else if (a > 0 && !esStr.empty()) {
+        double es;
+        try {
+            es = c_locale_stod(esStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid es value");
+        }
+        double f = 1 - sqrt(1 - es);
+        auto ellipsoid = Ellipsoid::createFlattenedSphere(
+                             createMapWithUnknownName(), Length(a),
+                             Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
+                             ->identify();
+        return GeodeticReferenceFrame::create(
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       title.empty() ? "unknown" : title.c_str()),
+            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+    }
+
+    // If only a is specified, create a sphere
+    if (a > 0 && bStr.empty() && rfStr.empty() && eStr.empty() &&
+        esStr.empty()) {
+        auto ellipsoid = Ellipsoid::createSphere(createMapWithUnknownName(),
+                                                 Length(a), guessBodyName(a));
+        return GeodeticReferenceFrame::create(
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       title.empty() ? "unknown" : title.c_str()),
+            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
     if (!bStr.empty() && aStr.empty()) {
@@ -5893,6 +5981,14 @@ PROJStringParser::Private::buildDatum(const Step &step,
 
     if (!fStr.empty() && aStr.empty()) {
         throw ParsingException("f found, but a missing");
+    }
+
+    if (!eStr.empty() && aStr.empty()) {
+        throw ParsingException("e found, but a missing");
+    }
+
+    if (!esStr.empty() && aStr.empty()) {
+        throw ParsingException("es found, but a missing");
     }
 
     return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6326);
@@ -6064,6 +6160,22 @@ PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
 
 // ---------------------------------------------------------------------------
 
+static double getNumericValue(const std::string &paramValue,
+                              bool *pHasError = nullptr) {
+    try {
+        double value = c_locale_stod(paramValue);
+        if (pHasError)
+            *pHasError = false;
+        return value;
+    } catch (const std::invalid_argument &) {
+        if (pHasError)
+            *pHasError = true;
+        return 0.0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 GeographicCRSNNPtr
 PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
                                               int iAxisSwap, bool ignoreVUnits,
@@ -6077,7 +6189,10 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
-    if (l_isGeographicStep && hasParamValue(step, "wktext")) {
+    if (l_isGeographicStep &&
+        (hasParamValue(step, "wktext") ||
+         hasParamValue(step, "lon_wrap") | hasParamValue(step, "geoc") ||
+         getNumericValue(getParamValue(step, "lon_0")) != 0.0)) {
         props.set("EXTENSION_PROJ4", projString_);
     }
 
@@ -6214,22 +6329,6 @@ static double getAngularValue(const std::string &paramValue,
 
 // ---------------------------------------------------------------------------
 
-static double getNumericValue(const std::string &paramValue,
-                              bool *pHasError = nullptr) {
-    try {
-        double value = c_locale_stod(paramValue);
-        if (pHasError)
-            *pHasError = false;
-        return value;
-    } catch (const std::invalid_argument &) {
-        if (pHasError)
-            *pHasError = true;
-        return 0.0;
-    }
-}
-
-// ---------------------------------------------------------------------------
-
 CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     int iStep, GeographicCRSNNPtr geogCRS, int iUnitConvert, int iAxisSwap) {
     auto &step = steps_[iStep];
@@ -6285,7 +6384,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         mapping =
             getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y);
     } else if (step.name == "omerc") {
-        if (hasParamValue(step, "no_uoff") || hasParamValue(step, "no_off")) {
+        if (hasParamValue(step, "no_rot")) {
+            mapping = nullptr;
+        } else if (hasParamValue(step, "no_uoff") ||
+                   hasParamValue(step, "no_off")) {
             mapping =
                 getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A);
         } else if (hasParamValue(step, "lat_1") &&
@@ -6839,6 +6941,21 @@ PROJStringParser::Private::buildMolodenskyTransformation(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static const metadata::ExtentPtr nullExtent{};
+
+static const metadata::ExtentPtr &getExtent(const crs::CRS *crs) {
+    const auto &domains = crs->domains();
+    if (!domains.empty()) {
+        return domains[0]->domainOfValidity();
+    }
+    return nullExtent;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a sub-class of BaseObject from a PROJ string.
  * @throw ParsingException
  */
@@ -6909,30 +7026,36 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             }
             auto obj =
                 createFromUserInput(d->steps_[0].name, d->dbContext_, true);
-            auto geogCRS = dynamic_cast<GeographicCRS *>(obj.get());
-            if (geogCRS) {
-                // Override with longitude latitude in radian
-                return GeographicCRS::create(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                      geogCRS->nameStr()),
-                    geogCRS->datum(), geogCRS->datumEnsemble(),
-                    EllipsoidalCS::createLongitudeLatitude(
-                        UnitOfMeasure::RADIAN));
-            }
-            auto projCRS = dynamic_cast<ProjectedCRS *>(obj.get());
-            if (projCRS) {
-                // Override with easting northing orer
-                auto conv = projCRS->derivingConversionRef();
-                if (conv->method()->getEPSGCode() !=
-                    EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
-                    return ProjectedCRS::create(
-                        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                          projCRS->nameStr()),
-                        projCRS->baseCRS(), conv,
-                        CartesianCS::createEastingNorthing(
-                            projCRS->coordinateSystem()
-                                ->axisList()[0]
-                                ->unit()));
+            auto crs = dynamic_cast<CRS *>(obj.get());
+            if (crs) {
+                PropertyMap properties;
+                properties.set(IdentifiedObject::NAME_KEY, crs->nameStr());
+                const auto &extent = getExtent(crs);
+                if (extent) {
+                    properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                                   NN_NO_CHECK(extent));
+                }
+                auto geogCRS = dynamic_cast<GeographicCRS *>(crs);
+                if (geogCRS) {
+                    // Override with longitude latitude in radian
+                    return GeographicCRS::create(
+                        properties, geogCRS->datum(), geogCRS->datumEnsemble(),
+                        EllipsoidalCS::createLongitudeLatitude(
+                            UnitOfMeasure::RADIAN));
+                }
+                auto projCRS = dynamic_cast<ProjectedCRS *>(crs);
+                if (projCRS) {
+                    // Override with easting northing order
+                    const auto &conv = projCRS->derivingConversionRef();
+                    if (conv->method()->getEPSGCode() !=
+                        EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
+                        return ProjectedCRS::create(
+                            properties, projCRS->baseCRS(), conv,
+                            CartesianCS::createEastingNorthing(
+                                projCRS->coordinateSystem()
+                                    ->axisList()[0]
+                                    ->unit()));
+                    }
                 }
             }
             return obj;

@@ -5686,23 +5686,33 @@ TEST(io, projparse_longlat_a_f_non_zero) {
         PROJStringParser().createFromPROJString("+proj=longlat +a=2 +f=0.5");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    WKTFormatterNNPtr f(WKTFormatter::create());
-    f->simulCurNodeHasId();
-    crs->exportToWKT(f.get());
-    auto expected = "GEODCRS[\"unknown\",\n"
-                    "    DATUM[\"unknown\",\n"
-                    "        ELLIPSOID[\"unknown\",2,2,\n"
-                    "            LENGTHUNIT[\"metre\",1]]],\n"
-                    "    PRIMEM[\"Reference meridian\",0,\n"
-                    "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-                    "    CS[ellipsoidal,2],\n"
-                    "        AXIS[\"longitude\",east,\n"
-                    "            ORDER[1],\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-                    "        AXIS[\"latitude\",north,\n"
-                    "            ORDER[2],\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
-    EXPECT_EQ(f->toString(), expected);
+    EXPECT_EQ(crs->ellipsoid()->semiMajorAxis().getSIValue(), 2);
+    auto rf = crs->ellipsoid()->computedInverseFlattening();
+    EXPECT_EQ(rf, 2) << rf;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_a_e) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=longlat +a=2 +e=0.5");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->ellipsoid()->semiMajorAxis().getSIValue(), 2);
+    auto rf = crs->ellipsoid()->computedInverseFlattening();
+    EXPECT_NEAR(rf, 7.46410161513775, 1e-14) << rf;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_a_es) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=longlat +a=2 +es=0.5");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->ellipsoid()->semiMajorAxis().getSIValue(), 2);
+    auto rf = crs->ellipsoid()->computedInverseFlattening();
+    EXPECT_EQ(rf, 3.4142135623730958) << rf;
 }
 
 // ---------------------------------------------------------------------------
@@ -5711,23 +5721,31 @@ TEST(io, projparse_longlat_R) {
     auto obj = PROJStringParser().createFromPROJString("+proj=longlat +R=2");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    WKTFormatterNNPtr f(WKTFormatter::create());
-    f->simulCurNodeHasId();
-    crs->exportToWKT(f.get());
-    auto expected = "GEODCRS[\"unknown\",\n"
-                    "    DATUM[\"unknown\",\n"
-                    "        ELLIPSOID[\"unknown\",2,0,\n"
-                    "            LENGTHUNIT[\"metre\",1]]],\n"
-                    "    PRIMEM[\"Reference meridian\",0,\n"
-                    "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-                    "    CS[ellipsoidal,2],\n"
-                    "        AXIS[\"longitude\",east,\n"
-                    "            ORDER[1],\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-                    "        AXIS[\"latitude\",north,\n"
-                    "            ORDER[2],\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
-    EXPECT_EQ(f->toString(), expected);
+    EXPECT_TRUE(crs->ellipsoid()->isSphere());
+    EXPECT_EQ(crs->ellipsoid()->semiMajorAxis().getSIValue(), 2);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_a) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=longlat +a=2");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(crs->ellipsoid()->isSphere());
+    EXPECT_EQ(crs->ellipsoid()->semiMajorAxis().getSIValue(), 2);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_a_override_ellps) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +a=2 +ellps=WGS84");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(!crs->ellipsoid()->isSphere());
+    EXPECT_EQ(crs->ellipsoid()->semiMajorAxis().getSIValue(), 2);
+    EXPECT_EQ(crs->ellipsoid()->computedInverseFlattening(), 298.25722356300003)
+        << crs->ellipsoid()->computedInverseFlattening();
 }
 
 // ---------------------------------------------------------------------------
@@ -7505,6 +7523,16 @@ TEST(io, projparse_init) {
         EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=pipeline +step +init=epsg:4326 +step +proj=longlat");
     }
+
+    {
+        auto obj = PROJStringParser().createFromPROJString(
+            "init=epsg:4326 proj=longlat ellps=GRS80");
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline +step +proj=longlat +ellps=GRS80 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -7535,10 +7563,6 @@ TEST(io, projparse_errors) {
 
     EXPECT_THROW(PROJStringParser().createFromPROJString(
                      "proj=pipeline step init=epsg:4326 init=epsg:4326"),
-                 ParsingException);
-
-    EXPECT_THROW(PROJStringParser().createFromPROJString(
-                     "proj=pipeline step init=epsg:4326 proj=longlat"),
                  ParsingException);
 }
 
@@ -7576,9 +7600,6 @@ TEST(io, projparse_longlat_errors) {
     EXPECT_THROW(
         PROJStringParser().createFromPROJString("+proj=longlat +R=invalid"),
         ParsingException);
-
-    EXPECT_THROW(PROJStringParser().createFromPROJString("+proj=longlat +a=1"),
-                 ParsingException);
 
     EXPECT_THROW(PROJStringParser().createFromPROJString("+proj=longlat +b=1"),
                  ParsingException);

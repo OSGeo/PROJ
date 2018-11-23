@@ -26,12 +26,19 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#define FROM_PROJ_CPP
+
 #include <ctype.h>
 #include <locale.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <cassert>
+#include <string>
+
+#include <proj/internal/internal.hpp>
 
 // PROJ include order is sensitive
 // clang-format off
@@ -41,9 +48,15 @@
 // clang-format on
 
 #define MAX_LINE 1000
-#define MAX_PARGS 100
 
-static projPJ fromProj, toProj;
+static PJ *transformation = nullptr;
+
+static bool srcIsGeog = false;
+static double srcToRadians = 0.0;
+
+static bool destIsGeog = false;
+static double destToRadians = 0.0;
+static bool destIsLatLong = false;
 
 static int reversein = 0, /* != 0 reverse input arguments */
     reverseout = 0,       /* != 0 reverse output arguments */
@@ -116,19 +129,45 @@ static void process(FILE *fid)
         }
 
         if (data.u != HUGE_VAL) {
-            if (pj_transform(fromProj, toProj, 1, 0, &(data.u), &(data.v),
-                             &z) != 0) {
-                data.u = HUGE_VAL;
-                data.v = HUGE_VAL;
-                emess(-3, "pj_transform(): %s", pj_strerrno(pj_errno));
+
+            if (srcIsGeog) {
+                /* dmstor gives values to radians. Convert now to the SRS unit
+                 */
+                data.u /= srcToRadians;
+                data.v /= srcToRadians;
             }
+
+            PJ_COORD coord;
+            coord.xyzt.x = data.u;
+            coord.xyzt.y = data.v;
+            coord.xyzt.z = z;
+            coord.xyzt.t = HUGE_VAL;
+            coord = proj_trans(transformation, PJ_FWD, coord);
+            data.u = coord.xyz.x;
+            data.v = coord.xyz.y;
+            z = coord.xyz.z;
         }
 
         if (data.u == HUGE_VAL) /* error output */
             fputs(oterr, stdout);
 
-        else if (pj_is_latlong(toProj) && !oform) { /*ascii DMS output */
-            if (reverseout) {
+        else if (destIsGeog && !oform) { /*ascii DMS output */
+
+            // rtodms() expect radians: convert from the output SRS unit
+            data.u *= destToRadians;
+            data.v *= destToRadians;
+
+            if (destIsLatLong) {
+                if (reverseout) {
+                    fputs(rtodms(pline, data.v, 'E', 'W'), stdout);
+                    putchar('\t');
+                    fputs(rtodms(pline, data.u, 'N', 'S'), stdout);
+                } else {
+                    fputs(rtodms(pline, data.u, 'N', 'S'), stdout);
+                    putchar('\t');
+                    fputs(rtodms(pline, data.v, 'E', 'W'), stdout);
+                }
+            } else if (reverseout) {
                 fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
                 putchar('\t');
                 fputs(rtodms(pline, data.u, 'E', 'W'), stdout);
@@ -139,9 +178,9 @@ static void process(FILE *fid)
             }
 
         } else { /* x-y or decimal degree ascii output */
-            if (proj_angular_output(toProj, PJ_FWD)) {
-                data.v *= RAD_TO_DEG;
-                data.u *= RAD_TO_DEG;
+            if (destIsGeog) {
+                data.v *= destToRadians * RAD_TO_DEG;
+                data.u *= destToRadians * RAD_TO_DEG;
             }
             if (reverseout) {
                 printf(oform, data.v);
@@ -167,23 +206,127 @@ static void process(FILE *fid)
 }
 
 /************************************************************************/
+/*                          instanciate_crs()                           */
+/************************************************************************/
+
+static PJ_OBJ *instanciate_crs(const std::string &definition,
+                               const char *const *optionsImportCRS,
+                               bool &isGeog, double &toRadians,
+                               bool &isLatFirst) {
+    PJ_OBJ *crs = proj_obj_create_from_user_input(nullptr, definition.c_str(),
+                                                  optionsImportCRS);
+    if (!crs) {
+        return nullptr;
+    }
+
+    isGeog = false;
+    toRadians = 0.0;
+    isLatFirst = false;
+
+    auto type = proj_obj_get_type(crs);
+    if (type == PJ_OBJ_TYPE_BOUND_CRS) {
+        auto base = proj_obj_get_source_crs(crs);
+        proj_obj_unref(crs);
+        crs = base;
+        type = proj_obj_get_type(crs);
+    }
+    if (type == PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS ||
+        type == PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS) {
+        auto cs = proj_obj_crs_get_coordinate_system(crs);
+        assert(cs);
+
+        isGeog = true;
+        const char *axisName = "";
+        proj_obj_cs_get_axis_info(cs, 0,
+                                  &axisName, // name,
+                                  nullptr,   // abbrev
+                                  nullptr,   // direction
+                                  &toRadians,
+                                  nullptr // unit name
+                                  );
+        isLatFirst =
+            NS_PROJ::internal::ci_find(std::string(axisName), "latitude") !=
+            std::string::npos;
+
+        proj_obj_unref(cs);
+    }
+
+    return crs;
+}
+
+/************************************************************************/
+/*               get_geog_crs_proj_string_from_proj_crs()               */
+/************************************************************************/
+
+static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
+                                                          double &toRadians,
+                                                          bool &isLatFirst) {
+    auto srcType = proj_obj_get_type(src);
+    if (srcType == PJ_OBJ_TYPE_BOUND_CRS) {
+        auto base = proj_obj_get_source_crs(src);
+        assert(base);
+        proj_obj_unref(src);
+        src = base;
+        srcType = proj_obj_get_type(src);
+    }
+    if (srcType != PJ_OBJ_TYPE_PROJECTED_CRS) {
+        return std::string();
+    }
+
+    auto base = proj_obj_get_source_crs(src);
+    assert(base);
+    auto baseType = proj_obj_get_type(base);
+    if (baseType != PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS &&
+        baseType != PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS) {
+        proj_obj_unref(base);
+        return std::string();
+    }
+
+    auto cs = proj_obj_crs_get_coordinate_system(base);
+    assert(cs);
+
+    const char *axisName = "";
+    proj_obj_cs_get_axis_info(cs, 0,
+                              &axisName, // name,
+                              nullptr,   // abbrev
+                              nullptr,   // direction
+                              &toRadians,
+                              nullptr // unit name
+                              );
+    isLatFirst = NS_PROJ::internal::ci_find(std::string(axisName),
+                                            "latitude") != std::string::npos;
+
+    proj_obj_unref(cs);
+
+    auto retCStr = proj_obj_as_proj_string(base, PJ_PROJ_5, nullptr);
+    std::string ret(retCStr ? retCStr : "");
+    proj_obj_unref(base);
+    return ret;
+}
+
+/************************************************************************/
 /*                                main()                                */
 /************************************************************************/
 
 int main(int argc, char **argv) {
     char *arg;
     char **eargv = argv;
-    char *from_argv[MAX_PARGS];
-    char *to_argv[MAX_PARGS];
+    std::string fromStr;
+    std::string toStr;
     FILE *fid;
-    int from_argc = 0, to_argc = 0, eargc = 0, mon = 0;
-    int have_to_flag = 0, inverse = 0, i;
+    int eargc = 0, mon = 0;
+    int have_to_flag = 0, inverse = 0;
     int use_env_locale = 0;
 
     /* This is just to check that pj_init() is locale-safe */
     /* Used by nad/testvarious */
     if (getenv("PROJ_USE_ENV_LOCALE") != nullptr)
         use_env_locale = 1;
+
+    /* Enable compatibility mode for init=epsg:XXXX by default */
+    if (getenv("PROJ_USE_PROJ4_INIT_RULES") == nullptr) {
+        proj_context_use_proj4_init_rules(nullptr, true);
+    }
 
     if ((emess_dat.Prog_name = strrchr(*argv, DIR_CHAR)) != nullptr)
         ++emess_dat.Prog_name;
@@ -194,9 +337,27 @@ int main(int argc, char **argv) {
         (void)fprintf(stderr, usage, pj_get_release(), emess_dat.Prog_name);
         exit(0);
     }
+
+    // First pass to check if we have "cs2cs [-bla]* <SRC> <DEST>" syntax
+    int countNonOptionArg = 0;
+    for (int i = 1; i < argc; i++) {
+        if (argv[i][0] == '-') {
+            if (argv[i][1] == '\0') {
+                countNonOptionArg++;
+            }
+        } else {
+            if (strcmp(argv[i], "+to") == 0) {
+                countNonOptionArg = -1;
+                break;
+            }
+            countNonOptionArg++;
+        }
+    }
+    const bool isSrcDestSyntax = (countNonOptionArg == 2);
+
     /* process run line arguments */
     while (--argc > 0) { /* collect run line arguments */
-        if (**++argv == '-')
+        if (**++argv == '-') {
             for (arg = *argv;;) {
                 switch (*++arg) {
                 case '\0': /* position of "stdin" */
@@ -325,21 +486,28 @@ int main(int argc, char **argv) {
                 }
                 break;
             }
-        else if (strcmp(*argv, "+to") == 0) {
+        } else if (isSrcDestSyntax) {
+            if (fromStr.empty())
+                fromStr = *argv;
+            else
+                toStr = *argv;
+        } else if (strcmp(*argv, "+to") == 0) {
             have_to_flag = 1;
 
         } else if (**argv == '+') { /* + argument */
             if (have_to_flag) {
-                if (to_argc < MAX_PARGS)
-                    to_argv[to_argc++] = *argv + 1;
-                else
-                    emess(1, "overflowed + argument table");
+                if (!toStr.empty())
+                    toStr += ' ';
+                toStr += *argv;
             } else {
-                if (from_argc < MAX_PARGS)
-                    from_argv[from_argc++] = *argv + 1;
-                else
-                    emess(1, "overflowed + argument table");
+                if (!fromStr.empty())
+                    fromStr += ' ';
+                fromStr += *argv;
             }
+        } else if (!have_to_flag) {
+            fromStr = *argv;
+        } else if (toStr.empty()) {
+            toStr = *argv;
         } else /* assumed to be input file name(s) */
             eargv[eargc++] = *argv;
     }
@@ -351,17 +519,7 @@ int main(int argc, char **argv) {
      * coordinate systems.
      */
     if (inverse) {
-        int argcount;
-
-        for (i = 0; i < MAX_PARGS; i++) {
-            arg = from_argv[i];
-            from_argv[i] = to_argv[i];
-            to_argv[i] = arg;
-        }
-
-        argcount = from_argc;
-        from_argc = to_argc;
-        to_argc = argcount;
+        std::swap(fromStr, toStr);
     }
 
     if (use_env_locale) {
@@ -369,48 +527,64 @@ int main(int argc, char **argv) {
         setlocale(LC_ALL, "");
     }
 
-    if (from_argc == 0 && to_argc != 0) {
-        /* we will generate the from proj as the latlong of the +to in a bit */
-    } else if (!(fromProj = pj_init(from_argc, from_argv))) {
-        printf("Using from definition: ");
-        for (i = 0; i < from_argc; i++)
-            printf("%s ", from_argv[i]);
-        printf("\n");
-
-        emess(3, "projection initialization failure\ncause: %s",
-              pj_strerrno(pj_errno));
+    if (fromStr.empty() && toStr.empty()) {
+        emess(3, "missing source and target coordinate systems");
     }
 
-    if (to_argc == 0) {
-        if (!(toProj = pj_latlong_from_proj(fromProj))) {
-            printf("Using to definition: ");
-            for (i = 0; i < to_argc; i++)
-                printf("%s ", to_argv[i]);
-            printf("\n");
+    const char *const optionsProj4Mode[] = {"USE_PROJ4_INIT_RULES=YES",
+                                            nullptr};
+    const char *const *optionsImportCRS =
+        proj_context_get_use_proj4_init_rules(nullptr) ? optionsProj4Mode
+                                                       : nullptr;
 
-            emess(3, "projection initialization failure\ncause: %s",
-                  pj_strerrno(pj_errno));
+    PJ_OBJ *src = nullptr;
+    if (!fromStr.empty()) {
+        bool ignored;
+        src = instanciate_crs(fromStr, optionsImportCRS, srcIsGeog,
+                              srcToRadians, ignored);
+        if (!src) {
+            emess(3, "cannot instanciate source coordinate system");
         }
-    } else if (!(toProj = pj_init(to_argc, to_argv))) {
-        printf("Using to definition: ");
-        for (i = 0; i < to_argc; i++)
-            printf("%s ", to_argv[i]);
-        printf("\n");
-
-        emess(3, "projection initialization failure\ncause: %s",
-              pj_strerrno(pj_errno));
     }
 
-    if (from_argc == 0 && toProj != nullptr) {
-        if (!(fromProj = pj_latlong_from_proj(toProj))) {
-            printf("Using to definition: ");
-            for (i = 0; i < to_argc; i++)
-                printf("%s ", to_argv[i]);
-            printf("\n");
-
-            emess(3, "projection initialization failure\ncause: %s",
-                  pj_strerrno(pj_errno));
+    PJ_OBJ *dst = nullptr;
+    if (!toStr.empty()) {
+        dst = instanciate_crs(toStr, optionsImportCRS, destIsGeog,
+                              destToRadians, destIsLatLong);
+        if (!dst) {
+            emess(3, "cannot instanciate target coordinate system");
         }
+    }
+
+    if (toStr.empty()) {
+        assert(src);
+        toStr = get_geog_crs_proj_string_from_proj_crs(src, destToRadians,
+                                                       destIsLatLong);
+        if (toStr.empty()) {
+            emess(3,
+                  "missing target CRS and source CRS is not a projected CRS");
+        }
+        destIsGeog = true;
+    } else if (fromStr.empty()) {
+        assert(dst);
+        bool ignored;
+        fromStr =
+            get_geog_crs_proj_string_from_proj_crs(dst, srcToRadians, ignored);
+        if (fromStr.empty()) {
+            emess(3,
+                  "missing source CRS and target CRS is not a projected CRS");
+        }
+        srcIsGeog = true;
+    }
+
+    proj_obj_unref(src);
+    proj_obj_unref(dst);
+
+    transformation = proj_create_crs_to_crs(nullptr, fromStr.c_str(),
+                                            toStr.c_str(), nullptr);
+    if (!transformation) {
+        emess(3, "cannot initialize transformation\ncause: %s",
+              pj_strerrno(pj_errno));
     }
 
     if (use_env_locale) {
@@ -420,19 +594,19 @@ int main(int argc, char **argv) {
 
     if (mon) {
         printf("%c ---- From Coordinate System ----\n", tag);
-        pj_pr_list(fromProj);
+        printf("%s\n", fromStr.c_str());
         printf("%c ---- To Coordinate System ----\n", tag);
-        pj_pr_list(toProj);
+        printf("%s\n", toStr.c_str());
     }
 
     /* set input formatting control */
-    if (!fromProj->is_latlong)
+    if (!srcIsGeog)
         informat = strtod;
     else {
         informat = dmstor;
     }
 
-    if (!toProj->is_latlong && !oform)
+    if (!destIsGeog && !oform)
         oform = "%.2f";
 
     /* process input file list */
@@ -454,8 +628,7 @@ int main(int argc, char **argv) {
         emess_dat.File_name = nullptr;
     }
 
-    pj_free(fromProj);
-    pj_free(toProj);
+    proj_destroy(transformation);
 
     pj_deallocate_grids();
 

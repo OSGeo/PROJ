@@ -41,13 +41,7 @@ echo "============================================"
 
 OUT=proj_outIGNF
 
-REMOVE_IGNF=NO
-if test ! -f IGNF; then
-    cp ${PROJ_LIB}/IGNF .
-    REMOVE_IGNF=YES
-fi
-
-INIT_FILE=./IGNF
+INIT_FILE=IGNF
 RES="-f %.3f"
 #
 echo "doing tests into file ${OUT}, please wait"
@@ -161,10 +155,6 @@ echo "+init=${INIT_FILE}:RGR92 +to +init=${INIT_FILE}:REUN47" >>${OUT}
 $EXE +init=${INIT_FILE}:RGR92 +to +init=${INIT_FILE}:REUN47 -E $RES >>${OUT} <<EOF
 3356123.5400 1303218.3090 5247430.6050
 EOF
-
-if test "${REMOVE_IGNF}" = "YES"; then
-    rm ./IGNF
-fi
 
 #
 # do 'diff' with distribution results

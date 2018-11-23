@@ -170,6 +170,14 @@ const GeodeticCRS *CRS::extractGeodeticCRSRaw() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+const std::string &CRS::getExtensionProj4() const noexcept {
+    return d->extensionProj4_;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the GeographicCRS of the CRS.
  *
  * Returns the GeographicCRS contained in a CRS. This works currently with

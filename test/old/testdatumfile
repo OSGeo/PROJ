@@ -77,7 +77,7 @@ echo "edge or even a wee bit outside (#141)."  >> ${OUT}
 # Our test points are (1) right on mesh corner, (2) outside but within 
 # epsilon (3) inside a bit (4) outside by more than epsilon
 #
-$EXE +proj=latlong +ellps=WGS84 +nadgrids=ntf_r93.gsb \
+$EXE +proj=latlong +ellps=WGS84 +nadgrids=ntf_r93.gsb,null \
  +to +proj=latlong +datum=WGS84 \
  -E -f "%.12f" >>${OUT} <<EOF
 -5.5 52.0
@@ -87,7 +87,7 @@ $EXE +proj=latlong +ellps=WGS84 +nadgrids=ntf_r93.gsb \
 EOF
 #
 $EXE +proj=latlong +datum=WGS84 \
- +to +proj=latlong +ellps=WGS84 +nadgrids=ntf_r93.gsb \
+ +to +proj=latlong +ellps=WGS84 +nadgrids=ntf_r93.gsb,null \
  -E -f "%.12f" >>${OUT} <<EOF
 -5.5 52.0
 -5.5000000000001 52.0000000000001

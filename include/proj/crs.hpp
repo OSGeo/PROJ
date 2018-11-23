@@ -108,6 +108,8 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
 
     PROJ_FOR_TEST CRSNNPtr shallowClone() const;
 
+    PROJ_INTERNAL const std::string &getExtensionProj4() const noexcept;
+
     //! @endcond
 
   protected:
