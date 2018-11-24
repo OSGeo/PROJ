@@ -195,7 +195,7 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
     if (P->is_geocent)
         return 0;
 
-    if(P->fwd3d != NULL)
+    if(P->fwd3d != NULL && !(z == NULL && P->is_latlong))
     {
         /* Three dimensions must be defined */
         if ( z == NULL)
@@ -292,6 +292,8 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
     /* Nothing to do? */
     if (P->is_latlong && !P->geoc && P->vto_meter == 1.0)
         return 0;
+    if (P->is_geocent)
+        return 0;
 
     /* Check first if projection is invertible. */
     if( (P->inv3d == NULL) && (P->inv == NULL))
@@ -303,7 +305,7 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
     }
 
     /* If invertible - First try inv3d if defined */
-    if (P->inv3d != NULL)
+    if (P->inv3d != NULL && !(z == NULL && P->is_latlong))
     {
         /* Three dimensions must be defined */
         if ( z == NULL)
