@@ -60,7 +60,6 @@ TEST(PjPhi2Test, Basic) {
     EXPECT_TRUE(std::isnan(pj_phi2(ctx, -M_PI, -M_PI)));
 }
 
-
 TEST(PjPhi2Test, AvoidUndefinedBehavior) {
     auto ctx = pj_get_default_ctx();
 
@@ -82,4 +81,4 @@ TEST(PjPhi2Test, AvoidUndefinedBehavior) {
     EXPECT_TRUE(std::isnan(pj_phi2(ctx, -inf, -inf)));
 }
 
-}  // namespace
+} // namespace
