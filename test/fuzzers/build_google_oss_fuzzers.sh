@@ -28,7 +28,7 @@ build_fuzzer()
     echo "Building fuzzer $fuzzerName"
     $CXX $CXXFLAGS -std=c++11 -I$SRC_DIR/src \
         $sourceFilename $* -o $OUT/$fuzzerName \
-        -lFuzzingEngine $SRC_DIR/src/.libs/libproj.a -lpthread $EXTRA_LIBS
+        -lFuzzingEngine $SRC_DIR/src/.libs/libproj.a -lpthread -lsqlite3 $EXTRA_LIBS
 }
 
 build_fuzzer standard_fuzzer $(dirname $0)/standard_fuzzer.cpp
