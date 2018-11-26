@@ -567,6 +567,7 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     char  *args, **argv;
     size_t argc, n;
     int    ret;
+    int    allow_init_epsg;
 
     if (0==ctx)
         ctx = pj_get_default_ctx ();
@@ -590,7 +591,9 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     argv = pj_trim_argv (argc, args);
 
     /* ...and let pj_init_ctx do the hard work */
-    P = pj_init_ctx (ctx, (int) argc, argv);
+    /* New interface: forbid init=epsg:XXXX syntax by default */
+    allow_init_epsg = proj_context_get_use_proj4_init_rules(ctx, FALSE);
+    P = pj_init_ctx_with_allow_init_epsg (ctx, (int) argc, argv, allow_init_epsg);
 
     pj_dealloc (argv);
     pj_dealloc (args);
@@ -687,7 +690,7 @@ static int EQUAL(const char* a, const char* b) {
 /*                  proj_context_get_use_proj4_init_rules()             */
 /************************************************************************/
 
-int proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx) {
+int proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_path) {
     const char* val = getenv("PROJ_USE_PROJ4_INIT_RULES");
 
     if( ctx == NULL ) {
@@ -704,7 +707,10 @@ int proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx) {
         pj_log(ctx, PJ_LOG_ERROR, "Invalid value for PROJ_USE_PROJ4_INIT_RULES");
     }
 
-    return ctx->use_proj4_init_rules;
+    if( ctx->use_proj4_init_rules >= 0 ) {
+        return ctx->use_proj4_init_rules;
+    }
+    return from_legacy_code_path;
 }
 
 
@@ -735,7 +741,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
     const char* proj_string;
     const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", NULL };
     const char* const* optionsImportCRS =
-        proj_context_get_use_proj4_init_rules(ctx) ? optionsProj4Mode : NULL;
+        proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : NULL;
 
     src = proj_obj_create_from_user_input(ctx, srid_from, optionsImportCRS);
     if( !src ) {
@@ -1151,6 +1157,42 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
     file_found = pj_find_file(ctx, initname, ininfo.filename, sizeof(ininfo.filename));
     if (!file_found || strlen(initname) > 64) {
+        if( strcmp(initname, "epsg") == 0 || strcmp(initname, "EPSG") == 0 ) {
+            const char* val;
+
+            pj_ctx_set_errno( ctx, 0 );
+
+            strncpy (ininfo.name, initname, sizeof(ininfo.name) - 1);
+            strcpy(ininfo.origin, "EPSG");
+            val = proj_context_get_database_metadata(ctx, "EPSG.VERSION");
+            if( val ) {
+                strncpy(ininfo.version, val, sizeof(ininfo.version) - 1);
+            }
+            val = proj_context_get_database_metadata(ctx, "EPSG.DATE");
+            if( val ) {
+                strncpy(ininfo.lastupdate, val, sizeof(ininfo.lastupdate) - 1);
+            }
+            return ininfo;
+        }
+
+        if( strcmp(initname, "IGNF") == 0 ) {
+            const char* val;
+
+            pj_ctx_set_errno( ctx, 0 );
+
+            strncpy (ininfo.name, initname, sizeof(ininfo.name) - 1);
+            strcpy(ininfo.origin, "IGNF");
+            val = proj_context_get_database_metadata(ctx, "IGNF.VERSION");
+            if( val ) {
+                strncpy(ininfo.version, val, sizeof(ininfo.version) - 1);
+            }
+            val = proj_context_get_database_metadata(ctx, "IGNF.DATE");
+            if( val ) {
+                strncpy(ininfo.lastupdate, val, sizeof(ininfo.lastupdate) - 1);
+            }
+            return ininfo;
+        }
+
         return ininfo;
     }
 

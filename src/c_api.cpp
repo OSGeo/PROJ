@@ -252,6 +252,28 @@ const char *proj_context_get_database_path(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a metadata from the database.
+ *
+ * The returned pointer remains valid while ctx is valid, and until
+ * proj_context_get_database_metadata() is called.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param key Metadata key. Must not be NULL
+ * @return value, or nullptr
+ */
+const char *proj_context_get_database_metadata(PJ_CONTEXT *ctx,
+                                               const char *key) {
+    SANITIZE_CTX(ctx);
+    try {
+        return getDBcontext(ctx)->getMetadata(key);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Guess the "dialect" of the WKT string.
  *
  * @param ctx PROJ context, or NULL for default context

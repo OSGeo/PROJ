@@ -12,6 +12,8 @@ Test 5201, Geographic Geocentric conversions, v2.0_2011-09-28. (EPSG 4979 - WGS8
 
 <gie>
 
+use_proj4_init_rules true
+
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4978 +inv

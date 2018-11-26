@@ -2729,4 +2729,14 @@ TEST(factory, createObjectsFromName) {
     factory->createObjectsFromName("i_dont_exist", types, false, 1);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(factory, getMetadata) {
+    auto ctxt = DatabaseContext::create();
+    EXPECT_EQ(ctxt->getMetadata("i_do_not_exist"), nullptr);
+    const char *IGNF_VERSION = ctxt->getMetadata("IGNF.VERSION");
+    ASSERT_TRUE(IGNF_VERSION != nullptr);
+    EXPECT_EQ(std::string(IGNF_VERSION), "3.0.2");
+}
+
 } // namespace

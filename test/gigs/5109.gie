@@ -6,6 +6,8 @@ Test 5109, Albers Equal Area, v2-0_2011-06-28.
 
 <gie>
 
+use_proj4_init_rules true
+
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4283 +inv

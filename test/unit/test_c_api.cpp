@@ -2036,4 +2036,11 @@ TEST_F(CApi, proj_obj_cs_get_axis_info) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_get_database_metadata) {
+    EXPECT_TRUE(proj_context_get_database_metadata(m_ctxt, "IGNF.VERSION") !=
+                nullptr);
+}
+
 } // namespace

@@ -690,6 +690,8 @@ class PROJ_GCC_DLL DatabaseContext {
 
     PROJ_DLL const std::string &getPath() const;
 
+    PROJ_DLL const char *getMetadata(const char *key) const;
+
     PROJ_DLL std::set<std::string> getAuthorities() const;
 
     PROJ_DLL std::vector<std::string> getDatabaseStructure() const;

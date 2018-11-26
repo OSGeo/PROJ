@@ -6,6 +6,8 @@ Test 5106, Hotine Oblique Mercator (variant A), v2-0_2011-06-28.
 
 <gie>
 
+use_proj4_init_rules true
+
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4742 +inv

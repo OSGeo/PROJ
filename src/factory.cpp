@@ -157,6 +157,8 @@ struct DatabaseContext::Private {
     };
 
   private:
+    friend class DatabaseContext;
+
     std::string databasePath_{};
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
@@ -164,6 +166,7 @@ struct DatabaseContext::Private {
     PJ_CONTEXT *pjCtxt_ = nullptr;
     int recLevel_ = 0;
     bool detach_ = false;
+    std::string lastMetadataValue_{};
 
     void closeDB();
 
@@ -701,6 +704,22 @@ std::vector<std::string> DatabaseContext::getDatabaseStructure() const {
 /** \brief Return the path to the database.
  */
 const std::string &DatabaseContext::getPath() const { return d->getPath(); }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a metadata item.
+ *
+ * Value remains valid while this is alive and to the next call to getMetadata
+ */
+const char *DatabaseContext::getMetadata(const char *key) const {
+    auto res =
+        d->run("SELECT value FROM metadata WHERE key = ?", {std::string(key)});
+    if (res.empty()) {
+        return nullptr;
+    }
+    d->lastMetadataValue_ = res[0][0];
+    return d->lastMetadataValue_.c_str();
+}
 
 // ---------------------------------------------------------------------------
 

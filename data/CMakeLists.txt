@@ -2,12 +2,10 @@
 # files containing dictionary of useful projection
 #
 
-set(PROJ_DICTIONARY  epsg
-                     esri
+set(PROJ_DICTIONARY  esri
                      world
                      esri.extra
                      other.extra
-                     IGNF
                      nad27
                      GL27
                      nad83

@@ -6,6 +6,8 @@ Test 5103 (part 1), Lambert Conic Conformal (2SP), v2-0_2011-06-28.
 
 <gie>
 
+use_proj4_init_rules true
+
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4313 +inv

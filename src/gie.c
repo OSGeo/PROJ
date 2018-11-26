@@ -148,7 +148,8 @@ static ffio *ffio_destroy (ffio *G);
 static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
 
 static const char *gie_tags[] = {
-    "<gie>", "operation", "accept", "expect", "roundtrip", "banner", "verbose",
+    "<gie>", "operation", "use_proj4_init_rules",
+    "accept", "expect", "roundtrip", "banner", "verbose",
     "direction", "tolerance", "ignore", "require_grid", "echo", "skip", "</gie>"
 };
 
@@ -186,6 +187,7 @@ typedef struct {
     size_t operation_lineno;
     size_t dimensions_given, dimensions_given_at_last_accept;
     double tolerance;
+    int use_proj4_init_rules;
     int ignore;
     int skip_test;
     const char *curr_file;
@@ -243,6 +245,7 @@ int main (int argc, char **argv) {
     T.verbosity = 1;
     T.tolerance = 5e-4;
     T.ignore = 5555; /* Error code that will not be issued by proj_create() */
+    T.use_proj4_init_rules = FALSE;
 
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (0==o)
@@ -498,6 +501,12 @@ static int tolerance (const char *args) {
     return 0;
 }
 
+
+static int use_proj4_init_rules (const char *args) {
+    T.use_proj4_init_rules = strcmp(args, "true") == 0;
+    return 0;
+}
+
 static int ignore (const char *args) {
     T.ignore = errno_from_err_const (column (args, 1));
     return 0;
@@ -583,6 +592,7 @@ either a conversion or a transformation)
     if (T.P)
         proj_destroy (T.P);
     proj_errno_reset (0);
+    proj_context_use_proj4_init_rules(0, T.use_proj4_init_rules);
 
     T.P = proj_create (0, F->args);
 
@@ -1001,6 +1011,8 @@ static int dispatch (const char *cmnd, const char *args) {
     if  (0==strcmp (cmnd, "require_grid"))   return  require_grid   (args);
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
     if  (0==strcmp (cmnd, "skip"))      return  skip      (args);
+    if  (0==strcmp (cmnd, "use_proj4_init_rules"))
+                                        return  use_proj4_init_rules    (args);
 
     return 0;
 }

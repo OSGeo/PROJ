@@ -207,6 +207,7 @@ expect  failure
 -------------------------------------------------------------------------------
 Test that Google's Web Mercator works as intended (see #834 for details).
 -------------------------------------------------------------------------------
+use_proj4_init_rules true
 operation   proj=pipeline step init=epsg:26915 inv step init=epsg:3857
 -------------------------------------------------------------------------------
 tolerance   20 cm
@@ -220,6 +221,7 @@ expect      -10370728.80        5552839.74          0
 -------------------------------------------------------------------------------
 Test Google's Web Mercator with +proj=webmerc
 -------------------------------------------------------------------------------
+use_proj4_init_rules true
 operation   proj=pipeline step init=epsg:26915 inv step proj=webmerc datum=WGS84
 -------------------------------------------------------------------------------
 tolerance   20 cm

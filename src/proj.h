@@ -336,7 +336,7 @@ PJ_CONTEXT PROJ_DLL *proj_context_create (void);
 PJ_CONTEXT PROJ_DLL *proj_context_destroy (PJ_CONTEXT *ctx);
 
 void PROJ_DLL proj_context_use_proj4_init_rules(PJ_CONTEXT *ctx, int enable);
-int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx);
+int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_path);
 
 /* Manage the transformation definition object PJ */
 PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
@@ -457,6 +457,9 @@ int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
                                             const char* const *options);
 
 const char PROJ_DLL *proj_context_get_database_path(PJ_CONTEXT *ctx);
+
+const char PROJ_DLL *proj_context_get_database_metadata(PJ_CONTEXT* ctx,
+                                                        const char* key);
 
 /** \brief Guessed WKT "dialect". */
 typedef enum

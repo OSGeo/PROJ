@@ -22,6 +22,8 @@ To be on the safe side we, use 0.01 m as the tolerance.
 
 <gie>
 
+use_proj4_init_rules true
+
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4275 +inv

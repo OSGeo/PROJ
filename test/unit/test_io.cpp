@@ -7465,6 +7465,7 @@ TEST(io, projparse_projected_title) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_init) {
+    auto dbContext = DatabaseContext::create();
 
     // Not allowed in non-compatibillity mode
     EXPECT_THROW(PROJStringParser().createFromPROJString("init=epsg:4326"),
@@ -7473,7 +7474,6 @@ TEST(io, projparse_init) {
     {
         // EPSG:4326 is normally latitude-longitude order with degree,
         // but in compatibillity mode it will be long-lat radian
-        auto dbContext = DatabaseContext::create();
         auto obj = createFromUserInput("init=epsg:4326", dbContext, true);
         auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
@@ -7485,7 +7485,6 @@ TEST(io, projparse_init) {
     {
         // EPSG:3040 is normally northing-easting order, but in compatibillity
         // mode it will be easting-northing
-        auto dbContext = DatabaseContext::create();
         auto obj = createFromUserInput("init=epsg:3040", dbContext, true);
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
@@ -7506,8 +7505,8 @@ TEST(io, projparse_init) {
     }
 
     {
-        auto obj = PROJStringParser().createFromPROJString(
-            "title=mytitle init=epsg:4326 ellps=WGS84");
+        auto obj = createFromUserInput(
+            "title=mytitle init=epsg:4326 ellps=WGS84", dbContext, true);
         auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
         ASSERT_TRUE(co != nullptr);
         EXPECT_EQ(co->nameStr(), "mytitle");
@@ -7516,8 +7515,9 @@ TEST(io, projparse_init) {
     }
 
     {
-        auto obj = PROJStringParser().createFromPROJString(
-            "proj=pipeline step init=epsg:4326 step proj=longlat");
+        auto obj = createFromUserInput(
+            "proj=pipeline step init=epsg:4326 step proj=longlat", dbContext,
+            true);
         auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
         ASSERT_TRUE(co != nullptr);
         EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
@@ -7525,8 +7525,8 @@ TEST(io, projparse_init) {
     }
 
     {
-        auto obj = PROJStringParser().createFromPROJString(
-            "init=epsg:4326 proj=longlat ellps=GRS80");
+        auto obj = createFromUserInput(
+            "init=epsg:4326 proj=longlat ellps=GRS80", dbContext, true);
         auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),

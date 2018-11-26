@@ -534,8 +534,8 @@ int main(int argc, char **argv) {
     const char *const optionsProj4Mode[] = {"USE_PROJ4_INIT_RULES=YES",
                                             nullptr};
     const char *const *optionsImportCRS =
-        proj_context_get_use_proj4_init_rules(nullptr) ? optionsProj4Mode
-                                                       : nullptr;
+        proj_context_get_use_proj4_init_rules(nullptr, TRUE) ? optionsProj4Mode
+                                                             : nullptr;
 
     PJ_OBJ *src = nullptr;
     if (!fromStr.empty()) {

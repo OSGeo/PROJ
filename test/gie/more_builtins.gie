@@ -166,6 +166,7 @@ expect    12 55 0 0
 -------------------------------------------------------------------------------
 Finally test a pipeline with more than one init step
 -------------------------------------------------------------------------------
+use_proj4_init_rules true
 operation proj=pipeline
           step init=epsg:25832 inv
           step init=epsg:25833

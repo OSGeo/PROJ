@@ -12,6 +12,8 @@ Test 5111 (part 1), Mercator (variant A), v2-0_2011-06-28.
 
 <gie>
 
+use_proj4_init_rules true
+
 --------------------------------------------------------------------------------
 operation  +proj=pipeline towgs84=0,0,0
            +step +init=epsg:4211 +inv

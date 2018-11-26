@@ -7009,14 +7009,15 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
 
         // Those used to come from a text init file
         // We only support them in compatibility mode
-        if (ci_starts_with(d->steps_[0].name, "epsg:") ||
-            ci_starts_with(d->steps_[0].name, "IGNF:")) {
+        const std::string &stepName = d->steps_[0].name;
+        if (ci_starts_with(stepName, "epsg:") ||
+            ci_starts_with(stepName, "IGNF:")) {
             bool usePROJ4InitRules = d->usePROJ4InitRules_;
             if (!usePROJ4InitRules) {
                 PJ_CONTEXT *ctx = proj_context_create();
                 if (ctx) {
-                    usePROJ4InitRules =
-                        proj_context_get_use_proj4_init_rules(ctx) == TRUE;
+                    usePROJ4InitRules = proj_context_get_use_proj4_init_rules(
+                                            ctx, FALSE) == TRUE;
                     proj_context_destroy(ctx);
                 }
             }
@@ -7024,41 +7025,52 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 throw ParsingException("init=epsg:/init=IGNF: syntax not "
                                        "supported in non-PROJ4 emulation mode");
             }
-            auto obj =
-                createFromUserInput(d->steps_[0].name, d->dbContext_, true);
-            auto crs = dynamic_cast<CRS *>(obj.get());
-            if (crs) {
-                PropertyMap properties;
-                properties.set(IdentifiedObject::NAME_KEY, crs->nameStr());
-                const auto &extent = getExtent(crs);
-                if (extent) {
-                    properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                                   NN_NO_CHECK(extent));
-                }
-                auto geogCRS = dynamic_cast<GeographicCRS *>(crs);
-                if (geogCRS) {
-                    // Override with longitude latitude in radian
-                    return GeographicCRS::create(
-                        properties, geogCRS->datum(), geogCRS->datumEnsemble(),
-                        EllipsoidalCS::createLongitudeLatitude(
-                            UnitOfMeasure::RADIAN));
-                }
-                auto projCRS = dynamic_cast<ProjectedCRS *>(crs);
-                if (projCRS) {
-                    // Override with easting northing order
-                    const auto &conv = projCRS->derivingConversionRef();
-                    if (conv->method()->getEPSGCode() !=
-                        EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
-                        return ProjectedCRS::create(
-                            properties, projCRS->baseCRS(), conv,
-                            CartesianCS::createEastingNorthing(
-                                projCRS->coordinateSystem()
-                                    ->axisList()[0]
-                                    ->unit()));
+
+            PJ_CONTEXT *ctx = proj_context_create();
+            char unused[256];
+            std::string initname(stepName);
+            initname.resize(initname.find(':'));
+            int file_found =
+                pj_find_file(ctx, initname.c_str(), unused, sizeof(unused));
+            proj_context_destroy(ctx);
+            if (!file_found) {
+                auto obj = createFromUserInput(stepName, d->dbContext_, true);
+                auto crs = dynamic_cast<CRS *>(obj.get());
+                if (crs) {
+                    PropertyMap properties;
+                    properties.set(IdentifiedObject::NAME_KEY, crs->nameStr());
+                    const auto &extent = getExtent(crs);
+                    if (extent) {
+                        properties.set(
+                            common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                            NN_NO_CHECK(extent));
+                    }
+                    auto geogCRS = dynamic_cast<GeographicCRS *>(crs);
+                    if (geogCRS) {
+                        // Override with longitude latitude in radian
+                        return GeographicCRS::create(
+                            properties, geogCRS->datum(),
+                            geogCRS->datumEnsemble(),
+                            EllipsoidalCS::createLongitudeLatitude(
+                                UnitOfMeasure::RADIAN));
+                    }
+                    auto projCRS = dynamic_cast<ProjectedCRS *>(crs);
+                    if (projCRS) {
+                        // Override with easting northing order
+                        const auto &conv = projCRS->derivingConversionRef();
+                        if (conv->method()->getEPSGCode() !=
+                            EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
+                            return ProjectedCRS::create(
+                                properties, projCRS->baseCRS(), conv,
+                                CartesianCS::createEastingNorthing(
+                                    projCRS->coordinateSystem()
+                                        ->axisList()[0]
+                                        ->unit()));
+                        }
                     }
                 }
+                return obj;
             }
-            return obj;
         }
 
         paralist *init = pj_mkparam(("init=" + d->steps_[0].name).c_str());
@@ -7284,6 +7296,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         throw ParsingException("out of memory");
     }
     proj_log_func(pj_context, &logger, Logger::log);
+    proj_context_use_proj4_init_rules(pj_context, d->usePROJ4InitRules_);
     auto pj = proj_create(pj_context, projString.c_str());
     bool valid = pj != nullptr;
     proj_destroy(pj);
