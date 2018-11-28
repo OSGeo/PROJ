@@ -4665,3 +4665,136 @@ TEST(crs, crs_stripVerticalComponent) {
         EXPECT_EQ(projCRS->coordinateSystem()->axisList().size(), 2);
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, crs_alterGeodeticCRS) {
+
+    {
+        auto crs = GeographicCRS::EPSG_4326->alterGeodeticCRS(
+            GeographicCRS::EPSG_4979);
+        EXPECT_TRUE(crs->isEquivalentTo(GeographicCRS::EPSG_4979.get()));
+    }
+
+    {
+        auto crs =
+            createProjected()->alterGeodeticCRS(GeographicCRS::EPSG_4979);
+        auto projCRS = dynamic_cast<ProjectedCRS *>(crs.get());
+        ASSERT_TRUE(projCRS != nullptr);
+        EXPECT_TRUE(
+            projCRS->baseCRS()->isEquivalentTo(GeographicCRS::EPSG_4979.get()));
+    }
+
+    {
+        auto crs =
+            createCompoundCRS()->alterGeodeticCRS(GeographicCRS::EPSG_4979);
+        auto compoundCRS = dynamic_cast<CompoundCRS *>(crs.get());
+        ASSERT_TRUE(compoundCRS != nullptr);
+        EXPECT_TRUE(compoundCRS->componentReferenceSystems()[0]
+                        ->extractGeographicCRS()
+                        ->isEquivalentTo(GeographicCRS::EPSG_4979.get()));
+    }
+
+    {
+        auto crs =
+            createVerticalCRS()->alterGeodeticCRS(GeographicCRS::EPSG_4979);
+        EXPECT_TRUE(crs->isEquivalentTo(createVerticalCRS().get()));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, crs_alterCSLinearUnit) {
+
+    {
+        auto crs =
+            createProjected()->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
+        auto projCRS = dynamic_cast<ProjectedCRS *>(crs.get());
+        ASSERT_TRUE(projCRS != nullptr);
+        auto cs = projCRS->coordinateSystem();
+        ASSERT_EQ(cs->axisList().size(), 2U);
+        EXPECT_EQ(cs->axisList()[0]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[0]->unit().conversionToSI(), 2);
+        EXPECT_EQ(cs->axisList()[1]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[1]->unit().conversionToSI(), 2);
+    }
+
+    {
+        auto crs = GeodeticCRS::EPSG_4978->alterCSLinearUnit(
+            UnitOfMeasure("my unit", 2));
+        auto geodCRS = dynamic_cast<GeodeticCRS *>(crs.get());
+        ASSERT_TRUE(geodCRS != nullptr);
+        auto cs =
+            dynamic_cast<CartesianCS *>(geodCRS->coordinateSystem().get());
+        ASSERT_EQ(cs->axisList().size(), 3U);
+        EXPECT_EQ(cs->axisList()[0]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[0]->unit().conversionToSI(), 2);
+        EXPECT_EQ(cs->axisList()[1]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[1]->unit().conversionToSI(), 2);
+        EXPECT_EQ(cs->axisList()[2]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[2]->unit().conversionToSI(), 2);
+    }
+
+    {
+        auto crs = GeographicCRS::EPSG_4979->alterCSLinearUnit(
+            UnitOfMeasure("my unit", 2));
+        auto geogCRS = dynamic_cast<GeographicCRS *>(crs.get());
+        ASSERT_TRUE(geogCRS != nullptr);
+        auto cs = geogCRS->coordinateSystem();
+        ASSERT_EQ(cs->axisList().size(), 3U);
+        EXPECT_NE(cs->axisList()[0]->unit().name(), "my unit");
+        EXPECT_NE(cs->axisList()[0]->unit().conversionToSI(), 2);
+        EXPECT_NE(cs->axisList()[1]->unit().name(), "my unit");
+        EXPECT_NE(cs->axisList()[1]->unit().conversionToSI(), 2);
+        EXPECT_EQ(cs->axisList()[2]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[2]->unit().conversionToSI(), 2);
+    }
+
+    {
+        auto crs =
+            createVerticalCRS()->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
+        auto vertCRS = dynamic_cast<VerticalCRS *>(crs.get());
+        ASSERT_TRUE(vertCRS != nullptr);
+        auto cs = vertCRS->coordinateSystem();
+        ASSERT_EQ(cs->axisList().size(), 1U);
+        EXPECT_EQ(cs->axisList()[0]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[0]->unit().conversionToSI(), 2);
+    }
+
+    {
+        // Not implemented on compoundCRS
+        auto crs =
+            createCompoundCRS()->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
+        EXPECT_TRUE(createCompoundCRS()->isEquivalentTo(crs.get()));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, alterParametersLinearUnit) {
+    {
+        auto crs = createProjected()->alterParametersLinearUnit(
+            UnitOfMeasure("my unit", 2), false);
+        auto wkt =
+            crs->exportToWKT(&WKTFormatter::create()->setMultiLine(false));
+        EXPECT_TRUE(wkt.find("PARAMETER[\"Longitude of natural origin\",3") !=
+                    std::string::npos)
+            << wkt;
+        EXPECT_TRUE(
+            wkt.find(
+                "PARAMETER[\"False easting\",500000,UNIT[\"my unit\",2]") !=
+            std::string::npos)
+            << wkt;
+    }
+    {
+        auto crs = createProjected()->alterParametersLinearUnit(
+            UnitOfMeasure("my unit", 2), true);
+        auto wkt =
+            crs->exportToWKT(&WKTFormatter::create()->setMultiLine(false));
+        EXPECT_TRUE(
+            wkt.find(
+                "PARAMETER[\"False easting\",250000,UNIT[\"my unit\",2]") !=
+            std::string::npos)
+            << wkt;
+    }
+}

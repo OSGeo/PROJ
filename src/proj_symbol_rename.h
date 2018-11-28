@@ -156,6 +156,7 @@
 #define proj_lpz_dist internal_proj_lpz_dist
 #define proj_obj_as_proj_string internal_proj_obj_as_proj_string
 #define proj_obj_as_wkt internal_proj_obj_as_wkt
+#define proj_obj_clone internal_proj_obj_clone
 #define proj_obj_create_from_database internal_proj_obj_create_from_database
 #define proj_obj_create_from_name internal_proj_obj_create_from_name
 #define proj_obj_create_from_proj_string internal_proj_obj_create_from_proj_string

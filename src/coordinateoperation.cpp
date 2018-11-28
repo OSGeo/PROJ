@@ -1898,6 +1898,58 @@ ConversionNNPtr Conversion::shallowClone() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+ConversionNNPtr
+Conversion::alterParametersLinearUnit(const common::UnitOfMeasure &unit,
+                                      bool convertToNewUnit) const {
+
+    std::vector<GeneralParameterValueNNPtr> newValues;
+    bool changesDone = false;
+    for (const auto &genOpParamvalue : parameterValues()) {
+        bool updated = false;
+        auto opParamvalue = dynamic_cast<const OperationParameterValue *>(
+            genOpParamvalue.get());
+        if (opParamvalue) {
+            const auto &paramValue = opParamvalue->parameterValue();
+            if (paramValue->type() == ParameterValue::Type::MEASURE) {
+                const auto &measure = paramValue->value();
+                if (measure.unit().type() ==
+                    common::UnitOfMeasure::Type::LINEAR) {
+                    if (!measure.unit()._isEquivalentTo(
+                            unit, util::IComparable::Criterion::EQUIVALENT)) {
+                        const double newValue =
+                            convertToNewUnit ? measure.convertToUnit(unit)
+                                             : measure.value();
+                        newValues.emplace_back(OperationParameterValue::create(
+                            opParamvalue->parameter(),
+                            ParameterValue::create(
+                                common::Measure(newValue, unit))));
+                        updated = true;
+                    }
+                }
+            }
+        }
+        if (updated) {
+            changesDone = true;
+        } else {
+            newValues.emplace_back(genOpParamvalue);
+        }
+    }
+    if (changesDone) {
+        auto conv = create(util::PropertyMap().set(
+                               common::IdentifiedObject::NAME_KEY, "unknown"),
+                           method(), newValues);
+        conv->setCRSs(this, false);
+        return conv;
+    } else {
+        return NN_NO_CHECK(
+            util::nn_dynamic_pointer_cast<Conversion>(shared_from_this()));
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a Conversion from a vector of GeneralParameterValue.
  *
  * @param properties See \ref general_properties. At minimum the name should be

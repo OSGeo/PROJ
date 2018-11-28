@@ -197,6 +197,97 @@ GeographicCRSPtr CRS::extractGeographicCRS() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static util::PropertyMap createPropertyMapName(const std::string &name) {
+    return util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+CRSNNPtr CRS::alterGeodeticCRS(const GeodeticCRSNNPtr &newGeodCRS) const {
+    auto geodCRS = dynamic_cast<const GeodeticCRS *>(this);
+    if (geodCRS) {
+        return newGeodCRS;
+    }
+
+    auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        return ProjectedCRS::create(
+            createPropertyMapName(nameStr()), newGeodCRS,
+            projCRS->derivingConversionRef(), projCRS->coordinateSystem());
+    }
+
+    auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        std::vector<CRSNNPtr> components;
+        for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
+            components.emplace_back(subCrs->alterGeodeticCRS(newGeodCRS));
+        }
+        return CompoundCRS::create(createPropertyMapName(nameStr()),
+                                   components);
+    }
+
+    return NN_NO_CHECK(
+        std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
+    {
+        auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
+        if (projCRS) {
+            return ProjectedCRS::create(
+                createPropertyMapName(projCRS->nameStr().c_str()),
+                projCRS->baseCRS(), projCRS->derivingConversionRef(),
+                projCRS->coordinateSystem()->alterUnit(unit));
+        }
+    }
+
+    {
+        auto geodCRS = dynamic_cast<const GeodeticCRS *>(this);
+        if (geodCRS && geodCRS->isGeocentric()) {
+            auto cs = dynamic_cast<const cs::CartesianCS *>(
+                geodCRS->coordinateSystem().get());
+            assert(cs);
+            return GeodeticCRS::create(
+                createPropertyMapName(geodCRS->nameStr().c_str()),
+                geodCRS->datum(), geodCRS->datumEnsemble(),
+                cs->alterUnit(unit));
+        }
+    }
+
+    {
+        auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
+        if (geogCRS && geogCRS->coordinateSystem()->axisList().size() == 3) {
+            return GeographicCRS::create(
+                createPropertyMapName(geogCRS->nameStr().c_str()),
+                geogCRS->datum(), geogCRS->datumEnsemble(),
+                geogCRS->coordinateSystem()->alterLinearUnit(unit));
+        }
+    }
+
+    {
+        auto vertCRS = dynamic_cast<const VerticalCRS *>(this);
+        if (vertCRS) {
+            return VerticalCRS::create(
+                createPropertyMapName(vertCRS->nameStr().c_str()),
+                vertCRS->datum(), vertCRS->datumEnsemble(),
+                vertCRS->coordinateSystem()->alterUnit(unit));
+        }
+    }
+
+    return NN_NO_CHECK(
+        std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the VerticalCRS of the CRS.
  *
  * Returns the VerticalCRS contained in a CRS. This works currently with
@@ -386,6 +477,19 @@ CRSNNPtr CRS::stripVerticalComponent() const {
 
 /** \brief Return a shallow clone of this object. */
 CRSNNPtr CRS::shallowClone() const { return _shallowClone(); }
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+CRSNNPtr CRS::alterName(const std::string &newName) const {
+    auto crs = shallowClone();
+    crs->setProperties(
+        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, newName));
+    return crs;
+}
 
 //! @endcond
 
@@ -2490,6 +2594,19 @@ bool ProjectedCRS::_isEquivalentTo(
     return otherProjCRS != nullptr &&
            DerivedCRS::_isEquivalentTo(other, criterion);
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+ProjectedCRSNNPtr
+ProjectedCRS::alterParametersLinearUnit(const common::UnitOfMeasure &unit,
+                                        bool convertToNewUnit) const {
+    return create(createPropertyMapName(nameStr()), baseCRS(),
+                  derivingConversionRef()->alterParametersLinearUnit(
+                      unit, convertToNewUnit),
+                  coordinateSystem());
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

@@ -108,7 +108,15 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
 
     PROJ_FOR_TEST CRSNNPtr shallowClone() const;
 
+    PROJ_FOR_TEST CRSNNPtr alterName(const std::string &newName) const;
+
     PROJ_INTERNAL const std::string &getExtensionProj4() const noexcept;
+
+    PROJ_FOR_TEST CRSNNPtr
+    alterGeodeticCRS(const GeodeticCRSNNPtr &newGeodCRS) const;
+
+    PROJ_FOR_TEST CRSNNPtr
+    alterCSLinearUnit(const common::UnitOfMeasure &unit) const;
 
     //! @endcond
 
@@ -556,6 +564,9 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_FOR_TEST ProjectedCRSNNPtr alterParametersLinearUnit(
+        const common::UnitOfMeasure &unit, bool convertToNewUnit) const;
 
     //! @endcond
 

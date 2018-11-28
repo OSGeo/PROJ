@@ -1286,6 +1286,9 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
 
     PROJ_INTERNAL ConversionNNPtr shallowClone() const;
 
+    PROJ_INTERNAL ConversionNNPtr alterParametersLinearUnit(
+        const common::UnitOfMeasure &unit, bool convertToNewUnit) const;
+
     //! @endcond
 
   protected:
