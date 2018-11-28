@@ -32,7 +32,7 @@ elseif(USE_THREAD AND NOT Threads_FOUND)
   message(FATAL_ERROR "No thread library found and thread/mutex support is required by USE_THREAD option")
 endif()
 
-option(ENABLE_LTO "Build library with LTO optimization (if available)." ON)
+option(ENABLE_LTO "Build library with LTO optimization (if available)." OFF)
 if(ENABLE_LTO)
     if("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
         include (CheckCXXSourceCompiles)
