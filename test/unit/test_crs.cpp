@@ -1107,6 +1107,9 @@ TEST(crs, geocentricCRS_as_WKT1_GDAL) {
               "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
               "    UNIT[\"metre\",1,\n"
               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+              "    AXIS[\"Geocentric X\",OTHER],\n"
+              "    AXIS[\"Geocentric Y\",OTHER],\n"
+              "    AXIS[\"Geocentric Z\",NORTH],\n"
               "    AUTHORITY[\"EPSG\",\"4328\"]]");
 }
 

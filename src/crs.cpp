@@ -861,7 +861,16 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (!isWKT2) {
         unit._exportToWKT(formatter);
     }
+
+    const auto oldAxisOutputRule = formatter->outputAxis();
+    if (oldAxisOutputRule ==
+            io::WKTFormatter::OutputAxisRule::WKT1_GDAL_EPSG_STYLE &&
+        isGeocentric()) {
+        formatter->setOutputAxis(io::WKTFormatter::OutputAxisRule::YES);
+    }
     cs->_exportToWKT(formatter);
+    formatter->setOutputAxis(oldAxisOutputRule);
+
     ObjectUsage::baseExportToWKT(formatter);
 
     if (!isWKT2 && !formatter->useESRIDialect()) {

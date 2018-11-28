@@ -493,6 +493,9 @@ TEST(wkt_parse, wkt1_geocentric_with_PROJ4_extension) {
                "        SPHEROID[\"WGS84\",6378137,298.257223563]],\n"
                "    PRIMEM[\"Greenwich\",0],\n"
                "    UNIT[\"Meter\",1],\n"
+               "    AXIS[\"Geocentric X\",OTHER],\n"
+               "    AXIS[\"Geocentric Y\",OTHER],\n"
+               "    AXIS[\"Geocentric Z\",NORTH],\n"
                "    EXTENSION[\"PROJ4\",\"+proj=geocent +foo=bar +wktext\"]]";
     auto obj = WKTParser().createFromWKT(wkt);
 
