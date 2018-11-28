@@ -1166,6 +1166,7 @@ struct WKTParser::Private {
     MeridianNNPtr buildMeridian(const WKTNodeNNPtr &node);
     CoordinateSystemAxisNNPtr buildAxis(const WKTNodeNNPtr &node,
                                         const UnitOfMeasure &unitIn,
+                                        const UnitOfMeasure::Type &unitType,
                                         bool isGeocentric,
                                         int expectedOrderNum);
 
@@ -2039,10 +2040,17 @@ MeridianNNPtr WKTParser::Private::buildMeridian(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+PROJ_NO_RETURN static void ThrowParsingExceptionMissingUNIT() {
+    throw ParsingException("buildCS: missing UNIT");
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateSystemAxisNNPtr
 WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
-                              const UnitOfMeasure &unitIn, bool isGeocentric,
-                              int expectedOrderNum) {
+                              const UnitOfMeasure &unitIn,
+                              const UnitOfMeasure::Type &unitType,
+                              bool isGeocentric, int expectedOrderNum) {
     const auto *nodeP = node->GP();
     const auto &children = nodeP->children();
     if (children.size() < 2) {
@@ -2128,7 +2136,8 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
         abbreviation = AxisAbbreviation::Y;
         direction = &AxisDirection::GEOCENTRIC_Y;
     } else if (isGeocentric && axisName == AxisName::Geocentric_Z &&
-               dirString == AxisDirectionWKT1::NORTH.toString()) {
+               (dirString == AxisDirectionWKT1::NORTH.toString() ||
+                dirString == AxisDirectionWKT1::OTHER.toString())) {
         abbreviation = AxisAbbreviation::Z;
         direction = &AxisDirection::GEOCENTRIC_Z;
     } else if (dirString == AxisDirectionWKT1::OTHER.toString()) {
@@ -2146,6 +2155,11 @@ WKTParser::Private::buildAxis(const WKTNodeNNPtr &node,
         // If no unit in the AXIS node, use the one potentially coming from
         // the CS.
         unit = unitIn;
+        if (unit == UnitOfMeasure::NONE &&
+            unitType != UnitOfMeasure::Type::NONE &&
+            unitType != UnitOfMeasure::Type::TIME) {
+            ThrowParsingExceptionMissingUNIT();
+        }
     }
 
     auto &meridianNode = nodeP->lookForChild(WKTConstants::MERIDIAN);
@@ -2163,10 +2177,6 @@ static const PropertyMap emptyPropertyMap{};
 
 PROJ_NO_RETURN static void ThrowParsingException(const std::string &msg) {
     throw ParsingException(msg);
-}
-
-PROJ_NO_RETURN static void ThrowParsingExceptionMissingUNIT() {
-    throw ParsingException("buildCS: missing UNIT");
 }
 
 static ParsingException
@@ -2331,8 +2341,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                                "and number of AXIS are inconsistent");
     }
 
-    UnitOfMeasure unit = buildUnitInSubNode(
-        parentNode,
+    const auto unitType =
         ci_equal(csType, "ellipsoidal")
             ? UnitOfMeasure::Type::ANGULAR
             : ci_equal(csType, "ordinal")
@@ -2347,13 +2356,14 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                                  ci_equal(csType, "TemporalCount") ||
                                  ci_equal(csType, "TemporalMeasure"))
                                     ? UnitOfMeasure::Type::TIME
-                                    : UnitOfMeasure::Type::UNKNOWN);
+                                    : UnitOfMeasure::Type::UNKNOWN;
+    UnitOfMeasure unit = buildUnitInSubNode(parentNode, unitType);
 
     std::vector<CoordinateSystemAxisNNPtr> axisList;
     for (int i = 0; i < axisCount; i++) {
         axisList.emplace_back(
             buildAxis(parentNode->GP()->lookForChild(WKTConstants::AXIS, i),
-                      unit, isGeocentric, i + 1));
+                      unit, unitType, isGeocentric, i + 1));
     };
 
     const PropertyMap &csMap = emptyPropertyMap;
@@ -3173,11 +3183,11 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
         projCRSNode->countChildrenOfName(WKTConstants::AXIS) == 2 &&
         &buildAxis(
              projCRSNode->GP()->lookForChild(WKTConstants::AXIS, 0),
-             defaultLinearUnit, false,
+             defaultLinearUnit, UnitOfMeasure::Type::LINEAR, false,
              1)->direction() == &AxisDirection::SOUTH &&
         &buildAxis(
              projCRSNode->GP()->lookForChild(WKTConstants::AXIS, 1),
-             defaultLinearUnit, false,
+             defaultLinearUnit, UnitOfMeasure::Type::LINEAR, false,
              2)->direction() == &AxisDirection::WEST) {
         mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
     }

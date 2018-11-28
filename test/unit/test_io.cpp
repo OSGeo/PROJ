@@ -768,6 +768,28 @@ TEST(wkt_parse, wkt1_geocentric) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_geocentric_with_z_OTHER) {
+    auto wkt = "GEOCCS[\"WGS 84 (geocentric)\",\n"
+               "    DATUM[\"WGS_1984\",\n"
+               "        SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+               "            AUTHORITY[\"EPSG\",\"7030\"]],\n"
+               "        AUTHORITY[\"EPSG\",\"6326\"]],\n"
+               "    PRIMEM[\"Greenwich\",0,\n"
+               "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "    AXIS[\"Geocentric X\",OTHER],\n"
+               "    AXIS[\"Geocentric Y\",OTHER],\n"
+               "    AXIS[\"Geocentric Z\",OTHER],\n"
+               "    AUTHORITY[\"EPSG\",\"4328\"]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    checkGeocentric(crs);
+}
+
+// ---------------------------------------------------------------------------
+
 static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N");
     ASSERT_EQ(crs->identifiers().size(), 1);
@@ -2641,9 +2663,10 @@ TEST(wkt_parse, LOCAL_CS_short) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, LOCAL_CS_long_one_aix) {
+TEST(wkt_parse, LOCAL_CS_long_one_axis) {
     auto wkt = "LOCAL_CS[\"Engineering CRS\",\n"
                "    LOCAL_DATUM[\"Engineering datum\",12345],\n"
+               "    UNIT[\"meter\",1],\n"
                "    AXIS[\"height\",up]]";
 
     auto obj = WKTParser().createFromWKT(wkt);
@@ -2661,6 +2684,7 @@ TEST(wkt_parse, LOCAL_CS_long_one_aix) {
 TEST(wkt_parse, LOCAL_CS_long_two_axis) {
     auto wkt = "LOCAL_CS[\"Engineering CRS\",\n"
                "    LOCAL_DATUM[\"Engineering datum\",12345],\n"
+               "    UNIT[\"meter\",1],\n"
                "    AXIS[\"Easting\",EAST],\n"
                "    AXIS[\"Northing\",NORTH]]";
 
@@ -4139,7 +4163,7 @@ TEST(wkt_parse, invalid_GEOGCS) {
 TEST(wkt_parse, invalid_UNIT) {
     std::string startWKT("GEODCRS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],CS["
                          "ellipsoidal,2],AXIS[\"latitude\",north],AXIS["
-                         "\"longitude\",east,");
+                         "\"longitude\",east],");
 
     EXPECT_NO_THROW(WKTParser().createFromWKT(
         startWKT + "UNIT[\"degree\",0.0174532925199433]]]"));
@@ -4228,31 +4252,35 @@ TEST(wkt_parse, invalid_CS_of_GEODCRS) {
     // CS: OK
     EXPECT_NO_THROW(WKTParser().createFromWKT(
         startWKT + ",CS[ellipsoidal,2],AXIS[\"latitude\",north],AXIS["
-                   "\"longitude\",east]]"));
+                   "\"longitude\",east],UNIT[\"degree\",0.0174532925199433]]"));
 
     // CS: Cartesian with 2 axis unexpected
-    EXPECT_THROW(WKTParser().createFromWKT(startWKT +
-                                           ",CS[Cartesian,2],AXIS[\"latitude\","
-                                           "north],AXIS[\"longitude\",east]]"),
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     startWKT + ",CS[Cartesian,2],AXIS[\"latitude\","
+                                "north],AXIS[\"longitude\",east],"
+                                "UNIT[\"degree\",0.0174532925199433]]"),
                  ParsingException);
 
     // CS: missing axis
     EXPECT_THROW(WKTParser().createFromWKT(
-                     startWKT + ",CS[ellipsoidal,2],AXIS[\"latitude\",north]]"),
+                     startWKT + ",CS[ellipsoidal,2],AXIS[\"latitude\",north],"
+                                "UNIT[\"degree\",0.0174532925199433]]"),
                  ParsingException);
 
     // not enough children in AXIS
     EXPECT_THROW(
         WKTParser().createFromWKT(
             startWKT +
-            ",CS[ellipsoidal,2],AXIS[\"latitude\",north],AXIS[\"longitude\"]]"),
+            ",CS[ellipsoidal,2],AXIS[\"latitude\",north],AXIS[\"longitude\"],"
+            "UNIT[\"degree\",0.0174532925199433]]"),
         ParsingException);
 
     // not enough children in ORDER
     EXPECT_THROW(WKTParser().createFromWKT(
                      startWKT +
                      ",CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[]],AXIS["
-                     "\"longitude\",east]]"),
+                     "\"longitude\",east],"
+                     "UNIT[\"degree\",0.0174532925199433]]"),
                  ParsingException);
 
     // invalid value in ORDER
@@ -4260,7 +4288,7 @@ TEST(wkt_parse, invalid_CS_of_GEODCRS) {
         WKTParser().createFromWKT(
             startWKT +
             ",CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[\"x\"]],AXIS["
-            "\"longitude\",east]]"),
+            "\"longitude\",east],UNIT[\"degree\",0.0174532925199433]]"),
         ParsingException);
 
     // unexpected ORDER value
@@ -4268,7 +4296,7 @@ TEST(wkt_parse, invalid_CS_of_GEODCRS) {
         WKTParser().createFromWKT(
             startWKT +
             ",CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[2]],AXIS["
-            "\"longitude\",east]]"),
+            "\"longitude\",east],UNIT[\"degree\",0.0174532925199433]]"),
         ParsingException);
 
     // Invalid CS type
@@ -4794,7 +4822,8 @@ TEST(wkt_parse, invalid_DerivedGeographicCRS) {
         "        METHOD[\"bar\"]],\n"
         "    CS[ellipsoidal,2],\n"
         "        AXIS[\"latitude\",north],\n"
-        "        AXIS[\"longitude\",east]]"));
+        "        AXIS[\"longitude\",east],\n"
+        "        UNIT[\"degree\",0.0174532925199433]]"));
 
     // Missing DERIVINGCONVERSION
     EXPECT_THROW(
@@ -4805,7 +4834,8 @@ TEST(wkt_parse, invalid_DerivedGeographicCRS) {
             "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
             "    CS[ellipsoidal,2],\n"
             "        AXIS[\"latitude\",north],\n"
-            "        AXIS[\"longitude\",east]]"),
+            "        AXIS[\"longitude\",east],\n"
+            "        UNIT[\"degree\",0.0174532925199433]]"),
         ParsingException);
 
     // Missing CS
@@ -4982,18 +5012,20 @@ TEST(wkt_parse, invalid_LOCAL_CS) {
 
 TEST(wkt_parse, invalid_ParametricCRS) {
 
-    EXPECT_NO_THROW(
-        WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
-                                  "    PDATUM[\"name\"],\n"
-                                  "    CS[parametric,1],\n"
-                                  "        AXIS[\"time (T)\",future]]"));
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "PARAMETRICCRS[\"name\",\n"
+        "    PDATUM[\"name\"],\n"
+        "    CS[parametric,1],\n"
+        "        AXIS[\"pressure (hPa)\",up,\n"
+        "            PARAMETRICUNIT[\"HectoPascal\",100]]]"));
 
     // Missing PDATUM
-    EXPECT_THROW(
-        WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
-                                  "    CS[parametric,1],\n"
-                                  "        AXIS[\"time (T)\",future]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "PARAMETRICCRS[\"name\",\n"
+                     "    CS[parametric,1],\n"
+                     "        AXIS[\"pressure (hPa)\",up,\n"
+                     "            PARAMETRICUNIT[\"HectoPascal\",100]]]"),
+                 ParsingException);
 
     // Missing CS
     EXPECT_THROW(WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
@@ -5001,13 +5033,15 @@ TEST(wkt_parse, invalid_ParametricCRS) {
                  ParsingException);
 
     // Invalid number of axis for CS
-    EXPECT_THROW(
-        WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
-                                  "    PDATUM[\"name\"],\n"
-                                  "    CS[parametric,2],\n"
-                                  "        AXIS[\"time (T)\",future],\n"
-                                  "        AXIS[\"time (T)\",future]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "PARAMETRICCRS[\"name\",\n"
+                     "    PDATUM[\"name\"],\n"
+                     "    CS[parametric,2],\n"
+                     "        AXIS[\"pressure (hPa)\",up,\n"
+                     "            PARAMETRICUNIT[\"HectoPascal\",100]]"
+                     "        AXIS[\"pressure (hPa)\",up,\n"
+                     "            PARAMETRICUNIT[\"HectoPascal\",100]]]"),
+                 ParsingException);
 
     // Invalid CS type
     EXPECT_THROW(
@@ -5034,7 +5068,8 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
         "        METHOD[\"PROJ unimplemented\"]],\n"
         "    CS[Cartesian,2],\n"
         "        AXIS[\"(E)\",east],\n"
-        "        AXIS[\"(N)\",north]]"));
+        "        AXIS[\"(N)\",north],\n"
+        "        UNIT[\"metre\",1]]"));
 
     EXPECT_THROW(
         WKTParser().createFromWKT("DERIVEDPROJCRS[\"derived projectedCRS\",\n"
@@ -5042,7 +5077,8 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
                                   "        METHOD[\"PROJ unimplemented\"]],\n"
                                   "    CS[Cartesian,2],\n"
                                   "        AXIS[\"(E)\",east],\n"
-                                  "        AXIS[\"(N)\",north]]"),
+                                  "        AXIS[\"(N)\",north],\n"
+                                  "        UNIT[\"metre\",1]]"),
         ParsingException);
 
     // Missing DERIVINGCONVERSION
@@ -5058,7 +5094,8 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
             "            METHOD[\"PROJ unimplemented\"]]],\n"
             "    CS[Cartesian,2],\n"
             "        AXIS[\"(E)\",east],\n"
-            "        AXIS[\"(N)\",north]]"),
+            "        AXIS[\"(N)\",north],\n"
+            "        UNIT[\"metre\",1]]"),
         ParsingException);
 
     // Missing CS
@@ -5087,7 +5124,8 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
         "    DERIVINGCONVERSION[\"unnamed\",\n"
         "        METHOD[\"PROJ unimplemented\"]],\n"
         "    CS[vertical,1],\n"
-        "        AXIS[\"gravity-related height (H)\",up]]"));
+        "        AXIS[\"gravity-related height (H)\",up],\n"
+        "        UNIT[\"metre\",1]]"));
 
     // Missing DERIVINGCONVERSION
     EXPECT_THROW(WKTParser().createFromWKT(
@@ -5095,7 +5133,8 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
                      "    BASEVERTCRS[\"ODN height\",\n"
                      "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
                      "    CS[vertical,1],\n"
-                     "        AXIS[\"gravity-related height (H)\",up]]"),
+                     "        AXIS[\"gravity-related height (H)\",up],\n"
+                     "        UNIT[\"metre\",1]]"),
                  ParsingException);
 
     // Missing CS
@@ -5115,7 +5154,8 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
                      "    DERIVINGCONVERSION[\"unnamed\",\n"
                      "        METHOD[\"PROJ unimplemented\"]],\n"
                      "    CS[parametric,1],\n"
-                     "        AXIS[\"gravity-related height (H)\",up]]"),
+                     "        AXIS[\"gravity-related height (H)\",up],\n"
+                     "        UNIT[\"metre\",1]]"),
                  ParsingException);
 }
 
