@@ -3016,6 +3016,29 @@ TEST(operation, webmerc_import_from_GDAL_wkt1) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, webmerc_import_from_GDAL_wkt1_with_EPSG_code) {
+
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap()
+            .set(IdentifiedObject::NAME_KEY, "Pseudo-Mercator")
+            .set(Identifier::CODESPACE_KEY, "EPSG")
+            .set(Identifier::CODE_KEY, "3857"),
+        GeographicCRS::EPSG_4326,
+        Conversion::createPopularVisualisationPseudoMercator(
+            PropertyMap(), Angle(0), Angle(0), Length(0), Length(0)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto wkt1 = projCRS->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(wkt1.find("3857") != std::string::npos) << wkt1;
+    auto obj = WKTParser().createFromWKT(wkt1);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->identifiers().size(), 1);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, webmerc_import_from_GDAL_wkt1_EPSG_3785_deprecated) {
 
     auto wkt1 =
