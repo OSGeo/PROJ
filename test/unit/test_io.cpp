@@ -991,6 +991,33 @@ TEST(wkt_parse, wkt1_projected_with_PROJ4_extension) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_Mercator_1SP_with_latitude_origin_0) {
+    auto wkt = "PROJCS[\"unnamed\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"unknown\",\n"
+               "            SPHEROID[\"WGS84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
+               "    PROJECTION[\"Mercator_1SP\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",0],\n"
+               "    PARAMETER[\"central_meridian\",0],\n"
+               "    PARAMETER[\"scale_factor\",1],\n"
+               "    PARAMETER[\"false_easting\",0],\n"
+               "    PARAMETER[\"false_northing\",0],\n"
+               "    UNIT[\"Meter\",1],\n"
+               "    AXIS[\"Easting\",EAST],\n"
+               "    AXIS[\"Northing\",NORTH]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto got_wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(got_wkt.find("Mercator_1SP") != std::string::npos) << got_wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt1_krovak_south_west) {
     auto wkt =
         "PROJCS[\"S-JTSK / Krovak\","

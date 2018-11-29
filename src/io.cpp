@@ -1199,8 +1199,8 @@ struct WKTParser::Private {
     static bool hasWebMercPROJ4String(const WKTNodeNNPtr &projCRSNode,
                                       const WKTNodeNNPtr &projectionNode);
 
-    static bool projectionHasParameter(const WKTNodeNNPtr &projCRSNode,
-                                       const char *paramName);
+    static std::string projectionGetParameter(const WKTNodeNNPtr &projCRSNode,
+                                              const char *paramName);
 
     ConversionNNPtr buildProjection(const WKTNodeNNPtr &projCRSNode,
                                     const WKTNodeNNPtr &projectionNode,
@@ -3044,19 +3044,20 @@ WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
 
 // ---------------------------------------------------------------------------
 
-bool WKTParser::Private::projectionHasParameter(const WKTNodeNNPtr &projCRSNode,
-                                                const char *paramName) {
+std::string
+WKTParser::Private::projectionGetParameter(const WKTNodeNNPtr &projCRSNode,
+                                           const char *paramName) {
     for (const auto &childNode : projCRSNode->GP()->children()) {
         if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
             const auto &childNodeChildren = childNode->GP()->children();
             if (childNodeChildren.size() == 2 &&
                 metadata::Identifier::isEquivalentName(
                     stripQuotes(childNodeChildren[0]).c_str(), paramName)) {
-                return true;
+                return childNodeChildren[1]->GP()->value();
             }
         }
     }
-    return false;
+    return std::string();
 }
 
 // ---------------------------------------------------------------------------
@@ -3078,10 +3079,12 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     bool gdal_3026_hack = false;
     if (metadata::Identifier::isEquivalentName(wkt1ProjectionName.c_str(),
                                                "Mercator_1SP") &&
-        !projectionHasParameter(projCRSNode, "center_latitude")) {
+        projectionGetParameter(projCRSNode, "center_latitude").empty()) {
 
         // Hack for https://trac.osgeo.org/gdal/ticket/3026
-        if (projectionHasParameter(projCRSNode, "latitude_of_origin")) {
+        std::string lat0(
+            projectionGetParameter(projCRSNode, "latitude_of_origin"));
+        if (!lat0.empty() && lat0 != "0" && lat0 != "0.0") {
             wkt1ProjectionName = "Mercator_2SP";
             gdal_3026_hack = true;
         } else {
