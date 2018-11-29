@@ -142,11 +142,11 @@ struct PJ_OBJ_LIST {
 struct projCppContext {
     DatabaseContextNNPtr databaseContext;
 
-    explicit projCppContext(PJ_CONTEXT *ctxt, const char *dbPath = nullptr,
+    explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
                             const char *const *auxDbPaths = nullptr)
         : databaseContext(DatabaseContext::create(
               dbPath ? dbPath : std::string(), toVector(auxDbPaths))) {
-        databaseContext->attachPJContext(ctxt);
+        databaseContext->attachPJContext(ctx);
     }
 
     static std::vector<std::string> toVector(const char *const *auxDbPaths) {
@@ -4962,22 +4962,22 @@ proj_create_operation_factory_context(PJ_CONTEXT *ctx, const char *authority) {
  * This method should be called one and exactly one for each function
  * returning a PJ_OPERATION_FACTORY_CONTEXT*
  *
- * @param ctxt Object, or NULL.
+ * @param ctx Object, or NULL.
  */
-void proj_operation_factory_context_unref(PJ_OPERATION_FACTORY_CONTEXT *ctxt) {
-    delete ctxt;
+void proj_operation_factory_context_unref(PJ_OPERATION_FACTORY_CONTEXT *ctx) {
+    delete ctx;
 }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Set the desired accuracy of the resulting coordinate transformations.
- * @param ctxt Operation factory context. must not be NULL
+ * @param ctx Operation factory context. must not be NULL
  * @param accuracy Accuracy in meter (or 0 to disable the filter).
  */
 void proj_operation_factory_context_set_desired_accuracy(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, double accuracy) {
-    assert(ctxt);
-    ctxt->operationContext->setDesiredAccuracy(accuracy);
+    PJ_OPERATION_FACTORY_CONTEXT *ctx, double accuracy) {
+    assert(ctx);
+    ctx->operationContext->setDesiredAccuracy(accuracy);
 }
 
 // ---------------------------------------------------------------------------
@@ -4988,17 +4988,17 @@ void proj_operation_factory_context_set_desired_accuracy(
  * For an area of interest crossing the anti-meridian, west_lon_degree will be
  * greater than east_lon_degree.
  *
- * @param ctxt Operation factory context. must not be NULL
+ * @param ctx Operation factory context. must not be NULL
  * @param west_lon_degree West longitude (in degrees).
  * @param south_lat_degree South latitude (in degrees).
  * @param east_lon_degree East longitude (in degrees).
  * @param north_lat_degree North latitude (in degrees).
  */
 void proj_operation_factory_context_set_area_of_interest(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, double west_lon_degree,
+    PJ_OPERATION_FACTORY_CONTEXT *ctx, double west_lon_degree,
     double south_lat_degree, double east_lon_degree, double north_lat_degree) {
-    assert(ctxt);
-    ctxt->operationContext->setAreaOfInterest(Extent::createFromBBOX(
+    assert(ctx);
+    ctx->operationContext->setAreaOfInterest(Extent::createFromBBOX(
         west_lon_degree, south_lat_degree, east_lon_degree, north_lat_degree));
 }
 
@@ -5010,30 +5010,30 @@ void proj_operation_factory_context_set_area_of_interest(
  *
  * The default is PJ_CRS_EXTENT_SMALLEST.
  *
- * @param ctxt Operation factory context. must not be NULL
+ * @param ctx Operation factory context. must not be NULL
  * @param use How source and target CRS extent should be used.
  */
 void proj_operation_factory_context_set_crs_extent_use(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, PROJ_CRS_EXTENT_USE use) {
-    assert(ctxt);
+    PJ_OPERATION_FACTORY_CONTEXT *ctx, PROJ_CRS_EXTENT_USE use) {
+    assert(ctx);
     switch (use) {
     case PJ_CRS_EXTENT_NONE:
-        ctxt->operationContext->setSourceAndTargetCRSExtentUse(
+        ctx->operationContext->setSourceAndTargetCRSExtentUse(
             CoordinateOperationContext::SourceTargetCRSExtentUse::NONE);
         break;
 
     case PJ_CRS_EXTENT_BOTH:
-        ctxt->operationContext->setSourceAndTargetCRSExtentUse(
+        ctx->operationContext->setSourceAndTargetCRSExtentUse(
             CoordinateOperationContext::SourceTargetCRSExtentUse::BOTH);
         break;
 
     case PJ_CRS_EXTENT_INTERSECTION:
-        ctxt->operationContext->setSourceAndTargetCRSExtentUse(
+        ctx->operationContext->setSourceAndTargetCRSExtentUse(
             CoordinateOperationContext::SourceTargetCRSExtentUse::INTERSECTION);
         break;
 
     case PJ_CRS_EXTENT_SMALLEST:
-        ctxt->operationContext->setSourceAndTargetCRSExtentUse(
+        ctx->operationContext->setSourceAndTargetCRSExtentUse(
             CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST);
         break;
     }
@@ -5048,20 +5048,20 @@ void proj_operation_factory_context_set_crs_extent_use(
  *
  * The default is PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT.
  *
- * @param ctxt Operation factory context. must not be NULL
+ * @param ctx Operation factory context. must not be NULL
  * @param criterion patial criterion to use
  */
 void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, PROJ_SPATIAL_CRITERION criterion) {
-    assert(ctxt);
+    PJ_OPERATION_FACTORY_CONTEXT *ctx, PROJ_SPATIAL_CRITERION criterion) {
+    assert(ctx);
     switch (criterion) {
     case PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT:
-        ctxt->operationContext->setSpatialCriterion(
+        ctx->operationContext->setSpatialCriterion(
             CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT);
         break;
 
     case PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION:
-        ctxt->operationContext->setSpatialCriterion(
+        ctx->operationContext->setSpatialCriterion(
             CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
         break;
     }
@@ -5073,26 +5073,26 @@ void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
  *
  * The default is USE_FOR_SORTING.
  *
- * @param ctxt Operation factory context. must not be NULL
+ * @param ctx Operation factory context. must not be NULL
  * @param use how grid availability is used.
  */
 void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, PROJ_GRID_AVAILABILITY_USE use) {
-    assert(ctxt);
+    PJ_OPERATION_FACTORY_CONTEXT *ctx, PROJ_GRID_AVAILABILITY_USE use) {
+    assert(ctx);
     switch (use) {
     case PROJ_GRID_AVAILABILITY_USED_FOR_SORTING:
-        ctxt->operationContext->setGridAvailabilityUse(
+        ctx->operationContext->setGridAvailabilityUse(
             CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING);
         break;
 
     case PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID:
-        ctxt->operationContext->setGridAvailabilityUse(
+        ctx->operationContext->setGridAvailabilityUse(
             CoordinateOperationContext::GridAvailabilityUse::
                 DISCARD_OPERATION_IF_MISSING_GRID);
         break;
 
     case PROJ_GRID_AVAILABILITY_IGNORED:
-        ctxt->operationContext->setGridAvailabilityUse(
+        ctx->operationContext->setGridAvailabilityUse(
             CoordinateOperationContext::GridAvailabilityUse::
                 IGNORE_GRID_AVAILABILITY);
         break;
@@ -5106,13 +5106,13 @@ void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
  *
  * The default is true.
  *
- * @param ctxt Operation factory context. must not be NULL
+ * @param ctx Operation factory context. must not be NULL
  * @param usePROJNames whether PROJ alternative grid names should be used
  */
 void proj_operation_factory_context_set_use_proj_alternative_grid_names(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, int usePROJNames) {
-    assert(ctxt);
-    ctxt->operationContext->setUsePROJAlternativeGridNames(usePROJNames != 0);
+    PJ_OPERATION_FACTORY_CONTEXT *ctx, int usePROJNames) {
+    assert(ctx);
+    ctx->operationContext->setUsePROJAlternativeGridNames(usePROJNames != 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -5134,13 +5134,13 @@ void proj_operation_factory_context_set_use_proj_alternative_grid_names(
  *
  * The default is true.
  *
- * @param ctxt Operation factory context. must not be NULL
+ * @param ctx Operation factory context. must not be NULL
  * @param allow whether intermediate CRS may be used.
  */
 void proj_operation_factory_context_set_allow_use_intermediate_crs(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, int allow) {
-    assert(ctxt);
-    ctxt->operationContext->setAllowUseIntermediateCRS(allow != 0);
+    PJ_OPERATION_FACTORY_CONTEXT *ctx, int allow) {
+    assert(ctx);
+    ctx->operationContext->setAllowUseIntermediateCRS(allow != 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -5148,21 +5148,21 @@ void proj_operation_factory_context_set_allow_use_intermediate_crs(
 /** \brief Restrict the potential pivot CRSs that can be used when trying to
  * build a coordinate operation between two CRS that have no direct operation.
  *
- * @param ctxt Operation factory context. must not be NULL
+ * @param ctx Operation factory context. must not be NULL
  * @param list_of_auth_name_codes an array of strings NLL terminated,
  * with the format { "auth_name1", "code1", "auth_name2", "code2", ... NULL }
  */
 void proj_operation_factory_context_set_allowed_intermediate_crs(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+    PJ_OPERATION_FACTORY_CONTEXT *ctx,
     const char *const *list_of_auth_name_codes) {
-    assert(ctxt);
+    assert(ctx);
     std::vector<std::pair<std::string, std::string>> pivots;
     for (auto iter = list_of_auth_name_codes; iter && iter[0] && iter[1];
          iter += 2) {
         pivots.emplace_back(std::pair<std::string, std::string>(
             std::string(iter[0]), std::string(iter[1])));
     }
-    ctxt->operationContext->setIntermediateCRS(pivots);
+    ctx->operationContext->setIntermediateCRS(pivots);
 }
 
 // ---------------------------------------------------------------------------

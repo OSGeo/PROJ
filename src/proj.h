@@ -682,14 +682,14 @@ PJ_OPERATION_FACTORY_CONTEXT PROJ_DLL *proj_create_operation_factory_context(
                                             const char *authority);
 
 void PROJ_DLL proj_operation_factory_context_unref(
-                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt);
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctx);
 
 void PROJ_DLL proj_operation_factory_context_set_desired_accuracy(
-                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctx,
                                             double accuracy);
 
 void PROJ_DLL proj_operation_factory_context_set_area_of_interest(
-                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctx,
                                             double west_lon_degree,
                                             double south_lat_degree,
                                             double east_lon_degree,
@@ -715,7 +715,7 @@ typedef enum
 } PROJ_CRS_EXTENT_USE;
 
 void PROJ_DLL proj_operation_factory_context_set_crs_extent_use(
-                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctx,
                                             PROJ_CRS_EXTENT_USE use);
 
 /** Spatial criterion to restrict candiate operations. */
@@ -730,7 +730,7 @@ typedef enum {
 } PROJ_SPATIAL_CRITERION;
 
 void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
-                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctx,
                                             PROJ_SPATIAL_CRITERION criterion);
 
 
@@ -749,18 +749,18 @@ typedef enum {
 } PROJ_GRID_AVAILABILITY_USE;
 
 void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
-                                            PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+                                            PJ_OPERATION_FACTORY_CONTEXT *ctx,
                                             PROJ_GRID_AVAILABILITY_USE use);
 
 void PROJ_DLL proj_operation_factory_context_set_use_proj_alternative_grid_names(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+    PJ_OPERATION_FACTORY_CONTEXT *ctx,
     int usePROJNames);
 
 void PROJ_DLL proj_operation_factory_context_set_allow_use_intermediate_crs(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt, int allow);
+    PJ_OPERATION_FACTORY_CONTEXT *ctx, int allow);
 
 void PROJ_DLL proj_operation_factory_context_set_allowed_intermediate_crs(
-    PJ_OPERATION_FACTORY_CONTEXT *ctxt,
+    PJ_OPERATION_FACTORY_CONTEXT *ctx,
     const char* const *list_of_auth_name_codes);
 
 /* ------------------------------------------------------------------------- */
