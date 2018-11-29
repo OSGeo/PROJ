@@ -275,6 +275,50 @@ TEST_F(gieTest, proj_create_crs_to_crs) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(gieTest, proj_create_crs_to_crs_EPSG_4326) {
+
+    auto P =
+        proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4326", "EPSG:32631", NULL);
+    ASSERT_TRUE(P != nullptr);
+    PJ_COORD a, b;
+
+    // Lat, long degrees
+    a.xy.x = 0.0;
+    a.xy.y = 3.0;
+
+    b.xy.x = 500000.0;
+    b.xy.y = 0.0;
+
+    a = proj_trans(P, PJ_FWD, a);
+    EXPECT_NEAR(a.xy.x, b.xy.x, 1e-9);
+    EXPECT_NEAR(a.xy.y, b.xy.y, 1e-9);
+    proj_destroy(P);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(gieTest, proj_create_crs_to_crs_proj_longlat) {
+
+    auto P = proj_create_crs_to_crs(
+        PJ_DEFAULT_CTX, "+proj=longlat +datum=WGS84", "EPSG:32631", NULL);
+    ASSERT_TRUE(P != nullptr);
+    PJ_COORD a, b;
+
+    // Long, lat degrees
+    a.xy.x = 3.0;
+    a.xy.y = 0;
+
+    b.xy.x = 500000.0;
+    b.xy.y = 0.0;
+
+    a = proj_trans(P, PJ_FWD, a);
+    EXPECT_NEAR(a.xy.x, b.xy.x, 1e-9);
+    EXPECT_NEAR(a.xy.y, b.xy.y, 1e-9);
+    proj_destroy(P);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(gie, info_functions) {
     PJ_INFO info;
     PJ_PROJ_INFO pj_info;

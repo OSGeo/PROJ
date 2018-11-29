@@ -341,7 +341,7 @@ int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_leg
 /* Manage the transformation definition object PJ */
 PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-PJ PROJ_DLL *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area);
+PJ PROJ_DLL *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area);
 PJ PROJ_DLL *proj_destroy (PJ *P);
 
 

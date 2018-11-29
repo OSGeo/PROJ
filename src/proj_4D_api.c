@@ -715,14 +715,22 @@ int proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_
 
 
 /*****************************************************************************/
-PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area) {
+PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area) {
 /******************************************************************************
     Create a transformation pipeline between two known coordinate reference
     systems.
 
-    srid_from and srid_to should be the value part of a +init=... parameter
-    set, i.e. "EPSG:25833" or "IGNF:AMST63". Any projection definition that
-    can be found in a init-file in PROJ_LIB is a valid input to this function.
+    source_crs and target_crs can be :
+    - a "AUTHORITY:CODE", like EPSG:25832. When using that syntax for a source
+      CRS, the created pipeline will expect that the values passed to proj_trans()
+      respect the axis order and axis unit of the official definition (
+      so for example, for EPSG:4326, with latitude first and longitude next,
+      in degrees). Similarly, when using that syntax for a target CRS, output
+      values will be emitted according to the official definition of this CRS.
+    - a PROJ string, like "+proj=longlat +datum=WGS84".
+      When using that syntax, the axis order and unit for geographic CRS will
+      be longitude, latitude, and the unit degrees.
+    - more generally any string accepted by proj_obj_create_from_user_input()
 
     An "area of use" can be specified in area. When it is supplied, the more
     accurate transformation between two given systems can be chosen.
@@ -743,12 +751,12 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
     const char* const* optionsImportCRS =
         proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : NULL;
 
-    src = proj_obj_create_from_user_input(ctx, srid_from, optionsImportCRS);
+    src = proj_obj_create_from_user_input(ctx, source_crs, optionsImportCRS);
     if( !src ) {
         return NULL;
     }
 
-    dst = proj_obj_create_from_user_input(ctx, srid_to, optionsImportCRS);
+    dst = proj_obj_create_from_user_input(ctx, target_crs, optionsImportCRS);
     if( !dst ) {
         proj_obj_unref(src);
         return NULL;
