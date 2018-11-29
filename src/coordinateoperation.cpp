@@ -149,6 +149,8 @@ static std::set<std::string> buildSetEquivalentParameters() {
         {"latitude_of_point_2", "Latitude_Of_2nd_Point", nullptr},
         {"longitude_of_point_2", "Longitude_Of_2nd_Point", nullptr},
 
+        {"satellite_height", "height", nullptr},
+
         {EPSG_NAME_PARAMETER_FALSE_EASTING,
          EPSG_NAME_PARAMETER_EASTING_FALSE_ORIGIN,
          EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE, nullptr},

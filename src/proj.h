@@ -606,11 +606,11 @@ const char PROJ_DLL* proj_obj_get_id_auth_name(const PJ_OBJ *obj, int index);
 const char PROJ_DLL* proj_obj_get_id_code(const PJ_OBJ *obj, int index);
 
 int PROJ_DLL proj_obj_get_area_of_use(const PJ_OBJ *obj,
-                                      double* p_west_lon_degree,
-                                      double* p_south_lat_degree,
-                                      double* p_east_lon_degree,
-                                      double* p_north_lat_degree,
-                                      const char **p_area_name);
+                                      double* out_west_lon_degree,
+                                      double* out_south_lat_degree,
+                                      double* out_east_lon_degree,
+                                      double* out_north_lat_degree,
+                                      const char **out_area_name);
 
 /** \brief WKT version. */
 typedef enum
@@ -811,31 +811,31 @@ PJ_COORDINATE_SYSTEM_TYPE PROJ_DLL proj_obj_cs_get_type(const PJ_OBJ* cs);
 int PROJ_DLL proj_obj_cs_get_axis_count(const PJ_OBJ *cs);
 
 int PROJ_DLL proj_obj_cs_get_axis_info(const PJ_OBJ *cs, int index,
-                                       const char **pName,
-                                       const char **pAbbrev,
-                                       const char **pDirection,
-                                       double *pUnitConvFactor,
-                                       const char **pUnitName);
+                                       const char **out_name,
+                                       const char **out_abbrev,
+                                       const char **out_direction,
+                                       double *out_unit_conv_factor,
+                                       const char **out_unit_name);
 
 PJ_OBJ PROJ_DLL *proj_obj_get_ellipsoid(const PJ_OBJ *obj);
 
 int PROJ_DLL proj_obj_ellipsoid_get_parameters(const PJ_OBJ *ellipsoid,
-                                            double *pSemiMajorMetre,
-                                            double *pSemiMinorMetre,
-                                            int    *pIsSemiMinorComputed,
-                                            double *pInverseFlattening);
+                                            double *out_semi_major_metre,
+                                            double *out_semi_minor_metre,
+                                            int    *out_is_semi_minor_computed,
+                                            double *out_inv_flattening);
 
 PJ_OBJ PROJ_DLL *proj_obj_get_prime_meridian(const PJ_OBJ *obj);
 
 int PROJ_DLL proj_obj_prime_meridian_get_parameters(const PJ_OBJ *prime_meridian,
-                                               double *pLongitude,
-                                               double *pLongitudeUnitConvFactor,
-                                               const char **pLongitudeUnitName);
+                                               double *out_longitude,
+                                               double *out_unit_conv_factor,
+                                               const char **out_unit_name);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_get_coordoperation(const PJ_OBJ *crs,
-                                             const char **pMethodName,
-                                             const char **pMethodAuthorityName,
-                                             const char **pMethodCode);
+                                             const char **out_method_name,
+                                             const char **out_method_auth_name,
+                                             const char **out_method_code);
 
 int PROJ_DLL proj_coordoperation_is_instanciable(const PJ_OBJ *coordoperation);
 
@@ -846,25 +846,25 @@ int PROJ_DLL proj_coordoperation_get_param_index(const PJ_OBJ *coordoperation,
 
 int PROJ_DLL proj_coordoperation_get_param(const PJ_OBJ *coordoperation,
                                            int index,
-                                           const char **pName,
-                                           const char **pNameAuthorityName,
-                                           const char **pNameCode,
-                                           double *pValue,
-                                           const char **pValueString,
-                                           double *pValueUnitConvFactor,
-                                           const char **pValueUnitName);
+                                           const char **out_name,
+                                           const char **out_auth_name,
+                                           const char **out_code,
+                                           double *out_value,
+                                           const char **out_value_string,
+                                           double *out_unit_conv_factor,
+                                           const char **out_unit_name);
 
 int PROJ_DLL proj_coordoperation_get_grid_used_count(const PJ_OBJ *coordoperation);
 
 int PROJ_DLL proj_coordoperation_get_grid_used(const PJ_OBJ *coordoperation,
                                                int index,
-                                               const char **pShortName,
-                                               const char **pFullName,
-                                               const char **pPackageName,
-                                               const char **pURL,
-                                               int *pDirectDownload,
-                                               int *pOpenLicense,
-                                               int *pAvailable);
+                                               const char **out_short_name,
+                                               const char **out_full_name,
+                                               const char **out_package_name,
+                                               const char **out_url,
+                                               int *out_direct_download,
+                                               int *out_open_license,
+                                               int *out_available);
 
 double PROJ_DLL proj_coordoperation_get_accuracy(const PJ_OBJ* obj);
 

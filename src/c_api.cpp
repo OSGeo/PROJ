@@ -1062,30 +1062,30 @@ const char *proj_obj_as_proj_string(const PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
 /** \brief Return the area of use of an object.
  *
  * @param obj Object (must not be NULL)
- * @param p_west_lon_degree Pointer to a double to receive the west longitude
+ * @param out_west_lon_degree Pointer to a double to receive the west longitude
  * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
  * unknown.
- * @param p_south_lat_degree Pointer to a double to receive the south latitude
+ * @param out_south_lat_degree Pointer to a double to receive the south latitude
  * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
  * unknown.
- * @param p_east_lon_degree Pointer to a double to receive the east longitude
+ * @param out_east_lon_degree Pointer to a double to receive the east longitude
  * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
  * unknown.
- * @param p_north_lat_degree Pointer to a double to receive the north latitude
+ * @param out_north_lat_degree Pointer to a double to receive the north latitude
  * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
  * unknown.
- * @param p_area_name Pointer to a string to receive the name of the area of
+ * @param out_area_name Pointer to a string to receive the name of the area of
  * use. Or NULL. *p_area_name is valid while obj is valid itself.
  * @return TRUE in case of success, FALSE in case of error or if the area
  * of use is unknown.
  */
-int proj_obj_get_area_of_use(const PJ_OBJ *obj, double *p_west_lon_degree,
-                             double *p_south_lat_degree,
-                             double *p_east_lon_degree,
-                             double *p_north_lat_degree,
-                             const char **p_area_name) {
-    if (p_area_name) {
-        *p_area_name = nullptr;
+int proj_obj_get_area_of_use(const PJ_OBJ *obj, double *out_west_lon_degree,
+                             double *out_south_lat_degree,
+                             double *out_east_lon_degree,
+                             double *out_north_lat_degree,
+                             const char **out_area_name) {
+    if (out_area_name) {
+        *out_area_name = nullptr;
     }
     auto objectUsage = dynamic_cast<const ObjectUsage *>(obj->obj.get());
     if (!objectUsage) {
@@ -1100,8 +1100,8 @@ int proj_obj_get_area_of_use(const PJ_OBJ *obj, double *p_west_lon_degree,
         return false;
     }
     const auto &desc = extent->description();
-    if (desc.has_value() && p_area_name) {
-        *p_area_name = desc->c_str();
+    if (desc.has_value() && out_area_name) {
+        *out_area_name = desc->c_str();
     }
 
     const auto &geogElements = extent->geographicElements();
@@ -1109,32 +1109,32 @@ int proj_obj_get_area_of_use(const PJ_OBJ *obj, double *p_west_lon_degree,
         auto bbox =
             dynamic_cast<const GeographicBoundingBox *>(geogElements[0].get());
         if (bbox) {
-            if (p_west_lon_degree) {
-                *p_west_lon_degree = bbox->westBoundLongitude();
+            if (out_west_lon_degree) {
+                *out_west_lon_degree = bbox->westBoundLongitude();
             }
-            if (p_south_lat_degree) {
-                *p_south_lat_degree = bbox->southBoundLatitude();
+            if (out_south_lat_degree) {
+                *out_south_lat_degree = bbox->southBoundLatitude();
             }
-            if (p_east_lon_degree) {
-                *p_east_lon_degree = bbox->eastBoundLongitude();
+            if (out_east_lon_degree) {
+                *out_east_lon_degree = bbox->eastBoundLongitude();
             }
-            if (p_north_lat_degree) {
-                *p_north_lat_degree = bbox->northBoundLatitude();
+            if (out_north_lat_degree) {
+                *out_north_lat_degree = bbox->northBoundLatitude();
             }
             return true;
         }
     }
-    if (p_west_lon_degree) {
-        *p_west_lon_degree = -1000;
+    if (out_west_lon_degree) {
+        *out_west_lon_degree = -1000;
     }
-    if (p_south_lat_degree) {
-        *p_south_lat_degree = -1000;
+    if (out_south_lat_degree) {
+        *out_south_lat_degree = -1000;
     }
-    if (p_east_lon_degree) {
-        *p_east_lon_degree = -1000;
+    if (out_east_lon_degree) {
+        *out_east_lon_degree = -1000;
     }
-    if (p_north_lat_degree) {
-        *p_north_lat_degree = -1000;
+    if (out_north_lat_degree) {
+        *out_north_lat_degree = -1000;
     }
     return true;
 }
@@ -1352,22 +1352,25 @@ PJ_OBJ *proj_obj_crs_get_horizontal_datum(const PJ_OBJ *crs) {
 /** \brief Return ellipsoid parameters.
  *
  * @param ellipsoid Object of type Ellipsoid (must not be NULL)
- * @param pSemiMajorMetre Pointer to a value to store the semi-major axis in
+ * @param out_semi_major_metre Pointer to a value to store the semi-major axis
+ * in
  * metre. or NULL
- * @param pSemiMinorMetre Pointer to a value to store the semi-minor axis in
+ * @param out_semi_minor_metre Pointer to a value to store the semi-minor axis
+ * in
  * metre. or NULL
- * @param pIsSemiMinorComputed Pointer to a boolean value to indicate if the
+ * @param out_is_semi_minor_computed Pointer to a boolean value to indicate if
+ * the
  * semi-minor value was computed. If FALSE, its value comes from the
  * definition. or NULL
- * @param pInverseFlattening Pointer to a value to store the inverse
+ * @param out_inv_flattening Pointer to a value to store the inverse
  * flattening. or NULL
  * @return TRUE in case of success.
  */
 int proj_obj_ellipsoid_get_parameters(const PJ_OBJ *ellipsoid,
-                                      double *pSemiMajorMetre,
-                                      double *pSemiMinorMetre,
-                                      int *pIsSemiMinorComputed,
-                                      double *pInverseFlattening) {
+                                      double *out_semi_major_metre,
+                                      double *out_semi_minor_metre,
+                                      int *out_is_semi_minor_computed,
+                                      double *out_inv_flattening) {
     assert(ellipsoid);
     auto l_ellipsoid = dynamic_cast<const Ellipsoid *>(ellipsoid->obj.get());
     if (!l_ellipsoid) {
@@ -1376,17 +1379,19 @@ int proj_obj_ellipsoid_get_parameters(const PJ_OBJ *ellipsoid,
         return FALSE;
     }
 
-    if (pSemiMajorMetre) {
-        *pSemiMajorMetre = l_ellipsoid->semiMajorAxis().getSIValue();
+    if (out_semi_major_metre) {
+        *out_semi_major_metre = l_ellipsoid->semiMajorAxis().getSIValue();
     }
-    if (pSemiMinorMetre) {
-        *pSemiMinorMetre = l_ellipsoid->computeSemiMinorAxis().getSIValue();
+    if (out_semi_minor_metre) {
+        *out_semi_minor_metre =
+            l_ellipsoid->computeSemiMinorAxis().getSIValue();
     }
-    if (pIsSemiMinorComputed) {
-        *pIsSemiMinorComputed = !(l_ellipsoid->semiMinorAxis().has_value());
+    if (out_is_semi_minor_computed) {
+        *out_is_semi_minor_computed =
+            !(l_ellipsoid->semiMinorAxis().has_value());
     }
-    if (pInverseFlattening) {
-        *pInverseFlattening = l_ellipsoid->computedInverseFlattening();
+    if (out_inv_flattening) {
+        *out_inv_flattening = l_ellipsoid->computedInverseFlattening();
     }
     return TRUE;
 }
@@ -1427,18 +1432,18 @@ PJ_OBJ *proj_obj_get_prime_meridian(const PJ_OBJ *obj) {
 /** \brief Return prime meridian parameters.
  *
  * @param prime_meridian Object of type PrimeMeridian (must not be NULL)
- * @param pLongitude Pointer to a value to store the longitude of the prime
+ * @param out_longitude Pointer to a value to store the longitude of the prime
  * meridian, in its native unit. or NULL
- * @param pLongitudeUnitConvFactor Pointer to a value to store the conversion
+ * @param out_unit_conv_factor Pointer to a value to store the conversion
  * factor of the prime meridian longitude unit to radian. or NULL
- * @param pLongitudeUnitName Pointer to a string value to store the unit name.
+ * @param out_unit_name Pointer to a string value to store the unit name.
  * or NULL
  * @return TRUE in case of success.
  */
 int proj_obj_prime_meridian_get_parameters(const PJ_OBJ *prime_meridian,
-                                           double *pLongitude,
-                                           double *pLongitudeUnitConvFactor,
-                                           const char **pLongitudeUnitName) {
+                                           double *out_longitude,
+                                           double *out_unit_conv_factor,
+                                           const char **out_unit_name) {
     assert(prime_meridian);
     auto l_pm = dynamic_cast<const PrimeMeridian *>(prime_meridian->obj.get());
     if (!l_pm) {
@@ -1447,15 +1452,15 @@ int proj_obj_prime_meridian_get_parameters(const PJ_OBJ *prime_meridian,
         return false;
     }
     const auto &longitude = l_pm->longitude();
-    if (pLongitude) {
-        *pLongitude = longitude.value();
+    if (out_longitude) {
+        *out_longitude = longitude.value();
     }
     const auto &unit = longitude.unit();
-    if (pLongitudeUnitConvFactor) {
-        *pLongitudeUnitConvFactor = unit.conversionToSI();
+    if (out_unit_conv_factor) {
+        *out_unit_conv_factor = unit.conversionToSI();
     }
-    if (pLongitudeUnitName) {
-        *pLongitudeUnitName = unit.name().c_str();
+    if (out_unit_name) {
+        *out_unit_name = unit.name().c_str();
     }
     return true;
 }
@@ -1704,19 +1709,19 @@ void proj_free_string_list(PROJ_STRING_LIST list) {
  * It should be used by at most one thread at a time.
  *
  * @param crs Objet of type DerivedCRS or BoundCRSs (must not be NULL)
- * @param pMethodName Pointer to a string value to store the method
+ * @param out_method_name Pointer to a string value to store the method
  * (projection) name. or NULL
- * @param pMethodAuthorityName Pointer to a string value to store the method
+ * @param out_method_auth_name Pointer to a string value to store the method
  * authority name. or NULL
- * @param pMethodCode Pointer to a string value to store the method
+ * @param out_method_code Pointer to a string value to store the method
  * code. or NULL
  * @return Object of type SingleOperation that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_crs_get_coordoperation(const PJ_OBJ *crs,
-                                        const char **pMethodName,
-                                        const char **pMethodAuthorityName,
-                                        const char **pMethodCode) {
+                                        const char **out_method_name,
+                                        const char **out_method_auth_name,
+                                        const char **out_method_code) {
     assert(crs);
     SingleOperationPtr co;
 
@@ -1736,21 +1741,21 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(const PJ_OBJ *crs,
 
     const auto &method = co->method();
     const auto &method_ids = method->identifiers();
-    if (pMethodName) {
-        *pMethodName = method->name()->description()->c_str();
+    if (out_method_name) {
+        *out_method_name = method->name()->description()->c_str();
     }
-    if (pMethodAuthorityName) {
+    if (out_method_auth_name) {
         if (!method_ids.empty()) {
-            *pMethodAuthorityName = method_ids[0]->codeSpace()->c_str();
+            *out_method_auth_name = method_ids[0]->codeSpace()->c_str();
         } else {
-            *pMethodAuthorityName = nullptr;
+            *out_method_auth_name = nullptr;
         }
     }
-    if (pMethodCode) {
+    if (out_method_code) {
         if (!method_ids.empty()) {
-            *pMethodCode = method_ids[0]->code().c_str();
+            *out_method_code = method_ids[0]->code().c_str();
         } else {
-            *pMethodCode = nullptr;
+            *out_method_code = nullptr;
         }
     }
     return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(co));
@@ -4691,29 +4696,30 @@ int proj_coordoperation_get_param_index(const PJ_OBJ *coordoperation,
  * @param coordoperation Objet of type SingleOperation or derived classes
  * (must not be NULL)
  * @param index Parameter index.
- * @param pName Pointer to a string value to store the parameter name. or NULL
- * @param pNameAuthorityName Pointer to a string value to store the parameter
+ * @param out_name Pointer to a string value to store the parameter name. or
+ * NULL
+ * @param out_auth_name Pointer to a string value to store the parameter
  * authority name. or NULL
- * @param pNameCode Pointer to a string value to store the parameter
+ * @param out_code Pointer to a string value to store the parameter
  * code. or NULL
- * @param pValue Pointer to a double value to store the parameter
+ * @param out_value Pointer to a double value to store the parameter
  * value (if numeric). or NULL
- * @param pValueString Pointer to a string value to store the parameter
+ * @param out_value_string Pointer to a string value to store the parameter
  * value (if of type string). or NULL
- * @param pValueUnitConvFactor Pointer to a double value to store the parameter
+ * @param out_unit_conv_factor Pointer to a double value to store the parameter
  * unit conversion factor. or NULL
- * @param pValueUnitName Pointer to a string value to store the parameter
+ * @param out_unit_name Pointer to a string value to store the parameter
  * unit name. or NULL
  * @return TRUE in case of success.
  */
 
 int proj_coordoperation_get_param(const PJ_OBJ *coordoperation, int index,
-                                  const char **pName,
-                                  const char **pNameAuthorityName,
-                                  const char **pNameCode, double *pValue,
-                                  const char **pValueString,
-                                  double *pValueUnitConvFactor,
-                                  const char **pValueUnitName) {
+                                  const char **out_name,
+                                  const char **out_auth_name,
+                                  const char **out_code, double *out_value,
+                                  const char **out_value_string,
+                                  double *out_unit_conv_factor,
+                                  const char **out_unit_name) {
     assert(coordoperation);
     auto op = dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
     if (!op) {
@@ -4731,21 +4737,21 @@ int proj_coordoperation_get_param(const PJ_OBJ *coordoperation, int index,
 
     const auto &param = parameters[index];
     const auto &param_ids = param->identifiers();
-    if (pName) {
-        *pName = param->name()->description()->c_str();
+    if (out_name) {
+        *out_name = param->name()->description()->c_str();
     }
-    if (pNameAuthorityName) {
+    if (out_auth_name) {
         if (!param_ids.empty()) {
-            *pNameAuthorityName = param_ids[0]->codeSpace()->c_str();
+            *out_auth_name = param_ids[0]->codeSpace()->c_str();
         } else {
-            *pNameAuthorityName = nullptr;
+            *out_auth_name = nullptr;
         }
     }
-    if (pNameCode) {
+    if (out_code) {
         if (!param_ids.empty()) {
-            *pNameCode = param_ids[0]->code().c_str();
+            *out_code = param_ids[0]->code().c_str();
         } else {
-            *pNameCode = nullptr;
+            *out_code = nullptr;
         }
     }
 
@@ -4756,38 +4762,38 @@ int proj_coordoperation_get_param(const PJ_OBJ *coordoperation, int index,
     if (opParamValue) {
         paramValue = opParamValue->parameterValue().as_nullable();
     }
-    if (pValue) {
-        *pValue = 0;
+    if (out_value) {
+        *out_value = 0;
         if (paramValue) {
             if (paramValue->type() == ParameterValue::Type::MEASURE) {
-                *pValue = paramValue->value().value();
+                *out_value = paramValue->value().value();
             }
         }
     }
-    if (pValueString) {
-        *pValueString = nullptr;
+    if (out_value_string) {
+        *out_value_string = nullptr;
         if (paramValue) {
             if (paramValue->type() == ParameterValue::Type::FILENAME) {
-                *pValueString = paramValue->valueFile().c_str();
+                *out_value_string = paramValue->valueFile().c_str();
             } else if (paramValue->type() == ParameterValue::Type::STRING) {
-                *pValueString = paramValue->stringValue().c_str();
+                *out_value_string = paramValue->stringValue().c_str();
             }
         }
     }
-    if (pValueUnitConvFactor) {
-        *pValueUnitConvFactor = 0;
+    if (out_unit_conv_factor) {
+        *out_unit_conv_factor = 0;
         if (paramValue) {
             if (paramValue->type() == ParameterValue::Type::MEASURE) {
-                *pValueUnitConvFactor =
+                *out_unit_conv_factor =
                     paramValue->value().unit().conversionToSI();
             }
         }
     }
-    if (pValueUnitName) {
-        *pValueUnitName = nullptr;
+    if (out_unit_name) {
+        *out_unit_name = nullptr;
         if (paramValue) {
             if (paramValue->type() == ParameterValue::Type::MEASURE) {
-                *pValueUnitName = paramValue->value().unit().name().c_str();
+                *out_unit_name = paramValue->value().unit().name().c_str();
             }
         }
     }
@@ -4835,29 +4841,29 @@ int proj_coordoperation_get_grid_used_count(const PJ_OBJ *coordoperation) {
  * @param coordoperation Objet of type SingleOperation or derived classes
  * (must not be NULL)
  * @param index Parameter index.
- * @param pShortName Pointer to a string value to store the grid short name. or
- * NULL
- * @param pFullName Pointer to a string value to store the grid full filename.
+ * @param out_short_name Pointer to a string value to store the grid short name.
  * or NULL
- * @param pPackageName Pointer to a string value to store the package name where
+ * @param out_full_name Pointer to a string value to store the grid full
+ * filename. or NULL
+ * @param out_package_name Pointer to a string value to store the package name
+ * where
  * the grid might be found. or NULL
- * @param pURL Pointer to a string value to store the grid URL or the
+ * @param out_url Pointer to a string value to store the grid URL or the
  * package URL where the grid might be found. or NULL
- * @param pDirectDownload Pointer to a int (boolean) value to store whether
- * *pURL can be downloaded directly. or NULL
- * @param pOpenLicense Pointer to a int (boolean) value to store whether
+ * @param out_direct_download Pointer to a int (boolean) value to store whether
+ * *out_url can be downloaded directly. or NULL
+ * @param out_open_license Pointer to a int (boolean) value to store whether
  * the grid is released with an open license. or NULL
- * @param pAvailable Pointer to a int (boolean) value to store whether the grid
- * is available at runtime. or NULL
+ * @param out_available Pointer to a int (boolean) value to store whether the
+ * grid is available at runtime. or NULL
  * @return TRUE in case of success.
  */
 
-int proj_coordoperation_get_grid_used(const PJ_OBJ *coordoperation, int index,
-                                      const char **pShortName,
-                                      const char **pFullName,
-                                      const char **pPackageName,
-                                      const char **pURL, int *pDirectDownload,
-                                      int *pOpenLicense, int *pAvailable) {
+int proj_coordoperation_get_grid_used(
+    const PJ_OBJ *coordoperation, int index, const char **out_short_name,
+    const char **out_full_name, const char **out_package_name,
+    const char **out_url, int *out_direct_download, int *out_open_license,
+    int *out_available) {
     const int count = proj_coordoperation_get_grid_used_count(coordoperation);
     if (index < 0 || index >= count) {
         proj_log_error(coordoperation->ctx, __FUNCTION__, "Invalid index");
@@ -4865,32 +4871,32 @@ int proj_coordoperation_get_grid_used(const PJ_OBJ *coordoperation, int index,
     }
 
     const auto &gridDesc = coordoperation->gridsNeeded[index];
-    if (pShortName) {
-        *pShortName = gridDesc.shortName.c_str();
+    if (out_short_name) {
+        *out_short_name = gridDesc.shortName.c_str();
     }
 
-    if (pFullName) {
-        *pFullName = gridDesc.fullName.c_str();
+    if (out_full_name) {
+        *out_full_name = gridDesc.fullName.c_str();
     }
 
-    if (pPackageName) {
-        *pPackageName = gridDesc.packageName.c_str();
+    if (out_package_name) {
+        *out_package_name = gridDesc.packageName.c_str();
     }
 
-    if (pURL) {
-        *pURL = gridDesc.url.c_str();
+    if (out_url) {
+        *out_url = gridDesc.url.c_str();
     }
 
-    if (pDirectDownload) {
-        *pDirectDownload = gridDesc.directDownload;
+    if (out_direct_download) {
+        *out_direct_download = gridDesc.directDownload;
     }
 
-    if (pOpenLicense) {
-        *pOpenLicense = gridDesc.openLicense;
+    if (out_open_license) {
+        *out_open_license = gridDesc.openLicense;
     }
 
-    if (pAvailable) {
-        *pAvailable = gridDesc.available;
+    if (out_available) {
+        *out_available = gridDesc.available;
     }
 
     return true;
@@ -5408,20 +5414,22 @@ int proj_obj_cs_get_axis_count(const PJ_OBJ *cs) {
  * @param cs Objet of type CoordinateSystem (must not be NULL)
  * @param index Index of the coordinate system (between 0 and
  * proj_obj_cs_get_axis_count() - 1)
- * @param pName Pointer to a string value to store the axis name. or NULL
- * @param pAbbrev Pointer to a string value to store the axis abbreviation. or
- * NULL
- * @param pDirection Pointer to a string value to store the axis direction. or
- * NULL
- * @param pUnitConvFactor Pointer to a double value to store the axis
+ * @param out_name Pointer to a string value to store the axis name. or NULL
+ * @param out_abbrev Pointer to a string value to store the axis abbreviation.
+ * or NULL
+ * @param out_direction Pointer to a string value to store the axis direction.
+ * or NULL
+ * @param out_unit_conv_factor Pointer to a double value to store the axis
  * unit conversion factor. or NULL
- * @param pUnitName Pointer to a string value to store the axis
+ * @param out_unit_name Pointer to a string value to store the axis
  * unit name. or NULL
  * @return TRUE in case of success
  */
-int proj_obj_cs_get_axis_info(const PJ_OBJ *cs, int index, const char **pName,
-                              const char **pAbbrev, const char **pDirection,
-                              double *pUnitConvFactor, const char **pUnitName) {
+int proj_obj_cs_get_axis_info(const PJ_OBJ *cs, int index,
+                              const char **out_name, const char **out_abbrev,
+                              const char **out_direction,
+                              double *out_unit_conv_factor,
+                              const char **out_unit_name) {
     assert(cs);
     auto l_cs = dynamic_cast<const CoordinateSystem *>(cs->obj.get());
     if (!l_cs) {
@@ -5435,20 +5443,20 @@ int proj_obj_cs_get_axis_info(const PJ_OBJ *cs, int index, const char **pName,
         return false;
     }
     const auto &axis = axisList[index];
-    if (pName) {
-        *pName = axis->nameStr().c_str();
+    if (out_name) {
+        *out_name = axis->nameStr().c_str();
     }
-    if (pAbbrev) {
-        *pAbbrev = axis->abbreviation().c_str();
+    if (out_abbrev) {
+        *out_abbrev = axis->abbreviation().c_str();
     }
-    if (pDirection) {
-        *pDirection = axis->direction().toString().c_str();
+    if (out_direction) {
+        *out_direction = axis->direction().toString().c_str();
     }
-    if (pUnitConvFactor) {
-        *pUnitConvFactor = axis->unit().conversionToSI();
+    if (out_unit_conv_factor) {
+        *out_unit_conv_factor = axis->unit().conversionToSI();
     }
-    if (pUnitName) {
-        *pUnitName = axis->unit().name().c_str();
+    if (out_unit_name) {
+        *out_unit_name = axis->unit().name().c_str();
     }
     return true;
 }
