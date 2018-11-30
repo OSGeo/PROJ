@@ -401,6 +401,33 @@ TEST(wkt_parse, wkt1_EPSG_4326) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_EPSG_4267) {
+    auto obj =
+        WKTParser()
+            .attachDatabaseContext(DatabaseContext::create())
+            .createFromWKT(
+                "GEOGCS[\"NAD27\","
+                "    DATUM[\"North_American_Datum_1927\","
+                "        SPHEROID[\"Clarke 1866\",6378206.4,294.978698213898,"
+                "            AUTHORITY[\"EPSG\",\"7008\"]],"
+                "        AUTHORITY[\"EPSG\",\"6267\"]],"
+                "    PRIMEM[\"Greenwich\",0,"
+                "        AUTHORITY[\"EPSG\",\"8901\"]],"
+                "    UNIT[\"degree\",0.0174532925199433,"
+                "        AUTHORITY[\"EPSG\",\"9122\"]],"
+                "    AUTHORITY[\"EPSG\",\"4267\"]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    ASSERT_EQ(datum->identifiers().size(), 1);
+    EXPECT_EQ(datum->identifiers()[0]->code(), "6267");
+    EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(datum->nameStr(), "North American Datum 1927");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt1_EPSG_4807_grad_mess) {
     auto obj = WKTParser().createFromWKT(
         "GEOGCS[\"NTF (Paris)\",\n"

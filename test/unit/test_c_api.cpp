@@ -292,6 +292,25 @@ TEST_F(CApi, proj_obj_as_wkt) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_obj_as_wkt_check_db_use) {
+    auto obj = proj_obj_create_from_wkt(
+        m_ctxt, "GEOGCS[\"AGD66\",DATUM[\"Australian_Geodetic_Datum_1966\","
+                "SPHEROID[\"Australian National Spheroid\",6378160,298.25]],"
+                "PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433]]",
+        nullptr);
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_ESRI, nullptr);
+    EXPECT_EQ(std::string(wkt),
+              "GEOGCS[\"GCS_Australian_1966\",DATUM[\"D_Australian_1966\","
+              "SPHEROID[\"Australian\",6378160.0,298.25]],"
+              "PRIMEM[\"Greenwich\",0.0],"
+              "UNIT[\"Degree\",0.0174532925199433]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_obj_as_wkt_incompatible_WKT1) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
@@ -1546,6 +1565,44 @@ TEST_F(CApi, proj_obj_create_geographic_crs) {
                                                   0.0, nullptr, 0.0, cs);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
+    }
+
+    // Datum with GDAL_WKT1 spelling: special case of WGS_1984
+    {
+        auto obj = proj_obj_create_geographic_crs(
+            m_ctxt, "WGS 84", "WGS_1984", "WGS 84", 6378137, 298.257223563,
+            "Greenwich", 0.0, "Degree", 0.0174532925199433, cs);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+
+        auto objRef = proj_obj_create_from_user_input(
+            m_ctxt,
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr);
+        ObjectKeeper keeperobjRef(objRef);
+        EXPECT_NE(objRef, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(obj, objRef, PJ_COMP_EQUIVALENT));
+    }
+
+    // Datum with GDAL_WKT1 spelling: database query
+    {
+        auto obj = proj_obj_create_geographic_crs(
+            m_ctxt, "NAD83", "North_American_Datum_1983", "GRS 1980", 6378137,
+            298.257222101, "Greenwich", 0.0, "Degree", 0.0174532925199433, cs);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+
+        auto objRef = proj_obj_create_from_user_input(
+            m_ctxt,
+            GeographicCRS::EPSG_4269->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr);
+        ObjectKeeper keeperobjRef(objRef);
+        EXPECT_NE(objRef, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(obj, objRef, PJ_COMP_EQUIVALENT));
     }
 }
 

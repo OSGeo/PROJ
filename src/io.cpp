@@ -1925,6 +1925,37 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                     .set(Identifier::AUTHORITY_KEY, authNameFromAlias)));
             properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
         }
+    } else if (name.find('_') != std::string::npos) {
+        // Likely coming from WKT1
+        if (dbContext_) {
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto res = authFactory->createObjectsFromName(
+                name, {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
+                true, 1);
+            if (!res.empty()) {
+                const auto &refDatum = res.front();
+                if (metadata::Identifier::isEquivalentName(
+                        name.c_str(), refDatum->nameStr().c_str())) {
+                    properties.set(IdentifiedObject::NAME_KEY,
+                                   refDatum->nameStr());
+                    if (properties.find(Identifier::CODESPACE_KEY) ==
+                            properties.end() &&
+                        refDatum->identifiers().size() == 1) {
+                        const auto &id = refDatum->identifiers()[0];
+                        auto identifiers = ArrayOfBaseObject::create();
+                        identifiers->add(Identifier::create(
+                            id->code(), PropertyMap()
+                                            .set(Identifier::CODESPACE_KEY,
+                                                 *id->codeSpace())
+                                            .set(Identifier::AUTHORITY_KEY,
+                                                 *id->codeSpace())));
+                        properties.set(IdentifiedObject::IDENTIFIERS_KEY,
+                                       identifiers);
+                    }
+                }
+            }
+        }
     }
 
     auto ellipsoid = buildEllipsoid(ellipsoidNode);

@@ -409,8 +409,13 @@ PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
     assert(wkt);
     (void)options;
     try {
+        WKTParser parser;
+        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+        if (dbContext) {
+            parser.attachDatabaseContext(NN_NO_CHECK(dbContext));
+        }
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
-            WKTParser().createFromWKT(wkt));
+            parser.createFromWKT(wkt));
         if (identifiedObject) {
             return PJ_OBJ::create(NN_NO_CHECK(identifiedObject));
         }
@@ -442,8 +447,13 @@ PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
     (void)options;
     assert(proj_string);
     try {
+        PROJStringParser parser;
+        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+        if (dbContext) {
+            parser.attachDatabaseContext(NN_NO_CHECK(dbContext));
+        }
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
-            PROJStringParser().createFromPROJString(proj_string));
+            parser.createFromPROJString(proj_string));
         if (identifiedObject) {
             return PJ_OBJ::create(NN_NO_CHECK(identifiedObject));
         }
@@ -961,7 +971,8 @@ const char *proj_obj_as_wkt(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
     const WKTFormatter::Convention convention =
         static_cast<WKTFormatter::Convention>(type);
     try {
-        auto formatter = WKTFormatter::create(convention);
+        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+        auto formatter = WKTFormatter::create(convention, dbContext);
         for (auto iter = options; iter && iter[0]; ++iter) {
             const char *value;
             if ((value = getOptionValue(*iter, "MULTILINE="))) {
@@ -1827,7 +1838,7 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
     const char *angular_units, double angular_units_conv) {
     const UnitOfMeasure angUnit(
         createAngularUnit(angular_units, angular_units_conv));
-    auto dbContext = getDBcontext(ctx);
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     auto body = Ellipsoid::guessBodyName(dbContext, semi_major_metre);
     auto ellpsName = createPropertyMapName(ellps_name);
     auto ellps = inv_flattening != 0.0
@@ -1847,9 +1858,32 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
                              : "Reference meridian")
                       : "unnamed"),
         Angle(prime_meridian_offset, angUnit));
-    return GeodeticReferenceFrame::create(createPropertyMapName(datum_name),
-                                          ellps, util::optional<std::string>(),
-                                          pm);
+
+    std::string datumName(datum_name ? datum_name : "unnamed");
+    if (datumName == "WGS_1984") {
+        datumName = GeodeticReferenceFrame::EPSG_6326->nameStr();
+    } else if (datumName.find('_') != std::string::npos) {
+        // Likely coming from WKT1
+        if (dbContext) {
+            auto authFactory =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
+            auto res = authFactory->createObjectsFromName(
+                datumName,
+                {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, true,
+                1);
+            if (!res.empty()) {
+                const auto &refDatum = res.front();
+                if (metadata::Identifier::isEquivalentName(
+                        datumName.c_str(), refDatum->nameStr().c_str())) {
+                    datumName = refDatum->nameStr();
+                }
+            }
+        }
+    }
+
+    return GeodeticReferenceFrame::create(
+        createPropertyMapName(datumName.c_str()), ellps,
+        util::optional<std::string>(), pm);
 }
 
 //! @endcond
