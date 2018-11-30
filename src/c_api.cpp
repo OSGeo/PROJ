@@ -92,7 +92,6 @@ static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
  * Operation. Should be used by at most one thread at a time. */
 struct PJ_OBJ {
     //! @cond Doxygen_Suppress
-    PJ_CONTEXT *ctx;
     IdentifiedObjectNNPtr obj;
 
     // cached results
@@ -101,10 +100,8 @@ struct PJ_OBJ {
     mutable bool gridsNeededAsked = false;
     mutable std::vector<GridDescription> gridsNeeded{};
 
-    explicit PJ_OBJ(PJ_CONTEXT *ctxIn, const IdentifiedObjectNNPtr &objIn)
-        : ctx(ctxIn), obj(objIn) {}
-    static PJ_OBJ *create(PJ_CONTEXT *ctxIn,
-                          const IdentifiedObjectNNPtr &objIn);
+    explicit PJ_OBJ(const IdentifiedObjectNNPtr &objIn) : obj(objIn) {}
+    static PJ_OBJ *create(const IdentifiedObjectNNPtr &objIn);
 
     PJ_OBJ(const PJ_OBJ &) = delete;
     PJ_OBJ &operator=(const PJ_OBJ &) = delete;
@@ -112,8 +109,8 @@ struct PJ_OBJ {
 };
 
 //! @cond Doxygen_Suppress
-PJ_OBJ *PJ_OBJ::create(PJ_CONTEXT *ctxIn, const IdentifiedObjectNNPtr &objIn) {
-    return new PJ_OBJ(ctxIn, objIn);
+PJ_OBJ *PJ_OBJ::create(const IdentifiedObjectNNPtr &objIn) {
+    return new PJ_OBJ(objIn);
 }
 //! @endcond
 
@@ -122,12 +119,10 @@ PJ_OBJ *PJ_OBJ::create(PJ_CONTEXT *ctxIn, const IdentifiedObjectNNPtr &objIn) {
 /** \brief Opaque object representing a set of operation results. */
 struct PJ_OBJ_LIST {
     //! @cond Doxygen_Suppress
-    PJ_CONTEXT *ctx;
     std::vector<IdentifiedObjectNNPtr> objects;
 
-    explicit PJ_OBJ_LIST(PJ_CONTEXT *ctxIn,
-                         std::vector<IdentifiedObjectNNPtr> &&objectsIn)
-        : ctx(ctxIn), objects(std::move(objectsIn)) {}
+    explicit PJ_OBJ_LIST(std::vector<IdentifiedObjectNNPtr> &&objectsIn)
+        : objects(std::move(objectsIn)) {}
 
     PJ_OBJ_LIST(const PJ_OBJ_LIST &) = delete;
     PJ_OBJ_LIST &operator=(const PJ_OBJ_LIST &) = delete;
@@ -320,15 +315,17 @@ static const char *getOptionValue(const char *option,
  * The returned object must be unreferenced with proj_obj_unref() after use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object to clone. Must not be NULL.
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL in
  * case of error.
  */
-PJ_OBJ *proj_obj_clone(const PJ_OBJ *obj) {
+PJ_OBJ *proj_obj_clone(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
+    SANITIZE_CTX(ctx);
     try {
-        return PJ_OBJ::create(obj->ctx, obj->obj);
+        return PJ_OBJ::create(obj->obj);
     } catch (const std::exception &e) {
-        proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
     return nullptr;
 }
@@ -382,7 +379,7 @@ PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text,
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
             createFromUserInput(text, dbContext, usePROJ4InitRules));
         if (identifiedObject) {
-            return PJ_OBJ::create(ctx, NN_NO_CHECK(identifiedObject));
+            return PJ_OBJ::create(NN_NO_CHECK(identifiedObject));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -414,7 +411,7 @@ PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
             WKTParser().createFromWKT(wkt));
         if (identifiedObject) {
-            return PJ_OBJ::create(ctx, NN_NO_CHECK(identifiedObject));
+            return PJ_OBJ::create(NN_NO_CHECK(identifiedObject));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -447,7 +444,7 @@ PJ_OBJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
             PROJStringParser().createFromPROJString(proj_string));
         if (identifiedObject) {
-            return PJ_OBJ::create(ctx, NN_NO_CHECK(identifiedObject));
+            return PJ_OBJ::create(NN_NO_CHECK(identifiedObject));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -504,7 +501,7 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                       .as_nullable();
             break;
         }
-        return PJ_OBJ::create(ctx, NN_NO_CHECK(obj));
+        return PJ_OBJ::create(NN_NO_CHECK(obj));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -671,7 +668,7 @@ PJ_OBJ_LIST *proj_obj_create_from_name(PJ_CONTEXT *ctx, const char *auth_name,
         for (const auto &obj : res) {
             objects.push_back(obj);
         }
-        return new PJ_OBJ_LIST(ctx, std::move(objects));
+        return new PJ_OBJ_LIST(std::move(objects));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -907,6 +904,7 @@ const char *proj_obj_get_id_code(const PJ_OBJ *obj, int index) {
  * This function may return NULL if the object is not compatible with an
  * export to the requested type.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object (must not be NULL)
  * @param type WKT version.
  * @param options null-terminated list of options, or NULL. Currently
@@ -922,8 +920,9 @@ const char *proj_obj_get_id_code(const PJ_OBJ *obj, int index) {
  * </ul>
  * @return a string, or NULL in case of error.
  */
-const char *proj_obj_as_wkt(const PJ_OBJ *obj, PJ_WKT_TYPE type,
-                            const char *const *options) {
+const char *proj_obj_as_wkt(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
+                            PJ_WKT_TYPE type, const char *const *options) {
+    SANITIZE_CTX(ctx);
     assert(obj);
 
     // Make sure that the C and C++ enumerations match
@@ -978,14 +977,14 @@ const char *proj_obj_as_wkt(const PJ_OBJ *obj, PJ_WKT_TYPE type,
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;
-                proj_log_error(obj->ctx, __FUNCTION__, msg.c_str());
+                proj_log_error(ctx, __FUNCTION__, msg.c_str());
                 return nullptr;
             }
         }
         obj->lastWKT = obj->obj->exportToWKT(formatter.get());
         return obj->lastWKT.c_str();
     } catch (const std::exception &e) {
-        proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
 }
@@ -1004,6 +1003,7 @@ const char *proj_obj_as_wkt(const PJ_OBJ *obj, PJ_WKT_TYPE type,
  * This function may return NULL if the object is not compatible with an
  * export to the requested type.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object (must not be NULL)
  * @param type PROJ String version.
  * @param options NULL-terminated list of strings with "KEY=VALUE" format. or
@@ -1013,14 +1013,15 @@ const char *proj_obj_as_wkt(const PJ_OBJ *obj, PJ_WKT_TYPE type,
  * use of etmerc by utm conversions)
  * @return a string, or NULL in case of error.
  */
-const char *proj_obj_as_proj_string(const PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
+const char *proj_obj_as_proj_string(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
+                                    PJ_PROJ_STRING_TYPE type,
                                     const char *const *options) {
+    SANITIZE_CTX(ctx);
     assert(obj);
     auto exportable =
         dynamic_cast<const IPROJStringExportable *>(obj->obj.get());
     if (!exportable) {
-        proj_log_error(obj->ctx, __FUNCTION__,
-                       "Object type not exportable to PROJ");
+        proj_log_error(ctx, __FUNCTION__, "Object type not exportable to PROJ");
         return nullptr;
     }
     // Make sure that the C and C++ enumeration match
@@ -1039,7 +1040,7 @@ const char *proj_obj_as_proj_string(const PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
     }
     const PROJStringFormatter::Convention convention =
         static_cast<PROJStringFormatter::Convention>(type);
-    auto dbContext = getDBcontextNoException(obj->ctx, __FUNCTION__);
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
         auto formatter = PROJStringFormatter::create(convention, dbContext);
         if (options != nullptr && options[0] != nullptr) {
@@ -1052,7 +1053,7 @@ const char *proj_obj_as_proj_string(const PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
         obj->lastPROJString = exportable->exportToPROJString(formatter.get());
         return obj->lastPROJString.c_str();
     } catch (const std::exception &e) {
-        proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
 }
@@ -1061,6 +1062,7 @@ const char *proj_obj_as_proj_string(const PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
 
 /** \brief Return the area of use of an object.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object (must not be NULL)
  * @param out_west_lon_degree Pointer to a double to receive the west longitude
  * (in degrees). Or NULL. If the returned value is -1000, the bounding box is
@@ -1079,11 +1081,13 @@ const char *proj_obj_as_proj_string(const PJ_OBJ *obj, PJ_PROJ_STRING_TYPE type,
  * @return TRUE in case of success, FALSE in case of error or if the area
  * of use is unknown.
  */
-int proj_obj_get_area_of_use(const PJ_OBJ *obj, double *out_west_lon_degree,
+int proj_obj_get_area_of_use(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
+                             double *out_west_lon_degree,
                              double *out_south_lat_degree,
                              double *out_east_lon_degree,
                              double *out_north_lat_degree,
                              const char **out_area_name) {
+    (void)ctx;
     if (out_area_name) {
         *out_area_name = nullptr;
     }
@@ -1141,17 +1145,17 @@ int proj_obj_get_area_of_use(const PJ_OBJ *obj, double *out_west_lon_degree,
 
 // ---------------------------------------------------------------------------
 
-static const GeodeticCRS *extractGeodeticCRS(const PJ_OBJ *crs,
+static const GeodeticCRS *extractGeodeticCRS(PJ_CONTEXT *ctx, const PJ_OBJ *crs,
                                              const char *fname) {
     assert(crs);
     auto l_crs = dynamic_cast<const CRS *>(crs->obj.get());
     if (!l_crs) {
-        proj_log_error(crs->ctx, fname, "Object is not a CRS");
+        proj_log_error(ctx, fname, "Object is not a CRS");
         return nullptr;
     }
     auto geodCRS = l_crs->extractGeodeticCRSRaw();
     if (!geodCRS) {
-        proj_log_error(crs->ctx, fname, "CRS has no geodetic CRS");
+        proj_log_error(ctx, fname, "CRS has no geodetic CRS");
     }
     return geodCRS;
 }
@@ -1164,18 +1168,19 @@ static const GeodeticCRS *extractGeodeticCRS(const PJ_OBJ *crs,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type CRS (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_crs_get_geodetic_crs(const PJ_OBJ *crs) {
-    auto geodCRS = extractGeodeticCRS(crs, __FUNCTION__);
+PJ_OBJ *proj_obj_crs_get_geodetic_crs(PJ_CONTEXT *ctx, const PJ_OBJ *crs) {
+    SANITIZE_CTX(ctx);
+    auto geodCRS = extractGeodeticCRS(ctx, crs, __FUNCTION__);
     if (!geodCRS) {
         return nullptr;
     }
-    return PJ_OBJ::create(crs->ctx,
-                          NN_NO_CHECK(nn_dynamic_pointer_cast<IdentifiedObject>(
-                              geodCRS->shared_from_this())));
+    return PJ_OBJ::create(NN_NO_CHECK(nn_dynamic_pointer_cast<IdentifiedObject>(
+        geodCRS->shared_from_this())));
 }
 
 // ---------------------------------------------------------------------------
@@ -1186,24 +1191,27 @@ PJ_OBJ *proj_obj_crs_get_geodetic_crs(const PJ_OBJ *crs) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type CRS (must not be NULL)
  * @param index Index of the CRS component (typically 0 = horizontal, 1 =
  * vertical)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_crs_get_sub_crs(const PJ_OBJ *crs, int index) {
+PJ_OBJ *proj_obj_crs_get_sub_crs(PJ_CONTEXT *ctx, const PJ_OBJ *crs,
+                                 int index) {
+    SANITIZE_CTX(ctx);
     assert(crs);
     auto l_crs = dynamic_cast<CompoundCRS *>(crs->obj.get());
     if (!l_crs) {
-        proj_log_error(crs->ctx, __FUNCTION__, "Object is not a CompoundCRS");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CompoundCRS");
         return nullptr;
     }
     const auto &components = l_crs->componentReferenceSystems();
     if (static_cast<size_t>(index) >= components.size()) {
         return nullptr;
     }
-    return PJ_OBJ::create(crs->ctx, components[index]);
+    return PJ_OBJ::create(components[index]);
 }
 
 // ---------------------------------------------------------------------------
@@ -1214,42 +1222,42 @@ PJ_OBJ *proj_obj_crs_get_sub_crs(const PJ_OBJ *crs, int index) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param base_crs Base CRS (must not be NULL)
  * @param hub_crs Hub CRS (must not be NULL)
  * @param transformation Transformation (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_crs_create_bound_crs(const PJ_OBJ *base_crs,
+PJ_OBJ *proj_obj_crs_create_bound_crs(PJ_CONTEXT *ctx, const PJ_OBJ *base_crs,
                                       const PJ_OBJ *hub_crs,
                                       const PJ_OBJ *transformation) {
+    SANITIZE_CTX(ctx);
     assert(base_crs);
     assert(hub_crs);
     assert(transformation);
     auto l_base_crs = util::nn_dynamic_pointer_cast<CRS>(base_crs->obj);
     if (!l_base_crs) {
-        proj_log_error(base_crs->ctx, __FUNCTION__, "base_crs is not a CRS");
+        proj_log_error(ctx, __FUNCTION__, "base_crs is not a CRS");
         return nullptr;
     }
     auto l_hub_crs = util::nn_dynamic_pointer_cast<CRS>(hub_crs->obj);
     if (!l_hub_crs) {
-        proj_log_error(base_crs->ctx, __FUNCTION__, "hub_crs is not a CRS");
+        proj_log_error(ctx, __FUNCTION__, "hub_crs is not a CRS");
         return nullptr;
     }
     auto l_transformation =
         util::nn_dynamic_pointer_cast<Transformation>(transformation->obj);
     if (!l_transformation) {
-        proj_log_error(base_crs->ctx, __FUNCTION__,
-                       "transformation is not a CRS");
+        proj_log_error(ctx, __FUNCTION__, "transformation is not a CRS");
         return nullptr;
     }
     try {
-        return PJ_OBJ::create(base_crs->ctx,
-                              BoundCRS::create(NN_NO_CHECK(l_base_crs),
+        return PJ_OBJ::create(BoundCRS::create(NN_NO_CHECK(l_base_crs),
                                                NN_NO_CHECK(l_hub_crs),
                                                NN_NO_CHECK(l_transformation)));
     } catch (const std::exception &e) {
-        proj_log_error(base_crs->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
 }
@@ -1266,23 +1274,26 @@ PJ_OBJ *proj_obj_crs_create_bound_crs(const PJ_OBJ *base_crs,
  * This is the same as method
  * osgeo::proj::crs::CRS::createBoundCRSToWGS84IfPossible()
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type CRS (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(const PJ_OBJ *crs) {
+PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx,
+                                               const PJ_OBJ *crs) {
+    SANITIZE_CTX(ctx);
     assert(crs);
     auto l_crs = dynamic_cast<const CRS *>(crs->obj.get());
     if (!l_crs) {
-        proj_log_error(crs->ctx, __FUNCTION__, "Object is not a CRS");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
         return nullptr;
     }
-    auto dbContext = getDBcontextNoException(crs->ctx, __FUNCTION__);
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
         return PJ_OBJ::create(
-            crs->ctx, l_crs->createBoundCRSToWGS84IfPossible(dbContext));
+            l_crs->createBoundCRSToWGS84IfPossible(dbContext));
     } catch (const std::exception &e) {
-        proj_log_error(crs->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
 }
@@ -1295,24 +1306,26 @@ PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(const PJ_OBJ *crs) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Objet of type CRS or GeodeticReferenceFrame (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_get_ellipsoid(const PJ_OBJ *obj) {
+PJ_OBJ *proj_obj_get_ellipsoid(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
+    SANITIZE_CTX(ctx);
     auto ptr = obj->obj.get();
     if (dynamic_cast<const CRS *>(ptr)) {
-        auto geodCRS = extractGeodeticCRS(obj, __FUNCTION__);
+        auto geodCRS = extractGeodeticCRS(ctx, obj, __FUNCTION__);
         if (geodCRS) {
-            return PJ_OBJ::create(obj->ctx, geodCRS->ellipsoid());
+            return PJ_OBJ::create(geodCRS->ellipsoid());
         }
     } else {
         auto datum = dynamic_cast<const GeodeticReferenceFrame *>(ptr);
         if (datum) {
-            return PJ_OBJ::create(obj->ctx, datum->ellipsoid());
+            return PJ_OBJ::create(datum->ellipsoid());
         }
     }
-    proj_log_error(obj->ctx, __FUNCTION__,
+    proj_log_error(ctx, __FUNCTION__,
                    "Object is not a CRS or GeodeticReferenceFrame");
     return nullptr;
 }
@@ -1325,25 +1338,27 @@ PJ_OBJ *proj_obj_get_ellipsoid(const PJ_OBJ *obj) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type CRS (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_crs_get_horizontal_datum(const PJ_OBJ *crs) {
-    auto geodCRS = extractGeodeticCRS(crs, __FUNCTION__);
+PJ_OBJ *proj_obj_crs_get_horizontal_datum(PJ_CONTEXT *ctx, const PJ_OBJ *crs) {
+    SANITIZE_CTX(ctx);
+    auto geodCRS = extractGeodeticCRS(ctx, crs, __FUNCTION__);
     if (!geodCRS) {
         return nullptr;
     }
     const auto &datum = geodCRS->datum();
     if (datum) {
-        return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(datum));
+        return PJ_OBJ::create(NN_NO_CHECK(datum));
     }
 
     const auto &datumEnsemble = geodCRS->datumEnsemble();
     if (datumEnsemble) {
-        return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(datumEnsemble));
+        return PJ_OBJ::create(NN_NO_CHECK(datumEnsemble));
     }
-    proj_log_error(crs->ctx, __FUNCTION__, "CRS has no datum");
+    proj_log_error(ctx, __FUNCTION__, "CRS has no datum");
     return nullptr;
 }
 
@@ -1351,6 +1366,7 @@ PJ_OBJ *proj_obj_crs_get_horizontal_datum(const PJ_OBJ *crs) {
 
 /** \brief Return ellipsoid parameters.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param ellipsoid Object of type Ellipsoid (must not be NULL)
  * @param out_semi_major_metre Pointer to a value to store the semi-major axis
  * in
@@ -1366,16 +1382,16 @@ PJ_OBJ *proj_obj_crs_get_horizontal_datum(const PJ_OBJ *crs) {
  * flattening. or NULL
  * @return TRUE in case of success.
  */
-int proj_obj_ellipsoid_get_parameters(const PJ_OBJ *ellipsoid,
+int proj_obj_ellipsoid_get_parameters(PJ_CONTEXT *ctx, const PJ_OBJ *ellipsoid,
                                       double *out_semi_major_metre,
                                       double *out_semi_minor_metre,
                                       int *out_is_semi_minor_computed,
                                       double *out_inv_flattening) {
+    SANITIZE_CTX(ctx);
     assert(ellipsoid);
     auto l_ellipsoid = dynamic_cast<const Ellipsoid *>(ellipsoid->obj.get());
     if (!l_ellipsoid) {
-        proj_log_error(ellipsoid->ctx, __FUNCTION__,
-                       "Object is not a Ellipsoid");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a Ellipsoid");
         return FALSE;
     }
 
@@ -1404,25 +1420,27 @@ int proj_obj_ellipsoid_get_parameters(const PJ_OBJ *ellipsoid,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Objet of type CRS or GeodeticReferenceFrame (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
 
-PJ_OBJ *proj_obj_get_prime_meridian(const PJ_OBJ *obj) {
+PJ_OBJ *proj_obj_get_prime_meridian(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
+    SANITIZE_CTX(ctx);
     auto ptr = obj->obj.get();
     if (dynamic_cast<CRS *>(ptr)) {
-        auto geodCRS = extractGeodeticCRS(obj, __FUNCTION__);
+        auto geodCRS = extractGeodeticCRS(ctx, obj, __FUNCTION__);
         if (geodCRS) {
-            return PJ_OBJ::create(obj->ctx, geodCRS->primeMeridian());
+            return PJ_OBJ::create(geodCRS->primeMeridian());
         }
     } else {
         auto datum = dynamic_cast<const GeodeticReferenceFrame *>(ptr);
         if (datum) {
-            return PJ_OBJ::create(obj->ctx, datum->primeMeridian());
+            return PJ_OBJ::create(datum->primeMeridian());
         }
     }
-    proj_log_error(obj->ctx, __FUNCTION__,
+    proj_log_error(ctx, __FUNCTION__,
                    "Object is not a CRS or GeodeticReferenceFrame");
     return nullptr;
 }
@@ -1431,6 +1449,7 @@ PJ_OBJ *proj_obj_get_prime_meridian(const PJ_OBJ *obj) {
 
 /** \brief Return prime meridian parameters.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param prime_meridian Object of type PrimeMeridian (must not be NULL)
  * @param out_longitude Pointer to a value to store the longitude of the prime
  * meridian, in its native unit. or NULL
@@ -1440,15 +1459,16 @@ PJ_OBJ *proj_obj_get_prime_meridian(const PJ_OBJ *obj) {
  * or NULL
  * @return TRUE in case of success.
  */
-int proj_obj_prime_meridian_get_parameters(const PJ_OBJ *prime_meridian,
+int proj_obj_prime_meridian_get_parameters(PJ_CONTEXT *ctx,
+                                           const PJ_OBJ *prime_meridian,
                                            double *out_longitude,
                                            double *out_unit_conv_factor,
                                            const char **out_unit_name) {
+    SANITIZE_CTX(ctx);
     assert(prime_meridian);
     auto l_pm = dynamic_cast<const PrimeMeridian *>(prime_meridian->obj.get());
     if (!l_pm) {
-        proj_log_error(prime_meridian->ctx, __FUNCTION__,
-                       "Object is not a PrimeMeridian");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a PrimeMeridian");
         return false;
     }
     const auto &longitude = l_pm->longitude();
@@ -1474,30 +1494,32 @@ int proj_obj_prime_meridian_get_parameters(const PJ_OBJ *prime_meridian,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Objet of type BoundCRS or CoordinateOperation (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error, or missing source CRS.
  */
-PJ_OBJ *proj_obj_get_source_crs(const PJ_OBJ *obj) {
+PJ_OBJ *proj_obj_get_source_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
+    SANITIZE_CTX(ctx);
     assert(obj);
     auto ptr = obj->obj.get();
     auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
-        return PJ_OBJ::create(obj->ctx, boundCRS->baseCRS());
+        return PJ_OBJ::create(boundCRS->baseCRS());
     }
     auto derivedCRS = dynamic_cast<const DerivedCRS *>(ptr);
     if (derivedCRS) {
-        return PJ_OBJ::create(obj->ctx, derivedCRS->baseCRS());
+        return PJ_OBJ::create(derivedCRS->baseCRS());
     }
     auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
         auto sourceCRS = co->sourceCRS();
         if (sourceCRS) {
-            return PJ_OBJ::create(obj->ctx, NN_NO_CHECK(sourceCRS));
+            return PJ_OBJ::create(NN_NO_CHECK(sourceCRS));
         }
         return nullptr;
     }
-    proj_log_error(obj->ctx, __FUNCTION__,
+    proj_log_error(ctx, __FUNCTION__,
                    "Object is not a BoundCRS or a CoordinateOperation");
     return nullptr;
 }
@@ -1511,26 +1533,28 @@ PJ_OBJ *proj_obj_get_source_crs(const PJ_OBJ *obj) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Objet of type BoundCRS or CoordinateOperation (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error, or missing target CRS.
  */
-PJ_OBJ *proj_obj_get_target_crs(const PJ_OBJ *obj) {
+PJ_OBJ *proj_obj_get_target_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
+    SANITIZE_CTX(ctx);
     assert(obj);
     auto ptr = obj->obj.get();
     auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
-        return PJ_OBJ::create(obj->ctx, boundCRS->hubCRS());
+        return PJ_OBJ::create(boundCRS->hubCRS());
     }
     auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
         auto targetCRS = co->targetCRS();
         if (targetCRS) {
-            return PJ_OBJ::create(obj->ctx, NN_NO_CHECK(targetCRS));
+            return PJ_OBJ::create(NN_NO_CHECK(targetCRS));
         }
         return nullptr;
     }
-    proj_log_error(obj->ctx, __FUNCTION__,
+    proj_log_error(ctx, __FUNCTION__,
                    "Object is not a BoundCRS or a CoordinateOperation");
     return nullptr;
 }
@@ -1556,6 +1580,7 @@ PJ_OBJ *proj_obj_get_target_crs(const PJ_OBJ *obj) {
  * This is implemented for GeodeticCRS, ProjectedCRS, VerticalCRS and
  * CompoundCRS.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type CRS. Must not be NULL
  * @param auth_name Authority name, or NULL for all authorities
  * @param options Placeholder for future options. Should be set to NULL.
@@ -1567,8 +1592,10 @@ PJ_OBJ *proj_obj_get_target_crs(const PJ_OBJ *obj) {
  * released with proj_free_int_list().
  * @return a list of matching reference CRS, or nullptr in case of error.
  */
-PJ_OBJ_LIST *proj_obj_identify(const PJ_OBJ *obj, const char *auth_name,
+PJ_OBJ_LIST *proj_obj_identify(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
+                               const char *auth_name,
                                const char *const *options, int **confidence) {
+    SANITIZE_CTX(ctx);
     assert(obj);
     (void)options;
     if (confidence) {
@@ -1577,11 +1604,11 @@ PJ_OBJ_LIST *proj_obj_identify(const PJ_OBJ *obj, const char *auth_name,
     auto ptr = obj->obj.get();
     auto crs = dynamic_cast<const CRS *>(ptr);
     if (!crs) {
-        proj_log_error(obj->ctx, __FUNCTION__, "Object is not a CRS");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
     } else {
         int *confidenceTemp = nullptr;
         try {
-            auto factory = AuthorityFactory::create(getDBcontext(obj->ctx),
+            auto factory = AuthorityFactory::create(getDBcontext(ctx),
                                                     auth_name ? auth_name : "");
             auto res = crs->identify(factory);
             std::vector<IdentifiedObjectNNPtr> objects;
@@ -1594,8 +1621,7 @@ PJ_OBJ_LIST *proj_obj_identify(const PJ_OBJ *obj, const char *auth_name,
                     ++i;
                 }
             }
-            auto ret = internal::make_unique<PJ_OBJ_LIST>(obj->ctx,
-                                                          std::move(objects));
+            auto ret = internal::make_unique<PJ_OBJ_LIST>(std::move(objects));
             if (confidence) {
                 *confidence = confidenceTemp;
                 confidenceTemp = nullptr;
@@ -1603,7 +1629,7 @@ PJ_OBJ_LIST *proj_obj_identify(const PJ_OBJ *obj, const char *auth_name,
             return ret.release();
         } catch (const std::exception &e) {
             delete[] confidenceTemp;
-            proj_log_error(obj->ctx, __FUNCTION__, e.what());
+            proj_log_error(ctx, __FUNCTION__, e.what());
         }
     }
     return nullptr;
@@ -1708,6 +1734,7 @@ void proj_free_string_list(PROJ_STRING_LIST list) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type DerivedCRS or BoundCRSs (must not be NULL)
  * @param out_method_name Pointer to a string value to store the method
  * (projection) name. or NULL
@@ -1718,10 +1745,11 @@ void proj_free_string_list(PROJ_STRING_LIST list) {
  * @return Object of type SingleOperation that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_crs_get_coordoperation(const PJ_OBJ *crs,
+PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ_OBJ *crs,
                                         const char **out_method_name,
                                         const char **out_method_auth_name,
                                         const char **out_method_code) {
+    SANITIZE_CTX(ctx);
     assert(crs);
     SingleOperationPtr co;
 
@@ -1733,7 +1761,7 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(const PJ_OBJ *crs,
         if (boundCRS) {
             co = boundCRS->transformation().as_nullable();
         } else {
-            proj_log_error(crs->ctx, __FUNCTION__,
+            proj_log_error(ctx, __FUNCTION__,
                            "Object is not a DerivedCRS or BoundCRS");
             return nullptr;
         }
@@ -1758,7 +1786,7 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(const PJ_OBJ *crs,
             *out_method_code = nullptr;
         }
     }
-    return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(co));
+    return PJ_OBJ::create(NN_NO_CHECK(co));
 }
 
 // ---------------------------------------------------------------------------
@@ -1868,7 +1896,7 @@ PJ_OBJ *proj_obj_create_geographic_crs(
             pmAngularUnitsConv);
         auto geogCRS = GeographicCRS::create(createPropertyMapName(crsName),
                                              datum, NN_NO_CHECK(cs));
-        return PJ_OBJ::create(ctx, geogCRS);
+        return PJ_OBJ::create(geogCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -1883,6 +1911,7 @@ PJ_OBJ *proj_obj_create_geographic_crs(
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crsName Name of the GeographicCRS. Or NULL
  * @param datum Datum. Must not be NULL.
  * @param ellipsoidalCS Coordinate system. Must not be NULL.
@@ -1890,14 +1919,16 @@ PJ_OBJ *proj_obj_create_geographic_crs(
  * @return Object of type GeographicCRS that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_create_geographic_crs_from_datum(const char *crsName,
+PJ_OBJ *proj_obj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx,
+                                                  const char *crsName,
                                                   PJ_OBJ *datum,
                                                   PJ_OBJ *ellipsoidalCS) {
 
+    SANITIZE_CTX(ctx);
     auto l_datum =
         util::nn_dynamic_pointer_cast<GeodeticReferenceFrame>(datum->obj);
     if (!l_datum) {
-        proj_log_error(datum->ctx, __FUNCTION__,
+        proj_log_error(ctx, __FUNCTION__,
                        "datum is not a GeodeticReferenceFrame");
         return nullptr;
     }
@@ -1909,9 +1940,9 @@ PJ_OBJ *proj_obj_create_geographic_crs_from_datum(const char *crsName,
         auto geogCRS =
             GeographicCRS::create(createPropertyMapName(crsName),
                                   NN_NO_CHECK(l_datum), NN_NO_CHECK(cs));
-        return PJ_OBJ::create(datum->ctx, geogCRS);
+        return PJ_OBJ::create(geogCRS);
     } catch (const std::exception &e) {
-        proj_log_error(datum->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
     return nullptr;
 }
@@ -1962,7 +1993,7 @@ PJ_OBJ *proj_obj_create_geocentric_crs(
         auto geodCRS =
             GeodeticCRS::create(createPropertyMapName(crsName), datum,
                                 cs::CartesianCS::createGeocentric(linearUnit));
-        return PJ_OBJ::create(ctx, geodCRS);
+        return PJ_OBJ::create(geodCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -1977,6 +2008,7 @@ PJ_OBJ *proj_obj_create_geocentric_crs(
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crsName Name of the GeographicCRS. Or NULL
  * @param datum Datum. Must not be NULL.
  * @param linearUnits Name of the linear units. Or NULL for Metre
@@ -1986,26 +2018,28 @@ PJ_OBJ *proj_obj_create_geocentric_crs(
  * @return Object of type GeodeticCRS that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_create_geocentric_crs_from_datum(const char *crsName,
+PJ_OBJ *proj_obj_create_geocentric_crs_from_datum(PJ_CONTEXT *ctx,
+                                                  const char *crsName,
                                                   const PJ_OBJ *datum,
                                                   const char *linearUnits,
                                                   double linearUnitsConv) {
+    SANITIZE_CTX(ctx);
     try {
         const UnitOfMeasure linearUnit(
             createLinearUnit(linearUnits, linearUnitsConv));
         auto l_datum =
             util::nn_dynamic_pointer_cast<GeodeticReferenceFrame>(datum->obj);
         if (!l_datum) {
-            proj_log_error(datum->ctx, __FUNCTION__,
+            proj_log_error(ctx, __FUNCTION__,
                            "datum is not a GeodeticReferenceFrame");
             return nullptr;
         }
         auto geodCRS = GeodeticCRS::create(
             createPropertyMapName(crsName), NN_NO_CHECK(l_datum),
             cs::CartesianCS::createGeocentric(linearUnit));
-        return PJ_OBJ::create(datum->ctx, geodCRS);
+        return PJ_OBJ::create(geodCRS);
     } catch (const std::exception &e) {
-        proj_log_error(datum->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
     return nullptr;
 }
@@ -2020,21 +2054,24 @@ PJ_OBJ *proj_obj_create_geocentric_crs_from_datum(const char *crsName,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type CRS. Must not be NULL
  * @param name New name. Must not be NULL
  *
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ PROJ_DLL *proj_obj_alter_name(const PJ_OBJ *obj, const char *name) {
+PJ_OBJ PROJ_DLL *proj_obj_alter_name(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
+                                     const char *name) {
+    SANITIZE_CTX(ctx);
     auto crs = dynamic_cast<const CRS *>(obj->obj.get());
     if (!crs) {
         return nullptr;
     }
     try {
-        return PJ_OBJ::create(obj->ctx, crs->alterName(name));
+        return PJ_OBJ::create(crs->alterName(name));
     } catch (const std::exception &e) {
-        proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
     return nullptr;
 }
@@ -2053,33 +2090,33 @@ PJ_OBJ PROJ_DLL *proj_obj_alter_name(const PJ_OBJ *obj, const char *name) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type CRS. Must not be NULL
  * @param newGeodCRS Object of type GeodeticCRS. Must not be NULL
  *
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_crs_alter_geodetic_crs(const PJ_OBJ *obj,
+PJ_OBJ *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
                                         const PJ_OBJ *newGeodCRS) {
+    SANITIZE_CTX(ctx);
     auto l_newGeodCRS =
         util::nn_dynamic_pointer_cast<GeodeticCRS>(newGeodCRS->obj);
     if (!l_newGeodCRS) {
-        proj_log_error(obj->ctx, __FUNCTION__,
-                       "newGeodCRS is not a GeodeticCRS");
+        proj_log_error(ctx, __FUNCTION__, "newGeodCRS is not a GeodeticCRS");
         return nullptr;
     }
 
     auto crs = dynamic_cast<const CRS *>(obj->obj.get());
     if (!crs) {
-        proj_log_error(obj->ctx, __FUNCTION__, "obj is not a CRS");
+        proj_log_error(ctx, __FUNCTION__, "obj is not a CRS");
         return nullptr;
     }
 
     try {
-        return PJ_OBJ::create(obj->ctx,
-                              crs->alterGeodeticCRS(NN_NO_CHECK(l_newGeodCRS)));
+        return PJ_OBJ::create(crs->alterGeodeticCRS(NN_NO_CHECK(l_newGeodCRS)));
     } catch (const std::exception &e) {
-        proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
 }
@@ -2094,6 +2131,7 @@ PJ_OBJ *proj_obj_crs_alter_geodetic_crs(const PJ_OBJ *obj,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type CRS. Must not be NULL
  * @param angularUnits Name of the angular units. Or NULL for Degree
  * @param angularUnitsConv Conversion factor from the angular unit to radian. Or
@@ -2102,11 +2140,12 @@ PJ_OBJ *proj_obj_crs_alter_geodetic_crs(const PJ_OBJ *obj,
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(const PJ_OBJ *obj,
+PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
                                            const char *angularUnits,
                                            double angularUnitsConv) {
 
-    auto geodCRS = proj_obj_crs_get_geodetic_crs(obj);
+    SANITIZE_CTX(ctx);
+    auto geodCRS = proj_obj_crs_get_geodetic_crs(ctx, obj);
     if (!geodCRS) {
         return nullptr;
     }
@@ -2120,20 +2159,18 @@ PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(const PJ_OBJ *obj,
     try {
         const UnitOfMeasure angUnit(
             createAngularUnit(angularUnits, angularUnitsConv));
-        geogCRSAltered = PJ_OBJ::create(
-            obj->ctx,
-            GeographicCRS::create(
-                createPropertyMapName(proj_obj_get_name(geodCRS)),
-                geogCRS->datum(), geogCRS->datumEnsemble(),
-                geogCRS->coordinateSystem()->alterAngularUnit(angUnit)));
+        geogCRSAltered = PJ_OBJ::create(GeographicCRS::create(
+            createPropertyMapName(proj_obj_get_name(geodCRS)), geogCRS->datum(),
+            geogCRS->datumEnsemble(),
+            geogCRS->coordinateSystem()->alterAngularUnit(angUnit)));
         proj_obj_unref(geodCRS);
     } catch (const std::exception &e) {
-        proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         proj_obj_unref(geodCRS);
         return nullptr;
     }
 
-    auto ret = proj_obj_crs_alter_geodetic_crs(obj, geogCRSAltered);
+    auto ret = proj_obj_crs_alter_geodetic_crs(ctx, obj, geogCRSAltered);
     proj_obj_unref(geogCRSAltered);
     return ret;
 }
@@ -2149,6 +2186,7 @@ PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(const PJ_OBJ *obj,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type CRS. Must not be NULL
  * @param linearUnits Name of the linear units. Or NULL for Metre
  * @param linearUnitsConv Conversion factor from the linear unit to metre. Or
@@ -2157,9 +2195,10 @@ PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(const PJ_OBJ *obj,
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(const PJ_OBJ *obj,
+PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
                                           const char *linearUnits,
                                           double linearUnitsConv) {
+    SANITIZE_CTX(ctx);
     auto crs = dynamic_cast<const CRS *>(obj->obj.get());
     if (!crs) {
         return nullptr;
@@ -2168,9 +2207,9 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(const PJ_OBJ *obj,
     try {
         const UnitOfMeasure linearUnit(
             createLinearUnit(linearUnits, linearUnitsConv));
-        return PJ_OBJ::create(obj->ctx, crs->alterCSLinearUnit(linearUnit));
+        return PJ_OBJ::create(crs->alterCSLinearUnit(linearUnit));
     } catch (const std::exception &e) {
-        proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
 }
@@ -2186,6 +2225,7 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(const PJ_OBJ *obj,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type ProjectedCRS. Must not be NULL
  * @param linearUnits Name of the linear units. Or NULL for Metre
  * @param linearUnitsConv Conversion factor from the linear unit to metre. Or
@@ -2198,10 +2238,12 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(const PJ_OBJ *obj,
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(const PJ_OBJ *obj,
+PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
+                                                  const PJ_OBJ *obj,
                                                   const char *linearUnits,
                                                   double linearUnitsConv,
                                                   int convertToNewUnit) {
+    SANITIZE_CTX(ctx);
     auto crs = dynamic_cast<const ProjectedCRS *>(obj->obj.get());
     if (!crs) {
         return nullptr;
@@ -2210,11 +2252,10 @@ PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(const PJ_OBJ *obj,
     try {
         const UnitOfMeasure linearUnit(
             createLinearUnit(linearUnits, linearUnitsConv));
-        return PJ_OBJ::create(
-            obj->ctx, crs->alterParametersLinearUnit(linearUnit,
-                                                     convertToNewUnit == TRUE));
+        return PJ_OBJ::create(crs->alterParametersLinearUnit(
+            linearUnit, convertToNewUnit == TRUE));
     } catch (const std::exception &e) {
-        proj_log_error(obj->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
 }
@@ -2235,12 +2276,12 @@ PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(const PJ_OBJ *obj,
  */
 PJ_OBJ PROJ_DLL *proj_obj_create_engineering_crs(PJ_CONTEXT *ctx,
                                                  const char *crsName) {
+    SANITIZE_CTX(ctx);
     try {
-        return PJ_OBJ::create(
-            ctx, EngineeringCRS::create(
-                     createPropertyMapName(crsName),
-                     EngineeringDatum::create(PropertyMap()),
-                     CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)));
+        return PJ_OBJ::create(EngineeringCRS::create(
+            createPropertyMapName(crsName),
+            EngineeringDatum::create(PropertyMap()),
+            CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -2275,6 +2316,7 @@ PJ_OBJ *proj_obj_create_conversion(PJ_CONTEXT *ctx, const char *name,
                                    const char *method_auth_name,
                                    const char *method_code, int param_count,
                                    const PJ_PARAM_DESCRIPTION *params) {
+    SANITIZE_CTX(ctx);
     try {
         PropertyMap propConv;
         propConv.set(common::IdentifiedObject::NAME_KEY,
@@ -2338,7 +2380,7 @@ PJ_OBJ *proj_obj_create_conversion(PJ_CONTEXT *ctx, const char *name,
             values.emplace_back(ParameterValue::create(measure));
         }
         return PJ_OBJ::create(
-            ctx, Conversion::create(propConv, propMethod, parameters, values));
+            Conversion::create(propConv, propMethod, parameters, values));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -2413,29 +2455,24 @@ PJ_OBJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_CARTESIAN: {
             if (axis_count == 2) {
-                return PJ_OBJ::create(
-                    ctx, CartesianCS::create(PropertyMap(), createAxis(axis[0]),
-                                             createAxis(axis[1])));
+                return PJ_OBJ::create(CartesianCS::create(
+                    PropertyMap(), createAxis(axis[0]), createAxis(axis[1])));
             } else if (axis_count == 3) {
-                return PJ_OBJ::create(
-                    ctx, CartesianCS::create(PropertyMap(), createAxis(axis[0]),
-                                             createAxis(axis[1]),
-                                             createAxis(axis[2])));
+                return PJ_OBJ::create(CartesianCS::create(
+                    PropertyMap(), createAxis(axis[0]), createAxis(axis[1]),
+                    createAxis(axis[2])));
             }
             break;
         }
 
         case PJ_CS_TYPE_ELLIPSOIDAL: {
             if (axis_count == 2) {
-                return PJ_OBJ::create(
-                    ctx,
-                    EllipsoidalCS::create(PropertyMap(), createAxis(axis[0]),
-                                          createAxis(axis[1])));
+                return PJ_OBJ::create(EllipsoidalCS::create(
+                    PropertyMap(), createAxis(axis[0]), createAxis(axis[1])));
             } else if (axis_count == 3) {
-                return PJ_OBJ::create(
-                    ctx, EllipsoidalCS::create(
-                             PropertyMap(), createAxis(axis[0]),
-                             createAxis(axis[1]), createAxis(axis[2])));
+                return PJ_OBJ::create(EllipsoidalCS::create(
+                    PropertyMap(), createAxis(axis[0]), createAxis(axis[1]),
+                    createAxis(axis[2])));
             }
             break;
         }
@@ -2443,7 +2480,6 @@ PJ_OBJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
         case PJ_CS_TYPE_VERTICAL: {
             if (axis_count == 1) {
                 return PJ_OBJ::create(
-                    ctx,
                     VerticalCS::create(PropertyMap(), createAxis(axis[0])));
             }
             break;
@@ -2451,10 +2487,9 @@ PJ_OBJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_SPHERICAL: {
             if (axis_count == 3) {
-                return PJ_OBJ::create(
-                    ctx, EllipsoidalCS::create(
-                             PropertyMap(), createAxis(axis[0]),
-                             createAxis(axis[1]), createAxis(axis[2])));
+                return PJ_OBJ::create(EllipsoidalCS::create(
+                    PropertyMap(), createAxis(axis[0]), createAxis(axis[1]),
+                    createAxis(axis[2])));
             }
             break;
         }
@@ -2462,7 +2497,6 @@ PJ_OBJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
         case PJ_CS_TYPE_PARAMETRIC: {
             if (axis_count == 1) {
                 return PJ_OBJ::create(
-                    ctx,
                     ParametricCS::create(PropertyMap(), createAxis(axis[0])));
             }
             break;
@@ -2474,33 +2508,29 @@ PJ_OBJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
                 axisVector.emplace_back(createAxis(axis[i]));
             }
 
-            return PJ_OBJ::create(ctx,
-                                  OrdinalCS::create(PropertyMap(), axisVector));
+            return PJ_OBJ::create(OrdinalCS::create(PropertyMap(), axisVector));
         }
 
         case PJ_CS_TYPE_DATETIMETEMPORAL: {
             if (axis_count == 1) {
-                return PJ_OBJ::create(
-                    ctx, DateTimeTemporalCS::create(PropertyMap(),
-                                                    createAxis(axis[0])));
+                return PJ_OBJ::create(DateTimeTemporalCS::create(
+                    PropertyMap(), createAxis(axis[0])));
             }
             break;
         }
 
         case PJ_CS_TYPE_TEMPORALCOUNT: {
             if (axis_count == 1) {
-                return PJ_OBJ::create(
-                    ctx, TemporalCountCS::create(PropertyMap(),
-                                                 createAxis(axis[0])));
+                return PJ_OBJ::create(TemporalCountCS::create(
+                    PropertyMap(), createAxis(axis[0])));
             }
             break;
         }
 
         case PJ_CS_TYPE_TEMPORALMEASURE: {
             if (axis_count == 1) {
-                return PJ_OBJ::create(
-                    ctx, TemporalMeasureCS::create(PropertyMap(),
-                                                   createAxis(axis[0])));
+                return PJ_OBJ::create(TemporalMeasureCS::create(
+                    PropertyMap(), createAxis(axis[0])));
             }
             break;
         }
@@ -2538,14 +2568,12 @@ PJ_OBJ *proj_obj_create_cartesian_2D_cs(PJ_CONTEXT *ctx,
     try {
         switch (type) {
         case PJ_CART2D_EASTING_NORTHING:
-            return PJ_OBJ::create(
-                ctx, CartesianCS::createEastingNorthing(
-                         createLinearUnit(unit_name, unit_conv_factor)));
+            return PJ_OBJ::create(CartesianCS::createEastingNorthing(
+                createLinearUnit(unit_name, unit_conv_factor)));
 
         case PJ_CART2D_NORTHING_EASTING:
-            return PJ_OBJ::create(
-                ctx, CartesianCS::createNorthingEasting(
-                         createLinearUnit(unit_name, unit_conv_factor)));
+            return PJ_OBJ::create(CartesianCS::createNorthingEasting(
+                createLinearUnit(unit_name, unit_conv_factor)));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2577,14 +2605,12 @@ PJ_OBJ *proj_obj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
     try {
         switch (type) {
         case PJ_ELLPS2D_LONGITUDE_LATITUDE:
-            return PJ_OBJ::create(
-                ctx, EllipsoidalCS::createLongitudeLatitude(
-                         createAngularUnit(unit_name, unit_conv_factor)));
+            return PJ_OBJ::create(EllipsoidalCS::createLongitudeLatitude(
+                createAngularUnit(unit_name, unit_conv_factor)));
 
         case PJ_ELLPS2D_LATITUDE_LONGITUDE:
-            return PJ_OBJ::create(
-                ctx, EllipsoidalCS::createLatitudeLongitude(
-                         createAngularUnit(unit_name, unit_conv_factor)));
+            return PJ_OBJ::create(EllipsoidalCS::createLatitudeLongitude(
+                createAngularUnit(unit_name, unit_conv_factor)));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2600,6 +2626,7 @@ PJ_OBJ *proj_obj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crs_name CRS name. Or NULL
  * @param geodetic_crs Base GeodeticCRS. Must not be NULL.
  * @param conversion Conversion. Must not be NULL.
@@ -2609,10 +2636,11 @@ PJ_OBJ *proj_obj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
  * proj_obj_unref(), or NULL in case of error.
  */
 
-PJ_OBJ *proj_obj_create_projected_crs(const char *crs_name,
+PJ_OBJ *proj_obj_create_projected_crs(PJ_CONTEXT *ctx, const char *crs_name,
                                       const PJ_OBJ *geodetic_crs,
                                       const PJ_OBJ *conversion,
                                       const PJ_OBJ *coordinate_system) {
+    SANITIZE_CTX(ctx);
     auto geodCRS =
         util::nn_dynamic_pointer_cast<GeodeticCRS>(geodetic_crs->obj);
     if (!geodCRS) {
@@ -2628,13 +2656,11 @@ PJ_OBJ *proj_obj_create_projected_crs(const char *crs_name,
         return nullptr;
     }
     try {
-        return PJ_OBJ::create(
-            geodetic_crs->ctx,
-            ProjectedCRS::create(createPropertyMapName(crs_name),
-                                 NN_NO_CHECK(geodCRS), NN_NO_CHECK(conv),
-                                 NN_NO_CHECK(cs)));
+        return PJ_OBJ::create(ProjectedCRS::create(
+            createPropertyMapName(crs_name), NN_NO_CHECK(geodCRS),
+            NN_NO_CHECK(conv), NN_NO_CHECK(cs)));
     } catch (const std::exception &e) {
-        proj_log_error(geodetic_crs->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
     return nullptr;
 }
@@ -2643,9 +2669,8 @@ PJ_OBJ *proj_obj_create_projected_crs(const char *crs_name,
 
 //! @cond Doxygen_Suppress
 
-static PJ_OBJ *proj_obj_create_conversion(PJ_CONTEXT *ctx,
-                                          const ConversionNNPtr &conv) {
-    return PJ_OBJ::create(ctx, conv);
+static PJ_OBJ *proj_obj_create_conversion(const ConversionNNPtr &conv) {
+    return PJ_OBJ::create(conv);
 }
 
 //! @endcond
@@ -2662,9 +2687,10 @@ static PJ_OBJ *proj_obj_create_conversion(PJ_CONTEXT *ctx,
  * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
  */
 PJ_OBJ *proj_obj_create_conversion_utm(PJ_CONTEXT *ctx, int zone, int north) {
+    SANITIZE_CTX(ctx);
     try {
         auto conv = Conversion::createUTM(PropertyMap(), zone, north != 0);
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2685,6 +2711,7 @@ PJ_OBJ *proj_obj_create_conversion_transverse_mercator(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2695,7 +2722,7 @@ PJ_OBJ *proj_obj_create_conversion_transverse_mercator(
             Angle(centerLong, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2717,6 +2744,7 @@ PJ_OBJ *proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2727,7 +2755,7 @@ PJ_OBJ *proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
             Angle(centerLong, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2749,6 +2777,7 @@ PJ_OBJ *proj_obj_create_conversion_transverse_mercator_south_oriented(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2759,7 +2788,7 @@ PJ_OBJ *proj_obj_create_conversion_transverse_mercator_south_oriented(
             Angle(centerLong, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2780,6 +2809,7 @@ PJ_OBJ *proj_obj_create_conversion_two_point_equidistant(
     double latitudeSecondPoint, double longitudeSeconPoint, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2792,7 +2822,7 @@ PJ_OBJ *proj_obj_create_conversion_two_point_equidistant(
             Angle(longitudeSeconPoint, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2812,6 +2842,7 @@ PJ_OBJ *proj_obj_create_conversion_tunisia_mapping_grid(
     PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2821,7 +2852,7 @@ PJ_OBJ *proj_obj_create_conversion_tunisia_mapping_grid(
             PropertyMap(), Angle(centerLat, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2843,6 +2874,7 @@ PJ_OBJ *proj_obj_create_conversion_albers_equal_area(
     double eastingFalseOrigin, double northingFalseOrigin,
     const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2855,7 +2887,7 @@ PJ_OBJ *proj_obj_create_conversion_albers_equal_area(
             Angle(latitudeSecondParallel, angUnit),
             Length(eastingFalseOrigin, linearUnit),
             Length(northingFalseOrigin, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2876,6 +2908,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_1sp(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2886,7 +2919,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_1sp(
             Angle(centerLong, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2908,6 +2941,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp(
     double eastingFalseOrigin, double northingFalseOrigin,
     const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2920,7 +2954,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp(
             Angle(latitudeSecondParallel, angUnit),
             Length(eastingFalseOrigin, linearUnit),
             Length(northingFalseOrigin, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2944,6 +2978,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
     double ellipsoidScalingFactor, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2957,7 +2992,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
             Length(eastingFalseOrigin, linearUnit),
             Length(northingFalseOrigin, linearUnit),
             Scale(ellipsoidScalingFactor));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2980,6 +3015,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
     double eastingFalseOrigin, double northingFalseOrigin,
     const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -2992,7 +3028,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
             Angle(latitudeSecondParallel, angUnit),
             Length(eastingFalseOrigin, linearUnit),
             Length(northingFalseOrigin, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3013,6 +3049,7 @@ PJ_OBJ *proj_obj_create_conversion_azimuthal_equidistant(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3023,7 +3060,7 @@ PJ_OBJ *proj_obj_create_conversion_azimuthal_equidistant(
             Angle(longitudeNatOrigin, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3044,6 +3081,7 @@ PJ_OBJ *proj_obj_create_conversion_guam_projection(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3054,7 +3092,7 @@ PJ_OBJ *proj_obj_create_conversion_guam_projection(
             Angle(longitudeNatOrigin, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3075,6 +3113,7 @@ PJ_OBJ *proj_obj_create_conversion_bonne(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3085,7 +3124,7 @@ PJ_OBJ *proj_obj_create_conversion_bonne(
                                             Angle(longitudeNatOrigin, angUnit),
                                             Length(falseEasting, linearUnit),
                                             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3107,6 +3146,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3117,7 +3157,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical(
             Angle(longitudeNatOrigin, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3138,6 +3178,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_cylindrical_equal_area(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3148,7 +3189,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_cylindrical_equal_area(
             Angle(longitudeNatOrigin, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3168,6 +3209,7 @@ PJ_OBJ *proj_obj_create_conversion_cassini_soldner(
     PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3177,7 +3219,7 @@ PJ_OBJ *proj_obj_create_conversion_cassini_soldner(
             PropertyMap(), Angle(centerLat, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3199,6 +3241,7 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_conic(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3210,7 +3253,7 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_conic(
             Angle(latitudeSecondParallel, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3230,6 +3273,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_i(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3239,7 +3283,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_i(
             Conversion::createEckertI(PropertyMap(), Angle(centerLong, angUnit),
                                       Length(falseEasting, linearUnit),
                                       Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3259,6 +3303,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_ii(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3268,7 +3313,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_ii(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3288,6 +3333,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_iii(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3297,7 +3343,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_iii(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3317,6 +3363,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_iv(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3326,7 +3373,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_iv(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3346,6 +3393,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_v(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3355,7 +3403,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_v(
             Conversion::createEckertV(PropertyMap(), Angle(centerLong, angUnit),
                                       Length(falseEasting, linearUnit),
                                       Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3375,6 +3423,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_vi(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3384,7 +3433,7 @@ PJ_OBJ *proj_obj_create_conversion_eckert_vi(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3405,6 +3454,7 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_cylindrical(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3415,7 +3465,7 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_cylindrical(
             Angle(longitudeNatOrigin, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3437,6 +3487,7 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_cylindrical_spherical(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3447,7 +3498,7 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_cylindrical_spherical(
             Angle(longitudeNatOrigin, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3467,6 +3518,7 @@ PJ_OBJ *proj_obj_create_conversion_gall(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3476,7 +3528,7 @@ PJ_OBJ *proj_obj_create_conversion_gall(
             Conversion::createGall(PropertyMap(), Angle(centerLong, angUnit),
                                    Length(falseEasting, linearUnit),
                                    Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3496,6 +3548,7 @@ PJ_OBJ *proj_obj_create_conversion_goode_homolosine(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3505,7 +3558,7 @@ PJ_OBJ *proj_obj_create_conversion_goode_homolosine(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3525,6 +3578,7 @@ PJ_OBJ *proj_obj_create_conversion_interrupted_goode_homolosine(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3534,7 +3588,7 @@ PJ_OBJ *proj_obj_create_conversion_interrupted_goode_homolosine(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3555,6 +3609,7 @@ PJ_OBJ *proj_obj_create_conversion_geostationary_satellite_sweep_x(
     PJ_CONTEXT *ctx, double centerLong, double height, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3564,7 +3619,7 @@ PJ_OBJ *proj_obj_create_conversion_geostationary_satellite_sweep_x(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(height, linearUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3585,6 +3640,7 @@ PJ_OBJ *proj_obj_create_conversion_geostationary_satellite_sweep_y(
     PJ_CONTEXT *ctx, double centerLong, double height, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3594,7 +3650,7 @@ PJ_OBJ *proj_obj_create_conversion_geostationary_satellite_sweep_y(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(height, linearUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3614,6 +3670,7 @@ PJ_OBJ *proj_obj_create_conversion_gnomonic(
     PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3623,7 +3680,7 @@ PJ_OBJ *proj_obj_create_conversion_gnomonic(
             PropertyMap(), Angle(centerLat, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3646,6 +3703,7 @@ PJ_OBJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
     double angleFromRectifiedToSkrewGrid, double scale, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3658,7 +3716,7 @@ PJ_OBJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
             Angle(angleFromRectifiedToSkrewGrid, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3682,6 +3740,7 @@ PJ_OBJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
     double eastingProjectionCentre, double northingProjectionCentre,
     const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3694,7 +3753,7 @@ PJ_OBJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
             Angle(angleFromRectifiedToSkrewGrid, angUnit), Scale(scale),
             Length(eastingProjectionCentre, linearUnit),
             Length(northingProjectionCentre, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3719,6 +3778,7 @@ proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
     double northingProjectionCentre, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3731,7 +3791,7 @@ proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
                 Angle(latitudePoint2, angUnit), Angle(longitudePoint2, angUnit),
                 Scale(scale), Length(eastingProjectionCentre, linearUnit),
                 Length(northingProjectionCentre, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3753,6 +3813,7 @@ PJ_OBJ *proj_obj_create_conversion_international_map_world_polyconic(
     double latitudeSecondParallel, double falseEasting, double falseNorthing,
     const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3764,7 +3825,7 @@ PJ_OBJ *proj_obj_create_conversion_international_map_world_polyconic(
             Angle(latitudeSecondParallel, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3786,6 +3847,7 @@ PJ_OBJ *proj_obj_create_conversion_krovak_north_oriented(
     double scaleFactorPseudoStandardParallel, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3799,7 +3861,7 @@ PJ_OBJ *proj_obj_create_conversion_krovak_north_oriented(
             Scale(scaleFactorPseudoStandardParallel),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3821,6 +3883,7 @@ PJ_OBJ *proj_obj_create_conversion_krovak(
     double scaleFactorPseudoStandardParallel, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3834,7 +3897,7 @@ PJ_OBJ *proj_obj_create_conversion_krovak(
             Scale(scaleFactorPseudoStandardParallel),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3855,6 +3918,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_azimuthal_equal_area(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3865,7 +3929,7 @@ PJ_OBJ *proj_obj_create_conversion_lambert_azimuthal_equal_area(
             Angle(longitudeNatOrigin, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3885,6 +3949,7 @@ PJ_OBJ *proj_obj_create_conversion_miller_cylindrical(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3894,7 +3959,7 @@ PJ_OBJ *proj_obj_create_conversion_miller_cylindrical(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3915,6 +3980,7 @@ PJ_OBJ *proj_obj_create_conversion_mercator_variant_a(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3925,7 +3991,7 @@ PJ_OBJ *proj_obj_create_conversion_mercator_variant_a(
             Angle(centerLong, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3946,6 +4012,7 @@ PJ_OBJ *proj_obj_create_conversion_mercator_variant_b(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3955,7 +4022,7 @@ PJ_OBJ *proj_obj_create_conversion_mercator_variant_b(
             PropertyMap(), Angle(latitudeFirstParallel, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3976,6 +4043,7 @@ PJ_OBJ *proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
     PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -3985,7 +4053,7 @@ PJ_OBJ *proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
             PropertyMap(), Angle(centerLat, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4005,6 +4073,7 @@ PJ_OBJ *proj_obj_create_conversion_mollweide(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4014,7 +4083,7 @@ PJ_OBJ *proj_obj_create_conversion_mollweide(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4034,6 +4103,7 @@ PJ_OBJ *proj_obj_create_conversion_new_zealand_mapping_grid(
     PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4043,7 +4113,7 @@ PJ_OBJ *proj_obj_create_conversion_new_zealand_mapping_grid(
             PropertyMap(), Angle(centerLat, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4064,6 +4134,7 @@ PJ_OBJ *proj_obj_create_conversion_oblique_stereographic(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4074,7 +4145,7 @@ PJ_OBJ *proj_obj_create_conversion_oblique_stereographic(
             Angle(centerLong, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4094,6 +4165,7 @@ PJ_OBJ *proj_obj_create_conversion_orthographic(
     PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4103,7 +4175,7 @@ PJ_OBJ *proj_obj_create_conversion_orthographic(
             PropertyMap(), Angle(centerLat, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4123,6 +4195,7 @@ PJ_OBJ *proj_obj_create_conversion_american_polyconic(
     PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4132,7 +4205,7 @@ PJ_OBJ *proj_obj_create_conversion_american_polyconic(
             PropertyMap(), Angle(centerLat, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4153,6 +4226,7 @@ PJ_OBJ *proj_obj_create_conversion_polar_stereographic_variant_a(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4163,7 +4237,7 @@ PJ_OBJ *proj_obj_create_conversion_polar_stereographic_variant_a(
             Angle(centerLong, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4184,6 +4258,7 @@ PJ_OBJ *proj_obj_create_conversion_polar_stereographic_variant_b(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4193,7 +4268,7 @@ PJ_OBJ *proj_obj_create_conversion_polar_stereographic_variant_b(
             PropertyMap(), Angle(latitudeStandardParallel, angUnit),
             Angle(longitudeOfOrigin, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4213,6 +4288,7 @@ PJ_OBJ *proj_obj_create_conversion_robinson(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4222,7 +4298,7 @@ PJ_OBJ *proj_obj_create_conversion_robinson(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4242,6 +4318,7 @@ PJ_OBJ *proj_obj_create_conversion_sinusoidal(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4251,7 +4328,7 @@ PJ_OBJ *proj_obj_create_conversion_sinusoidal(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4272,6 +4349,7 @@ PJ_OBJ *proj_obj_create_conversion_stereographic(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4282,7 +4360,7 @@ PJ_OBJ *proj_obj_create_conversion_stereographic(
             Angle(centerLong, angUnit), Scale(scale),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4302,6 +4380,7 @@ PJ_OBJ *proj_obj_create_conversion_van_der_grinten(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4311,7 +4390,7 @@ PJ_OBJ *proj_obj_create_conversion_van_der_grinten(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4331,6 +4410,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_i(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4340,7 +4420,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_i(
             Conversion::createWagnerI(PropertyMap(), Angle(centerLong, angUnit),
                                       Length(falseEasting, linearUnit),
                                       Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4360,6 +4440,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_ii(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4369,7 +4450,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_ii(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4390,6 +4471,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_iii(
     double falseEasting, double falseNorthing, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4399,7 +4481,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_iii(
             PropertyMap(), Angle(latitudeTrueScale, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4419,6 +4501,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_iv(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4428,7 +4511,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_iv(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4448,6 +4531,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_v(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4457,7 +4541,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_v(
             Conversion::createWagnerV(PropertyMap(), Angle(centerLong, angUnit),
                                       Length(falseEasting, linearUnit),
                                       Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4477,6 +4561,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_vi(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4486,7 +4571,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_vi(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4506,6 +4591,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_vii(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4515,7 +4601,7 @@ PJ_OBJ *proj_obj_create_conversion_wagner_vii(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4536,6 +4622,7 @@ PJ_OBJ *proj_obj_create_conversion_quadrilateralized_spherical_cube(
     PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4545,7 +4632,7 @@ PJ_OBJ *proj_obj_create_conversion_quadrilateralized_spherical_cube(
             PropertyMap(), Angle(centerLat, angUnit),
             Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4566,6 +4653,7 @@ PJ_OBJ *proj_obj_create_conversion_spherical_cross_track_height(
     double pegPointHeading, double pegPointHeight, const char *angUnitName,
     double angUnitConvFactor, const char *linearUnitName,
     double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4575,7 +4663,7 @@ PJ_OBJ *proj_obj_create_conversion_spherical_cross_track_height(
             PropertyMap(), Angle(pegPointLat, angUnit),
             Angle(pegPointLong, angUnit), Angle(pegPointHeading, angUnit),
             Length(pegPointHeight, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4595,6 +4683,7 @@ PJ_OBJ *proj_obj_create_conversion_equal_earth(
     PJ_CONTEXT *ctx, double centerLong, double falseEasting,
     double falseNorthing, const char *angUnitName, double angUnitConvFactor,
     const char *linearUnitName, double linearUnitConvFactor) {
+    SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
             createLinearUnit(linearUnitName, linearUnitConvFactor));
@@ -4604,7 +4693,7 @@ PJ_OBJ *proj_obj_create_conversion_equal_earth(
             PropertyMap(), Angle(centerLong, angUnit),
             Length(falseEasting, linearUnit),
             Length(falseNorthing, linearUnit));
-        return proj_obj_create_conversion(ctx, conv);
+        return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4618,21 +4707,23 @@ PJ_OBJ *proj_obj_create_conversion_equal_earth(
  * a PROJ pipeline, checking in particular that referenced grids are
  * available.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param coordoperation Objet of type CoordinateOperation or derived classes
  * (must not be NULL)
  * @return TRUE or FALSE.
  */
 
-int proj_coordoperation_is_instanciable(const PJ_OBJ *coordoperation) {
+int proj_coordoperation_is_instanciable(PJ_CONTEXT *ctx,
+                                        const PJ_OBJ *coordoperation) {
     assert(coordoperation);
     auto op =
         dynamic_cast<const CoordinateOperation *>(coordoperation->obj.get());
     if (!op) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__,
+        proj_log_error(ctx, __FUNCTION__,
                        "Object is not a CoordinateOperation");
         return 0;
     }
-    auto dbContext = getDBcontextNoException(coordoperation->ctx, __FUNCTION__);
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
         return op->isPROJInstanciable(dbContext) ? 1 : 0;
     } catch (const std::exception &) {
@@ -4644,16 +4735,18 @@ int proj_coordoperation_is_instanciable(const PJ_OBJ *coordoperation) {
 
 /** \brief Return the number of parameters of a SingleOperation
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param coordoperation Objet of type SingleOperation or derived classes
  * (must not be NULL)
  */
 
-int proj_coordoperation_get_param_count(const PJ_OBJ *coordoperation) {
+int proj_coordoperation_get_param_count(PJ_CONTEXT *ctx,
+                                        const PJ_OBJ *coordoperation) {
+    SANITIZE_CTX(ctx);
     assert(coordoperation);
     auto op = dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
     if (!op) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__,
-                       "Object is not a SingleOperation");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a SingleOperation");
         return 0;
     }
     return static_cast<int>(op->parameterValues().size());
@@ -4663,20 +4756,22 @@ int proj_coordoperation_get_param_count(const PJ_OBJ *coordoperation) {
 
 /** \brief Return the index of a parameter of a SingleOperation
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param coordoperation Objet of type SingleOperation or derived classes
  * (must not be NULL)
  * @param name Parameter name. Must not be NULL
  * @return index (>=0), or -1 in case of error.
  */
 
-int proj_coordoperation_get_param_index(const PJ_OBJ *coordoperation,
+int proj_coordoperation_get_param_index(PJ_CONTEXT *ctx,
+                                        const PJ_OBJ *coordoperation,
                                         const char *name) {
+    SANITIZE_CTX(ctx);
     assert(coordoperation);
     assert(name);
     auto op = dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
     if (!op) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__,
-                       "Object is not a SingleOperation");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a SingleOperation");
         return -1;
     }
     int index = 0;
@@ -4693,6 +4788,7 @@ int proj_coordoperation_get_param_index(const PJ_OBJ *coordoperation,
 
 /** \brief Return a parameter of a SingleOperation
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param coordoperation Objet of type SingleOperation or derived classes
  * (must not be NULL)
  * @param index Parameter index.
@@ -4713,25 +4809,25 @@ int proj_coordoperation_get_param_index(const PJ_OBJ *coordoperation,
  * @return TRUE in case of success.
  */
 
-int proj_coordoperation_get_param(const PJ_OBJ *coordoperation, int index,
-                                  const char **out_name,
+int proj_coordoperation_get_param(PJ_CONTEXT *ctx, const PJ_OBJ *coordoperation,
+                                  int index, const char **out_name,
                                   const char **out_auth_name,
                                   const char **out_code, double *out_value,
                                   const char **out_value_string,
                                   double *out_unit_conv_factor,
                                   const char **out_unit_name) {
+    SANITIZE_CTX(ctx);
     assert(coordoperation);
     auto op = dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
     if (!op) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__,
-                       "Object is not a SingleOperation");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a SingleOperation");
         return false;
     }
     const auto &parameters = op->method()->parameters();
     const auto &values = op->parameterValues();
     if (static_cast<size_t>(index) >= parameters.size() ||
         static_cast<size_t>(index) >= values.size()) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__, "Invalid index");
+        proj_log_error(ctx, __FUNCTION__, "Invalid index");
         return false;
     }
 
@@ -4805,20 +4901,23 @@ int proj_coordoperation_get_param(const PJ_OBJ *coordoperation, int index,
 
 /** \brief Return the number of grids used by a CoordinateOperation
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param coordoperation Objet of type CoordinateOperation or derived classes
  * (must not be NULL)
  */
 
-int proj_coordoperation_get_grid_used_count(const PJ_OBJ *coordoperation) {
+int proj_coordoperation_get_grid_used_count(PJ_CONTEXT *ctx,
+                                            const PJ_OBJ *coordoperation) {
+    SANITIZE_CTX(ctx);
     assert(coordoperation);
     auto co =
         dynamic_cast<const CoordinateOperation *>(coordoperation->obj.get());
     if (!co) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__,
+        proj_log_error(ctx, __FUNCTION__,
                        "Object is not a CoordinateOperation");
         return 0;
     }
-    auto dbContext = getDBcontextNoException(coordoperation->ctx, __FUNCTION__);
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
         if (!coordoperation->gridsNeededAsked) {
             coordoperation->gridsNeededAsked = true;
@@ -4829,7 +4928,7 @@ int proj_coordoperation_get_grid_used_count(const PJ_OBJ *coordoperation) {
         }
         return static_cast<int>(coordoperation->gridsNeeded.size());
     } catch (const std::exception &e) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return 0;
     }
 }
@@ -4838,6 +4937,7 @@ int proj_coordoperation_get_grid_used_count(const PJ_OBJ *coordoperation) {
 
 /** \brief Return a parameter of a SingleOperation
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param coordoperation Objet of type SingleOperation or derived classes
  * (must not be NULL)
  * @param index Parameter index.
@@ -4860,13 +4960,15 @@ int proj_coordoperation_get_grid_used_count(const PJ_OBJ *coordoperation) {
  */
 
 int proj_coordoperation_get_grid_used(
-    const PJ_OBJ *coordoperation, int index, const char **out_short_name,
-    const char **out_full_name, const char **out_package_name,
-    const char **out_url, int *out_direct_download, int *out_open_license,
-    int *out_available) {
-    const int count = proj_coordoperation_get_grid_used_count(coordoperation);
+    PJ_CONTEXT *ctx, const PJ_OBJ *coordoperation, int index,
+    const char **out_short_name, const char **out_full_name,
+    const char **out_package_name, const char **out_url,
+    int *out_direct_download, int *out_open_license, int *out_available) {
+    SANITIZE_CTX(ctx);
+    const int count =
+        proj_coordoperation_get_grid_used_count(ctx, coordoperation);
     if (index < 0 || index >= count) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__, "Invalid index");
+        proj_log_error(ctx, __FUNCTION__, "Invalid index");
         return false;
     }
 
@@ -4907,12 +5009,11 @@ int proj_coordoperation_get_grid_used(
 /** \brief Opaque object representing an operation factory context. */
 struct PJ_OPERATION_FACTORY_CONTEXT {
     //! @cond Doxygen_Suppress
-    PJ_CONTEXT *ctx;
     CoordinateOperationContextNNPtr operationContext;
 
     explicit PJ_OPERATION_FACTORY_CONTEXT(
-        PJ_CONTEXT *ctxIn, CoordinateOperationContextNNPtr &&operationContextIn)
-        : ctx(ctxIn), operationContext(std::move(operationContextIn)) {}
+        CoordinateOperationContextNNPtr &&operationContextIn)
+        : operationContext(std::move(operationContextIn)) {}
 
     PJ_OPERATION_FACTORY_CONTEXT(const PJ_OPERATION_FACTORY_CONTEXT &) = delete;
     PJ_OPERATION_FACTORY_CONTEXT &
@@ -4948,12 +5049,12 @@ proj_create_operation_factory_context(PJ_CONTEXT *ctx, const char *authority) {
             auto operationContext =
                 CoordinateOperationContext::create(authFactory, nullptr, 0.0);
             return new PJ_OPERATION_FACTORY_CONTEXT(
-                ctx, std::move(operationContext));
+                std::move(operationContext));
         } else {
             auto operationContext =
                 CoordinateOperationContext::create(nullptr, nullptr, 0.0);
             return new PJ_OPERATION_FACTORY_CONTEXT(
-                ctx, std::move(operationContext));
+                std::move(operationContext));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4977,13 +5078,20 @@ void proj_operation_factory_context_unref(PJ_OPERATION_FACTORY_CONTEXT *ctx) {
 // ---------------------------------------------------------------------------
 
 /** \brief Set the desired accuracy of the resulting coordinate transformations.
- * @param ctx Operation factory context. must not be NULL
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
  * @param accuracy Accuracy in meter (or 0 to disable the filter).
  */
 void proj_operation_factory_context_set_desired_accuracy(
-    PJ_OPERATION_FACTORY_CONTEXT *ctx, double accuracy) {
-    assert(ctx);
-    ctx->operationContext->setDesiredAccuracy(accuracy);
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    double accuracy) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        factory_ctx->operationContext->setDesiredAccuracy(accuracy);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -4994,18 +5102,26 @@ void proj_operation_factory_context_set_desired_accuracy(
  * For an area of interest crossing the anti-meridian, west_lon_degree will be
  * greater than east_lon_degree.
  *
- * @param ctx Operation factory context. must not be NULL
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
  * @param west_lon_degree West longitude (in degrees).
  * @param south_lat_degree South latitude (in degrees).
  * @param east_lon_degree East longitude (in degrees).
  * @param north_lat_degree North latitude (in degrees).
  */
 void proj_operation_factory_context_set_area_of_interest(
-    PJ_OPERATION_FACTORY_CONTEXT *ctx, double west_lon_degree,
-    double south_lat_degree, double east_lon_degree, double north_lat_degree) {
-    assert(ctx);
-    ctx->operationContext->setAreaOfInterest(Extent::createFromBBOX(
-        west_lon_degree, south_lat_degree, east_lon_degree, north_lat_degree));
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    double west_lon_degree, double south_lat_degree, double east_lon_degree,
+    double north_lat_degree) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        factory_ctx->operationContext->setAreaOfInterest(
+            Extent::createFromBBOX(west_lon_degree, south_lat_degree,
+                                   east_lon_degree, north_lat_degree));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -5016,32 +5132,40 @@ void proj_operation_factory_context_set_area_of_interest(
  *
  * The default is PJ_CRS_EXTENT_SMALLEST.
  *
- * @param ctx Operation factory context. must not be NULL
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
  * @param use How source and target CRS extent should be used.
  */
 void proj_operation_factory_context_set_crs_extent_use(
-    PJ_OPERATION_FACTORY_CONTEXT *ctx, PROJ_CRS_EXTENT_USE use) {
-    assert(ctx);
-    switch (use) {
-    case PJ_CRS_EXTENT_NONE:
-        ctx->operationContext->setSourceAndTargetCRSExtentUse(
-            CoordinateOperationContext::SourceTargetCRSExtentUse::NONE);
-        break;
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    PROJ_CRS_EXTENT_USE use) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        switch (use) {
+        case PJ_CRS_EXTENT_NONE:
+            factory_ctx->operationContext->setSourceAndTargetCRSExtentUse(
+                CoordinateOperationContext::SourceTargetCRSExtentUse::NONE);
+            break;
 
-    case PJ_CRS_EXTENT_BOTH:
-        ctx->operationContext->setSourceAndTargetCRSExtentUse(
-            CoordinateOperationContext::SourceTargetCRSExtentUse::BOTH);
-        break;
+        case PJ_CRS_EXTENT_BOTH:
+            factory_ctx->operationContext->setSourceAndTargetCRSExtentUse(
+                CoordinateOperationContext::SourceTargetCRSExtentUse::BOTH);
+            break;
 
-    case PJ_CRS_EXTENT_INTERSECTION:
-        ctx->operationContext->setSourceAndTargetCRSExtentUse(
-            CoordinateOperationContext::SourceTargetCRSExtentUse::INTERSECTION);
-        break;
+        case PJ_CRS_EXTENT_INTERSECTION:
+            factory_ctx->operationContext->setSourceAndTargetCRSExtentUse(
+                CoordinateOperationContext::SourceTargetCRSExtentUse::
+                    INTERSECTION);
+            break;
 
-    case PJ_CRS_EXTENT_SMALLEST:
-        ctx->operationContext->setSourceAndTargetCRSExtentUse(
-            CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST);
-        break;
+        case PJ_CRS_EXTENT_SMALLEST:
+            factory_ctx->operationContext->setSourceAndTargetCRSExtentUse(
+                CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST);
+            break;
+        }
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
 }
 
@@ -5054,22 +5178,31 @@ void proj_operation_factory_context_set_crs_extent_use(
  *
  * The default is PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT.
  *
- * @param ctx Operation factory context. must not be NULL
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
  * @param criterion patial criterion to use
  */
 void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
-    PJ_OPERATION_FACTORY_CONTEXT *ctx, PROJ_SPATIAL_CRITERION criterion) {
-    assert(ctx);
-    switch (criterion) {
-    case PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT:
-        ctx->operationContext->setSpatialCriterion(
-            CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT);
-        break;
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    PROJ_SPATIAL_CRITERION criterion) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        switch (criterion) {
+        case PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT:
+            factory_ctx->operationContext->setSpatialCriterion(
+                CoordinateOperationContext::SpatialCriterion::
+                    STRICT_CONTAINMENT);
+            break;
 
-    case PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION:
-        ctx->operationContext->setSpatialCriterion(
-            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
-        break;
+        case PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION:
+            factory_ctx->operationContext->setSpatialCriterion(
+                CoordinateOperationContext::SpatialCriterion::
+                    PARTIAL_INTERSECTION);
+            break;
+        }
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
 }
 
@@ -5079,29 +5212,37 @@ void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
  *
  * The default is USE_FOR_SORTING.
  *
- * @param ctx Operation factory context. must not be NULL
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
  * @param use how grid availability is used.
  */
 void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
-    PJ_OPERATION_FACTORY_CONTEXT *ctx, PROJ_GRID_AVAILABILITY_USE use) {
-    assert(ctx);
-    switch (use) {
-    case PROJ_GRID_AVAILABILITY_USED_FOR_SORTING:
-        ctx->operationContext->setGridAvailabilityUse(
-            CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING);
-        break;
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    PROJ_GRID_AVAILABILITY_USE use) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        switch (use) {
+        case PROJ_GRID_AVAILABILITY_USED_FOR_SORTING:
+            factory_ctx->operationContext->setGridAvailabilityUse(
+                CoordinateOperationContext::GridAvailabilityUse::
+                    USE_FOR_SORTING);
+            break;
 
-    case PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID:
-        ctx->operationContext->setGridAvailabilityUse(
-            CoordinateOperationContext::GridAvailabilityUse::
-                DISCARD_OPERATION_IF_MISSING_GRID);
-        break;
+        case PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID:
+            factory_ctx->operationContext->setGridAvailabilityUse(
+                CoordinateOperationContext::GridAvailabilityUse::
+                    DISCARD_OPERATION_IF_MISSING_GRID);
+            break;
 
-    case PROJ_GRID_AVAILABILITY_IGNORED:
-        ctx->operationContext->setGridAvailabilityUse(
-            CoordinateOperationContext::GridAvailabilityUse::
-                IGNORE_GRID_AVAILABILITY);
-        break;
+        case PROJ_GRID_AVAILABILITY_IGNORED:
+            factory_ctx->operationContext->setGridAvailabilityUse(
+                CoordinateOperationContext::GridAvailabilityUse::
+                    IGNORE_GRID_AVAILABILITY);
+            break;
+        }
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
 }
 
@@ -5112,13 +5253,21 @@ void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
  *
  * The default is true.
  *
- * @param ctx Operation factory context. must not be NULL
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
  * @param usePROJNames whether PROJ alternative grid names should be used
  */
 void proj_operation_factory_context_set_use_proj_alternative_grid_names(
-    PJ_OPERATION_FACTORY_CONTEXT *ctx, int usePROJNames) {
-    assert(ctx);
-    ctx->operationContext->setUsePROJAlternativeGridNames(usePROJNames != 0);
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    int usePROJNames) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        factory_ctx->operationContext->setUsePROJAlternativeGridNames(
+            usePROJNames != 0);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -5140,13 +5289,19 @@ void proj_operation_factory_context_set_use_proj_alternative_grid_names(
  *
  * The default is true.
  *
- * @param ctx Operation factory context. must not be NULL
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
  * @param allow whether intermediate CRS may be used.
  */
 void proj_operation_factory_context_set_allow_use_intermediate_crs(
-    PJ_OPERATION_FACTORY_CONTEXT *ctx, int allow) {
-    assert(ctx);
-    ctx->operationContext->setAllowUseIntermediateCRS(allow != 0);
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx, int allow) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        factory_ctx->operationContext->setAllowUseIntermediateCRS(allow != 0);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -5154,21 +5309,27 @@ void proj_operation_factory_context_set_allow_use_intermediate_crs(
 /** \brief Restrict the potential pivot CRSs that can be used when trying to
  * build a coordinate operation between two CRS that have no direct operation.
  *
- * @param ctx Operation factory context. must not be NULL
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
  * @param list_of_auth_name_codes an array of strings NLL terminated,
  * with the format { "auth_name1", "code1", "auth_name2", "code2", ... NULL }
  */
 void proj_operation_factory_context_set_allowed_intermediate_crs(
-    PJ_OPERATION_FACTORY_CONTEXT *ctx,
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
     const char *const *list_of_auth_name_codes) {
-    assert(ctx);
-    std::vector<std::pair<std::string, std::string>> pivots;
-    for (auto iter = list_of_auth_name_codes; iter && iter[0] && iter[1];
-         iter += 2) {
-        pivots.emplace_back(std::pair<std::string, std::string>(
-            std::string(iter[0]), std::string(iter[1])));
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        std::vector<std::pair<std::string, std::string>> pivots;
+        for (auto iter = list_of_auth_name_codes; iter && iter[0] && iter[1];
+             iter += 2) {
+            pivots.emplace_back(std::pair<std::string, std::string>(
+                std::string(iter[0]), std::string(iter[1])));
+        }
+        factory_ctx->operationContext->setIntermediateCRS(pivots);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
     }
-    ctx->operationContext->setIntermediateCRS(pivots);
 }
 
 // ---------------------------------------------------------------------------
@@ -5183,6 +5344,7 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
  * by increasing accuracy. Operations with unknown accuracy are sorted last,
  * whatever their area.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param source_crs source CRS. Must not be NULL.
  * @param target_crs source CRS. Must not be NULL.
  * @param operationContext Search context. Must not be NULL.
@@ -5190,22 +5352,21 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
  * proj_obj_list_unref(), or NULL in case of error.
  */
 PJ_OBJ_LIST *proj_obj_create_operations(
-    const PJ_OBJ *source_crs, const PJ_OBJ *target_crs,
+    PJ_CONTEXT *ctx, const PJ_OBJ *source_crs, const PJ_OBJ *target_crs,
     const PJ_OPERATION_FACTORY_CONTEXT *operationContext) {
+    SANITIZE_CTX(ctx);
     assert(source_crs);
     assert(target_crs);
     assert(operationContext);
 
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(source_crs->obj);
     if (!sourceCRS) {
-        proj_log_error(operationContext->ctx, __FUNCTION__,
-                       "source_crs is not a CRS");
+        proj_log_error(ctx, __FUNCTION__, "source_crs is not a CRS");
         return nullptr;
     }
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(target_crs->obj);
     if (!targetCRS) {
-        proj_log_error(operationContext->ctx, __FUNCTION__,
-                       "target_crs is not a CRS");
+        proj_log_error(ctx, __FUNCTION__, "target_crs is not a CRS");
         return nullptr;
     }
 
@@ -5218,9 +5379,9 @@ PJ_OBJ_LIST *proj_obj_create_operations(
         for (const auto &op : ops) {
             objects.emplace_back(op);
         }
-        return new PJ_OBJ_LIST(operationContext->ctx, std::move(objects));
+        return new PJ_OBJ_LIST(std::move(objects));
     } catch (const std::exception &e) {
-        proj_log_error(operationContext->ctx, __FUNCTION__, e.what());
+        proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
 }
@@ -5244,19 +5405,22 @@ int proj_obj_list_get_count(const PJ_OBJ_LIST *result) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param result Objet of type PJ_OBJ_LIST (must not be NULL)
  * @param index Index
  * @return a new object that must be unreferenced with proj_obj_unref(),
  * or nullptr in case of error.
  */
 
-PJ_OBJ *proj_obj_list_get(const PJ_OBJ_LIST *result, int index) {
+PJ_OBJ *proj_obj_list_get(PJ_CONTEXT *ctx, const PJ_OBJ_LIST *result,
+                          int index) {
+    SANITIZE_CTX(ctx);
     assert(result);
     if (index < 0 || index >= proj_obj_list_get_count(result)) {
-        proj_log_error(result->ctx, __FUNCTION__, "Invalid index");
+        proj_log_error(ctx, __FUNCTION__, "Invalid index");
         return nullptr;
     }
-    return PJ_OBJ::create(result->ctx, result->objects[index]);
+    return PJ_OBJ::create(result->objects[index]);
 }
 
 // ---------------------------------------------------------------------------
@@ -5274,14 +5438,18 @@ void proj_obj_list_unref(PJ_OBJ_LIST *result) { delete result; }
 
 /** \brief Return the accuracy (in metre) of a coordinate operation.
  *
+ * @param ctx PROJ context, or NULL for default context
+ * @param coordoperation Coordinate operation. Must not be NULL.
  * @return the accuracy, or a negative value if unknown or in case of error.
  */
-double proj_coordoperation_get_accuracy(const PJ_OBJ *coordoperation) {
+double proj_coordoperation_get_accuracy(PJ_CONTEXT *ctx,
+                                        const PJ_OBJ *coordoperation) {
+    SANITIZE_CTX(ctx);
     assert(coordoperation);
     auto co =
         dynamic_cast<const CoordinateOperation *>(coordoperation->obj.get());
     if (!co) {
-        proj_log_error(coordoperation->ctx, __FUNCTION__,
+        proj_log_error(ctx, __FUNCTION__,
                        "Object is not a CoordinateOperation");
         return -1;
     }
@@ -5304,22 +5472,24 @@ double proj_coordoperation_get_accuracy(const PJ_OBJ *coordoperation) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type SingleCRS (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error (or if there is no datum)
  */
-PJ_OBJ *proj_obj_crs_get_datum(const PJ_OBJ *crs) {
+PJ_OBJ *proj_obj_crs_get_datum(PJ_CONTEXT *ctx, const PJ_OBJ *crs) {
+    SANITIZE_CTX(ctx);
     assert(crs);
     auto l_crs = dynamic_cast<const SingleCRS *>(crs->obj.get());
     if (!l_crs) {
-        proj_log_error(crs->ctx, __FUNCTION__, "Object is not a SingleCRS");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a SingleCRS");
         return nullptr;
     }
     const auto &datum = l_crs->datum();
     if (!datum) {
         return nullptr;
     }
-    return PJ_OBJ::create(crs->ctx, NN_NO_CHECK(datum));
+    return PJ_OBJ::create(NN_NO_CHECK(datum));
 }
 
 // ---------------------------------------------------------------------------
@@ -5330,33 +5500,37 @@ PJ_OBJ *proj_obj_crs_get_datum(const PJ_OBJ *crs) {
  * use.
  * It should be used by at most one thread at a time.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type SingleCRS (must not be NULL)
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
-PJ_OBJ *proj_obj_crs_get_coordinate_system(const PJ_OBJ *crs) {
+PJ_OBJ *proj_obj_crs_get_coordinate_system(PJ_CONTEXT *ctx, const PJ_OBJ *crs) {
+    SANITIZE_CTX(ctx);
     assert(crs);
     auto l_crs = dynamic_cast<const SingleCRS *>(crs->obj.get());
     if (!l_crs) {
-        proj_log_error(crs->ctx, __FUNCTION__, "Object is not a SingleCRS");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a SingleCRS");
         return nullptr;
     }
-    return PJ_OBJ::create(crs->ctx, l_crs->coordinateSystem());
+    return PJ_OBJ::create(l_crs->coordinateSystem());
 }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the type of the coordinate system.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param cs Objet of type CoordinateSystem (must not be NULL)
  * @return type, or PJ_CS_TYPE_UNKNOWN in case of error.
  */
-PJ_COORDINATE_SYSTEM_TYPE proj_obj_cs_get_type(const PJ_OBJ *cs) {
+PJ_COORDINATE_SYSTEM_TYPE proj_obj_cs_get_type(PJ_CONTEXT *ctx,
+                                               const PJ_OBJ *cs) {
+    SANITIZE_CTX(ctx);
     assert(cs);
     auto l_cs = dynamic_cast<const CoordinateSystem *>(cs->obj.get());
     if (!l_cs) {
-        proj_log_error(cs->ctx, __FUNCTION__,
-                       "Object is not a CoordinateSystem");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CoordinateSystem");
         return PJ_CS_TYPE_UNKNOWN;
     }
     if (dynamic_cast<const CartesianCS *>(l_cs)) {
@@ -5393,15 +5567,16 @@ PJ_COORDINATE_SYSTEM_TYPE proj_obj_cs_get_type(const PJ_OBJ *cs) {
 
 /** \brief Returns the number of axis of the coordinate system.
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param cs Objet of type CoordinateSystem (must not be NULL)
  * @return number of axis, or -1 in case of error.
  */
-int proj_obj_cs_get_axis_count(const PJ_OBJ *cs) {
+int proj_obj_cs_get_axis_count(PJ_CONTEXT *ctx, const PJ_OBJ *cs) {
+    SANITIZE_CTX(ctx);
     assert(cs);
     auto l_cs = dynamic_cast<const CoordinateSystem *>(cs->obj.get());
     if (!l_cs) {
-        proj_log_error(cs->ctx, __FUNCTION__,
-                       "Object is not a CoordinateSystem");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CoordinateSystem");
         return -1;
     }
     return static_cast<int>(l_cs->axisList().size());
@@ -5411,6 +5586,7 @@ int proj_obj_cs_get_axis_count(const PJ_OBJ *cs) {
 
 /** \brief Returns information on an axis
  *
+ * @param ctx PROJ context, or NULL for default context
  * @param cs Objet of type CoordinateSystem (must not be NULL)
  * @param index Index of the coordinate system (between 0 and
  * proj_obj_cs_get_axis_count() - 1)
@@ -5425,21 +5601,21 @@ int proj_obj_cs_get_axis_count(const PJ_OBJ *cs) {
  * unit name. or NULL
  * @return TRUE in case of success
  */
-int proj_obj_cs_get_axis_info(const PJ_OBJ *cs, int index,
+int proj_obj_cs_get_axis_info(PJ_CONTEXT *ctx, const PJ_OBJ *cs, int index,
                               const char **out_name, const char **out_abbrev,
                               const char **out_direction,
                               double *out_unit_conv_factor,
                               const char **out_unit_name) {
+    SANITIZE_CTX(ctx);
     assert(cs);
     auto l_cs = dynamic_cast<const CoordinateSystem *>(cs->obj.get());
     if (!l_cs) {
-        proj_log_error(cs->ctx, __FUNCTION__,
-                       "Object is not a CoordinateSystem");
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CoordinateSystem");
         return false;
     }
     const auto &axisList = l_cs->axisList();
     if (index < 0 || static_cast<size_t>(index) >= axisList.size()) {
-        proj_log_error(cs->ctx, __FUNCTION__, "Invalid index");
+        proj_log_error(ctx, __FUNCTION__, "Invalid index");
         return false;
     }
     const auto &axis = axisList[index];

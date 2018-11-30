@@ -137,6 +137,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                 cppfile.write(" * Angular parameters are expressed in (angUnitName, angUnitConvFactor).\n")
             cppfile.write(" */\n")
             cppfile.write("PJ_OBJ* " + decl + "{\n");
+            cppfile.write("  SANITIZE_CTX(ctx);\n");
             cppfile.write("  try {\n");
             if has_linear:
                 cppfile.write("    UnitOfMeasure linearUnit(createLinearUnit(linearUnitName, linearUnitConvFactor));\n")
@@ -156,7 +157,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                     cppfile.write(", Scale(" + param[1] + ")")
 
             cppfile.write(");\n")
-            cppfile.write("    return proj_obj_create_conversion(ctx, conv);\n")
+            cppfile.write("    return proj_obj_create_conversion(conv);\n")
             cppfile.write("  } catch (const std::exception &e) {\n");
             cppfile.write("    proj_log_error(ctx, __FUNCTION__, e.what());\n")
             cppfile.write("  }\n")

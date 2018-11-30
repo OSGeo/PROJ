@@ -771,6 +771,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
     if( area && area->bbox_set ) {
         proj_operation_factory_context_set_area_of_interest(
+                                            ctx,
                                             operation_ctx,
                                             area->west_lon_degree,
                                             area->south_lat_degree,
@@ -779,9 +780,9 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     }
 
     proj_operation_factory_context_set_grid_availability_use(
-        operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+        ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
-    op_list = proj_obj_create_operations(src, dst, operation_ctx);
+    op_list = proj_obj_create_operations(ctx, src, dst, operation_ctx);
 
     proj_operation_factory_context_unref(operation_ctx);
     proj_obj_unref(src);
@@ -796,13 +797,13 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         return NULL;
     }
 
-    op = proj_obj_list_get(op_list, 0);
+    op = proj_obj_list_get(ctx, op_list, 0);
     proj_obj_list_unref(op_list);
     if( !op ) {
         return NULL;
     }
 
-    proj_string = proj_obj_as_proj_string(op, PJ_PROJ_5, NULL);
+    proj_string = proj_obj_as_proj_string(ctx, op, PJ_PROJ_5, NULL);
     if( !proj_string) {
         proj_obj_unref(op);
         return NULL;

@@ -290,7 +290,7 @@ Expand key from buffer or (if not in buffer) from init file
                 return 0;
             }
 
-            proj_string = proj_obj_as_proj_string(src, PJ_PROJ_4, NULL);
+            proj_string = proj_obj_as_proj_string(ctx, src, PJ_PROJ_4, NULL);
             if( !proj_string ) {
                 proj_obj_unref(src);
                 return 0;

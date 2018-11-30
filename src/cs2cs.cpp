@@ -225,19 +225,19 @@ static PJ_OBJ *instanciate_crs(const std::string &definition,
 
     auto type = proj_obj_get_type(crs);
     if (type == PJ_OBJ_TYPE_BOUND_CRS) {
-        auto base = proj_obj_get_source_crs(crs);
+        auto base = proj_obj_get_source_crs(nullptr, crs);
         proj_obj_unref(crs);
         crs = base;
         type = proj_obj_get_type(crs);
     }
     if (type == PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS ||
         type == PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS) {
-        auto cs = proj_obj_crs_get_coordinate_system(crs);
+        auto cs = proj_obj_crs_get_coordinate_system(nullptr, crs);
         assert(cs);
 
         isGeog = true;
         const char *axisName = "";
-        proj_obj_cs_get_axis_info(cs, 0,
+        proj_obj_cs_get_axis_info(nullptr, cs, 0,
                                   &axisName, // name,
                                   nullptr,   // abbrev
                                   nullptr,   // direction
@@ -263,7 +263,7 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
                                                           bool &isLatFirst) {
     auto srcType = proj_obj_get_type(src);
     if (srcType == PJ_OBJ_TYPE_BOUND_CRS) {
-        auto base = proj_obj_get_source_crs(src);
+        auto base = proj_obj_get_source_crs(nullptr, src);
         assert(base);
         proj_obj_unref(src);
         src = base;
@@ -273,7 +273,7 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
         return std::string();
     }
 
-    auto base = proj_obj_get_source_crs(src);
+    auto base = proj_obj_get_source_crs(nullptr, src);
     assert(base);
     auto baseType = proj_obj_get_type(base);
     if (baseType != PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS &&
@@ -282,11 +282,11 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
         return std::string();
     }
 
-    auto cs = proj_obj_crs_get_coordinate_system(base);
+    auto cs = proj_obj_crs_get_coordinate_system(nullptr, base);
     assert(cs);
 
     const char *axisName = "";
-    proj_obj_cs_get_axis_info(cs, 0,
+    proj_obj_cs_get_axis_info(nullptr, cs, 0,
                               &axisName, // name,
                               nullptr,   // abbrev
                               nullptr,   // direction
@@ -298,7 +298,7 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
 
     proj_obj_unref(cs);
 
-    auto retCStr = proj_obj_as_proj_string(base, PJ_PROJ_5, nullptr);
+    auto retCStr = proj_obj_as_proj_string(nullptr, base, PJ_PROJ_5, nullptr);
     std::string ret(retCStr ? retCStr : "");
     proj_obj_unref(base);
     return ret;
