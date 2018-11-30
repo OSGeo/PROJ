@@ -981,64 +981,64 @@ PJ_OBJ PROJ_DLL *proj_obj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
 
 PJ_OBJ PROJ_DLL *proj_obj_create_geographic_crs(
                             PJ_CONTEXT *ctx,
-                            const char *crsName,
-                            const char *datumName,
-                            const char *ellipsoidName,
-                            double semiMajorMetre, double invFlattening,
-                            const char *primeMeridianName,
-                            double primeMeridianOffset,
-                            const char *pmAngularUnits,
-                            double pmUnitsConv,
-                            PJ_OBJ* ellipsoidalCS);
+                            const char *crs_name,
+                            const char *datum_name,
+                            const char *ellps_name,
+                            double semi_major_metre, double inv_flattening,
+                            const char *prime_meridian_name,
+                            double prime_meridian_offset,
+                            const char *pm_angular_units,
+                            double pm_units_conv,
+                            PJ_OBJ* ellipsoidal_cs);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_geographic_crs_from_datum(
                             PJ_CONTEXT *ctx,
-                            const char *crsName,
+                            const char *crs_name,
                             PJ_OBJ* datum,
-                            PJ_OBJ* ellipsoidalCS);
+                            PJ_OBJ* ellipsoidal_cs);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_geocentric_crs(
                             PJ_CONTEXT *ctx,
-                            const char *crsName,
-                            const char *datumName,
-                            const char *ellipsoidName,
-                            double semiMajorMetre, double invFlattening,
-                            const char *primeMeridianName,
-                            double primeMeridianOffset,
-                            const char *angularUnits,
-                            double angularUnitsConv,
-                            const char *linearUnits,
-                            double linearUnitsConv);
+                            const char *crs_name,
+                            const char *datum_name,
+                            const char *ellps_name,
+                            double semi_major_metre, double inv_flattening,
+                            const char *prime_meridian_name,
+                            double prime_meridian_offset,
+                            const char *angular_units,
+                            double angular_units_conv,
+                            const char *linear_units,
+                            double linear_units_conv);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_geocentric_crs_from_datum(
                             PJ_CONTEXT *ctx,
-                            const char *crsName,
+                            const char *crs_name,
                             const PJ_OBJ* datum,
-                            const char *linearUnits,
-                            double linearUnitsConv);
+                            const char *linear_units,
+                            double linear_units_conv);
 
 PJ_OBJ PROJ_DLL *proj_obj_alter_name(PJ_CONTEXT *ctx,
                                      const PJ_OBJ* obj, const char* name);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx,
                                                  const PJ_OBJ* obj,
-                                                 const PJ_OBJ* newGeodCRS);
+                                                 const PJ_OBJ* new_geod_crs);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx,
                                                     const PJ_OBJ* obj,
-                                                    const char *angularUnits,
-                                                    double angularUnitsConv);
+                                                    const char *angular_units,
+                                                    double angular_units_conv);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx,
                                                    const PJ_OBJ* obj,
-                                                    const char *linearUnits,
-                                                    double linearUnitsConv);
+                                                    const char *linear_units,
+                                                    double linear_units_conv);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
                                                            const PJ_OBJ* obj,
-                                                    const char *linearUnits,
-                                                    double linearUnitsConv,
-                                                    int convertToNewUnit);
+                                                    const char *linear_units,
+                                                    double linear_units_conv,
+                                                    int convert_to_new_unit);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_engineering_crs(PJ_CONTEXT *ctx,
                                                  const char *crsName);
@@ -1094,587 +1094,587 @@ PJ_OBJ PROJ_DLL *proj_obj_create_conversion_utm(
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_transverse_mercator(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
+    double center_lat,
+    double center_long,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
+    double center_lat,
+    double center_long,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_transverse_mercator_south_oriented(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
+    double center_lat,
+    double center_long,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_two_point_equidistant(
     PJ_CONTEXT *ctx,
-    double latitudeFirstPoint,
-    double longitudeFirstPoint,
-    double latitudeSecondPoint,
-    double longitudeSeconPoint,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_first_point,
+    double longitude_first_point,
+    double latitude_second_point,
+    double longitude_secon_point,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_tunisia_mapping_grid(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_albers_equal_area(
     PJ_CONTEXT *ctx,
-    double latitudeFalseOrigin,
-    double longitudeFalseOrigin,
-    double latitudeFirstParallel,
-    double latitudeSecondParallel,
-    double eastingFalseOrigin,
-    double northingFalseOrigin,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_false_origin,
+    double longitude_false_origin,
+    double latitude_first_parallel,
+    double latitude_second_parallel,
+    double easting_false_origin,
+    double northing_false_origin,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_1sp(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
+    double center_lat,
+    double center_long,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp(
     PJ_CONTEXT *ctx,
-    double latitudeFalseOrigin,
-    double longitudeFalseOrigin,
-    double latitudeFirstParallel,
-    double latitudeSecondParallel,
-    double eastingFalseOrigin,
-    double northingFalseOrigin,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_false_origin,
+    double longitude_false_origin,
+    double latitude_first_parallel,
+    double latitude_second_parallel,
+    double easting_false_origin,
+    double northing_false_origin,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
     PJ_CONTEXT *ctx,
-    double latitudeFalseOrigin,
-    double longitudeFalseOrigin,
-    double latitudeFirstParallel,
-    double latitudeSecondParallel,
-    double eastingFalseOrigin,
-    double northingFalseOrigin,
-    double ellipsoidScalingFactor,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_false_origin,
+    double longitude_false_origin,
+    double latitude_first_parallel,
+    double latitude_second_parallel,
+    double easting_false_origin,
+    double northing_false_origin,
+    double ellipsoid_scaling_factor,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
     PJ_CONTEXT *ctx,
-    double latitudeFalseOrigin,
-    double longitudeFalseOrigin,
-    double latitudeFirstParallel,
-    double latitudeSecondParallel,
-    double eastingFalseOrigin,
-    double northingFalseOrigin,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_false_origin,
+    double longitude_false_origin,
+    double latitude_first_parallel,
+    double latitude_second_parallel,
+    double easting_false_origin,
+    double northing_false_origin,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_azimuthal_equidistant(
     PJ_CONTEXT *ctx,
-    double latitudeNatOrigin,
-    double longitudeNatOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_nat_origin,
+    double longitude_nat_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_guam_projection(
     PJ_CONTEXT *ctx,
-    double latitudeNatOrigin,
-    double longitudeNatOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_nat_origin,
+    double longitude_nat_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_bonne(
     PJ_CONTEXT *ctx,
-    double latitudeNatOrigin,
-    double longitudeNatOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_nat_origin,
+    double longitude_nat_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical(
     PJ_CONTEXT *ctx,
-    double latitudeFirstParallel,
-    double longitudeNatOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_first_parallel,
+    double longitude_nat_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_lambert_cylindrical_equal_area(
     PJ_CONTEXT *ctx,
-    double latitudeFirstParallel,
-    double longitudeNatOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_first_parallel,
+    double longitude_nat_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_cassini_soldner(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_equidistant_conic(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double latitudeFirstParallel,
-    double latitudeSecondParallel,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double latitude_first_parallel,
+    double latitude_second_parallel,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_eckert_i(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_eckert_ii(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_eckert_iii(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_eckert_iv(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_eckert_v(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_eckert_vi(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_equidistant_cylindrical(
     PJ_CONTEXT *ctx,
-    double latitudeFirstParallel,
-    double longitudeNatOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_first_parallel,
+    double longitude_nat_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_equidistant_cylindrical_spherical(
     PJ_CONTEXT *ctx,
-    double latitudeFirstParallel,
-    double longitudeNatOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_first_parallel,
+    double longitude_nat_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_gall(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_goode_homolosine(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_interrupted_goode_homolosine(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_geostationary_satellite_sweep_x(
     PJ_CONTEXT *ctx,
-    double centerLong,
+    double center_long,
     double height,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_geostationary_satellite_sweep_y(
     PJ_CONTEXT *ctx,
-    double centerLong,
+    double center_long,
     double height,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_gnomonic(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
     PJ_CONTEXT *ctx,
-    double latitudeProjectionCentre,
-    double longitudeProjectionCentre,
-    double azimuthInitialLine,
-    double angleFromRectifiedToSkrewGrid,
+    double latitude_projection_centre,
+    double longitude_projection_centre,
+    double azimuth_initial_line,
+    double angle_from_rectified_to_skrew_grid,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
     PJ_CONTEXT *ctx,
-    double latitudeProjectionCentre,
-    double longitudeProjectionCentre,
-    double azimuthInitialLine,
-    double angleFromRectifiedToSkrewGrid,
+    double latitude_projection_centre,
+    double longitude_projection_centre,
+    double azimuth_initial_line,
+    double angle_from_rectified_to_skrew_grid,
     double scale,
-    double eastingProjectionCentre,
-    double northingProjectionCentre,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double easting_projection_centre,
+    double northing_projection_centre,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
     PJ_CONTEXT *ctx,
-    double latitudeProjectionCentre,
-    double latitudePoint1,
-    double longitudePoint1,
-    double latitudePoint2,
-    double longitudePoint2,
+    double latitude_projection_centre,
+    double latitude_point1,
+    double longitude_point1,
+    double latitude_point2,
+    double longitude_point2,
     double scale,
-    double eastingProjectionCentre,
-    double northingProjectionCentre,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double easting_projection_centre,
+    double northing_projection_centre,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_international_map_world_polyconic(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double latitudeFirstParallel,
-    double latitudeSecondParallel,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double latitude_first_parallel,
+    double latitude_second_parallel,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_krovak_north_oriented(
     PJ_CONTEXT *ctx,
-    double latitudeProjectionCentre,
-    double longitudeOfOrigin,
-    double colatitudeConeAxis,
-    double latitudePseudoStandardParallel,
-    double scaleFactorPseudoStandardParallel,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_projection_centre,
+    double longitude_of_origin,
+    double colatitude_cone_axis,
+    double latitude_pseudo_standard_parallel,
+    double scale_factor_pseudo_standard_parallel,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_krovak(
     PJ_CONTEXT *ctx,
-    double latitudeProjectionCentre,
-    double longitudeOfOrigin,
-    double colatitudeConeAxis,
-    double latitudePseudoStandardParallel,
-    double scaleFactorPseudoStandardParallel,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_projection_centre,
+    double longitude_of_origin,
+    double colatitude_cone_axis,
+    double latitude_pseudo_standard_parallel,
+    double scale_factor_pseudo_standard_parallel,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_lambert_azimuthal_equal_area(
     PJ_CONTEXT *ctx,
-    double latitudeNatOrigin,
-    double longitudeNatOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_nat_origin,
+    double longitude_nat_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_miller_cylindrical(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_mercator_variant_a(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
+    double center_lat,
+    double center_long,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_mercator_variant_b(
     PJ_CONTEXT *ctx,
-    double latitudeFirstParallel,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_first_parallel,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_mollweide(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_new_zealand_mapping_grid(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_oblique_stereographic(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
+    double center_lat,
+    double center_long,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_orthographic(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_american_polyconic(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_polar_stereographic_variant_a(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
+    double center_lat,
+    double center_long,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_polar_stereographic_variant_b(
     PJ_CONTEXT *ctx,
-    double latitudeStandardParallel,
-    double longitudeOfOrigin,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_standard_parallel,
+    double longitude_of_origin,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_robinson(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_sinusoidal(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_stereographic(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
+    double center_lat,
+    double center_long,
     double scale,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_van_der_grinten(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_wagner_i(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_wagner_ii(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_wagner_iii(
     PJ_CONTEXT *ctx,
-    double latitudeTrueScale,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double latitude_true_scale,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_wagner_iv(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_wagner_v(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_wagner_vi(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_wagner_vii(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_quadrilateralized_spherical_cube(
     PJ_CONTEXT *ctx,
-    double centerLat,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_spherical_cross_track_height(
     PJ_CONTEXT *ctx,
-    double pegPointLat,
-    double pegPointLong,
-    double pegPointHeading,
-    double pegPointHeight,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double peg_point_lat,
+    double peg_point_long,
+    double peg_point_heading,
+    double peg_point_height,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_equal_earth(
     PJ_CONTEXT *ctx,
-    double centerLong,
-    double falseEasting,
-    double falseNorthing,
-    const char* angUnitName, double angUnitConvFactor,
-    const char* linearUnitName, double linearUnitConvFactor);
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
 
 /* END: Generated by scripts/create_c_api_projections.py*/
 

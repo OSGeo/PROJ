@@ -1820,31 +1820,33 @@ static UnitOfMeasure createAngularUnit(const char *name, double convFactor) {
 // ---------------------------------------------------------------------------
 
 static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
-    PJ_CONTEXT *ctx, const char *datumName, const char *ellipsoidName,
-    double semiMajorMetre, double invFlattening, const char *primeMeridianName,
-    double primeMeridianOffset, const char *angularUnits,
-    double angularUnitsConv) {
+    PJ_CONTEXT *ctx, const char *datum_name, const char *ellps_name,
+    double semi_major_metre, double inv_flattening,
+    const char *prime_meridian_name, double prime_meridian_offset,
+    const char *angular_units, double angular_units_conv) {
     const UnitOfMeasure angUnit(
-        createAngularUnit(angularUnits, angularUnitsConv));
+        createAngularUnit(angular_units, angular_units_conv));
     auto dbContext = getDBcontext(ctx);
-    auto body = Ellipsoid::guessBodyName(dbContext, semiMajorMetre);
-    auto ellpsName = createPropertyMapName(ellipsoidName);
-    auto ellps =
-        invFlattening != 0.0
-            ? Ellipsoid::createFlattenedSphere(
-                  ellpsName, Length(semiMajorMetre), Scale(invFlattening), body)
-            : Ellipsoid::createSphere(ellpsName, Length(semiMajorMetre), body);
+    auto body = Ellipsoid::guessBodyName(dbContext, semi_major_metre);
+    auto ellpsName = createPropertyMapName(ellps_name);
+    auto ellps = inv_flattening != 0.0
+                     ? Ellipsoid::createFlattenedSphere(
+                           ellpsName, Length(semi_major_metre),
+                           Scale(inv_flattening), body)
+                     : Ellipsoid::createSphere(ellpsName,
+                                               Length(semi_major_metre), body);
     auto pm = PrimeMeridian::create(
-        PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                          primeMeridianName ? primeMeridianName
-                                            : primeMeridianOffset == 0.0
-                                                  ? (ellps->celestialBody() ==
-                                                             Ellipsoid::EARTH
-                                                         ? "Greenwich"
-                                                         : "Reference meridian")
-                                                  : "unnamed"),
-        Angle(primeMeridianOffset, angUnit));
-    return GeodeticReferenceFrame::create(createPropertyMapName(datumName),
+        PropertyMap().set(
+            common::IdentifiedObject::NAME_KEY,
+            prime_meridian_name
+                ? prime_meridian_name
+                : prime_meridian_offset == 0.0
+                      ? (ellps->celestialBody() == Ellipsoid::EARTH
+                             ? "Greenwich"
+                             : "Reference meridian")
+                      : "unnamed"),
+        Angle(prime_meridian_offset, angUnit));
+    return GeodeticReferenceFrame::create(createPropertyMapName(datum_name),
                                           ellps, util::optional<std::string>(),
                                           pm);
 }
@@ -1860,41 +1862,42 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
  * It should be used by at most one thread at a time.
  *
  * @param ctx PROJ context, or NULL for default context
- * @param crsName Name of the GeographicCRS. Or NULL
- * @param datumName Name of the GeodeticReferenceFrame. Or NULL
- * @param ellipsoidName Name of the Ellipsoid. Or NULL
- * @param semiMajorMetre Ellipsoid semi-major axis, in metres.
- * @param invFlattening Ellipsoid inverse flattening. Or 0 for a sphere.
- * @param primeMeridianName Name of the PrimeMeridian. Or NULL
- * @param primeMeridianOffset Offset of the prime meridian, expressed in the
+ * @param crs_name Name of the GeographicCRS. Or NULL
+ * @param datum_name Name of the GeodeticReferenceFrame. Or NULL
+ * @param ellps_name Name of the Ellipsoid. Or NULL
+ * @param semi_major_metre Ellipsoid semi-major axis, in metres.
+ * @param inv_flattening Ellipsoid inverse flattening. Or 0 for a sphere.
+ * @param prime_meridian_name Name of the PrimeMeridian. Or NULL
+ * @param prime_meridian_offset Offset of the prime meridian, expressed in the
  * specified angular units.
- * @param pmAngularUnits Name of the angular units. Or NULL for Degree
- * @param pmAngularUnitsConv Conversion factor from the angular unit to radian.
+ * @param pm_angular_units Name of the angular units. Or NULL for Degree
+ * @param pm_angular_units_conv Conversion factor from the angular unit to
+ * radian.
  * Or
- * 0 for Degree if angularUnits == NULL. Otherwise should be not NULL
- * @param ellipsoidalCS Coordinate system. Must not be NULL.
+ * 0 for Degree if pm_angular_units == NULL. Otherwise should be not NULL
+ * @param ellipsoidal_cs Coordinate system. Must not be NULL.
  *
  * @return Object of type GeographicCRS that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_create_geographic_crs(
-    PJ_CONTEXT *ctx, const char *crsName, const char *datumName,
-    const char *ellipsoidName, double semiMajorMetre, double invFlattening,
-    const char *primeMeridianName, double primeMeridianOffset,
-    const char *pmAngularUnits, double pmAngularUnitsConv,
-    PJ_OBJ *ellipsoidalCS) {
+    PJ_CONTEXT *ctx, const char *crs_name, const char *datum_name,
+    const char *ellps_name, double semi_major_metre, double inv_flattening,
+    const char *prime_meridian_name, double prime_meridian_offset,
+    const char *pm_angular_units, double pm_angular_units_conv,
+    PJ_OBJ *ellipsoidal_cs) {
 
     SANITIZE_CTX(ctx);
-    auto cs = util::nn_dynamic_pointer_cast<EllipsoidalCS>(ellipsoidalCS->obj);
+    auto cs = util::nn_dynamic_pointer_cast<EllipsoidalCS>(ellipsoidal_cs->obj);
     if (!cs) {
         return nullptr;
     }
     try {
         auto datum = createGeodeticReferenceFrame(
-            ctx, datumName, ellipsoidName, semiMajorMetre, invFlattening,
-            primeMeridianName, primeMeridianOffset, pmAngularUnits,
-            pmAngularUnitsConv);
-        auto geogCRS = GeographicCRS::create(createPropertyMapName(crsName),
+            ctx, datum_name, ellps_name, semi_major_metre, inv_flattening,
+            prime_meridian_name, prime_meridian_offset, pm_angular_units,
+            pm_angular_units_conv);
+        auto geogCRS = GeographicCRS::create(createPropertyMapName(crs_name),
                                              datum, NN_NO_CHECK(cs));
         return PJ_OBJ::create(geogCRS);
     } catch (const std::exception &e) {
@@ -1912,17 +1915,17 @@ PJ_OBJ *proj_obj_create_geographic_crs(
  * It should be used by at most one thread at a time.
  *
  * @param ctx PROJ context, or NULL for default context
- * @param crsName Name of the GeographicCRS. Or NULL
+ * @param crs_name Name of the GeographicCRS. Or NULL
  * @param datum Datum. Must not be NULL.
- * @param ellipsoidalCS Coordinate system. Must not be NULL.
+ * @param ellipsoidal_cs Coordinate system. Must not be NULL.
  *
  * @return Object of type GeographicCRS that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx,
-                                                  const char *crsName,
+                                                  const char *crs_name,
                                                   PJ_OBJ *datum,
-                                                  PJ_OBJ *ellipsoidalCS) {
+                                                  PJ_OBJ *ellipsoidal_cs) {
 
     SANITIZE_CTX(ctx);
     auto l_datum =
@@ -1932,13 +1935,13 @@ PJ_OBJ *proj_obj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx,
                        "datum is not a GeodeticReferenceFrame");
         return nullptr;
     }
-    auto cs = util::nn_dynamic_pointer_cast<EllipsoidalCS>(ellipsoidalCS->obj);
+    auto cs = util::nn_dynamic_pointer_cast<EllipsoidalCS>(ellipsoidal_cs->obj);
     if (!cs) {
         return nullptr;
     }
     try {
         auto geogCRS =
-            GeographicCRS::create(createPropertyMapName(crsName),
+            GeographicCRS::create(createPropertyMapName(crs_name),
                                   NN_NO_CHECK(l_datum), NN_NO_CHECK(cs));
         return PJ_OBJ::create(geogCRS);
     } catch (const std::exception &e) {
@@ -1956,42 +1959,43 @@ PJ_OBJ *proj_obj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx,
  * It should be used by at most one thread at a time.
  *
  * @param ctx PROJ context, or NULL for default context
- * @param crsName Name of the GeographicCRS. Or NULL
- * @param datumName Name of the GeodeticReferenceFrame. Or NULL
- * @param ellipsoidName Name of the Ellipsoid. Or NULL
- * @param semiMajorMetre Ellipsoid semi-major axis, in metres.
- * @param invFlattening Ellipsoid inverse flattening. Or 0 for a sphere.
- * @param primeMeridianName Name of the PrimeMeridian. Or NULL
- * @param primeMeridianOffset Offset of the prime meridian, expressed in the
+ * @param crs_name Name of the GeographicCRS. Or NULL
+ * @param datum_name Name of the GeodeticReferenceFrame. Or NULL
+ * @param ellps_name Name of the Ellipsoid. Or NULL
+ * @param semi_major_metre Ellipsoid semi-major axis, in metres.
+ * @param inv_flattening Ellipsoid inverse flattening. Or 0 for a sphere.
+ * @param prime_meridian_name Name of the PrimeMeridian. Or NULL
+ * @param prime_meridian_offset Offset of the prime meridian, expressed in the
  * specified angular units.
- * @param angularUnits Name of the angular units. Or NULL for Degree
- * @param angularUnitsConv Conversion factor from the angular unit to radian. Or
- * 0 for Degree if angularUnits == NULL. Otherwise should be not NULL
- * @param linearUnits Name of the linear units. Or NULL for Metre
- * @param linearUnitsConv Conversion factor from the linear unit to metre. Or
- * 0 for Metre if linearUnits == NULL. Otherwise should be not NULL
+ * @param angular_units Name of the angular units. Or NULL for Degree
+ * @param angular_units_conv Conversion factor from the angular unit to radian.
+ * Or
+ * 0 for Degree if angular_units == NULL. Otherwise should be not NULL
+ * @param linear_units Name of the linear units. Or NULL for Metre
+ * @param linear_units_conv Conversion factor from the linear unit to metre. Or
+ * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
  *
  * @return Object of type GeodeticCRS that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_create_geocentric_crs(
-    PJ_CONTEXT *ctx, const char *crsName, const char *datumName,
-    const char *ellipsoidName, double semiMajorMetre, double invFlattening,
-    const char *primeMeridianName, double primeMeridianOffset,
-    const char *angularUnits, double angularUnitsConv, const char *linearUnits,
-    double linearUnitsConv) {
+    PJ_CONTEXT *ctx, const char *crs_name, const char *datum_name,
+    const char *ellps_name, double semi_major_metre, double inv_flattening,
+    const char *prime_meridian_name, double prime_meridian_offset,
+    const char *angular_units, double angular_units_conv,
+    const char *linear_units, double linear_units_conv) {
 
     SANITIZE_CTX(ctx);
     try {
         const UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnits, linearUnitsConv));
+            createLinearUnit(linear_units, linear_units_conv));
         auto datum = createGeodeticReferenceFrame(
-            ctx, datumName, ellipsoidName, semiMajorMetre, invFlattening,
-            primeMeridianName, primeMeridianOffset, angularUnits,
-            angularUnitsConv);
+            ctx, datum_name, ellps_name, semi_major_metre, inv_flattening,
+            prime_meridian_name, prime_meridian_offset, angular_units,
+            angular_units_conv);
 
         auto geodCRS =
-            GeodeticCRS::create(createPropertyMapName(crsName), datum,
+            GeodeticCRS::create(createPropertyMapName(crs_name), datum,
                                 cs::CartesianCS::createGeocentric(linearUnit));
         return PJ_OBJ::create(geodCRS);
     } catch (const std::exception &e) {
@@ -2009,24 +2013,24 @@ PJ_OBJ *proj_obj_create_geocentric_crs(
  * It should be used by at most one thread at a time.
  *
  * @param ctx PROJ context, or NULL for default context
- * @param crsName Name of the GeographicCRS. Or NULL
+ * @param crs_name Name of the GeographicCRS. Or NULL
  * @param datum Datum. Must not be NULL.
- * @param linearUnits Name of the linear units. Or NULL for Metre
- * @param linearUnitsConv Conversion factor from the linear unit to metre. Or
- * 0 for Metre if linearUnits == NULL. Otherwise should be not NULL
+ * @param linear_units Name of the linear units. Or NULL for Metre
+ * @param linear_units_conv Conversion factor from the linear unit to metre. Or
+ * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
  *
  * @return Object of type GeodeticCRS that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_create_geocentric_crs_from_datum(PJ_CONTEXT *ctx,
-                                                  const char *crsName,
+                                                  const char *crs_name,
                                                   const PJ_OBJ *datum,
-                                                  const char *linearUnits,
-                                                  double linearUnitsConv) {
+                                                  const char *linear_units,
+                                                  double linear_units_conv) {
     SANITIZE_CTX(ctx);
     try {
         const UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnits, linearUnitsConv));
+            createLinearUnit(linear_units, linear_units_conv));
         auto l_datum =
             util::nn_dynamic_pointer_cast<GeodeticReferenceFrame>(datum->obj);
         if (!l_datum) {
@@ -2035,7 +2039,7 @@ PJ_OBJ *proj_obj_create_geocentric_crs_from_datum(PJ_CONTEXT *ctx,
             return nullptr;
         }
         auto geodCRS = GeodeticCRS::create(
-            createPropertyMapName(crsName), NN_NO_CHECK(l_datum),
+            createPropertyMapName(crs_name), NN_NO_CHECK(l_datum),
             cs::CartesianCS::createGeocentric(linearUnit));
         return PJ_OBJ::create(geodCRS);
     } catch (const std::exception &e) {
@@ -2080,10 +2084,10 @@ PJ_OBJ PROJ_DLL *proj_obj_alter_name(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
 
 /** \brief Return a copy of the CRS with its geodetic CRS changed
  *
- * Currently, when obj is a GeodeticCRS, it returns a clone of newGeodCRS
- * When obj is a ProjectedCRS, it replaces its base CRS with newGeodCRS.
+ * Currently, when obj is a GeodeticCRS, it returns a clone of new_geod_crs
+ * When obj is a ProjectedCRS, it replaces its base CRS with new_geod_crs.
  * When obj is a CompoundCRS, it replaces the GeodeticCRS part of the horizontal
- * CRS with newGeodCRS.
+ * CRS with new_geod_crs.
  * In other cases, it returns a clone of obj.
  *
  * The returned object must be unreferenced with proj_obj_unref() after
@@ -2092,18 +2096,18 @@ PJ_OBJ PROJ_DLL *proj_obj_alter_name(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type CRS. Must not be NULL
- * @param newGeodCRS Object of type GeodeticCRS. Must not be NULL
+ * @param new_geod_crs Object of type GeodeticCRS. Must not be NULL
  *
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
-                                        const PJ_OBJ *newGeodCRS) {
+                                        const PJ_OBJ *new_geod_crs) {
     SANITIZE_CTX(ctx);
-    auto l_newGeodCRS =
-        util::nn_dynamic_pointer_cast<GeodeticCRS>(newGeodCRS->obj);
-    if (!l_newGeodCRS) {
-        proj_log_error(ctx, __FUNCTION__, "newGeodCRS is not a GeodeticCRS");
+    auto l_new_geod_crs =
+        util::nn_dynamic_pointer_cast<GeodeticCRS>(new_geod_crs->obj);
+    if (!l_new_geod_crs) {
+        proj_log_error(ctx, __FUNCTION__, "new_geod_crs is not a GeodeticCRS");
         return nullptr;
     }
 
@@ -2114,7 +2118,8 @@ PJ_OBJ *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
     }
 
     try {
-        return PJ_OBJ::create(crs->alterGeodeticCRS(NN_NO_CHECK(l_newGeodCRS)));
+        return PJ_OBJ::create(
+            crs->alterGeodeticCRS(NN_NO_CHECK(l_new_geod_crs)));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -2133,16 +2138,17 @@ PJ_OBJ *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type CRS. Must not be NULL
- * @param angularUnits Name of the angular units. Or NULL for Degree
- * @param angularUnitsConv Conversion factor from the angular unit to radian. Or
- * 0 for Degree if angularUnits == NULL. Otherwise should be not NULL
+ * @param angular_units Name of the angular units. Or NULL for Degree
+ * @param angular_units_conv Conversion factor from the angular unit to radian.
+ * Or
+ * 0 for Degree if angular_units == NULL. Otherwise should be not NULL
  *
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
-                                           const char *angularUnits,
-                                           double angularUnitsConv) {
+                                           const char *angular_units,
+                                           double angular_units_conv) {
 
     SANITIZE_CTX(ctx);
     auto geodCRS = proj_obj_crs_get_geodetic_crs(ctx, obj);
@@ -2158,7 +2164,7 @@ PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
     PJ_OBJ *geogCRSAltered = nullptr;
     try {
         const UnitOfMeasure angUnit(
-            createAngularUnit(angularUnits, angularUnitsConv));
+            createAngularUnit(angular_units, angular_units_conv));
         geogCRSAltered = PJ_OBJ::create(GeographicCRS::create(
             createPropertyMapName(proj_obj_get_name(geodCRS)), geogCRS->datum(),
             geogCRS->datumEnsemble(),
@@ -2188,16 +2194,16 @@ PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type CRS. Must not be NULL
- * @param linearUnits Name of the linear units. Or NULL for Metre
- * @param linearUnitsConv Conversion factor from the linear unit to metre. Or
- * 0 for Metre if linearUnits == NULL. Otherwise should be not NULL
+ * @param linear_units Name of the linear units. Or NULL for Metre
+ * @param linear_units_conv Conversion factor from the linear unit to metre. Or
+ * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
  *
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
-                                          const char *linearUnits,
-                                          double linearUnitsConv) {
+                                          const char *linear_units,
+                                          double linear_units_conv) {
     SANITIZE_CTX(ctx);
     auto crs = dynamic_cast<const CRS *>(obj->obj.get());
     if (!crs) {
@@ -2206,7 +2212,7 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
 
     try {
         const UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnits, linearUnitsConv));
+            createLinearUnit(linear_units, linear_units_conv));
         return PJ_OBJ::create(crs->alterCSLinearUnit(linearUnit));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2227,10 +2233,10 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param obj Object of type ProjectedCRS. Must not be NULL
- * @param linearUnits Name of the linear units. Or NULL for Metre
- * @param linearUnitsConv Conversion factor from the linear unit to metre. Or
- * 0 for Metre if linearUnits == NULL. Otherwise should be not NULL
- * @param convertToNewUnit TRUE if exisiting values should be converted from
+ * @param linear_units Name of the linear units. Or NULL for Metre
+ * @param linear_units_conv Conversion factor from the linear unit to metre. Or
+ * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
+ * @param convert_to_new_unit TRUE if exisiting values should be converted from
  * their current unit to the new unit. If FALSE, their value will be left
  * unchanged and the unit overriden (so the resulting CRS will not be
  * equivalent to the original one for reprojection purposes).
@@ -2240,9 +2246,9 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  */
 PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
                                                   const PJ_OBJ *obj,
-                                                  const char *linearUnits,
-                                                  double linearUnitsConv,
-                                                  int convertToNewUnit) {
+                                                  const char *linear_units,
+                                                  double linear_units_conv,
+                                                  int convert_to_new_unit) {
     SANITIZE_CTX(ctx);
     auto crs = dynamic_cast<const ProjectedCRS *>(obj->obj.get());
     if (!crs) {
@@ -2251,9 +2257,9 @@ PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
 
     try {
         const UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnits, linearUnitsConv));
+            createLinearUnit(linear_units, linear_units_conv));
         return PJ_OBJ::create(crs->alterParametersLinearUnit(
-            linearUnit, convertToNewUnit == TRUE));
+            linearUnit, convert_to_new_unit == TRUE));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -2269,17 +2275,17 @@ PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
  * It should be used by at most one thread at a time.
  *
  * @param ctx PROJ context, or NULL for default context
- * @param crsName CRS name. Or NULL.
+ * @param crs_name CRS name. Or NULL.
  *
  * @return Object that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
 PJ_OBJ PROJ_DLL *proj_obj_create_engineering_crs(PJ_CONTEXT *ctx,
-                                                 const char *crsName) {
+                                                 const char *crs_name) {
     SANITIZE_CTX(ctx);
     try {
         return PJ_OBJ::create(EngineeringCRS::create(
-            createPropertyMapName(crsName),
+            createPropertyMapName(crs_name),
             EngineeringDatum::create(PropertyMap()),
             CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)));
     } catch (const std::exception &e) {
@@ -2684,7 +2690,8 @@ static PJ_OBJ *proj_obj_create_conversion(const ConversionNNPtr &conv) {
  *
  * See osgeo::proj::operation::Conversion::createUTM().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_utm(PJ_CONTEXT *ctx, int zone, int north) {
     SANITIZE_CTX(ctx);
@@ -2703,25 +2710,26 @@ PJ_OBJ *proj_obj_create_conversion_utm(PJ_CONTEXT *ctx, int zone, int north) {
  *
  * See osgeo::proj::operation::Conversion::createTransverseMercator().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_transverse_mercator(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double scale,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createTransverseMercator(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2736,25 +2744,26 @@ PJ_OBJ *proj_obj_create_conversion_transverse_mercator(
  * See
  * osgeo::proj::operation::Conversion::createGaussSchreiberTransverseMercator().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double scale,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createGaussSchreiberTransverseMercator(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2769,25 +2778,26 @@ PJ_OBJ *proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
  * See
  * osgeo::proj::operation::Conversion::createTransverseMercatorSouthOriented().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_transverse_mercator_south_oriented(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double scale,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createTransverseMercatorSouthOriented(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2801,27 +2811,29 @@ PJ_OBJ *proj_obj_create_conversion_transverse_mercator_south_oriented(
  *
  * See osgeo::proj::operation::Conversion::createTwoPointEquidistant().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_two_point_equidistant(
-    PJ_CONTEXT *ctx, double latitudeFirstPoint, double longitudeFirstPoint,
-    double latitudeSecondPoint, double longitudeSeconPoint, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_first_point, double longitude_first_point,
+    double latitude_second_point, double longitude_secon_point,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createTwoPointEquidistant(
-            PropertyMap(), Angle(latitudeFirstPoint, angUnit),
-            Angle(longitudeFirstPoint, angUnit),
-            Angle(latitudeSecondPoint, angUnit),
-            Angle(longitudeSeconPoint, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_first_point, angUnit),
+            Angle(longitude_first_point, angUnit),
+            Angle(latitude_second_point, angUnit),
+            Angle(longitude_secon_point, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2835,23 +2847,25 @@ PJ_OBJ *proj_obj_create_conversion_two_point_equidistant(
  *
  * See osgeo::proj::operation::Conversion::createTunisiaMappingGrid().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_tunisia_mapping_grid(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createTunisiaMappingGrid(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2865,28 +2879,30 @@ PJ_OBJ *proj_obj_create_conversion_tunisia_mapping_grid(
  *
  * See osgeo::proj::operation::Conversion::createAlbersEqualArea().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_albers_equal_area(
-    PJ_CONTEXT *ctx, double latitudeFalseOrigin, double longitudeFalseOrigin,
-    double latitudeFirstParallel, double latitudeSecondParallel,
-    double eastingFalseOrigin, double northingFalseOrigin,
-    const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_false_origin,
+    double longitude_false_origin, double latitude_first_parallel,
+    double latitude_second_parallel, double easting_false_origin,
+    double northing_false_origin, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createAlbersEqualArea(
-            PropertyMap(), Angle(latitudeFalseOrigin, angUnit),
-            Angle(longitudeFalseOrigin, angUnit),
-            Angle(latitudeFirstParallel, angUnit),
-            Angle(latitudeSecondParallel, angUnit),
-            Length(eastingFalseOrigin, linearUnit),
-            Length(northingFalseOrigin, linearUnit));
+            PropertyMap(), Angle(latitude_false_origin, angUnit),
+            Angle(longitude_false_origin, angUnit),
+            Angle(latitude_first_parallel, angUnit),
+            Angle(latitude_second_parallel, angUnit),
+            Length(easting_false_origin, linearUnit),
+            Length(northing_false_origin, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2900,25 +2916,26 @@ PJ_OBJ *proj_obj_create_conversion_albers_equal_area(
  *
  * See osgeo::proj::operation::Conversion::createLambertConicConformal_1SP().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_1sp(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double scale,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createLambertConicConformal_1SP(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2932,28 +2949,30 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_1sp(
  *
  * See osgeo::proj::operation::Conversion::createLambertConicConformal_2SP().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp(
-    PJ_CONTEXT *ctx, double latitudeFalseOrigin, double longitudeFalseOrigin,
-    double latitudeFirstParallel, double latitudeSecondParallel,
-    double eastingFalseOrigin, double northingFalseOrigin,
-    const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_false_origin,
+    double longitude_false_origin, double latitude_first_parallel,
+    double latitude_second_parallel, double easting_false_origin,
+    double northing_false_origin, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createLambertConicConformal_2SP(
-            PropertyMap(), Angle(latitudeFalseOrigin, angUnit),
-            Angle(longitudeFalseOrigin, angUnit),
-            Angle(latitudeFirstParallel, angUnit),
-            Angle(latitudeSecondParallel, angUnit),
-            Length(eastingFalseOrigin, linearUnit),
-            Length(northingFalseOrigin, linearUnit));
+            PropertyMap(), Angle(latitude_false_origin, angUnit),
+            Angle(longitude_false_origin, angUnit),
+            Angle(latitude_first_parallel, angUnit),
+            Angle(latitude_second_parallel, angUnit),
+            Length(easting_false_origin, linearUnit),
+            Length(northing_false_origin, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2968,30 +2987,31 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp(
  * See
  * osgeo::proj::operation::Conversion::createLambertConicConformal_2SP_Michigan().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
-    PJ_CONTEXT *ctx, double latitudeFalseOrigin, double longitudeFalseOrigin,
-    double latitudeFirstParallel, double latitudeSecondParallel,
-    double eastingFalseOrigin, double northingFalseOrigin,
-    double ellipsoidScalingFactor, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_false_origin,
+    double longitude_false_origin, double latitude_first_parallel,
+    double latitude_second_parallel, double easting_false_origin,
+    double northing_false_origin, double ellipsoid_scaling_factor,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createLambertConicConformal_2SP_Michigan(
-            PropertyMap(), Angle(latitudeFalseOrigin, angUnit),
-            Angle(longitudeFalseOrigin, angUnit),
-            Angle(latitudeFirstParallel, angUnit),
-            Angle(latitudeSecondParallel, angUnit),
-            Length(eastingFalseOrigin, linearUnit),
-            Length(northingFalseOrigin, linearUnit),
-            Scale(ellipsoidScalingFactor));
+            PropertyMap(), Angle(latitude_false_origin, angUnit),
+            Angle(longitude_false_origin, angUnit),
+            Angle(latitude_first_parallel, angUnit),
+            Angle(latitude_second_parallel, angUnit),
+            Length(easting_false_origin, linearUnit),
+            Length(northing_false_origin, linearUnit),
+            Scale(ellipsoid_scaling_factor));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3006,28 +3026,30 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
  * See
  * osgeo::proj::operation::Conversion::createLambertConicConformal_2SP_Belgium().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
-    PJ_CONTEXT *ctx, double latitudeFalseOrigin, double longitudeFalseOrigin,
-    double latitudeFirstParallel, double latitudeSecondParallel,
-    double eastingFalseOrigin, double northingFalseOrigin,
-    const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_false_origin,
+    double longitude_false_origin, double latitude_first_parallel,
+    double latitude_second_parallel, double easting_false_origin,
+    double northing_false_origin, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createLambertConicConformal_2SP_Belgium(
-            PropertyMap(), Angle(latitudeFalseOrigin, angUnit),
-            Angle(longitudeFalseOrigin, angUnit),
-            Angle(latitudeFirstParallel, angUnit),
-            Angle(latitudeSecondParallel, angUnit),
-            Length(eastingFalseOrigin, linearUnit),
-            Length(northingFalseOrigin, linearUnit));
+            PropertyMap(), Angle(latitude_false_origin, angUnit),
+            Angle(longitude_false_origin, angUnit),
+            Angle(latitude_first_parallel, angUnit),
+            Angle(latitude_second_parallel, angUnit),
+            Length(easting_false_origin, linearUnit),
+            Length(northing_false_origin, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3041,25 +3063,26 @@ PJ_OBJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
  *
  * See osgeo::proj::operation::Conversion::createAzimuthalEquidistant().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_azimuthal_equidistant(
-    PJ_CONTEXT *ctx, double latitudeNatOrigin, double longitudeNatOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_nat_origin, double longitude_nat_origin,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createAzimuthalEquidistant(
-            PropertyMap(), Angle(latitudeNatOrigin, angUnit),
-            Angle(longitudeNatOrigin, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_nat_origin, angUnit),
+            Angle(longitude_nat_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3073,25 +3096,26 @@ PJ_OBJ *proj_obj_create_conversion_azimuthal_equidistant(
  *
  * See osgeo::proj::operation::Conversion::createGuamProjection().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_guam_projection(
-    PJ_CONTEXT *ctx, double latitudeNatOrigin, double longitudeNatOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_nat_origin, double longitude_nat_origin,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createGuamProjection(
-            PropertyMap(), Angle(latitudeNatOrigin, angUnit),
-            Angle(longitudeNatOrigin, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_nat_origin, angUnit),
+            Angle(longitude_nat_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3105,25 +3129,26 @@ PJ_OBJ *proj_obj_create_conversion_guam_projection(
  *
  * See osgeo::proj::operation::Conversion::createBonne().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_bonne(
-    PJ_CONTEXT *ctx, double latitudeNatOrigin, double longitudeNatOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_nat_origin, double longitude_nat_origin,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
-        auto conv = Conversion::createBonne(PropertyMap(),
-                                            Angle(latitudeNatOrigin, angUnit),
-                                            Angle(longitudeNatOrigin, angUnit),
-                                            Length(falseEasting, linearUnit),
-                                            Length(falseNorthing, linearUnit));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createBonne(
+            PropertyMap(), Angle(latitude_nat_origin, angUnit),
+            Angle(longitude_nat_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3138,25 +3163,26 @@ PJ_OBJ *proj_obj_create_conversion_bonne(
  * See
  * osgeo::proj::operation::Conversion::createLambertCylindricalEqualAreaSpherical().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical(
-    PJ_CONTEXT *ctx, double latitudeFirstParallel, double longitudeNatOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_first_parallel,
+    double longitude_nat_origin, double false_easting, double false_northing,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createLambertCylindricalEqualAreaSpherical(
-            PropertyMap(), Angle(latitudeFirstParallel, angUnit),
-            Angle(longitudeNatOrigin, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_first_parallel, angUnit),
+            Angle(longitude_nat_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3170,25 +3196,26 @@ PJ_OBJ *proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical(
  *
  * See osgeo::proj::operation::Conversion::createLambertCylindricalEqualArea().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_lambert_cylindrical_equal_area(
-    PJ_CONTEXT *ctx, double latitudeFirstParallel, double longitudeNatOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_first_parallel,
+    double longitude_nat_origin, double false_easting, double false_northing,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createLambertCylindricalEqualArea(
-            PropertyMap(), Angle(latitudeFirstParallel, angUnit),
-            Angle(longitudeNatOrigin, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_first_parallel, angUnit),
+            Angle(longitude_nat_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3202,23 +3229,25 @@ PJ_OBJ *proj_obj_create_conversion_lambert_cylindrical_equal_area(
  *
  * See osgeo::proj::operation::Conversion::createCassiniSoldner().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_cassini_soldner(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createCassiniSoldner(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3232,27 +3261,29 @@ PJ_OBJ *proj_obj_create_conversion_cassini_soldner(
  *
  * See osgeo::proj::operation::Conversion::createEquidistantConic().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_equidistant_conic(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong,
-    double latitudeFirstParallel, double latitudeSecondParallel,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double latitude_first_parallel, double latitude_second_parallel,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createEquidistantConic(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Angle(latitudeFirstParallel, angUnit),
-            Angle(latitudeSecondParallel, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit),
+            Angle(latitude_first_parallel, angUnit),
+            Angle(latitude_second_parallel, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3266,23 +3297,27 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_conic(
  *
  * See osgeo::proj::operation::Conversion::createEckertI().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
-PJ_OBJ *proj_obj_create_conversion_eckert_i(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+PJ_OBJ *proj_obj_create_conversion_eckert_i(PJ_CONTEXT *ctx, double center_long,
+                                            double false_easting,
+                                            double false_northing,
+                                            const char *ang_unit_name,
+                                            double ang_unit_conv_factor,
+                                            const char *linear_unit_name,
+                                            double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
-        auto conv =
-            Conversion::createEckertI(PropertyMap(), Angle(centerLong, angUnit),
-                                      Length(falseEasting, linearUnit),
-                                      Length(falseNorthing, linearUnit));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createEckertI(
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3296,23 +3331,25 @@ PJ_OBJ *proj_obj_create_conversion_eckert_i(
  *
  * See osgeo::proj::operation::Conversion::createEckertII().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_eckert_ii(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createEckertII(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3326,23 +3363,25 @@ PJ_OBJ *proj_obj_create_conversion_eckert_ii(
  *
  * See osgeo::proj::operation::Conversion::createEckertIII().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_eckert_iii(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createEckertIII(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3356,23 +3395,25 @@ PJ_OBJ *proj_obj_create_conversion_eckert_iii(
  *
  * See osgeo::proj::operation::Conversion::createEckertIV().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_eckert_iv(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createEckertIV(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3386,23 +3427,27 @@ PJ_OBJ *proj_obj_create_conversion_eckert_iv(
  *
  * See osgeo::proj::operation::Conversion::createEckertV().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
-PJ_OBJ *proj_obj_create_conversion_eckert_v(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+PJ_OBJ *proj_obj_create_conversion_eckert_v(PJ_CONTEXT *ctx, double center_long,
+                                            double false_easting,
+                                            double false_northing,
+                                            const char *ang_unit_name,
+                                            double ang_unit_conv_factor,
+                                            const char *linear_unit_name,
+                                            double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
-        auto conv =
-            Conversion::createEckertV(PropertyMap(), Angle(centerLong, angUnit),
-                                      Length(falseEasting, linearUnit),
-                                      Length(falseNorthing, linearUnit));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createEckertV(
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3416,23 +3461,25 @@ PJ_OBJ *proj_obj_create_conversion_eckert_v(
  *
  * See osgeo::proj::operation::Conversion::createEckertVI().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_eckert_vi(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createEckertVI(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3446,25 +3493,26 @@ PJ_OBJ *proj_obj_create_conversion_eckert_vi(
  *
  * See osgeo::proj::operation::Conversion::createEquidistantCylindrical().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_equidistant_cylindrical(
-    PJ_CONTEXT *ctx, double latitudeFirstParallel, double longitudeNatOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_first_parallel,
+    double longitude_nat_origin, double false_easting, double false_northing,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createEquidistantCylindrical(
-            PropertyMap(), Angle(latitudeFirstParallel, angUnit),
-            Angle(longitudeNatOrigin, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_first_parallel, angUnit),
+            Angle(longitude_nat_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3479,25 +3527,26 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_cylindrical(
  * See
  * osgeo::proj::operation::Conversion::createEquidistantCylindricalSpherical().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_equidistant_cylindrical_spherical(
-    PJ_CONTEXT *ctx, double latitudeFirstParallel, double longitudeNatOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_first_parallel,
+    double longitude_nat_origin, double false_easting, double false_northing,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createEquidistantCylindricalSpherical(
-            PropertyMap(), Angle(latitudeFirstParallel, angUnit),
-            Angle(longitudeNatOrigin, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_first_parallel, angUnit),
+            Angle(longitude_nat_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3511,23 +3560,27 @@ PJ_OBJ *proj_obj_create_conversion_equidistant_cylindrical_spherical(
  *
  * See osgeo::proj::operation::Conversion::createGall().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
-PJ_OBJ *proj_obj_create_conversion_gall(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+PJ_OBJ *proj_obj_create_conversion_gall(PJ_CONTEXT *ctx, double center_long,
+                                        double false_easting,
+                                        double false_northing,
+                                        const char *ang_unit_name,
+                                        double ang_unit_conv_factor,
+                                        const char *linear_unit_name,
+                                        double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv =
-            Conversion::createGall(PropertyMap(), Angle(centerLong, angUnit),
-                                   Length(falseEasting, linearUnit),
-                                   Length(falseNorthing, linearUnit));
+            Conversion::createGall(PropertyMap(), Angle(center_long, angUnit),
+                                   Length(false_easting, linearUnit),
+                                   Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3541,23 +3594,25 @@ PJ_OBJ *proj_obj_create_conversion_gall(
  *
  * See osgeo::proj::operation::Conversion::createGoodeHomolosine().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_goode_homolosine(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createGoodeHomolosine(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3571,23 +3626,25 @@ PJ_OBJ *proj_obj_create_conversion_goode_homolosine(
  *
  * See osgeo::proj::operation::Conversion::createInterruptedGoodeHomolosine().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_interrupted_goode_homolosine(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createInterruptedGoodeHomolosine(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3602,23 +3659,25 @@ PJ_OBJ *proj_obj_create_conversion_interrupted_goode_homolosine(
  *
  * See osgeo::proj::operation::Conversion::createGeostationarySatelliteSweepX().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_geostationary_satellite_sweep_x(
-    PJ_CONTEXT *ctx, double centerLong, double height, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double height, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createGeostationarySatelliteSweepX(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(height, linearUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(height, linearUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3633,23 +3692,25 @@ PJ_OBJ *proj_obj_create_conversion_geostationary_satellite_sweep_x(
  *
  * See osgeo::proj::operation::Conversion::createGeostationarySatelliteSweepY().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_geostationary_satellite_sweep_y(
-    PJ_CONTEXT *ctx, double centerLong, double height, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double height, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createGeostationarySatelliteSweepY(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(height, linearUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(height, linearUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3663,23 +3724,25 @@ PJ_OBJ *proj_obj_create_conversion_geostationary_satellite_sweep_y(
  *
  * See osgeo::proj::operation::Conversion::createGnomonic().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_gnomonic(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createGnomonic(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3694,28 +3757,30 @@ PJ_OBJ *proj_obj_create_conversion_gnomonic(
  * See
  * osgeo::proj::operation::Conversion::createHotineObliqueMercatorVariantA().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
-    PJ_CONTEXT *ctx, double latitudeProjectionCentre,
-    double longitudeProjectionCentre, double azimuthInitialLine,
-    double angleFromRectifiedToSkrewGrid, double scale, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_projection_centre,
+    double longitude_projection_centre, double azimuth_initial_line,
+    double angle_from_rectified_to_skrew_grid, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createHotineObliqueMercatorVariantA(
-            PropertyMap(), Angle(latitudeProjectionCentre, angUnit),
-            Angle(longitudeProjectionCentre, angUnit),
-            Angle(azimuthInitialLine, angUnit),
-            Angle(angleFromRectifiedToSkrewGrid, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_projection_centre, angUnit),
+            Angle(longitude_projection_centre, angUnit),
+            Angle(azimuth_initial_line, angUnit),
+            Angle(angle_from_rectified_to_skrew_grid, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3730,29 +3795,30 @@ PJ_OBJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
  * See
  * osgeo::proj::operation::Conversion::createHotineObliqueMercatorVariantB().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
-    PJ_CONTEXT *ctx, double latitudeProjectionCentre,
-    double longitudeProjectionCentre, double azimuthInitialLine,
-    double angleFromRectifiedToSkrewGrid, double scale,
-    double eastingProjectionCentre, double northingProjectionCentre,
-    const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_projection_centre,
+    double longitude_projection_centre, double azimuth_initial_line,
+    double angle_from_rectified_to_skrew_grid, double scale,
+    double easting_projection_centre, double northing_projection_centre,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createHotineObliqueMercatorVariantB(
-            PropertyMap(), Angle(latitudeProjectionCentre, angUnit),
-            Angle(longitudeProjectionCentre, angUnit),
-            Angle(azimuthInitialLine, angUnit),
-            Angle(angleFromRectifiedToSkrewGrid, angUnit), Scale(scale),
-            Length(eastingProjectionCentre, linearUnit),
-            Length(northingProjectionCentre, linearUnit));
+            PropertyMap(), Angle(latitude_projection_centre, angUnit),
+            Angle(longitude_projection_centre, angUnit),
+            Angle(azimuth_initial_line, angUnit),
+            Angle(angle_from_rectified_to_skrew_grid, angUnit), Scale(scale),
+            Length(easting_projection_centre, linearUnit),
+            Length(northing_projection_centre, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3767,30 +3833,33 @@ PJ_OBJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
  * See
  * osgeo::proj::operation::Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *
 proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
-    PJ_CONTEXT *ctx, double latitudeProjectionCentre, double latitudePoint1,
-    double longitudePoint1, double latitudePoint2, double longitudePoint2,
-    double scale, double eastingProjectionCentre,
-    double northingProjectionCentre, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_projection_centre, double latitude_point1,
+    double longitude_point1, double latitude_point2, double longitude_point2,
+    double scale, double easting_projection_centre,
+    double northing_projection_centre, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv =
             Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
-                PropertyMap(), Angle(latitudeProjectionCentre, angUnit),
-                Angle(latitudePoint1, angUnit), Angle(longitudePoint1, angUnit),
-                Angle(latitudePoint2, angUnit), Angle(longitudePoint2, angUnit),
-                Scale(scale), Length(eastingProjectionCentre, linearUnit),
-                Length(northingProjectionCentre, linearUnit));
+                PropertyMap(), Angle(latitude_projection_centre, angUnit),
+                Angle(latitude_point1, angUnit),
+                Angle(longitude_point1, angUnit),
+                Angle(latitude_point2, angUnit),
+                Angle(longitude_point2, angUnit), Scale(scale),
+                Length(easting_projection_centre, linearUnit),
+                Length(northing_projection_centre, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3805,26 +3874,28 @@ proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
  * See
  * osgeo::proj::operation::Conversion::createInternationalMapWorldPolyconic().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_international_map_world_polyconic(
-    PJ_CONTEXT *ctx, double centerLong, double latitudeFirstParallel,
-    double latitudeSecondParallel, double falseEasting, double falseNorthing,
-    const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double latitude_first_parallel,
+    double latitude_second_parallel, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createInternationalMapWorldPolyconic(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Angle(latitudeFirstParallel, angUnit),
-            Angle(latitudeSecondParallel, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Angle(latitude_first_parallel, angUnit),
+            Angle(latitude_second_parallel, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3838,29 +3909,32 @@ PJ_OBJ *proj_obj_create_conversion_international_map_world_polyconic(
  *
  * See osgeo::proj::operation::Conversion::createKrovakNorthOriented().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_krovak_north_oriented(
-    PJ_CONTEXT *ctx, double latitudeProjectionCentre, double longitudeOfOrigin,
-    double colatitudeConeAxis, double latitudePseudoStandardParallel,
-    double scaleFactorPseudoStandardParallel, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_projection_centre,
+    double longitude_of_origin, double colatitude_cone_axis,
+    double latitude_pseudo_standard_parallel,
+    double scale_factor_pseudo_standard_parallel, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createKrovakNorthOriented(
-            PropertyMap(), Angle(latitudeProjectionCentre, angUnit),
-            Angle(longitudeOfOrigin, angUnit),
-            Angle(colatitudeConeAxis, angUnit),
-            Angle(latitudePseudoStandardParallel, angUnit),
-            Scale(scaleFactorPseudoStandardParallel),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_projection_centre, angUnit),
+            Angle(longitude_of_origin, angUnit),
+            Angle(colatitude_cone_axis, angUnit),
+            Angle(latitude_pseudo_standard_parallel, angUnit),
+            Scale(scale_factor_pseudo_standard_parallel),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3874,29 +3948,32 @@ PJ_OBJ *proj_obj_create_conversion_krovak_north_oriented(
  *
  * See osgeo::proj::operation::Conversion::createKrovak().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_krovak(
-    PJ_CONTEXT *ctx, double latitudeProjectionCentre, double longitudeOfOrigin,
-    double colatitudeConeAxis, double latitudePseudoStandardParallel,
-    double scaleFactorPseudoStandardParallel, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_projection_centre,
+    double longitude_of_origin, double colatitude_cone_axis,
+    double latitude_pseudo_standard_parallel,
+    double scale_factor_pseudo_standard_parallel, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createKrovak(
-            PropertyMap(), Angle(latitudeProjectionCentre, angUnit),
-            Angle(longitudeOfOrigin, angUnit),
-            Angle(colatitudeConeAxis, angUnit),
-            Angle(latitudePseudoStandardParallel, angUnit),
-            Scale(scaleFactorPseudoStandardParallel),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_projection_centre, angUnit),
+            Angle(longitude_of_origin, angUnit),
+            Angle(colatitude_cone_axis, angUnit),
+            Angle(latitude_pseudo_standard_parallel, angUnit),
+            Scale(scale_factor_pseudo_standard_parallel),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3910,25 +3987,26 @@ PJ_OBJ *proj_obj_create_conversion_krovak(
  *
  * See osgeo::proj::operation::Conversion::createLambertAzimuthalEqualArea().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_lambert_azimuthal_equal_area(
-    PJ_CONTEXT *ctx, double latitudeNatOrigin, double longitudeNatOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_nat_origin, double longitude_nat_origin,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createLambertAzimuthalEqualArea(
-            PropertyMap(), Angle(latitudeNatOrigin, angUnit),
-            Angle(longitudeNatOrigin, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_nat_origin, angUnit),
+            Angle(longitude_nat_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3942,23 +4020,25 @@ PJ_OBJ *proj_obj_create_conversion_lambert_azimuthal_equal_area(
  *
  * See osgeo::proj::operation::Conversion::createMillerCylindrical().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_miller_cylindrical(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createMillerCylindrical(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3972,25 +4052,26 @@ PJ_OBJ *proj_obj_create_conversion_miller_cylindrical(
  *
  * See osgeo::proj::operation::Conversion::createMercatorVariantA().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_mercator_variant_a(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double scale,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createMercatorVariantA(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4004,24 +4085,25 @@ PJ_OBJ *proj_obj_create_conversion_mercator_variant_a(
  *
  * See osgeo::proj::operation::Conversion::createMercatorVariantB().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_mercator_variant_b(
-    PJ_CONTEXT *ctx, double latitudeFirstParallel, double centerLong,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_first_parallel, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createMercatorVariantB(
-            PropertyMap(), Angle(latitudeFirstParallel, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_first_parallel, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4036,23 +4118,25 @@ PJ_OBJ *proj_obj_create_conversion_mercator_variant_b(
  * See
  * osgeo::proj::operation::Conversion::createPopularVisualisationPseudoMercator().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createPopularVisualisationPseudoMercator(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4066,23 +4150,25 @@ PJ_OBJ *proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
  *
  * See osgeo::proj::operation::Conversion::createMollweide().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_mollweide(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createMollweide(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4096,23 +4182,25 @@ PJ_OBJ *proj_obj_create_conversion_mollweide(
  *
  * See osgeo::proj::operation::Conversion::createNewZealandMappingGrid().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_new_zealand_mapping_grid(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createNewZealandMappingGrid(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4126,25 +4214,26 @@ PJ_OBJ *proj_obj_create_conversion_new_zealand_mapping_grid(
  *
  * See osgeo::proj::operation::Conversion::createObliqueStereographic().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_oblique_stereographic(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double scale,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createObliqueStereographic(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4158,23 +4247,25 @@ PJ_OBJ *proj_obj_create_conversion_oblique_stereographic(
  *
  * See osgeo::proj::operation::Conversion::createOrthographic().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_orthographic(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createOrthographic(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4188,23 +4279,25 @@ PJ_OBJ *proj_obj_create_conversion_orthographic(
  *
  * See osgeo::proj::operation::Conversion::createAmericanPolyconic().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_american_polyconic(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createAmericanPolyconic(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4218,25 +4311,26 @@ PJ_OBJ *proj_obj_create_conversion_american_polyconic(
  *
  * See osgeo::proj::operation::Conversion::createPolarStereographicVariantA().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_polar_stereographic_variant_a(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double scale,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createPolarStereographicVariantA(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4250,24 +4344,26 @@ PJ_OBJ *proj_obj_create_conversion_polar_stereographic_variant_a(
  *
  * See osgeo::proj::operation::Conversion::createPolarStereographicVariantB().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_polar_stereographic_variant_b(
-    PJ_CONTEXT *ctx, double latitudeStandardParallel, double longitudeOfOrigin,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_standard_parallel,
+    double longitude_of_origin, double false_easting, double false_northing,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createPolarStereographicVariantB(
-            PropertyMap(), Angle(latitudeStandardParallel, angUnit),
-            Angle(longitudeOfOrigin, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_standard_parallel, angUnit),
+            Angle(longitude_of_origin, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4281,23 +4377,27 @@ PJ_OBJ *proj_obj_create_conversion_polar_stereographic_variant_b(
  *
  * See osgeo::proj::operation::Conversion::createRobinson().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
-PJ_OBJ *proj_obj_create_conversion_robinson(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+PJ_OBJ *proj_obj_create_conversion_robinson(PJ_CONTEXT *ctx, double center_long,
+                                            double false_easting,
+                                            double false_northing,
+                                            const char *ang_unit_name,
+                                            double ang_unit_conv_factor,
+                                            const char *linear_unit_name,
+                                            double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createRobinson(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4311,23 +4411,25 @@ PJ_OBJ *proj_obj_create_conversion_robinson(
  *
  * See osgeo::proj::operation::Conversion::createSinusoidal().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_sinusoidal(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createSinusoidal(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4341,25 +4443,26 @@ PJ_OBJ *proj_obj_create_conversion_sinusoidal(
  *
  * See osgeo::proj::operation::Conversion::createStereographic().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_stereographic(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double scale,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long, double scale,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createStereographic(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Scale(scale),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4373,23 +4476,25 @@ PJ_OBJ *proj_obj_create_conversion_stereographic(
  *
  * See osgeo::proj::operation::Conversion::createVanDerGrinten().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_van_der_grinten(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createVanDerGrinten(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4403,23 +4508,27 @@ PJ_OBJ *proj_obj_create_conversion_van_der_grinten(
  *
  * See osgeo::proj::operation::Conversion::createWagnerI().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
-PJ_OBJ *proj_obj_create_conversion_wagner_i(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+PJ_OBJ *proj_obj_create_conversion_wagner_i(PJ_CONTEXT *ctx, double center_long,
+                                            double false_easting,
+                                            double false_northing,
+                                            const char *ang_unit_name,
+                                            double ang_unit_conv_factor,
+                                            const char *linear_unit_name,
+                                            double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
-        auto conv =
-            Conversion::createWagnerI(PropertyMap(), Angle(centerLong, angUnit),
-                                      Length(falseEasting, linearUnit),
-                                      Length(falseNorthing, linearUnit));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createWagnerI(
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4433,23 +4542,25 @@ PJ_OBJ *proj_obj_create_conversion_wagner_i(
  *
  * See osgeo::proj::operation::Conversion::createWagnerII().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_wagner_ii(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createWagnerII(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4463,24 +4574,25 @@ PJ_OBJ *proj_obj_create_conversion_wagner_ii(
  *
  * See osgeo::proj::operation::Conversion::createWagnerIII().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_wagner_iii(
-    PJ_CONTEXT *ctx, double latitudeTrueScale, double centerLong,
-    double falseEasting, double falseNorthing, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double latitude_true_scale, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createWagnerIII(
-            PropertyMap(), Angle(latitudeTrueScale, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(latitude_true_scale, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4494,23 +4606,25 @@ PJ_OBJ *proj_obj_create_conversion_wagner_iii(
  *
  * See osgeo::proj::operation::Conversion::createWagnerIV().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_wagner_iv(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createWagnerIV(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4524,23 +4638,27 @@ PJ_OBJ *proj_obj_create_conversion_wagner_iv(
  *
  * See osgeo::proj::operation::Conversion::createWagnerV().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
-PJ_OBJ *proj_obj_create_conversion_wagner_v(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+PJ_OBJ *proj_obj_create_conversion_wagner_v(PJ_CONTEXT *ctx, double center_long,
+                                            double false_easting,
+                                            double false_northing,
+                                            const char *ang_unit_name,
+                                            double ang_unit_conv_factor,
+                                            const char *linear_unit_name,
+                                            double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
-        auto conv =
-            Conversion::createWagnerV(PropertyMap(), Angle(centerLong, angUnit),
-                                      Length(falseEasting, linearUnit),
-                                      Length(falseNorthing, linearUnit));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createWagnerV(
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4554,23 +4672,25 @@ PJ_OBJ *proj_obj_create_conversion_wagner_v(
  *
  * See osgeo::proj::operation::Conversion::createWagnerVI().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_wagner_vi(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createWagnerVI(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4584,23 +4704,25 @@ PJ_OBJ *proj_obj_create_conversion_wagner_vi(
  *
  * See osgeo::proj::operation::Conversion::createWagnerVII().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_wagner_vii(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createWagnerVII(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4615,23 +4737,25 @@ PJ_OBJ *proj_obj_create_conversion_wagner_vii(
  * See
  * osgeo::proj::operation::Conversion::createQuadrilateralizedSphericalCube().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_quadrilateralized_spherical_cube(
-    PJ_CONTEXT *ctx, double centerLat, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createQuadrilateralizedSphericalCube(
-            PropertyMap(), Angle(centerLat, angUnit),
-            Angle(centerLong, angUnit), Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4645,24 +4769,25 @@ PJ_OBJ *proj_obj_create_conversion_quadrilateralized_spherical_cube(
  *
  * See osgeo::proj::operation::Conversion::createSphericalCrossTrackHeight().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_spherical_cross_track_height(
-    PJ_CONTEXT *ctx, double pegPointLat, double pegPointLong,
-    double pegPointHeading, double pegPointHeight, const char *angUnitName,
-    double angUnitConvFactor, const char *linearUnitName,
-    double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double peg_point_lat, double peg_point_long,
+    double peg_point_heading, double peg_point_height,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createSphericalCrossTrackHeight(
-            PropertyMap(), Angle(pegPointLat, angUnit),
-            Angle(pegPointLong, angUnit), Angle(pegPointHeading, angUnit),
-            Length(pegPointHeight, linearUnit));
+            PropertyMap(), Angle(peg_point_lat, angUnit),
+            Angle(peg_point_long, angUnit), Angle(peg_point_heading, angUnit),
+            Length(peg_point_height, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -4676,23 +4801,25 @@ PJ_OBJ *proj_obj_create_conversion_spherical_cross_track_height(
  *
  * See osgeo::proj::operation::Conversion::createEqualEarth().
  *
- * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).
- * Angular parameters are expressed in (angUnitName, angUnitConvFactor).
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  */
 PJ_OBJ *proj_obj_create_conversion_equal_earth(
-    PJ_CONTEXT *ctx, double centerLong, double falseEasting,
-    double falseNorthing, const char *angUnitName, double angUnitConvFactor,
-    const char *linearUnitName, double linearUnitConvFactor) {
+    PJ_CONTEXT *ctx, double center_long, double false_easting,
+    double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
     SANITIZE_CTX(ctx);
     try {
         UnitOfMeasure linearUnit(
-            createLinearUnit(linearUnitName, linearUnitConvFactor));
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
         UnitOfMeasure angUnit(
-            createAngularUnit(angUnitName, angUnitConvFactor));
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
         auto conv = Conversion::createEqualEarth(
-            PropertyMap(), Angle(centerLong, angUnit),
-            Length(falseEasting, linearUnit),
-            Length(falseNorthing, linearUnit));
+            PropertyMap(), Angle(center_long, angUnit),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
         return proj_obj_create_conversion(conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());

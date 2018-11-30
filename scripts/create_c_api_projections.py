@@ -91,7 +91,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                 paramname = param.find('declname').text
                 if paramname == 'properties':
                     continue
-                params.append((type, paramname))
+                params.append((type, snake_casify(paramname)))
 
             shortName = name[len('create'):]
             c_shortName = snake_casify(shortName)
@@ -114,12 +114,12 @@ for sectiondef in compounddef.iter('sectiondef'):
             if has_angle:
                 if has_output_params:
                     decl += ",\n"
-                decl += "    const char* angUnitName, double angUnitConvFactor"
+                decl += "    const char* ang_unit_name, double ang_unit_conv_factor"
                 has_output_params = True
             if has_linear:
                 if has_output_params:
                     decl += ",\n"
-                decl += "    const char* linearUnitName, double linearUnitConvFactor"
+                decl += "    const char* linear_unit_name, double linear_unit_conv_factor"
             decl += ")"
 
             header.write("PJ_OBJ PROJ_DLL *" + decl + ";\n\n")
@@ -132,17 +132,17 @@ for sectiondef in compounddef.iter('sectiondef'):
             cppfile.write(" *\n")
             cppfile.write(" * See osgeo::proj::operation::Conversion::create" + shortName + "().\n")
             cppfile.write(" *\n")
-            cppfile.write(" * Linear parameters are expressed in (linearUnitName, linearUnitConvFactor).\n")
+            cppfile.write(" * Linear parameters are expressed in (linear_unit_name, linear_unit_conv_factor).\n")
             if has_angle:
-                cppfile.write(" * Angular parameters are expressed in (angUnitName, angUnitConvFactor).\n")
+                cppfile.write(" * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).\n")
             cppfile.write(" */\n")
             cppfile.write("PJ_OBJ* " + decl + "{\n");
             cppfile.write("  SANITIZE_CTX(ctx);\n");
             cppfile.write("  try {\n");
             if has_linear:
-                cppfile.write("    UnitOfMeasure linearUnit(createLinearUnit(linearUnitName, linearUnitConvFactor));\n")
+                cppfile.write("    UnitOfMeasure linearUnit(createLinearUnit(linear_unit_name, linear_unit_conv_factor));\n")
             if has_angle:
-                cppfile.write("    UnitOfMeasure angUnit(createAngularUnit(angUnitName, angUnitConvFactor));\n")
+                cppfile.write("    UnitOfMeasure angUnit(createAngularUnit(ang_unit_name, ang_unit_conv_factor));\n")
             cppfile.write("    auto conv = Conversion::create" + shortName + "(PropertyMap()")
             for param in params:
                 if param[0] in 'int':
