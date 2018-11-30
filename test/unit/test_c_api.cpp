@@ -29,6 +29,7 @@
 #include "gtest_include.h"
 
 #include "proj.h"
+#include "proj_experimental.h"
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"

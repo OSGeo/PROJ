@@ -52,6 +52,7 @@
 // clang-format off
 #include "proj_internal.h"
 #include "proj.h"
+#include "proj_experimental.h"
 #include "projects.h"
 // clang-format on
 
