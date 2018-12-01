@@ -351,7 +351,7 @@ dnl Generate files
 dnl ---------------------------------------------------------------------------
 
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
-                 test/Makefile test/old/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
+                 test/Makefile test/cli/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
                  test/googletest/Makefile test/googletest/include/Makefile
                  test/googletest/include/gtest/Makefile
                  test/googletest/include/gtest/internal/Makefile

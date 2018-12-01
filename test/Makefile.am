@@ -7,4 +7,4 @@ EXTRA_DIST = CMakeLists.txt
 # libtestmain_la_LDFLAGS = -no-undefined
 # libtestmain_la_SOURCES = test_main.cpp
 
-SUBDIRS = old googletest . gie gigs unit
+SUBDIRS = cli googletest . gie gigs unit

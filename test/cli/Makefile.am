@@ -1,6 +1,6 @@
 # Executables paths passed to test scripts
 DATAPATH = ../../data
-THIS_DIR = $(top_srcdir)/test/old
+THIS_DIR = $(top_srcdir)/test/cli
 EXEPATH = ../../src
 PROJEXE = $(EXEPATH)/proj
 CS2CSEXE = $(EXEPATH)/cs2cs

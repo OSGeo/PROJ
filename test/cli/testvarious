@@ -3,7 +3,7 @@
 # on datum files.
 #
 #
-TEST_OLD_DIR=`dirname $0`
+TEST_CLI_DIR=`dirname $0`
 DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
@@ -957,7 +957,7 @@ EOF
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${TEST_OLD_DIR}/${OUT}.dist
+diff -b ${OUT} ${TEST_CLI_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURRED"
