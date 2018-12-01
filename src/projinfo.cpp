@@ -206,7 +206,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
         if (outputOpt.PROJ5) {
             try {
                 if (!outputOpt.quiet) {
-                    std::cout << "PROJ string: " << std::endl;
+                    std::cout << "PROJ string:" << std::endl;
                 }
                 std::cout << projStringExportable->exportToPROJString(
                                  PROJStringFormatter::create(
@@ -227,7 +227,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "PROJ.4 string: " << std::endl;
+                    std::cout << "PROJ.4 string:" << std::endl;
                 }
 
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
@@ -263,7 +263,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2015 string: " << std::endl;
+                    std::cout << "WKT2_2015 string:" << std::endl;
                 }
                 auto formatter =
                     WKTFormatter::create(WKTFormatter::Convention::WKT2_2015);
@@ -288,7 +288,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2015_SIMPLIFIED string: " << std::endl;
+                    std::cout << "WKT2_2015_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
                     WKTFormatter::Convention::WKT2_2015_SIMPLIFIED);
@@ -313,7 +313,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2018 string: " << std::endl;
+                    std::cout << "WKT2_2018 string:" << std::endl;
                 }
                 auto formatter =
                     WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
@@ -338,7 +338,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2018_SIMPLIFIED string: " << std::endl;
+                    std::cout << "WKT2_2018_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
                     WKTFormatter::Convention::WKT2_2018_SIMPLIFIED);
@@ -363,7 +363,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT1_GDAL: " << std::endl;
+                    std::cout << "WKT1_GDAL:" << std::endl;
                 }
 
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
@@ -400,7 +400,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT1_ESRI: " << std::endl;
+                    std::cout << "WKT1_ESRI:" << std::endl;
                 }
 
                 auto wkt = wktExportable->exportToWKT(
@@ -586,6 +586,7 @@ int main(int argc, char **argv) {
                     outputOpt.WKT2_2018 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
+                    outputOpt.WKT1_ESRI = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
                     outputOpt.PROJ4 = false;

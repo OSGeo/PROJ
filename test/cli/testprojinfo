@@ -1,0 +1,67 @@
+:
+# Test projinfo
+
+TEST_CLI_DIR=`dirname $0`
+DATA_DIR=`dirname $0`/../../data
+EXE=$1
+
+usage()
+{
+    echo "Usage: ${0} <path to 'projinfo' program>" 
+    echo
+    exit 1
+}
+
+if test -z "${EXE}"; then
+    EXE=../../src/projinfo
+fi
+
+if test ! -x ${EXE}; then
+    echo "*** ERROR: Can not find '${EXE}' program!"
+    exit 1
+fi
+
+echo "============================================"
+echo "Running ${0} using ${EXE}:"
+echo "============================================"
+
+OUT=testprojinfo_out
+
+rm -f ${OUT}
+
+echo "Testing projinfo EPSG:4326" >> ${OUT}
+$EXE EPSG:4326 >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo -o ALL EPSG:4326" >> ${OUT}
+$EXE -o ALL EPSG:4326 >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo -s EPSG:4326 -t EPSG:32631" >> ${OUT}
+$EXE -s EPSG:4326 -t EPSG:32631 >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary" >> ${OUT}
+$EXE -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects" >> ${OUT}
+$EXE -s NAD27 -t NAD83 --grid-check none --spatial-test intersects >>${OUT}
+echo "" >>${OUT}
+
+# do 'diff' with distribution results
+echo "diff ${OUT} with testprojinfo_out.dist"
+diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
+if [ $? -ne 0 ] ; then
+	echo  ""
+	echo "PROBLEMS HAVE OCCURRED"
+	echo "test file ${OUT} saved"
+    echo
+	exit 100
+else
+	echo "TEST OK"
+	echo "test file ${OUT} removed"
+    echo
+	/bin/rm -f ${OUT}
+	exit 0
+fi
