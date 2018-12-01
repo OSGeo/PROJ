@@ -1145,7 +1145,7 @@ TEST_F(CApi, proj_obj_create_operations) {
     ASSERT_NE(res, nullptr);
     ObjListKeeper keeper_res(res);
 
-    EXPECT_EQ(proj_obj_list_get_count(res), 7);
+    EXPECT_EQ(proj_obj_list_get_count(res), 8);
 
     EXPECT_EQ(proj_obj_list_get(m_ctxt, res, -1), nullptr);
     EXPECT_EQ(proj_obj_list_get(m_ctxt, res, proj_obj_list_get_count(res)),
@@ -1233,8 +1233,8 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
             proj_obj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
-        EXPECT_EQ(proj_obj_list_get_count(res), 6);
-        auto op = proj_obj_list_get(m_ctxt, res, 0);
+        EXPECT_EQ(proj_obj_list_get_count(res), 7);
+        auto op = proj_obj_list_get(m_ctxt, res, 1);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1263,7 +1263,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         // includes 2 results from ESRI
-        EXPECT_EQ(proj_obj_list_get_count(res), 4);
+        EXPECT_EQ(proj_obj_list_get_count(res), 5);
         auto op = proj_obj_list_get(m_ctxt, res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);

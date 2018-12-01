@@ -9328,6 +9328,7 @@ struct FilterAndSort {
         // Precompute a number of parameters for each operation that will be
         // useful for the sorting.
         std::map<CoordinateOperation *, PrecomputedOpCharacteristics> map;
+        const auto gridAvailabilityUse = context->getGridAvailabilityUse();
         for (const auto &op : res) {
             bool dummy = false;
             auto extentOp = getExtent(op, true, dummy);
@@ -9360,14 +9361,20 @@ struct FilterAndSort {
             bool gridsAvailable = true;
             bool gridsKnown = true;
             if (context->getAuthorityFactory() &&
-                context->getGridAvailabilityUse() ==
-                    CoordinateOperationContext::GridAvailabilityUse::
-                        USE_FOR_SORTING) {
+                (gridAvailabilityUse ==
+                     CoordinateOperationContext::GridAvailabilityUse::
+                         USE_FOR_SORTING ||
+                 gridAvailabilityUse ==
+                     CoordinateOperationContext::GridAvailabilityUse::
+                         IGNORE_GRID_AVAILABILITY)) {
                 const auto gridsNeeded = op->gridsNeeded(
                     context->getAuthorityFactory()->databaseContext());
                 for (const auto &gridDesc : gridsNeeded) {
                     hasGrids = true;
-                    if (!gridDesc.available) {
+                    if (gridAvailabilityUse ==
+                            CoordinateOperationContext::GridAvailabilityUse::
+                                USE_FOR_SORTING &&
+                        !gridDesc.available) {
                         gridsAvailable = false;
                     }
                     if (gridDesc.packageName.empty()) {
