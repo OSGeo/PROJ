@@ -3187,6 +3187,44 @@ TEST(operation, webmerc_import_from_WKT2_EPSG_3785_deprecated) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, webmerc_import_from_broken_esri_WGS_84_Pseudo_Mercator) {
+
+    // Likely the result of a broken export of GDAL morphToESRI()
+    auto wkt1 = "PROJCS[\"WGS_84_Pseudo_Mercator\",GEOGCS[\"GCS_WGS_1984\","
+                "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                "6378137,298.257223563]],PRIMEM[\"Greenwich\",0],"
+                "UNIT[\"Degree\",0.017453292519943295]],"
+                "PROJECTION[\"Mercator\"],PARAMETER[\"central_meridian\",0],"
+                "PARAMETER[\"false_easting\",0],"
+                "PARAMETER[\"false_northing\",0],UNIT[\"Meter\",1],"
+                "PARAMETER[\"standard_parallel_1\",0.0]]";
+
+    auto obj = WKTParser().createFromWKT(wkt1);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto convGot = crs->derivingConversion();
+
+    EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create().get()),
+              "CONVERSION[\"unnamed\",\n"
+              "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
+              "        ID[\"EPSG\",1024]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",0,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",0,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, mollweide_export) {
 
     auto conv = Conversion::createMollweide(PropertyMap(), Angle(1), Length(2),
