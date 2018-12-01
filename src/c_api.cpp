@@ -1596,8 +1596,8 @@ PJ_OBJ *proj_obj_get_target_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
  * @param obj Object of type CRS. Must not be NULL
  * @param auth_name Authority name, or NULL for all authorities
  * @param options Placeholder for future options. Should be set to NULL.
- * @param confidence Output parameter. Pointer to an array of integers that will
- * be allocated by the function and filled with the confidence values
+ * @param out_confidence Output parameter. Pointer to an array of integers that
+ * will be allocated by the function and filled with the confidence values
  * (0-100). There are as many elements in this array as
  * proj_obj_list_get_count()
  * returns on the return value of this function. *confidence should be
@@ -1606,12 +1606,13 @@ PJ_OBJ *proj_obj_get_target_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
  */
 PJ_OBJ_LIST *proj_obj_identify(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
                                const char *auth_name,
-                               const char *const *options, int **confidence) {
+                               const char *const *options,
+                               int **out_confidence) {
     SANITIZE_CTX(ctx);
     assert(obj);
     (void)options;
-    if (confidence) {
-        *confidence = nullptr;
+    if (out_confidence) {
+        *out_confidence = nullptr;
     }
     auto ptr = obj->obj.get();
     auto crs = dynamic_cast<const CRS *>(ptr);
@@ -1624,7 +1625,7 @@ PJ_OBJ_LIST *proj_obj_identify(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
                                                     auth_name ? auth_name : "");
             auto res = crs->identify(factory);
             std::vector<IdentifiedObjectNNPtr> objects;
-            confidenceTemp = confidence ? new int[res.size()] : nullptr;
+            confidenceTemp = out_confidence ? new int[res.size()] : nullptr;
             size_t i = 0;
             for (const auto &pair : res) {
                 objects.push_back(pair.first);
@@ -1634,8 +1635,8 @@ PJ_OBJ_LIST *proj_obj_identify(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
                 }
             }
             auto ret = internal::make_unique<PJ_OBJ_LIST>(std::move(objects));
-            if (confidence) {
-                *confidence = confidenceTemp;
+            if (out_confidence) {
+                *out_confidence = confidenceTemp;
                 confidenceTemp = nullptr;
             }
             return ret.release();

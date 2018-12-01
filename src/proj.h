@@ -658,7 +658,7 @@ PJ_OBJ_LIST PROJ_DLL *proj_obj_identify(PJ_CONTEXT *ctx,
                                         const PJ_OBJ* obj,
                                         const char *auth_name,
                                         const char* const *options,
-                                        int **confidence);
+                                        int **out_confidence);
 
 void PROJ_DLL proj_free_int_list(int* list);
 
