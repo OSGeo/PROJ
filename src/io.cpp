@@ -2517,6 +2517,11 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     auto props = buildProperties(node);
     addExtensionProj4ToProp(nodeP, props);
 
+    // No explicit AXIS node ? (WKT1)
+    if (isNull(nodeP->lookForChild(WKTConstants::AXIS))) {
+        props.set("IMPLICIT_CS", true);
+    }
+
     auto datum =
         !isNull(datumNode)
             ? buildGeodeticReferenceFrame(datumNode, primeMeridian, dynamicNode)
@@ -3360,6 +3365,11 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
+
+    // No explicit AXIS node ? (WKT1)
+    if (isNull(nodeP->lookForChild(WKTConstants::AXIS))) {
+        props.set("IMPLICIT_CS", true);
+    }
 
     if (isNull(csNode) && node->countChildrenOfName(WKTConstants::AXIS) == 0) {
         const auto methodCode = conversion->method()->getEPSGCode();
