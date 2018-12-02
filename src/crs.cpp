@@ -1329,6 +1329,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 }
             }
         } else {
+            bool gotAbove25Pct = false;
             for (int ipass = 0; ipass < 2; ipass++) {
                 const bool approximateMatch = ipass == 1;
                 auto objects = authorityFactory->createObjectsFromName(
@@ -1348,6 +1349,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             metadata::Identifier::isEquivalentName(
                                 thisName.c_str(), crs->nameStr().c_str());
                         res.emplace_back(crsNN, eqName ? 90 : 70);
+                        gotAbove25Pct = true;
                     } else {
                         res.emplace_back(crsNN, 25);
                     }
@@ -1356,7 +1358,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     break;
                 }
             }
-            if (res.empty() && thisDatum) {
+            if (!gotAbove25Pct && thisDatum) {
                 if (!thisDatum->identifiers().empty()) {
                     searchByDatum();
                 } else {
