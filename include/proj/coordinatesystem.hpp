@@ -208,6 +208,9 @@ class PROJ_GCC_DLL CoordinateSystemAxis final
     PROJ_INTERNAL static CoordinateSystemAxisNNPtr
     createLONG_EAST(const common::UnitOfMeasure &unit);
 
+    PROJ_INTERNAL CoordinateSystemAxisNNPtr
+    alterUnit(const common::UnitOfMeasure &newUnit) const;
+
     //! @endcond
 
   private:
@@ -372,6 +375,13 @@ class PROJ_GCC_DLL EllipsoidalCS final : public CoordinateSystem {
     };
 
     PROJ_INTERNAL AxisOrder axisOrder() const;
+
+    PROJ_INTERNAL EllipsoidalCSNNPtr
+    alterAngularUnit(const common::UnitOfMeasure &angularUnit) const;
+
+    PROJ_INTERNAL EllipsoidalCSNNPtr
+    alterLinearUnit(const common::UnitOfMeasure &linearUnit) const;
+
     //! @endcond
 
   protected:
@@ -415,6 +425,13 @@ class PROJ_GCC_DLL VerticalCS final : public CoordinateSystem {
 
     PROJ_DLL static VerticalCSNNPtr
     createGravityRelatedHeight(const common::UnitOfMeasure &unit);
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL VerticalCSNNPtr
+        alterUnit(const common::UnitOfMeasure &unit) const;
+
+    //! @endcond
 
   protected:
     PROJ_INTERNAL explicit VerticalCS(const CoordinateSystemAxisNNPtr &axisIn);
@@ -460,10 +477,22 @@ class PROJ_GCC_DLL CartesianCS final : public CoordinateSystem {
            const CoordinateSystemAxisNNPtr &axis1,
            const CoordinateSystemAxisNNPtr &axis2,
            const CoordinateSystemAxisNNPtr &axis3);
+
     PROJ_DLL static CartesianCSNNPtr
     createEastingNorthing(const common::UnitOfMeasure &unit);
+
+    PROJ_DLL static CartesianCSNNPtr
+    createNorthingEasting(const common::UnitOfMeasure &unit);
+
     PROJ_DLL static CartesianCSNNPtr
     createGeocentric(const common::UnitOfMeasure &unit);
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL CartesianCSNNPtr
+        alterUnit(const common::UnitOfMeasure &unit) const;
+
+    //! @endcond
 
   protected:
     PROJ_INTERNAL explicit CartesianCS(

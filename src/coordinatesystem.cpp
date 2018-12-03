@@ -416,6 +416,16 @@ bool CoordinateSystemAxis::_isEquivalentTo(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+CoordinateSystemAxisNNPtr
+CoordinateSystemAxis::alterUnit(const common::UnitOfMeasure &newUnit) const {
+    return create(util::PropertyMap().set(IdentifiedObject::NAME_KEY, name()),
+                  abbreviation(), direction(), newUnit, meridian());
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct CoordinateSystem::Private {
     std::vector<CoordinateSystemAxisNNPtr> axisList{};
 
@@ -738,6 +748,43 @@ EllipsoidalCS::AxisOrder EllipsoidalCS::axisOrder() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+EllipsoidalCSNNPtr EllipsoidalCS::alterAngularUnit(
+    const common::UnitOfMeasure &angularUnit) const {
+    const auto &l_axisList = CoordinateSystem::getPrivate()->axisList;
+    if (l_axisList.size() == 2) {
+        return EllipsoidalCS::create(util::PropertyMap(),
+                                     l_axisList[0]->alterUnit(angularUnit),
+                                     l_axisList[1]->alterUnit(angularUnit));
+    } else {
+        assert(l_axisList.size() == 3);
+        return EllipsoidalCS::create(
+            util::PropertyMap(), l_axisList[0]->alterUnit(angularUnit),
+            l_axisList[1]->alterUnit(angularUnit), l_axisList[2]);
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+EllipsoidalCSNNPtr
+EllipsoidalCS::alterLinearUnit(const common::UnitOfMeasure &linearUnit) const {
+    const auto &l_axisList = CoordinateSystem::getPrivate()->axisList;
+    if (l_axisList.size() == 2) {
+        return EllipsoidalCS::create(util::PropertyMap(), l_axisList[0],
+                                     l_axisList[1]);
+    } else {
+        assert(l_axisList.size() == 3);
+        return EllipsoidalCS::create(util::PropertyMap(), l_axisList[0],
+                                     l_axisList[1],
+                                     l_axisList[2]->alterUnit(linearUnit));
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 VerticalCS::~VerticalCS() = default;
 //! @endcond
 
@@ -784,6 +831,16 @@ VerticalCS::createGravityRelatedHeight(const common::UnitOfMeasure &unit) {
         "H", AxisDirection::UP, unit)));
     return cs;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+VerticalCSNNPtr VerticalCS::alterUnit(const common::UnitOfMeasure &unit) const {
+    const auto &l_axisList = CoordinateSystem::getPrivate()->axisList;
+    return VerticalCS::nn_make_shared<VerticalCS>(
+        l_axisList[0]->alterUnit(unit));
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -863,6 +920,27 @@ CartesianCS::createEastingNorthing(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CartesianCS with a Northing (first) and Easting
+ * (second) axis.
+ *
+ * @param unit Linear unit of the axes.
+ * @return a new CartesianCS.
+ */
+CartesianCSNNPtr
+CartesianCS::createNorthingEasting(const common::UnitOfMeasure &unit) {
+    return create(util::PropertyMap(),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Northing),
+                      AxisAbbreviation::N, AxisDirection::NORTH, unit),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Easting),
+                      AxisAbbreviation::E, AxisDirection::EAST, unit));
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a CartesianCS with the three geocentric axes.
  *
  * @param unit Liinear unit of the axes.
@@ -884,6 +962,25 @@ CartesianCS::createGeocentric(const common::UnitOfMeasure &unit) {
                                               AxisName::Geocentric_Z),
                       AxisAbbreviation::Z, AxisDirection::GEOCENTRIC_Z, unit));
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+CartesianCSNNPtr
+CartesianCS::alterUnit(const common::UnitOfMeasure &unit) const {
+    const auto &l_axisList = CoordinateSystem::getPrivate()->axisList;
+    if (l_axisList.size() == 2) {
+        return CartesianCS::create(util::PropertyMap(),
+                                   l_axisList[0]->alterUnit(unit),
+                                   l_axisList[1]->alterUnit(unit));
+    } else {
+        assert(l_axisList.size() == 3);
+        return CartesianCS::create(
+            util::PropertyMap(), l_axisList[0]->alterUnit(unit),
+            l_axisList[1]->alterUnit(unit), l_axisList[2]->alterUnit(unit));
+    }
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

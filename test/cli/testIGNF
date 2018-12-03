@@ -11,7 +11,7 @@
 # 2009-10-04 :  addition of NTFG to RGF93G test to check if
 #               the gsb grid is still ok
 
-TEST_OLD_DIR=`dirname $0`
+TEST_CLI_DIR=`dirname $0`
 DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
@@ -41,13 +41,7 @@ echo "============================================"
 
 OUT=proj_outIGNF
 
-REMOVE_IGNF=NO
-if test ! -f IGNF; then
-    cp ${PROJ_LIB}/IGNF .
-    REMOVE_IGNF=YES
-fi
-
-INIT_FILE=./IGNF
+INIT_FILE=IGNF
 RES="-f %.3f"
 #
 echo "doing tests into file ${OUT}, please wait"
@@ -162,14 +156,10 @@ $EXE +init=${INIT_FILE}:RGR92 +to +init=${INIT_FILE}:REUN47 -E $RES >>${OUT} <<E
 3356123.5400 1303218.3090 5247430.6050
 EOF
 
-if test "${REMOVE_IGNF}" = "YES"; then
-    rm ./IGNF
-fi
-
 #
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${TEST_OLD_DIR}/${OUT}.dist
+diff -b ${OUT} ${TEST_CLI_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 echo  ""
 echo "PROBLEMS HAVE OCCURRED"

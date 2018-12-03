@@ -349,7 +349,7 @@ LP proj_hgrid_apply(PJ *P, LP lp, PJ_DIRECTION direction) {
     out = nad_cvt(lp, inverse, ct);
 
     if (out.lam == HUGE_VAL || out.phi == HUGE_VAL)
-        pj_ctx_set_errno(P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+        pj_ctx_set_errno(P->ctx, PJD_ERR_GRID_AREA);
 
     return out;
 

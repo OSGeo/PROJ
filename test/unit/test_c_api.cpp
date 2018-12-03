@@ -29,6 +29,7 @@
 #include "gtest_include.h"
 
 #include "proj.h"
+#include "proj_experimental.h"
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
@@ -198,13 +199,14 @@ TEST_F(CApi, proj_obj_as_wkt) {
     ASSERT_NE(obj, nullptr);
 
     {
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2018, nullptr);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT2_2018, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEOGCRS[") == 0) << wkt;
     }
 
     {
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2018_SIMPLIFIED, nullptr);
+        auto wkt =
+            proj_obj_as_wkt(m_ctxt, obj, PJ_WKT2_2018_SIMPLIFIED, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEOGCRS[") == 0) << wkt;
         EXPECT_TRUE(std::string(wkt).find("ANGULARUNIT[") == std::string::npos)
@@ -212,13 +214,14 @@ TEST_F(CApi, proj_obj_as_wkt) {
     }
 
     {
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2015, nullptr);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT2_2015, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEODCRS[") == 0) << wkt;
     }
 
     {
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2015_SIMPLIFIED, nullptr);
+        auto wkt =
+            proj_obj_as_wkt(m_ctxt, obj, PJ_WKT2_2015_SIMPLIFIED, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEODCRS[") == 0) << wkt;
         EXPECT_TRUE(std::string(wkt).find("ANGULARUNIT[") == std::string::npos)
@@ -226,13 +229,13 @@ TEST_F(CApi, proj_obj_as_wkt) {
     }
 
     {
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, nullptr);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_GDAL, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEOGCS[\"WGS 84\"") == 0) << wkt;
     }
 
     {
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_ESRI, nullptr);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_ESRI, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEOGCS[\"GCS_WGS_1984\"") == 0)
             << wkt;
@@ -241,7 +244,7 @@ TEST_F(CApi, proj_obj_as_wkt) {
     // MULTILINE=NO
     {
         const char *const options[] = {"MULTILINE=NO", nullptr};
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, options);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_GDAL, options);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("\n") == std::string::npos) << wkt;
     }
@@ -249,7 +252,7 @@ TEST_F(CApi, proj_obj_as_wkt) {
     // INDENTATION_WIDTH=2
     {
         const char *const options[] = {"INDENTATION_WIDTH=2", nullptr};
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, options);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_GDAL, options);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("\n  DATUM") != std::string::npos)
             << wkt;
@@ -258,7 +261,7 @@ TEST_F(CApi, proj_obj_as_wkt) {
     // OUTPUT_AXIS=NO
     {
         const char *const options[] = {"OUTPUT_AXIS=NO", nullptr};
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, options);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_GDAL, options);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("AXIS") == std::string::npos) << wkt;
     }
@@ -266,7 +269,7 @@ TEST_F(CApi, proj_obj_as_wkt) {
     // OUTPUT_AXIS=AUTO
     {
         const char *const options[] = {"OUTPUT_AXIS=AUTO", nullptr};
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, options);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_GDAL, options);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("AXIS") == std::string::npos) << wkt;
     }
@@ -274,7 +277,7 @@ TEST_F(CApi, proj_obj_as_wkt) {
     // OUTPUT_AXIS=YES
     {
         const char *const options[] = {"OUTPUT_AXIS=YES", nullptr};
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, options);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_GDAL, options);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("AXIS") != std::string::npos) << wkt;
     }
@@ -282,9 +285,28 @@ TEST_F(CApi, proj_obj_as_wkt) {
     // unsupported option
     {
         const char *const options[] = {"unsupported=yes", nullptr};
-        auto wkt = proj_obj_as_wkt(obj, PJ_WKT2_2018, options);
+        auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT2_2018, options);
         EXPECT_EQ(wkt, nullptr);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_as_wkt_check_db_use) {
+    auto obj = proj_obj_create_from_wkt(
+        m_ctxt, "GEOGCS[\"AGD66\",DATUM[\"Australian_Geodetic_Datum_1966\","
+                "SPHEROID[\"Australian National Spheroid\",6378160,298.25]],"
+                "PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433]]",
+        nullptr);
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    auto wkt = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_ESRI, nullptr);
+    EXPECT_EQ(std::string(wkt),
+              "GEOGCS[\"GCS_Australian_1966\",DATUM[\"D_Australian_1966\","
+              "SPHEROID[\"Australian\",6378160.0,298.25]],"
+              "PRIMEM[\"Greenwich\",0.0],"
+              "UNIT[\"Degree\",0.0174532925199433]]");
 }
 
 // ---------------------------------------------------------------------------
@@ -297,7 +319,7 @@ TEST_F(CApi, proj_obj_as_wkt_incompatible_WKT1) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto wkt1_GDAL = proj_obj_as_wkt(obj, PJ_WKT1_GDAL, nullptr);
+    auto wkt1_GDAL = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_GDAL, nullptr);
     ASSERT_EQ(wkt1_GDAL, nullptr);
 }
 
@@ -313,7 +335,7 @@ TEST_F(CApi, proj_obj_as_proj_string) {
     ASSERT_NE(obj, nullptr);
 
     {
-        auto proj_5 = proj_obj_as_proj_string(obj, PJ_PROJ_5, nullptr);
+        auto proj_5 = proj_obj_as_proj_string(m_ctxt, obj, PJ_PROJ_5, nullptr);
         ASSERT_NE(proj_5, nullptr);
         EXPECT_EQ(std::string(proj_5), "+proj=pipeline +step +proj=longlat "
                                        "+ellps=WGS84 +step +proj=unitconvert "
@@ -321,7 +343,7 @@ TEST_F(CApi, proj_obj_as_proj_string) {
                                        "+proj=axisswap +order=2,1");
     }
     {
-        auto proj_4 = proj_obj_as_proj_string(obj, PJ_PROJ_4, nullptr);
+        auto proj_4 = proj_obj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, nullptr);
         ASSERT_NE(proj_4, nullptr);
         EXPECT_EQ(std::string(proj_4), "+proj=longlat +datum=WGS84 +no_defs");
     }
@@ -337,7 +359,7 @@ TEST_F(CApi, proj_obj_as_proj_string_incompatible_WKT1) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto str = proj_obj_as_proj_string(obj, PJ_PROJ_5, nullptr);
+    auto str = proj_obj_as_proj_string(m_ctxt, obj, PJ_PROJ_5, nullptr);
     ASSERT_EQ(str, nullptr);
 }
 
@@ -349,7 +371,7 @@ TEST_F(CApi, proj_obj_as_proj_string_etmerc_option_yes) {
     ASSERT_NE(obj, nullptr);
 
     const char *options[] = {"USE_ETMERC=YES", nullptr};
-    auto str = proj_obj_as_proj_string(obj, PJ_PROJ_4, options);
+    auto str = proj_obj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, options);
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str, std::string("+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 "
                                "+y_0=0 +datum=WGS84 +units=m +no_defs"));
@@ -364,7 +386,7 @@ TEST_F(CApi, proj_obj_as_proj_string_etmerc_option_no) {
     ASSERT_NE(obj, nullptr);
 
     const char *options[] = {"USE_ETMERC=NO", nullptr};
-    auto str = proj_obj_as_proj_string(obj, PJ_PROJ_4, options);
+    auto str = proj_obj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, options);
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str, std::string("+proj=tmerc +lat_0=0 +lon_0=3 +k=0.9996 "
                                "+x_0=500000 +y_0=0 +datum=WGS84 +units=m "
@@ -379,17 +401,37 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
-    auto res = proj_obj_crs_create_bound_crs_to_WGS84(crs);
+    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, crs);
     ObjectKeeper keeper_res(res);
     ASSERT_NE(res, nullptr);
 
-    auto proj_4 = proj_obj_as_proj_string(res, PJ_PROJ_4, nullptr);
+    auto proj_4 = proj_obj_as_proj_string(m_ctxt, res, PJ_PROJ_4, nullptr);
     ASSERT_NE(proj_4, nullptr);
     EXPECT_EQ(std::string(proj_4),
               "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
               "+y_0=500000 +ellps=krass "
               "+towgs84=2.329,-147.042,-92.08,-0.309,0.325,0.497,5.69 "
               "+units=m +no_defs");
+
+    auto base_crs = proj_obj_get_source_crs(m_ctxt, res);
+    ObjectKeeper keeper_base_crs(base_crs);
+    ASSERT_NE(base_crs, nullptr);
+
+    auto hub_crs = proj_obj_get_target_crs(m_ctxt, res);
+    ObjectKeeper keeper_hub_crs(hub_crs);
+    ASSERT_NE(hub_crs, nullptr);
+
+    auto transf =
+        proj_obj_crs_get_coordoperation(m_ctxt, res, nullptr, nullptr, nullptr);
+    ObjectKeeper keeper_transf(transf);
+    ASSERT_NE(transf, nullptr);
+
+    auto res2 =
+        proj_obj_crs_create_bound_crs(m_ctxt, base_crs, hub_crs, transf);
+    ObjectKeeper keeper_res2(res2);
+    ASSERT_NE(res2, nullptr);
+
+    EXPECT_TRUE(proj_obj_is_equivalent_to(res, res2, PJ_COMP_STRICT));
 }
 
 // ---------------------------------------------------------------------------
@@ -404,7 +446,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84_on_invalid_type) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto res = proj_obj_crs_create_bound_crs_to_WGS84(obj);
+    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, obj);
     ASSERT_EQ(res, nullptr);
 }
 
@@ -647,7 +689,7 @@ TEST_F(CApi, proj_crs) {
     ObjectKeeper keeper(crs);
     EXPECT_TRUE(proj_obj_is_crs(crs));
 
-    auto geodCRS = proj_obj_crs_get_geodetic_crs(crs);
+    auto geodCRS = proj_obj_crs_get_geodetic_crs(m_ctxt, crs);
     ASSERT_NE(geodCRS, nullptr);
     ObjectKeeper keeper_geogCRS(geodCRS);
     EXPECT_TRUE(proj_obj_is_crs(geodCRS));
@@ -655,37 +697,44 @@ TEST_F(CApi, proj_crs) {
     ASSERT_TRUE(geogCRS_name != nullptr);
     EXPECT_EQ(geogCRS_name, std::string("WGS 84"));
 
-    auto datum = proj_obj_crs_get_horizontal_datum(crs);
+    auto h_datum = proj_obj_crs_get_horizontal_datum(m_ctxt, crs);
+    ASSERT_NE(h_datum, nullptr);
+    ObjectKeeper keeper_h_datum(h_datum);
+
+    auto datum = proj_obj_crs_get_datum(m_ctxt, crs);
     ASSERT_NE(datum, nullptr);
     ObjectKeeper keeper_datum(datum);
+
+    EXPECT_TRUE(proj_obj_is_equivalent_to(h_datum, datum, PJ_COMP_STRICT));
+
     auto datum_name = proj_obj_get_name(datum);
     ASSERT_TRUE(datum_name != nullptr);
     EXPECT_EQ(datum_name, std::string("World Geodetic System 1984"));
 
-    auto ellipsoid = proj_obj_get_ellipsoid(crs);
+    auto ellipsoid = proj_obj_get_ellipsoid(m_ctxt, crs);
     ASSERT_NE(ellipsoid, nullptr);
     ObjectKeeper keeper_ellipsoid(ellipsoid);
     auto ellipsoid_name = proj_obj_get_name(ellipsoid);
     ASSERT_TRUE(ellipsoid_name != nullptr);
     EXPECT_EQ(ellipsoid_name, std::string("WGS 84"));
 
-    auto ellipsoid_from_datum = proj_obj_get_ellipsoid(datum);
+    auto ellipsoid_from_datum = proj_obj_get_ellipsoid(m_ctxt, datum);
     ASSERT_NE(ellipsoid_from_datum, nullptr);
     ObjectKeeper keeper_ellipsoid_from_datum(ellipsoid_from_datum);
 
-    EXPECT_EQ(proj_obj_get_ellipsoid(ellipsoid), nullptr);
+    EXPECT_EQ(proj_obj_get_ellipsoid(m_ctxt, ellipsoid), nullptr);
     EXPECT_FALSE(proj_obj_is_crs(ellipsoid));
 
     double a;
     double b;
     int b_is_computed;
     double rf;
-    EXPECT_TRUE(proj_obj_ellipsoid_get_parameters(ellipsoid, nullptr, nullptr,
-                                                  nullptr, nullptr));
-    EXPECT_TRUE(proj_obj_ellipsoid_get_parameters(ellipsoid, &a, &b,
+    EXPECT_TRUE(proj_obj_ellipsoid_get_parameters(m_ctxt, ellipsoid, nullptr,
+                                                  nullptr, nullptr, nullptr));
+    EXPECT_TRUE(proj_obj_ellipsoid_get_parameters(m_ctxt, ellipsoid, &a, &b,
                                                   &b_is_computed, &rf));
-    EXPECT_FALSE(
-        proj_obj_ellipsoid_get_parameters(crs, &a, &b, &b_is_computed, &rf));
+    EXPECT_FALSE(proj_obj_ellipsoid_get_parameters(m_ctxt, crs, &a, &b,
+                                                   &b_is_computed, &rf));
     EXPECT_EQ(a, 6378137);
     EXPECT_NEAR(b, 6356752.31424518, 1e-9);
     EXPECT_EQ(b_is_computed, 1);
@@ -708,31 +757,31 @@ TEST_F(CApi, proj_obj_get_prime_meridian) {
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
-    auto pm = proj_obj_get_prime_meridian(crs);
+    auto pm = proj_obj_get_prime_meridian(m_ctxt, crs);
     ASSERT_NE(pm, nullptr);
     ObjectKeeper keeper_pm(pm);
     auto pm_name = proj_obj_get_name(pm);
     ASSERT_TRUE(pm_name != nullptr);
     EXPECT_EQ(pm_name, std::string("Greenwich"));
 
-    EXPECT_EQ(proj_obj_get_prime_meridian(pm), nullptr);
+    EXPECT_EQ(proj_obj_get_prime_meridian(m_ctxt, pm), nullptr);
 
-    EXPECT_TRUE(
-        proj_obj_prime_meridian_get_parameters(pm, nullptr, nullptr, nullptr));
+    EXPECT_TRUE(proj_obj_prime_meridian_get_parameters(m_ctxt, pm, nullptr,
+                                                       nullptr, nullptr));
     double longitude = -1;
     double longitude_unit = 0;
     const char *longitude_unit_name = nullptr;
     EXPECT_TRUE(proj_obj_prime_meridian_get_parameters(
-        pm, &longitude, &longitude_unit, &longitude_unit_name));
+        m_ctxt, pm, &longitude, &longitude_unit, &longitude_unit_name));
     EXPECT_EQ(longitude, 0);
     EXPECT_NEAR(longitude_unit, UnitOfMeasure::DEGREE.conversionToSI(), 1e-10);
     ASSERT_TRUE(longitude_unit_name != nullptr);
     EXPECT_EQ(longitude_unit_name, std::string("degree"));
 
-    auto datum = proj_obj_crs_get_horizontal_datum(crs);
+    auto datum = proj_obj_crs_get_horizontal_datum(m_ctxt, crs);
     ASSERT_NE(datum, nullptr);
     ObjectKeeper keeper_datum(datum);
-    auto pm_from_datum = proj_obj_get_prime_meridian(datum);
+    auto pm_from_datum = proj_obj_get_prime_meridian(m_ctxt, datum);
     ASSERT_NE(pm_from_datum, nullptr);
     ObjectKeeper keeper_pm_from_datum(pm_from_datum);
 }
@@ -748,16 +797,16 @@ TEST_F(CApi, proj_crs_compound) {
     ObjectKeeper keeper(crs);
     EXPECT_EQ(proj_obj_get_type(crs), PJ_OBJ_TYPE_COMPOUND_CRS);
 
-    EXPECT_EQ(proj_obj_crs_get_sub_crs(crs, -1), nullptr);
-    EXPECT_EQ(proj_obj_crs_get_sub_crs(crs, 2), nullptr);
+    EXPECT_EQ(proj_obj_crs_get_sub_crs(m_ctxt, crs, -1), nullptr);
+    EXPECT_EQ(proj_obj_crs_get_sub_crs(m_ctxt, crs, 2), nullptr);
 
-    auto subcrs_horiz = proj_obj_crs_get_sub_crs(crs, 0);
+    auto subcrs_horiz = proj_obj_crs_get_sub_crs(m_ctxt, crs, 0);
     ASSERT_NE(subcrs_horiz, nullptr);
     ObjectKeeper keeper_subcrs_horiz(subcrs_horiz);
     EXPECT_EQ(proj_obj_get_type(subcrs_horiz), PJ_OBJ_TYPE_PROJECTED_CRS);
-    EXPECT_EQ(proj_obj_crs_get_sub_crs(subcrs_horiz, 0), nullptr);
+    EXPECT_EQ(proj_obj_crs_get_sub_crs(m_ctxt, subcrs_horiz, 0), nullptr);
 
-    auto subcrs_vertical = proj_obj_crs_get_sub_crs(crs, 1);
+    auto subcrs_vertical = proj_obj_crs_get_sub_crs(m_ctxt, crs, 1);
     ASSERT_NE(subcrs_vertical, nullptr);
     ObjectKeeper keeper_subcrs_vertical(subcrs_vertical);
     EXPECT_EQ(proj_obj_get_type(subcrs_vertical), PJ_OBJ_TYPE_VERTICAL_CRS);
@@ -773,12 +822,12 @@ TEST_F(CApi, proj_obj_get_source_target_crs_bound_crs) {
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
-    auto sourceCRS = proj_obj_get_source_crs(crs);
+    auto sourceCRS = proj_obj_get_source_crs(m_ctxt, crs);
     ASSERT_NE(sourceCRS, nullptr);
     ObjectKeeper keeper_sourceCRS(sourceCRS);
     EXPECT_EQ(std::string(proj_obj_get_name(sourceCRS)), "NTF (Paris)");
 
-    auto targetCRS = proj_obj_get_target_crs(crs);
+    auto targetCRS = proj_obj_get_target_crs(m_ctxt, crs);
     ASSERT_NE(targetCRS, nullptr);
     ObjectKeeper keeper_targetCRS(targetCRS);
     EXPECT_EQ(std::string(proj_obj_get_name(targetCRS)), "WGS 84");
@@ -796,15 +845,31 @@ TEST_F(CApi, proj_obj_get_source_target_crs_transformation) {
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
 
-    auto sourceCRS = proj_obj_get_source_crs(obj);
+    auto sourceCRS = proj_obj_get_source_crs(m_ctxt, obj);
     ASSERT_NE(sourceCRS, nullptr);
     ObjectKeeper keeper_sourceCRS(sourceCRS);
     EXPECT_EQ(std::string(proj_obj_get_name(sourceCRS)), "NTF (Paris)");
 
-    auto targetCRS = proj_obj_get_target_crs(obj);
+    auto targetCRS = proj_obj_get_target_crs(m_ctxt, obj);
     ASSERT_NE(targetCRS, nullptr);
     ObjectKeeper keeper_targetCRS(targetCRS);
     EXPECT_EQ(std::string(proj_obj_get_name(targetCRS)), "WGS 84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_get_source_crs_of_projected_crs) {
+    auto crs = proj_obj_create_from_wkt(
+        m_ctxt,
+        createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
+        nullptr);
+    ASSERT_NE(crs, nullptr);
+    ObjectKeeper keeper(crs);
+
+    auto sourceCRS = proj_obj_get_source_crs(m_ctxt, crs);
+    ASSERT_NE(sourceCRS, nullptr);
+    ObjectKeeper keeper_sourceCRS(sourceCRS);
+    EXPECT_EQ(std::string(proj_obj_get_name(sourceCRS)), "WGS 84");
 }
 
 // ---------------------------------------------------------------------------
@@ -816,10 +881,10 @@ TEST_F(CApi, proj_obj_get_source_target_crs_conversion_without_crs) {
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
 
-    auto sourceCRS = proj_obj_get_source_crs(obj);
+    auto sourceCRS = proj_obj_get_source_crs(m_ctxt, obj);
     ASSERT_EQ(sourceCRS, nullptr);
 
-    auto targetCRS = proj_obj_get_target_crs(obj);
+    auto targetCRS = proj_obj_get_target_crs(m_ctxt, obj);
     ASSERT_EQ(targetCRS, nullptr);
 }
 
@@ -831,10 +896,10 @@ TEST_F(CApi, proj_obj_get_source_target_crs_invalid_object) {
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
 
-    auto sourceCRS = proj_obj_get_source_crs(obj);
+    auto sourceCRS = proj_obj_get_source_crs(m_ctxt, obj);
     ASSERT_EQ(sourceCRS, nullptr);
 
-    auto targetCRS = proj_obj_get_target_crs(obj);
+    auto targetCRS = proj_obj_get_target_crs(m_ctxt, obj);
     ASSERT_EQ(targetCRS, nullptr);
 }
 
@@ -923,21 +988,21 @@ TEST_F(CApi, conversion) {
     ObjectKeeper keeper(crs);
 
     {
-        auto conv =
-            proj_obj_crs_get_coordoperation(crs, nullptr, nullptr, nullptr);
+        auto conv = proj_obj_crs_get_coordoperation(m_ctxt, crs, nullptr,
+                                                    nullptr, nullptr);
         ASSERT_NE(conv, nullptr);
         ObjectKeeper keeper_conv(conv);
 
-        ASSERT_EQ(
-            proj_obj_crs_get_coordoperation(conv, nullptr, nullptr, nullptr),
-            nullptr);
+        ASSERT_EQ(proj_obj_crs_get_coordoperation(m_ctxt, conv, nullptr,
+                                                  nullptr, nullptr),
+                  nullptr);
     }
 
     const char *methodName = nullptr;
     const char *methodAuthorityName = nullptr;
     const char *methodCode = nullptr;
     auto conv = proj_obj_crs_get_coordoperation(
-        crs, &methodName, &methodAuthorityName, &methodCode);
+        m_ctxt, crs, &methodName, &methodAuthorityName, &methodCode);
     ASSERT_NE(conv, nullptr);
     ObjectKeeper keeper_conv(conv);
 
@@ -948,16 +1013,17 @@ TEST_F(CApi, conversion) {
     EXPECT_EQ(methodAuthorityName, std::string("EPSG"));
     EXPECT_EQ(methodCode, std::string("9807"));
 
-    EXPECT_EQ(proj_coordoperation_get_param_count(conv), 5);
-    EXPECT_EQ(proj_coordoperation_get_param_index(conv, "foo"), -1);
-    EXPECT_EQ(proj_coordoperation_get_param_index(conv, "False easting"), 3);
+    EXPECT_EQ(proj_coordoperation_get_param_count(m_ctxt, conv), 5);
+    EXPECT_EQ(proj_coordoperation_get_param_index(m_ctxt, conv, "foo"), -1);
+    EXPECT_EQ(
+        proj_coordoperation_get_param_index(m_ctxt, conv, "False easting"), 3);
 
-    EXPECT_FALSE(proj_coordoperation_get_param(conv, -1, nullptr, nullptr,
+    EXPECT_FALSE(proj_coordoperation_get_param(m_ctxt, conv, -1, nullptr,
                                                nullptr, nullptr, nullptr,
-                                               nullptr, nullptr));
-    EXPECT_FALSE(proj_coordoperation_get_param(conv, 5, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr));
+    EXPECT_FALSE(proj_coordoperation_get_param(m_ctxt, conv, 5, nullptr,
                                                nullptr, nullptr, nullptr,
-                                               nullptr, nullptr));
+                                               nullptr, nullptr, nullptr));
 
     const char *name = nullptr;
     const char *nameAuthorityName = nullptr;
@@ -967,8 +1033,8 @@ TEST_F(CApi, conversion) {
     double valueUnitConvFactor = 0;
     const char *valueUnitName = nullptr;
     EXPECT_TRUE(proj_coordoperation_get_param(
-        conv, 3, &name, &nameAuthorityName, &nameCode, &value, &valueString,
-        &valueUnitConvFactor, &valueUnitName));
+        m_ctxt, conv, 3, &name, &nameAuthorityName, &nameCode, &value,
+        &valueString, &valueUnitConvFactor, &valueUnitName));
     ASSERT_NE(name, nullptr);
     ASSERT_NE(nameAuthorityName, nullptr);
     ASSERT_NE(nameCode, nullptr);
@@ -993,7 +1059,7 @@ TEST_F(CApi, transformation_from_boundCRS) {
     ObjectKeeper keeper(crs);
 
     auto transf =
-        proj_obj_crs_get_coordoperation(crs, nullptr, nullptr, nullptr);
+        proj_obj_crs_get_coordoperation(m_ctxt, crs, nullptr, nullptr, nullptr);
     ASSERT_NE(transf, nullptr);
     ObjectKeeper keeper_transf(transf);
 }
@@ -1007,7 +1073,7 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper(op);
 
-    EXPECT_EQ(proj_coordoperation_get_grid_used_count(op), 1);
+    EXPECT_EQ(proj_coordoperation_get_grid_used_count(m_ctxt, op), 1);
     const char *shortName = nullptr;
     const char *fullName = nullptr;
     const char *packageName = nullptr;
@@ -1015,16 +1081,16 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
     int directDownload = 0;
     int openLicense = 0;
     int available = 0;
-    EXPECT_EQ(proj_coordoperation_get_grid_used(op, -1, nullptr, nullptr,
+    EXPECT_EQ(proj_coordoperation_get_grid_used(m_ctxt, op, -1, nullptr,
                                                 nullptr, nullptr, nullptr,
-                                                nullptr, nullptr),
+                                                nullptr, nullptr, nullptr),
               0);
-    EXPECT_EQ(proj_coordoperation_get_grid_used(op, 1, nullptr, nullptr,
+    EXPECT_EQ(proj_coordoperation_get_grid_used(m_ctxt, op, 1, nullptr, nullptr,
                                                 nullptr, nullptr, nullptr,
                                                 nullptr, nullptr),
               0);
     EXPECT_EQ(proj_coordoperation_get_grid_used(
-                  op, 0, &shortName, &fullName, &packageName, &url,
+                  m_ctxt, op, 0, &shortName, &fullName, &packageName, &url,
                   &directDownload, &openLicense, &available),
               1);
     ASSERT_NE(shortName, nullptr);
@@ -1049,7 +1115,7 @@ TEST_F(CApi, proj_coordoperation_is_instanciable) {
         nullptr);
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper(op);
-    EXPECT_EQ(proj_coordoperation_is_instanciable(op), 1);
+    EXPECT_EQ(proj_coordoperation_is_instanciable(m_ctxt, op), 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -1070,20 +1136,21 @@ TEST_F(CApi, proj_obj_create_operations) {
     ObjectKeeper keeper_target_crs(target_crs);
 
     proj_operation_factory_context_set_spatial_criterion(
-        ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
 
     proj_operation_factory_context_set_grid_availability_use(
-        ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
 
-    auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+    auto res = proj_obj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
     ASSERT_NE(res, nullptr);
     ObjListKeeper keeper_res(res);
 
-    EXPECT_EQ(proj_obj_list_get_count(res), 7);
+    EXPECT_EQ(proj_obj_list_get_count(res), 8);
 
-    EXPECT_EQ(proj_obj_list_get(res, -1), nullptr);
-    EXPECT_EQ(proj_obj_list_get(res, proj_obj_list_get_count(res)), nullptr);
-    auto op = proj_obj_list_get(res, 0);
+    EXPECT_EQ(proj_obj_list_get(m_ctxt, res, -1), nullptr);
+    EXPECT_EQ(proj_obj_list_get(m_ctxt, res, proj_obj_list_get_count(res)),
+              nullptr);
+    auto op = proj_obj_list_get(m_ctxt, res, 0);
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper_op(op);
 
@@ -1112,11 +1179,12 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
 
-        auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+        auto res =
+            proj_obj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 1);
-        auto op = proj_obj_list_get(res, 0);
+        auto op = proj_obj_list_get(m_ctxt, res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1131,14 +1199,15 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
         auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
-        proj_operation_factory_context_set_allow_use_intermediate_crs(ctxt,
-                                                                      false);
+        proj_operation_factory_context_set_allow_use_intermediate_crs(
+            m_ctxt, ctxt, false);
 
-        auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+        auto res =
+            proj_obj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 1);
-        auto op = proj_obj_list_get(res, 0);
+        auto op = proj_obj_list_get(m_ctxt, res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1153,18 +1222,19 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
         ContextKeeper keeper_ctxt(ctxt);
 
         const char *pivots[] = {"EPSG", "4301", nullptr};
-        proj_operation_factory_context_set_allowed_intermediate_crs(ctxt,
-                                                                    pivots);
+        proj_operation_factory_context_set_allowed_intermediate_crs(
+            m_ctxt, ctxt, pivots);
         proj_operation_factory_context_set_spatial_criterion(
-            ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+            m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
         proj_operation_factory_context_set_grid_availability_use(
-            ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+            m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
 
-        auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+        auto res =
+            proj_obj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
-        EXPECT_EQ(proj_obj_list_get_count(res), 6);
-        auto op = proj_obj_list_get(res, 0);
+        EXPECT_EQ(proj_obj_list_get_count(res), 7);
+        auto op = proj_obj_list_get(m_ctxt, res, 1);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1181,19 +1251,20 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
         ContextKeeper keeper_ctxt(ctxt);
 
         const char *pivots[] = {"EPSG", "4612", nullptr};
-        proj_operation_factory_context_set_allowed_intermediate_crs(ctxt,
-                                                                    pivots);
+        proj_operation_factory_context_set_allowed_intermediate_crs(
+            m_ctxt, ctxt, pivots);
         proj_operation_factory_context_set_spatial_criterion(
-            ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+            m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
         proj_operation_factory_context_set_grid_availability_use(
-            ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+            m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
 
-        auto res = proj_obj_create_operations(source_crs, target_crs, ctxt);
+        auto res =
+            proj_obj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         // includes 2 results from ESRI
-        EXPECT_EQ(proj_obj_list_get_count(res), 4);
-        auto op = proj_obj_list_get(res, 0);
+        EXPECT_EQ(proj_obj_list_get_count(res), 5);
+        auto op = proj_obj_list_get(m_ctxt, res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1364,13 +1435,13 @@ TEST_F(CApi, proj_obj_identify) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
     {
-        auto res = proj_obj_identify(obj, nullptr, nullptr, nullptr);
+        auto res = proj_obj_identify(m_ctxt, obj, nullptr, nullptr, nullptr);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 1);
     }
     {
         int *confidence = nullptr;
-        auto res = proj_obj_identify(obj, "EPSG", nullptr, &confidence);
+        auto res = proj_obj_identify(m_ctxt, obj, "EPSG", nullptr, &confidence);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 1);
         EXPECT_EQ(confidence[0], 100);
@@ -1383,7 +1454,8 @@ TEST_F(CApi, proj_obj_identify) {
                 .c_str(),
             nullptr);
         ObjectKeeper keeperEllps(objEllps);
-        auto res = proj_obj_identify(objEllps, nullptr, nullptr, nullptr);
+        auto res =
+            proj_obj_identify(m_ctxt, objEllps, nullptr, nullptr, nullptr);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(res, nullptr);
     }
@@ -1397,14 +1469,15 @@ TEST_F(CApi, proj_obj_get_area_of_use) {
             m_ctxt, "EPSG", "4326", PJ_OBJ_CATEGORY_CRS, false, nullptr);
         ASSERT_NE(crs, nullptr);
         ObjectKeeper keeper(crs);
-        EXPECT_TRUE(proj_obj_get_area_of_use(crs, nullptr, nullptr, nullptr,
-                                             nullptr, nullptr));
+        EXPECT_TRUE(proj_obj_get_area_of_use(m_ctxt, crs, nullptr, nullptr,
+                                             nullptr, nullptr, nullptr));
         const char *name = nullptr;
         double w;
         double s;
         double e;
         double n;
-        EXPECT_TRUE(proj_obj_get_area_of_use(crs, &w, &s, &e, &n, &name));
+        EXPECT_TRUE(
+            proj_obj_get_area_of_use(m_ctxt, crs, &w, &s, &e, &n, &name));
         EXPECT_EQ(w, -180);
         EXPECT_EQ(s, -90);
         EXPECT_EQ(e, 180);
@@ -1417,8 +1490,8 @@ TEST_F(CApi, proj_obj_get_area_of_use) {
             proj_obj_create_from_user_input(m_ctxt, "+proj=longlat", nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
-        EXPECT_FALSE(proj_obj_get_area_of_use(obj, nullptr, nullptr, nullptr,
-                                              nullptr, nullptr));
+        EXPECT_FALSE(proj_obj_get_area_of_use(m_ctxt, obj, nullptr, nullptr,
+                                              nullptr, nullptr, nullptr));
     }
 }
 
@@ -1430,7 +1503,7 @@ TEST_F(CApi, proj_coordoperation_get_accuracy) {
             m_ctxt, "EPSG", "4326", PJ_OBJ_CATEGORY_CRS, false, nullptr);
         ASSERT_NE(crs, nullptr);
         ObjectKeeper keeper(crs);
-        EXPECT_EQ(proj_coordoperation_get_accuracy(crs), -1.0);
+        EXPECT_EQ(proj_coordoperation_get_accuracy(m_ctxt, crs), -1.0);
     }
     {
         auto obj = proj_obj_create_from_database(
@@ -1438,25 +1511,67 @@ TEST_F(CApi, proj_coordoperation_get_accuracy) {
             nullptr);
         ASSERT_NE(obj, nullptr);
         ObjectKeeper keeper(obj);
-        EXPECT_EQ(proj_coordoperation_get_accuracy(obj), 16.0);
+        EXPECT_EQ(proj_coordoperation_get_accuracy(m_ctxt, obj), 16.0);
     }
     {
         auto obj =
             proj_obj_create_from_user_input(m_ctxt, "+proj=helmert", nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
-        EXPECT_EQ(proj_coordoperation_get_accuracy(obj), -1.0);
+        EXPECT_EQ(proj_coordoperation_get_accuracy(m_ctxt, obj), -1.0);
     }
 }
 
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_geographic_crs) {
+
+    auto cs = proj_obj_create_ellipsoidal_2D_cs(
+        m_ctxt, PJ_ELLPS2D_LATITUDE_LONGITUDE, nullptr, 0);
+    ObjectKeeper keeper_cs(cs);
+    ASSERT_NE(cs, nullptr);
+
     {
         auto obj = proj_obj_create_geographic_crs(
             m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
-            298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433,
-            true);
+            298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433, cs);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+
+        auto objRef = proj_obj_create_from_user_input(
+            m_ctxt,
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr);
+        ObjectKeeper keeperobjRef(objRef);
+        EXPECT_NE(objRef, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(obj, objRef, PJ_COMP_EQUIVALENT));
+
+        auto datum = proj_obj_crs_get_datum(m_ctxt, obj);
+        ObjectKeeper keeper_datum(datum);
+        ASSERT_NE(datum, nullptr);
+
+        auto obj2 = proj_obj_create_geographic_crs_from_datum(m_ctxt, "WGS 84",
+                                                              datum, cs);
+        ObjectKeeper keeperObj(obj2);
+        ASSERT_NE(obj2, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(obj, obj2, PJ_COMP_STRICT));
+    }
+    {
+        auto obj = proj_obj_create_geographic_crs(m_ctxt, nullptr, nullptr,
+                                                  nullptr, 1.0, 0.0, nullptr,
+                                                  0.0, nullptr, 0.0, cs);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+    }
+
+    // Datum with GDAL_WKT1 spelling: special case of WGS_1984
+    {
+        auto obj = proj_obj_create_geographic_crs(
+            m_ctxt, "WGS 84", "WGS_1984", "WGS 84", 6378137, 298.257223563,
+            "Greenwich", 0.0, "Degree", 0.0174532925199433, cs);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
 
@@ -1470,489 +1585,784 @@ TEST_F(CApi, proj_obj_create_geographic_crs) {
 
         EXPECT_TRUE(proj_obj_is_equivalent_to(obj, objRef, PJ_COMP_EQUIVALENT));
     }
+
+    // Datum with GDAL_WKT1 spelling: database query
     {
-        auto obj = proj_obj_create_geographic_crs(m_ctxt, nullptr, nullptr,
-                                                  nullptr, 1.0, 0.0, nullptr,
-                                                  0.0, nullptr, 0.0, false);
+        auto obj = proj_obj_create_geographic_crs(
+            m_ctxt, "NAD83", "North_American_Datum_1983", "GRS 1980", 6378137,
+            298.257222101, "Greenwich", 0.0, "Degree", 0.0174532925199433, cs);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
+
+        auto objRef = proj_obj_create_from_user_input(
+            m_ctxt,
+            GeographicCRS::EPSG_4269->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr);
+        ObjectKeeper keeperobjRef(objRef);
+        EXPECT_NE(objRef, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(obj, objRef, PJ_COMP_EQUIVALENT));
     }
 }
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_obj_create_projections) {
+TEST_F(CApi, proj_obj_create_geocentric_crs) {
+    {
+        auto obj = proj_obj_create_geocentric_crs(
+            m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
+            298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433,
+            "Metre", 1.0);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
 
-    auto geogCRS = proj_obj_create_geographic_crs(
-        m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
-        298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433, true);
-    ObjectKeeper keepergeogCRS(geogCRS);
-    ASSERT_NE(geogCRS, nullptr);
+        auto objRef = proj_obj_create_from_user_input(
+            m_ctxt,
+            GeographicCRS::EPSG_4978->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr);
+        ObjectKeeper keeperobjRef(objRef);
+        EXPECT_NE(objRef, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(obj, objRef, PJ_COMP_EQUIVALENT));
+
+        auto datum = proj_obj_crs_get_datum(m_ctxt, obj);
+        ObjectKeeper keeper_datum(datum);
+        ASSERT_NE(datum, nullptr);
+
+        auto obj2 = proj_obj_create_geocentric_crs_from_datum(
+            m_ctxt, "WGS 84", datum, "Metre", 1.0);
+        ObjectKeeper keeperObj(obj2);
+        ASSERT_NE(obj2, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(obj, obj2, PJ_COMP_STRICT));
+    }
+    {
+        auto obj = proj_obj_create_geocentric_crs(
+            m_ctxt, nullptr, nullptr, nullptr, 1.0, 0.0, nullptr, 0.0, nullptr,
+            0.0, nullptr, 0.0);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr);
+    }
+}
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_projections) {
 
     /* BEGIN: Generated by scripts/create_c_api_projections.py*/
     {
-        auto projCRS =
-            proj_obj_create_projected_crs_UTM(geogCRS, nullptr, 0, 0);
+        auto projCRS = proj_obj_create_conversion_utm(m_ctxt, 0, 0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_TransverseMercator(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
+        auto projCRS = proj_obj_create_conversion_transverse_mercator(
+            m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_GaussSchreiberTransverseMercator(
-                geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
+            proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
+                m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+                1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS =
+            proj_obj_create_conversion_transverse_mercator_south_oriented(
+                m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+                1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_two_point_equidistant(
+            m_ctxt, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+            1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_tunisia_mapping_grid(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_albers_equal_area(
+            m_ctxt, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+            1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_lambert_conic_conformal_1sp(
+            m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_lambert_conic_conformal_2sp(
+            m_ctxt, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+            1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS =
+            proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
+                m_ctxt, 0, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
                 "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_TransverseMercatorSouthOriented(
-                geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-                "Metre", 1.0);
+            proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
+                m_ctxt, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+                1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_TwoPointEquidistant(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
+        auto projCRS = proj_obj_create_conversion_azimuthal_equidistant(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_TunisiaMappingGrid(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_guam_projection(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_AlbersEqualArea(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_LambertConicConformal_1SP(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_LambertConicConformal_2SP(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
+        auto projCRS = proj_obj_create_conversion_bonne(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_LambertConicConformal_2SP_Michigan(
-                geogCRS, nullptr, 0, 0, 0, 0, 0, 0, 0, "Degree",
-                0.0174532925199433, "Metre", 1.0);
+            proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical(
+                m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_LambertConicConformal_2SP_Belgium(
-                geogCRS, nullptr, 0, 0, 0, 0, 0, 0, "Degree",
-                0.0174532925199433, "Metre", 1.0);
+            proj_obj_create_conversion_lambert_cylindrical_equal_area(
+                m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_AzimuthalEquidistant(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+        auto projCRS = proj_obj_create_conversion_cassini_soldner(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_equidistant_conic(
+            m_ctxt, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
             1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_GuamProjection(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_eckert_i(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Bonne(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_eckert_ii(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_eckert_iii(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_eckert_iv(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_eckert_v(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_eckert_vi(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_equidistant_cylindrical(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_LambertCylindricalEqualAreaSpherical(
-                geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-                "Metre", 1.0);
+            proj_obj_create_conversion_equidistant_cylindrical_spherical(
+                m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_gall(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_goode_homolosine(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_interrupted_goode_homolosine(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_LambertCylindricalEqualArea(
-                geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-                "Metre", 1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_CassiniSoldner(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_EquidistantConic(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_EckertI(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_EckertII(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_EckertIII(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_EckertIV(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_EckertV(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_EckertVI(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_EquidistantCylindrical(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+            proj_obj_create_conversion_geostationary_satellite_sweep_x(
+                m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_EquidistantCylindricalSpherical(
-                geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-                "Metre", 1.0);
+            proj_obj_create_conversion_geostationary_satellite_sweep_y(
+                m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Gall(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_GoodeHomolosine(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_InterruptedGoodeHomolosine(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_gnomonic(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_GeostationarySatelliteSweepX(
-                geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433,
+            proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
+                m_ctxt, 0, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
                 "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_GeostationarySatelliteSweepY(
-                geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433,
+            proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
+                m_ctxt, 0, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
                 "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Gnomonic(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
         auto projCRS =
-            proj_obj_create_projected_crs_HotineObliqueMercatorVariantA(
-                geogCRS, nullptr, 0, 0, 0, 0, 0, 0, 0, "Degree",
-                0.0174532925199433, "Metre", 1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS =
-            proj_obj_create_projected_crs_HotineObliqueMercatorVariantB(
-                geogCRS, nullptr, 0, 0, 0, 0, 0, 0, 0, "Degree",
-                0.0174532925199433, "Metre", 1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS =
-            proj_obj_create_projected_crs_HotineObliqueMercatorTwoPointNaturalOrigin(
-                geogCRS, nullptr, 0, 0, 0, 0, 0, 0, 0, 0, "Degree",
-                0.0174532925199433, "Metre", 1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS =
-            proj_obj_create_projected_crs_InternationalMapWorldPolyconic(
-                geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
+            proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
+                m_ctxt, 0, 0, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
                 "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_KrovakNorthOriented(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
+        auto projCRS =
+            proj_obj_create_conversion_international_map_world_polyconic(
+                m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+                1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Krovak(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
-        ObjectKeeper keeper_projCRS(projCRS);
-        ASSERT_NE(projCRS, nullptr);
-    }
-    {
-        auto projCRS = proj_obj_create_projected_crs_LambertAzimuthalEqualArea(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+        auto projCRS = proj_obj_create_conversion_krovak_north_oriented(
+            m_ctxt, 0, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
             1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_MillerCylindrical(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+        auto projCRS = proj_obj_create_conversion_krovak(
+            m_ctxt, 0, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
             1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_MercatorVariantA(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
+        auto projCRS = proj_obj_create_conversion_lambert_azimuthal_equal_area(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_MercatorVariantB(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_miller_cylindrical(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_mercator_variant_a(
+            m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
+        auto projCRS = proj_obj_create_conversion_mercator_variant_b(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_PopularVisualisationPseudoMercator(
-                geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-                "Metre", 1.0);
+            proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
+                m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Mollweide(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_mollweide(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_NewZealandMappingGrid(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_new_zealand_mapping_grid(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_ObliqueStereographic(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
+        auto projCRS = proj_obj_create_conversion_oblique_stereographic(
+            m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Orthographic(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_orthographic(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_AmericanPolyconic(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_american_polyconic(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_PolarStereographicVariantA(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
+        auto projCRS = proj_obj_create_conversion_polar_stereographic_variant_a(
+            m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_PolarStereographicVariantB(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_polar_stereographic_variant_b(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Robinson(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_robinson(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Sinusoidal(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_sinusoidal(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_Stereographic(
-            geogCRS, nullptr, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-            "Metre", 1.0);
+        auto projCRS = proj_obj_create_conversion_stereographic(
+            m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_VanDerGrinten(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_van_der_grinten(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_WagnerI(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_wagner_i(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_WagnerII(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_wagner_ii(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_WagnerIII(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_wagner_iii(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_WagnerIV(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_wagner_iv(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_WagnerV(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_wagner_v(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_WagnerVI(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_wagner_vi(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_WagnerVII(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_wagner_vii(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
         auto projCRS =
-            proj_obj_create_projected_crs_QuadrilateralizedSphericalCube(
-                geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433,
-                "Metre", 1.0);
+            proj_obj_create_conversion_quadrilateralized_spherical_cube(
+                m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_SphericalCrossTrackHeight(
-            geogCRS, nullptr, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_spherical_cross_track_height(
+            m_ctxt, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     {
-        auto projCRS = proj_obj_create_projected_crs_EqualEarth(
-            geogCRS, nullptr, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
-            1.0);
+        auto projCRS = proj_obj_create_conversion_equal_earth(
+            m_ctxt, 0, 0, 0, "Degree", 0.0174532925199433, "Metre", 1.0);
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
     }
     /* END: Generated by scripts/create_c_api_projections.py*/
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_cs_get_axis_info) {
+    {
+        auto crs = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "4326", PJ_OBJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper(crs);
+
+        auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, crs);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+
+        EXPECT_EQ(proj_obj_cs_get_type(m_ctxt, cs), PJ_CS_TYPE_ELLIPSOIDAL);
+
+        EXPECT_EQ(proj_obj_cs_get_axis_count(m_ctxt, cs), 2);
+
+        EXPECT_FALSE(proj_obj_cs_get_axis_info(m_ctxt, cs, -1, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr));
+
+        EXPECT_FALSE(proj_obj_cs_get_axis_info(m_ctxt, cs, 2, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr));
+
+        EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
+                                              nullptr, nullptr, nullptr));
+
+        const char *name = nullptr;
+        const char *abbrev = nullptr;
+        const char *direction = nullptr;
+        double unitConvFactor = 0.0;
+        const char *unitName = nullptr;
+
+        EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, &name, &abbrev,
+                                              &direction, &unitConvFactor,
+                                              &unitName));
+        ASSERT_NE(name, nullptr);
+        ASSERT_NE(abbrev, nullptr);
+        ASSERT_NE(direction, nullptr);
+        ASSERT_NE(unitName, nullptr);
+        EXPECT_EQ(std::string(name), "Geodetic latitude");
+        EXPECT_EQ(std::string(abbrev), "Lat");
+        EXPECT_EQ(std::string(direction), "north");
+        EXPECT_EQ(unitConvFactor, 0.017453292519943295) << unitConvFactor;
+        EXPECT_EQ(std::string(unitName), "degree");
+    }
+
+    // Non CRS object
+    {
+        auto obj = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "1170", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, false,
+            nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        EXPECT_EQ(proj_obj_crs_get_coordinate_system(m_ctxt, obj), nullptr);
+
+        EXPECT_EQ(proj_obj_cs_get_type(m_ctxt, obj), PJ_CS_TYPE_UNKNOWN);
+
+        EXPECT_EQ(proj_obj_cs_get_axis_count(m_ctxt, obj), -1);
+
+        EXPECT_FALSE(proj_obj_cs_get_axis_info(m_ctxt, obj, 0, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_get_database_metadata) {
+    EXPECT_TRUE(proj_context_get_database_metadata(m_ctxt, "IGNF.VERSION") !=
+                nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_clone) {
+    auto obj =
+        proj_obj_create_from_proj_string(m_ctxt, "+proj=longlat", nullptr);
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    auto clone = proj_obj_clone(m_ctxt, obj);
+    ObjectKeeper keeperClone(clone);
+    ASSERT_NE(clone, nullptr);
+
+    EXPECT_TRUE(proj_obj_is_equivalent_to(obj, clone, PJ_COMP_STRICT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_crs_alter_geodetic_crs) {
+    auto projCRS = proj_obj_create_from_wkt(
+        m_ctxt,
+        createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
+        nullptr);
+    ObjectKeeper keeper(projCRS);
+    ASSERT_NE(projCRS, nullptr);
+
+    auto newGeodCRS =
+        proj_obj_create_from_proj_string(m_ctxt, "+proj=longlat", nullptr);
+    ObjectKeeper keeper_newGeodCRS(newGeodCRS);
+    ASSERT_NE(newGeodCRS, nullptr);
+
+    auto geodCRS = proj_obj_crs_get_geodetic_crs(m_ctxt, projCRS);
+    ObjectKeeper keeper_geodCRS(geodCRS);
+    ASSERT_NE(geodCRS, nullptr);
+
+    auto geodCRSAltered =
+        proj_obj_crs_alter_geodetic_crs(m_ctxt, geodCRS, newGeodCRS);
+    ObjectKeeper keeper_geodCRSAltered(geodCRSAltered);
+    ASSERT_NE(geodCRSAltered, nullptr);
+    EXPECT_TRUE(
+        proj_obj_is_equivalent_to(geodCRSAltered, newGeodCRS, PJ_COMP_STRICT));
+
+    auto projCRSAltered =
+        proj_obj_crs_alter_geodetic_crs(m_ctxt, projCRS, newGeodCRS);
+    ObjectKeeper keeper_projCRSAltered(projCRSAltered);
+    ASSERT_NE(projCRSAltered, nullptr);
+
+    EXPECT_EQ(proj_obj_get_type(projCRSAltered), PJ_OBJ_TYPE_PROJECTED_CRS);
+
+    auto projCRSAltered_geodCRS =
+        proj_obj_crs_get_geodetic_crs(m_ctxt, projCRSAltered);
+    ObjectKeeper keeper_projCRSAltered_geodCRS(projCRSAltered_geodCRS);
+    ASSERT_NE(projCRSAltered_geodCRS, nullptr);
+
+    EXPECT_TRUE(proj_obj_is_equivalent_to(projCRSAltered_geodCRS, newGeodCRS,
+                                          PJ_COMP_STRICT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_crs_alter_cs_angular_unit) {
+    auto crs = proj_obj_create_from_wkt(
+        m_ctxt,
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+            .c_str(),
+        nullptr);
+    ObjectKeeper keeper(crs);
+    ASSERT_NE(crs, nullptr);
+
+    auto alteredCRS =
+        proj_obj_crs_alter_cs_angular_unit(m_ctxt, crs, "my unit", 2);
+    ObjectKeeper keeper_alteredCRS(alteredCRS);
+    ASSERT_NE(alteredCRS, nullptr);
+
+    auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, alteredCRS);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeperCs(cs);
+    double unitConvFactor = 0.0;
+    const char *unitName = nullptr;
+
+    EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
+                                          nullptr, &unitConvFactor, &unitName));
+    ASSERT_NE(unitName, nullptr);
+    EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
+    EXPECT_EQ(std::string(unitName), "my unit");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_crs_alter_cs_linear_unit) {
+    auto crs = proj_obj_create_from_wkt(
+        m_ctxt,
+        createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
+        nullptr);
+    ObjectKeeper keeper(crs);
+    ASSERT_NE(crs, nullptr);
+
+    auto alteredCRS =
+        proj_obj_crs_alter_cs_linear_unit(m_ctxt, crs, "my unit", 2);
+    ObjectKeeper keeper_alteredCRS(alteredCRS);
+    ASSERT_NE(alteredCRS, nullptr);
+
+    auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, alteredCRS);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeperCs(cs);
+    double unitConvFactor = 0.0;
+    const char *unitName = nullptr;
+
+    EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
+                                          nullptr, &unitConvFactor, &unitName));
+    ASSERT_NE(unitName, nullptr);
+    EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
+    EXPECT_EQ(std::string(unitName), "my unit");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_crs_alter_parameters_linear_unit) {
+    auto crs = proj_obj_create_from_wkt(
+        m_ctxt,
+        createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
+        nullptr);
+    ObjectKeeper keeper(crs);
+    ASSERT_NE(crs, nullptr);
+
+    {
+        auto alteredCRS = proj_obj_crs_alter_parameters_linear_unit(
+            m_ctxt, crs, "my unit", 2, false);
+        ObjectKeeper keeper_alteredCRS(alteredCRS);
+        ASSERT_NE(alteredCRS, nullptr);
+
+        auto wkt = proj_obj_as_wkt(m_ctxt, alteredCRS, PJ_WKT2_2018, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("500000") != std::string::npos)
+            << wkt;
+        EXPECT_TRUE(std::string(wkt).find("\"my unit\",2") != std::string::npos)
+            << wkt;
+    }
+
+    {
+        auto alteredCRS = proj_obj_crs_alter_parameters_linear_unit(
+            m_ctxt, crs, "my unit", 2, true);
+        ObjectKeeper keeper_alteredCRS(alteredCRS);
+        ASSERT_NE(alteredCRS, nullptr);
+
+        auto wkt = proj_obj_as_wkt(m_ctxt, alteredCRS, PJ_WKT2_2018, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("250000") != std::string::npos)
+            << wkt;
+        EXPECT_TRUE(std::string(wkt).find("\"my unit\",2") != std::string::npos)
+            << wkt;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_engineering_crs) {
+
+    auto crs = proj_obj_create_engineering_crs(m_ctxt, "name");
+    ObjectKeeper keeper(crs);
+    ASSERT_NE(crs, nullptr);
+    auto wkt = proj_obj_as_wkt(m_ctxt, crs, PJ_WKT1_GDAL, nullptr);
+    ASSERT_NE(wkt, nullptr);
+    EXPECT_EQ(std::string(wkt), "LOCAL_CS[\"name\"]") << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_alter_name) {
+
+    auto cs = proj_obj_create_ellipsoidal_2D_cs(
+        m_ctxt, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
+    ObjectKeeper keeper_cs(cs);
+    ASSERT_NE(cs, nullptr);
+
+    auto obj = proj_obj_create_geographic_crs(
+        m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
+        298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433, cs);
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    auto alteredObj = proj_obj_alter_name(m_ctxt, obj, "new name");
+    ObjectKeeper keeper_alteredObj(alteredObj);
+    ASSERT_NE(alteredObj, nullptr);
+
+    EXPECT_EQ(std::string(proj_obj_get_name(alteredObj)), "new name");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_projected_crs) {
+
+    PJ_PARAM_DESCRIPTION param;
+    param.name = "param name";
+    param.auth_name = nullptr;
+    param.code = nullptr;
+    param.value = 0.99;
+    param.unit_name = nullptr;
+    param.unit_conv_factor = 1.0;
+    param.unit_type = PJ_UT_SCALE;
+
+    auto conv = proj_obj_create_conversion(m_ctxt, "conv", "conv auth",
+                                           "conv code", "method", "method auth",
+                                           "method code", 1, &param);
+    ObjectKeeper keeper_conv(conv);
+    ASSERT_NE(conv, nullptr);
+
+    auto geog_cs = proj_obj_create_ellipsoidal_2D_cs(
+        m_ctxt, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
+    ObjectKeeper keeper_geog_cs(geog_cs);
+    ASSERT_NE(geog_cs, nullptr);
+
+    auto geogCRS = proj_obj_create_geographic_crs(
+        m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
+        298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433, geog_cs);
+    ObjectKeeper keeper_geogCRS(geogCRS);
+    ASSERT_NE(geogCRS, nullptr);
+
+    auto cs = proj_obj_create_cartesian_2D_cs(
+        m_ctxt, PJ_CART2D_EASTING_NORTHING, nullptr, 0);
+    ObjectKeeper keeper_cs(cs);
+    ASSERT_NE(cs, nullptr);
+
+    auto projCRS =
+        proj_obj_create_projected_crs(m_ctxt, "my CRS", geogCRS, conv, cs);
+    ObjectKeeper keeper_projCRS(projCRS);
+    ASSERT_NE(projCRS, nullptr);
 }
 
 } // namespace

@@ -58,13 +58,13 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${SQLITE3_INCLUDE_DIR})
 
-add_executable(proj_test_unit
+add_executable(proj_pj_transform_test
   main.cpp
-  basic_test.cpp)
-target_link_libraries(proj_test_unit
+  pj_transform_test.cpp)
+target_link_libraries(proj_pj_transform_test
   gtest
   ${PROJ_LIBRARIES})
-add_test(NAME proj_test_unit COMMAND proj_test_unit)
+add_test(NAME proj_pj_transform_test COMMAND proj_pj_transform_test)
 
 add_executable(proj_errno_string_test
   main.cpp
@@ -103,3 +103,11 @@ target_link_libraries(proj_test_cpp_api
   ${PROJ_LIBRARIES}
   ${SQLITE3_LIBRARY})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
+
+add_executable(gie_self_tests
+  main.cpp
+  gie_self_tests.cpp)
+target_link_libraries(gie_self_tests
+  gtest
+  ${PROJ_LIBRARIES})
+add_test(NAME gie_self_tests COMMAND gie_self_tests)

@@ -3,7 +3,7 @@
 # on datum files.
 #
 #
-TEST_OLD_DIR=`dirname $0`
+TEST_CLI_DIR=`dirname $0`
 DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
@@ -523,7 +523,7 @@ EOF
 #
 echo "##############################################################" >> ${OUT}
 echo "Test the Natural Earth Projection" >> ${OUT}
-$EXE +proj=latlong +a=1 +lon_0=0 \
+$EXE +proj=latlong +a=6371008.7714 +b=6371008.7714 \
  +to +proj=natearth +a=6371008.7714 +b=6371008.7714 -f '%.'7'f' \
  -E >>${OUT} <<EOF
 0.0 0.0 0 0.0 0.0
@@ -554,7 +554,7 @@ $EXE +proj=latlong +a=1 +lon_0=0 \
 EOF
 echo "##############################################################" >> ${OUT}
 echo "Test the Natural Earth II Projection" >> ${OUT}
-$EXE +proj=latlong +a=1 +lon_0=0 \
+$EXE +proj=latlong +a=6371008.7714 +b=6371008.7714 \
  +to +proj=natearth2 +a=6371008.7714 +b=6371008.7714 -f '%.'7'f' \
  -E >>${OUT} <<EOF
 0.0 0.0 0 0.00000000 0.00000000
@@ -585,7 +585,7 @@ $EXE +proj=latlong +a=1 +lon_0=0 \
 EOF
 echo "##############################################################" >> ${OUT}
 echo "Test the Compact Miller projection" >> ${OUT}
-$EXE +proj=latlong +a=1 +lon_0=0 \
+$EXE +proj=latlong +a=6371008.7714 +b=6371008.7714 \
  +to +proj=comill +a=6371008.7714 +b=6371008.7714 -f '%.'7'f' \
  -E >>${OUT} <<EOF
 0.0 0.0 0 0.0 0.0
@@ -656,14 +656,14 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Check inverse error handling with ob_tran (#225)" >> ${OUT}
 $EXE +proj=ob_tran \
-    +o_proj=moll +a=6378137 +es=0 +o_lon_p=LON_POLE +o_lat_p=LAT_POLE +lon_0=180 \
+    +o_proj=moll +a=6378137 +es=0 +o_lon_p=0 +o_lat_p=0 +lon_0=180 \
  -E >>${OUT} <<EOF
 300000 400000
 20000000 30000000
 EOF
 echo "Test inverse handling" >> ${OUT}
 $EXE -I +proj=ob_tran \
-    +o_proj=moll +a=6378137 +es=0 +o_lon_p=LON_POLE +o_lat_p=LAT_POLE +lon_0=180 \
+    +o_proj=moll +a=6378137 +es=0 +o_lon_p=0 +o_lat_p=0 +lon_0=180 \
  -E >>${OUT} <<EOF
 10 20
 EOF
@@ -939,11 +939,25 @@ $EXE -f '%0.3f' \
 0 0 1000
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test EPSG:4326 to EPSG:32631" >> ${OUT}
+# Input is latitude, longitude order
+$EXE EPSG:4326 +to EPSG:32631 -E >> ${OUT} <<EOF
+49 3 0
+EOF
+
+echo  "##############################################################" >> ${OUT}
+echo  "Test EPSG:32631 to EPSG:4326" >> ${OUT}
+# Input is latitude, longitude order
+$EXE EPSG:32631 EPSG:4326 -E >> ${OUT} <<EOF
+400000 5000000 0
+EOF
+
 
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${TEST_OLD_DIR}/${OUT}.dist
+diff -b ${OUT} ${TEST_CLI_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURRED"

@@ -104,7 +104,7 @@ PROJ_FOR_TEST std::string replaceAll(const std::string &str,
                                      const std::string &before,
                                      const std::string &after);
 
-size_t ci_find(const std::string &osStr, const char *needle) noexcept;
+PROJ_DLL size_t ci_find(const std::string &osStr, const char *needle) noexcept;
 
 size_t ci_find(const std::string &osStr, const std::string &needle,
                size_t startPos = 0) noexcept;

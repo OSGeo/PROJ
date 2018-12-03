@@ -54,6 +54,9 @@ all_sql = []
 version = 'ArcMap 10.6.1 / ArcGISPro 2.2'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.VERSION', '%s');""" % (version))
+date = '2018-09-19'
+all_sql.append(
+    """INSERT INTO "metadata" VALUES('ESRI.DATE', '%s');""" % (date))
 
 
 def escape_literal(x):

@@ -7,7 +7,7 @@
 # Proj will vary in the .001ft range with projections using Transverse
 #   Mercator due to greater precision of meridional distance function.
 #
-TEST_OLD_DIR=`dirname $0`
+TEST_CLI_DIR=`dirname $0`
 DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
@@ -714,7 +714,7 @@ EOF
 #
 # do 'diff' with distribution results
 echo "diff ${OUT} with pj_out83.dist"
-diff -b ${OUT} ${TEST_OLD_DIR}/pj_out83.dist
+diff -b ${OUT} ${TEST_CLI_DIR}/pj_out83.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURRED"

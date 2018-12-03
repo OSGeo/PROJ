@@ -43,7 +43,6 @@
 #include "projects.h"
 
 
-
 /**************************************************************************************/
 static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
 /***************************************************************************************
@@ -81,14 +80,15 @@ static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
 
 
 /**************************************************************************************/
-static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
+static char *get_init_string (PJ_CONTEXT *ctx, const char *name) {
 /***************************************************************************************
     Read a section of an init file. Return its contents as a plain character string.
     It is the duty of the caller to free the memory allocated for the string.
 ***************************************************************************************/
 #define MAX_LINE_LENGTH 1000
     size_t current_buffer_size = 5 * (MAX_LINE_LENGTH + 1);
-    char *fname, *section, *key;
+    char *fname, *section;
+    const char *key;
     char *buffer = 0;
     char *line = 0;
     PAFile fid;
@@ -228,11 +228,12 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
 
 
 /************************************************************************/
-static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
+static paralist *get_init(PJ_CONTEXT *ctx, const char *key, int allow_init_epsg) {
 /*************************************************************************
 Expand key from buffer or (if not in buffer) from init file
 *************************************************************************/
-    char *xkey, *definition;
+    const char *xkey;
+    char *definition = 0;
     paralist *init_items = 0;
 
     /* support "init=file:section", "+init=file:section", and "file:section" format */
@@ -248,10 +249,68 @@ Expand key from buffer or (if not in buffer) from init file
     if (init_items)
         return init_items;
 
-    /* If not, we must read it from file */
-    pj_log (ctx, PJ_LOG_TRACE,
-            "get_init: searching on in init files for [%s]", xkey);
-    definition = get_init_string (ctx, xkey);
+    if( (strncmp(xkey, "epsg:", 5) == 0 || strncmp(xkey, "IGNF:", 5) == 0) ) {
+        char unused[256];
+        char initname[5];
+        int exists;
+
+        memcpy(initname, xkey, 4);
+        initname[4] = 0;
+
+        if( strncmp(xkey, "epsg:", 5) == 0 ) {
+            exists = ctx->epsg_file_exists;
+            if( exists < 0 ) {
+                exists = pj_find_file(ctx, initname, unused, sizeof(unused));
+                ctx->epsg_file_exists = exists;
+            }
+        } else {
+            exists = pj_find_file(ctx, initname, unused, sizeof(unused));
+        }
+
+        if( !exists ) {
+            const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", NULL };
+            char szInitStr[7 + 64];
+            PJ_OBJ* src;
+            const char* proj_string;
+
+            pj_ctx_set_errno( ctx, 0 );
+
+            if( !allow_init_epsg ) {
+                pj_log (ctx, PJ_LOG_TRACE, "%s expansion disallowed", xkey);
+                return 0;
+            }
+            if( strlen(xkey) > 64 ) {
+                return 0;
+            }
+            strcpy(szInitStr, "+init=");
+            strcat(szInitStr, xkey);
+
+            src = proj_obj_create_from_user_input(ctx, szInitStr, optionsProj4Mode);
+            if( !src ) {
+                return 0;
+            }
+
+            proj_string = proj_obj_as_proj_string(ctx, src, PJ_PROJ_4, NULL);
+            if( !proj_string ) {
+                proj_obj_unref(src);
+                return 0;
+            }
+            definition = (char*)calloc(1, strlen(proj_string)+1);
+            if( definition ) {
+                strcpy(definition, proj_string);
+            }
+
+            proj_obj_unref(src);
+        }
+    }
+
+    if( !definition ) {
+        /* If not, we must read it from file */
+        pj_log (ctx, PJ_LOG_TRACE,
+                "get_init: searching on in init files for [%s]", xkey);
+        definition = get_init_string (ctx, xkey);
+    }
+
     if (0==definition)
         return 0;
     init_items = string_to_paralist (ctx, definition);
@@ -271,7 +330,7 @@ Expand key from buffer or (if not in buffer) from init file
 
 
 
-static paralist *append_defaults_to_paralist (PJ_CONTEXT *ctx, paralist *start, char *key) {
+static paralist *append_defaults_to_paralist (PJ_CONTEXT *ctx, paralist *start, const char *key, int allow_init_epsg) {
     paralist *defaults, *last = 0;
     char keystring[ID_TAG_MAX + 20];
     paralist *next, *proj;
@@ -303,7 +362,7 @@ static paralist *append_defaults_to_paralist (PJ_CONTEXT *ctx, paralist *start, 
 
     strcpy (keystring, "proj_def.dat:");
     strcat (keystring, key);
-    defaults = get_init (ctx, keystring);
+    defaults = get_init (ctx, keystring, allow_init_epsg);
 
     /* Defaults are optional - so we don't care if we cannot open the file */
     pj_ctx_set_errno (ctx, err);
@@ -340,7 +399,7 @@ static paralist *append_defaults_to_paralist (PJ_CONTEXT *ctx, paralist *start, 
 }
 
 /*****************************************************************************/
-paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init) {
+static paralist *pj_expand_init_internal(PJ_CONTEXT *ctx, paralist *init, int allow_init_epsg) {
 /******************************************************************************
 Append expansion of <key> to the paralist <init>. The expansion is appended,
 rather than inserted at <init>'s place, since <init> may contain
@@ -367,7 +426,7 @@ Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
     if (0==init)
         return 0;
 
-    expn = get_init(ctx, init->param);
+    expn = get_init(ctx, init->param, allow_init_epsg);
 
     /* Nothing in expansion? */
     if (0==expn)
@@ -381,6 +440,9 @@ Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
     return init;
 }
 
+paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init) {
+    return pj_expand_init_internal(ctx, init, TRUE);
+}
 
 
 /************************************************************************/
@@ -496,6 +558,14 @@ static PJ_CONSTRUCTOR locate_constructor (const char *name) {
 
 PJ *
 pj_init_ctx(projCtx ctx, int argc, char **argv) {
+    /* Legacy interface: allow init=epsg:XXXX syntax by default */
+    int allow_init_epsg = proj_context_get_use_proj4_init_rules(ctx, TRUE);
+    return pj_init_ctx_with_allow_init_epsg(ctx, argc, argv, allow_init_epsg);
+}
+
+
+PJ *
+pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_init_epsg) {
     const char *s;
     char *name;
     PJ_CONSTRUCTOR proj;
@@ -558,7 +628,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* problem when '+init's are expanded as late as possible.                    */
     init = pj_param_exists (start, "init");
     if (init && n_pipelines == 0) {
-        init = pj_expand_init (ctx, init);
+        init = pj_expand_init_internal (ctx, init, allow_init_epsg);
         if (!init)
             return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
     }
@@ -580,8 +650,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
 
     /* Append general and projection specific defaults to the definition list */
-    append_defaults_to_paralist (ctx, start, "general");
-    append_defaults_to_paralist (ctx, start, name);
+    append_defaults_to_paralist (ctx, start, "general", allow_init_epsg);
+    append_defaults_to_paralist (ctx, start, name, allow_init_epsg);
 
 
     /* Allocate projection structure */

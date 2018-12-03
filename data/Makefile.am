@@ -1,8 +1,7 @@
 DATAPATH = $(top_srcdir)/data
 
-pkgdata_DATA = GL27 nad.lst proj_def.dat nad27 nad83 world epsg esri \
-		esri.extra other.extra \
-		CH IGNF \
+pkgdata_DATA = GL27 nad.lst proj_def.dat nad27 nad83 world other.extra \
+		CH \
 		ITRF2000 ITRF2008 ITRF2014 proj.db
 
 SQL_ORDERED_LIST = sql/begin.sql \
@@ -35,9 +34,8 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/commit.sql
 
 EXTRA_DIST = GL27 nad.lst proj_def.dat nad27 nad83 \
-		world epsg esri \
-		esri.extra other.extra \
-		CH IGNF \
+		world other.extra \
+		CH \
 		ITRF2000 ITRF2008 ITRF2014 \
 		CMakeLists.txt tests/test_nodata.gtx null.lla \
 		generate_all_sql_in.cmake sql_filelist.cmake \

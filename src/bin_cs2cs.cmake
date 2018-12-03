@@ -1,4 +1,4 @@
-set(CS2CS_SRC cs2cs.c 
+set(CS2CS_SRC cs2cs.cpp
               gen_cheb.c 
               p_series.c)
 

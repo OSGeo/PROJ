@@ -134,6 +134,14 @@ using DatabaseContextNNPtr = util::nn<DatabaseContextPtr>;
 
 // ---------------------------------------------------------------------------
 
+class WKTNode;
+/** Unique pointer of WKTNode. */
+using WKTNodePtr = std::unique_ptr<WKTNode>;
+/** Non-null unique pointer of WKTNode. */
+using WKTNodeNNPtr = util::nn<WKTNodePtr>;
+
+// ---------------------------------------------------------------------------
+
 class WKTFormatter;
 /** WKTFormatter unique pointer. */
 using WKTFormatterPtr = std::unique_ptr<WKTFormatter>;
@@ -308,6 +316,8 @@ class PROJ_GCC_DLL WKTFormatter {
 
     PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
 
+    PROJ_INTERNAL void ingestWKTNode(const WKTNodeNNPtr &node);
+
     //! @endcond
 
   protected:
@@ -365,6 +375,7 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_DLL void stopInversion();
     PROJ_INTERNAL bool isInverted() const;
     PROJ_INTERNAL bool getUseETMercForTMerc(bool &settingSetOut) const;
+    PROJ_INTERNAL void setCoordinateOperationOptimizations(bool enable);
 
     PROJ_DLL void
     ingestPROJString(const std::string &str); // throw ParsingException
@@ -554,12 +565,6 @@ class PROJ_GCC_DLL IPROJStringExportable {
 
 // ---------------------------------------------------------------------------
 
-class WKTNode;
-/** Unique pointer of WKTNode. */
-using WKTNodePtr = std::unique_ptr<WKTNode>;
-/** Non-null unique pointer of WKTNode. */
-using WKTNodeNNPtr = util::nn<WKTNodePtr>;
-
 /** \brief Node in the tree-splitted WKT representation.
  */
 class PROJ_GCC_DLL WKTNode {
@@ -597,7 +602,8 @@ class PROJ_GCC_DLL WKTNode {
 
 PROJ_DLL util::BaseObjectNNPtr
 createFromUserInput(const std::string &text,
-                    const DatabaseContextPtr &dbContext);
+                    const DatabaseContextPtr &dbContext,
+                    bool usePROJ4InitRules = false);
 
 // ---------------------------------------------------------------------------
 
@@ -654,6 +660,8 @@ class PROJ_GCC_DLL PROJStringParser {
     PROJ_DLL PROJStringParser &
     attachDatabaseContext(const DatabaseContextPtr &dbContext);
 
+    PROJ_DLL PROJStringParser &setUsePROJ4InitRules(bool enable);
+
     PROJ_DLL std::vector<std::string> warningList() const;
 
     PROJ_DLL util::BaseObjectNNPtr createFromPROJString(
@@ -685,6 +693,8 @@ class PROJ_GCC_DLL DatabaseContext {
            const std::vector<std::string> &auxiliaryDatabasePaths);
 
     PROJ_DLL const std::string &getPath() const;
+
+    PROJ_DLL const char *getMetadata(const char *key) const;
 
     PROJ_DLL std::set<std::string> getAuthorities() const;
 
@@ -718,6 +728,9 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_INTERNAL bool isKnownName(const std::string &name,
                                    const std::string &tableName) const;
 
+    PROJ_INTERNAL std::string getTextDefinition(const std::string &tableName,
+                                                const std::string &authName,
+                                                const std::string &code) const;
     //! @endcond
 
   protected:

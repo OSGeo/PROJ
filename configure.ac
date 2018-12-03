@@ -151,10 +151,10 @@ AC_MSG_CHECKING([to enable LTO (link time optimization) build])
 
 AC_ARG_ENABLE(lto,
               AS_HELP_STRING([--enable-lto],
-                             [enable LTO(link time optimization) (enabled by default)]))
+                             [enable LTO(link time optimization) (disabled by default)]))
 
 FLTO_FLAG=""
-if test "x$enable_lto" = "xyes" -o "x$enable_lto" = "x"; then
+if test "x$enable_lto" = "xyes"; then
     AC_LANG_PUSH([C++])
     AX_CHECK_COMPILE_FLAG([-flto], [FLTO_FLAG="-flto"],,[$ERROR_ON_UNKNOWN_OPTIONS])
     if test "$FLTO_FLAG" != ""; then
@@ -351,7 +351,7 @@ dnl Generate files
 dnl ---------------------------------------------------------------------------
 
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
-                 test/Makefile test/old/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
+                 test/Makefile test/cli/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
                  test/googletest/Makefile test/googletest/include/Makefile
                  test/googletest/include/gtest/Makefile
                  test/googletest/include/gtest/internal/Makefile

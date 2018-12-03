@@ -1,9 +1,10 @@
 # Executables paths passed to test scripts
 DATAPATH = ../../data
-THIS_DIR = $(top_srcdir)/test/old
+THIS_DIR = $(top_srcdir)/test/cli
 EXEPATH = ../../src
 PROJEXE = $(EXEPATH)/proj
 CS2CSEXE = $(EXEPATH)/cs2cs
+PROJINFOEXE = $(EXEPATH)/projinfo
 
 # PROJ.4 test scripts
 TEST27 = $(THIS_DIR)/test27
@@ -13,18 +14,23 @@ TESTVARIOUS = $(THIS_DIR)/testvarious
 TESTFLAKY = $(THIS_DIR)/testflaky
 TESTDATUMFILE = $(THIS_DIR)/testdatumfile
 TESTIGN = $(THIS_DIR)/testIGNF
+TESTPROJINFO = $(THIS_DIR)/testprojinfo
 
 EXTRA_DIST = pj_out27.dist pj_out83.dist td_out.dist \
 		test27 test83 tv_out.dist tf_out.dist \
 		testflaky testvarious testdatumfile testntv2 ntv2_out.dist \
 		testIGNF proj_outIGNF.dist \
+		testprojinfo testprojinfo_out.dist \
 		CMakeLists.txt
 
-check-local:
+testprojinfo-check:
+	PROJ_LIB=$(DATAPATH) $(TESTPROJINFO) $(PROJINFOEXE)
+
+check-local: testprojinfo-check
 	$(TEST27) $(PROJEXE)
 	$(TEST83) $(PROJEXE)
 	PROJ_LIB=$(DATAPATH) $(TESTVARIOUS) $(CS2CSEXE)
-	@if [ -f $(DATAPATH)/conus ] ; then \
+	@if [ -f $(DATAPATH)/conus -a -f $(DATAPATH)/ntv1_can.dat -a -f $(DATAPATH)/MD -a -f $(DATAPATH)/ntf_r93.dat ]; then \
 	  PROJ_LIB=$(DATAPATH) $(TESTDATUMFILE) $(CS2CSEXE) ; \
 	fi
 	@if [ -f $(DATAPATH)/ntf_r93.gsb ] ; then \
@@ -33,3 +39,4 @@ check-local:
 	@if [ -f $(DATAPATH)/ntv2_0.gsb ] ; then \
 	  PROJ_LIB=$(DATAPATH) $(TESTNTV2) $(CS2CSEXE) ; \
 	fi
+

@@ -166,6 +166,7 @@ expect    12 55 0 0
 -------------------------------------------------------------------------------
 Finally test a pipeline with more than one init step
 -------------------------------------------------------------------------------
+use_proj4_init_rules true
 operation proj=pipeline
           step init=epsg:25832 inv
           step init=epsg:25833
@@ -710,10 +711,13 @@ accept    0 0 0 0
 expect    failure
 
 -------------------------------------------------------------------------------
-run the few gie-builtin tests, which are currently either awkward or impossible
-to express in the gie command set
+# Test lon_wrap
+operation +proj=longlat +ellps=WGS84 +lon_wrap=180
 -------------------------------------------------------------------------------
-builtins
+direction forward
+accept    -1 10 0
+expect    359 10 0
+
 -------------------------------------------------------------------------------
 
 </gie>

@@ -2703,6 +2703,13 @@ TEST(factory, createObjectsFromName) {
                   .size(),
               1);
 
+    // Deprecated object (but without explicit deprecated)
+    EXPECT_EQ(
+        factoryEPSG
+            ->createObjectsFromName("NAD27(CGQ77) / SCoPQ zone 2", {}, false, 2)
+            .size(),
+        1);
+
     const auto types = std::vector<AuthorityFactory::ObjectType>{
         AuthorityFactory::ObjectType::PRIME_MERIDIAN,
         AuthorityFactory::ObjectType::ELLIPSOID,
@@ -2727,6 +2734,16 @@ TEST(factory, createObjectsFromName) {
         factory->createObjectsFromName("i_dont_exist", {type}, false, 1);
     }
     factory->createObjectsFromName("i_dont_exist", types, false, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, getMetadata) {
+    auto ctxt = DatabaseContext::create();
+    EXPECT_EQ(ctxt->getMetadata("i_do_not_exist"), nullptr);
+    const char *IGNF_VERSION = ctxt->getMetadata("IGNF.VERSION");
+    ASSERT_TRUE(IGNF_VERSION != nullptr);
+    EXPECT_EQ(std::string(IGNF_VERSION), "3.0.2");
 }
 
 } // namespace

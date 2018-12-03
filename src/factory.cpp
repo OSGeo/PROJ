@@ -157,6 +157,8 @@ struct DatabaseContext::Private {
     };
 
   private:
+    friend class DatabaseContext;
+
     std::string databasePath_{};
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
@@ -164,6 +166,7 @@ struct DatabaseContext::Private {
     PJ_CONTEXT *pjCtxt_ = nullptr;
     int recLevel_ = 0;
     bool detach_ = false;
+    std::string lastMetadataValue_{};
 
     void closeDB();
 
@@ -704,6 +707,22 @@ const std::string &DatabaseContext::getPath() const { return d->getPath(); }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a metadata item.
+ *
+ * Value remains valid while this is alive and to the next call to getMetadata
+ */
+const char *DatabaseContext::getMetadata(const char *key) const {
+    auto res =
+        d->run("SELECT value FROM metadata WHERE key = ?", {std::string(key)});
+    if (res.empty()) {
+        return nullptr;
+    }
+    d->lastMetadataValue_ = res[0][0];
+    return d->lastMetadataValue_.c_str();
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 DatabaseContextNNPtr DatabaseContext::create(void *sqlite_handle) {
@@ -827,6 +846,29 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
     res = d->run("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
                  "auth_name = ? AND code = ? AND source = ?",
                  {tableName, res[0][0], res[0][1], source});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res[0][0];
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the 'text_definition' column of a table for an object
+ *
+ * @param tableName Table name/category.
+ * @param authName Authority name of the object.
+ * @param code Code of the object
+ * @return Text definition (or empty)
+ * @throw FactoryException
+ */
+std::string DatabaseContext::getTextDefinition(const std::string &tableName,
+                                               const std::string &authName,
+                                               const std::string &code) const {
+    std::string sql("SELECT text_definition FROM \"");
+    sql += replaceAll(tableName, "\"", "\"\"");
+    sql += "\" WHERE auth_name = ? AND code = ?";
+    auto res = d->run(sql, {authName, code});
     if (res.empty()) {
         return std::string();
     }
@@ -3787,6 +3829,11 @@ AuthorityFactory::createObjectsFromName(
         if (limitResultCount > 0 && res.size() == limitResultCount) {
             break;
         }
+    }
+    if (res.empty() && !deprecated) {
+        return createObjectsFromName(searchedName + " (deprecated)",
+                                     allowedObjectTypes, approximateMatch,
+                                     limitResultCount);
     }
 
     auto sortLambda = [](const common::IdentifiedObjectNNPtr &a,
