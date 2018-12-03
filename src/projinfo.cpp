@@ -422,6 +422,51 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
 
 // ---------------------------------------------------------------------------
 
+static void outputOperationSummary(const CoordinateOperationNNPtr &op) {
+    auto ids = op->identifiers();
+    if (!ids.empty()) {
+        std::cout << *(ids[0]->codeSpace()) << ":" << ids[0]->code();
+    } else {
+        std::cout << "unknown id";
+    }
+
+    std::cout << ", ";
+
+    auto name = op->nameStr();
+    if (!name.empty()) {
+        std::cout << name;
+    } else {
+        std::cout << "unknown name";
+    }
+
+    std::cout << ", ";
+
+    auto accuracies = op->coordinateOperationAccuracies();
+    if (!accuracies.empty()) {
+        std::cout << accuracies[0]->value() << " m";
+    } else {
+        if (std::dynamic_pointer_cast<Conversion>(op.as_nullable())) {
+            std::cout << "0 m";
+        } else {
+            std::cout << "unknown accuracy";
+        }
+    }
+
+    std::cout << ", ";
+
+    auto domains = op->domains();
+    if (!domains.empty() && domains[0]->domainOfValidity() &&
+        domains[0]->domainOfValidity()->description().has_value()) {
+        std::cout << *(domains[0]->domainOfValidity()->description());
+    } else {
+        std::cout << "unknown domain of validity";
+    }
+
+    std::cout << std::endl;
+}
+
+// ---------------------------------------------------------------------------
+
 static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
@@ -477,46 +522,7 @@ static void outputOperations(
     if (summary) {
         std::cout << "Candidate operations found: " << list.size() << std::endl;
         for (const auto &op : list) {
-            auto ids = op->identifiers();
-            if (!ids.empty()) {
-                std::cout << *(ids[0]->codeSpace()) << ":" << ids[0]->code();
-            } else {
-                std::cout << "unknown id";
-            }
-
-            std::cout << ", ";
-
-            auto name = op->nameStr();
-            if (!name.empty()) {
-                std::cout << name;
-            } else {
-                std::cout << "unknown name";
-            }
-
-            std::cout << ", ";
-
-            auto accuracies = op->coordinateOperationAccuracies();
-            if (!accuracies.empty()) {
-                std::cout << accuracies[0]->value() << " m";
-            } else {
-                if (std::dynamic_pointer_cast<Conversion>(op.as_nullable())) {
-                    std::cout << "0 m";
-                } else {
-                    std::cout << "unknown accuracy";
-                }
-            }
-
-            std::cout << ", ";
-
-            auto domains = op->domains();
-            if (!domains.empty() && domains[0]->domainOfValidity() &&
-                domains[0]->domainOfValidity()->description().has_value()) {
-                std::cout << *(domains[0]->domainOfValidity()->description());
-            } else {
-                std::cout << "unknown domain of validity";
-            }
-
-            std::cout << std::endl;
+            outputOperationSummary(op);
         }
     } else {
         bool first = true;
@@ -534,6 +540,8 @@ static void outputOperations(
                           << (i + 1) << ":" << std::endl
                           << std::endl;
             }
+            outputOperationSummary(op);
+            std::cout << std::endl;
             outputObject(dbContext, op, outputOpt);
         }
     }
