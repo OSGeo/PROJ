@@ -3642,7 +3642,7 @@ std::list<common::IdentifiedObjectNNPtr>
 AuthorityFactory::createObjectsFromName(
     const std::string &searchedName,
     const std::vector<ObjectType> &allowedObjectTypes, bool approximateMatch,
-    size_t limitResultCount) {
+    size_t limitResultCount) const {
 
     std::string searchedNameWithoutDeprecated(searchedName);
     bool deprecated = false;
@@ -3880,6 +3880,39 @@ AuthorityFactory::createObjectsFromName(
 
     res.sort(sortLambda);
 
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a list of area of use from their name
+ *
+ * @param name Searched name.
+ * @param approximateMatch Whether approximate name identification is allowed.
+ * @return list of (auth_name, code) of matched objects.
+ * @throw FactoryException
+ */
+std::list<std::pair<std::string, std::string>>
+AuthorityFactory::listAreaOfUseFromName(const std::string &name,
+                                        bool approximateMatch) const {
+    std::string sql(
+        "SELECT auth_name, code FROM area WHERE deprecated = 0 AND ");
+    std::vector<SQLValues> params;
+    if (!getAuthority().empty()) {
+        sql += " auth_name = ? AND ";
+        params.emplace_back(getAuthority());
+    }
+    sql += "name LIKE ?";
+    if (!approximateMatch) {
+        params.push_back(name);
+    } else {
+        params.push_back('%' + name + '%');
+    }
+    auto sqlRes = d->run(sql, params);
+    std::list<std::pair<std::string, std::string>> res;
+    for (const auto &row : sqlRes) {
+        res.emplace_back(row[0], row[1]);
+    }
     return res;
 }
 

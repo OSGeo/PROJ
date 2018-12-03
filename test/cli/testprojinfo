@@ -49,6 +49,31 @@ echo "Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test inters
 $EXE -s NAD27 -t NAD83 --grid-check none --spatial-test intersects >>${OUT}
 echo "" >>${OUT}
 
+echo "Testing projinfo -s EPSG:4230 -t EPSG:4258 --bbox 8,54.51,15.24,57.8 --summary" >> ${OUT}
+$EXE -s EPSG:4230 -t EPSG:4258 --bbox 8,54.51,15.24,57.8 --summary >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo -s EPSG:4230 -t EPSG:4258 --area EPSG:3237 --summary" >> ${OUT}
+$EXE -s EPSG:4230 -t EPSG:4258 --area EPSG:3237 --summary >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark - onshore' --summary" >> ${OUT}
+$EXE -s EPSG:4230 -t EPSG:4258 --area 'Denmark - onshore' --summary >>${OUT}
+echo "" >>${OUT}
+
+# several match
+echo "Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark -' --summary" >> ${OUT}
+$EXE -s EPSG:4230 -t EPSG:4258 --area 'Denmark -' --summary >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo "Testing projinfo -s EPSG:4230 -t EPSG:4258 --area no_match --summary" >> ${OUT}
+$EXE -s EPSG:4230 -t EPSG:4258 --area no_match --summary >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo "Testing projinfo -s EPSG:4230 -t EPSG:4258 --area WRONG:CODE --summary" >> ${OUT}
+$EXE -s EPSG:4230 -t EPSG:4258 --area WRONG:CODE --summary >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist

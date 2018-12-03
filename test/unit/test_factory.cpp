@@ -2746,4 +2746,26 @@ TEST(factory, getMetadata) {
     EXPECT_EQ(std::string(IGNF_VERSION), "3.0.2");
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(factory, listAreaOfUseFromName) {
+    auto ctxt = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(ctxt, std::string());
+    auto factoryEPSG = AuthorityFactory::create(ctxt, "EPSG");
+    {
+        auto res = factory->listAreaOfUseFromName("Denmark - onshore", false);
+        ASSERT_EQ(res.size(), 1);
+        EXPECT_EQ(res.front().first, "EPSG");
+        EXPECT_EQ(res.front().second, "3237");
+    }
+    {
+        auto res = factory->listAreaOfUseFromName("Denmark", true);
+        EXPECT_GT(res.size(), 1U);
+    }
+    {
+        auto res = factory->listAreaOfUseFromName("no where land", false);
+        ASSERT_EQ(res.size(), 0);
+    }
+}
+
 } // namespace
