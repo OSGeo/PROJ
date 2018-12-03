@@ -1038,6 +1038,10 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
         assert(indexEndChild > i);
         i = indexEndChild;
         i = skipSpace(wkt, i);
+        if (i < wkt.size() && wkt[i] == ',') {
+            ++i;
+            i = skipSpace(wkt, i);
+        }
     }
     if (i == wkt.size() || (wkt[i] != ']' && wkt[i] != ')')) {
         throw ParsingException("missing ]");

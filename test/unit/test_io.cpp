@@ -119,6 +119,11 @@ TEST(io, wkt_parsing) {
         str = "A[" + str + "]";
     }
     EXPECT_THROW(WKTNode::createFrom(str), ParsingException);
+
+    {
+        auto wkt = "A[\"a\",B[\"b\",C[\"c\"]],D[\"d\"]]";
+        EXPECT_EQ(WKTNode::createFrom(wkt)->toString(), wkt);
+    }
 }
 
 // ---------------------------------------------------------------------------
