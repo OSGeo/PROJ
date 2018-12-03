@@ -373,7 +373,7 @@ void WKTFormatter::startNode(const std::string &keyword, bool hasId) {
     if (!d->stackHasChild_.empty()) {
         d->startNewChild();
     } else if (!d->result_.empty()) {
-        d->result_ += ",";
+        d->result_ += ',';
         if (d->params_.multiLine_ && !keyword.empty()) {
             d->addNewLine();
         }
@@ -390,7 +390,7 @@ void WKTFormatter::startNode(const std::string &keyword, bool hasId) {
 
     if (!keyword.empty()) {
         d->result_ += keyword;
-        d->result_ += "[";
+        d->result_ += '[';
     }
     d->indentLevel_++;
     d->stackHasChild_.push_back(false);
@@ -428,7 +428,7 @@ void WKTFormatter::endNode() {
     d->stackEmptyKeyword_.pop_back();
     d->stackHasChild_.pop_back();
     if (!emptyKeyword)
-        d->result_ += "]";
+        d->result_ += ']';
 }
 
 // ---------------------------------------------------------------------------
@@ -443,7 +443,7 @@ WKTFormatter &WKTFormatter::simulCurNodeHasId() {
 void WKTFormatter::Private::startNewChild() {
     assert(!stackHasChild_.empty());
     if (stackHasChild_.back()) {
-        result_ += ",";
+        result_ += ',';
     }
     stackHasChild_.back() = true;
 }
@@ -456,9 +456,9 @@ void WKTFormatter::addQuotedString(const char *str) {
 
 void WKTFormatter::addQuotedString(const std::string &str) {
     d->startNewChild();
-    d->result_ += "\"";
+    d->result_ += '"';
     d->result_ += replaceAll(str, "\"", "\"\"");
-    d->result_ += "\"";
+    d->result_ += '"';
 }
 
 // ---------------------------------------------------------------------------
@@ -717,6 +717,20 @@ std::string WKTFormatter::morphNameToESRI(const std::string &name) {
         }
     }
     return ret;
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::ingestWKTNode(const WKTNodeNNPtr &node) {
+    startNode(node->value(), true);
+    for (const auto &child : node->children()) {
+        if (!child->children().empty()) {
+            ingestWKTNode(child);
+        } else {
+            add(child->value());
+        }
+    }
+    endNode();
 }
 
 #ifdef unused
@@ -991,7 +1005,7 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
             if (!inString) {
                 inString = true;
                 closingStringMarker = endPrintedQuote;
-                value += "\"";
+                value += '"';
                 i += 2;
                 continue;
             }
@@ -1000,7 +1014,7 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
                    wkt.substr(i, 3) == endPrintedQuote) {
             inString = false;
             closingStringMarker.clear();
-            value += "\"";
+            value += '"';
             i += 2;
             continue;
         }
@@ -1069,7 +1083,7 @@ static std::string escapeIfQuotedString(const std::string &str) {
     if (str.size() > 2 && str[0] == '"' && str.back() == '"') {
         std::string res("\"");
         res += replaceAll(str.substr(1, str.size() - 2), "\"", "\"\"");
-        res += "\"";
+        res += '"';
         return res;
     } else {
         return str;
@@ -1088,7 +1102,7 @@ std::string WKTNode::toString() const {
         bool first = true;
         for (auto &child : d->children_) {
             if (!first) {
-                str += ",";
+                str += ',';
             }
             first = false;
             str += child->toString();
@@ -3308,11 +3322,10 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
 
 // ---------------------------------------------------------------------------
 
-static ProjectedCRSNNPtr createPseudoMercator(PropertyMap &props) {
+static ProjectedCRSNNPtr createPseudoMercator(const PropertyMap &props) {
     auto conversion = Conversion::createPopularVisualisationPseudoMercator(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(0),
         Angle(0), Length(0), Length(0));
-    props.set(IdentifiedObject::NAME_KEY, "WGS 84 / Pseudo-Mercator");
     return ProjectedCRS::create(
         props, GeographicCRS::EPSG_4326, conversion,
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
@@ -3330,24 +3343,6 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         ThrowMissing(WKTConstants::CONVERSION);
     }
 
-    auto props = buildProperties(node);
-
-    if (isNull(conversionNode) && hasWebMercPROJ4String(node, projectionNode)) {
-        return createPseudoMercator(props);
-    }
-
-    const std::string projectedCRSName = stripQuotes(nodeP->children()[0]);
-    // WGS_84_Pseudo_Mercator: Particular case for corrupted ESRI WKT generated
-    // by older GDAL versions
-    // https://trac.osgeo.org/gdal/changeset/30732
-    // WGS_1984_Web_Mercator: deprecated ESRI:102113
-    if (metadata::Identifier::isEquivalentName(projectedCRSName.c_str(),
-                                               "WGS_84_Pseudo_Mercator") ||
-        metadata::Identifier::isEquivalentName(projectedCRSName.c_str(),
-                                               "WGS_1984_Web_Mercator")) {
-        return createPseudoMercator(props);
-    }
-
     auto &baseGeodCRSNode =
         nodeP->lookForChild(WKTConstants::BASEGEODCRS,
                             WKTConstants::BASEGEOGCRS, WKTConstants::GEOGCS);
@@ -3356,6 +3351,50 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             "Missing BASEGEODCRS / BASEGEOGCRS / GEOGCS node");
     }
     auto baseGeodCRS = buildGeodeticCRS(baseGeodCRSNode);
+
+    auto props = buildProperties(node);
+
+    const std::string projCRSName = stripQuotes(nodeP->children()[0]);
+    if (esriStyle_ && dbContext_) {
+        // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
+        // EPSG:32761 (UPS South) uses the easting-northing order, instead
+        // of the EPSG northing-easting order
+        // so don't substitue names to avoid confusion.
+        if (projCRSName == "UPS_North") {
+            props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS North (E,N)");
+        } else if (projCRSName == "UPS_South") {
+            props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS South (E,N)");
+        } else {
+            std::string outTableName;
+            std::string authNameFromAlias;
+            std::string codeFromAlias;
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto officialName = authFactory->getOfficialNameFromAlias(
+                projCRSName, "projected_crs", "ESRI", outTableName,
+                authNameFromAlias, codeFromAlias);
+            if (!officialName.empty()) {
+                props.set(IdentifiedObject::NAME_KEY, officialName);
+            }
+        }
+    }
+
+    if (isNull(conversionNode) && hasWebMercPROJ4String(node, projectionNode)) {
+        toWGS84Parameters_.clear();
+        return createPseudoMercator(props);
+    }
+
+    // WGS_84_Pseudo_Mercator: Particular case for corrupted ESRI WKT generated
+    // by older GDAL versions
+    // https://trac.osgeo.org/gdal/changeset/30732
+    // WGS_1984_Web_Mercator: deprecated ESRI:102113
+    if (metadata::Identifier::isEquivalentName(projCRSName.c_str(),
+                                               "WGS_84_Pseudo_Mercator") ||
+        metadata::Identifier::isEquivalentName(projCRSName.c_str(),
+                                               "WGS_1984_Web_Mercator")) {
+        toWGS84Parameters_.clear();
+        return createPseudoMercator(props);
+    }
 
     auto linearUnit = buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR);
     auto angularUnit = baseGeodCRS->coordinateSystem()->axisList()[0]->unit();
@@ -3443,32 +3482,6 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     }
     if (!cartesianCS) {
         ThrowNotExpectedCSType("Cartesian");
-    }
-
-    if (esriStyle_ && dbContext_) {
-        auto projCRSName = stripQuotes(nodeP->children()[0]);
-
-        // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
-        // EPSG:32761 (UPS South) uses the easting-northing order, instead
-        // of the EPSG northing-easting order
-        // so don't substitue names to avoid confusion.
-        if (projCRSName == "UPS_North") {
-            props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS North (E,N)");
-        } else if (projCRSName == "UPS_South") {
-            props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS South (E,N)");
-        } else {
-            std::string outTableName;
-            std::string authNameFromAlias;
-            std::string codeFromAlias;
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
-            auto officialName = authFactory->getOfficialNameFromAlias(
-                projCRSName, "projected_crs", "ESRI", outTableName,
-                authNameFromAlias, codeFromAlias);
-            if (!officialName.empty()) {
-                props.set(IdentifiedObject::NAME_KEY, officialName);
-            }
-        }
     }
 
     addExtensionProj4ToProp(nodeP, props);
@@ -5274,7 +5287,7 @@ void PROJStringFormatter::addParam(const char *paramName,
     std::string paramValue;
     for (size_t i = 0; i < vals.size(); ++i) {
         if (i > 0) {
-            paramValue += ",";
+            paramValue += ',';
         }
         paramValue += formatToString(vals[i]);
     }

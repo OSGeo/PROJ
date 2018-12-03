@@ -134,6 +134,14 @@ using DatabaseContextNNPtr = util::nn<DatabaseContextPtr>;
 
 // ---------------------------------------------------------------------------
 
+class WKTNode;
+/** Unique pointer of WKTNode. */
+using WKTNodePtr = std::unique_ptr<WKTNode>;
+/** Non-null unique pointer of WKTNode. */
+using WKTNodeNNPtr = util::nn<WKTNodePtr>;
+
+// ---------------------------------------------------------------------------
+
 class WKTFormatter;
 /** WKTFormatter unique pointer. */
 using WKTFormatterPtr = std::unique_ptr<WKTFormatter>;
@@ -307,6 +315,8 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL bool useESRIDialect() const;
 
     PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
+
+    PROJ_INTERNAL void ingestWKTNode(const WKTNodeNNPtr &node);
 
     //! @endcond
 
@@ -555,12 +565,6 @@ class PROJ_GCC_DLL IPROJStringExportable {
 
 // ---------------------------------------------------------------------------
 
-class WKTNode;
-/** Unique pointer of WKTNode. */
-using WKTNodePtr = std::unique_ptr<WKTNode>;
-/** Non-null unique pointer of WKTNode. */
-using WKTNodeNNPtr = util::nn<WKTNodePtr>;
-
 /** \brief Node in the tree-splitted WKT representation.
  */
 class PROJ_GCC_DLL WKTNode {
@@ -724,6 +728,9 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_INTERNAL bool isKnownName(const std::string &name,
                                    const std::string &tableName) const;
 
+    PROJ_INTERNAL std::string getTextDefinition(const std::string &tableName,
+                                                const std::string &authName,
+                                                const std::string &code) const;
     //! @endcond
 
   protected:

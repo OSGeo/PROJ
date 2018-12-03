@@ -1685,6 +1685,60 @@ TEST(crs, projectedCRS_as_WKT1_ESRI) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_with_ESRI_code_as_WKT1_ESRI) {
+    auto dbContext = DatabaseContext::create();
+    auto crs = AuthorityFactory::create(dbContext, "ESRI")
+                   ->createProjectedCRS("102113");
+
+    // Comes literally from the text_definition column of
+    // projected_crs table
+    auto esri_wkt =
+        "PROJCS[\"WGS_1984_Web_Mercator\","
+        "GEOGCS[\"GCS_WGS_1984_Major_Auxiliary_Sphere\","
+        "DATUM[\"D_WGS_1984_Major_Auxiliary_Sphere\","
+        "SPHEROID[\"WGS_1984_Major_Auxiliary_Sphere\",6378137.0,0.0]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Mercator\"],PARAMETER[\"False_Easting\",0.0],"
+        "PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0],"
+        "PARAMETER[\"Standard_Parallel_1\",0.0],UNIT[\"Meter\",1.0]]";
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        esri_wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_from_WKT1_ESRI_as_WKT1_ESRI) {
+    auto dbContext = DatabaseContext::create();
+    // Comes literally from the text_definition column of
+    // projected_crs table
+    auto esri_wkt =
+        "PROJCS[\"WGS_1984_Web_Mercator\","
+        "GEOGCS[\"GCS_WGS_1984_Major_Auxiliary_Sphere\","
+        "DATUM[\"D_WGS_1984_Major_Auxiliary_Sphere\","
+        "SPHEROID[\"WGS_1984_Major_Auxiliary_Sphere\",6378137.0,0.0]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Mercator\"],PARAMETER[\"False_Easting\",0.0],"
+        "PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0],"
+        "PARAMETER[\"Standard_Parallel_1\",0.0],UNIT[\"Meter\",1.0]]";
+
+    auto obj =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(esri_wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        esri_wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_as_PROJ_string) {
     auto crs = createProjected();
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),

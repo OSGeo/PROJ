@@ -2415,6 +2415,63 @@ const cs::CartesianCSNNPtr &ProjectedCRS::coordinateSystem() PROJ_CONST_DEFN {
 void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
+    const auto &l_identifiers = identifiers();
+    // Try to perfectly round-trip ESRI projectedCRS if the current object
+    // perfectly matches the database definition
+    const auto &dbContext = formatter->databaseContext();
+
+    auto l_name = nameStr();
+    std::string l_alias;
+    if (formatter->useESRIDialect() && dbContext) {
+        l_alias = dbContext->getAliasFromOfficialName(l_name, "projected_crs",
+                                                      "ESRI");
+    }
+
+    if (!isWKT2 && formatter->useESRIDialect() && !l_identifiers.empty() &&
+        *(l_identifiers[0]->codeSpace()) == "ESRI" && dbContext) {
+        try {
+            const auto definition = dbContext->getTextDefinition(
+                "projected_crs", "ESRI", l_identifiers[0]->code());
+            if (starts_with(definition, "PROJCS")) {
+                auto crsFromFromDef = io::WKTParser()
+                                          .attachDatabaseContext(dbContext)
+                                          .createFromWKT(definition);
+                if (_isEquivalentTo(
+                        dynamic_cast<IComparable *>(crsFromFromDef.get()),
+                        util::IComparable::Criterion::EQUIVALENT)) {
+                    formatter->ingestWKTNode(
+                        io::WKTNode::createFrom(definition));
+                    return;
+                }
+            }
+        } catch (const std::exception &) {
+        }
+    } else if (!isWKT2 && formatter->useESRIDialect() && !l_alias.empty()) {
+        try {
+            auto res =
+                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI")
+                    ->createObjectsFromName(
+                        l_alias,
+                        {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
+                        false);
+            if (res.size() == 1) {
+                const auto definition = dbContext->getTextDefinition(
+                    "projected_crs", "ESRI",
+                    res.front()->identifiers()[0]->code());
+                if (starts_with(definition, "PROJCS")) {
+                    if (_isEquivalentTo(
+                            dynamic_cast<IComparable *>(res.front().get()),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        formatter->ingestWKTNode(
+                            io::WKTNode::createFrom(definition));
+                        return;
+                    }
+                }
+            }
+        } catch (const std::exception &) {
+        }
+    }
+
     const auto &l_coordinateSystem = d->coordinateSystem();
     const auto &axisList = l_coordinateSystem->axisList();
 
@@ -2433,7 +2490,7 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     if (!isWKT2 && !formatter->useESRIDialect() &&
         starts_with(nameStr(), "Popular Visualisation CRS / Mercator")) {
-        formatter->startNode(io::WKTConstants::PROJCS, !identifiers().empty());
+        formatter->startNode(io::WKTConstants::PROJCS, !l_identifiers.empty());
         formatter->addQuotedString(nameStr());
         formatter->setTOWGS84Parameters({0, 0, 0, 0, 0, 0, 0});
         baseCRS()->_exportToWKT(formatter);
@@ -2473,21 +2530,13 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     formatter->startNode(isWKT2 ? io::WKTConstants::PROJCRS
                                 : io::WKTConstants::PROJCS,
-                         !identifiers().empty());
-    auto l_name = nameStr();
+                         !l_identifiers.empty());
+
     if (formatter->useESRIDialect()) {
-        bool aliasFound = false;
-        const auto &dbContext = formatter->databaseContext();
-        if (dbContext) {
-            auto l_alias = dbContext->getAliasFromOfficialName(
-                l_name, "projected_crs", "ESRI");
-            if (!l_alias.empty()) {
-                l_name = l_alias;
-                aliasFound = true;
-            }
-        }
-        if (!aliasFound) {
+        if (l_alias.empty()) {
             l_name = io::WKTFormatter::morphNameToESRI(l_name);
+        } else {
+            l_name = l_alias;
         }
     }
     if (!isWKT2 && !formatter->useESRIDialect() && isDeprecated()) {

@@ -852,6 +852,29 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
     return res[0][0];
 }
 
+// ---------------------------------------------------------------------------
+
+/** \brief Return the 'text_definition' column of a table for an object
+ *
+ * @param tableName Table name/category.
+ * @param authName Authority name of the object.
+ * @param code Code of the object
+ * @return Text definition (or empty)
+ * @throw FactoryException
+ */
+std::string DatabaseContext::getTextDefinition(const std::string &tableName,
+                                               const std::string &authName,
+                                               const std::string &code) const {
+    std::string sql("SELECT text_definition FROM \"");
+    sql += replaceAll(tableName, "\"", "\"\"");
+    sql += "\" WHERE auth_name = ? AND code = ?";
+    auto res = d->run(sql, {authName, code});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res[0][0];
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -3806,6 +3829,11 @@ AuthorityFactory::createObjectsFromName(
         if (limitResultCount > 0 && res.size() == limitResultCount) {
             break;
         }
+    }
+    if (res.empty() && !deprecated) {
+        return createObjectsFromName(searchedName + " (deprecated)",
+                                     allowedObjectTypes, approximateMatch,
+                                     limitResultCount);
     }
 
     auto sortLambda = [](const common::IdentifiedObjectNNPtr &a,
