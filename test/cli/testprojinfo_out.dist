@@ -496,3 +496,32 @@ COORDINATEOPERATION["NAD27 to NAD83 (6)",
     BBOX[44.99,-79.85,62.62,-57.1],
     ID["EPSG",1573]]
 
+Testing projinfo -s EPSG:4230 -t EPSG:4258 --bbox 8,54.51,15.24,57.8 --summary
+Candidate operations found: 1
+EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore
+
+Testing projinfo -s EPSG:4230 -t EPSG:4258 --area EPSG:3237 --summary
+Candidate operations found: 1
+EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore
+
+Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark - onshore' --summary
+Candidate operations found: 1
+EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore
+
+Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark -' --summary
+Several candidates area of use matching provided name :
+  EPSG:2531 : Denmark - onshore Jutland and Funen
+  EPSG:2532 : Denmark - onshore Zealand and Lolland
+  EPSG:2533 : Denmark - onshore Bornholm
+  EPSG:3237 : Denmark - onshore
+  EPSG:3471 : Denmark - onshore west of 12°E
+  EPSG:3472 : Denmark - onshore east of 12°E
+  EPSG:3631 : Denmark - onshore Jutland west of 10°E
+  EPSG:3632 : Denmark - onshore Jutland east of 9°E and Funen
+
+Testing projinfo -s EPSG:4230 -t EPSG:4258 --area no_match --summary
+No area of use matching provided name
+
+Testing projinfo -s EPSG:4230 -t EPSG:4258 --area WRONG:CODE --summary
+Area of use retrieval failed: area not found
+

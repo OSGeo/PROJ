@@ -907,7 +907,10 @@ class PROJ_GCC_DLL AuthorityFactory {
                           const std::vector<ObjectType> &allowedObjectTypes =
                               std::vector<ObjectType>(),
                           bool approximateMatch = true,
-                          size_t limitResultCount = 0);
+                          size_t limitResultCount = 0) const;
+
+    PROJ_DLL std::list<std::pair<std::string, std::string>>
+    listAreaOfUseFromName(const std::string &name, bool approximateMatch) const;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

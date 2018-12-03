@@ -74,7 +74,8 @@ static void usage() {
     std::cerr
         << "usage: projinfo [-o formats] [-k crs|operation] [--summary] [-q]"
         << std::endl
-        << "                [--bbox min_long,min_lat,max_long,max_lat] "
+        << "                ([--area name_or_code] | "
+           "[--bbox min_long,min_lat,max_long,max_lat]) "
         << std::endl
         << "                [--spatial-test contains|intersects]" << std::endl
         << "                [--crs-extent-use none|both|intersection|smallest]"
@@ -565,6 +566,7 @@ int main(int argc, char **argv) {
     bool kindIsCRS = true;
     bool summary = false;
     ExtentPtr bboxFilter = nullptr;
+    std::string area;
     CoordinateOperationContext::SpatialCriterion spatialCriterion =
         CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT;
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse =
@@ -686,6 +688,9 @@ int main(int argc, char **argv) {
                           << ", " << e.what() << std::endl;
                 usage();
             }
+        } else if (arg == "--area" && i + 1 < argc) {
+            i++;
+            area = argv[i];
         } else if (arg == "-k" && i + 1 < argc) {
             i++;
             std::string kind(argv[i]);
@@ -818,12 +823,17 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (bboxFilter && !area.empty()) {
+        std::cerr << "ERROR: --bbox and --area are exclusive" << std::endl;
+        std::exit(1);
+    }
+
     DatabaseContextPtr dbContext;
     try {
         dbContext =
             DatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
     } catch (const std::exception &e) {
-        if (!mainDBPath.empty() || !auxDBPath.empty()) {
+        if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty()) {
             std::cerr << "ERROR: Cannot create database connection: "
                       << e.what() << std::endl;
             std::exit(1);
@@ -928,6 +938,68 @@ int main(int argc, char **argv) {
             }
         }
     } else {
+
+        if (!area.empty()) {
+            assert(dbContext);
+            try {
+                if (area.find(' ') == std::string::npos &&
+                    area.find(':') != std::string::npos) {
+                    auto tokens = split(area, ':');
+                    if (tokens.size() == 2) {
+                        const std::string &areaAuth = tokens[0];
+                        const std::string &areaCode = tokens[1];
+                        bboxFilter = AuthorityFactory::create(
+                                         NN_NO_CHECK(dbContext), areaAuth)
+                                         ->createExtent(areaCode)
+                                         .as_nullable();
+                    }
+                }
+                if (!bboxFilter) {
+                    auto authFactory = AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), std::string());
+                    auto res = authFactory->listAreaOfUseFromName(area, false);
+                    if (res.size() == 1) {
+                        bboxFilter =
+                            AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                     res.front().first)
+                                ->createExtent(res.front().second)
+                                .as_nullable();
+                    } else {
+                        res = authFactory->listAreaOfUseFromName(area, true);
+                        if (res.size() == 1) {
+                            bboxFilter =
+                                AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                         res.front().first)
+                                    ->createExtent(res.front().second)
+                                    .as_nullable();
+                        } else if (res.empty()) {
+                            std::cerr << "No area of use matching provided name"
+                                      << std::endl;
+                            std::exit(1);
+                        } else {
+                            std::cerr << "Several candidates area of use "
+                                         "matching provided name :"
+                                      << std::endl;
+                            for (const auto &candidate : res) {
+                                auto obj =
+                                    AuthorityFactory::create(
+                                        NN_NO_CHECK(dbContext), candidate.first)
+                                        ->createExtent(candidate.second);
+                                std::cerr << "  " << candidate.first << ":"
+                                          << candidate.second << " : "
+                                          << *obj->description() << std::endl;
+                            }
+                            std::exit(1);
+                        }
+                    }
+                }
+            } catch (const std::exception &e) {
+                std::cerr << "Area of use retrieval failed: " << e.what()
+                          << std::endl;
+                std::exit(1);
+            }
+        }
+
         outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
                          spatialCriterion, crsExtentUse, gridAvailabilityUse,
                          allowPivots, pivots, authority,
