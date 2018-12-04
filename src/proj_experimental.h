@@ -187,6 +187,17 @@ PJ_OBJ PROJ_DLL *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
 PJ_OBJ PROJ_DLL *proj_obj_create_engineering_crs(PJ_CONTEXT *ctx,
                                                  const char *crsName);
 
+PJ_OBJ PROJ_DLL *proj_obj_create_vertical_crs(PJ_CONTEXT *ctx,
+                                              const char *crs_name,
+                                              const char *datum_name,
+                                              const char *linear_units,
+                                              double linear_units_conv);
+
+PJ_OBJ PROJ_DLL *proj_obj_create_compound_crs(PJ_CONTEXT *ctx,
+                                              const char *crs_name,
+                                              PJ_OBJ* horiz_crs,
+                                              PJ_OBJ* vert_crs);
+
 /** Description of a parameter value for a Conversion. */
 typedef struct
 {

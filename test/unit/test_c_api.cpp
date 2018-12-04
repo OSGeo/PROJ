@@ -2432,4 +2432,47 @@ TEST_F(CApi, proj_obj_create_projected_crs) {
     ASSERT_NE(projCRS, nullptr);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_compound_crs) {
+
+    auto horiz_cs = proj_obj_create_ellipsoidal_2D_cs(
+        m_ctxt, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
+    ObjectKeeper keeper_horiz_cs(horiz_cs);
+    ASSERT_NE(horiz_cs, nullptr);
+
+    auto horiz_crs = proj_obj_create_geographic_crs(
+        m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
+        298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433,
+        horiz_cs);
+    ObjectKeeper keeper_horiz_crs(horiz_crs);
+    ASSERT_NE(horiz_crs, nullptr);
+
+    auto vert_crs = proj_obj_create_vertical_crs(m_ctxt, "myVertCRS",
+                                                 "myVertDatum", nullptr, 0.0);
+    ObjectKeeper keeper_vert_crs(vert_crs);
+    ASSERT_NE(vert_crs, nullptr);
+
+    EXPECT_EQ(proj_obj_get_name(vert_crs), std::string("myVertCRS"));
+
+    auto compound_crs = proj_obj_create_compound_crs(m_ctxt, "myCompoundCRS",
+                                                     horiz_crs, vert_crs);
+    ObjectKeeper keeper_compound_crss(compound_crs);
+    ASSERT_NE(compound_crs, nullptr);
+
+    EXPECT_EQ(proj_obj_get_name(compound_crs), std::string("myCompoundCRS"));
+
+    auto subcrs_horiz = proj_obj_crs_get_sub_crs(m_ctxt, compound_crs, 0);
+    ASSERT_NE(subcrs_horiz, nullptr);
+    ObjectKeeper keeper_subcrs_horiz(subcrs_horiz);
+    EXPECT_TRUE(
+        proj_obj_is_equivalent_to(subcrs_horiz, horiz_crs, PJ_COMP_STRICT));
+
+    auto subcrs_vert = proj_obj_crs_get_sub_crs(m_ctxt, compound_crs, 1);
+    ASSERT_NE(subcrs_vert, nullptr);
+    ObjectKeeper keeper_subcrs_vert(subcrs_vert);
+    EXPECT_TRUE(
+        proj_obj_is_equivalent_to(subcrs_vert, vert_crs, PJ_COMP_STRICT));
+}
+
 } // namespace

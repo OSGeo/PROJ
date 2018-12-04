@@ -2101,6 +2101,86 @@ PJ_OBJ *proj_obj_create_geocentric_crs_from_datum(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Create a VerticalCRS
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_name Name of the GeographicCRS. Or NULL
+ * @param datum_name Name of the VerticalReferenceFrame. Or NULL
+ * @param linear_units Name of the linear units. Or NULL for Metre
+ * @param linear_units_conv Conversion factor from the linear unit to metre. Or
+ * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
+ *
+ * @return Object of type VerticalCRS that must be unreferenced with
+ * proj_obj_unref(), or NULL in case of error.
+ */
+PJ_OBJ *proj_obj_create_vertical_crs(PJ_CONTEXT *ctx, const char *crs_name,
+                                     const char *datum_name,
+                                     const char *linear_units,
+                                     double linear_units_conv) {
+
+    SANITIZE_CTX(ctx);
+    try {
+        const UnitOfMeasure linearUnit(
+            createLinearUnit(linear_units, linear_units_conv));
+        auto datum =
+            VerticalReferenceFrame::create(createPropertyMapName(datum_name));
+        auto vertCRS = VerticalCRS::create(
+            createPropertyMapName(crs_name), datum,
+            cs::VerticalCS::createGravityRelatedHeight(linearUnit));
+        return PJ_OBJ::create(vertCRS);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Create a CompoundCRS
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_name Name of the GeographicCRS. Or NULL
+ * @param horiz_crs Horizontal CRS. must not be NULL.
+ * @param vert_crs Vertical CRS. must not be NULL.
+ *
+ * @return Object of type CompoundCRS that must be unreferenced with
+ * proj_obj_unref(), or NULL in case of error.
+ */
+PJ_OBJ *proj_obj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
+                                     PJ_OBJ *horiz_crs, PJ_OBJ *vert_crs) {
+
+    assert(horiz_crs);
+    assert(vert_crs);
+    SANITIZE_CTX(ctx);
+    auto l_horiz_crs = util::nn_dynamic_pointer_cast<CRS>(horiz_crs->obj);
+    if (!l_horiz_crs) {
+        return nullptr;
+    }
+    auto l_vert_crs = util::nn_dynamic_pointer_cast<CRS>(vert_crs->obj);
+    if (!l_vert_crs) {
+        return nullptr;
+    }
+    try {
+        auto compoundCRS = CompoundCRS::create(
+            createPropertyMapName(crs_name),
+            {NN_NO_CHECK(l_horiz_crs), NN_NO_CHECK(l_vert_crs)});
+        return PJ_OBJ::create(compoundCRS);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return a copy of the object with its name changed
  *
  * Currently, only implemented on CRS objects.
