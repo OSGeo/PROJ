@@ -1096,7 +1096,9 @@ void GeodeticReferenceFrame::_exportToWKT(
                     }
                 }
             }
-        } else {
+            // Replace spaces by underscore, except if it is a special MapInfo
+            // datum name
+        } else if (!starts_with(l_name, "MIF ")) {
             l_name = io::WKTFormatter::morphNameToESRI(l_name);
             if (l_name == "World_Geodetic_System_1984") {
                 l_name = "WGS_1984";
