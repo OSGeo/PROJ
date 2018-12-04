@@ -212,6 +212,7 @@ def import_spheroid():
                 break
             assert len(row) == nfields, row
 
+            code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
             authority = row[idx_authority]
             esri_name = row[idx_name]
@@ -229,7 +230,7 @@ def import_spheroid():
 
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('ellipsoid','EPSG','%s','%s','ESRI');""" % (
-                        latestWkid, escape_literal(esri_name))
+                        code, escape_literal(esri_name))
                     all_sql.append(sql)
 
             else:
@@ -309,6 +310,7 @@ def import_prime_meridian():
                 break
             assert len(row) == nfields, row
 
+            code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
             authority = row[idx_authority]
             esri_name = row[idx_name]
@@ -325,7 +327,7 @@ def import_prime_meridian():
 
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('prime_meridian','EPSG','%s','%s','ESRI');""" % (
-                        latestWkid, escape_literal(esri_name))
+                        code, escape_literal(esri_name))
                     all_sql.append(sql)
 
             else:
@@ -386,6 +388,7 @@ def import_datum():
                 break
             assert len(row) == nfields, row
 
+            code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
             authority = row[idx_authority]
             esri_name = row[idx_name]
@@ -400,10 +403,9 @@ def import_datum():
                 src_row = cursor.fetchone()
                 assert src_row, row
                 src_name = src_row[0]
-                esri_name = row[idx_name]
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('geodetic_datum','EPSG','%s','%s','ESRI');""" % (
-                        latestWkid, escape_literal(esri_name))
+                        code, escape_literal(esri_name))
                     all_sql.append(sql)
             else:
                 assert authority.upper() == 'ESRI', row
@@ -494,6 +496,7 @@ def import_geogcs():
                 break
             assert len(row) == nfields, row
 
+            code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
             authority = row[idx_authority]
             esri_name = row[idx_name]
@@ -508,15 +511,12 @@ def import_geogcs():
                 src_row = cursor.fetchone()
                 assert src_row, row
                 src_name = src_row[0]
-                esri_name = row[idx_name]
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('geodetic_crs','EPSG','%s','%s','ESRI');""" % (
-                        latestWkid, escape_literal(esri_name))
+                        code, escape_literal(esri_name))
                     all_sql.append(sql)
             else:
                 assert authority.upper() == 'ESRI', row
-
-                code = row[idx_wkid]
 
                 wkt = row[idx_wkt]
                 pos = wkt.find('DATUM["')
@@ -671,6 +671,7 @@ def import_projcs():
                 break
             assert len(row) == nfields, row
 
+            code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
             authority = row[idx_authority]
             esri_name = row[idx_name]
@@ -688,12 +689,11 @@ def import_projcs():
                 esri_name = row[idx_name]
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('projected_crs','EPSG','%s','%s','ESRI');""" % (
-                        latestWkid, escape_literal(esri_name))
+                        code, escape_literal(esri_name))
                     all_sql.append(sql)
             else:
                 assert authority.upper() == 'ESRI', row
 
-                code = row[idx_wkid]
                 wkid_set.add(code)
 
                 wkt = row[idx_wkt]
@@ -799,7 +799,7 @@ def import_vdatum():
                 esri_name = row[idx_name]
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('vertical_datum','EPSG','%s','%s','ESRI');""" % (
-                        latestWkid, escape_literal(esri_name))
+                        wkid, escape_literal(esri_name))
                     all_sql.append(sql)
             else:
                 assert authority.upper() == 'ESRI', row
@@ -873,6 +873,7 @@ def import_vertcs():
                 break
             assert len(row) == nfields, row
 
+            code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
             authority = row[idx_authority]
             esri_name = row[idx_name]
@@ -890,12 +891,10 @@ def import_vertcs():
                 esri_name = row[idx_name]
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('vertical_crs','EPSG','%s','%s','ESRI');""" % (
-                        latestWkid, escape_literal(esri_name))
+                        code, escape_literal(esri_name))
                     all_sql.append(sql)
             else:
                 assert authority.upper() == 'ESRI', row
-
-                code = row[idx_wkid]
 
                 wkt = row[idx_wkt]
 
@@ -1022,6 +1021,7 @@ def import_hvcoordsys():
                 break
             assert len(row) == nfields, row
 
+            code = row[idx_wkid]
             latestWkid = row[idx_latestWkid]
             authority = row[idx_authority]
             esri_name = row[idx_name]
@@ -1039,7 +1039,7 @@ def import_hvcoordsys():
                 esri_name = row[idx_name]
                 if src_name != esri_name:
                     sql = """INSERT INTO alias_name VALUES('compound_crs','EPSG','%s','%s','ESRI');""" % (
-                        latestWkid, escape_literal(esri_name))
+                        code, escape_literal(esri_name))
                     all_sql.append(sql)
             else:
                 assert False, row  # no ESRI specific entries at that time !
