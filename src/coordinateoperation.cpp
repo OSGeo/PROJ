@@ -5626,6 +5626,13 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
         bool foundRotZ = false;
         bool foundScale = false;
         const double rotSign = invertRotSigns ? -1.0 : 1.0;
+
+        const auto fixNegativeZero = [](double x) {
+            if (x == 0.0)
+                return 0.0;
+            return x;
+        };
+
         for (const auto &genOpParamvalue : parameterValues()) {
             auto opParamvalue = dynamic_cast<const OperationParameterValue *>(
                 genOpParamvalue.get());
@@ -5648,21 +5655,24 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                         foundZ = true;
                     } else if (epsg_code ==
                                EPSG_CODE_PARAMETER_X_AXIS_ROTATION) {
-                        params[3] = rotSign *
-                                    measure.convertToUnit(
-                                        common::UnitOfMeasure::ARC_SECOND);
+                        params[3] = fixNegativeZero(
+                            rotSign *
+                            measure.convertToUnit(
+                                common::UnitOfMeasure::ARC_SECOND));
                         foundRotX = true;
                     } else if (epsg_code ==
                                EPSG_CODE_PARAMETER_Y_AXIS_ROTATION) {
-                        params[4] = rotSign *
-                                    measure.convertToUnit(
-                                        common::UnitOfMeasure::ARC_SECOND);
+                        params[4] = fixNegativeZero(
+                            rotSign *
+                            measure.convertToUnit(
+                                common::UnitOfMeasure::ARC_SECOND));
                         foundRotY = true;
                     } else if (epsg_code ==
                                EPSG_CODE_PARAMETER_Z_AXIS_ROTATION) {
-                        params[5] = rotSign *
-                                    measure.convertToUnit(
-                                        common::UnitOfMeasure::ARC_SECOND);
+                        params[5] = fixNegativeZero(
+                            rotSign *
+                            measure.convertToUnit(
+                                common::UnitOfMeasure::ARC_SECOND));
                         foundRotZ = true;
                     } else if (epsg_code ==
                                EPSG_CODE_PARAMETER_SCALE_DIFFERENCE) {
