@@ -301,6 +301,29 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
         }
     }
 
+    {
+        auto engCRS = dynamic_cast<const EngineeringCRS *>(this);
+        if (engCRS) {
+            auto cartCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(
+                engCRS->coordinateSystem());
+            if (cartCS) {
+                auto props = createPropertyMap(this);
+                props.set("FORCE_OUTPUT_CS", true);
+                return EngineeringCRS::create(props, engCRS->datum(),
+                                              cartCS->alterUnit(unit));
+            } else {
+                auto vertCS = util::nn_dynamic_pointer_cast<cs::VerticalCS>(
+                    engCRS->coordinateSystem());
+                if (vertCS) {
+                    auto props = createPropertyMap(this);
+                    props.set("FORCE_OUTPUT_CS", true);
+                    return EngineeringCRS::create(props, engCRS->datum(),
+                                                  vertCS->alterUnit(unit));
+                }
+            }
+        }
+    }
+
     return NN_NO_CHECK(
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
@@ -4376,7 +4399,9 @@ bool TemporalCRS::_isEquivalentTo(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct EngineeringCRS::Private {};
+struct EngineeringCRS::Private {
+    bool forceOutputCS_ = false;
+};
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -4389,12 +4414,13 @@ EngineeringCRS::~EngineeringCRS() = default;
 
 EngineeringCRS::EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
                                const cs::CoordinateSystemNNPtr &csIn)
-    : SingleCRS(datumIn.as_nullable(), nullptr, csIn), d(nullptr) {}
+    : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
+      d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
 EngineeringCRS::EngineeringCRS(const EngineeringCRS &other)
-    : SingleCRS(other), d(nullptr) {}
+    : SingleCRS(other), d(internal::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -4432,6 +4458,18 @@ EngineeringCRS::create(const util::PropertyMap &properties,
     auto crs(EngineeringCRS::nn_make_shared<EngineeringCRS>(datumIn, csIn));
     crs->assignSelf(crs);
     crs->setProperties(properties);
+
+    auto oIter = properties.find("FORCE_OUTPUT_CS");
+    if (oIter != properties.end()) {
+        if (auto genVal = util::nn_dynamic_pointer_cast<util::BoxedValue>(
+                oIter->second)) {
+            if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
+                genVal->booleanValue()) {
+                crs->d->forceOutputCS_ = true;
+            }
+        }
+    }
+
     return crs;
 }
 
@@ -4447,6 +4485,9 @@ void EngineeringCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (isWKT2 || !datum()->nameStr().empty()) {
         datum()->_exportToWKT(formatter);
         coordinateSystem()->_exportToWKT(formatter);
+    }
+    if (!isWKT2 && d->forceOutputCS_) {
+        coordinateSystem()->axisList()[0]->unit()._exportToWKT(formatter);
     }
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();

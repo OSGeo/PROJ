@@ -4977,6 +4977,16 @@ TEST(crs, crs_alterCSLinearUnit) {
     }
 
     {
+        auto obj = WKTParser().createFromWKT("LOCAL_CS[\"foo\"]");
+        auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+        auto alteredCRS = crs->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
+        auto wkt = alteredCRS->exportToWKT(
+            &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
+                  ->setMultiLine(false)));
+        EXPECT_EQ(wkt, "LOCAL_CS[\"foo\",UNIT[\"my unit\",2]]");
+    }
+
+    {
         // Not implemented on compoundCRS
         auto crs =
             createCompoundCRS()->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
