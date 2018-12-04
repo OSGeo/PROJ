@@ -1805,9 +1805,14 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ_OBJ *crs,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static PropertyMap createPropertyMapName(const char *name) {
-    return PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                             name ? name : "unnamed");
+static PropertyMap createPropertyMapName(const char *c_name) {
+    std::string name(c_name ? c_name : "unnamed");
+    PropertyMap properties;
+    if (ends_with(name, " (deprecated)")) {
+        name.resize(name.size() - strlen(" (deprecated)"));
+        properties.set(common::IdentifiedObject::DEPRECATED_KEY, true);
+    }
+    return properties.set(common::IdentifiedObject::NAME_KEY, name);
 }
 
 // ---------------------------------------------------------------------------

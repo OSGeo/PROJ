@@ -513,6 +513,29 @@ TEST(wkt_parse, wkt1_geographic_old_datum_name_witout_EPSG_code) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_geographic_deprecated) {
+    auto wkt = "GEOGCS[\"SAD69 (deprecated)\",\n"
+               "    DATUM[\"South_American_Datum_1969\",\n"
+               "        SPHEROID[\"GRS 1967\",6378160,298.247167427,\n"
+               "            AUTHORITY[\"EPSG\",\"7036\"]],\n"
+               "        AUTHORITY[\"EPSG\",\"6291\"]],\n"
+               "    PRIMEM[\"Greenwich\",0,\n"
+               "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
+               "    UNIT[\"degree\",0.0174532925199433,\n"
+               "        AUTHORITY[\"EPSG\",\"9108\"]],\n"
+               "    AUTHORITY[\"EPSG\",\"4291\"]]";
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "SAD69");
+    EXPECT_TRUE(crs->isDeprecated());
+}
+
+// ---------------------------------------------------------------------------
+
 static std::string contentWKT2_EPSG_4326(
     "[\"WGS 84\",\n"
     "    DATUM[\"World Geodetic System 1984\",\n"

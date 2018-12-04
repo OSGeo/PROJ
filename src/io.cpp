@@ -1449,6 +1449,10 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
     if (!nodeChildren.empty()) {
         const auto &nodeName(nodeP->value());
         auto name(stripQuotes(nodeChildren[0]));
+        if (ends_with(name, " (deprecated)")) {
+            name.resize(name.size() - strlen(" (deprecated)"));
+            properties->set(common::IdentifiedObject::DEPRECATED_KEY, true);
+        }
 
         const char *tableNameForAlias = nullptr;
         if (ci_equal(nodeName, WKTConstants::GEOGCS)) {

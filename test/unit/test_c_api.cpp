@@ -1625,6 +1625,21 @@ TEST_F(CApi, proj_obj_create_geographic_crs) {
                   std::string("System of the Unified Trigonometrical Cadastral "
                               "Network (Ferro)"));
     }
+
+    // WKT1 with (deprecated)
+    {
+        auto crs = proj_obj_create_geographic_crs(
+            m_ctxt, "SAD69 (deprecated)", "South_American_Datum_1969",
+            "GRS 1967", 6378160, 298.247167427, "Greenwich", 0, "Degree",
+            0.0174532925199433, cs);
+        ObjectKeeper keeper(crs);
+        ASSERT_NE(crs, nullptr);
+
+        auto name = proj_obj_get_name(crs);
+        ASSERT_TRUE(name != nullptr);
+        EXPECT_EQ(name, std::string("SAD69"));
+        EXPECT_TRUE(proj_obj_is_deprecated(crs));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2199,20 +2214,38 @@ TEST_F(CApi, proj_obj_crs_alter_geodetic_crs) {
     EXPECT_TRUE(
         proj_obj_is_equivalent_to(geodCRSAltered, newGeodCRS, PJ_COMP_STRICT));
 
-    auto projCRSAltered =
-        proj_obj_crs_alter_geodetic_crs(m_ctxt, projCRS, newGeodCRS);
-    ObjectKeeper keeper_projCRSAltered(projCRSAltered);
-    ASSERT_NE(projCRSAltered, nullptr);
+    {
+        auto projCRSAltered =
+            proj_obj_crs_alter_geodetic_crs(m_ctxt, projCRS, newGeodCRS);
+        ObjectKeeper keeper_projCRSAltered(projCRSAltered);
+        ASSERT_NE(projCRSAltered, nullptr);
 
-    EXPECT_EQ(proj_obj_get_type(projCRSAltered), PJ_OBJ_TYPE_PROJECTED_CRS);
+        EXPECT_EQ(proj_obj_get_type(projCRSAltered), PJ_OBJ_TYPE_PROJECTED_CRS);
 
-    auto projCRSAltered_geodCRS =
-        proj_obj_crs_get_geodetic_crs(m_ctxt, projCRSAltered);
-    ObjectKeeper keeper_projCRSAltered_geodCRS(projCRSAltered_geodCRS);
-    ASSERT_NE(projCRSAltered_geodCRS, nullptr);
+        auto projCRSAltered_geodCRS =
+            proj_obj_crs_get_geodetic_crs(m_ctxt, projCRSAltered);
+        ObjectKeeper keeper_projCRSAltered_geodCRS(projCRSAltered_geodCRS);
+        ASSERT_NE(projCRSAltered_geodCRS, nullptr);
 
-    EXPECT_TRUE(proj_obj_is_equivalent_to(projCRSAltered_geodCRS, newGeodCRS,
-                                          PJ_COMP_STRICT));
+        EXPECT_TRUE(proj_obj_is_equivalent_to(projCRSAltered_geodCRS,
+                                              newGeodCRS, PJ_COMP_STRICT));
+    }
+
+    // Check that proj_obj_crs_alter_geodetic_crs preserves deprecation flag
+    {
+        auto projCRSDeprecated =
+            proj_obj_alter_name(m_ctxt, projCRS, "new name (deprecated)");
+        ObjectKeeper keeper_projCRSDeprecated(projCRSDeprecated);
+        ASSERT_NE(projCRSDeprecated, nullptr);
+
+        auto projCRSAltered = proj_obj_crs_alter_geodetic_crs(
+            m_ctxt, projCRSDeprecated, newGeodCRS);
+        ObjectKeeper keeper_projCRSAltered(projCRSAltered);
+        ASSERT_NE(projCRSAltered, nullptr);
+
+        EXPECT_EQ(proj_obj_get_name(projCRSAltered), std::string("new name"));
+        EXPECT_TRUE(proj_obj_is_deprecated(projCRSAltered));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2338,11 +2371,24 @@ TEST_F(CApi, proj_obj_alter_name) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto alteredObj = proj_obj_alter_name(m_ctxt, obj, "new name");
-    ObjectKeeper keeper_alteredObj(alteredObj);
-    ASSERT_NE(alteredObj, nullptr);
+    {
+        auto alteredObj = proj_obj_alter_name(m_ctxt, obj, "new name");
+        ObjectKeeper keeper_alteredObj(alteredObj);
+        ASSERT_NE(alteredObj, nullptr);
 
-    EXPECT_EQ(std::string(proj_obj_get_name(alteredObj)), "new name");
+        EXPECT_EQ(std::string(proj_obj_get_name(alteredObj)), "new name");
+        EXPECT_FALSE(proj_obj_is_deprecated(alteredObj));
+    }
+
+    {
+        auto alteredObj =
+            proj_obj_alter_name(m_ctxt, obj, "new name (deprecated)");
+        ObjectKeeper keeper_alteredObj(alteredObj);
+        ASSERT_NE(alteredObj, nullptr);
+
+        EXPECT_EQ(std::string(proj_obj_get_name(alteredObj)), "new name");
+        EXPECT_TRUE(proj_obj_is_deprecated(alteredObj));
+    }
 }
 
 // ---------------------------------------------------------------------------

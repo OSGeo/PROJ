@@ -213,9 +213,16 @@ GeographicCRSPtr CRS::extractGeographicCRS() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static util::PropertyMap createPropertyMapName(const std::string &name) {
-    return util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name);
+static util::PropertyMap
+createPropertyMap(const common::IdentifiedObject *obj) {
+    auto props = util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                         obj->nameStr());
+    if (obj->isDeprecated()) {
+        props.set(common::IdentifiedObject::DEPRECATED_KEY, true);
+    }
+    return props;
 }
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -229,9 +236,9 @@ CRSNNPtr CRS::alterGeodeticCRS(const GeodeticCRSNNPtr &newGeodCRS) const {
 
     auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
     if (projCRS) {
-        return ProjectedCRS::create(
-            createPropertyMapName(nameStr()), newGeodCRS,
-            projCRS->derivingConversionRef(), projCRS->coordinateSystem());
+        return ProjectedCRS::create(createPropertyMap(this), newGeodCRS,
+                                    projCRS->derivingConversionRef(),
+                                    projCRS->coordinateSystem());
     }
 
     auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
@@ -240,8 +247,7 @@ CRSNNPtr CRS::alterGeodeticCRS(const GeodeticCRSNNPtr &newGeodCRS) const {
         for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
             components.emplace_back(subCrs->alterGeodeticCRS(newGeodCRS));
         }
-        return CompoundCRS::create(createPropertyMapName(nameStr()),
-                                   components);
+        return CompoundCRS::create(createPropertyMap(this), components);
     }
 
     return NN_NO_CHECK(
@@ -257,8 +263,8 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
         auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
         if (projCRS) {
             return ProjectedCRS::create(
-                createPropertyMapName(projCRS->nameStr().c_str()),
-                projCRS->baseCRS(), projCRS->derivingConversionRef(),
+                createPropertyMap(this), projCRS->baseCRS(),
+                projCRS->derivingConversionRef(),
                 projCRS->coordinateSystem()->alterUnit(unit));
         }
     }
@@ -270,9 +276,8 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
                 geodCRS->coordinateSystem().get());
             assert(cs);
             return GeodeticCRS::create(
-                createPropertyMapName(geodCRS->nameStr().c_str()),
-                geodCRS->datum(), geodCRS->datumEnsemble(),
-                cs->alterUnit(unit));
+                createPropertyMap(this), geodCRS->datum(),
+                geodCRS->datumEnsemble(), cs->alterUnit(unit));
         }
     }
 
@@ -280,8 +285,8 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
         auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
         if (geogCRS && geogCRS->coordinateSystem()->axisList().size() == 3) {
             return GeographicCRS::create(
-                createPropertyMapName(geogCRS->nameStr().c_str()),
-                geogCRS->datum(), geogCRS->datumEnsemble(),
+                createPropertyMap(this), geogCRS->datum(),
+                geogCRS->datumEnsemble(),
                 geogCRS->coordinateSystem()->alterLinearUnit(unit));
         }
     }
@@ -290,8 +295,8 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
         auto vertCRS = dynamic_cast<const VerticalCRS *>(this);
         if (vertCRS) {
             return VerticalCRS::create(
-                createPropertyMapName(vertCRS->nameStr().c_str()),
-                vertCRS->datum(), vertCRS->datumEnsemble(),
+                createPropertyMap(this), vertCRS->datum(),
+                vertCRS->datumEnsemble(),
                 vertCRS->coordinateSystem()->alterUnit(unit));
         }
     }
@@ -501,8 +506,14 @@ CRSNNPtr CRS::shallowClone() const { return _shallowClone(); }
 
 CRSNNPtr CRS::alterName(const std::string &newName) const {
     auto crs = shallowClone();
-    crs->setProperties(
-        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, newName));
+    auto newNameMod(newName);
+    auto props = util::PropertyMap();
+    if (ends_with(newNameMod, " (deprecated)")) {
+        newNameMod.resize(newNameMod.size() - strlen(" (deprecated)"));
+        props.set(common::IdentifiedObject::DEPRECATED_KEY, true);
+    }
+    props.set(common::IdentifiedObject::NAME_KEY, newNameMod);
+    crs->setProperties(props);
     return crs;
 }
 
@@ -2671,7 +2682,7 @@ bool ProjectedCRS::_isEquivalentTo(
 ProjectedCRSNNPtr
 ProjectedCRS::alterParametersLinearUnit(const common::UnitOfMeasure &unit,
                                         bool convertToNewUnit) const {
-    return create(createPropertyMapName(nameStr()), baseCRS(),
+    return create(createPropertyMap(this), baseCRS(),
                   derivingConversionRef()->alterParametersLinearUnit(
                       unit, convertToNewUnit),
                   coordinateSystem());
