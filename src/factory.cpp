@@ -156,6 +156,10 @@ struct DatabaseContext::Private {
         DatabaseContextNNPtr dbContext_;
     };
 
+    std::map<std::string, std::list<SQLRow>> &getMapCanonicalizeGRFName() {
+        return mapCanonicalizeGRFName_;
+    }
+
   private:
     friend class DatabaseContext;
 
@@ -167,6 +171,7 @@ struct DatabaseContext::Private {
     int recLevel_ = 0;
     bool detach_ = false;
     std::string lastMetadataValue_{};
+    std::map<std::string, std::list<SQLRow>> mapCanonicalizeGRFName_{};
 
     void closeDB();
 
@@ -3828,56 +3833,124 @@ AuthorityFactory::createObjectsFromName(
     }
 
     std::list<common::IdentifiedObjectNNPtr> res;
-    auto sqlRes = d->run(sql, params);
-    for (const auto &row : sqlRes) {
-        const auto &name = row[3];
-        if (approximateMatch) {
-            bool match = ci_find(name, searchedNameWithoutDeprecated) !=
-                         std::string::npos;
-            if (!match) {
+
+    // Querying geodetic datum is a super hot path when importing from WKT1
+    // so cache results.
+    if (allowedObjectTypes.size() == 1 &&
+        allowedObjectTypes[0] == ObjectType::GEODETIC_REFERENCE_FRAME &&
+        approximateMatch && getAuthority().empty()) {
+        auto &mapCanonicalizeGRFName =
+            d->context()->getPrivate()->getMapCanonicalizeGRFName();
+        if (mapCanonicalizeGRFName.empty()) {
+            auto sqlRes = d->run(sql, params);
+            for (const auto &row : sqlRes) {
+                const auto &name = row[3];
                 const auto canonicalizedName(
                     metadata::Identifier::canonicalizeName(name));
-                match = ci_find(canonicalizedName, canonicalizedSearchedName) !=
-                        std::string::npos;
-            }
-            if (!match) {
-                continue;
+                mapCanonicalizeGRFName[canonicalizedName].push_back(row);
             }
         }
-        const auto &table_name = row[0];
-        const auto &auth_name = row[1];
-        const auto &code = row[2];
-        auto factory = d->createFactory(auth_name);
-        if (table_name == "prime_meridian") {
-            res.emplace_back(factory->createPrimeMeridian(code));
-        } else if (table_name == "ellipsoid") {
-            res.emplace_back(factory->createEllipsoid(code));
-        } else if (table_name == "geodetic_datum") {
-            res.emplace_back(factory->createGeodeticDatum(code));
-        } else if (table_name == "vertical_datum") {
-            res.emplace_back(factory->createVerticalDatum(code));
-        } else if (table_name == "geodetic_crs") {
-            res.emplace_back(factory->createGeodeticCRS(code));
-        } else if (table_name == "projected_crs") {
-            res.emplace_back(factory->createProjectedCRS(code));
-        } else if (table_name == "vertical_crs") {
-            res.emplace_back(factory->createVerticalCRS(code));
-        } else if (table_name == "compound_crs") {
-            res.emplace_back(factory->createCompoundCRS(code));
-        } else if (table_name == "conversion") {
-            res.emplace_back(factory->createConversion(code));
-        } else if (table_name == "grid_transformation" ||
-                   table_name == "helmert_transformation" ||
-                   table_name == "other_transformation" ||
-                   table_name == "concatenated_operation") {
-            res.emplace_back(factory->createCoordinateOperation(code, true));
+        auto iter = mapCanonicalizeGRFName.find(canonicalizedSearchedName);
+        if (iter != mapCanonicalizeGRFName.end()) {
+            const auto &listOfRow = iter->second;
+            for (const auto &row : listOfRow) {
+                const auto &auth_name = row[1];
+                const auto &code = row[2];
+                auto factory = d->createFactory(auth_name);
+                res.emplace_back(factory->createGeodeticDatum(code));
+                if (limitResultCount > 0 && res.size() == limitResultCount) {
+                    break;
+                }
+            }
         } else {
-            assert(false);
+            for (const auto &pair : mapCanonicalizeGRFName) {
+                const auto &listOfRow = pair.second;
+                for (const auto &row : listOfRow) {
+                    const auto &name = row[3];
+                    if (approximateMatch) {
+                        bool match =
+                            ci_find(name, searchedNameWithoutDeprecated) !=
+                            std::string::npos;
+                        if (!match) {
+                            const auto &canonicalizedName(pair.first);
+                            match = ci_find(canonicalizedName,
+                                            canonicalizedSearchedName) !=
+                                    std::string::npos;
+                        }
+                        if (!match) {
+                            continue;
+                        }
+                    }
+
+                    const auto &auth_name = row[1];
+                    const auto &code = row[2];
+                    auto factory = d->createFactory(auth_name);
+                    res.emplace_back(factory->createGeodeticDatum(code));
+                    if (limitResultCount > 0 &&
+                        res.size() == limitResultCount) {
+                        break;
+                    }
+                }
+                if (limitResultCount > 0 && res.size() == limitResultCount) {
+                    break;
+                }
+            }
         }
-        if (limitResultCount > 0 && res.size() == limitResultCount) {
-            break;
+    } else {
+        auto sqlRes = d->run(sql, params);
+        for (const auto &row : sqlRes) {
+            const auto &name = row[3];
+            if (approximateMatch) {
+                bool match = ci_find(name, searchedNameWithoutDeprecated) !=
+                             std::string::npos;
+                if (!match) {
+                    const auto canonicalizedName(
+                        metadata::Identifier::canonicalizeName(name));
+                    match =
+                        ci_find(canonicalizedName, canonicalizedSearchedName) !=
+                        std::string::npos;
+                }
+                if (!match) {
+                    continue;
+                }
+            }
+            const auto &table_name = row[0];
+            const auto &auth_name = row[1];
+            const auto &code = row[2];
+            auto factory = d->createFactory(auth_name);
+            if (table_name == "prime_meridian") {
+                res.emplace_back(factory->createPrimeMeridian(code));
+            } else if (table_name == "ellipsoid") {
+                res.emplace_back(factory->createEllipsoid(code));
+            } else if (table_name == "geodetic_datum") {
+                res.emplace_back(factory->createGeodeticDatum(code));
+            } else if (table_name == "vertical_datum") {
+                res.emplace_back(factory->createVerticalDatum(code));
+            } else if (table_name == "geodetic_crs") {
+                res.emplace_back(factory->createGeodeticCRS(code));
+            } else if (table_name == "projected_crs") {
+                res.emplace_back(factory->createProjectedCRS(code));
+            } else if (table_name == "vertical_crs") {
+                res.emplace_back(factory->createVerticalCRS(code));
+            } else if (table_name == "compound_crs") {
+                res.emplace_back(factory->createCompoundCRS(code));
+            } else if (table_name == "conversion") {
+                res.emplace_back(factory->createConversion(code));
+            } else if (table_name == "grid_transformation" ||
+                       table_name == "helmert_transformation" ||
+                       table_name == "other_transformation" ||
+                       table_name == "concatenated_operation") {
+                res.emplace_back(
+                    factory->createCoordinateOperation(code, true));
+            } else {
+                assert(false);
+            }
+            if (limitResultCount > 0 && res.size() == limitResultCount) {
+                break;
+            }
         }
     }
+
     if (res.empty() && !deprecated) {
         return createObjectsFromName(searchedName + " (deprecated)",
                                      allowedObjectTypes, approximateMatch,
