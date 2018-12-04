@@ -504,6 +504,19 @@ def fill_concatenated_operation(proj_db_cursor):
             proj_db_cursor.execute('INSERT INTO concatenated_operation VALUES (' +
             '?,?,?, ?,?, ?,?, ?,?, ?,?, ?, ?,?, ?,?, ?,?, ?)', arg)
 
+def fill_alias(proj_db_cursor):
+    proj_db_cursor.execute("SELECT object_code, alias FROM epsg.epsg_alias WHERE object_table_name = 'epsg_datum'")
+    for row in proj_db_cursor.fetchall():
+        code, alt_name = row
+        proj_db_cursor.execute('SELECT 1 FROM geodetic_datum WHERE code = ?', (code,))
+        if proj_db_cursor.fetchone() is not None:
+            proj_db_cursor.execute("INSERT INTO alias_name VALUES ('geodetic_datum','EPSG',?,?,'EPSG')", (code, alt_name))
+        else:
+            proj_db_cursor.execute('SELECT 1 FROM vertical_datum WHERE code = ?', (code,))
+            if proj_db_cursor.fetchone() is not None:
+                proj_db_cursor.execute("INSERT INTO alias_name VALUES ('vertical_datum','EPSG',?,?,'EPSG')", (code, alt_name))
+            else:
+                print('Cannot find datum %s in geodetic_datum or vertical_datum' % (code))
 
 def report_non_imported_operations(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_type, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_code NOT IN (SELECT code FROM coordinate_operation_with_conversion_view)")
@@ -549,6 +562,7 @@ fill_helmert_transformation(proj_db_cursor)
 fill_grid_transformation(proj_db_cursor)
 fill_other_transformation(proj_db_cursor)
 fill_concatenated_operation(proj_db_cursor)
+fill_alias(proj_db_cursor)
 non_imported_operations = report_non_imported_operations(proj_db_cursor)
 
 proj_db_cursor.close()

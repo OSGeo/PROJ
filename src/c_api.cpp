@@ -1878,6 +1878,16 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
                         datumName.c_str(), refDatum->nameStr().c_str())) {
                     datumName = refDatum->nameStr();
                 }
+            } else {
+                std::string outTableName;
+                std::string authNameFromAlias;
+                std::string codeFromAlias;
+                auto officialName = authFactory->getOfficialNameFromAlias(
+                    datumName, "geodetic_datum", std::string(), true,
+                    outTableName, authNameFromAlias, codeFromAlias);
+                if (!officialName.empty()) {
+                    datumName = officialName;
+                }
             }
         }
     }

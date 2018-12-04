@@ -1604,6 +1604,27 @@ TEST_F(CApi, proj_obj_create_geographic_crs) {
 
         EXPECT_TRUE(proj_obj_is_equivalent_to(obj, objRef, PJ_COMP_EQUIVALENT));
     }
+
+    // Datum with GDAL_WKT1 spelling: database query in alias_name table
+    {
+        auto crs = proj_obj_create_geographic_crs(
+            m_ctxt, "S-JTSK (Ferro)",
+            "System_Jednotne_Trigonometricke_Site_Katastralni_Ferro",
+            "Bessel 1841", 6377397.155, 299.1528128, "Ferro",
+            -17.66666666666667, "Degree", 0.0174532925199433, cs);
+        ObjectKeeper keeper(crs);
+        ASSERT_NE(crs, nullptr);
+
+        auto datum = proj_obj_crs_get_datum(m_ctxt, crs);
+        ASSERT_NE(datum, nullptr);
+        ObjectKeeper keeper_datum(datum);
+
+        auto datum_name = proj_obj_get_name(datum);
+        ASSERT_TRUE(datum_name != nullptr);
+        EXPECT_EQ(datum_name,
+                  std::string("System of the Unified Trigonometrical Cadastral "
+                              "Network (Ferro)"));
+    }
 }
 
 // ---------------------------------------------------------------------------

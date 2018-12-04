@@ -2522,7 +2522,7 @@ TEST(factory, getOfficialNameFromAlias) {
 
     {
         auto officialName = factory->getOfficialNameFromAlias(
-            "GCS_WGS_1984", std::string(), std::string(), outTableName,
+            "GCS_WGS_1984", std::string(), std::string(), false, outTableName,
             outAuthName, outCode);
         EXPECT_EQ(officialName, "WGS 84");
         EXPECT_EQ(outTableName, "geodetic_crs");
@@ -2532,8 +2532,8 @@ TEST(factory, getOfficialNameFromAlias) {
 
     {
         auto officialName = factory->getOfficialNameFromAlias(
-            "GCS_WGS_1984", "geodetic_crs", "ESRI", outTableName, outAuthName,
-            outCode);
+            "GCS_WGS_1984", "geodetic_crs", "ESRI", false, outTableName,
+            outAuthName, outCode);
         EXPECT_EQ(officialName, "WGS 84");
         EXPECT_EQ(outTableName, "geodetic_crs");
         EXPECT_EQ(outAuthName, "EPSG");
@@ -2542,9 +2542,19 @@ TEST(factory, getOfficialNameFromAlias) {
 
     {
         auto officialName = factory->getOfficialNameFromAlias(
-            "no match", std::string(), std::string(), outTableName, outAuthName,
-            outCode);
+            "no match", std::string(), std::string(), false, outTableName,
+            outAuthName, outCode);
         EXPECT_EQ(officialName, "");
+    }
+
+    {
+        auto officialName = factory->getOfficialNameFromAlias(
+            "System_Jednotne_Trigonometricke_Site_Katastralni_Ferro",
+            "geodetic_datum", std::string(), true, outTableName, outAuthName,
+            outCode);
+        EXPECT_EQ(
+            officialName,
+            "System of the Unified Trigonometrical Cadastral Network (Ferro)");
     }
 }
 

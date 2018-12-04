@@ -1106,6 +1106,40 @@ static bool isIgnoredChar(char ch) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+static const struct utf8_to_lower {
+    const char *utf8;
+    char ascii;
+} map_utf8_to_lower[] = {
+    {"\xc3\xa1", 'a'}, // a acute
+    {"\xc3\xa4", 'a'}, // a tremma
+
+    {"\xc4\x9b", 'e'}, // e reverse circumflex
+    {"\xc3\xa8", 'e'}, // e grave
+    {"\xc3\xa9", 'e'}, // e acute
+    {"\xc3\xab", 'e'}, // e tremma
+
+    {"\xc3\xad", 'i'}, // i grave
+
+    {"\xc3\xb4", 'o'}, // o circumflex
+    {"\xc3\xb6", 'o'}, // o tremma
+
+    {"\xc3\xa7", 'c'}, // c cedilla
+};
+
+static const struct utf8_to_lower *get_ascii_replacement(const char *c_str) {
+    for (const auto &pair : map_utf8_to_lower) {
+        if (*c_str == pair.utf8[0] &&
+            strncmp(c_str, pair.utf8, strlen(pair.utf8)) == 0) {
+            return &pair;
+        }
+    }
+    return nullptr;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::string Identifier::canonicalizeName(const std::string &str) {
     std::string res;
     const char *c_str = str.c_str();
@@ -1120,6 +1154,14 @@ std::string Identifier::canonicalizeName(const std::string &str) {
             c_str[i + 2] >= '0' && c_str[i + 2] <= '9') {
             ++i;
             continue;
+        }
+        if (static_cast<unsigned char>(ch) > 127) {
+            const auto *replacement = get_ascii_replacement(c_str + i);
+            if (replacement) {
+                res.push_back(replacement->ascii);
+                i += strlen(replacement->utf8) - 1;
+                continue;
+            }
         }
         if (!isIgnoredChar(ch)) {
             res.push_back(static_cast<char>(::tolower(ch)));
@@ -1142,8 +1184,8 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
     char lastValidA = 0;
     char lastValidB = 0;
     while (a[i] != 0 && b[j] != 0) {
-        const char aCh = a[i];
-        const char bCh = b[j];
+        char aCh = a[i];
+        char bCh = b[j];
         if (aCh == ' ' && a[i + 1] == '+' && a[i + 2] == ' ') {
             i += 3;
             continue;
@@ -1171,6 +1213,20 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
             j += 2;
             lastValidB = '9';
             continue;
+        }
+        if (static_cast<unsigned char>(aCh) > 127) {
+            const auto *replacement = get_ascii_replacement(a + i);
+            if (replacement) {
+                aCh = replacement->ascii;
+                i += strlen(replacement->utf8) - 1;
+            }
+        }
+        if (static_cast<unsigned char>(bCh) > 127) {
+            const auto *replacement = get_ascii_replacement(b + j);
+            if (replacement) {
+                bCh = replacement->ascii;
+                j += strlen(replacement->utf8) - 1;
+            }
         }
         if (::tolower(aCh) != ::tolower(bCh)) {
             return false;

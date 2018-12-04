@@ -899,8 +899,9 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_DLL std::string getOfficialNameFromAlias(
         const std::string &aliasedName, const std::string &tableName,
-        const std::string &source, std::string &outTableName,
-        std::string &outAuthName, std::string &outCode) const;
+        const std::string &source, bool tryEquivalentNameSpelling,
+        std::string &outTableName, std::string &outAuthName,
+        std::string &outCode) const;
 
     PROJ_DLL std::list<common::IdentifiedObjectNNPtr>
     createObjectsFromName(const std::string &name,

@@ -1475,7 +1475,7 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
             auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
                                                         std::string());
             auto officialName = authFactory->getOfficialNameFromAlias(
-                name, tableNameForAlias, "ESRI", outTableName,
+                name, tableNameForAlias, "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
             if (!officialName.empty()) {
                 name = officialName;
@@ -1708,7 +1708,7 @@ UnitOfMeasure WKTParser::Private::buildUnit(const WKTNodeNNPtr &node,
             auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
                                                         std::string());
             auto officialName = authFactory->getOfficialNameFromAlias(
-                unitName, "unit_of_measure", "ESRI", outTableName,
+                unitName, "unit_of_measure", "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
             if (!officialName.empty()) {
                 unitName = officialName;
@@ -1918,7 +1918,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
                                                         std::string());
             auto officialName = authFactory->getOfficialNameFromAlias(
-                name, tableNameForAlias, "ESRI", outTableName,
+                name, tableNameForAlias, "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
             if (!officialName.empty()) {
                 if (primeMeridian->nameStr() !=
@@ -1951,10 +1951,12 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             auto res = authFactory->createObjectsFromName(
                 name, {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
                 true, 1);
+            bool foundDatumName = false;
             if (!res.empty()) {
                 const auto &refDatum = res.front();
                 if (metadata::Identifier::isEquivalentName(
                         name.c_str(), refDatum->nameStr().c_str())) {
+                    foundDatumName = true;
                     properties.set(IdentifiedObject::NAME_KEY,
                                    refDatum->nameStr());
                     if (properties.find(Identifier::CODESPACE_KEY) ==
@@ -1971,6 +1973,34 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                         properties.set(IdentifiedObject::IDENTIFIERS_KEY,
                                        identifiers);
                     }
+                }
+            } else {
+                // Get official name from database if AUTHORITY is present
+                auto &idNode = nodeP->lookForChild(WKTConstants::AUTHORITY);
+                if (!isNull(idNode)) {
+                    try {
+                        auto id = buildId(idNode);
+                        auto authFactory2 = AuthorityFactory::create(
+                            NN_NO_CHECK(dbContext_), *id->codeSpace());
+                        auto dbDatum =
+                            authFactory2->createGeodeticDatum(id->code());
+                        foundDatumName = true;
+                        properties.set(IdentifiedObject::NAME_KEY,
+                                       dbDatum->nameStr());
+                    } catch (const std::exception &) {
+                    }
+                }
+            }
+
+            if (!foundDatumName) {
+                std::string outTableName;
+                std::string authNameFromAlias;
+                std::string codeFromAlias;
+                auto officialName = authFactory->getOfficialNameFromAlias(
+                    name, "geodetic_datum", std::string(), true, outTableName,
+                    authNameFromAlias, codeFromAlias);
+                if (!officialName.empty()) {
+                    properties.set(IdentifiedObject::NAME_KEY, officialName);
                 }
             }
         }
@@ -3371,7 +3401,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
                                                         std::string());
             auto officialName = authFactory->getOfficialNameFromAlias(
-                projCRSName, "projected_crs", "ESRI", outTableName,
+                projCRSName, "projected_crs", "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
             if (!officialName.empty()) {
                 props.set(IdentifiedObject::NAME_KEY, officialName);

@@ -385,4 +385,10 @@ TEST(metadata, id) {
 TEST(metadata, Identifier_isEquivalentName) {
     EXPECT_TRUE(Identifier::isEquivalentName("Central_Meridian",
                                              "Central_- ()/Meridian"));
+
+    EXPECT_TRUE(Identifier::isEquivalentName("\xc3\xa1", "a"));
+
+    EXPECT_TRUE(Identifier::isEquivalentName("a", "\xc3\xa1"));
+
+    EXPECT_TRUE(Identifier::isEquivalentName("\xc3\xa4", "\xc3\xa1"));
 }

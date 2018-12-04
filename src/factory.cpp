@@ -3567,6 +3567,10 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
  * Or empty otherwise.
  * @param source Source of the alias. Can help in case of ambiguities.
  * Or empty otherwise.
+ * @param tryEquivalentNameSpelling whether the comparison of aliasedName with
+ * the alt_name column of the alis_name table should be done with using
+ * metadata::Identifier::isEquivalentName() rather than strict string
+ * comparison;
  * @param outTableName Table name in which the official name has been found.
  * @param outAuthName Authority name of the official name that has been found.
  * @param outCode Code of the official name that has been found.
@@ -3575,34 +3579,78 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
  */
 std::string AuthorityFactory::getOfficialNameFromAlias(
     const std::string &aliasedName, const std::string &tableName,
-    const std::string &source, std::string &outTableName,
-    std::string &outAuthName, std::string &outCode) const {
-    std::string sql("SELECT table_name, auth_name, code FROM alias_name WHERE "
-                    "alt_name = ?");
-    std::vector<SQLValues> params{aliasedName};
-    if (!tableName.empty()) {
-        sql += " AND table_name = ?";
-        params.push_back(tableName);
-    }
-    if (!source.empty()) {
-        sql += " AND source = ?";
-        params.push_back(source);
-    }
-    auto res = d->run(sql, params);
-    if (res.empty()) {
+    const std::string &source, bool tryEquivalentNameSpelling,
+    std::string &outTableName, std::string &outAuthName,
+    std::string &outCode) const {
+
+    if (tryEquivalentNameSpelling) {
+        std::string sql(
+            "SELECT table_name, auth_name, code, alt_name FROM alias_name");
+        std::vector<SQLValues> params;
+        if (!tableName.empty()) {
+            sql += " WHERE table_name = ?";
+            params.push_back(tableName);
+        }
+        if (!source.empty()) {
+            if (!tableName.empty()) {
+                sql += " AND ";
+            } else {
+                sql += " WHERE ";
+            }
+            sql += "source = ?";
+            params.push_back(source);
+        }
+        auto res = d->run(sql, params);
+        if (res.empty()) {
+            return std::string();
+        }
+        for (const auto &row : res) {
+            const auto &alt_name = row[3];
+            if (metadata::Identifier::isEquivalentName(alt_name.c_str(),
+                                                       aliasedName.c_str())) {
+                outTableName = row[0];
+                outAuthName = row[1];
+                outCode = row[2];
+                sql = "SELECT name FROM \"";
+                sql += replaceAll(outTableName, "\"", "\"\"");
+                sql += "\" WHERE auth_name = ? AND code = ?";
+                res = d->run(sql, {outAuthName, outCode});
+                if (res.empty()) { // shouldn't happen normally
+                    return std::string();
+                }
+                return res[0][0];
+            }
+        }
         return std::string();
+    } else {
+        std::string sql(
+            "SELECT table_name, auth_name, code FROM alias_name WHERE "
+            "alt_name = ?");
+        std::vector<SQLValues> params{aliasedName};
+        if (!tableName.empty()) {
+            sql += " AND table_name = ?";
+            params.push_back(tableName);
+        }
+        if (!source.empty()) {
+            sql += " AND source = ?";
+            params.push_back(source);
+        }
+        auto res = d->run(sql, params);
+        if (res.empty()) {
+            return std::string();
+        }
+        outTableName = res[0][0];
+        outAuthName = res[0][1];
+        outCode = res[0][2];
+        sql = "SELECT name FROM \"";
+        sql += replaceAll(outTableName, "\"", "\"\"");
+        sql += "\" WHERE auth_name = ? AND code = ?";
+        res = d->run(sql, {outAuthName, outCode});
+        if (res.empty()) { // shouldn't happen normally
+            return std::string();
+        }
+        return res[0][0];
     }
-    outTableName = res[0][0];
-    outAuthName = res[0][1];
-    outCode = res[0][2];
-    sql = "SELECT name FROM \"";
-    sql += replaceAll(outTableName, "\"", "\"\"");
-    sql += "\" WHERE auth_name = ? AND code = ?";
-    res = d->run(sql, {outAuthName, outCode});
-    if (res.empty()) { // shouldn't happen normally
-        return std::string();
-    }
-    return res[0][0];
 }
 
 // ---------------------------------------------------------------------------
