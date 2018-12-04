@@ -372,6 +372,11 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
     auto geogCRS = extractGeographicCRS();
     auto hubCRS = util::nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326);
     if (geodCRS && !geogCRS) {
+        if (geodCRS->_isEquivalentTo(
+                GeographicCRS::EPSG_4978.get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
+            return thisAsCRS;
+        }
         hubCRS = util::nn_static_pointer_cast<CRS>(GeodeticCRS::EPSG_4978);
     } else if (!geogCRS ||
                geogCRS->_isEquivalentTo(

@@ -1115,6 +1115,29 @@ TEST(crs, geocentricCRS_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4978_as_WKT1_GDAL_with_database) {
+    auto crs = GeodeticCRS::EPSG_4978;
+    auto wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
+                             DatabaseContext::create())
+            .get());
+    EXPECT_EQ(wkt, "GEOCCS[\"WGS 84\",\n"
+                   "    DATUM[\"WGS_1984\",\n"
+                   "        SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                   "            AUTHORITY[\"EPSG\",\"7030\"]],\n"
+                   "        AUTHORITY[\"EPSG\",\"6326\"]],\n"
+                   "    PRIMEM[\"Greenwich\",0,\n"
+                   "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                   "    UNIT[\"metre\",1,\n"
+                   "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+                   "    AXIS[\"Geocentric X\",OTHER],\n"
+                   "    AXIS[\"Geocentric Y\",OTHER],\n"
+                   "    AXIS[\"Geocentric Z\",NORTH],\n"
+                   "    AUTHORITY[\"EPSG\",\"4978\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, geocentricCRS_as_PROJ_string) {
     auto crs = createGeocentric();
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
