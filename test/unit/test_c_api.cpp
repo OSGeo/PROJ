@@ -29,6 +29,7 @@
 #include "gtest_include.h"
 
 #include "proj.h"
+#include "proj_constants.h"
 #include "proj_experimental.h"
 
 #include "proj/common.hpp"
@@ -2473,6 +2474,82 @@ TEST_F(CApi, proj_obj_create_compound_crs) {
     ObjectKeeper keeper_subcrs_vert(subcrs_vert);
     EXPECT_TRUE(
         proj_obj_is_equivalent_to(subcrs_vert, vert_crs, PJ_COMP_STRICT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_convert_conversion_to_other_method) {
+    {
+        auto geog_cs = proj_obj_create_ellipsoidal_2D_cs(
+            m_ctxt, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
+        ObjectKeeper keeper_geog_cs(geog_cs);
+        ASSERT_NE(geog_cs, nullptr);
+
+        auto geogCRS = proj_obj_create_geographic_crs(
+            m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
+            298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433,
+            geog_cs);
+        ObjectKeeper keeper_geogCRS(geogCRS);
+        ASSERT_NE(geogCRS, nullptr);
+
+        auto cs = proj_obj_create_cartesian_2D_cs(
+            m_ctxt, PJ_CART2D_EASTING_NORTHING, nullptr, 0);
+        ObjectKeeper keeper_cs(cs);
+        ASSERT_NE(cs, nullptr);
+
+        auto conv = proj_obj_create_conversion_mercator_variant_a(
+            m_ctxt, 0, 1, 0.99, 2, 3, "Degree", 0.0174532925199433, "Metre",
+            1.0);
+        ObjectKeeper keeper_conv(conv);
+        ASSERT_NE(conv, nullptr);
+
+        auto projCRS =
+            proj_obj_create_projected_crs(m_ctxt, "my CRS", geogCRS, conv, cs);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+
+        // Wrong object type
+        EXPECT_EQ(
+            proj_obj_convert_conversion_to_other_method(
+                m_ctxt, projCRS, EPSG_CODE_METHOD_MERCATOR_VARIANT_B, nullptr),
+            nullptr);
+
+        auto conv_in_proj = proj_obj_crs_get_coordoperation(
+            m_ctxt, projCRS, nullptr, nullptr, nullptr);
+        ObjectKeeper keeper_conv_in_proj(conv_in_proj);
+        ASSERT_NE(conv_in_proj, nullptr);
+
+        // 3rd and 4th argument both 0/null
+        EXPECT_EQ(proj_obj_convert_conversion_to_other_method(
+                      m_ctxt, conv_in_proj, 0, nullptr),
+                  nullptr);
+
+        auto new_conv = proj_obj_convert_conversion_to_other_method(
+            m_ctxt, conv_in_proj, EPSG_CODE_METHOD_MERCATOR_VARIANT_B, nullptr);
+        ObjectKeeper keeper_new_conv(new_conv);
+        ASSERT_NE(new_conv, nullptr);
+
+        EXPECT_FALSE(
+            proj_obj_is_equivalent_to(new_conv, conv_in_proj, PJ_COMP_STRICT));
+        EXPECT_TRUE(proj_obj_is_equivalent_to(new_conv, conv_in_proj,
+                                              PJ_COMP_EQUIVALENT));
+
+        auto new_conv_from_name = proj_obj_convert_conversion_to_other_method(
+            m_ctxt, conv_in_proj, 0, EPSG_NAME_METHOD_MERCATOR_VARIANT_B);
+        ObjectKeeper keeper_new_conv_from_name(new_conv_from_name);
+        ASSERT_NE(new_conv_from_name, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(new_conv, new_conv_from_name,
+                                              PJ_COMP_STRICT));
+
+        auto new_conv_back = proj_obj_convert_conversion_to_other_method(
+            m_ctxt, conv_in_proj, 0, EPSG_NAME_METHOD_MERCATOR_VARIANT_A);
+        ObjectKeeper keeper_new_conv_back(new_conv_back);
+        ASSERT_NE(new_conv_back, nullptr);
+
+        EXPECT_TRUE(proj_obj_is_equivalent_to(conv_in_proj, new_conv_back,
+                                              PJ_COMP_STRICT));
+    }
 }
 
 } // namespace

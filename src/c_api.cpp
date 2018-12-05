@@ -55,6 +55,7 @@
 #include "proj_experimental.h"
 #include "projects.h"
 // clang-format on
+#include "proj_constants.h"
 
 using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;
@@ -2518,6 +2519,72 @@ PJ_OBJ *proj_obj_create_conversion(PJ_CONTEXT *ctx, const char *name,
         }
         return PJ_OBJ::create(
             Conversion::create(propConv, propMethod, parameters, values));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * \brief Return an equivalent projection.
+ *
+ * Currently implemented:
+ * <ul>
+ * <li>EPSG_CODE_METHOD_MERCATOR_VARIANT_A (1SP) to
+ * EPSG_CODE_METHOD_MERCATOR_VARIANT_B (2SP)</li>
+ * <li>EPSG_CODE_METHOD_MERCATOR_VARIANT_B (2SP) to
+ * EPSG_CODE_METHOD_MERCATOR_VARIANT_A (1SP)</li>
+ * <li>EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP to
+ * EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP</li>
+ * <li>EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP to
+ * EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP</li>
+ * </ul>
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param conversion Object of type Conversion. Must not be NULL.
+ * @param new_method_epsg_code EPSG code of the target method. Or 0 (in which
+ * case new_method_name must be specified).
+ * @param new_method_name EPSG or PROJ target method name. Or nullptr  (in which
+ * case new_method_epsg_code must be specified).
+ * @return new conversion that must be unreferenced with
+ * proj_obj_unref(), or NULL in case of error.
+ */
+PJ_OBJ *proj_obj_convert_conversion_to_other_method(
+    PJ_CONTEXT *ctx, const PJ_OBJ *conversion, int new_method_epsg_code,
+    const char *new_method_name) {
+    SANITIZE_CTX(ctx);
+    auto conv = dynamic_cast<const Conversion *>(conversion->obj.get());
+    if (!conv) {
+        proj_log_error(ctx, __FUNCTION__, "not a Conversion");
+        return nullptr;
+    }
+    if (new_method_epsg_code == 0) {
+        if (!new_method_name) {
+            return nullptr;
+        }
+        if (metadata::Identifier::isEquivalentName(
+                new_method_name, EPSG_NAME_METHOD_MERCATOR_VARIANT_A)) {
+            new_method_epsg_code = EPSG_CODE_METHOD_MERCATOR_VARIANT_A;
+        } else if (metadata::Identifier::isEquivalentName(
+                       new_method_name, EPSG_NAME_METHOD_MERCATOR_VARIANT_B)) {
+            new_method_epsg_code = EPSG_CODE_METHOD_MERCATOR_VARIANT_B;
+        } else if (metadata::Identifier::isEquivalentName(
+                       new_method_name,
+                       EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_1SP)) {
+            new_method_epsg_code = EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP;
+        } else if (metadata::Identifier::isEquivalentName(
+                       new_method_name,
+                       EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP)) {
+            new_method_epsg_code = EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP;
+        }
+    }
+    try {
+        auto new_conv = conv->convertToOtherMethod(new_method_epsg_code);
+        if (!new_conv)
+            return nullptr;
+        return PJ_OBJ::create(NN_NO_CHECK(new_conv));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
