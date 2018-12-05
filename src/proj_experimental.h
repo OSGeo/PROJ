@@ -227,6 +227,11 @@ PJ_OBJ PROJ_DLL *proj_obj_create_conversion(PJ_CONTEXT *ctx,
                                             int param_count,
                                             const PJ_PARAM_DESCRIPTION* params);
 
+PJ_OBJ PROJ_DLL *proj_obj_convert_conversion_to_other_method(PJ_CONTEXT *ctx,
+                                             const PJ_OBJ *conversion,
+                                             int new_method_epsg_code,
+                                             const char *new_method_name);
+
 PJ_OBJ PROJ_DLL *proj_obj_create_projected_crs(PJ_CONTEXT *ctx,
                                                const char* crs_name,
                                                const PJ_OBJ* geodetic_crs,
