@@ -4633,10 +4633,12 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
             }
         } else if (esriMapping->epsg_code ==
                    EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
-            if (conv->parameterValueNumericAsSI(
-                    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) ==
-                conv->parameterValueNumericAsSI(
-                    EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) {
+            if (std::abs(
+                    conv->parameterValueNumericAsSI(
+                        EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) -
+                    conv->parameterValueNumericAsSI(
+                        EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) <
+                1e-15) {
                 esriParams =
                     paramsESRI_Hotine_Oblique_Mercator_Azimuth_Natural_Origin;
                 esriMethodName =
@@ -4648,10 +4650,12 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
             }
         } else if (esriMapping->epsg_code ==
                    EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) {
-            if (conv->parameterValueNumericAsSI(
-                    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) ==
-                conv->parameterValueNumericAsSI(
-                    EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) {
+            if (std::abs(
+                    conv->parameterValueNumericAsSI(
+                        EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) -
+                    conv->parameterValueNumericAsSI(
+                        EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)) <
+                1e-15) {
                 esriParams = paramsESRI_Hotine_Oblique_Mercator_Azimuth_Center;
                 esriMethodName = "Hotine_Oblique_Mercator_Azimuth_Center";
             } else {
