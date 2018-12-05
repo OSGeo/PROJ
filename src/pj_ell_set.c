@@ -258,9 +258,8 @@ static int ellps_shape (PJ *P) {
         P->f = pj_atof (pj_param_value (par));
         if (HUGE_VAL==P->f)
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->f)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        P->rf = 1 / P->f;
+
+        P->rf = P->f != 0.0 ? 1.0/P->f: HUGE_VAL;
         P->es = 2*P->f - P->f*P->f;
         break;
 
