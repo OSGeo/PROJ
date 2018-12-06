@@ -1799,6 +1799,38 @@ TEST(crs, projectedCRS_as_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_Krovak_EPSG_5221_as_PROJ_string) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createProjectedCRS("5221");
+    // 30deg 17' 17.30311'' = 30.28813975277777776
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=bessel +pm=ferro "
+              "+step +proj=krovak +lat_0=49.5 +lon_0=42.5 "
+              "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 "
+              "+ellps=bessel +pm=ferro");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_Krovak_with_approximate_alpha_as_PROJ_string) {
+    // 30deg 17' 17.303''   = 30.288139722222223 as used in GDAL WKT1
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=krovak +lat_0=49.5 +lon_0=42.5 +alpha=30.28813972222222 "
+        "+k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +pm=ferro +units=m +no_defs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=bessel +pm=ferro "
+              "+step +proj=krovak +lat_0=49.5 +lon_0=42.5 "
+              "+alpha=30.2881397222222 +k=0.9999 +x_0=0 +y_0=0 "
+              "+ellps=bessel +pm=ferro");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_identify_no_db) {
     {
         // Hard-coded case: WGS 84 / UTM. No name
@@ -2455,7 +2487,7 @@ TEST(crs, Krovak_North_Orientated_as_WKT1_ESRI) {
                     "PARAMETER[\"False_Northing\",0.0],"
                     "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
                     "PARAMETER[\"Scale_Factor\",1.0],"
-                    "PARAMETER[\"Azimuth\",30.2881397222222],"
+                    "PARAMETER[\"Azimuth\",30.2881397527778],"
                     "PARAMETER[\"Longitude_Of_Center\",0.0],"
                     "PARAMETER[\"Latitude_Of_Center\",0.0],"
                     "PARAMETER[\"X_Scale\",-1.0],"
@@ -2487,7 +2519,7 @@ TEST(crs, Krovak_as_WKT1_ESRI) {
                     "PARAMETER[\"False_Northing\",0.0],"
                     "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
                     "PARAMETER[\"Scale_Factor\",1.0],"
-                    "PARAMETER[\"Azimuth\",30.2881397222222],"
+                    "PARAMETER[\"Azimuth\",30.2881397527778],"
                     "PARAMETER[\"Longitude_Of_Center\",0.0],"
                     "PARAMETER[\"Latitude_Of_Center\",0.0],"
                     "PARAMETER[\"X_Scale\",1.0],"

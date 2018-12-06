@@ -5177,7 +5177,9 @@ void Conversion::_exportToPROJString(
         double latitudePseudoStandardParallel = parameterValueNumeric(
             EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL,
             common::UnitOfMeasure::DEGREE);
-        if (std::fabs(colatitude - 30.28813972222222) > 1e-8) {
+        // 30deg 17' 17.30311'' = 30.28813975277777776
+        // 30deg 17' 17.303''   = 30.288139722222223 as used in GDAL WKT1
+        if (std::fabs(colatitude - 30.2881397) > 1e-7) {
             throw io::FormattingException(
                 std::string("Unsupported value for ") +
                 EPSG_NAME_PARAMETER_COLATITUDE_CONE_AXIS);

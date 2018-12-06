@@ -6674,7 +6674,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 } else if (step.name == "krovak") {
                     if (param->epsg_code ==
                         EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
-                        value = 30.2881397222222;
+                        value = 30.28813975277777776;
                     } else if (
                         param->epsg_code ==
                         EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL) {
