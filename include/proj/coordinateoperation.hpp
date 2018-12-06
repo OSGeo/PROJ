@@ -1680,6 +1680,10 @@ class PROJ_GCC_DLL CoordinateOperationContext {
 
     PROJ_DLL bool getUsePROJAlternativeGridNames() const;
 
+    PROJ_DLL void setDiscardSuperseded(bool discard);
+
+    PROJ_DLL bool getDiscardSuperseded() const;
+
     /** Describe how grid availability is used. */
     enum class GridAvailabilityUse {
         /** Grid availability is only used for sorting results. Operations

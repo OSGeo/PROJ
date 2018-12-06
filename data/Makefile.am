@@ -27,6 +27,7 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/other_transformation.sql \
 		sql/concatenated_operation.sql \
 		sql/alias_name.sql \
+		sql/supersession.sql \
 		sql/esri.sql \
 		sql/ignf.sql \
 		sql/grid_alternatives.sql \

@@ -3046,7 +3046,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSCode, const std::string &targetCRSCode) const {
     return createFromCoordinateReferenceSystemCodes(
         getAuthority(), sourceCRSCode, getAuthority(), targetCRSCode, false,
-        false);
+        false, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -3075,6 +3075,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  * should be substituted to the official grid names.
  * @param discardIfMissingGrid Whether coordinate operations that reference
  * missing grids should be removed from the result set.
+ * @param discardSuperseded Whether cordinate operations that are superseded
+ * (but not deprecated) should be removed from the result set.
  * @return list of coordinate operations
  * @throw NoSuchAuthorityCodeException
  * @throw FactoryException
@@ -3084,7 +3086,8 @@ std::vector<operation::CoordinateOperationNNPtr>
 AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
-    bool usePROJAlternativeGridNames, bool discardIfMissingGrid) const {
+    bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+    bool discardSuperseded) const {
     std::vector<operation::CoordinateOperationNNPtr> list;
 
     // Look-up first for conversion which is the most precise.
@@ -3106,13 +3109,29 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         list.emplace_back(conv);
         return list;
     }
-    sql =
-        "SELECT cov.auth_name, cov.code FROM "
-        "coordinate_operation_view cov JOIN area ON cov.area_of_use_auth_name "
-        "= area.auth_name AND cov.area_of_use_code = area.code WHERE "
-        "source_crs_auth_name = ? AND source_crs_code = ? AND "
-        "target_crs_auth_name = ? AND target_crs_code = ? AND "
-        "cov.deprecated != 1";
+    if (discardSuperseded) {
+        sql = "SELECT cov.auth_name, cov.code, "
+              "ss.replacement_auth_name, ss.replacement_code FROM "
+              "coordinate_operation_view cov JOIN area "
+              "ON cov.area_of_use_auth_name = area.auth_name AND "
+              "cov.area_of_use_code = area.code "
+              "LEFT JOIN supersession ss ON "
+              "ss.superseded_table_name = cov.table_name AND "
+              "ss.superseded_auth_name = cov.auth_name AND "
+              "ss.superseded_code = cov.code AND "
+              "ss.superseded_table_name = ss.replacement_table_name "
+              "WHERE source_crs_auth_name = ? AND source_crs_code = ? AND "
+              "target_crs_auth_name = ? AND target_crs_code = ? AND "
+              "cov.deprecated != 1";
+    } else {
+        sql = "SELECT cov.auth_name, cov.code FROM "
+              "coordinate_operation_view cov JOIN area "
+              "ON cov.area_of_use_auth_name = area.auth_name AND "
+              "cov.area_of_use_code = area.code "
+              "WHERE source_crs_auth_name = ? AND source_crs_code = ? AND "
+              "target_crs_auth_name = ? AND target_crs_code = ? AND "
+              "cov.deprecated != 1";
+    }
     params = {sourceCRSAuthName, sourceCRSCode, targetCRSAuthName,
               targetCRSCode};
     if (!getAuthority().empty()) {
@@ -3123,7 +3142,29 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
            "east_lon) DESC, "
            "(CASE WHEN accuracy is NULL THEN 1 ELSE 0 END), accuracy";
     res = d->run(sql, params);
+    std::set<std::pair<std::string, std::string>> setTransf;
+    if (discardSuperseded) {
+        for (const auto &row : res) {
+            const auto &auth_name = row[0];
+            const auto &code = row[1];
+            setTransf.insert(
+                std::pair<std::string, std::string>(auth_name, code));
+        }
+    }
     for (const auto &row : res) {
+        if (discardSuperseded) {
+            const auto &replacement_auth_name = row[2];
+            const auto &replacement_code = row[3];
+            if (!replacement_auth_name.empty() &&
+                setTransf.find(std::pair<std::string, std::string>(
+                    replacement_auth_name, replacement_code)) !=
+                    setTransf.end()) {
+                // Skip transformations that are superseded by others that got
+                // returned in the result set.
+                continue;
+            }
+        }
+
         const auto &auth_name = row[0];
         const auto &code = row[1];
         auto op = d->createFactory(auth_name)->createCoordinateOperation(
@@ -3218,6 +3259,8 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * should be substituted to the official grid names.
  * @param discardIfMissingGrid Whether coordinate operations that reference
  * missing grids should be removed from the result set.
+ * @param discardSuperseded Whether cordinate operations that are superseded
+ * (but not deprecated) should be removed from the result set.
  * @param intermediateCRSAuthCodes List of (auth_name, code) of CRS that can be
  * used as potential intermediate CRS. If the list is empty, the database will
  * be used to find common CRS in operations involving both the source and
@@ -3232,6 +3275,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+    bool discardSuperseded,
     const std::vector<std::pair<std::string, std::string>>
         &intermediateCRSAuthCodes) const {
 
@@ -3243,21 +3287,57 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     }
 
     const std::string sqlProlog(
-        "SELECT v1.auth_name AS auth_name1, v1.code AS code1, "
-        "v1.accuracy AS accuracy1, "
-        "v2.auth_name AS auth_name2, v2.code AS code2, "
-        "v2.accuracy as accuracy2, "
-        "a1.south_lat AS south_lat1, "
-        "a1.west_lon AS west_lon1, "
-        "a1.north_lat AS north_lat1, "
-        "a1.east_lon AS east_lon1, "
-        "a2.south_lat AS south_lat2, "
-        "a2.west_lon AS west_lon2, "
-        "a2.north_lat AS north_lat2, "
-        "a2.east_lon AS east_lon2 "
-        "FROM coordinate_operation_view v1 "
-        "JOIN coordinate_operation_view v2 ");
+        discardSuperseded
+            ?
+
+            "SELECT v1.auth_name AS auth_name1, v1.code AS code1, "
+            "v1.accuracy AS accuracy1, "
+            "v2.auth_name AS auth_name2, v2.code AS code2, "
+            "v2.accuracy as accuracy2, "
+            "a1.south_lat AS south_lat1, "
+            "a1.west_lon AS west_lon1, "
+            "a1.north_lat AS north_lat1, "
+            "a1.east_lon AS east_lon1, "
+            "a2.south_lat AS south_lat2, "
+            "a2.west_lon AS west_lon2, "
+            "a2.north_lat AS north_lat2, "
+            "a2.east_lon AS east_lon2, "
+            "ss1.replacement_auth_name AS replacement_auth_name1, "
+            "ss1.replacement_code AS replacement_code1, "
+            "ss2.replacement_auth_name AS replacement_auth_name2, "
+            "ss2.replacement_code AS replacement_code2 "
+            "FROM coordinate_operation_view v1 "
+            "JOIN coordinate_operation_view v2 "
+            :
+
+            "SELECT v1.auth_name AS auth_name1, v1.code AS code1, "
+            "v1.accuracy AS accuracy1, "
+            "v2.auth_name AS auth_name2, v2.code AS code2, "
+            "v2.accuracy as accuracy2, "
+            "a1.south_lat AS south_lat1, "
+            "a1.west_lon AS west_lon1, "
+            "a1.north_lat AS north_lat1, "
+            "a1.east_lon AS east_lon1, "
+            "a2.south_lat AS south_lat2, "
+            "a2.west_lon AS west_lon2, "
+            "a2.north_lat AS north_lat2, "
+            "a2.east_lon AS east_lon2 "
+            "FROM coordinate_operation_view v1 "
+            "JOIN coordinate_operation_view v2 ");
+
+    const std::string joinSupersession(
+        "LEFT JOIN supersession ss1 ON "
+        "ss1.superseded_table_name = v1.table_name AND "
+        "ss1.superseded_auth_name = v1.auth_name AND "
+        "ss1.superseded_code = v1.code AND "
+        "ss1.superseded_table_name = ss1.replacement_table_name "
+        "LEFT JOIN supersession ss2 ON "
+        "ss2.superseded_table_name = v2.table_name AND "
+        "ss2.superseded_auth_name = v2.auth_name AND "
+        "ss2.superseded_code = v2.code AND "
+        "ss2.superseded_table_name = ss2.replacement_table_name ");
     const std::string joinArea(
+        (discardSuperseded ? joinSupersession : std::string()) +
         "JOIN area a1 ON v1.area_of_use_auth_name = a1.auth_name "
         "AND v1.area_of_use_code = a1.code "
         "JOIN area a2 ON v2.area_of_use_auth_name = a2.auth_name "
@@ -3297,6 +3377,50 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     auto res =
         d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
 
+    const auto filterOutSuperseded = [](SQLResultSet &&resultSet) {
+        std::set<std::pair<std::string, std::string>> setTransf1;
+        std::set<std::pair<std::string, std::string>> setTransf2;
+        for (const auto &row : resultSet) {
+            const auto &auth_name1 = row[0];
+            const auto &code1 = row[1];
+            // const auto &accuracy1 = row[2];
+            const auto &auth_name2 = row[3];
+            const auto &code2 = row[4];
+            setTransf1.insert(
+                std::pair<std::string, std::string>(auth_name1, code1));
+            setTransf2.insert(
+                std::pair<std::string, std::string>(auth_name2, code2));
+        }
+        SQLResultSet filteredResultSet;
+        for (const auto &row : resultSet) {
+            const auto &replacement_auth_name1 = row[14];
+            const auto &replacement_code1 = row[15];
+            const auto &replacement_auth_name2 = row[16];
+            const auto &replacement_code2 = row[17];
+            if (!replacement_auth_name1.empty() &&
+                setTransf1.find(std::pair<std::string, std::string>(
+                    replacement_auth_name1, replacement_code1)) !=
+                    setTransf1.end()) {
+                // Skip transformations that are superseded by others that got
+                // returned in the result set.
+                continue;
+            }
+            if (!replacement_auth_name2.empty() &&
+                setTransf2.find(std::pair<std::string, std::string>(
+                    replacement_auth_name2, replacement_code2)) !=
+                    setTransf2.end()) {
+                // Skip transformations that are superseded by others that got
+                // returned in the result set.
+                continue;
+            }
+            filteredResultSet.emplace_back(row);
+        }
+        return filteredResultSet;
+    };
+
+    if (discardSuperseded) {
+        res = filterOutSuperseded(std::move(res));
+    }
     for (const auto &row : res) {
         const auto &auth_name1 = row[0];
         const auto &code1 = row[1];
@@ -3333,6 +3457,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "target", "target");
     res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
+    if (discardSuperseded) {
+        res = filterOutSuperseded(std::move(res));
+    }
     for (const auto &row : res) {
         const auto &auth_name1 = row[0];
         const auto &code1 = row[1];
@@ -3369,6 +3496,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "source", "source");
     res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
+    if (discardSuperseded) {
+        res = filterOutSuperseded(std::move(res));
+    }
     for (const auto &row : res) {
         const auto &auth_name1 = row[0];
         const auto &code1 = row[1];
@@ -3405,6 +3535,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "source", "target");
     res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
+    if (discardSuperseded) {
+        res = filterOutSuperseded(std::move(res));
+    }
     for (const auto &row : res) {
         const auto &auth_name1 = row[0];
         const auto &code1 = row[1];
