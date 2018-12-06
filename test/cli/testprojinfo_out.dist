@@ -110,12 +110,11 @@ CONVERSION["UTM zone 31N",
     ID["EPSG",16031]]
 
 Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary
-Candidate operations found: 8
+Candidate operations found: 7
 DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 1.0 m, Canada
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - NAD27
 DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, USA - CONUS including EEZ
 DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, USA - Alaska including EEZ
-ESRI:108003, NAD_1927_To_NAD_1983_PR_VI, 0.05 m, Caribbean - Puerto Rico and Virgin Islands - onshore
 unknown id, Null geographic offset from NAD27 to NAD83, unknown accuracy, World
 EPSG:1462, NAD27 to NAD83 (5), 1.0 m, Canada - Quebec
 EPSG:1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec
@@ -306,52 +305,6 @@ COORDINATEOPERATION["NAD27 to NAD83 (2)",
 -------------------------------------
 Operation n°5:
 
-ESRI:108003, NAD_1927_To_NAD_1983_PR_VI, 0.05 m, Caribbean - Puerto Rico and Virgin Islands - onshore
-
-PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=prvi +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
-
-WKT2_2015 string:
-COORDINATEOPERATION["NAD_1927_To_NAD_1983_PR_VI",
-    SOURCECRS[
-        GEODCRS["NAD27",
-            DATUM["North American Datum 1927",
-                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]]]],
-    TARGETCRS[
-        GEODCRS["NAD83",
-            DATUM["North American Datum 1983",
-                ELLIPSOID["GRS 1980",6378137,298.257222101,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]]]],
-    METHOD["NTv2",
-        ID["EPSG",9615]],
-    PARAMETERFILE["Latitude and longitude difference file","prvi"],
-    OPERATIONACCURACY[0.05],
-    AREA["Caribbean - Puerto Rico and Virgin Islands - onshore"],
-    BBOX[17.62,-67.97,18.78,-64.25],
-    ID["ESRI",108003]]
-
--------------------------------------
-Operation n°6:
-
 unknown id, Null geographic offset from NAD27 to NAD83, unknown accuracy, World
 
 PROJ string:
@@ -405,7 +358,7 @@ COORDINATEOPERATION["Null geographic offset from NAD27 to NAD83",
     BBOX[-90,-180,90,180]]
 
 -------------------------------------
-Operation n°7:
+Operation n°6:
 
 EPSG:1462, NAD27 to NAD83 (5), 1.0 m, Canada - Quebec
 
@@ -451,7 +404,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (5)",
     ID["EPSG",1462]]
 
 -------------------------------------
-Operation n°8:
+Operation n°7:
 
 EPSG:1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec
 

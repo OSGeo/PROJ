@@ -880,6 +880,44 @@ std::string DatabaseContext::getTextDefinition(const std::string &tableName,
     return res[0][0];
 }
 
+// ---------------------------------------------------------------------------
+
+/** \brief Return the allowed authorities when researching transformations
+ * between different authorities.
+ *
+ * @throw FactoryException
+ */
+std::vector<std::string> DatabaseContext::getAllowedAuthorities(
+    const std::string &sourceAuthName,
+    const std::string &targetAuthName) const {
+    auto res = d->run(
+        "SELECT allowed_authorities FROM authority_to_authority_preference "
+        "WHERE source_auth_name = ? AND target_auth_name = ?",
+        {sourceAuthName, targetAuthName});
+    if (res.empty()) {
+        res = d->run(
+            "SELECT allowed_authorities FROM authority_to_authority_preference "
+            "WHERE source_auth_name = ? AND target_auth_name = 'any'",
+            {sourceAuthName});
+    }
+    if (res.empty()) {
+        res = d->run(
+            "SELECT allowed_authorities FROM authority_to_authority_preference "
+            "WHERE source_auth_name = 'any' AND target_auth_name = ?",
+            {targetAuthName});
+    }
+    if (res.empty()) {
+        res = d->run(
+            "SELECT allowed_authorities FROM authority_to_authority_preference "
+            "WHERE source_auth_name = 'any' AND target_auth_name = 'any'",
+            {});
+    }
+    if (res.empty()) {
+        return std::vector<std::string>();
+    }
+    return split(res[0][0], ',');
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -946,6 +984,10 @@ struct AuthorityFactory::Private {
                                   const std::string &code);
 
     SQLResultSet runWithCodeParam(const char *sql, const std::string &code);
+
+    bool hasAuthorityRestriction() const {
+        return !authority_.empty() && authority_ != "any";
+    }
 
   private:
     DatabaseContextNNPtr context_;
@@ -3097,7 +3139,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         "= ? AND auth_name = ? AND code = ? AND deprecated != 1");
     auto params = std::vector<SQLValues>{sourceCRSAuthName, sourceCRSCode,
                                          targetCRSAuthName, targetCRSCode};
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         sql += " AND conversion_auth_name = ?";
         params.emplace_back(getAuthority());
     }
@@ -3134,7 +3176,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     }
     params = {sourceCRSAuthName, sourceCRSCode, targetCRSAuthName,
               targetCRSCode};
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         sql += " AND cov.auth_name = ?";
         params.emplace_back(getAuthority());
     }
@@ -3361,7 +3403,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         "AND v1.deprecated = 0 AND v2.deprecated = 0 "
         "AND intersects_bbox(south_lat1, west_lon1, north_lat1, east_lon1, "
         "south_lat2, west_lon2, north_lat2, east_lon2) == 1 ");
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         additionalWhere += "AND v1.auth_name = ? AND v2.auth_name = ? ";
         params.emplace_back(getAuthority());
         params.emplace_back(getAuthority());
@@ -3852,7 +3894,7 @@ AuthorityFactory::createObjectsFromName(
         sql += "name LIKE ? AND ";
         params.push_back(searchedNameWithoutDeprecated);
     }
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         sql += " auth_name = ? AND ";
         params.emplace_back(getAuthority());
     }
@@ -4152,7 +4194,7 @@ AuthorityFactory::listAreaOfUseFromName(const std::string &name,
     std::string sql(
         "SELECT auth_name, code FROM area WHERE deprecated = 0 AND ");
     std::vector<SQLValues> params;
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         sql += " auth_name = ? AND ";
         params.emplace_back(getAuthority());
     }
@@ -4206,7 +4248,7 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
         "SELECT auth_name, code FROM geodetic_crs WHERE "
         "datum_auth_name = ? AND datum_code = ? AND deprecated = 0");
     std::vector<SQLValues> params{datum_auth_name, datum_code};
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         sql += " AND auth_name = ?";
         params.emplace_back(getAuthority());
     }
@@ -4242,7 +4284,7 @@ AuthorityFactory::createGeodeticCRSFromEllipsoid(
         "geodetic_datum.deprecated = 0 AND "
         "geodetic_crs.deprecated = 0");
     std::vector<SQLValues> params{ellipsoid_auth_name, ellipsoid_code};
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         sql += " AND geodetic_crs.auth_name = ?";
         params.emplace_back(getAuthority());
     }
@@ -4363,7 +4405,7 @@ AuthorityFactory::createProjectedCRSFromExisting(
     sql += "conversion.method_auth_name = 'EPSG' AND "
            "conversion.method_code = ?";
     params.emplace_back(toString(methodEPSGCode));
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         sql += " AND projected_crs.auth_name = ?";
         params.emplace_back(getAuthority());
     }
@@ -4533,7 +4575,7 @@ AuthorityFactory::createProjectedCRSFromExisting(
         params.emplace_back(patternVal);
     }
     sql += ")";
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         sql += " AND auth_name = ?";
         params.emplace_back(getAuthority());
     }
@@ -4597,7 +4639,7 @@ AuthorityFactory::createCompoundCRSFromExisting(
                                            "vertical_crs_");
         addAnd = true;
     }
-    if (!getAuthority().empty()) {
+    if (d->hasAuthorityRestriction()) {
         if (addAnd) {
             sql += " AND ";
         }

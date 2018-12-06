@@ -5354,9 +5354,17 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
  * The returned object must be unreferenced with
  * proj_operation_factory_context_unref() after use.
  *
+ * If authority is NULL or the empty string, then coordinate
+ * operations from any authority will be searched, with the restrictions set
+ * in the authority_to_authority_preference database table.
+ * If authority is set to "any", then coordinate
+ * operations from any authority will be searched
+ * If authority is a non-empty string different of "any",
+ * then coordinate operatiosn will be searched only in that authority namespace.
+ *
  * @param ctx Context, or NULL for default context.
  * @param authority Name of authority to which to restrict the search of
- *                  canidate operations. Or NULL to allow any authority.
+ *                  candidate operations.
  * @return Object that must be unreferenced with
  * proj_operation_factory_context_unref(), or NULL in
  * case of error.

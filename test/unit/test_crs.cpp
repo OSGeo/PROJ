@@ -4841,6 +4841,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                   "+proj=geocent +ellps=intl "
                   "+towgs84=324.8,153.6,172.1,0,0,0,0 +units=m +no_defs");
     }
+    {
+        auto crs = factory->createCoordinateReferenceSystem("4269"); // NAD83
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
+        EXPECT_EQ(bound, crs);
+    }
 }
 
 // ---------------------------------------------------------------------------

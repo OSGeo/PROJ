@@ -409,74 +409,97 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
     } else {
         geodCRS = geogCRS;
     }
-    auto l_domains = domains();
+
+    if (!dbContext) {
+        return thisAsCRS;
+    }
+
+    const auto &l_domains = domains();
     metadata::ExtentPtr extent;
     if (!l_domains.empty()) {
         extent = l_domains[0]->domainOfValidity();
     }
 
-    try {
-        auto authFactory = dbContext
-                               ? io::AuthorityFactory::create(
-                                     NN_NO_CHECK(dbContext), std::string())
-                                     .as_nullable()
-                               : nullptr;
-        auto ctxt = operation::CoordinateOperationContext::create(authFactory,
-                                                                  extent, 0.0);
-        // ctxt->setSpatialCriterion(
-        //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
-        auto list =
-            operation::CoordinateOperationFactory::create()->createOperations(
-                NN_NO_CHECK(geodCRS), hubCRS, ctxt);
-        for (const auto &op : list) {
-            auto transf =
-                util::nn_dynamic_pointer_cast<operation::Transformation>(op);
-            if (transf) {
-                try {
-                    transf->getTOWGS84Parameters();
-                } catch (const std::exception &) {
-                    continue;
-                }
-                return util::nn_static_pointer_cast<CRS>(
-                    BoundCRS::create(thisAsCRS, hubCRS, NN_NO_CHECK(transf)));
-            } else {
-                auto concatenated =
-                    dynamic_cast<const operation::ConcatenatedOperation *>(
-                        op.get());
-                if (concatenated) {
-                    // Case for EPSG:4807 / "NTF (Paris)" that is made of a
-                    // longitude rotation followed by a Helmert
-                    // The prime meridian shift will be accounted elsewhere
-                    const auto &subops = concatenated->operations();
-                    if (subops.size() == 2) {
-                        auto firstOpIsTransformation =
-                            dynamic_cast<const operation::Transformation *>(
-                                subops[0].get());
-                        auto firstOpIsConversion =
-                            dynamic_cast<const operation::Conversion *>(
-                                subops[0].get());
-                        if ((firstOpIsTransformation &&
-                             firstOpIsTransformation->isLongitudeRotation()) ||
-                            (dynamic_cast<DerivedCRS *>(thisAsCRS.get()) &&
-                             firstOpIsConversion)) {
-                            transf = util::nn_dynamic_pointer_cast<
-                                operation::Transformation>(subops[1]);
-                            if (transf) {
-                                try {
-                                    transf->getTOWGS84Parameters();
-                                } catch (const std::exception &) {
-                                    continue;
+    std::string crs_authority;
+    const auto &l_identifiers = identifiers();
+    // If the object has an authority, restrict the transformations to
+    // come from that codespace too. This avoids for example EPSG:4269
+    // (NAD83) to use a (dubious) ESRI transformation.
+    if (!l_identifiers.empty()) {
+        crs_authority = *(l_identifiers[0]->codeSpace());
+    }
+
+    auto authorities = dbContext->getAllowedAuthorities(crs_authority, "EPSG");
+    if (authorities.empty()) {
+        authorities.emplace_back();
+    }
+    for (const auto &authority : authorities) {
+        try {
+
+            auto authFactory = io::AuthorityFactory::create(
+                NN_NO_CHECK(dbContext),
+                authority == "any" ? std::string() : authority);
+            auto ctxt = operation::CoordinateOperationContext::create(
+                authFactory, extent, 0.0);
+            // ctxt->setSpatialCriterion(
+            //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+            auto list =
+                operation::CoordinateOperationFactory::create()
+                    ->createOperations(NN_NO_CHECK(geodCRS), hubCRS, ctxt);
+            for (const auto &op : list) {
+                auto transf =
+                    util::nn_dynamic_pointer_cast<operation::Transformation>(
+                        op);
+                if (transf && !starts_with(transf->nameStr(), "Null geo")) {
+                    try {
+                        transf->getTOWGS84Parameters();
+                    } catch (const std::exception &) {
+                        continue;
+                    }
+                    return util::nn_static_pointer_cast<CRS>(BoundCRS::create(
+                        thisAsCRS, hubCRS, NN_NO_CHECK(transf)));
+                } else {
+                    auto concatenated =
+                        dynamic_cast<const operation::ConcatenatedOperation *>(
+                            op.get());
+                    if (concatenated) {
+                        // Case for EPSG:4807 / "NTF (Paris)" that is made of a
+                        // longitude rotation followed by a Helmert
+                        // The prime meridian shift will be accounted elsewhere
+                        const auto &subops = concatenated->operations();
+                        if (subops.size() == 2) {
+                            auto firstOpIsTransformation =
+                                dynamic_cast<const operation::Transformation *>(
+                                    subops[0].get());
+                            auto firstOpIsConversion =
+                                dynamic_cast<const operation::Conversion *>(
+                                    subops[0].get());
+                            if ((firstOpIsTransformation &&
+                                 firstOpIsTransformation
+                                     ->isLongitudeRotation()) ||
+                                (dynamic_cast<DerivedCRS *>(thisAsCRS.get()) &&
+                                 firstOpIsConversion)) {
+                                transf = util::nn_dynamic_pointer_cast<
+                                    operation::Transformation>(subops[1]);
+                                if (transf &&
+                                    !starts_with(transf->nameStr(),
+                                                 "Null geo")) {
+                                    try {
+                                        transf->getTOWGS84Parameters();
+                                    } catch (const std::exception &) {
+                                        continue;
+                                    }
+                                    return util::nn_static_pointer_cast<CRS>(
+                                        BoundCRS::create(thisAsCRS, hubCRS,
+                                                         NN_NO_CHECK(transf)));
                                 }
-                                return util::nn_static_pointer_cast<CRS>(
-                                    BoundCRS::create(thisAsCRS, hubCRS,
-                                                     NN_NO_CHECK(transf)));
                             }
                         }
                     }
                 }
             }
+        } catch (const std::exception &) {
         }
-    } catch (const std::exception &) {
     }
     return thisAsCRS;
 }

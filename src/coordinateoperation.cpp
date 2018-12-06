@@ -8937,6 +8937,14 @@ CoordinateOperationContext::getIntermediateCRS() const {
  * If a non null authorityFactory is provided, the resulting context should
  * not be used simultaneously by more than one thread.
  *
+ * If authorityFactory->getAuthority() is the empty string, then coordinate
+ * operations from any authority will be searched, with the restrictions set
+ * in the authority_to_authority_preference database table.
+ * If authorityFactory->getAuthority() is set to "any", then coordinate
+ * operations from any authority will be searched
+ * If authorityFactory->getAuthority() is a non-empty string different of "any",
+ * then coordinate operatiosn will be searched only in that authority namespace.
+ *
  * @param authorityFactory Authority factory, or null if no database lookup
  * is allowed.
  * Use io::authorityFactory::create(context, std::string()) to allow all
@@ -9663,6 +9671,8 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
                         const CoordinateOperationContextNNPtr &context) {
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
+    const auto &authFactoryName = authFactory->getAuthority();
+
     for (const auto &idSrc : sourceCRS->identifiers()) {
         const auto &srcAuthName = *(idSrc->codeSpace());
         const auto &srcCode = idSrc->code();
@@ -9671,17 +9681,39 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
                 const auto &targetAuthName = *(idTarget->codeSpace());
                 const auto &targetCode = idTarget->code();
                 if (!targetAuthName.empty()) {
-                    auto res =
-                        authFactory->createFromCoordinateReferenceSystemCodes(
-                            srcAuthName, srcCode, targetAuthName, targetCode,
-                            context->getUsePROJAlternativeGridNames(),
-                            context->getGridAvailabilityUse() ==
-                                CoordinateOperationContext::
-                                    GridAvailabilityUse::
-                                        DISCARD_OPERATION_IF_MISSING_GRID,
-                            context->getDiscardSuperseded());
-                    if (!res.empty()) {
-                        return res;
+                    std::vector<std::string> authorities;
+                    if (authFactoryName == "any") {
+                        authorities.emplace_back();
+                    }
+                    if (authFactoryName.empty()) {
+                        authorities = authFactory->databaseContext()
+                                          ->getAllowedAuthorities(
+                                              srcAuthName, targetAuthName);
+                        if (authorities.empty()) {
+                            authorities.emplace_back();
+                        }
+                    } else {
+                        authorities.emplace_back(authFactoryName);
+                    }
+                    for (const auto &authority : authorities) {
+                        const auto tmpAuthFactory =
+                            io::AuthorityFactory::create(
+                                authFactory->databaseContext(),
+                                authority == "any" ? std::string() : authority);
+                        auto res =
+                            tmpAuthFactory
+                                ->createFromCoordinateReferenceSystemCodes(
+                                    srcAuthName, srcCode, targetAuthName,
+                                    targetCode,
+                                    context->getUsePROJAlternativeGridNames(),
+                                    context->getGridAvailabilityUse() ==
+                                        CoordinateOperationContext::
+                                            GridAvailabilityUse::
+                                                DISCARD_OPERATION_IF_MISSING_GRID,
+                                    context->getDiscardSuperseded());
+                        if (!res.empty()) {
+                            return res;
+                        }
                     }
                 }
             }
@@ -9706,6 +9738,8 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
 
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
+    const auto &authFactoryName = authFactory->getAuthority();
+
     for (const auto &idSrc : sourceCRS->identifiers()) {
         const auto &srcAuthName = *(idSrc->codeSpace());
         const auto &srcCode = idSrc->code();
@@ -9714,16 +9748,40 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
                 const auto &targetAuthName = *(idTarget->codeSpace());
                 const auto &targetCode = idTarget->code();
                 if (!targetAuthName.empty()) {
-                    auto res = authFactory->createFromCRSCodesWithIntermediates(
-                        srcAuthName, srcCode, targetAuthName, targetCode,
-                        context->getUsePROJAlternativeGridNames(),
-                        context->getGridAvailabilityUse() ==
-                            CoordinateOperationContext::GridAvailabilityUse::
-                                DISCARD_OPERATION_IF_MISSING_GRID,
-                        context->getDiscardSuperseded(),
-                        context->getIntermediateCRS());
-                    if (!res.empty()) {
-                        return res;
+                    std::vector<std::string> authorities;
+                    if (authFactoryName == "any") {
+                        authorities.emplace_back();
+                    }
+                    if (authFactoryName.empty()) {
+                        authorities = authFactory->databaseContext()
+                                          ->getAllowedAuthorities(
+                                              srcAuthName, targetAuthName);
+                        if (authorities.empty()) {
+                            authorities.emplace_back();
+                        }
+                    } else {
+                        authorities.emplace_back(authFactoryName);
+                    }
+                    for (const auto &authority : authorities) {
+                        const auto tmpAuthFactory =
+                            io::AuthorityFactory::create(
+                                authFactory->databaseContext(),
+                                authority == "any" ? std::string() : authority);
+
+                        auto res =
+                            tmpAuthFactory->createFromCRSCodesWithIntermediates(
+                                srcAuthName, srcCode, targetAuthName,
+                                targetCode,
+                                context->getUsePROJAlternativeGridNames(),
+                                context->getGridAvailabilityUse() ==
+                                    CoordinateOperationContext::
+                                        GridAvailabilityUse::
+                                            DISCARD_OPERATION_IF_MISSING_GRID,
+                                context->getDiscardSuperseded(),
+                                context->getIntermediateCRS());
+                        if (!res.empty()) {
+                            return res;
+                        }
                     }
                 }
             }

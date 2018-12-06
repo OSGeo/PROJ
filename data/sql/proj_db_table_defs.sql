@@ -1048,3 +1048,12 @@ CREATE VIEW authority_list AS
     UNION
     SELECT DISTINCT auth_name FROM coordinate_operation_view
 ;
+
+-- Define the allowed authorities, and their precedence, when researching a
+-- coordinate operation
+CREATE TABLE authority_to_authority_preference(
+    source_auth_name TEXT NOT NULL, -- 'any' for any source
+    target_auth_name TEXT NOT NULL, -- 'any' for any target
+    allowed_authorities TEXT NOT NULL,  -- for example 'PROJ,EPSG,any'
+    CONSTRAINT unique_authority_to_authority_preference UNIQUE (source_auth_name, target_auth_name)
+);

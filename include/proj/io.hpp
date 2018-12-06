@@ -731,6 +731,11 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_INTERNAL std::string getTextDefinition(const std::string &tableName,
                                                 const std::string &authName,
                                                 const std::string &code) const;
+
+    PROJ_INTERNAL std::vector<std::string>
+    getAllowedAuthorities(const std::string &sourceAuthName,
+                          const std::string &targetAuthName) const;
+
     //! @endcond
 
   protected:
