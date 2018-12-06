@@ -887,13 +887,15 @@ class PROJ_GCC_DLL AuthorityFactory {
     createFromCoordinateReferenceSystemCodes(
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
-        bool usePROJAlternativeGridNames, bool discardIfMissingGrid) const;
+        bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+        bool discardSuperseded) const;
 
     PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
     createFromCRSCodesWithIntermediates(
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+        bool discardSuperseded,
         const std::vector<std::pair<std::string, std::string>>
             &intermediateCRSAuthCodes) const;
 

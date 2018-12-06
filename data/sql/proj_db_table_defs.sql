@@ -916,27 +916,33 @@ END;
 
 -- For ESRI stuff
 -- typically deprecated is the 'wkid' column of deprecated = 'yes' entries in the .csv files, and non_deprecates is the 'latestWkid' column
-CREATE TABLE link_from_deprecated_to_non_deprecated(
-    table_name TEXT NOT NULL CHECK (table_name IN (
+-- For EPSG, used to track superseded coordinate operations.
+CREATE TABLE supersession(
+    superseded_table_name TEXT NOT NULL CHECK (superseded_table_name IN (
         'unit_of_measure', 'celestial_body', 'ellipsoid', 
         'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
         'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
-    deprecated_auth_name TEXT NOT NULL,
-    deprecated_code TEXT NOT NULL,
-    non_deprecated_auth_name TEXT NOT NULL,
-    non_deprecated_code TEXT NOT NULL,
+    superseded_auth_name TEXT NOT NULL,
+    superseded_code TEXT NOT NULL,
+    replacement_table_name TEXT NOT NULL CHECK (replacement_table_name IN (
+        'unit_of_measure', 'celestial_body', 'ellipsoid', 
+        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
+        'helmert_transformation', 'other_transformation', 'concatenated_operation')),
+    replacement_auth_name TEXT NOT NULL,
+    replacement_code TEXT NOT NULL,
     source TEXT
 );
 
-CREATE TRIGGER link_from_deprecated_to_non_deprecated_insert_trigger
-BEFORE INSERT ON link_from_deprecated_to_non_deprecated
+CREATE TRIGGER supersession_insert_trigger
+BEFORE INSERT ON supersession
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on link_from_deprecated_to_non_deprecated violates constraint: deprecated entry refers to unexisting code')
-        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.deprecated_auth_name AND o.code = NEW.deprecated_code);
+    SELECT RAISE(ABORT, 'insert on supersession violates constraint: superseded entry refers to unexisting code')
+        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.superseded_table_name AND o.auth_name = NEW.superseded_auth_name AND o.code = NEW.superseded_code);
 
-    SELECT RAISE(ABORT, 'insert on link_from_deprecated_to_non_deprecated violates constraint: non_deprecated entry refers to unexisting code')
-        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.non_deprecated_auth_name AND o.code = NEW.non_deprecated_code);
+    SELECT RAISE(ABORT, 'insert on supersession violates constraint: replacement entry refers to unexisting code')
+        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.replacement_table_name AND o.auth_name = NEW.replacement_auth_name AND o.code = NEW.replacement_code);
 END;
 
 

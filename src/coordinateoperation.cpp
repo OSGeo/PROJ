@@ -8683,6 +8683,7 @@ struct CoordinateOperationContext::Private {
     bool allowUseIntermediateCRS_ = true;
     std::vector<std::pair<std::string, std::string>>
         intermediateCRSAuthCodes_{};
+    bool discardSuperseded_ = true;
 };
 //! @endcond
 
@@ -8819,6 +8820,29 @@ void CoordinateOperationContext::setUsePROJAlternativeGridNames(
  */
 bool CoordinateOperationContext::getUsePROJAlternativeGridNames() const {
     return d->usePROJNames_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether transformations that are superseded (but not
+ * deprecated)
+ * should be discarded.
+ *
+ * The default is true.
+ */
+bool CoordinateOperationContext::getDiscardSuperseded() const {
+    return d->discardSuperseded_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether transformations that are superseded (but not deprecated)
+ * should be discarded.
+ *
+ * The default is true.
+ */
+void CoordinateOperationContext::setDiscardSuperseded(bool discard) {
+    d->discardSuperseded_ = discard;
 }
 
 // ---------------------------------------------------------------------------
@@ -9654,7 +9678,8 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
                             context->getGridAvailabilityUse() ==
                                 CoordinateOperationContext::
                                     GridAvailabilityUse::
-                                        DISCARD_OPERATION_IF_MISSING_GRID);
+                                        DISCARD_OPERATION_IF_MISSING_GRID,
+                            context->getDiscardSuperseded());
                     if (!res.empty()) {
                         return res;
                     }
@@ -9695,6 +9720,7 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
                         context->getGridAvailabilityUse() ==
                             CoordinateOperationContext::GridAvailabilityUse::
                                 DISCARD_OPERATION_IF_MISSING_GRID,
+                        context->getDiscardSuperseded(),
                         context->getIntermediateCRS());
                     if (!res.empty()) {
                         return res;

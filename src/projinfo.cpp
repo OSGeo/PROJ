@@ -80,7 +80,8 @@ static void usage() {
         << "                [--spatial-test contains|intersects]" << std::endl
         << "                [--crs-extent-use none|both|intersection|smallest]"
         << std::endl
-        << "                [--grid-check none|discard_missing|sort]"
+        << "                [--grid-check none|discard_missing|sort] "
+           "[--show-superseded]"
         << std::endl
         << "                [--pivot-crs none|{auth:code[,auth:code]*}]"
         << std::endl
@@ -477,7 +478,7 @@ static void outputOperations(
     bool allowPivots,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
-    const OutputOptions &outputOpt, bool summary) {
+    bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
     auto sourceObj =
         buildObject(dbContext, sourceCRSStr, true, "source CRS", false);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
@@ -509,6 +510,7 @@ static void outputOperations(
         ctxt->setAllowUseIntermediateCRS(allowPivots);
         ctxt->setIntermediateCRS(pivots);
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
+        ctxt->setDiscardSuperseded(!showSuperseded);
         list = CoordinateOperationFactory::create()->createOperations(
             NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), ctxt);
     } catch (const std::exception &e) {
@@ -582,6 +584,7 @@ int main(int argc, char **argv) {
     bool guessDialect = false;
     std::string authority;
     bool identify = false;
+    bool showSuperseded = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -807,6 +810,8 @@ int main(int argc, char **argv) {
             authority = argv[i];
         } else if (arg == "--identify") {
             identify = true;
+        } else if (arg == "--show-superseded") {
+            showSuperseded = true;
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {
@@ -1000,10 +1005,10 @@ int main(int argc, char **argv) {
             }
         }
 
-        outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
-                         spatialCriterion, crsExtentUse, gridAvailabilityUse,
-                         allowPivots, pivots, authority,
-                         usePROJGridAlternatives, outputOpt, summary);
+        outputOperations(
+            dbContext, sourceCRSStr, targetCRSStr, bboxFilter, spatialCriterion,
+            crsExtentUse, gridAvailabilityUse, allowPivots, pivots, authority,
+            usePROJGridAlternatives, showSuperseded, outputOpt, summary);
     }
 
     return 0;
