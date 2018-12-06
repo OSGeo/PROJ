@@ -918,6 +918,38 @@ std::vector<std::string> DatabaseContext::getAllowedAuthorities(
     return split(res[0][0], ',');
 }
 
+// ---------------------------------------------------------------------------
+
+std::list<std::pair<std::string, std::string>>
+DatabaseContext::getNonDeprecated(const std::string &tableName,
+                                  const std::string &authName,
+                                  const std::string &code) const {
+    auto sqlRes =
+        d->run("SELECT replacement_auth_name, replacement_code, source "
+               "FROM deprecation "
+               "WHERE table_name = ? AND deprecated_auth_name = ? "
+               "AND deprecated_code = ?",
+               {tableName, authName, code});
+    std::list<std::pair<std::string, std::string>> res;
+    for (const auto &row : sqlRes) {
+        const auto &source = row[2];
+        if (source == "PROJ") {
+            const auto &replacement_auth_name = row[0];
+            const auto &replacement_code = row[1];
+            res.emplace_back(replacement_auth_name, replacement_code);
+        }
+    }
+    if (!res.empty()) {
+        return res;
+    }
+    for (const auto &row : sqlRes) {
+        const auto &replacement_auth_name = row[0];
+        const auto &replacement_code = row[1];
+        res.emplace_back(replacement_auth_name, replacement_code);
+    }
+    return res;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------

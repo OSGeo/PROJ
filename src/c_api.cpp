@@ -791,6 +791,36 @@ int proj_obj_is_deprecated(const PJ_OBJ *obj) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a list of non-deprecated objects related to the passed one
+ *
+ * @param ctx Context, or NULL for default context.
+ * @param obj Object (of type CRS for now) for which non-deprecated objects
+ * must be searched. Must not be NULL
+ * @return a result set that must be unreferenced with
+ * proj_obj_list_unref(), or NULL in case of error.
+ */
+PJ_OBJ_LIST *proj_obj_get_non_deprecated(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
+    assert(obj);
+    SANITIZE_CTX(ctx);
+    auto crs = dynamic_cast<const CRS *>(obj->obj.get());
+    if (!crs) {
+        return nullptr;
+    }
+    try {
+        std::vector<IdentifiedObjectNNPtr> objects;
+        auto res = crs->getNonDeprecated(getDBcontext(ctx));
+        for (const auto &resObj : res) {
+            objects.push_back(resObj);
+        }
+        return new PJ_OBJ_LIST(std::move(objects));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return whether two objects are equivalent.
  *
  * @param obj Object (must not be NULL)

@@ -101,6 +101,9 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
     PROJ_DLL std::list<std::pair<CRSNNPtr, int>>
     identify(const io::AuthorityFactoryPtr &authorityFactory) const;
 
+    PROJ_DLL std::list<CRSNNPtr>
+    getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL const GeodeticCRS *

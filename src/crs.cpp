@@ -603,6 +603,40 @@ CRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return CRSs that are non-deprecated substitutes for the current CRS.
+ */
+std::list<CRSNNPtr>
+CRS::getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const {
+    std::list<CRSNNPtr> res;
+    const auto &l_identifiers = identifiers();
+    if (l_identifiers.empty()) {
+        return res;
+    }
+    const char *tableName = nullptr;
+    if (dynamic_cast<const GeodeticCRS *>(this)) {
+        tableName = "geodetic_crs";
+    } else if (dynamic_cast<const ProjectedCRS *>(this)) {
+        tableName = "projected_crs";
+    } else if (dynamic_cast<const VerticalCRS *>(this)) {
+        tableName = "vertical_crs";
+    } else if (dynamic_cast<const CompoundCRS *>(this)) {
+        tableName = "compound_crs";
+    }
+    if (!tableName) {
+        return res;
+    }
+    const auto &id = l_identifiers[0];
+    auto tmpRes =
+        dbContext->getNonDeprecated(tableName, *(id->codeSpace()), id->code());
+    for (const auto &pair : tmpRes) {
+        res.emplace_back(io::AuthorityFactory::create(dbContext, pair.first)
+                             ->createCoordinateReferenceSystem(pair.second));
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 std::list<std::pair<CRSNNPtr, int>>

@@ -5082,3 +5082,58 @@ TEST(crs, alterParametersLinearUnit) {
             << wkt;
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, getNonDeprecated) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+
+    {
+        // No id
+        auto crs = ProjectedCRS::create(
+            PropertyMap(), GeographicCRS::EPSG_4326,
+            Conversion::createUTM(PropertyMap(), 31, true),
+            CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 0);
+    }
+
+    {
+        // Non-deprecated
+        auto crs = factory->createGeodeticCRS("4326");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 0);
+    }
+
+    {
+        // Non supported CRS type
+        auto crs = BoundCRS::createFromTOWGS84(
+            createProjected(), std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 0);
+    }
+
+    {
+        auto crs = factory->createGeodeticCRS("4226");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 2);
+    }
+
+    {
+        auto crs = factory->createProjectedCRS("26591");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 1);
+    }
+
+    {
+        auto crs = factory->createVerticalCRS("5704");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 1);
+    }
+    {
+        auto crs = factory->createCompoundCRS("7401");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 1);
+    }
+}

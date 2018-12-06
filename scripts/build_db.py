@@ -520,7 +520,7 @@ def fill_alias(proj_db_cursor):
 
 
 def find_table(proj_db_cursor, code):
-    for table_name in ('helmert_transformation', 'grid_transformation', 'concatenated_operation'):
+    for table_name in ('helmert_transformation', 'grid_transformation', 'concatenated_operation', 'geodetic_crs', 'projected_crs', 'vertical_crs', 'compound_crs'):
         proj_db_cursor.execute('SELECT name FROM %s WHERE code = ?' % table_name, (code,))
         row = proj_db_cursor.fetchone()
         if row is not None:
@@ -544,6 +544,22 @@ def fill_supersession(proj_db_cursor):
             print('Skipping supersession of %d (%s) by %d (%s)' % (code, src_name, superseded_by, dst_name))
             continue
         proj_db_cursor.execute("INSERT INTO supersession VALUES (?,'EPSG',?,?,'EPSG',?,'EPSG')", (superseded_table_name, code, replacement_table_name, superseded_by))
+
+def fill_deprecation(proj_db_cursor):
+    proj_db_cursor.execute("SELECT object_code, replaced_by FROM epsg.epsg_deprecation WHERE object_table_name = 'epsg_coordinatereferencesystem' AND object_code != replaced_by")
+    for row in proj_db_cursor.fetchall():
+        code, replaced_by = row
+        proj_db_cursor.execute('SELECT 1 FROM crs_view WHERE code = ?', (code,))
+        if proj_db_cursor.fetchone() is None:
+            print('Skipping deprecation of %d since it has not been imported' % code)
+            continue
+
+        src_name, deprecated_table_name = find_table(proj_db_cursor, code)
+        dst_name, replacement_table_name = find_table(proj_db_cursor, replaced_by)
+        assert deprecated_table_name, row
+        assert replacement_table_name, row
+        assert deprecated_table_name == replacement_table_name
+        proj_db_cursor.execute("INSERT INTO deprecation VALUES (?,'EPSG',?,'EPSG',?,'EPSG')", (deprecated_table_name, code, replaced_by))
 
 def report_non_imported_operations(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_type, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_code NOT IN (SELECT code FROM coordinate_operation_with_conversion_view)")
@@ -591,6 +607,7 @@ fill_other_transformation(proj_db_cursor)
 fill_concatenated_operation(proj_db_cursor)
 fill_alias(proj_db_cursor)
 fill_supersession(proj_db_cursor)
+fill_deprecation(proj_db_cursor)
 non_imported_operations = report_non_imported_operations(proj_db_cursor)
 
 proj_db_cursor.close()

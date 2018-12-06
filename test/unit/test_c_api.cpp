@@ -2552,4 +2552,18 @@ TEST_F(CApi, proj_obj_convert_conversion_to_other_method) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_get_non_deprecated) {
+    auto crs = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "4226", PJ_OBJ_CATEGORY_CRS, false, nullptr);
+    ObjectKeeper keeper(crs);
+    ASSERT_NE(crs, nullptr);
+
+    auto list = proj_obj_get_non_deprecated(m_ctxt, crs);
+    ASSERT_NE(list, nullptr);
+    ObjListKeeper keeper_list(list);
+    EXPECT_EQ(proj_obj_list_get_count(list), 2);
+}
+
 } // namespace

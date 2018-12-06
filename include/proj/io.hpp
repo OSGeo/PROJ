@@ -736,6 +736,10 @@ class PROJ_GCC_DLL DatabaseContext {
     getAllowedAuthorities(const std::string &sourceAuthName,
                           const std::string &targetAuthName) const;
 
+    PROJ_INTERNAL std::list<std::pair<std::string, std::string>>
+    getNonDeprecated(const std::string &tableName, const std::string &authName,
+                     const std::string &code) const;
+
     //! @endcond
 
   protected:
