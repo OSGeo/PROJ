@@ -339,6 +339,28 @@ TEST(crs, EPSG_4326_as_WKT1_GDAL_with_axis) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4326_from_db_as_WKT1_GDAL_with_axis) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("4326");
+    auto wkt = crs->exportToWKT(
+        &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
+              ->setOutputAxis(WKTFormatter::OutputAxisRule::YES)));
+    EXPECT_EQ(wkt, "GEOGCS[\"WGS 84\",\n"
+                   "    DATUM[\"WGS_1984\",\n"
+                   "        SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                   "            AUTHORITY[\"EPSG\",\"7030\"]],\n"
+                   "        AUTHORITY[\"EPSG\",\"6326\"]],\n"
+                   "    PRIMEM[\"Greenwich\",0,\n"
+                   "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                   "    UNIT[\"degree\",0.0174532925199433,\n"
+                   "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
+                   "    AXIS[\"Latitude\",NORTH],\n"
+                   "    AXIS[\"Longitude\",EAST],\n"
+                   "    AUTHORITY[\"EPSG\",\"4326\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4326_as_WKT1_ESRI_with_database) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(WKTFormatter::create(

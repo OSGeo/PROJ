@@ -325,7 +325,13 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
             axisDesignation =
                 tolower(axisName.substr(0, 1)) + axisName.substr(1);
         } else {
-            axisDesignation = axisName;
+            if (axisName == "Geodetic latitude") {
+                axisDesignation = "Latitude";
+            } else if (axisName == "Geodetic longitude") {
+                axisDesignation = "Longitude";
+            } else {
+                axisDesignation = axisName;
+            }
         }
     }
 
