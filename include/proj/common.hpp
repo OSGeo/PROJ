@@ -277,9 +277,9 @@ using IdentifiedObjectNNPtr = util::nn<IdentifiedObjectPtr>;
  *
  * \remark Implements IdentifiedObject from \ref ISO_19111_2018
  */
-class IdentifiedObject : public util::BaseObject,
-                         public util::IComparable,
-                         public io::IWKTExportable {
+class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
+                                      public util::IComparable,
+                                      public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~IdentifiedObject() override;
@@ -311,14 +311,14 @@ class IdentifiedObject : public util::BaseObject,
         //! @cond Doxygen_Suppress
         void
         formatID(io::WKTFormatter *formatter) const;
-    void formatRemarks(io::WKTFormatter *formatter) const;
+    PROJ_INTERNAL void formatRemarks(io::WKTFormatter *formatter) const;
 
-    bool
+    PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) const override;
 
-    bool
+    PROJ_INTERNAL bool
     _isEquivalentTo(const IdentifiedObject *other,
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) PROJ_CONST_DECL;

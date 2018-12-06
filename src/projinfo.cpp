@@ -37,6 +37,7 @@
 
 #include "projects.h"
 
+#include <proj/common.hpp>
 #include <proj/coordinateoperation.hpp>
 #include <proj/crs.hpp>
 #include <proj/io.hpp>
@@ -45,6 +46,7 @@
 
 #include "proj/internal/internal.hpp" // for split
 
+using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
@@ -201,6 +203,30 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
 
 static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                          const OutputOptions &outputOpt) {
+
+    auto identified = dynamic_cast<const IdentifiedObject *>(obj.get());
+    if (!outputOpt.quiet && identified && identified->isDeprecated()) {
+        std::cout << "Warning: object is deprecated" << std::endl;
+        auto crs = dynamic_cast<const CRS *>(obj.get());
+        if (crs && dbContext) {
+            try {
+                auto list = crs->getNonDeprecated(NN_NO_CHECK(dbContext));
+                if (!list.empty()) {
+                    std::cout << "Alternative non-deprecated CRS:" << std::endl;
+                }
+                for (const auto &altCRS : list) {
+                    const auto &ids = altCRS->identifiers();
+                    if (!ids.empty()) {
+                        std::cout << "  " << *(ids[0]->codeSpace()) << ":"
+                                  << ids[0]->code() << std::endl;
+                    }
+                }
+            } catch (const std::exception &) {
+            }
+        }
+        std::cout << std::endl;
+    }
+
     auto projStringExportable =
         nn_dynamic_pointer_cast<IPROJStringExportable>(obj);
     bool alreadyOutputed = false;

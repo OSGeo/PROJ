@@ -478,3 +478,48 @@ No area of use matching provided name
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area WRONG:CODE --summary
 Area of use retrieval failed: area not found
 
+Testing deprecated CRS: projinfo EPSG:26591
+Warning: object is deprecated
+Alternative non-deprecated CRS:
+  EPSG:3003
+
+PROJ string:
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=longlat +ellps=intl +pm=rome +step +proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=1500000 +y_0=0 +ellps=intl +pm=rome
+
+WKT2_2015 string:
+PROJCRS["Monte Mario (Rome) / Italy zone 1",
+    BASEGEODCRS["Monte Mario (Rome)",
+        DATUM["Monte Mario (Rome)",
+            ELLIPSOID["International 1924",6378388,297,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Rome",12.4523333333333,
+            ANGLEUNIT["degree",0.0174532925199433]]],
+    CONVERSION["Italy zone 1",
+        METHOD["Transverse Mercator",
+            ID["EPSG",9807]],
+        PARAMETER["Latitude of natural origin",0,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8801]],
+        PARAMETER["Longitude of natural origin",9,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["Scale factor at natural origin",0.9996,
+            SCALEUNIT["unity",1],
+            ID["EPSG",8805]],
+        PARAMETER["False easting",1500000,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["easting (X)",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1]],
+        AXIS["northing (Y)",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1]],
+    AREA["Italy - west of 12°E"],
+    BBOX[36.53,5.94,47.04,12],
+    ID["EPSG",26591]]
+
