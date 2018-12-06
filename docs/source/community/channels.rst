@@ -14,7 +14,7 @@ about the development of the library and from time to time interesting discussio
 on geodesy appear as well. You are more than welcome to join in on the discussions!
 
 
-The PROJ mailing list can be found at http://lists.maptools.org/mailman/listinfo/proj
+The PROJ mailing list can be found at https://lists.osgeo.org/mailman/listinfo/proj
 
 
 GitHub
