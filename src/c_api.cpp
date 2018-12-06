@@ -1319,11 +1319,19 @@ PJ_OBJ *proj_obj_crs_create_bound_crs(PJ_CONTEXT *ctx, const PJ_OBJ *base_crs,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type CRS (must not be NULL)
+ * @param options null-terminated list of options, or NULL. Currently
+ * supported options are:
+ * <ul>
+ * <li>ALLOW_INTERMEDIATE_CRS=YES/NO. Defaults to NO. When set to YES,
+ * intermediate CRS may be considered when computing the possible
+ * tranformations. Slower.</li>
+ * </ul>
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
 PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx,
-                                               const PJ_OBJ *crs) {
+                                               const PJ_OBJ *crs,
+                                               const char *const *options) {
     SANITIZE_CTX(ctx);
     assert(crs);
     auto l_crs = dynamic_cast<const CRS *>(crs->obj.get());
@@ -1333,8 +1341,20 @@ PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx,
     }
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        return PJ_OBJ::create(
-            l_crs->createBoundCRSToWGS84IfPossible(dbContext));
+        bool allowIntermediateCRS = false;
+        for (auto iter = options; iter && iter[0]; ++iter) {
+            const char *value;
+            if ((value = getOptionValue(*iter, "ALLOW_INTERMEDIATE_CRS="))) {
+                allowIntermediateCRS = ci_equal(value, "YES");
+            } else {
+                std::string msg("Unknown option :");
+                msg += *iter;
+                proj_log_error(ctx, __FUNCTION__, msg.c_str());
+                return nullptr;
+            }
+        }
+        return PJ_OBJ::create(l_crs->createBoundCRSToWGS84IfPossible(
+            dbContext, allowIntermediateCRS));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;

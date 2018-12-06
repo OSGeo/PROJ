@@ -375,8 +375,9 @@ VerticalCRSPtr CRS::extractVerticalCRS() const {
  *
  * @return a CRS.
  */
-CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
-    const io::DatabaseContextPtr &dbContext) const {
+CRSNNPtr
+CRS::createBoundCRSToWGS84IfPossible(const io::DatabaseContextPtr &dbContext,
+                                     bool allowIntermediateCRS) const {
     auto thisAsCRS = NN_NO_CHECK(
         std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
     auto boundCRS = util::nn_dynamic_pointer_cast<BoundCRS>(thisAsCRS);
@@ -441,6 +442,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                 authority == "any" ? std::string() : authority);
             auto ctxt = operation::CoordinateOperationContext::create(
                 authFactory, extent, 0.0);
+            ctxt->setAllowUseIntermediateCRS(allowIntermediateCRS);
             // ctxt->setSpatialCriterion(
             //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
             auto list =

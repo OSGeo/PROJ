@@ -402,7 +402,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
-    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, crs);
+    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, crs, nullptr);
     ObjectKeeper keeper_res(res);
     ASSERT_NE(res, nullptr);
 
@@ -447,7 +447,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84_on_invalid_type) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, obj);
+    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, obj, nullptr);
     ASSERT_EQ(res, nullptr);
 }
 

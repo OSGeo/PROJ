@@ -136,7 +136,8 @@ static std::string c_ify_string(const std::string &str) {
 static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
                                    const std::string &user_string,
                                    bool kindIsCRS, const std::string &context,
-                                   bool buildBoundCRSToWGS84) {
+                                   bool buildBoundCRSToWGS84,
+                                   bool allowPivots) {
     BaseObjectPtr obj;
 
     std::string l_user_string(user_string);
@@ -192,7 +193,8 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
     if (buildBoundCRSToWGS84) {
         auto crs = std::dynamic_pointer_cast<CRS>(obj);
         if (crs) {
-            obj = crs->createBoundCRSToWGS84IfPossible(dbContext).as_nullable();
+            obj = crs->createBoundCRSToWGS84IfPossible(dbContext, allowPivots)
+                      .as_nullable();
         }
     }
 
@@ -202,7 +204,7 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
 // ---------------------------------------------------------------------------
 
 static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
-                         const OutputOptions &outputOpt) {
+                         bool allowPivots, const OutputOptions &outputOpt) {
 
     auto identified = dynamic_cast<const IdentifiedObject *>(obj.get());
     if (!outputOpt.quiet && identified && identified->isDeprecated()) {
@@ -263,7 +265,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (crs) {
                     objToExport =
                         nn_dynamic_pointer_cast<IPROJStringExportable>(
-                            crs->createBoundCRSToWGS84IfPossible(dbContext));
+                            crs->createBoundCRSToWGS84IfPossible(dbContext,
+                                                                 allowPivots));
                 }
                 if (!objToExport) {
                     objToExport = projStringExportable;
@@ -398,7 +401,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 std::shared_ptr<IWKTExportable> objToExport;
                 if (crs) {
                     objToExport = nn_dynamic_pointer_cast<IWKTExportable>(
-                        crs->createBoundCRSToWGS84IfPossible(dbContext));
+                        crs->createBoundCRSToWGS84IfPossible(dbContext,
+                                                             allowPivots));
                 }
                 if (!objToExport) {
                     objToExport = wktExportable;
@@ -506,7 +510,7 @@ static void outputOperations(
     const std::string &authority, bool usePROJGridAlternatives,
     bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
     auto sourceObj =
-        buildObject(dbContext, sourceCRSStr, true, "source CRS", false);
+        buildObject(dbContext, sourceCRSStr, true, "source CRS", false, false);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
@@ -514,7 +518,7 @@ static void outputOperations(
     }
 
     auto targetObj =
-        buildObject(dbContext, targetCRSStr, true, "target CRS", false);
+        buildObject(dbContext, targetCRSStr, true, "target CRS", false, false);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -545,7 +549,7 @@ static void outputOperations(
         std::exit(1);
     }
     if (outputOpt.quiet && !list.empty()) {
-        outputObject(dbContext, list[0], outputOpt);
+        outputObject(dbContext, list[0], allowPivots, outputOpt);
         return;
     }
     if (summary) {
@@ -571,7 +575,7 @@ static void outputOperations(
             }
             outputOperationSummary(op);
             std::cout << std::endl;
-            outputObject(dbContext, op, outputOpt);
+            outputObject(dbContext, op, allowPivots, outputOpt);
         }
     }
 }
@@ -906,7 +910,7 @@ int main(int argc, char **argv) {
 
     if (!user_string.empty()) {
         auto obj(buildObject(dbContext, user_string, kindIsCRS, "input string",
-                             buildBoundCRSToWGS84));
+                             buildBoundCRSToWGS84, allowPivots));
         if (guessDialect) {
             auto dialect = WKTParser().guessDialect(user_string);
             std::cout << "Guessed WKT dialect: ";
@@ -923,7 +927,7 @@ int main(int argc, char **argv) {
             }
             std::cout << std::endl;
         }
-        outputObject(dbContext, obj, outputOpt);
+        outputObject(dbContext, obj, allowPivots, outputOpt);
         if (identify) {
             auto crs = dynamic_cast<CRS *>(obj.get());
             if (crs) {

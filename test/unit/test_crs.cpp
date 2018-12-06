@@ -3479,9 +3479,8 @@ TEST(crs, boundCRS_crs_link) {
         EXPECT_TRUE(baseCRS->isEquivalentTo(GeographicCRS::EPSG_4267.get()));
         EXPECT_TRUE(baseCRS->canonicalBoundCRS() != nullptr);
 
-        EXPECT_TRUE(
-            baseCRS->createBoundCRSToWGS84IfPossible(nullptr)->isEquivalentTo(
-                baseCRS->canonicalBoundCRS().get()));
+        EXPECT_TRUE(baseCRS->createBoundCRSToWGS84IfPossible(nullptr, false)
+                        ->isEquivalentTo(baseCRS->canonicalBoundCRS().get()));
     }
 
     {
@@ -4780,26 +4779,28 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     auto factory = AuthorityFactory::create(dbContext, "EPSG");
     {
         auto crs_4326 = factory->createCoordinateReferenceSystem("4326");
-        EXPECT_EQ(crs_4326->createBoundCRSToWGS84IfPossible(dbContext),
+        EXPECT_EQ(crs_4326->createBoundCRSToWGS84IfPossible(dbContext, false),
                   crs_4326);
     }
     {
         auto crs_32631 = factory->createCoordinateReferenceSystem("32631");
-        EXPECT_EQ(crs_32631->createBoundCRSToWGS84IfPossible(dbContext),
+        EXPECT_EQ(crs_32631->createBoundCRSToWGS84IfPossible(dbContext, false),
                   crs_32631);
     }
     {
         // Pulkovo 42 East Germany
         auto crs_5670 = factory->createCoordinateReferenceSystem("5670");
-        EXPECT_EQ(crs_5670->createBoundCRSToWGS84IfPossible(dbContext),
+        EXPECT_EQ(crs_5670->createBoundCRSToWGS84IfPossible(dbContext, false),
                   crs_5670);
     }
     {
         // Pulkovo 42 Romania
         auto crs_3844 = factory->createCoordinateReferenceSystem("3844");
-        auto bound = crs_3844->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound =
+            crs_3844->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs_3844);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext, false),
+                  bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(
@@ -4814,9 +4815,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // Pulkovo 42 Poland
         auto crs_2171 = factory->createCoordinateReferenceSystem("2171");
-        auto bound = crs_2171->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound =
+            crs_2171->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs_2171);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext, false),
+                  bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(
@@ -4831,9 +4834,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // NTF (Paris)
         auto crs_4807 = factory->createCoordinateReferenceSystem("4807");
-        auto bound = crs_4807->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound =
+            crs_4807->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs_4807);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext, false),
+                  bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(
@@ -4846,9 +4851,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // NTF (Paris) / Lambert zone II + NGF-IGN69 height
         auto crs_7421 = factory->createCoordinateReferenceSystem("7421");
-        auto bound = crs_7421->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound =
+            crs_7421->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs_7421);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext, false),
+                  bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(
@@ -4862,13 +4869,13 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     }
     {
         auto crs = createVerticalCRS();
-        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(dbContext), crs);
+        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(dbContext, false), crs);
     }
     {
         auto factoryIGNF =
             AuthorityFactory::create(DatabaseContext::create(), "IGNF");
         auto crs = factoryIGNF->createCoordinateReferenceSystem("TERA50STEREO");
-        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
@@ -4884,7 +4891,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         auto factoryIGNF =
             AuthorityFactory::create(DatabaseContext::create(), "IGNF");
         auto crs = factoryIGNF->createCoordinateReferenceSystem("PGP50");
-        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
@@ -4897,7 +4904,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     }
     {
         auto crs = factory->createCoordinateReferenceSystem("4269"); // NAD83
-        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_EQ(bound, crs);
     }
 }
