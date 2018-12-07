@@ -123,6 +123,13 @@ PJ_OBJ PROJ_DLL *proj_obj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
                                                    const char* unit_name,
                                                    double unit_conv_factor);
 
+PJ_OBJ_LIST PROJ_DLL *proj_obj_query_geodetic_crs_from_datum(
+                                                PJ_CONTEXT *ctx,
+                                                const char *crs_auth_name,
+                                                const char *datum_auth_name,
+                                                const char *datum_code,
+                                                const char *crs_type);
+
 PJ_OBJ PROJ_DLL *proj_obj_create_geographic_crs(
                             PJ_CONTEXT *ctx,
                             const char *crs_name,

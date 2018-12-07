@@ -2566,4 +2566,23 @@ TEST_F(CApi, proj_obj_get_non_deprecated) {
     EXPECT_EQ(proj_obj_list_get_count(list), 2);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_query_geodetic_crs_from_datum) {
+    {
+        auto list = proj_obj_query_geodetic_crs_from_datum(
+            m_ctxt, nullptr, "EPSG", "6326", nullptr);
+        ASSERT_NE(list, nullptr);
+        ObjListKeeper keeper_list(list);
+        EXPECT_GE(proj_obj_list_get_count(list), 3);
+    }
+    {
+        auto list = proj_obj_query_geodetic_crs_from_datum(
+            m_ctxt, "EPSG", "EPSG", "6326", "geographic 2D");
+        ASSERT_NE(list, nullptr);
+        ObjListKeeper keeper_list(list);
+        EXPECT_EQ(proj_obj_list_get_count(list), 1);
+    }
+}
+
 } // namespace

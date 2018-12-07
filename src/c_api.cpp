@@ -522,6 +522,42 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return GeodeticCRS that use the specified datum.
+ *
+ * @param ctx Context, or NULL for default context.
+ * @param crs_auth_name CRS authority name, or NULL.
+ * @param datum_auth_name Datum authority name (must not be NULL)
+ * @param datum_code Datum code (must not be NULL)
+ * @param crs_type "geographic 2D", "geographic 3D", "geocentric" or NULL
+ * @return a result set that must be unreferenced with
+ * proj_obj_list_unref(), or NULL in case of error.
+ */
+PJ_OBJ_LIST *proj_obj_query_geodetic_crs_from_datum(PJ_CONTEXT *ctx,
+                                                    const char *crs_auth_name,
+                                                    const char *datum_auth_name,
+                                                    const char *datum_code,
+                                                    const char *crs_type) {
+    assert(datum_auth_name);
+    assert(datum_code);
+    SANITIZE_CTX(ctx);
+    try {
+        auto factory = AuthorityFactory::create(
+            getDBcontext(ctx), crs_auth_name ? crs_auth_name : "");
+        auto res = factory->createGeodeticCRSFromDatum(
+            datum_auth_name, datum_code, crs_type ? crs_type : "");
+        std::vector<IdentifiedObjectNNPtr> objects;
+        for (const auto &obj : res) {
+            objects.push_back(obj);
+        }
+        return new PJ_OBJ_LIST(std::move(objects));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Drops a reference on an object.
  *
  * This method should be called one and exactly one for each function
