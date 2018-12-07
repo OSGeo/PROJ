@@ -92,14 +92,18 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
     PROJ_DLL GeodeticCRSPtr extractGeodeticCRS() const;
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
     PROJ_DLL VerticalCRSPtr extractVerticalCRS() const;
-    PROJ_DLL CRSNNPtr createBoundCRSToWGS84IfPossible(
-        const io::DatabaseContextPtr &dbContext) const;
+    PROJ_DLL CRSNNPtr
+    createBoundCRSToWGS84IfPossible(const io::DatabaseContextPtr &dbContext,
+                                    bool allowIntermediateCRS) const;
     PROJ_DLL CRSNNPtr stripVerticalComponent() const;
 
     PROJ_DLL const BoundCRSPtr &canonicalBoundCRS() PROJ_CONST_DECL;
 
     PROJ_DLL std::list<std::pair<CRSNNPtr, int>>
     identify(const io::AuthorityFactoryPtr &authorityFactory) const;
+
+    PROJ_DLL std::list<CRSNNPtr>
+    getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

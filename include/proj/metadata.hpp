@@ -406,12 +406,16 @@ class PROJ_GCC_DLL Identifier : public util::BaseObject,
   protected:
     PROJ_INTERNAL explicit Identifier(const std::string &codeIn,
                                       const util::PropertyMap &properties);
+    PROJ_INTERNAL explicit Identifier();
 
     PROJ_FRIEND_OPTIONAL(Identifier);
     INLINED_MAKE_SHARED
     Identifier &operator=(const Identifier &other) = delete;
 
     PROJ_FRIEND(common::IdentifiedObject);
+
+    PROJ_INTERNAL static IdentifierNNPtr
+    createFromDescription(const std::string &descriptionIn);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

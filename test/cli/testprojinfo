@@ -74,6 +74,10 @@ echo "Testing projinfo -s EPSG:4230 -t EPSG:4258 --area WRONG:CODE --summary" >>
 $EXE -s EPSG:4230 -t EPSG:4258 --area WRONG:CODE --summary >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo "Testing deprecated CRS: projinfo EPSG:26591" >> ${OUT}
+$EXE EPSG:26591 >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist

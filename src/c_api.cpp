@@ -522,6 +522,42 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return GeodeticCRS that use the specified datum.
+ *
+ * @param ctx Context, or NULL for default context.
+ * @param crs_auth_name CRS authority name, or NULL.
+ * @param datum_auth_name Datum authority name (must not be NULL)
+ * @param datum_code Datum code (must not be NULL)
+ * @param crs_type "geographic 2D", "geographic 3D", "geocentric" or NULL
+ * @return a result set that must be unreferenced with
+ * proj_obj_list_unref(), or NULL in case of error.
+ */
+PJ_OBJ_LIST *proj_obj_query_geodetic_crs_from_datum(PJ_CONTEXT *ctx,
+                                                    const char *crs_auth_name,
+                                                    const char *datum_auth_name,
+                                                    const char *datum_code,
+                                                    const char *crs_type) {
+    assert(datum_auth_name);
+    assert(datum_code);
+    SANITIZE_CTX(ctx);
+    try {
+        auto factory = AuthorityFactory::create(
+            getDBcontext(ctx), crs_auth_name ? crs_auth_name : "");
+        auto res = factory->createGeodeticCRSFromDatum(
+            datum_auth_name, datum_code, crs_type ? crs_type : "");
+        std::vector<IdentifiedObjectNNPtr> objects;
+        for (const auto &obj : res) {
+            objects.push_back(obj);
+        }
+        return new PJ_OBJ_LIST(std::move(objects));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Drops a reference on an object.
  *
  * This method should be called one and exactly one for each function
@@ -787,6 +823,36 @@ PJ_OBJ_TYPE proj_obj_get_type(const PJ_OBJ *obj) {
 int proj_obj_is_deprecated(const PJ_OBJ *obj) {
     assert(obj);
     return obj->obj->isDeprecated();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a list of non-deprecated objects related to the passed one
+ *
+ * @param ctx Context, or NULL for default context.
+ * @param obj Object (of type CRS for now) for which non-deprecated objects
+ * must be searched. Must not be NULL
+ * @return a result set that must be unreferenced with
+ * proj_obj_list_unref(), or NULL in case of error.
+ */
+PJ_OBJ_LIST *proj_obj_get_non_deprecated(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
+    assert(obj);
+    SANITIZE_CTX(ctx);
+    auto crs = dynamic_cast<const CRS *>(obj->obj.get());
+    if (!crs) {
+        return nullptr;
+    }
+    try {
+        std::vector<IdentifiedObjectNNPtr> objects;
+        auto res = crs->getNonDeprecated(getDBcontext(ctx));
+        for (const auto &resObj : res) {
+            objects.push_back(resObj);
+        }
+        return new PJ_OBJ_LIST(std::move(objects));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -1289,11 +1355,19 @@ PJ_OBJ *proj_obj_crs_create_bound_crs(PJ_CONTEXT *ctx, const PJ_OBJ *base_crs,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type CRS (must not be NULL)
+ * @param options null-terminated list of options, or NULL. Currently
+ * supported options are:
+ * <ul>
+ * <li>ALLOW_INTERMEDIATE_CRS=YES/NO. Defaults to NO. When set to YES,
+ * intermediate CRS may be considered when computing the possible
+ * tranformations. Slower.</li>
+ * </ul>
  * @return Object that must be unreferenced with proj_obj_unref(), or NULL
  * in case of error.
  */
 PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx,
-                                               const PJ_OBJ *crs) {
+                                               const PJ_OBJ *crs,
+                                               const char *const *options) {
     SANITIZE_CTX(ctx);
     assert(crs);
     auto l_crs = dynamic_cast<const CRS *>(crs->obj.get());
@@ -1303,8 +1377,20 @@ PJ_OBJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx,
     }
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        return PJ_OBJ::create(
-            l_crs->createBoundCRSToWGS84IfPossible(dbContext));
+        bool allowIntermediateCRS = false;
+        for (auto iter = options; iter && iter[0]; ++iter) {
+            const char *value;
+            if ((value = getOptionValue(*iter, "ALLOW_INTERMEDIATE_CRS="))) {
+                allowIntermediateCRS = ci_equal(value, "YES");
+            } else {
+                std::string msg("Unknown option :");
+                msg += *iter;
+                proj_log_error(ctx, __FUNCTION__, msg.c_str());
+                return nullptr;
+            }
+        }
+        return PJ_OBJ::create(l_crs->createBoundCRSToWGS84IfPossible(
+            dbContext, allowIntermediateCRS));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -5354,9 +5440,17 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
  * The returned object must be unreferenced with
  * proj_operation_factory_context_unref() after use.
  *
+ * If authority is NULL or the empty string, then coordinate
+ * operations from any authority will be searched, with the restrictions set
+ * in the authority_to_authority_preference database table.
+ * If authority is set to "any", then coordinate
+ * operations from any authority will be searched
+ * If authority is a non-empty string different of "any",
+ * then coordinate operatiosn will be searched only in that authority namespace.
+ *
  * @param ctx Context, or NULL for default context.
  * @param authority Name of authority to which to restrict the search of
- *                  canidate operations. Or NULL to allow any authority.
+ *                  candidate operations.
  * @return Object that must be unreferenced with
  * proj_operation_factory_context_unref(), or NULL in
  * case of error.

@@ -339,6 +339,28 @@ TEST(crs, EPSG_4326_as_WKT1_GDAL_with_axis) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4326_from_db_as_WKT1_GDAL_with_axis) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("4326");
+    auto wkt = crs->exportToWKT(
+        &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
+              ->setOutputAxis(WKTFormatter::OutputAxisRule::YES)));
+    EXPECT_EQ(wkt, "GEOGCS[\"WGS 84\",\n"
+                   "    DATUM[\"WGS_1984\",\n"
+                   "        SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                   "            AUTHORITY[\"EPSG\",\"7030\"]],\n"
+                   "        AUTHORITY[\"EPSG\",\"6326\"]],\n"
+                   "    PRIMEM[\"Greenwich\",0,\n"
+                   "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                   "    UNIT[\"degree\",0.0174532925199433,\n"
+                   "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
+                   "    AXIS[\"Latitude\",NORTH],\n"
+                   "    AXIS[\"Longitude\",EAST],\n"
+                   "    AUTHORITY[\"EPSG\",\"4326\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4326_as_WKT1_ESRI_with_database) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(WKTFormatter::create(
@@ -1777,6 +1799,38 @@ TEST(crs, projectedCRS_as_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_Krovak_EPSG_5221_as_PROJ_string) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createProjectedCRS("5221");
+    // 30deg 17' 17.30311'' = 30.28813975277777776
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=bessel +pm=ferro "
+              "+step +proj=krovak +lat_0=49.5 +lon_0=42.5 "
+              "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 "
+              "+ellps=bessel +pm=ferro");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_Krovak_with_approximate_alpha_as_PROJ_string) {
+    // 30deg 17' 17.303''   = 30.288139722222223 as used in GDAL WKT1
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=krovak +lat_0=49.5 +lon_0=42.5 +alpha=30.28813972222222 "
+        "+k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +pm=ferro +units=m +no_defs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=bessel +pm=ferro "
+              "+step +proj=krovak +lat_0=49.5 +lon_0=42.5 "
+              "+alpha=30.2881397222222 +k=0.9999 +x_0=0 +y_0=0 "
+              "+ellps=bessel +pm=ferro");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_identify_no_db) {
     {
         // Hard-coded case: WGS 84 / UTM. No name
@@ -2433,7 +2487,7 @@ TEST(crs, Krovak_North_Orientated_as_WKT1_ESRI) {
                     "PARAMETER[\"False_Northing\",0.0],"
                     "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
                     "PARAMETER[\"Scale_Factor\",1.0],"
-                    "PARAMETER[\"Azimuth\",30.2881397222222],"
+                    "PARAMETER[\"Azimuth\",30.2881397527778],"
                     "PARAMETER[\"Longitude_Of_Center\",0.0],"
                     "PARAMETER[\"Latitude_Of_Center\",0.0],"
                     "PARAMETER[\"X_Scale\",-1.0],"
@@ -2465,7 +2519,7 @@ TEST(crs, Krovak_as_WKT1_ESRI) {
                     "PARAMETER[\"False_Northing\",0.0],"
                     "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
                     "PARAMETER[\"Scale_Factor\",1.0],"
-                    "PARAMETER[\"Azimuth\",30.2881397222222],"
+                    "PARAMETER[\"Azimuth\",30.2881397527778],"
                     "PARAMETER[\"Longitude_Of_Center\",0.0],"
                     "PARAMETER[\"Latitude_Of_Center\",0.0],"
                     "PARAMETER[\"X_Scale\",1.0],"
@@ -3425,9 +3479,8 @@ TEST(crs, boundCRS_crs_link) {
         EXPECT_TRUE(baseCRS->isEquivalentTo(GeographicCRS::EPSG_4267.get()));
         EXPECT_TRUE(baseCRS->canonicalBoundCRS() != nullptr);
 
-        EXPECT_TRUE(
-            baseCRS->createBoundCRSToWGS84IfPossible(nullptr)->isEquivalentTo(
-                baseCRS->canonicalBoundCRS().get()));
+        EXPECT_TRUE(baseCRS->createBoundCRSToWGS84IfPossible(nullptr, false)
+                        ->isEquivalentTo(baseCRS->canonicalBoundCRS().get()));
     }
 
     {
@@ -4726,26 +4779,28 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     auto factory = AuthorityFactory::create(dbContext, "EPSG");
     {
         auto crs_4326 = factory->createCoordinateReferenceSystem("4326");
-        EXPECT_EQ(crs_4326->createBoundCRSToWGS84IfPossible(dbContext),
+        EXPECT_EQ(crs_4326->createBoundCRSToWGS84IfPossible(dbContext, false),
                   crs_4326);
     }
     {
         auto crs_32631 = factory->createCoordinateReferenceSystem("32631");
-        EXPECT_EQ(crs_32631->createBoundCRSToWGS84IfPossible(dbContext),
+        EXPECT_EQ(crs_32631->createBoundCRSToWGS84IfPossible(dbContext, false),
                   crs_32631);
     }
     {
         // Pulkovo 42 East Germany
         auto crs_5670 = factory->createCoordinateReferenceSystem("5670");
-        EXPECT_EQ(crs_5670->createBoundCRSToWGS84IfPossible(dbContext),
+        EXPECT_EQ(crs_5670->createBoundCRSToWGS84IfPossible(dbContext, false),
                   crs_5670);
     }
     {
         // Pulkovo 42 Romania
         auto crs_3844 = factory->createCoordinateReferenceSystem("3844");
-        auto bound = crs_3844->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound =
+            crs_3844->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs_3844);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext, false),
+                  bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(
@@ -4760,9 +4815,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // Pulkovo 42 Poland
         auto crs_2171 = factory->createCoordinateReferenceSystem("2171");
-        auto bound = crs_2171->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound =
+            crs_2171->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs_2171);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext, false),
+                  bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(
@@ -4777,9 +4834,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // NTF (Paris)
         auto crs_4807 = factory->createCoordinateReferenceSystem("4807");
-        auto bound = crs_4807->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound =
+            crs_4807->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs_4807);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext, false),
+                  bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(
@@ -4792,9 +4851,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // NTF (Paris) / Lambert zone II + NGF-IGN69 height
         auto crs_7421 = factory->createCoordinateReferenceSystem("7421");
-        auto bound = crs_7421->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound =
+            crs_7421->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs_7421);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext), bound);
+        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(dbContext, false),
+                  bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->exportToPROJString(
@@ -4808,13 +4869,13 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     }
     {
         auto crs = createVerticalCRS();
-        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(dbContext), crs);
+        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(dbContext, false), crs);
     }
     {
         auto factoryIGNF =
             AuthorityFactory::create(DatabaseContext::create(), "IGNF");
         auto crs = factoryIGNF->createCoordinateReferenceSystem("TERA50STEREO");
-        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
@@ -4830,7 +4891,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         auto factoryIGNF =
             AuthorityFactory::create(DatabaseContext::create(), "IGNF");
         auto crs = factoryIGNF->createCoordinateReferenceSystem("PGP50");
-        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext);
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext, false);
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
@@ -4840,6 +4901,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                           .get()),
                   "+proj=geocent +ellps=intl "
                   "+towgs84=324.8,153.6,172.1,0,0,0,0 +units=m +no_defs");
+    }
+    {
+        auto crs = factory->createCoordinateReferenceSystem("4269"); // NAD83
+        auto bound = crs->createBoundCRSToWGS84IfPossible(dbContext, false);
+        EXPECT_EQ(bound, crs);
     }
 }
 
@@ -5021,5 +5087,60 @@ TEST(crs, alterParametersLinearUnit) {
                 "PARAMETER[\"False easting\",250000,UNIT[\"my unit\",2]") !=
             std::string::npos)
             << wkt;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, getNonDeprecated) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+
+    {
+        // No id
+        auto crs = ProjectedCRS::create(
+            PropertyMap(), GeographicCRS::EPSG_4326,
+            Conversion::createUTM(PropertyMap(), 31, true),
+            CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 0);
+    }
+
+    {
+        // Non-deprecated
+        auto crs = factory->createGeodeticCRS("4326");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 0);
+    }
+
+    {
+        // Non supported CRS type
+        auto crs = BoundCRS::createFromTOWGS84(
+            createProjected(), std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 0);
+    }
+
+    {
+        auto crs = factory->createGeodeticCRS("4226");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 2);
+    }
+
+    {
+        auto crs = factory->createProjectedCRS("26591");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 1);
+    }
+
+    {
+        auto crs = factory->createVerticalCRS("5704");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 1);
+    }
+    {
+        auto crs = factory->createCompoundCRS("7401");
+        auto list = crs->getNonDeprecated(dbContext);
+        ASSERT_EQ(list.size(), 1);
     }
 }

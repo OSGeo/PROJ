@@ -731,6 +731,15 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_INTERNAL std::string getTextDefinition(const std::string &tableName,
                                                 const std::string &authName,
                                                 const std::string &code) const;
+
+    PROJ_INTERNAL std::vector<std::string>
+    getAllowedAuthorities(const std::string &sourceAuthName,
+                          const std::string &targetAuthName) const;
+
+    PROJ_INTERNAL std::list<std::pair<std::string, std::string>>
+    getNonDeprecated(const std::string &tableName, const std::string &authName,
+                     const std::string &code) const;
+
     //! @endcond
 
   protected:
@@ -952,7 +961,8 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_INTERNAL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code, bool allowConcatenated,
-                              bool usePROJAlternativeGridNames) const;
+                              bool usePROJAlternativeGridNames,
+                              const std::string &type) const;
 
     INLINED_MAKE_SHARED
 

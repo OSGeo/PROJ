@@ -946,6 +946,30 @@ FOR EACH ROW BEGIN
 END;
 
 
+CREATE TABLE deprecation(
+    table_name TEXT NOT NULL CHECK (table_name IN (
+        'unit_of_measure', 'celestial_body', 'ellipsoid',
+        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
+        'helmert_transformation', 'other_transformation', 'concatenated_operation')),
+    deprecated_auth_name TEXT NOT NULL,
+    deprecated_code TEXT NOT NULL,
+    replacement_auth_name TEXT NOT NULL,
+    replacement_code TEXT NOT NULL,
+    source TEXT
+);
+
+CREATE TRIGGER deprecation_insert_trigger
+BEFORE INSERT ON deprecation
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on deprecation violates constraint: deprecated entry refers to unexisting code')
+        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.deprecated_auth_name AND o.code = NEW.deprecated_code);
+
+    SELECT RAISE(ABORT, 'insert on deprecation violates constraint: replacement entry refers to unexisting code')
+        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.table_name AND o.auth_name = NEW.replacement_auth_name AND o.code = NEW.replacement_code);
+END;
+
+
 
 CREATE VIEW coordinate_operation_view AS
     SELECT 'grid_transformation' AS table_name, auth_name, code, name,
@@ -1048,3 +1072,12 @@ CREATE VIEW authority_list AS
     UNION
     SELECT DISTINCT auth_name FROM coordinate_operation_view
 ;
+
+-- Define the allowed authorities, and their precedence, when researching a
+-- coordinate operation
+CREATE TABLE authority_to_authority_preference(
+    source_auth_name TEXT NOT NULL, -- 'any' for any source
+    target_auth_name TEXT NOT NULL, -- 'any' for any target
+    allowed_authorities TEXT NOT NULL,  -- for example 'PROJ,EPSG,any'
+    CONSTRAINT unique_authority_to_authority_preference UNIQUE (source_auth_name, target_auth_name)
+);

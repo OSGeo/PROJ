@@ -239,7 +239,18 @@ ArrayOfBaseObjectNNPtr ArrayOfBaseObject::create() {
 
 //! @cond Doxygen_Suppress
 struct PropertyMap::Private {
-    std::map<std::string, BaseObjectNNPtr> map_{};
+    std::list<std::pair<std::string, BaseObjectNNPtr>> list_{};
+
+    // cppcheck-suppress functionStatic
+    void set(const std::string &key, const BoxedValueNNPtr &val) {
+        for (auto &pair : list_) {
+            if (pair.first == key) {
+                pair.second = val;
+                return;
+            }
+        }
+        list_.emplace_back(key, val);
+    }
 };
 //! @endcond
 
@@ -263,15 +274,13 @@ PropertyMap::~PropertyMap() = default;
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-std::map<std::string, BaseObjectNNPtr>::iterator
-PropertyMap::find(const std::string &key) const {
-    return d->map_.find(key);
-}
-
-// ---------------------------------------------------------------------------
-
-std::map<std::string, BaseObjectNNPtr>::iterator PropertyMap::end() const {
-    return d->map_.end();
+const BaseObjectNNPtr *PropertyMap::get(const std::string &key) const {
+    for (const auto &pair : d->list_) {
+        if (pair.first == key) {
+            return &(pair.second);
+        }
+    }
+    return nullptr;
 }
 //! @endcond
 
@@ -280,26 +289,13 @@ std::map<std::string, BaseObjectNNPtr>::iterator PropertyMap::end() const {
 /** \brief Set a BaseObjectNNPtr as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key,
                               const BaseObjectNNPtr &val) {
-    auto iter = d->map_.find(key);
-    if (iter != d->map_.end()) {
-        iter->second = val;
-    } else {
-        d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(key, val));
+    for (auto &pair : d->list_) {
+        if (pair.first == key) {
+            pair.second = val;
+            return *this;
+        }
     }
-    return *this;
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Set a BoxedValue as the value of a key. */
-PropertyMap &PropertyMap::set(const std::string &key, const BoxedValue &val) {
-    auto iter = d->map_.find(key);
-    if (iter != d->map_.end()) {
-        iter->second = util::nn_make_shared<BoxedValue>(val);
-    } else {
-        d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(
-            key, util::nn_make_shared<BoxedValue>(val)));
-    }
+    d->list_.emplace_back(key, val);
     return *this;
 }
 
@@ -307,28 +303,32 @@ PropertyMap &PropertyMap::set(const std::string &key, const BoxedValue &val) {
 
 /** \brief Set a string as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key, const std::string &val) {
-    return set(key, BoxedValue(val));
+    d->set(key, util::nn_make_shared<BoxedValue>(val));
+    return *this;
 }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Set a string as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key, const char *val) {
-    return set(key, BoxedValue(val));
+    d->set(key, util::nn_make_shared<BoxedValue>(val));
+    return *this;
 }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Set a integer as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key, int val) {
-    return set(key, BoxedValue(val));
+    d->set(key, util::nn_make_shared<BoxedValue>(val));
+    return *this;
 }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Set a boolean as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key, bool val) {
-    return set(key, BoxedValue(val));
+    d->set(key, util::nn_make_shared<BoxedValue>(val));
+    return *this;
 }
 
 // ---------------------------------------------------------------------------
@@ -350,16 +350,38 @@ bool PropertyMap::getStringValue(
     const std::string &key,
     std::string &outVal) const // throw(InvalidValueTypeException)
 {
-    auto oIter = d->map_.find(key);
-    if (oIter == d->map_.end()) {
-        return false;
+    for (const auto &pair : d->list_) {
+        if (pair.first == key) {
+            auto genVal = dynamic_cast<const BoxedValue *>(pair.second.get());
+            if (genVal && genVal->type() == BoxedValue::Type::STRING) {
+                outVal = genVal->stringValue();
+                return true;
+            }
+            throw InvalidValueTypeException("Invalid value type for " + key);
+        }
     }
-    auto genVal = dynamic_cast<const BoxedValue *>(oIter->second.get());
-    if (genVal && genVal->type() == BoxedValue::Type::STRING) {
-        outVal = genVal->stringValue();
-        return true;
+    return false;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+bool PropertyMap::getStringValue(
+    const std::string &key,
+    optional<std::string> &outVal) const // throw(InvalidValueTypeException)
+{
+    for (const auto &pair : d->list_) {
+        if (pair.first == key) {
+            auto genVal = dynamic_cast<const BoxedValue *>(pair.second.get());
+            if (genVal && genVal->type() == BoxedValue::Type::STRING) {
+                outVal = genVal->stringValue();
+                return true;
+            }
+            throw InvalidValueTypeException("Invalid value type for " + key);
+        }
     }
-    throw InvalidValueTypeException("Invalid value type for " + key);
+    return false;
 }
 //! @endcond
 

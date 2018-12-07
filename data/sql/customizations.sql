@@ -6,3 +6,21 @@ INSERT INTO "other_transformation" VALUES('PROJ','CRS84_TO_EPSG_4326','OGC:CRS84
 
 -- alias of EPSG:3857
 INSERT INTO "projected_crs" VALUES('EPSG','900913','Google Maps Global Mercator',NULL,NULL,'EPSG','4499','EPSG','4326','EPSG','3856','EPSG','3544',NULL,1);
+
+-- Define the allowed authorities, and their precedence, when researching a
+-- coordinate operation
+
+INSERT INTO authority_to_authority_preference(source_auth_name, target_auth_name, allowed_authorities) VALUES
+    ('any', 'EPSG', 'PROJ,EPSG,any' );
+
+INSERT INTO authority_to_authority_preference(source_auth_name, target_auth_name, allowed_authorities) VALUES
+    ('EPSG', 'EPSG', 'PROJ,EPSG' );
+
+INSERT INTO authority_to_authority_preference(source_auth_name, target_auth_name, allowed_authorities) VALUES
+    ('PROJ', 'EPSG', 'PROJ,EPSG' );
+
+INSERT INTO authority_to_authority_preference(source_auth_name, target_auth_name, allowed_authorities) VALUES
+    ('IGNF', 'EPSG', 'PROJ,IGNF,EPSG' );
+
+INSERT INTO authority_to_authority_preference(source_auth_name, target_auth_name, allowed_authorities) VALUES
+    ('ESRI', 'EPSG', 'PROJ,ESRI,EPSG' );

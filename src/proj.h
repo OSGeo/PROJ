@@ -572,6 +572,9 @@ PJ_OBJ_TYPE PROJ_DLL proj_obj_get_type(const PJ_OBJ *obj);
 
 int PROJ_DLL proj_obj_is_deprecated(const PJ_OBJ *obj);
 
+PJ_OBJ_LIST PROJ_DLL *proj_obj_get_non_deprecated(PJ_CONTEXT *ctx,
+                                                  const PJ_OBJ *obj);
+
 /** Comparison criterion. */
 typedef enum
 {

@@ -5941,7 +5941,7 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
         AuthorityFactory::create(DatabaseContext::create(), "EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
-    ASSERT_GE(list2.size(), 4U);
+    ASSERT_GE(list2.size(), 3U);
 
     EXPECT_EQ(replaceAll(list2[0]->exportToPROJString(
                              PROJStringFormatter::create().get()),
@@ -5950,10 +5950,8 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
 
     // The second entry in list2 (list2[1]) uses the
     // weird +pm=2.33720833333333 from "NTF (Paris) to NTF (2)"
-    // and the third one uses the ESRI geographic offset method with another
-    // value
-    // so skip to the 4th method
-    EXPECT_EQ(replaceAll(list2[3]->exportToPROJString(
+    // so skip to the 3th method
+    EXPECT_EQ(replaceAll(list2[2]->exportToPROJString(
                              PROJStringFormatter::create().get()),
                          "0.999877341", "0.99987734"),
               list[1]->exportToPROJString(PROJStringFormatter::create().get()));

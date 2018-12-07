@@ -92,10 +92,10 @@ struct CRS::Private {
     bool implicitCS_ = false;
 
     void setImplicitCS(const util::PropertyMap &properties) {
-        auto oIter = properties.find("IMPLICIT_CS");
-        if (oIter != properties.end()) {
-            if (auto genVal = util::nn_dynamic_pointer_cast<util::BoxedValue>(
-                    oIter->second)) {
+        const auto pVal = properties.get("IMPLICIT_CS");
+        if (pVal) {
+            if (const auto genVal =
+                    dynamic_cast<const util::BoxedValue *>(pVal->get())) {
                 if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
                     genVal->booleanValue()) {
                     implicitCS_ = true;
@@ -375,8 +375,9 @@ VerticalCRSPtr CRS::extractVerticalCRS() const {
  *
  * @return a CRS.
  */
-CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
-    const io::DatabaseContextPtr &dbContext) const {
+CRSNNPtr
+CRS::createBoundCRSToWGS84IfPossible(const io::DatabaseContextPtr &dbContext,
+                                     bool allowIntermediateCRS) const {
     auto thisAsCRS = NN_NO_CHECK(
         std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
     auto boundCRS = util::nn_dynamic_pointer_cast<BoundCRS>(thisAsCRS);
@@ -409,74 +410,98 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
     } else {
         geodCRS = geogCRS;
     }
-    auto l_domains = domains();
+
+    if (!dbContext) {
+        return thisAsCRS;
+    }
+
+    const auto &l_domains = domains();
     metadata::ExtentPtr extent;
     if (!l_domains.empty()) {
         extent = l_domains[0]->domainOfValidity();
     }
 
-    try {
-        auto authFactory = dbContext
-                               ? io::AuthorityFactory::create(
-                                     NN_NO_CHECK(dbContext), std::string())
-                                     .as_nullable()
-                               : nullptr;
-        auto ctxt = operation::CoordinateOperationContext::create(authFactory,
-                                                                  extent, 0.0);
-        // ctxt->setSpatialCriterion(
-        //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
-        auto list =
-            operation::CoordinateOperationFactory::create()->createOperations(
-                NN_NO_CHECK(geodCRS), hubCRS, ctxt);
-        for (const auto &op : list) {
-            auto transf =
-                util::nn_dynamic_pointer_cast<operation::Transformation>(op);
-            if (transf) {
-                try {
-                    transf->getTOWGS84Parameters();
-                } catch (const std::exception &) {
-                    continue;
-                }
-                return util::nn_static_pointer_cast<CRS>(
-                    BoundCRS::create(thisAsCRS, hubCRS, NN_NO_CHECK(transf)));
-            } else {
-                auto concatenated =
-                    dynamic_cast<const operation::ConcatenatedOperation *>(
-                        op.get());
-                if (concatenated) {
-                    // Case for EPSG:4807 / "NTF (Paris)" that is made of a
-                    // longitude rotation followed by a Helmert
-                    // The prime meridian shift will be accounted elsewhere
-                    const auto &subops = concatenated->operations();
-                    if (subops.size() == 2) {
-                        auto firstOpIsTransformation =
-                            dynamic_cast<const operation::Transformation *>(
-                                subops[0].get());
-                        auto firstOpIsConversion =
-                            dynamic_cast<const operation::Conversion *>(
-                                subops[0].get());
-                        if ((firstOpIsTransformation &&
-                             firstOpIsTransformation->isLongitudeRotation()) ||
-                            (dynamic_cast<DerivedCRS *>(thisAsCRS.get()) &&
-                             firstOpIsConversion)) {
-                            transf = util::nn_dynamic_pointer_cast<
-                                operation::Transformation>(subops[1]);
-                            if (transf) {
-                                try {
-                                    transf->getTOWGS84Parameters();
-                                } catch (const std::exception &) {
-                                    continue;
+    std::string crs_authority;
+    const auto &l_identifiers = identifiers();
+    // If the object has an authority, restrict the transformations to
+    // come from that codespace too. This avoids for example EPSG:4269
+    // (NAD83) to use a (dubious) ESRI transformation.
+    if (!l_identifiers.empty()) {
+        crs_authority = *(l_identifiers[0]->codeSpace());
+    }
+
+    auto authorities = dbContext->getAllowedAuthorities(crs_authority, "EPSG");
+    if (authorities.empty()) {
+        authorities.emplace_back();
+    }
+    for (const auto &authority : authorities) {
+        try {
+
+            auto authFactory = io::AuthorityFactory::create(
+                NN_NO_CHECK(dbContext),
+                authority == "any" ? std::string() : authority);
+            auto ctxt = operation::CoordinateOperationContext::create(
+                authFactory, extent, 0.0);
+            ctxt->setAllowUseIntermediateCRS(allowIntermediateCRS);
+            // ctxt->setSpatialCriterion(
+            //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+            auto list =
+                operation::CoordinateOperationFactory::create()
+                    ->createOperations(NN_NO_CHECK(geodCRS), hubCRS, ctxt);
+            for (const auto &op : list) {
+                auto transf =
+                    util::nn_dynamic_pointer_cast<operation::Transformation>(
+                        op);
+                if (transf && !starts_with(transf->nameStr(), "Null geo")) {
+                    try {
+                        transf->getTOWGS84Parameters();
+                    } catch (const std::exception &) {
+                        continue;
+                    }
+                    return util::nn_static_pointer_cast<CRS>(BoundCRS::create(
+                        thisAsCRS, hubCRS, NN_NO_CHECK(transf)));
+                } else {
+                    auto concatenated =
+                        dynamic_cast<const operation::ConcatenatedOperation *>(
+                            op.get());
+                    if (concatenated) {
+                        // Case for EPSG:4807 / "NTF (Paris)" that is made of a
+                        // longitude rotation followed by a Helmert
+                        // The prime meridian shift will be accounted elsewhere
+                        const auto &subops = concatenated->operations();
+                        if (subops.size() == 2) {
+                            auto firstOpIsTransformation =
+                                dynamic_cast<const operation::Transformation *>(
+                                    subops[0].get());
+                            auto firstOpIsConversion =
+                                dynamic_cast<const operation::Conversion *>(
+                                    subops[0].get());
+                            if ((firstOpIsTransformation &&
+                                 firstOpIsTransformation
+                                     ->isLongitudeRotation()) ||
+                                (dynamic_cast<DerivedCRS *>(thisAsCRS.get()) &&
+                                 firstOpIsConversion)) {
+                                transf = util::nn_dynamic_pointer_cast<
+                                    operation::Transformation>(subops[1]);
+                                if (transf &&
+                                    !starts_with(transf->nameStr(),
+                                                 "Null geo")) {
+                                    try {
+                                        transf->getTOWGS84Parameters();
+                                    } catch (const std::exception &) {
+                                        continue;
+                                    }
+                                    return util::nn_static_pointer_cast<CRS>(
+                                        BoundCRS::create(thisAsCRS, hubCRS,
+                                                         NN_NO_CHECK(transf)));
                                 }
-                                return util::nn_static_pointer_cast<CRS>(
-                                    BoundCRS::create(thisAsCRS, hubCRS,
-                                                     NN_NO_CHECK(transf)));
                             }
                         }
                     }
                 }
             }
+        } catch (const std::exception &) {
         }
-    } catch (const std::exception &) {
     }
     return thisAsCRS;
 }
@@ -576,6 +601,40 @@ CRSNNPtr CRS::alterName(const std::string &newName) const {
 std::list<std::pair<CRSNNPtr, int>>
 CRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     return _identify(authorityFactory);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return CRSs that are non-deprecated substitutes for the current CRS.
+ */
+std::list<CRSNNPtr>
+CRS::getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const {
+    std::list<CRSNNPtr> res;
+    const auto &l_identifiers = identifiers();
+    if (l_identifiers.empty()) {
+        return res;
+    }
+    const char *tableName = nullptr;
+    if (dynamic_cast<const GeodeticCRS *>(this)) {
+        tableName = "geodetic_crs";
+    } else if (dynamic_cast<const ProjectedCRS *>(this)) {
+        tableName = "projected_crs";
+    } else if (dynamic_cast<const VerticalCRS *>(this)) {
+        tableName = "vertical_crs";
+    } else if (dynamic_cast<const CompoundCRS *>(this)) {
+        tableName = "compound_crs";
+    }
+    if (!tableName) {
+        return res;
+    }
+    const auto &id = l_identifiers[0];
+    auto tmpRes =
+        dbContext->getNonDeprecated(tableName, *(id->codeSpace()), id->code());
+    for (const auto &pair : tmpRes) {
+        res.emplace_back(io::AuthorityFactory::create(dbContext, pair.first)
+                             ->createCoordinateReferenceSystem(pair.second));
+    }
+    return res;
 }
 
 // ---------------------------------------------------------------------------
@@ -3167,8 +3226,7 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
     auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
     compoundCRS->assignSelf(compoundCRS);
     compoundCRS->setProperties(properties);
-    if (properties.find(common::IdentifiedObject::NAME_KEY) ==
-        properties.end()) {
+    if (!properties.get(common::IdentifiedObject::NAME_KEY)) {
         std::string name;
         for (const auto &crs : components) {
             if (!name.empty()) {
@@ -4459,10 +4517,10 @@ EngineeringCRS::create(const util::PropertyMap &properties,
     crs->assignSelf(crs);
     crs->setProperties(properties);
 
-    auto oIter = properties.find("FORCE_OUTPUT_CS");
-    if (oIter != properties.end()) {
-        if (auto genVal = util::nn_dynamic_pointer_cast<util::BoxedValue>(
-                oIter->second)) {
+    const auto pVal = properties.get("FORCE_OUTPUT_CS");
+    if (pVal) {
+        if (const auto genVal =
+                dynamic_cast<const util::BoxedValue *>(pVal->get())) {
             if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
                 genVal->booleanValue()) {
                 crs->d->forceOutputCS_ = true;

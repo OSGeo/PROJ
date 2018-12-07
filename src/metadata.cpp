@@ -858,6 +858,8 @@ struct Identifier::Private {
     optional<std::string> description_{};
     optional<std::string> uri_{};
 
+    Private() = default;
+
     Private(const std::string &codeIn, const PropertyMap &properties)
         : code_(codeIn) {
         setProperties(properties);
@@ -874,10 +876,9 @@ void Identifier::Private::setProperties(
     const PropertyMap &properties) // throw(InvalidValueTypeException)
 {
     {
-        auto oIter = properties.find(AUTHORITY_KEY);
-        if (oIter != properties.end()) {
-            if (auto genVal =
-                    dynamic_cast<const BoxedValue *>(oIter->second.get())) {
+        const auto pVal = properties.get(AUTHORITY_KEY);
+        if (pVal) {
+            if (auto genVal = dynamic_cast<const BoxedValue *>(pVal->get())) {
                 if (genVal->type() == BoxedValue::Type::STRING) {
                     authority_ = Citation(genVal->stringValue());
                 } else {
@@ -886,7 +887,7 @@ void Identifier::Private::setProperties(
                 }
             } else {
                 if (auto citation =
-                        dynamic_cast<const Citation *>(oIter->second.get())) {
+                        dynamic_cast<const Citation *>(pVal->get())) {
                     authority_ = *citation;
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
@@ -897,10 +898,9 @@ void Identifier::Private::setProperties(
     }
 
     {
-        auto oIter = properties.find(CODE_KEY);
-        if (oIter != properties.end()) {
-            if (auto genVal =
-                    dynamic_cast<const BoxedValue *>(oIter->second.get())) {
+        const auto pVal = properties.get(CODE_KEY);
+        if (pVal) {
+            if (auto genVal = dynamic_cast<const BoxedValue *>(pVal->get())) {
                 if (genVal->type() == BoxedValue::Type::INTEGER) {
                     code_ = toString(genVal->integerValue());
                 } else if (genVal->type() == BoxedValue::Type::STRING) {
@@ -916,45 +916,30 @@ void Identifier::Private::setProperties(
         }
     }
 
-    {
-        std::string temp;
-        if (properties.getStringValue(CODESPACE_KEY, temp)) {
-            codeSpace_ = temp;
-        }
-    }
-
-    {
-        std::string temp;
-        if (properties.getStringValue(VERSION_KEY, temp)) {
-            version_ = temp;
-        }
-    }
-
-    {
-        std::string temp;
-        if (properties.getStringValue(DESCRIPTION_KEY, temp)) {
-            description_ = temp;
-        }
-    }
-
-    {
-        std::string temp;
-        if (properties.getStringValue(URI_KEY, temp)) {
-            uri_ = temp;
-        }
-    }
+    properties.getStringValue(CODESPACE_KEY, codeSpace_);
+    properties.getStringValue(VERSION_KEY, version_);
+    properties.getStringValue(DESCRIPTION_KEY, description_);
+    properties.getStringValue(URI_KEY, uri_);
 }
 
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-Identifier::Identifier(const std::string &codeIn, const PropertyMap &properties)
+Identifier::Identifier(const std::string &codeIn,
+                       const util::PropertyMap &properties)
     : d(internal::make_unique<Private>(codeIn, properties)) {}
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+// ---------------------------------------------------------------------------
+
+Identifier::Identifier() : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
 Identifier::Identifier(const Identifier &other)
     : d(internal::make_unique<Private>(*(other.d))) {}
 
@@ -976,6 +961,17 @@ IdentifierNNPtr Identifier::create(const std::string &codeIn,
                                    const PropertyMap &properties) {
     return Identifier::nn_make_shared<Identifier>(codeIn, properties);
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+IdentifierNNPtr
+Identifier::createFromDescription(const std::string &descriptionIn) {
+    auto id = Identifier::nn_make_shared<Identifier>();
+    id->d->description_ = descriptionIn;
+    return id;
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

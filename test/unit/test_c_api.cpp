@@ -402,7 +402,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
-    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, crs);
+    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, crs, nullptr);
     ObjectKeeper keeper_res(res);
     ASSERT_NE(res, nullptr);
 
@@ -447,7 +447,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84_on_invalid_type) {
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, obj);
+    auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, obj, nullptr);
     ASSERT_EQ(res, nullptr);
 }
 
@@ -1146,7 +1146,7 @@ TEST_F(CApi, proj_obj_create_operations) {
     ASSERT_NE(res, nullptr);
     ObjListKeeper keeper_res(res);
 
-    EXPECT_EQ(proj_obj_list_get_count(res), 8);
+    EXPECT_EQ(proj_obj_list_get_count(res), 7);
 
     EXPECT_EQ(proj_obj_list_get(m_ctxt, res, -1), nullptr);
     EXPECT_EQ(proj_obj_list_get(m_ctxt, res, proj_obj_list_get_count(res)),
@@ -1247,7 +1247,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
 
     // Restrict pivot to JGD2000
     {
-        auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+        auto ctxt = proj_create_operation_factory_context(m_ctxt, "any");
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
 
@@ -1263,7 +1263,7 @@ TEST_F(CApi, proj_obj_create_operations_with_pivot) {
             proj_obj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
-        // includes 2 results from ESRI
+        // includes results from ESRI
         EXPECT_EQ(proj_obj_list_get_count(res), 5);
         auto op = proj_obj_list_get(m_ctxt, res, 0);
         ASSERT_NE(op, nullptr);
@@ -2549,6 +2549,39 @@ TEST_F(CApi, proj_obj_convert_conversion_to_other_method) {
 
         EXPECT_TRUE(proj_obj_is_equivalent_to(conv_in_proj, new_conv_back,
                                               PJ_COMP_STRICT));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_get_non_deprecated) {
+    auto crs = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "4226", PJ_OBJ_CATEGORY_CRS, false, nullptr);
+    ObjectKeeper keeper(crs);
+    ASSERT_NE(crs, nullptr);
+
+    auto list = proj_obj_get_non_deprecated(m_ctxt, crs);
+    ASSERT_NE(list, nullptr);
+    ObjListKeeper keeper_list(list);
+    EXPECT_EQ(proj_obj_list_get_count(list), 2);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_query_geodetic_crs_from_datum) {
+    {
+        auto list = proj_obj_query_geodetic_crs_from_datum(
+            m_ctxt, nullptr, "EPSG", "6326", nullptr);
+        ASSERT_NE(list, nullptr);
+        ObjListKeeper keeper_list(list);
+        EXPECT_GE(proj_obj_list_get_count(list), 3);
+    }
+    {
+        auto list = proj_obj_query_geodetic_crs_from_datum(
+            m_ctxt, "EPSG", "EPSG", "6326", "geographic 2D");
+        ASSERT_NE(list, nullptr);
+        ObjListKeeper keeper_list(list);
+        EXPECT_EQ(proj_obj_list_get_count(list), 1);
     }
 }
 
