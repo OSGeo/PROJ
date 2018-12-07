@@ -499,12 +499,13 @@ class PropertyMap {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        std::map<std::string, BaseObjectNNPtr>::iterator
-        find(const std::string &key) const;
-    std::map<std::string, BaseObjectNNPtr>::iterator end() const;
+        const BaseObjectNNPtr *
+        get(const std::string &key) const;
 
     // throw(InvalidValueTypeException)
     bool getStringValue(const std::string &key, std::string &outVal) const;
+    bool getStringValue(const std::string &key,
+                        optional<std::string> &outVal) const;
 
     static PropertyMap createAndSetName(const char *name);
     static PropertyMap createAndSetName(const std::string &name);
@@ -512,8 +513,6 @@ class PropertyMap {
 
   private:
     PropertyMap &operator=(const PropertyMap &) = delete;
-
-    PropertyMap &set(const std::string &key, const BoxedValue &val);
 
     PROJ_OPAQUE_PRIVATE_DATA
 };

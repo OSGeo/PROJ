@@ -2055,8 +2055,7 @@ static util::PropertyMap createMethodMapNameEPSGCode(int code) {
 static util::PropertyMap
 getUTMConversionProperty(const util::PropertyMap &properties, int zone,
                          bool north) {
-    if (properties.find(common::IdentifiedObject::NAME_KEY) ==
-        properties.end()) {
+    if (!properties.get(common::IdentifiedObject::NAME_KEY)) {
         std::string conversionName("UTM zone ");
         conversionName += toString(zone);
         conversionName += (north ? 'N' : 'S');
@@ -2073,8 +2072,7 @@ getUTMConversionProperty(const util::PropertyMap &properties, int zone,
 static util::PropertyMap
 addDefaultNameIfNeeded(const util::PropertyMap &properties,
                        const std::string &defaultName) {
-    if (properties.find(common::IdentifiedObject::NAME_KEY) ==
-        properties.end()) {
+    if (!properties.get(common::IdentifiedObject::NAME_KEY)) {
         return util::PropertyMap(properties)
             .set(common::IdentifiedObject::NAME_KEY, defaultName);
     } else {
@@ -9578,6 +9576,10 @@ struct FilterAndSort {
 
     // cppcheck-suppress functionStatic
     void removeDuplicateOps() {
+
+        if (res.size() <= 1) {
+            return;
+        }
 
         // When going from EPSG:4807 (NTF Paris) to EPSG:4171 (RGC93), we get
         // EPSG:7811, NTF (Paris) to RGF93 (2), 1 m

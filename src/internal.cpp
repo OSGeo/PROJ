@@ -32,6 +32,7 @@
 
 #include "proj/internal/internal.hpp"
 
+#include <cstdint>
 #include <cstring>
 #ifdef _MSC_VER
 #include <string.h>
@@ -237,6 +238,38 @@ bool ends_with(const std::string &str, const std::string &suffix) noexcept {
 // ---------------------------------------------------------------------------
 
 double c_locale_stod(const std::string &s) {
+
+    const auto s_size = s.size();
+    // Fast path
+    if (s_size > 0 && s_size < 15) {
+        std::int64_t acc = 0;
+        std::int64_t div = 1;
+        bool afterDot = false;
+        size_t i = 0;
+        if (s[0] == '-') {
+            ++i;
+            div = -1;
+        } else if (s[0] == '+') {
+            ++i;
+        }
+        for (; i < s_size; ++i) {
+            const auto ch = s[i];
+            if (ch >= '0' && ch <= '9') {
+                acc = acc * 10 + ch - '0';
+                if (afterDot) {
+                    div *= 10;
+                }
+            } else if (ch == '.') {
+                afterDot = true;
+            } else {
+                div = 0;
+            }
+        }
+        if (div) {
+            return static_cast<double>(acc) / div;
+        }
+    }
+
     std::istringstream iss(s);
     iss.imbue(std::locale::classic());
     double d;

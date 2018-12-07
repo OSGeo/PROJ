@@ -961,7 +961,8 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_INTERNAL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code, bool allowConcatenated,
-                              bool usePROJAlternativeGridNames) const;
+                              bool usePROJAlternativeGridNames,
+                              const std::string &type) const;
 
     INLINED_MAKE_SHARED
 

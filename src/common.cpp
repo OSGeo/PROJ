@@ -650,23 +650,20 @@ bool IdentifiedObject::isDeprecated() PROJ_CONST_DEFN {
 void IdentifiedObject::Private::setName(
     const PropertyMap &properties) // throw(InvalidValueTypeException)
 {
-    auto oIter = properties.find(NAME_KEY);
-    if (oIter == properties.end()) {
+    const auto pVal = properties.get(NAME_KEY);
+    if (!pVal) {
         return;
     }
-    if (auto genVal =
-            util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
+    if (const auto genVal = dynamic_cast<const BoxedValue *>(pVal->get())) {
         if (genVal->type() == BoxedValue::Type::STRING) {
-            name = Identifier::create(
-                std::string(), PropertyMap().set(Identifier::DESCRIPTION_KEY,
-                                                 genVal->stringValue()));
+            name = Identifier::createFromDescription(genVal->stringValue());
         } else {
             throw InvalidValueTypeException("Invalid value type for " +
                                             NAME_KEY);
         }
     } else {
         if (auto identifier =
-                util::nn_dynamic_pointer_cast<Identifier>(oIter->second)) {
+                util::nn_dynamic_pointer_cast<Identifier>(*pVal)) {
             name = NN_NO_CHECK(identifier);
         } else {
             throw InvalidValueTypeException("Invalid value type for " +
@@ -680,23 +677,21 @@ void IdentifiedObject::Private::setName(
 void IdentifiedObject::Private::setIdentifiers(
     const PropertyMap &properties) // throw(InvalidValueTypeException)
 {
-    auto oIter = properties.find(IDENTIFIERS_KEY);
-    if (oIter == properties.end()) {
+    auto pVal = properties.get(IDENTIFIERS_KEY);
+    if (!pVal) {
 
-        oIter = properties.find(Identifier::CODE_KEY);
-        if (oIter != properties.end()) {
+        pVal = properties.get(Identifier::CODE_KEY);
+        if (pVal) {
             identifiers.push_back(
                 Identifier::create(std::string(), properties));
         }
         return;
     }
-    if (auto identifier =
-            util::nn_dynamic_pointer_cast<Identifier>(oIter->second)) {
+    if (auto identifier = util::nn_dynamic_pointer_cast<Identifier>(*pVal)) {
         identifiers.clear();
         identifiers.push_back(NN_NO_CHECK(identifier));
     } else {
-        if (auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
-                oIter->second)) {
+        if (auto array = dynamic_cast<const ArrayOfBaseObject *>(pVal->get())) {
             identifiers.clear();
             for (const auto &val : *array) {
                 identifier = util::nn_dynamic_pointer_cast<Identifier>(val);
@@ -719,17 +714,16 @@ void IdentifiedObject::Private::setIdentifiers(
 void IdentifiedObject::Private::setAliases(
     const PropertyMap &properties) // throw(InvalidValueTypeException)
 {
-    auto oIter = properties.find(ALIAS_KEY);
-    if (oIter == properties.end()) {
+    const auto pVal = properties.get(ALIAS_KEY);
+    if (!pVal) {
         return;
     }
-    if (auto l_name =
-            util::nn_dynamic_pointer_cast<GenericName>(oIter->second)) {
+    if (auto l_name = util::nn_dynamic_pointer_cast<GenericName>(*pVal)) {
         aliases.clear();
         aliases.push_back(NN_NO_CHECK(l_name));
     } else {
-        if (auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
-                oIter->second)) {
+        if (const auto array =
+                dynamic_cast<const ArrayOfBaseObject *>(pVal->get())) {
             aliases.clear();
             for (const auto &val : *array) {
                 l_name = util::nn_dynamic_pointer_cast<GenericName>(val);
@@ -737,7 +731,7 @@ void IdentifiedObject::Private::setAliases(
                     aliases.push_back(NN_NO_CHECK(l_name));
                 } else {
                     if (auto genVal =
-                            util::nn_dynamic_pointer_cast<BoxedValue>(val)) {
+                            dynamic_cast<const BoxedValue *>(val.get())) {
                         if (genVal->type() == BoxedValue::Type::STRING) {
                             aliases.push_back(NameFactory::createLocalName(
                                 nullptr, genVal->stringValue()));
@@ -777,10 +771,10 @@ void IdentifiedObject::setProperties(
     properties.getStringValue(REMARKS_KEY, d->remarks);
 
     {
-        auto oIter = properties.find(DEPRECATED_KEY);
-        if (oIter != properties.end()) {
-            if (auto genVal =
-                    util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
+        const auto pVal = properties.get(DEPRECATED_KEY);
+        if (pVal) {
+            if (const auto genVal =
+                    dynamic_cast<const BoxedValue *>(pVal->get())) {
                 if (genVal->type() == BoxedValue::Type::BOOLEAN) {
                     d->isDeprecated = genVal->booleanValue();
                 } else {
@@ -930,8 +924,8 @@ void ObjectDomain::_exportToWKT(WKTFormatter *formatter) const {
             formatter->endNode();
         }
         if (d->domainOfValidity_->geographicElements().size() == 1) {
-            auto bbox = util::nn_dynamic_pointer_cast<GeographicBoundingBox>(
-                d->domainOfValidity_->geographicElements()[0]);
+            const auto bbox = dynamic_cast<const GeographicBoundingBox *>(
+                d->domainOfValidity_->geographicElements()[0].get());
             if (bbox) {
                 formatter->startNode(WKTConstants::BBOX, false);
                 formatter->add(bbox->southBoundLatitude());
@@ -1029,19 +1023,13 @@ void ObjectUsage::setProperties(
     IdentifiedObject::setProperties(properties);
 
     optional<std::string> scope;
-    {
-        std::string temp;
-        if (properties.getStringValue(SCOPE_KEY, temp)) {
-            scope = temp;
-        }
-    }
+    properties.getStringValue(SCOPE_KEY, scope);
 
     ExtentPtr domainOfValidity;
     {
-        auto oIter = properties.find(DOMAIN_OF_VALIDITY_KEY);
-        if (oIter != properties.end()) {
-            domainOfValidity =
-                util::nn_dynamic_pointer_cast<Extent>(oIter->second);
+        const auto pVal = properties.get(DOMAIN_OF_VALIDITY_KEY);
+        if (pVal) {
+            domainOfValidity = util::nn_dynamic_pointer_cast<Extent>(*pVal);
             if (!domainOfValidity) {
                 throw InvalidValueTypeException("Invalid value type for " +
                                                 DOMAIN_OF_VALIDITY_KEY);
@@ -1054,14 +1042,14 @@ void ObjectUsage::setProperties(
     }
 
     {
-        auto oIter = properties.find(OBJECT_DOMAIN_KEY);
-        if (oIter != properties.end()) {
-            if (auto objectDomain = util::nn_dynamic_pointer_cast<ObjectDomain>(
-                    oIter->second)) {
+        const auto pVal = properties.get(OBJECT_DOMAIN_KEY);
+        if (pVal) {
+            if (auto objectDomain =
+                    util::nn_dynamic_pointer_cast<ObjectDomain>(*pVal)) {
                 d->domains_.emplace_back(NN_NO_CHECK(objectDomain));
-            } else if (auto array =
-                           util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
-                               oIter->second)) {
+            } else if (const auto array =
+                           dynamic_cast<const ArrayOfBaseObject *>(
+                               pVal->get())) {
                 for (const auto &val : *array) {
                     objectDomain =
                         util::nn_dynamic_pointer_cast<ObjectDomain>(val);

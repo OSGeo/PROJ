@@ -490,7 +490,7 @@ static std::string normalizeSerializedString(const std::string &in) {
     return in;
 }
 #else
-static std::string normalizeSerializedString(const std::string &in) {
+static inline std::string normalizeSerializedString(const std::string &in) {
     return in;
 }
 #endif
@@ -499,11 +499,19 @@ static std::string normalizeSerializedString(const std::string &in) {
 
 void WKTFormatter::add(double number, int precision) {
     d->startNewChild();
-    std::string val(
-        normalizeSerializedString(internal::toString(number, precision)));
-    d->result_ += val;
-    if (d->params_.useESRIDialect_ && val.find('.') == std::string::npos) {
-        d->result_ += ".0";
+    if (number == 0.0) {
+        if (d->params_.useESRIDialect_) {
+            d->result_ += "0.0";
+        } else {
+            d->result_ += '0';
+        }
+    } else {
+        std::string val(
+            normalizeSerializedString(internal::toString(number, precision)));
+        d->result_ += val;
+        if (d->params_.useESRIDialect_ && val.find('.') == std::string::npos) {
+            d->result_ += ".0";
+        }
     }
 }
 
@@ -1963,8 +1971,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                     foundDatumName = true;
                     properties.set(IdentifiedObject::NAME_KEY,
                                    refDatum->nameStr());
-                    if (properties.find(Identifier::CODESPACE_KEY) ==
-                            properties.end() &&
+                    if (!properties.get(Identifier::CODESPACE_KEY) &&
                         refDatum->identifiers().size() == 1) {
                         const auto &id = refDatum->identifiers()[0];
                         auto identifiers = ArrayOfBaseObject::create();

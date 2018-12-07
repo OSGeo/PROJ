@@ -92,10 +92,10 @@ struct CRS::Private {
     bool implicitCS_ = false;
 
     void setImplicitCS(const util::PropertyMap &properties) {
-        auto oIter = properties.find("IMPLICIT_CS");
-        if (oIter != properties.end()) {
-            if (auto genVal = util::nn_dynamic_pointer_cast<util::BoxedValue>(
-                    oIter->second)) {
+        const auto pVal = properties.get("IMPLICIT_CS");
+        if (pVal) {
+            if (const auto genVal =
+                    dynamic_cast<const util::BoxedValue *>(pVal->get())) {
                 if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
                     genVal->booleanValue()) {
                     implicitCS_ = true;
@@ -3226,8 +3226,7 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
     auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
     compoundCRS->assignSelf(compoundCRS);
     compoundCRS->setProperties(properties);
-    if (properties.find(common::IdentifiedObject::NAME_KEY) ==
-        properties.end()) {
+    if (!properties.get(common::IdentifiedObject::NAME_KEY)) {
         std::string name;
         for (const auto &crs : components) {
             if (!name.empty()) {
@@ -4518,10 +4517,10 @@ EngineeringCRS::create(const util::PropertyMap &properties,
     crs->assignSelf(crs);
     crs->setProperties(properties);
 
-    auto oIter = properties.find("FORCE_OUTPUT_CS");
-    if (oIter != properties.end()) {
-        if (auto genVal = util::nn_dynamic_pointer_cast<util::BoxedValue>(
-                oIter->second)) {
+    const auto pVal = properties.get("FORCE_OUTPUT_CS");
+    if (pVal) {
+        if (const auto genVal =
+                dynamic_cast<const util::BoxedValue *>(pVal->get())) {
             if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
                 genVal->booleanValue()) {
                 crs->d->forceOutputCS_ = true;
