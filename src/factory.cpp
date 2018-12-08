@@ -202,6 +202,21 @@ struct DatabaseContext::Private {
     void cache(const std::string &code,
                const std::vector<operation::CoordinateOperationNNPtr> &list);
 
+    struct GridInfoCache {
+        std::string fullFilename{};
+        std::string packageName{};
+        std::string url{};
+        bool found = false;
+        bool directDownload = false;
+        bool openLicense = false;
+        bool gridAvailable = false;
+    };
+
+    // cppcheck-suppress functionStatic
+    bool getGridInfoFromCache(const std::string &code, GridInfoCache &info);
+    // cppcheck-suppress functionStatic
+    void cache(const std::string &code, const GridInfoCache &info);
+
   private:
     friend class DatabaseContext;
 
@@ -226,6 +241,7 @@ struct DatabaseContext::Private {
     LRUCacheOfObjects cacheExtent_{CACHE_SIZE};
     lru11::Cache<std::string, std::vector<operation::CoordinateOperationNNPtr>>
         cacheCRSToCrsCoordOp_{CACHE_SIZE};
+    lru11::Cache<std::string, GridInfoCache> cacheGridInfo_{CACHE_SIZE};
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -424,6 +440,20 @@ DatabaseContext::Private::getExtentFromCache(const std::string &code) {
 void DatabaseContext::Private::cache(const std::string &code,
                                      const metadata::ExtentNNPtr &extent) {
     insertIntoCache(cacheExtent_, code, extent.as_nullable());
+}
+
+// ---------------------------------------------------------------------------
+
+bool DatabaseContext::Private::getGridInfoFromCache(const std::string &code,
+                                                    GridInfoCache &info) {
+    return cacheGridInfo_.tryGet(code, info);
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::cache(const std::string &code,
+                                     const GridInfoCache &info) {
+    cacheGridInfo_.insert(code, info);
 }
 
 // ---------------------------------------------------------------------------
@@ -965,6 +995,17 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
                                       std::string &url, bool &directDownload,
                                       bool &openLicense,
                                       bool &gridAvailable) const {
+    Private::GridInfoCache info;
+    if (d->getGridInfoFromCache(projFilename, info)) {
+        fullFilename = info.fullFilename;
+        packageName = info.packageName;
+        url = info.url;
+        directDownload = info.directDownload;
+        openLicense = info.openLicense;
+        gridAvailable = info.gridAvailable;
+        return info.found;
+    }
+
     fullFilename.clear();
     packageName.clear();
     url.clear();
@@ -994,15 +1035,24 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
                "grid_alternatives.package_name = grid_packages.package_name "
                "WHERE proj_grid_name = ?",
                {projFilename});
-    if (res.empty()) {
-        return false;
+    bool ret = !res.empty();
+    if (ret) {
+        const auto &row = res.front();
+        packageName = std::move(row[0]);
+        url = row[1].empty() ? std::move(row[2]) : std::move(row[1]);
+        openLicense = (row[3].empty() ? row[4] : row[3]) == "1";
+        directDownload = (row[5].empty() ? row[6] : row[5]) == "1";
+
+        info.fullFilename = fullFilename;
+        info.packageName = packageName;
+        info.url = url;
+        info.directDownload = directDownload;
+        info.openLicense = openLicense;
+        info.gridAvailable = gridAvailable;
     }
-    const auto &row = res.front();
-    packageName = std::move(row[0]);
-    url = row[1].empty() ? std::move(row[2]) : std::move(row[1]);
-    openLicense = (row[3].empty() ? row[4] : row[3]) == "1";
-    directDownload = (row[5].empty() ? row[6] : row[5]) == "1";
-    return true;
+    info.found = ret;
+    d->cache(projFilename, info);
+    return ret;
 }
 
 // ---------------------------------------------------------------------------
