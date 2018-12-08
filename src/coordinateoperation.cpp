@@ -9206,9 +9206,9 @@ static size_t getStepCount(const CoordinateOperationNNPtr &op) {
 
 // ---------------------------------------------------------------------------
 
-struct FilterAndSort {
+struct FilterResults {
 
-    FilterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceListIn,
+    FilterResults(const std::vector<CoordinateOperationNNPtr> &sourceListIn,
                   const CoordinateOperationContextNNPtr &contextIn,
                   const crs::CRSNNPtr &sourceCRSIn,
                   const crs::CRSNNPtr &targetCRSIn,
@@ -9223,6 +9223,9 @@ struct FilterAndSort {
 
         computeAreaOfIntest();
         filterOut(forceStrictContainmentTest);
+    }
+
+    FilterResults &andSort() {
         sort();
 
         // And now that we have a sorted list, we can remove uninteresting
@@ -9232,6 +9235,7 @@ struct FilterAndSort {
         removeUninterestingOps();
         removeDuplicateOps();
         removeSyntheticNullTransforms();
+        return *this;
     }
 
     // ----------------------------------------------------------------------
@@ -9646,7 +9650,8 @@ static std::vector<CoordinateOperationNNPtr>
 filterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceList,
               const CoordinateOperationContextNNPtr &context,
               const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) {
-    return FilterAndSort(sourceList, context, sourceCRS, targetCRS, false)
+    return FilterResults(sourceList, context, sourceCRS, targetCRS, false)
+        .andSort()
         .getRes();
 }
 //! @endcond
@@ -10449,7 +10454,7 @@ createNullGeocentricTranslation(const crs::CRSNNPtr &sourceCRS,
 
 bool CoordinateOperationFactory::Private::hasPerfectAccuracyResult(
     const std::vector<CoordinateOperationNNPtr> &res, const Context &context) {
-    auto resTmp = FilterAndSort(res, context.context, context.sourceCRS,
+    auto resTmp = FilterResults(res, context.context, context.sourceCRS,
                                 context.targetCRS, true)
                       .getRes();
     for (const auto &op : resTmp) {
