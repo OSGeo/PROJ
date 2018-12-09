@@ -45,6 +45,8 @@
 #include <sstream> // std::istringstream and std::ostringstream
 #include <string>
 
+#include "sqlite3.h"
+
 NS_PROJ_START
 
 namespace internal {
@@ -296,6 +298,12 @@ std::vector<std::string> split(const std::string &str, char separator) {
 
 // ---------------------------------------------------------------------------
 
+#ifdef _WIN32
+
+// For some reason, sqlite3_snprintf() in the sqlite3 builds used on AppVeyor
+// doesn't round identically to the Unix builds, and thus breaks a number of
+// unit test. So to avoid this, use the stdlib formatting
+
 std::string toString(int val) {
     std::ostringstream buffer;
     buffer.imbue(std::locale::classic());
@@ -318,6 +326,31 @@ std::string toString(double val, int precision) {
     }
     return str;
 }
+
+#else
+
+std::string toString(int val) {
+    // use sqlite3 API that is slighly faster than std::ostringstream
+    // with forcing the C locale. sqlite3_snprintf() emulates a C locale.
+    constexpr int BUF_SIZE = 16;
+    char szBuffer[BUF_SIZE];
+    sqlite3_snprintf(BUF_SIZE, szBuffer, "%d", val);
+    return szBuffer;
+}
+
+std::string toString(double val, int precision) {
+    // use sqlite3 API that is slighly faster than std::ostringstream
+    // with forcing the C locale. sqlite3_snprintf() emulates a C locale.
+    constexpr int BUF_SIZE = 32;
+    char szBuffer[BUF_SIZE];
+    sqlite3_snprintf(BUF_SIZE, szBuffer, "%.*g", precision, val);
+    if (precision == 15 && strstr(szBuffer, "9999999999")) {
+        sqlite3_snprintf(BUF_SIZE, szBuffer, "%.14g", val);
+    }
+    return szBuffer;
+}
+
+#endif
 
 // ---------------------------------------------------------------------------
 
