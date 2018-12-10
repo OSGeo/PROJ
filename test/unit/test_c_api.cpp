@@ -2121,32 +2121,41 @@ TEST_F(CApi, proj_obj_cs_get_axis_info) {
         EXPECT_EQ(proj_obj_cs_get_axis_count(m_ctxt, cs), 2);
 
         EXPECT_FALSE(proj_obj_cs_get_axis_info(m_ctxt, cs, -1, nullptr, nullptr,
-                                               nullptr, nullptr, nullptr));
+                                               nullptr, nullptr, nullptr,
+                                               nullptr, nullptr));
 
         EXPECT_FALSE(proj_obj_cs_get_axis_info(m_ctxt, cs, 2, nullptr, nullptr,
-                                               nullptr, nullptr, nullptr));
+                                               nullptr, nullptr, nullptr,
+                                               nullptr, nullptr));
 
         EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
-                                              nullptr, nullptr, nullptr));
+                                              nullptr, nullptr, nullptr,
+                                              nullptr, nullptr));
 
         const char *name = nullptr;
         const char *abbrev = nullptr;
         const char *direction = nullptr;
         double unitConvFactor = 0.0;
         const char *unitName = nullptr;
+        const char *unitAuthority = nullptr;
+        const char *unitCode = nullptr;
 
-        EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, &name, &abbrev,
-                                              &direction, &unitConvFactor,
-                                              &unitName));
+        EXPECT_TRUE(proj_obj_cs_get_axis_info(
+            m_ctxt, cs, 0, &name, &abbrev, &direction, &unitConvFactor,
+            &unitName, &unitAuthority, &unitCode));
         ASSERT_NE(name, nullptr);
         ASSERT_NE(abbrev, nullptr);
         ASSERT_NE(direction, nullptr);
         ASSERT_NE(unitName, nullptr);
+        ASSERT_NE(unitAuthority, nullptr);
+        ASSERT_NE(unitCode, nullptr);
         EXPECT_EQ(std::string(name), "Geodetic latitude");
         EXPECT_EQ(std::string(abbrev), "Lat");
         EXPECT_EQ(std::string(direction), "north");
         EXPECT_EQ(unitConvFactor, 0.017453292519943295) << unitConvFactor;
         EXPECT_EQ(std::string(unitName), "degree");
+        EXPECT_EQ(std::string(unitAuthority), "EPSG");
+        EXPECT_EQ(std::string(unitCode), "9122");
     }
 
     // Non CRS object
@@ -2163,7 +2172,8 @@ TEST_F(CApi, proj_obj_cs_get_axis_info) {
         EXPECT_EQ(proj_obj_cs_get_axis_count(m_ctxt, obj), -1);
 
         EXPECT_FALSE(proj_obj_cs_get_axis_info(m_ctxt, obj, 0, nullptr, nullptr,
-                                               nullptr, nullptr, nullptr));
+                                               nullptr, nullptr, nullptr,
+                                               nullptr, nullptr));
     }
 }
 
@@ -2272,7 +2282,8 @@ TEST_F(CApi, proj_obj_crs_alter_cs_angular_unit) {
     const char *unitName = nullptr;
 
     EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
-                                          nullptr, &unitConvFactor, &unitName));
+                                          nullptr, &unitConvFactor, &unitName,
+                                          nullptr, nullptr));
     ASSERT_NE(unitName, nullptr);
     EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
     EXPECT_EQ(std::string(unitName), "my unit");
@@ -2300,7 +2311,8 @@ TEST_F(CApi, proj_obj_crs_alter_cs_linear_unit) {
     const char *unitName = nullptr;
 
     EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
-                                          nullptr, &unitConvFactor, &unitName));
+                                          nullptr, &unitConvFactor, &unitName,
+                                          nullptr, nullptr));
     ASSERT_NE(unitName, nullptr);
     EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
     EXPECT_EQ(std::string(unitName), "my unit");

@@ -242,7 +242,9 @@ static PJ_OBJ *instanciate_crs(const std::string &definition,
                                   nullptr,   // abbrev
                                   nullptr,   // direction
                                   &toRadians,
-                                  nullptr // unit name
+                                  nullptr, // unit name
+                                  nullptr, // unit authority
+                                  nullptr  // unit code
                                   );
         isLatFirst =
             NS_PROJ::internal::ci_find(std::string(axisName), "latitude") !=
@@ -291,7 +293,9 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
                               nullptr,   // abbrev
                               nullptr,   // direction
                               &toRadians,
-                              nullptr // unit name
+                              nullptr, // unit name
+                              nullptr, // unit authority
+                              nullptr  // unit code
                               );
     isLatFirst = NS_PROJ::internal::ci_find(std::string(axisName),
                                             "latitude") != std::string::npos;

@@ -6018,13 +6018,19 @@ int proj_obj_cs_get_axis_count(PJ_CONTEXT *ctx, const PJ_OBJ *cs) {
  * unit conversion factor. or NULL
  * @param out_unit_name Pointer to a string value to store the axis
  * unit name. or NULL
+ * @param out_unit_auth_name Pointer to a string value to store the axis
+ * unit authority name. or NULL
+ * @param out_unit_code Pointer to a string value to store the axis
+ * unit code. or NULL
  * @return TRUE in case of success
  */
 int proj_obj_cs_get_axis_info(PJ_CONTEXT *ctx, const PJ_OBJ *cs, int index,
                               const char **out_name, const char **out_abbrev,
                               const char **out_direction,
                               double *out_unit_conv_factor,
-                              const char **out_unit_name) {
+                              const char **out_unit_name,
+                              const char **out_unit_auth_name,
+                              const char **out_unit_code) {
     SANITIZE_CTX(ctx);
     assert(cs);
     auto l_cs = dynamic_cast<const CoordinateSystem *>(cs->obj.get());
@@ -6052,6 +6058,12 @@ int proj_obj_cs_get_axis_info(PJ_CONTEXT *ctx, const PJ_OBJ *cs, int index,
     }
     if (out_unit_name) {
         *out_unit_name = axis->unit().name().c_str();
+    }
+    if (out_unit_auth_name) {
+        *out_unit_auth_name = axis->unit().codeSpace().c_str();
+    }
+    if (out_unit_code) {
+        *out_unit_code = axis->unit().code().c_str();
     }
     return true;
 }

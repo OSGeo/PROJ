@@ -838,7 +838,9 @@ int PROJ_DLL proj_obj_cs_get_axis_info(PJ_CONTEXT *ctx,
                                        const char **out_abbrev,
                                        const char **out_direction,
                                        double *out_unit_conv_factor,
-                                       const char **out_unit_name);
+                                       const char **out_unit_name,
+                                       const char **out_unit_auth_name,
+                                       const char **out_unit_code);
 
 PJ_OBJ PROJ_DLL *proj_obj_get_ellipsoid(PJ_CONTEXT *ctx,
                                         const PJ_OBJ *obj);
