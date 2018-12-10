@@ -499,6 +499,9 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
         case PJ_OBJ_CATEGORY_ELLIPSOID:
             obj = factory->createEllipsoid(codeStr).as_nullable();
             break;
+        case PJ_OBJ_CATEGORY_PRIME_MERIDIAN:
+            obj = factory->createPrimeMeridian(codeStr).as_nullable();
+            break;
         case PJ_OBJ_CATEGORY_DATUM:
             obj = factory->createDatum(codeStr).as_nullable();
             break;
@@ -577,6 +580,10 @@ convertPJObjectTypeToObjectType(PJ_OBJ_TYPE type, bool &valid) {
     switch (type) {
     case PJ_OBJ_TYPE_ELLIPSOID:
         cppType = AuthorityFactory::ObjectType::ELLIPSOID;
+        break;
+
+    case PJ_OBJ_TYPE_PRIME_MERIDIAN:
+        cppType = AuthorityFactory::ObjectType::PRIME_MERIDIAN;
         break;
 
     case PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME:
@@ -735,6 +742,10 @@ PJ_OBJ_TYPE proj_obj_get_type(const PJ_OBJ *obj) {
     auto ptr = obj->obj.get();
     if (dynamic_cast<Ellipsoid *>(ptr)) {
         return PJ_OBJ_TYPE_ELLIPSOID;
+    }
+
+    if (dynamic_cast<PrimeMeridian *>(ptr)) {
+        return PJ_OBJ_TYPE_PRIME_MERIDIAN;
     }
 
     if (dynamic_cast<DynamicGeodeticReferenceFrame *>(ptr)) {

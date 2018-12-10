@@ -659,6 +659,14 @@ TEST_F(CApi, proj_obj_create_from_database) {
         EXPECT_EQ(proj_obj_get_type(ellipsoid), PJ_OBJ_TYPE_ELLIPSOID);
     }
     {
+        auto pm = proj_obj_create_from_database(m_ctxt, "EPSG", "8903",
+                                                PJ_OBJ_CATEGORY_PRIME_MERIDIAN,
+                                                false, nullptr);
+        ASSERT_NE(pm, nullptr);
+        ObjectKeeper keeper(pm);
+        EXPECT_EQ(proj_obj_get_type(pm), PJ_OBJ_TYPE_PRIME_MERIDIAN);
+    }
+    {
         auto datum = proj_obj_create_from_database(
             m_ctxt, "EPSG", "6326", PJ_OBJ_CATEGORY_DATUM, false, nullptr);
         ASSERT_NE(datum, nullptr);
@@ -939,6 +947,8 @@ TEST_F(CApi, proj_get_codes_from_database) {
 
     auto listTypes =
         std::vector<PJ_OBJ_TYPE>{PJ_OBJ_TYPE_ELLIPSOID,
+
+                                 PJ_OBJ_TYPE_PRIME_MERIDIAN,
 
                                  PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME,
                                  PJ_OBJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME,
