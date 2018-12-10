@@ -2607,4 +2607,41 @@ TEST_F(CApi, proj_obj_query_geodetic_crs_from_datum) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_uom_get_info_from_database) {
+    {
+        EXPECT_FALSE(proj_uom_get_info_from_database(
+            m_ctxt, "auth", "code", nullptr, nullptr, nullptr));
+    }
+    {
+        EXPECT_TRUE(proj_uom_get_info_from_database(m_ctxt, "EPSG", "9001",
+                                                    nullptr, nullptr, nullptr));
+    }
+    {
+        const char *name = nullptr;
+        double conv_factor = 0.0;
+        const char *category = nullptr;
+        EXPECT_TRUE(proj_uom_get_info_from_database(
+            m_ctxt, "EPSG", "9001", &name, &conv_factor, &category));
+        ASSERT_NE(name, nullptr);
+        ASSERT_NE(category, nullptr);
+        EXPECT_EQ(std::string(name), "metre");
+        EXPECT_EQ(conv_factor, 1.0);
+        EXPECT_EQ(std::string(category), "linear");
+    }
+    {
+        const char *name = nullptr;
+        double conv_factor = 0.0;
+        const char *category = nullptr;
+        EXPECT_TRUE(proj_uom_get_info_from_database(
+            m_ctxt, "EPSG", "9102", &name, &conv_factor, &category));
+        ASSERT_NE(name, nullptr);
+        ASSERT_NE(category, nullptr);
+        EXPECT_EQ(std::string(name), "degree");
+        EXPECT_NEAR(conv_factor, UnitOfMeasure::DEGREE.conversionToSI(), 1e-10);
+        EXPECT_EQ(std::string(category), "angular");
+    }
+}
+
 } // namespace

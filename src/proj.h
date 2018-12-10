@@ -517,6 +517,13 @@ PJ_OBJ PROJ_DLL *proj_obj_create_from_database(PJ_CONTEXT *ctx,
                                                int usePROJAlternativeGridNames,
                                                const char* const *options);
 
+int PROJ_DLL proj_uom_get_info_from_database(PJ_CONTEXT *ctx,
+                               const char *auth_name,
+                               const char *code,
+                               const char **out_name,
+                               double *out_conv_factor,
+                               const char **out_category);
+
 void PROJ_DLL proj_obj_unref(PJ_OBJ *obj);
 
 PJ_OBJ PROJ_DLL *proj_obj_clone(PJ_CONTEXT *ctx, const PJ_OBJ *obj);

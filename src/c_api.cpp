@@ -138,6 +138,7 @@ struct PJ_OBJ_LIST {
 /** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
 struct projCppContext {
     DatabaseContextNNPtr databaseContext;
+    std::string lastUOMName_{};
 
     explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
                             const char *const *auxDbPaths = nullptr)
@@ -491,8 +492,8 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     assert(code);
     (void)options;
     SANITIZE_CTX(ctx);
-    const std::string codeStr(code);
     try {
+        const std::string codeStr(code);
         auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
         IdentifiedObjectPtr obj;
         switch (category) {
@@ -521,6 +522,72 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
     return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Get information for a unit of measure from a database lookup.
+ *
+ * @param ctx Context, or NULL for default context.
+ * @param auth_name Authority name (must not be NULL)
+ * @param code Unit of measure code (must not be NULL)
+ * @param out_name Pointer to a string value to store the parameter name. or
+ * NULL. This value remains valid until the next call to
+ * proj_uom_get_info_from_database() or the context destruction.
+ * @param out_conv_factor Pointer to a value to store the conversion
+ * factor of the prime meridian longitude unit to radian. or NULL
+ * @param out_category Pointer to a string value to store the parameter name. or
+ * NULL. This value might be "unknown", "none", "linear", "angular", "scale",
+ * "time" or "parametric";
+ * @return TRUE in case of success
+ */
+int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
+                                    const char *code, const char **out_name,
+                                    double *out_conv_factor,
+                                    const char **out_category) {
+    assert(auth_name);
+    assert(code);
+    SANITIZE_CTX(ctx);
+    try {
+        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
+        auto obj = factory->createUnitOfMeasure(code);
+        if (out_name) {
+            ctx->cpp_context->lastUOMName_ = obj->name();
+            *out_name = ctx->cpp_context->lastUOMName_.c_str();
+        }
+        if (out_conv_factor) {
+            *out_conv_factor = obj->conversionToSI();
+        }
+        if (out_category) {
+            switch (obj->type()) {
+            case UnitOfMeasure::Type::UNKNOWN:
+                *out_category = "unknown";
+                break;
+            case UnitOfMeasure::Type::NONE:
+                *out_category = "none";
+                break;
+            case UnitOfMeasure::Type::ANGULAR:
+                *out_category = "angular";
+                break;
+            case UnitOfMeasure::Type::LINEAR:
+                *out_category = "linear";
+                break;
+            case UnitOfMeasure::Type::SCALE:
+                *out_category = "scale";
+                break;
+            case UnitOfMeasure::Type::TIME:
+                *out_category = "time";
+                break;
+            case UnitOfMeasure::Type::PARAMETRIC:
+                *out_category = "parametric";
+                break;
+            }
+        }
+        return true;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return false;
 }
 
 // ---------------------------------------------------------------------------
