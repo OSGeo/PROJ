@@ -990,10 +990,8 @@ TEST_F(CApi, proj_get_codes_from_database) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, conversion) {
-    auto crs = proj_obj_create_from_wkt(
-        m_ctxt,
-        createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+    auto crs = proj_obj_create_from_database(
+        m_ctxt, "EPSG", "32631", PJ_OBJ_CATEGORY_CRS, false, nullptr);
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
@@ -1034,12 +1032,12 @@ TEST_F(CApi, conversion) {
     EXPECT_EQ(
         proj_coordoperation_get_param_index(m_ctxt, conv, "False easting"), 3);
 
-    EXPECT_FALSE(proj_coordoperation_get_param(m_ctxt, conv, -1, nullptr,
-                                               nullptr, nullptr, nullptr,
-                                               nullptr, nullptr, nullptr));
-    EXPECT_FALSE(proj_coordoperation_get_param(m_ctxt, conv, 5, nullptr,
-                                               nullptr, nullptr, nullptr,
-                                               nullptr, nullptr, nullptr));
+    EXPECT_FALSE(proj_coordoperation_get_param(
+        m_ctxt, conv, -1, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr));
+    EXPECT_FALSE(proj_coordoperation_get_param(
+        m_ctxt, conv, 5, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr));
 
     const char *name = nullptr;
     const char *nameAuthorityName = nullptr;
@@ -1048,20 +1046,30 @@ TEST_F(CApi, conversion) {
     const char *valueString = nullptr;
     double valueUnitConvFactor = 0;
     const char *valueUnitName = nullptr;
+    const char *unitAuthName = nullptr;
+    const char *unitCode = nullptr;
+    const char *unitCategory = nullptr;
     EXPECT_TRUE(proj_coordoperation_get_param(
         m_ctxt, conv, 3, &name, &nameAuthorityName, &nameCode, &value,
-        &valueString, &valueUnitConvFactor, &valueUnitName));
+        &valueString, &valueUnitConvFactor, &valueUnitName, &unitAuthName,
+        &unitCode, &unitCategory));
     ASSERT_NE(name, nullptr);
     ASSERT_NE(nameAuthorityName, nullptr);
     ASSERT_NE(nameCode, nullptr);
     EXPECT_EQ(valueString, nullptr);
     ASSERT_NE(valueUnitName, nullptr);
+    ASSERT_NE(unitAuthName, nullptr);
+    ASSERT_NE(unitCategory, nullptr);
+    ASSERT_NE(unitCategory, nullptr);
     EXPECT_EQ(name, std::string("False easting"));
     EXPECT_EQ(nameAuthorityName, std::string("EPSG"));
     EXPECT_EQ(nameCode, std::string("8806"));
     EXPECT_EQ(value, 500000.0);
     EXPECT_EQ(valueUnitConvFactor, 1.0);
     EXPECT_EQ(valueUnitName, std::string("metre"));
+    EXPECT_EQ(unitAuthName, std::string("EPSG"));
+    EXPECT_EQ(unitCode, std::string("9001"));
+    EXPECT_EQ(unitCategory, std::string("linear"));
 }
 
 // ---------------------------------------------------------------------------

@@ -526,6 +526,38 @@ PJ_OBJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static const char *get_unit_category(UnitOfMeasure::Type type) {
+    const char *ret = nullptr;
+    switch (type) {
+    case UnitOfMeasure::Type::UNKNOWN:
+        ret = "unknown";
+        break;
+    case UnitOfMeasure::Type::NONE:
+        ret = "none";
+        break;
+    case UnitOfMeasure::Type::ANGULAR:
+        ret = "angular";
+        break;
+    case UnitOfMeasure::Type::LINEAR:
+        ret = "linear";
+        break;
+    case UnitOfMeasure::Type::SCALE:
+        ret = "scale";
+        break;
+    case UnitOfMeasure::Type::TIME:
+        ret = "time";
+        break;
+    case UnitOfMeasure::Type::PARAMETRIC:
+        ret = "parametric";
+        break;
+    }
+    return ret;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Get information for a unit of measure from a database lookup.
  *
  * @param ctx Context, or NULL for default context.
@@ -559,29 +591,7 @@ int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
             *out_conv_factor = obj->conversionToSI();
         }
         if (out_category) {
-            switch (obj->type()) {
-            case UnitOfMeasure::Type::UNKNOWN:
-                *out_category = "unknown";
-                break;
-            case UnitOfMeasure::Type::NONE:
-                *out_category = "none";
-                break;
-            case UnitOfMeasure::Type::ANGULAR:
-                *out_category = "angular";
-                break;
-            case UnitOfMeasure::Type::LINEAR:
-                *out_category = "linear";
-                break;
-            case UnitOfMeasure::Type::SCALE:
-                *out_category = "scale";
-                break;
-            case UnitOfMeasure::Type::TIME:
-                *out_category = "time";
-                break;
-            case UnitOfMeasure::Type::PARAMETRIC:
-                *out_category = "parametric";
-                break;
-            }
+            *out_category = get_unit_category(obj->type());
         }
         return true;
     } catch (const std::exception &e) {
@@ -5320,16 +5330,24 @@ int proj_coordoperation_get_param_index(PJ_CONTEXT *ctx,
  * unit conversion factor. or NULL
  * @param out_unit_name Pointer to a string value to store the parameter
  * unit name. or NULL
+ * @param out_unit_auth_name Pointer to a string value to store the
+ * unit authority name. or NULL
+ * @param out_unit_code Pointer to a string value to store the
+ * unit code. or NULL
+ * @param out_unit_category Pointer to a string value to store the parameter
+ * name. or
+ * NULL. This value might be "unknown", "none", "linear", "angular", "scale",
+ * "time" or "parametric";
  * @return TRUE in case of success.
  */
 
-int proj_coordoperation_get_param(PJ_CONTEXT *ctx, const PJ_OBJ *coordoperation,
-                                  int index, const char **out_name,
-                                  const char **out_auth_name,
-                                  const char **out_code, double *out_value,
-                                  const char **out_value_string,
-                                  double *out_unit_conv_factor,
-                                  const char **out_unit_name) {
+int proj_coordoperation_get_param(
+    PJ_CONTEXT *ctx, const PJ_OBJ *coordoperation, int index,
+    const char **out_name, const char **out_auth_name, const char **out_code,
+    double *out_value, const char **out_value_string,
+    double *out_unit_conv_factor, const char **out_unit_name,
+    const char **out_unit_auth_name, const char **out_unit_code,
+    const char **out_unit_category) {
     SANITIZE_CTX(ctx);
     assert(coordoperation);
     auto op = dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
@@ -5392,18 +5410,36 @@ int proj_coordoperation_get_param(PJ_CONTEXT *ctx, const PJ_OBJ *coordoperation,
     }
     if (out_unit_conv_factor) {
         *out_unit_conv_factor = 0;
-        if (paramValue) {
-            if (paramValue->type() == ParameterValue::Type::MEASURE) {
-                *out_unit_conv_factor =
-                    paramValue->value().unit().conversionToSI();
-            }
-        }
     }
     if (out_unit_name) {
         *out_unit_name = nullptr;
-        if (paramValue) {
-            if (paramValue->type() == ParameterValue::Type::MEASURE) {
-                *out_unit_name = paramValue->value().unit().name().c_str();
+    }
+    if (out_unit_auth_name) {
+        *out_unit_auth_name = nullptr;
+    }
+    if (out_unit_code) {
+        *out_unit_code = nullptr;
+    }
+    if (out_unit_category) {
+        *out_unit_category = nullptr;
+    }
+    if (paramValue) {
+        if (paramValue->type() == ParameterValue::Type::MEASURE) {
+            const auto &unit = paramValue->value().unit();
+            if (out_unit_conv_factor) {
+                *out_unit_conv_factor = unit.conversionToSI();
+            }
+            if (out_unit_name) {
+                *out_unit_name = unit.name().c_str();
+            }
+            if (out_unit_auth_name) {
+                *out_unit_auth_name = unit.codeSpace().c_str();
+            }
+            if (out_unit_code) {
+                *out_unit_code = unit.code().c_str();
+            }
+            if (out_unit_category) {
+                *out_unit_category = get_unit_category(unit.type());
             }
         }
     }

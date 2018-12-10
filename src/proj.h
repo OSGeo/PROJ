@@ -899,7 +899,10 @@ int PROJ_DLL proj_coordoperation_get_param(PJ_CONTEXT *ctx,
                                            double *out_value,
                                            const char **out_value_string,
                                            double *out_unit_conv_factor,
-                                           const char **out_unit_name);
+                                           const char **out_unit_name,
+                                           const char **out_unit_auth_name,
+                                           const char **out_unit_code,
+                                           const char **out_unit_category);
 
 int PROJ_DLL proj_coordoperation_get_grid_used_count(PJ_CONTEXT *ctx,
                                                      const PJ_OBJ *coordoperation);

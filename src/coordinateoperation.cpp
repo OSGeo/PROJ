@@ -2258,7 +2258,7 @@ createParams(const common::Measure &m1, const common::Measure &m2,
  *(https://proj4.org/operations/projections/utm.html) conversion.
  *
  * UTM is a family of conversions, of EPSG codes from 16001 to 16060 for the
- * northern hemisphere, and 17001 t 17060 for the southern hemisphere,
+ * northern hemisphere, and 17001 to 17060 for the southern hemisphere,
  * based on the Transverse Mercator projection method.
  *
  * @param properties See \ref general_properties of the conversion. If the name
