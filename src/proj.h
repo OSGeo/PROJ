@@ -872,10 +872,13 @@ int PROJ_DLL proj_obj_prime_meridian_get_parameters(PJ_CONTEXT *ctx,
                                                const char **out_unit_name);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_get_coordoperation(PJ_CONTEXT *ctx,
-                                                 const PJ_OBJ *crs,
-                                             const char **out_method_name,
-                                             const char **out_method_auth_name,
-                                             const char **out_method_code);
+                                                 const PJ_OBJ *crs);
+
+int PROJ_DLL proj_coordoperation_get_method_info(PJ_CONTEXT *ctx,
+                                                 const PJ_OBJ *coordoperation,
+                                                 const char **out_method_name,
+                                                 const char **out_method_auth_name,
+                                                 const char **out_method_code);
 
 int PROJ_DLL proj_coordoperation_is_instanciable(PJ_CONTEXT *ctx,
                                                  const PJ_OBJ *coordoperation);

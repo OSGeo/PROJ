@@ -422,8 +422,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
     ObjectKeeper keeper_hub_crs(hub_crs);
     ASSERT_NE(hub_crs, nullptr);
 
-    auto transf =
-        proj_obj_crs_get_coordoperation(m_ctxt, res, nullptr, nullptr, nullptr);
+    auto transf = proj_obj_crs_get_coordoperation(m_ctxt, res);
     ObjectKeeper keeper_transf(transf);
     ASSERT_NE(transf, nullptr);
 
@@ -998,24 +997,30 @@ TEST_F(CApi, conversion) {
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
+    // invalid object type
+    EXPECT_FALSE(proj_coordoperation_get_method_info(m_ctxt, crs, nullptr,
+                                                     nullptr, nullptr));
+
     {
-        auto conv = proj_obj_crs_get_coordoperation(m_ctxt, crs, nullptr,
-                                                    nullptr, nullptr);
+        auto conv = proj_obj_crs_get_coordoperation(m_ctxt, crs);
         ASSERT_NE(conv, nullptr);
         ObjectKeeper keeper_conv(conv);
 
-        ASSERT_EQ(proj_obj_crs_get_coordoperation(m_ctxt, conv, nullptr,
-                                                  nullptr, nullptr),
-                  nullptr);
+        ASSERT_EQ(proj_obj_crs_get_coordoperation(m_ctxt, conv), nullptr);
     }
+
+    auto conv = proj_obj_crs_get_coordoperation(m_ctxt, crs);
+    ASSERT_NE(conv, nullptr);
+    ObjectKeeper keeper_conv(conv);
+
+    EXPECT_TRUE(proj_coordoperation_get_method_info(m_ctxt, conv, nullptr,
+                                                    nullptr, nullptr));
 
     const char *methodName = nullptr;
     const char *methodAuthorityName = nullptr;
     const char *methodCode = nullptr;
-    auto conv = proj_obj_crs_get_coordoperation(
-        m_ctxt, crs, &methodName, &methodAuthorityName, &methodCode);
-    ASSERT_NE(conv, nullptr);
-    ObjectKeeper keeper_conv(conv);
+    EXPECT_TRUE(proj_coordoperation_get_method_info(
+        m_ctxt, conv, &methodName, &methodAuthorityName, &methodCode));
 
     ASSERT_NE(methodName, nullptr);
     ASSERT_NE(methodAuthorityName, nullptr);
@@ -1069,8 +1074,7 @@ TEST_F(CApi, transformation_from_boundCRS) {
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
-    auto transf =
-        proj_obj_crs_get_coordoperation(m_ctxt, crs, nullptr, nullptr, nullptr);
+    auto transf = proj_obj_crs_get_coordoperation(m_ctxt, crs);
     ASSERT_NE(transf, nullptr);
     ObjectKeeper keeper_transf(transf);
 }
@@ -2536,8 +2540,7 @@ TEST_F(CApi, proj_obj_convert_conversion_to_other_method) {
                 m_ctxt, projCRS, EPSG_CODE_METHOD_MERCATOR_VARIANT_B, nullptr),
             nullptr);
 
-        auto conv_in_proj = proj_obj_crs_get_coordoperation(
-            m_ctxt, projCRS, nullptr, nullptr, nullptr);
+        auto conv_in_proj = proj_obj_crs_get_coordoperation(m_ctxt, projCRS);
         ObjectKeeper keeper_conv_in_proj(conv_in_proj);
         ASSERT_NE(conv_in_proj, nullptr);
 

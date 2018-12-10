@@ -1914,19 +1914,10 @@ void proj_free_string_list(PROJ_STRING_LIST list) {
  *
  * @param ctx PROJ context, or NULL for default context
  * @param crs Objet of type DerivedCRS or BoundCRSs (must not be NULL)
- * @param out_method_name Pointer to a string value to store the method
- * (projection) name. or NULL
- * @param out_method_auth_name Pointer to a string value to store the method
- * authority name. or NULL
- * @param out_method_code Pointer to a string value to store the method
- * code. or NULL
  * @return Object of type SingleOperation that must be unreferenced with
  * proj_obj_unref(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ_OBJ *crs,
-                                        const char **out_method_name,
-                                        const char **out_method_auth_name,
-                                        const char **out_method_code) {
+PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ_OBJ *crs) {
     SANITIZE_CTX(ctx);
     assert(crs);
     SingleOperationPtr co;
@@ -1945,7 +1936,41 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ_OBJ *crs,
         }
     }
 
-    const auto &method = co->method();
+    return PJ_OBJ::create(NN_NO_CHECK(co));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return informatin on the operation method of the SingleOperation.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param coordoperation Objet of type SingleOperation (typically a Conversion
+ * or Transformation) (must not be NULL)
+ * @param out_method_name Pointer to a string value to store the method
+ * (projection) name. or NULL
+ * @param out_method_auth_name Pointer to a string value to store the method
+ * authority name. or NULL
+ * @param out_method_code Pointer to a string value to store the method
+ * code. or NULL
+ * @return TRUE in case of success.
+ */
+int proj_coordoperation_get_method_info(PJ_CONTEXT *ctx,
+                                        const PJ_OBJ *coordoperation,
+                                        const char **out_method_name,
+                                        const char **out_method_auth_name,
+                                        const char **out_method_code) {
+    SANITIZE_CTX(ctx);
+    assert(coordoperation);
+
+    auto singleOp =
+        dynamic_cast<const SingleOperation *>(coordoperation->obj.get());
+    if (!singleOp) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a DerivedCRS or BoundCRS");
+        return false;
+    }
+
+    const auto &method = singleOp->method();
     const auto &method_ids = method->identifiers();
     if (out_method_name) {
         *out_method_name = method->name()->description()->c_str();
@@ -1964,7 +1989,7 @@ PJ_OBJ *proj_obj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ_OBJ *crs,
             *out_method_code = nullptr;
         }
     }
-    return PJ_OBJ::create(NN_NO_CHECK(co));
+    return true;
 }
 
 // ---------------------------------------------------------------------------
