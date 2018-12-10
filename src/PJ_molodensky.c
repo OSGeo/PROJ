@@ -272,6 +272,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
 
 
 PJ *TRANSFORMATION(molodensky,1) {
+    int count_required_params = 0;
     struct pj_opaque_molodensky *Q = pj_calloc(1, sizeof(struct pj_opaque_molodensky));
     if (0==Q)
         return pj_default_destructor(P, ENOMEM);
@@ -288,28 +289,38 @@ PJ *TRANSFORMATION(molodensky,1) {
     P->right  = PJ_IO_UNITS_ANGULAR;
 
     /* read args */
-    if (pj_param(P->ctx, P->params, "tdx").i)
+    if (pj_param(P->ctx, P->params, "tdx").i) {
+        count_required_params ++;
         Q->dx = pj_param(P->ctx, P->params, "ddx").f;
+    }
 
-    if (pj_param(P->ctx, P->params, "tdy").i)
+    if (pj_param(P->ctx, P->params, "tdy").i) {
+        count_required_params ++;
         Q->dy = pj_param(P->ctx, P->params, "ddy").f;
+    }
 
-    if (pj_param(P->ctx, P->params, "tdz").i)
+    if (pj_param(P->ctx, P->params, "tdz").i) {
+        count_required_params ++;
         Q->dz = pj_param(P->ctx, P->params, "ddz").f;
+    }
 
-    if (pj_param(P->ctx, P->params, "tda").i)
+    if (pj_param(P->ctx, P->params, "tda").i) {
+        count_required_params ++;
         Q->da = pj_param(P->ctx, P->params, "dda").f;
+    }
 
-    if (pj_param(P->ctx, P->params, "tdf").i)
+    if (pj_param(P->ctx, P->params, "tdf").i) {
+        count_required_params ++;
         Q->df = pj_param(P->ctx, P->params, "ddf").f;
+    }
 
     Q->abridged = pj_param(P->ctx, P->params, "tabridged").i;
 
     /* We want all parameters (except +abridged) to be set */
-    if ((Q->dx == 0) && (Q->dy == 0) && (Q->dz == 0) && (Q->da == 0) && (Q->df == 0))
+    if (count_required_params == 0)
         return pj_default_destructor(P, PJD_ERR_NO_ARGS);
 
-    if ((Q->dx == 0) || (Q->dy == 0) || (Q->dz == 0) || (Q->da == 0) || (Q->df == 0))
+    if (count_required_params != 5)
         return pj_default_destructor(P, PJD_ERR_MISSING_ARGS);
 
     return P;
