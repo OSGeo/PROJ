@@ -4265,6 +4265,42 @@ proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
 }
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ProjectedCRS with a conversion based on the Laborde
+ * Oblique Mercator projection method.
+ *
+ * See
+ * osgeo::proj::operation::Conversion::createLabordeObliqueMercator().
+ *
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
+ */
+PJ_OBJ *proj_obj_create_conversion_laborde_oblique_mercator(
+    PJ_CONTEXT *ctx, double latitude_projection_centre,
+    double longitude_projection_centre, double azimuth_initial_line,
+    double scale, double false_easting, double false_northing,
+    const char *ang_unit_name, double ang_unit_conv_factor,
+    const char *linear_unit_name, double linear_unit_conv_factor) {
+    SANITIZE_CTX(ctx);
+    try {
+        UnitOfMeasure linearUnit(
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
+        UnitOfMeasure angUnit(
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createLabordeObliqueMercator(
+            PropertyMap(), Angle(latitude_projection_centre, angUnit),
+            Angle(longitude_projection_centre, angUnit),
+            Angle(azimuth_initial_line, angUnit), Scale(scale),
+            Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
+        return proj_obj_create_conversion(conv);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a ProjectedCRS with a conversion based on the
  * International Map of the World Polyconic projection method.
  *

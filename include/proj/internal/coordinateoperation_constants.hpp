@@ -276,11 +276,6 @@ static const ParamMapping paramLonCentreLonCenterLonc = {
     EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, WKT1_LONGITUDE_OF_CENTER,
     common::UnitOfMeasure::Type::ANGULAR, lonc};
 
-static const ParamMapping paramLatCentreLatOrigin = {
-    EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
-    EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE, WKT1_LATITUDE_OF_ORIGIN,
-    common::UnitOfMeasure::Type::ANGULAR, lat_0};
-
 static const ParamMapping paramAzimuth = {
     EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
     EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE, WKT1_AZIMUTH,
@@ -478,16 +473,16 @@ static const ParamMapping *const paramsLoxim[] = {
 
 static const ParamMapping paramLonCentre = {
     EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
-    EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, nullptr,
+    EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, WKT1_LONGITUDE_OF_CENTER,
     common::UnitOfMeasure::Type::ANGULAR, lon_0};
 
 static const ParamMapping paramLabordeObliqueMercatorAzimuth = {
     EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
-    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE, nullptr,
+    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE, WKT1_AZIMUTH,
     common::UnitOfMeasure::Type::ANGULAR, "azi"};
 
 static const ParamMapping *const paramsLabordeObliqueMercator[] = {
-    &paramLatCentreLatOrigin,
+    &paramLatCentreLatCenter,
     &paramLonCentre,
     &paramLabordeObliqueMercatorAzimuth,
     &paramScaleFactorInitialLine,
@@ -758,8 +753,8 @@ static const MethodMapping methodMappings[] = {
      "eqearth", nullptr, paramsLonNatOrigin},
 
     {EPSG_NAME_METHOD_LABORDE_OBLIQUE_MERCATOR,
-     EPSG_CODE_METHOD_LABORDE_OBLIQUE_MERCATOR, nullptr, "labrd", nullptr,
-     paramsLabordeObliqueMercator},
+     EPSG_CODE_METHOD_LABORDE_OBLIQUE_MERCATOR, "Laborde_Oblique_Mercator",
+     "labrd", nullptr, paramsLabordeObliqueMercator},
 
 };
 

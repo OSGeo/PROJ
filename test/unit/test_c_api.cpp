@@ -1943,6 +1943,13 @@ TEST_F(CApi, proj_obj_create_projections) {
         ASSERT_NE(projCRS, nullptr);
     }
     {
+        auto projCRS = proj_obj_create_conversion_laborde_oblique_mercator(
+            m_ctxt, 0, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",
+            1.0);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+    }
+    {
         auto projCRS =
             proj_obj_create_conversion_international_map_world_polyconic(
                 m_ctxt, 0, 0, 0, 0, 0, "Degree", 0.0174532925199433, "Metre",

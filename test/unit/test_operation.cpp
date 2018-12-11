@@ -2482,6 +2482,52 @@ TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, laborde_oblique_mercator_export) {
+    auto conv = Conversion::createLabordeObliqueMercator(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Scale(4), Length(5),
+        Length(6));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=labrd +lat_0=1 +lon_0=2 +azi=3 +k=4 +x_0=5 +y_0=6");
+
+    auto formatter = WKTFormatter::create();
+    formatter->simulCurNodeHasId();
+    EXPECT_EQ(conv->exportToWKT(formatter.get()),
+              "CONVERSION[\"Laborde Oblique Mercator\",\n"
+              "    METHOD[\"Laborde Oblique Mercator\",\n"
+              "        ID[\"EPSG\",9813]],\n"
+              "    PARAMETER[\"Latitude of projection centre\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8811]],\n"
+              "    PARAMETER[\"Longitude of projection centre\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8812]],\n"
+              "    PARAMETER[\"Azimuth of initial line\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8813]],\n"
+              "    PARAMETER[\"Scale factor on initial line\",4,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8815]],\n"
+              "    PARAMETER[\"False easting\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        "PROJECTION[\"Laborde_Oblique_Mercator\"],\n"
+        "PARAMETER[\"latitude_of_center\",1],\n"
+        "PARAMETER[\"longitude_of_center\",2],\n"
+        "PARAMETER[\"azimuth\",3],\n"
+        "PARAMETER[\"scale_factor\",4],\n"
+        "PARAMETER[\"false_easting\",5],\n"
+        "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, imw_polyconic_export) {
     auto conv = Conversion::createInternationalMapWorldPolyconic(
         PropertyMap(), Angle(1), Angle(3), Angle(4), Length(5), Length(6));

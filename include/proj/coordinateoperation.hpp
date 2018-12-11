@@ -1082,6 +1082,15 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         const common::Length &eastingProjectionCentre,
         const common::Length &northingProjectionCentre);
 
+    PROJ_DLL static ConversionNNPtr
+    createLabordeObliqueMercator(const util::PropertyMap &properties,
+                                 const common::Angle &latitudeProjectionCentre,
+                                 const common::Angle &longitudeProjectionCentre,
+                                 const common::Angle &azimuthInitialLine,
+                                 const common::Scale &scale,
+                                 const common::Length &falseEasting,
+                                 const common::Length &falseNorthing);
+
     PROJ_DLL static ConversionNNPtr createInternationalMapWorldPolyconic(
         const util::PropertyMap &properties, const common::Angle &centerLong,
         const common::Angle &latitudeFirstParallel,

@@ -3267,6 +3267,36 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Laborde Oblique Mercator]
+ *(https://proj4.org/operations/projections/labrd.html) projection method.
+ *
+ * This method is defined as [EPSG:9813]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9813)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeProjectionCentre See \ref latitude_projection_centre
+ * @param longitudeProjectionCentre See \ref longitude_projection_centre
+ * @param azimuthInitialLine See \ref azimuth_initial_line
+ * @param scale See \ref scale_factor_initial_line
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createLabordeObliqueMercator(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeProjectionCentre,
+    const common::Angle &longitudeProjectionCentre,
+    const common::Angle &azimuthInitialLine, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    return create(properties, EPSG_CODE_METHOD_LABORDE_OBLIQUE_MERCATOR,
+                  createParams(latitudeProjectionCentre,
+                               longitudeProjectionCentre, azimuthInitialLine,
+                               scale, falseEasting, falseNorthing));
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a conversion based on the [International Map of the World
  *Polyconic]
  *(https://proj4.org/operations/projections/imw_p.html) projection method.

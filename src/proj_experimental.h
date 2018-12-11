@@ -584,6 +584,17 @@ PJ_OBJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_two_point_na
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
+PJ_OBJ PROJ_DLL *proj_obj_create_conversion_laborde_oblique_mercator(
+    PJ_CONTEXT *ctx,
+    double latitude_projection_centre,
+    double longitude_projection_centre,
+    double azimuth_initial_line,
+    double scale,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
+
 PJ_OBJ PROJ_DLL *proj_obj_create_conversion_international_map_world_polyconic(
     PJ_CONTEXT *ctx,
     double center_long,
