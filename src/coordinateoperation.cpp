@@ -1463,6 +1463,57 @@ bool SingleOperation::_isEquivalentTo(
             // Check it by using convertToOtherMethod()
 
             const int otherMethodEPSGCode = otherSO->d->method_->getEPSGCode();
+
+            if ((methodEPSGCode ==
+                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC &&
+                 (otherMethodEPSGCode ==
+                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
+                  otherMethodEPSGCode ==
+                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC)) ||
+                (methodEPSGCode ==
+                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D &&
+                 (otherMethodEPSGCode ==
+                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
+                  otherMethodEPSGCode ==
+                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D)) ||
+                (methodEPSGCode ==
+                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D &&
+                 (otherMethodEPSGCode ==
+                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D ||
+                  otherMethodEPSGCode ==
+                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D))) {
+                auto transf = static_cast<const Transformation *>(this);
+                auto otherTransf = static_cast<const Transformation *>(otherSO);
+                auto params = transf->getTOWGS84Parameters();
+                auto otherParams = otherTransf->getTOWGS84Parameters();
+                return params == otherParams;
+            }
+
+            if ((otherMethodEPSGCode ==
+                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC &&
+                 (methodEPSGCode ==
+                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
+                  methodEPSGCode ==
+                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC)) ||
+                (otherMethodEPSGCode ==
+                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D &&
+                 (methodEPSGCode ==
+                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
+                  methodEPSGCode ==
+                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D)) ||
+                (otherMethodEPSGCode ==
+                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D &&
+                 (methodEPSGCode ==
+                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D ||
+                  methodEPSGCode ==
+                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D))) {
+                auto transf = static_cast<const Transformation *>(this);
+                auto otherTransf = static_cast<const Transformation *>(otherSO);
+                auto params = transf->getTOWGS84Parameters();
+                auto otherParams = otherTransf->getTOWGS84Parameters();
+                return params == otherParams;
+            }
+
             if (methodEPSGCode ==
                     EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP &&
                 otherMethodEPSGCode ==

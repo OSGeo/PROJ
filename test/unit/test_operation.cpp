@@ -6654,3 +6654,39 @@ TEST(operation, lcc2sp_to_lcc1sp_invalid_eccentricity) {
         EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
     EXPECT_FALSE(targetConv != nullptr);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, three_param_equivalent_to_seven_param) {
+
+    auto three_param = Transformation::createGeocentricTranslations(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, {});
+
+    auto seven_param_pv = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, 0.0, 0.0, 0.0, 0.0, {});
+
+    auto seven_param_cf = Transformation::createCoordinateFrameRotation(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, 0.0, 0.0, 0.0, 0.0, {});
+
+    auto seven_param_non_eq = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, 1.0, 0.0, 0.0, 0.0, {});
+
+    EXPECT_TRUE(three_param->isEquivalentTo(
+        seven_param_pv.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_TRUE(three_param->isEquivalentTo(
+        seven_param_cf.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_TRUE(seven_param_cf->isEquivalentTo(
+        three_param.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_TRUE(seven_param_pv->isEquivalentTo(
+        three_param.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_FALSE(three_param->isEquivalentTo(
+        seven_param_non_eq.get(), IComparable::Criterion::EQUIVALENT));
+}

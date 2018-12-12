@@ -3806,12 +3806,13 @@ bool BoundCRS::_isEquivalentTo(const util::IComparable *other,
          !ObjectUsage::_isEquivalentTo(other, criterion))) {
         return false;
     }
+    const auto standardCriterion = getStandardCriterion(criterion);
     return d->baseCRS_->_isEquivalentTo(otherBoundCRS->d->baseCRS_.get(),
                                         criterion) &&
            d->hubCRS_->_isEquivalentTo(otherBoundCRS->d->hubCRS_.get(),
                                        criterion) &&
            d->transformation_->_isEquivalentTo(
-               otherBoundCRS->d->transformation_.get(), criterion);
+               otherBoundCRS->d->transformation_.get(), standardCriterion);
 }
 
 // ---------------------------------------------------------------------------
