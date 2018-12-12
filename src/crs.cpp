@@ -580,7 +580,9 @@ CRSNNPtr CRS::alterName(const std::string &newName) const {
  * authorityFactory is not null.
  *
  * The method returns a list of matching reference CRS, and the percentage
- * (0-100) of confidence in the match.
+ * (0-100) of confidence in the match. The list is sorted by decreasing
+ * confidence.
+ *
  * 100% means that the name of the reference entry
  * perfectly matches the CRS name, and both are equivalent. In which case a
  * single result is returned.
@@ -2874,7 +2876,9 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
  * authorityFactory is not null.
  *
  * The method returns a list of matching reference CRS, and the percentage
- * (0-100) of confidence in the match.
+ * (0-100) of confidence in the match. The list is sorted by decreasing
+ * confidence.
+ *
  * 100% means that the name of the reference entry
  * perfectly matches the CRS name, and both are equivalent. In which case a
  * single result is returned.
@@ -3311,7 +3315,9 @@ bool CompoundCRS::_isEquivalentTo(
  * authorityFactory is not null.
  *
  * The method returns a list of matching reference CRS, and the percentage
- * (0-100) of confidence in the match.
+ * (0-100) of confidence in the match. The list is sorted by decreasing
+ * confidence.
+ *
  * 100% means that the name of the reference entry
  * perfectly matches the CRS name, and both are equivalent. In which case a
  * single result is returned.
