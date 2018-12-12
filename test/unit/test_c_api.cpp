@@ -641,6 +641,10 @@ TEST_F(CApi, proj_obj_create_from_database) {
         EXPECT_TRUE(proj_obj_is_crs(crs));
         EXPECT_FALSE(proj_obj_is_deprecated(crs));
         EXPECT_EQ(proj_obj_get_type(crs), PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS);
+
+        const char *code = proj_obj_get_id_code(crs, 0);
+        ASSERT_NE(code, nullptr);
+        EXPECT_EQ(std::string(code), "4326");
     }
     {
         auto crs = proj_obj_create_from_database(
