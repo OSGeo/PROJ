@@ -2695,6 +2695,12 @@ TEST_F(CApi, proj_obj_create_cartesian_2D_cs) {
         ObjectKeeper keeper_cs(cs);
         ASSERT_NE(cs, nullptr);
     }
+    {
+        auto cs = proj_obj_create_cartesian_2D_cs(
+            m_ctxt, PJ_CART2D_WESTING_SOUTHING, nullptr, 0);
+        ObjectKeeper keeper_cs(cs);
+        ASSERT_NE(cs, nullptr);
+    }
 }
 
 } // namespace

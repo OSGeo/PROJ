@@ -947,6 +947,27 @@ CartesianCS::createNorthingEasting(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CartesianCS with a Westing (first) and Southing
+ * (second) axis.
+ *
+ * @param unit Linear unit of the axes.
+ * @return a new CartesianCS.
+ */
+CartesianCSNNPtr
+CartesianCS::createWestingSouthing(const common::UnitOfMeasure &unit) {
+    return create(util::PropertyMap(),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Easting),
+                      AxisAbbreviation::Y, AxisDirection::WEST, unit),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Northing),
+                      AxisAbbreviation::X, AxisDirection::SOUTH, unit));
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a CartesianCS, north-pole centered,
  * with a Easting (first) South-Oriented and
  * Northing (second) South-Oriented axis.

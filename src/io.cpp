@@ -3514,6 +3514,10 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
                         linearUnit)
                         .as_nullable();
             }
+        } else if (methodCode ==
+                   EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
+            cartesianCS =
+                CartesianCS::createWestingSouthing(linearUnit).as_nullable();
         }
     }
     if (!cartesianCS) {
