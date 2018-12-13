@@ -6693,6 +6693,32 @@ TEST(operation, three_param_equivalent_to_seven_param) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, position_vector_equivalent_coordinate_frame) {
+
+    auto pv = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, {});
+
+    auto cf = Transformation::createCoordinateFrameRotation(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, -4 + 1e-11, -5.0, -6.0, 7.0, {});
+
+    auto cf_non_eq = Transformation::createCoordinateFrameRotation(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, {});
+
+    EXPECT_TRUE(
+        pv->isEquivalentTo(cf.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_TRUE(
+        cf->isEquivalentTo(pv.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_FALSE(pv->isEquivalentTo(cf_non_eq.get(),
+                                    IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, conversion_missing_parameter) {
 
     auto wkt1 = "PROJCS[\"NAD83(CSRS98) / UTM zone 20N (deprecated)\","

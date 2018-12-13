@@ -1510,59 +1510,44 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
 
     if (!equivalentMethods) {
         if (criterion == util::IComparable::Criterion::EQUIVALENT) {
+
+            const auto isTOWGS84Transf = [](int code) {
+                return code ==
+                           EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC ||
+                       code == EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
+                       code == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
+                       code ==
+                           EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D ||
+                       code == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
+                       code ==
+                           EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+                       code ==
+                           EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D ||
+                       code == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D ||
+                       code == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D;
+            };
+
+            // Translation vs (PV or CF)
+            // or different PV vs CF convention
+            if (isTOWGS84Transf(methodEPSGCode) &&
+                isTOWGS84Transf(otherMethodEPSGCode)) {
+                auto transf = static_cast<const Transformation *>(this);
+                auto otherTransf = static_cast<const Transformation *>(otherSO);
+                auto params = transf->getTOWGS84Parameters();
+                auto otherParams = otherTransf->getTOWGS84Parameters();
+                assert(params.size() == 7);
+                assert(otherParams.size() == 7);
+                for (size_t i = 0; i < 7; i++) {
+                    if (std::fabs(params[i] - otherParams[i]) >
+                        1e-10 * std::fabs(params[i])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             // _1SP methods can sometimes be equivalent to _2SP ones
             // Check it by using convertToOtherMethod()
-
-            if ((methodEPSGCode ==
-                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC &&
-                 (otherMethodEPSGCode ==
-                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
-                  otherMethodEPSGCode ==
-                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC)) ||
-                (methodEPSGCode ==
-                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D &&
-                 (otherMethodEPSGCode ==
-                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
-                  otherMethodEPSGCode ==
-                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D)) ||
-                (methodEPSGCode ==
-                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D &&
-                 (otherMethodEPSGCode ==
-                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D ||
-                  otherMethodEPSGCode ==
-                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D))) {
-                auto transf = static_cast<const Transformation *>(this);
-                auto otherTransf = static_cast<const Transformation *>(otherSO);
-                auto params = transf->getTOWGS84Parameters();
-                auto otherParams = otherTransf->getTOWGS84Parameters();
-                return params == otherParams;
-            }
-
-            if ((otherMethodEPSGCode ==
-                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC &&
-                 (methodEPSGCode ==
-                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
-                  methodEPSGCode ==
-                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC)) ||
-                (otherMethodEPSGCode ==
-                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D &&
-                 (methodEPSGCode ==
-                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
-                  methodEPSGCode ==
-                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D)) ||
-                (otherMethodEPSGCode ==
-                     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D &&
-                 (methodEPSGCode ==
-                      EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D ||
-                  methodEPSGCode ==
-                      EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D))) {
-                auto transf = static_cast<const Transformation *>(this);
-                auto otherTransf = static_cast<const Transformation *>(otherSO);
-                auto params = transf->getTOWGS84Parameters();
-                auto otherParams = otherTransf->getTOWGS84Parameters();
-                return params == otherParams;
-            }
-
             if (methodEPSGCode ==
                     EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP &&
                 otherMethodEPSGCode ==
