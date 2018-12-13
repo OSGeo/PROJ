@@ -596,6 +596,10 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
     PROJ_INTERNAL bool
     exportToPROJStringGeneric(io::PROJStringFormatter *formatter) const;
 
+    PROJ_INTERNAL bool _isEquivalentTo(const util::IComparable *other,
+                                       util::IComparable::Criterion criterion,
+                                       bool inOtherDirection) const;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     SingleOperation &operator=(const SingleOperation &other) = delete;

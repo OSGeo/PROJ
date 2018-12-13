@@ -6690,3 +6690,253 @@ TEST(operation, three_param_equivalent_to_seven_param) {
     EXPECT_FALSE(three_param->isEquivalentTo(
         seven_param_non_eq.get(), IComparable::Criterion::EQUIVALENT));
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, conversion_missing_parameter) {
+
+    auto wkt1 = "PROJCS[\"NAD83(CSRS98) / UTM zone 20N (deprecated)\","
+                "    GEOGCS[\"NAD83(CSRS98)\","
+                "        DATUM[\"NAD83_Canadian_Spatial_Reference_System\","
+                "            SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+                "                AUTHORITY[\"EPSG\",\"7019\"]],"
+                "            AUTHORITY[\"EPSG\",\"6140\"]],"
+                "        PRIMEM[\"Greenwich\",0,"
+                "            AUTHORITY[\"EPSG\",\"8901\"]],"
+                "        UNIT[\"degree\",0.0174532925199433,"
+                "            AUTHORITY[\"EPSG\",\"9108\"]],"
+                "        AUTHORITY[\"EPSG\",\"4140\"]],"
+                "    PROJECTION[\"Transverse_Mercator\"],"
+                "    PARAMETER[\"latitude_of_origin\",0],"
+                "    PARAMETER[\"central_meridian\",-63],"
+                "    PARAMETER[\"scale_factor\",0.9996],"
+                "    PARAMETER[\"false_easting\",500000],"
+                "    UNIT[\"metre\",1,"
+                "        AUTHORITY[\"EPSG\",\"9001\"]],"
+                "    AUTHORITY[\"EPSG\",\"2038\"],"
+                "    AXIS[\"Easting\",EAST],"
+                "    AXIS[\"Northing\",NORTH]]";
+    auto obj1 = WKTParser().createFromWKT(wkt1);
+    auto crs1 = nn_dynamic_pointer_cast<ProjectedCRS>(obj1);
+    ASSERT_TRUE(crs1 != nullptr);
+
+    // Difference with wkt1: latitude_of_origin missing, but false_northing
+    // added to 0
+    auto wkt2 = "PROJCS[\"NAD83(CSRS98) / UTM zone 20N (deprecated)\","
+                "    GEOGCS[\"NAD83(CSRS98)\","
+                "        DATUM[\"NAD83_Canadian_Spatial_Reference_System\","
+                "            SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+                "                AUTHORITY[\"EPSG\",\"7019\"]],"
+                "            AUTHORITY[\"EPSG\",\"6140\"]],"
+                "        PRIMEM[\"Greenwich\",0,"
+                "            AUTHORITY[\"EPSG\",\"8901\"]],"
+                "        UNIT[\"degree\",0.0174532925199433,"
+                "            AUTHORITY[\"EPSG\",\"9108\"]],"
+                "        AUTHORITY[\"EPSG\",\"4140\"]],"
+                "    PROJECTION[\"Transverse_Mercator\"],"
+                "    PARAMETER[\"central_meridian\",-63],"
+                "    PARAMETER[\"scale_factor\",0.9996],"
+                "    PARAMETER[\"false_easting\",500000],"
+                "    PARAMETER[\"false_northing\",0],"
+                "    UNIT[\"metre\",1,"
+                "        AUTHORITY[\"EPSG\",\"9001\"]],"
+                "    AUTHORITY[\"EPSG\",\"2038\"],"
+                "    AXIS[\"Easting\",EAST],"
+                "    AXIS[\"Northing\",NORTH]]";
+    auto obj2 = WKTParser().createFromWKT(wkt2);
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj2);
+    ASSERT_TRUE(crs2 != nullptr);
+
+    // Difference with wkt1: false_northing added to 0
+    auto wkt3 = "PROJCS[\"NAD83(CSRS98) / UTM zone 20N (deprecated)\","
+                "    GEOGCS[\"NAD83(CSRS98)\","
+                "        DATUM[\"NAD83_Canadian_Spatial_Reference_System\","
+                "            SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+                "                AUTHORITY[\"EPSG\",\"7019\"]],"
+                "            AUTHORITY[\"EPSG\",\"6140\"]],"
+                "        PRIMEM[\"Greenwich\",0,"
+                "            AUTHORITY[\"EPSG\",\"8901\"]],"
+                "        UNIT[\"degree\",0.0174532925199433,"
+                "            AUTHORITY[\"EPSG\",\"9108\"]],"
+                "        AUTHORITY[\"EPSG\",\"4140\"]],"
+                "    PROJECTION[\"Transverse_Mercator\"],"
+                "    PARAMETER[\"latitude_of_origin\",0],"
+                "    PARAMETER[\"central_meridian\",-63],"
+                "    PARAMETER[\"scale_factor\",0.9996],"
+                "    PARAMETER[\"false_easting\",500000],"
+                "    PARAMETER[\"false_northing\",0],"
+                "    UNIT[\"metre\",1,"
+                "        AUTHORITY[\"EPSG\",\"9001\"]],"
+                "    AUTHORITY[\"EPSG\",\"2038\"],"
+                "    AXIS[\"Easting\",EAST],"
+                "    AXIS[\"Northing\",NORTH]]";
+    auto obj3 = WKTParser().createFromWKT(wkt3);
+    auto crs3 = nn_dynamic_pointer_cast<ProjectedCRS>(obj3);
+    ASSERT_TRUE(crs3 != nullptr);
+
+    // Difference with wkt1: UNKNOWN added to non-zero
+    auto wkt4 = "PROJCS[\"NAD83(CSRS98) / UTM zone 20N (deprecated)\","
+                "    GEOGCS[\"NAD83(CSRS98)\","
+                "        DATUM[\"NAD83_Canadian_Spatial_Reference_System\","
+                "            SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+                "                AUTHORITY[\"EPSG\",\"7019\"]],"
+                "            AUTHORITY[\"EPSG\",\"6140\"]],"
+                "        PRIMEM[\"Greenwich\",0,"
+                "            AUTHORITY[\"EPSG\",\"8901\"]],"
+                "        UNIT[\"degree\",0.0174532925199433,"
+                "            AUTHORITY[\"EPSG\",\"9108\"]],"
+                "        AUTHORITY[\"EPSG\",\"4140\"]],"
+                "    PROJECTION[\"Transverse_Mercator\"],"
+                "    PARAMETER[\"latitude_of_origin\",0],"
+                "    PARAMETER[\"central_meridian\",-63],"
+                "    PARAMETER[\"scale_factor\",0.9996],"
+                "    PARAMETER[\"false_easting\",500000],"
+                "    PARAMETER[\"false_northing\",0],"
+                "    PARAMETER[\"UNKNOWN\",13],"
+                "    UNIT[\"metre\",1,"
+                "        AUTHORITY[\"EPSG\",\"9001\"]],"
+                "    AUTHORITY[\"EPSG\",\"2038\"],"
+                "    AXIS[\"Easting\",EAST],"
+                "    AXIS[\"Northing\",NORTH]]";
+    auto obj4 = WKTParser().createFromWKT(wkt4);
+    auto crs4 = nn_dynamic_pointer_cast<ProjectedCRS>(obj4);
+    ASSERT_TRUE(crs4 != nullptr);
+
+    // Difference with wkt1: latitude_of_origin missing, but false_northing
+    // added to non-zero
+    auto wkt5 = "PROJCS[\"NAD83(CSRS98) / UTM zone 20N (deprecated)\","
+                "    GEOGCS[\"NAD83(CSRS98)\","
+                "        DATUM[\"NAD83_Canadian_Spatial_Reference_System\","
+                "            SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+                "                AUTHORITY[\"EPSG\",\"7019\"]],"
+                "            AUTHORITY[\"EPSG\",\"6140\"]],"
+                "        PRIMEM[\"Greenwich\",0,"
+                "            AUTHORITY[\"EPSG\",\"8901\"]],"
+                "        UNIT[\"degree\",0.0174532925199433,"
+                "            AUTHORITY[\"EPSG\",\"9108\"]],"
+                "        AUTHORITY[\"EPSG\",\"4140\"]],"
+                "    PROJECTION[\"Transverse_Mercator\"],"
+                "    PARAMETER[\"central_meridian\",-63],"
+                "    PARAMETER[\"scale_factor\",0.9996],"
+                "    PARAMETER[\"false_easting\",500000],"
+                "    PARAMETER[\"false_northing\",-99999],"
+                "    UNIT[\"metre\",1,"
+                "        AUTHORITY[\"EPSG\",\"9001\"]],"
+                "    AUTHORITY[\"EPSG\",\"2038\"],"
+                "    AXIS[\"Easting\",EAST],"
+                "    AXIS[\"Northing\",NORTH]]";
+    auto obj5 = WKTParser().createFromWKT(wkt5);
+    auto crs5 = nn_dynamic_pointer_cast<ProjectedCRS>(obj5);
+    ASSERT_TRUE(crs5 != nullptr);
+
+    EXPECT_TRUE(
+        crs1->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs2->isEquivalentTo(crs1.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs1->isEquivalentTo(crs3.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs3->isEquivalentTo(crs1.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs2->isEquivalentTo(crs3.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs3->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_FALSE(
+        crs1->isEquivalentTo(crs4.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(
+        crs4->isEquivalentTo(crs1.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_FALSE(
+        crs1->isEquivalentTo(crs5.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(
+        crs5->isEquivalentTo(crs1.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, conversion_missing_parameter_scale) {
+
+    auto wkt1 = "PROJCS[\"test\",\n"
+                "    GEOGCS[\"WGS 84\",\n"
+                "        DATUM[\"WGS 1984\",\n"
+                "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+                "        PRIMEM[\"Greenwich\",0],\n"
+                "        UNIT[\"degree\",0.0174532925199433]],\n"
+                "    PROJECTION[\"Mercator_1SP\"],\n"
+                "    PARAMETER[\"latitude_of_origin\",-1],\n"
+                "    PARAMETER[\"central_meridian\",2],\n"
+                "    PARAMETER[\"scale_factor\",1],\n"
+                "    PARAMETER[\"false_easting\",3],\n"
+                "    PARAMETER[\"false_northing\",4],\n"
+                "    UNIT[\"metre\",1]]";
+
+    auto obj1 = WKTParser().createFromWKT(wkt1);
+    auto crs1 = nn_dynamic_pointer_cast<ProjectedCRS>(obj1);
+    ASSERT_TRUE(crs1 != nullptr);
+
+    // Difference with wkt1: scale_factor missing
+    auto wkt2 = "PROJCS[\"test\",\n"
+                "    GEOGCS[\"WGS 84\",\n"
+                "        DATUM[\"WGS 1984\",\n"
+                "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+                "        PRIMEM[\"Greenwich\",0],\n"
+                "        UNIT[\"degree\",0.0174532925199433]],\n"
+                "    PROJECTION[\"Mercator_1SP\"],\n"
+                "    PARAMETER[\"latitude_of_origin\",-1],\n"
+                "    PARAMETER[\"central_meridian\",2],\n"
+                "    PARAMETER[\"false_easting\",3],\n"
+                "    PARAMETER[\"false_northing\",4],\n"
+                "    UNIT[\"metre\",1]]";
+
+    auto obj2 = WKTParser().createFromWKT(wkt2);
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj2);
+    ASSERT_TRUE(crs2 != nullptr);
+
+    // Difference with wkt1: scale_factor set to non-1
+    auto wkt3 = "PROJCS[\"test\",\n"
+                "    GEOGCS[\"WGS 84\",\n"
+                "        DATUM[\"WGS 1984\",\n"
+                "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+                "        PRIMEM[\"Greenwich\",0],\n"
+                "        UNIT[\"degree\",0.0174532925199433]],\n"
+                "    PROJECTION[\"Mercator_1SP\"],\n"
+                "    PARAMETER[\"latitude_of_origin\",-1],\n"
+                "    PARAMETER[\"central_meridian\",2],\n"
+                "    PARAMETER[\"scale_factor\",-1],\n"
+                "    PARAMETER[\"false_easting\",3],\n"
+                "    PARAMETER[\"false_northing\",4],\n"
+                "    UNIT[\"metre\",1]]";
+    auto obj3 = WKTParser().createFromWKT(wkt3);
+    auto crs3 = nn_dynamic_pointer_cast<ProjectedCRS>(obj3);
+    ASSERT_TRUE(crs3 != nullptr);
+
+    EXPECT_TRUE(
+        crs1->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs2->isEquivalentTo(crs1.get(), IComparable::Criterion::EQUIVALENT));
+
+    EXPECT_FALSE(
+        crs1->isEquivalentTo(crs3.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(
+        crs3->isEquivalentTo(crs1.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(
+        crs2->isEquivalentTo(crs3.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(
+        crs3->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     hotine_oblique_mercator_variant_A_export_equivalent_modulo_360) {
+    auto conv1 = Conversion::createHotineObliqueMercatorVariantA(
+        PropertyMap(), Angle(1), Angle(2), Angle(-3), Angle(-4), Scale(5),
+        Length(6), Length(7));
+    auto conv2 = Conversion::createHotineObliqueMercatorVariantA(
+        PropertyMap(), Angle(1), Angle(2), Angle(-3 + 360), Angle(-4 + 360),
+        Scale(5), Length(6), Length(7));
+
+    EXPECT_TRUE(
+        conv1->isEquivalentTo(conv2.get(), IComparable::Criterion::EQUIVALENT));
+}

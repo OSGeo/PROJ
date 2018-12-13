@@ -1113,10 +1113,38 @@ bool OperationParameterValue::_isEquivalentTo(
     if (otherOPV == nullptr) {
         return false;
     }
-    return d->parameter->_isEquivalentTo(otherOPV->d->parameter.get(),
-                                         criterion) &&
-           d->parameterValue->_isEquivalentTo(otherOPV->d->parameterValue.get(),
-                                              criterion);
+    if (!d->parameter->_isEquivalentTo(otherOPV->d->parameter.get(),
+                                       criterion)) {
+        return false;
+    }
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        return d->parameterValue->_isEquivalentTo(
+            otherOPV->d->parameterValue.get(), criterion);
+    }
+    if (d->parameterValue->_isEquivalentTo(otherOPV->d->parameterValue.get(),
+                                           criterion)) {
+        return true;
+    }
+    if (d->parameter->getEPSGCode() ==
+            EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE ||
+        d->parameter->getEPSGCode() ==
+            EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID) {
+        if (parameterValue()->type() == ParameterValue::Type::MEASURE &&
+            otherOPV->parameterValue()->type() ==
+                ParameterValue::Type::MEASURE) {
+            const double a = std::fmod(parameterValue()->value().convertToUnit(
+                                           common::UnitOfMeasure::DEGREE) +
+                                           360.0,
+                                       360.0);
+            const double b =
+                std::fmod(otherOPV->parameterValue()->value().convertToUnit(
+                              common::UnitOfMeasure::DEGREE) +
+                              360.0,
+                          360.0);
+            return std::fabs(a - b) <= 1e-10 * std::fabs(a);
+        }
+    }
+    return false;
 }
 //! @endcond
 
@@ -1187,8 +1215,17 @@ bool OperationParameter::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherOP = dynamic_cast<const OperationParameter *>(other);
-    return otherOP != nullptr &&
-           IdentifiedObject::_isEquivalentTo(other, criterion);
+    if (otherOP == nullptr) {
+        return false;
+    }
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        return IdentifiedObject::_isEquivalentTo(other, criterion);
+    }
+    if (IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        return true;
+    }
+    auto l_epsgCode = getEPSGCode();
+    return l_epsgCode != 0 && l_epsgCode == otherOP->getEPSGCode();
 }
 //! @endcond
 
@@ -1449,6 +1486,13 @@ static SingleOperationNNPtr createPROJBased(
 bool SingleOperation::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
+    return _isEquivalentTo(other, criterion, false);
+}
+
+bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
+                                      util::IComparable::Criterion criterion,
+                                      bool inOtherDirection) const {
+
     auto otherSO = dynamic_cast<const SingleOperation *>(other);
     if (otherSO == nullptr ||
         (criterion == util::IComparable::Criterion::STRICT &&
@@ -1457,12 +1501,17 @@ bool SingleOperation::_isEquivalentTo(
     }
 
     const int methodEPSGCode = d->method_->getEPSGCode();
-    if (!d->method_->_isEquivalentTo(otherSO->d->method_.get(), criterion)) {
+    const int otherMethodEPSGCode = otherSO->d->method_->getEPSGCode();
+
+    const bool equivalentMethods =
+        (criterion == util::IComparable::Criterion::EQUIVALENT &&
+         methodEPSGCode != 0 && methodEPSGCode == otherMethodEPSGCode) ||
+        d->method_->_isEquivalentTo(otherSO->d->method_.get(), criterion);
+
+    if (!equivalentMethods) {
         if (criterion == util::IComparable::Criterion::EQUIVALENT) {
             // _1SP methods can sometimes be equivalent to _2SP ones
             // Check it by using convertToOtherMethod()
-
-            const int otherMethodEPSGCode = otherSO->d->method_->getEPSGCode();
 
             if ((methodEPSGCode ==
                      EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC &&
@@ -1548,10 +1597,11 @@ bool SingleOperation::_isEquivalentTo(
     const auto &values = d->parameterValues_;
     const auto &otherValues = otherSO->d->parameterValues_;
     const auto valuesSize = values.size();
-    if (valuesSize != otherValues.size()) {
-        return false;
-    }
+    const auto otherValuesSize = otherValues.size();
     if (criterion == util::IComparable::Criterion::STRICT) {
+        if (valuesSize != otherValuesSize) {
+            return false;
+        }
         for (size_t i = 0; i < valuesSize; i++) {
             if (!values[i]->_isEquivalentTo(otherValues[i].get(), criterion)) {
                 return false;
@@ -1560,60 +1610,99 @@ bool SingleOperation::_isEquivalentTo(
         return true;
     }
 
-    std::vector<bool> candidateIndices(valuesSize, true);
+    std::vector<bool> candidateIndices(otherValuesSize, true);
     bool equivalent = true;
-    for (size_t i = 0; i < valuesSize; i++) {
-        bool found = false;
-        for (size_t j = 0; j < valuesSize; j++) {
+    bool foundMissingArgs = valuesSize != otherValuesSize;
+
+    for (size_t i = 0; equivalent && i < valuesSize; i++) {
+        auto opParamvalue =
+            dynamic_cast<const OperationParameterValue *>(values[i].get());
+        if (!opParamvalue)
+            return false;
+
+        equivalent = false;
+        bool sameNameDifferentValue = false;
+        for (size_t j = 0; j < otherValuesSize; j++) {
             if (candidateIndices[j] &&
                 values[i]->_isEquivalentTo(otherValues[j].get(), criterion)) {
                 candidateIndices[j] = false;
-                found = true;
+                equivalent = true;
                 break;
-            }
-        }
-        if (!found) {
-            equivalent = false;
-            if (methodEPSGCode ==
-                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
-                // For LCC_2SP, the standard parallels can be switched and
-                // this will result in the same result.
-                auto opParamvalue =
+            } else if (candidateIndices[j]) {
+                auto otherOpParamvalue =
                     dynamic_cast<const OperationParameterValue *>(
-                        values[i].get());
-                if (opParamvalue) {
-                    const int paramEPSGCode =
-                        opParamvalue->parameter()->getEPSGCode();
-                    if (paramEPSGCode ==
-                            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL ||
-                        paramEPSGCode ==
-                            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL) {
-                        auto value_1st = parameterValue(
-                            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL);
-                        auto value_2nd = parameterValue(
-                            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL);
-                        if (value_1st && value_2nd) {
-                            equivalent =
-                                value_1st->_isEquivalentTo(
-                                    otherSO
-                                        ->parameterValue(
-                                            EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL)
-                                        .get(),
-                                    criterion) &&
-                                value_2nd->_isEquivalentTo(
-                                    otherSO
-                                        ->parameterValue(
-                                            EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL)
-                                        .get(),
-                                    criterion);
-                        }
-                    }
+                        otherValues[j].get());
+                if (!otherOpParamvalue)
+                    return false;
+                sameNameDifferentValue =
+                    opParamvalue->parameter()->_isEquivalentTo(
+                        otherOpParamvalue->parameter().get(), criterion);
+                if (sameNameDifferentValue) {
+                    candidateIndices[j] = false;
+                    break;
                 }
             }
-            if (!equivalent) {
-                break;
+        }
+
+        if (!equivalent &&
+            methodEPSGCode == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
+            // For LCC_2SP, the standard parallels can be switched and
+            // this will result in the same result.
+            const int paramEPSGCode = opParamvalue->parameter()->getEPSGCode();
+            if (paramEPSGCode ==
+                    EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL ||
+                paramEPSGCode ==
+                    EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL) {
+                auto value_1st = parameterValue(
+                    EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL);
+                auto value_2nd = parameterValue(
+                    EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL);
+                if (value_1st && value_2nd) {
+                    equivalent =
+                        value_1st->_isEquivalentTo(
+                            otherSO
+                                ->parameterValue(
+                                    EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL)
+                                .get(),
+                            criterion) &&
+                        value_2nd->_isEquivalentTo(
+                            otherSO
+                                ->parameterValue(
+                                    EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL)
+                                .get(),
+                            criterion);
+                }
             }
         }
+
+        if (equivalent) {
+            continue;
+        }
+
+        if (sameNameDifferentValue) {
+            break;
+        }
+
+        // If there are parameters in this method not found in the other one,
+        // check that they are set to a default neutral value, that is 1
+        // for scale, and 0 otherwise.
+        foundMissingArgs = true;
+        const auto &value = opParamvalue->parameterValue();
+        if (value->type() != ParameterValue::Type::MEASURE) {
+            break;
+        }
+        if (value->value().unit().type() ==
+            common::UnitOfMeasure::Type::SCALE) {
+            equivalent = value->value().getSIValue() == 1.0;
+        } else {
+            equivalent = value->value().getSIValue() == 0.0;
+        }
+    }
+
+    // In the case the arguments don't perfectly match, try the reverse
+    // check.
+    if (equivalent && foundMissingArgs && !inOtherDirection) {
+        return otherSO->_isEquivalentTo(this, criterion, true);
     }
 
     // Equivalent formulations of 2SP can have different parameters
