@@ -170,6 +170,8 @@ static std::set<std::string> buildSetEquivalentParameters() {
          EPSG_NAME_PARAMETER_LONGITUDE_FALSE_ORIGIN,
          EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
          EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN, nullptr},
+
+        {"pseudo_standard_parallel_1", WKT1_STANDARD_PARALLEL_1, nullptr},
     };
 
     for (const auto &paramList : listOfEquivalentParameterNames) {
