@@ -101,6 +101,10 @@ typedef enum
     PJ_CART2D_EASTING_NORTHING,
     /* Northing-Easting */
     PJ_CART2D_NORTHING_EASTING,
+    /* North Pole Easting/SOUTH-Norting/SOUTH */
+    PJ_CART2D_NORTH_POLE_EASTING_SOUTH_NORTHING_SOUTH,
+    /* South Pole Easting/NORTH-Norting/NORTH */
+    PJ_CART2D_SOUTH_POLE_EASTING_NORTH_NORTHING_NORTH,
 } PJ_CARTESIAN_CS_2D_TYPE;
 
 PJ_OBJ PROJ_DLL *proj_obj_create_cartesian_2D_cs(PJ_CONTEXT *ctx,

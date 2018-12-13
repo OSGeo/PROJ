@@ -947,6 +947,54 @@ CartesianCS::createNorthingEasting(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CartesianCS, north-pole centered,
+ * with a Easting (first) South-Oriented and
+ * Northing (second) South-Oriented axis.
+ *
+ * @param unit Linear unit of the axes.
+ * @return a new CartesianCS.
+ */
+CartesianCSNNPtr CartesianCS::createNorthPoleEastingSouthNorthingSouth(
+    const common::UnitOfMeasure &unit) {
+    return create(util::PropertyMap(),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Easting),
+                      AxisAbbreviation::E, AxisDirection::SOUTH, unit,
+                      Meridian::create(common::Angle(90))),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Northing),
+                      AxisAbbreviation::N, AxisDirection::SOUTH, unit,
+                      Meridian::create(common::Angle(180))));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a CartesianCS, south-pole centered,
+ * with a Easting (first) North-Oriented and
+ * Northing (second) North-Oriented axis.
+ *
+ * @param unit Linear unit of the axes.
+ * @return a new CartesianCS.
+ */
+CartesianCSNNPtr CartesianCS::createSouthPoleEastingNorthNorthingNorth(
+    const common::UnitOfMeasure &unit) {
+    return create(util::PropertyMap(),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Easting),
+                      AxisAbbreviation::E, AxisDirection::NORTH, unit,
+                      Meridian::create(common::Angle(90))),
+                  CoordinateSystemAxis::create(
+                      util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              AxisName::Northing),
+                      AxisAbbreviation::N, AxisDirection::NORTH, unit,
+                      Meridian::create(common::Angle(0))));
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a CartesianCS with the three geocentric axes.
  *
  * @param unit Liinear unit of the axes.

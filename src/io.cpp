@@ -3461,36 +3461,6 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 
     if (isNull(csNode) && node->countChildrenOfName(WKTConstants::AXIS) == 0) {
 
-        const auto createEastingSouthNorthingSouth = [&linearUnit]() {
-            return CartesianCS::create(
-                PropertyMap(),
-                CoordinateSystemAxis::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            AxisName::Easting),
-                    AxisAbbreviation::E, AxisDirection::SOUTH, linearUnit,
-                    Meridian::create(Angle(90, UnitOfMeasure::DEGREE))),
-                CoordinateSystemAxis::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            AxisName::Northing),
-                    AxisAbbreviation::N, AxisDirection::SOUTH, linearUnit,
-                    Meridian::create(Angle(180, UnitOfMeasure::DEGREE))));
-        };
-
-        const auto createEastingNorthNorthingNorth = [&linearUnit]() {
-            return CartesianCS::create(
-                PropertyMap(),
-                CoordinateSystemAxis::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            AxisName::Easting),
-                    AxisAbbreviation::E, AxisDirection::NORTH, linearUnit,
-                    Meridian::create(Angle(90, UnitOfMeasure::DEGREE))),
-                CoordinateSystemAxis::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            AxisName::Northing),
-                    AxisAbbreviation::N, AxisDirection::NORTH, linearUnit,
-                    Meridian::create(Angle(0, UnitOfMeasure::DEGREE))));
-        };
-
         const auto methodCode = conversion->method()->getEPSGCode();
         // Krovak south oriented ?
         if (methodCode == EPSG_CODE_METHOD_KROVAK) {
@@ -3516,9 +3486,15 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
                 EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
                 common::UnitOfMeasure::DEGREE);
             if (std::fabs(lat0 - 90) < 1e-10) {
-                cartesianCS = createEastingSouthNorthingSouth().as_nullable();
+                cartesianCS =
+                    CartesianCS::createNorthPoleEastingSouthNorthingSouth(
+                        linearUnit)
+                        .as_nullable();
             } else if (std::fabs(lat0 - -90) < 1e-10) {
-                cartesianCS = createEastingNorthNorthingNorth().as_nullable();
+                cartesianCS =
+                    CartesianCS::createSouthPoleEastingNorthNorthingNorth(
+                        linearUnit)
+                        .as_nullable();
             }
         } else if (methodCode ==
                    EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
@@ -3526,9 +3502,15 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
                 EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL,
                 common::UnitOfMeasure::DEGREE);
             if (lat_ts > 0) {
-                cartesianCS = createEastingSouthNorthingSouth().as_nullable();
+                cartesianCS =
+                    CartesianCS::createNorthPoleEastingSouthNorthingSouth(
+                        linearUnit)
+                        .as_nullable();
             } else if (lat_ts < 0) {
-                cartesianCS = createEastingNorthNorthingNorth().as_nullable();
+                cartesianCS =
+                    CartesianCS::createSouthPoleEastingNorthNorthingNorth(
+                        linearUnit)
+                        .as_nullable();
             }
         }
     }

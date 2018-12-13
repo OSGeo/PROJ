@@ -485,6 +485,12 @@ class PROJ_GCC_DLL CartesianCS final : public CoordinateSystem {
     createNorthingEasting(const common::UnitOfMeasure &unit);
 
     PROJ_DLL static CartesianCSNNPtr
+    createNorthPoleEastingSouthNorthingSouth(const common::UnitOfMeasure &unit);
+
+    PROJ_DLL static CartesianCSNNPtr
+    createSouthPoleEastingNorthNorthingNorth(const common::UnitOfMeasure &unit);
+
+    PROJ_DLL static CartesianCSNNPtr
     createGeocentric(const common::UnitOfMeasure &unit);
 
     PROJ_PRIVATE :

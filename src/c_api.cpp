@@ -2979,6 +2979,16 @@ PJ_OBJ *proj_obj_create_cartesian_2D_cs(PJ_CONTEXT *ctx,
         case PJ_CART2D_NORTHING_EASTING:
             return PJ_OBJ::create(CartesianCS::createNorthingEasting(
                 createLinearUnit(unit_name, unit_conv_factor)));
+
+        case PJ_CART2D_NORTH_POLE_EASTING_SOUTH_NORTHING_SOUTH:
+            return PJ_OBJ::create(
+                CartesianCS::createNorthPoleEastingSouthNorthingSouth(
+                    createLinearUnit(unit_name, unit_conv_factor)));
+
+        case PJ_CART2D_SOUTH_POLE_EASTING_NORTH_NORTHING_NORTH:
+            return PJ_OBJ::create(
+                CartesianCS::createSouthPoleEastingNorthNorthingNorth(
+                    createLinearUnit(unit_name, unit_conv_factor)));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
