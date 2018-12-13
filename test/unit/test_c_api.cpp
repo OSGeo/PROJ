@@ -426,6 +426,13 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
     ObjectKeeper keeper_transf(transf);
     ASSERT_NE(transf, nullptr);
 
+    std::vector<double> values(7, 0);
+    EXPECT_TRUE(proj_coordoperation_get_towgs84_values(m_ctxt, transf,
+                                                       values.data(), 7, true));
+    auto expected = std::vector<double>{2.329, -147.042, -92.08, -0.309,
+                                        0.325, 0.497, 5.69};
+    EXPECT_EQ(values, expected);
+
     auto res2 =
         proj_obj_crs_create_bound_crs(m_ctxt, base_crs, hub_crs, transf);
     ObjectKeeper keeper_res2(res2);

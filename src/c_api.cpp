@@ -5501,6 +5501,52 @@ int proj_coordoperation_get_param(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the parameters of a Helmert transformation as WKT1 TOWGS84
+ * values.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param coordoperation Objet of type Transformation, that can be represented
+ * as a WKT1 TOWGS84 node (must not be NULL)
+ * @param out_values Pointer to an array of value_count double values.
+ * @param value_count Size of out_values array.
+ * @param emit_error_if_incompatible Boolean to inicate if an error must be
+ * logged if coordoperation is not compatible with a WKT1 TOWGS84
+ * representation.
+ * @return TRUE in case of success, or FALSE if coordoperation is not
+ * compatible with a WKT1 TOWGS84 representation.
+ */
+
+int proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
+                                           const PJ_OBJ *coordoperation,
+                                           double *out_values, int value_count,
+                                           int emit_error_if_incompatible) {
+    SANITIZE_CTX(ctx);
+    assert(coordoperation);
+    auto transf =
+        dynamic_cast<const Transformation *>(coordoperation->obj.get());
+    if (!transf) {
+        if (emit_error_if_incompatible) {
+            proj_log_error(ctx, __FUNCTION__, "Object is not a Transformation");
+        }
+        return FALSE;
+    }
+    try {
+        auto values = transf->getTOWGS84Parameters();
+        for (int i = 0;
+             i < value_count && static_cast<size_t>(i) < values.size(); i++) {
+            out_values[i] = values[i];
+        }
+        return TRUE;
+    } catch (const std::exception &e) {
+        if (emit_error_if_incompatible) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+        }
+        return FALSE;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the number of grids used by a CoordinateOperation
  *
  * @param ctx PROJ context, or NULL for default context

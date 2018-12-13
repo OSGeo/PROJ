@@ -921,6 +921,12 @@ int PROJ_DLL proj_coordoperation_get_grid_used(PJ_CONTEXT *ctx,
 double PROJ_DLL proj_coordoperation_get_accuracy(PJ_CONTEXT *ctx,
                                                  const PJ_OBJ* obj);
 
+int PROJ_DLL proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
+                                                    const PJ_OBJ *coordoperation,
+                                                    double *out_values,
+                                                    int value_count,
+                                                    int emit_error_if_incompatible);
+
 /**@}*/
 
 #ifdef __cplusplus
