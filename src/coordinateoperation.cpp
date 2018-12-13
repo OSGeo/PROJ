@@ -1503,10 +1503,35 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
     const int methodEPSGCode = d->method_->getEPSGCode();
     const int otherMethodEPSGCode = otherSO->d->method_->getEPSGCode();
 
-    const bool equivalentMethods =
+    bool equivalentMethods =
         (criterion == util::IComparable::Criterion::EQUIVALENT &&
          methodEPSGCode != 0 && methodEPSGCode == otherMethodEPSGCode) ||
         d->method_->_isEquivalentTo(otherSO->d->method_.get(), criterion);
+    if (!equivalentMethods &&
+        criterion == util::IComparable::Criterion::EQUIVALENT) {
+        if ((methodEPSGCode == EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA &&
+             otherMethodEPSGCode ==
+                 EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL) ||
+            (otherMethodEPSGCode ==
+                 EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA &&
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL) ||
+            (methodEPSGCode == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL &&
+             otherMethodEPSGCode ==
+                 EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL) ||
+            (otherMethodEPSGCode == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL &&
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL)) {
+            auto geodCRS =
+                dynamic_cast<const crs::GeodeticCRS *>(sourceCRS().get());
+            auto otherGeodCRS = dynamic_cast<const crs::GeodeticCRS *>(
+                otherSO->sourceCRS().get());
+            if (geodCRS && otherGeodCRS && geodCRS->ellipsoid()->isSphere() &&
+                otherGeodCRS->ellipsoid()->isSphere()) {
+                equivalentMethods = true;
+            }
+        }
+    }
 
     if (!equivalentMethods) {
         if (criterion == util::IComparable::Criterion::EQUIVALENT) {

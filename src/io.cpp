@@ -6500,8 +6500,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         }
     } else if (step.name == "aeqd" && hasParamValue(step, "guam")) {
         mapping = getMapping(EPSG_CODE_METHOD_GUAM_PROJECTION);
-    } else if (step.name == "cea" &&
-               !geogCRS->datum()->ellipsoid()->isSphere()) {
+    } else if (step.name == "cea" && !geogCRS->ellipsoid()->isSphere()) {
         mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
     } else if (step.name == "geos" && getParamValue(step, "sweep") == "x") {
         mapping =
@@ -6597,6 +6596,15 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             } else {
                 axisType = AxisType::SOUTH_POLE;
             }
+        }
+        if (geogCRS->ellipsoid()->isSphere()) {
+            mapping = getMapping(
+                EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL);
+        }
+    } else if (step.name == "eqc") {
+        if (geogCRS->ellipsoid()->isSphere()) {
+            mapping =
+                getMapping(EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL);
         }
     }
 

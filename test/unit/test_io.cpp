@@ -42,6 +42,8 @@
 
 #include "proj/internal/internal.hpp"
 
+#include "proj_constants.h"
+
 #include <string>
 
 using namespace osgeo::proj::common;
@@ -6969,6 +6971,52 @@ TEST(io, projparse_laea_south_pole) {
     auto wkt = f->toString();
     EXPECT_TRUE(wkt.find("AXIS[\"(E)\",north") != std::string::npos) << wkt;
     EXPECT_TRUE(wkt.find("AXIS[\"(N)\",north") != std::string::npos) << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_laea_spherical) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=laea +R=6371228");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL);
+
+    auto crs2 = ProjectedCRS::create(
+        PropertyMap(), crs->baseCRS(),
+        Conversion::createLambertAzimuthalEqualArea(
+            PropertyMap(), Angle(0), Angle(0), Length(0), Length(0)),
+        crs->coordinateSystem());
+    EXPECT_EQ(crs2->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA);
+
+    EXPECT_TRUE(
+        crs->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs2->isEquivalentTo(crs.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_eqc_spherical) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=eqc +R=6371228");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL);
+
+    auto crs2 = ProjectedCRS::create(
+        PropertyMap(), crs->baseCRS(),
+        Conversion::createEquidistantCylindrical(
+            PropertyMap(), Angle(0), Angle(0), Length(0), Length(0)),
+        crs->coordinateSystem());
+    EXPECT_EQ(crs2->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL);
+
+    EXPECT_TRUE(
+        crs->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs2->isEquivalentTo(crs.get(), IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
