@@ -1356,6 +1356,46 @@ TEST(wkt_parse, wkt1_polar_stereographic_latitude_of_origin_70) {
     auto expectedPROJString = "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=2 "
                               "+x_0=3 +y_0=4 +datum=WGS84 +units=m +no_defs";
     EXPECT_EQ(projString, expectedPROJString);
+
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->nameStr(), "Easting");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->direction(),
+              AxisDirection::SOUTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->nameStr(), "Northing");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
+              AxisDirection::SOUTH);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_polar_stereographic_latitude_of_origin_minus_70) {
+    auto wkt = "PROJCS[\"unknown\",\n"
+               "    GEOGCS[\"unknown\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+               "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+               "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+               "        UNIT[\"degree\",0.0174532925199433,\n"
+               "            AUTHORITY[\"EPSG\",\"9122\"]]],\n"
+               "    PROJECTION[\"Polar_Stereographic\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",-70],\n"
+               "    PARAMETER[\"central_meridian\",2],\n"
+               "    PARAMETER[\"false_easting\",3],\n"
+               "    PARAMETER[\"false_northing\",4],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->nameStr(), "Easting");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->direction(),
+              AxisDirection::NORTH);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->nameStr(), "Northing");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[1]->direction(),
+              AxisDirection::NORTH);
 }
 
 // ---------------------------------------------------------------------------
