@@ -3477,7 +3477,9 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
                         emptyString, AxisDirection::WEST, linearUnit))
                     .as_nullable();
         } else if (methodCode ==
-                   EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A) {
+                       EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A ||
+                   methodCode ==
+                       EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA) {
             // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
             // EPSG:32761 (UPS South) uses the easting-northing order, instead
             // of the EPSG northing-easting order.
@@ -6584,6 +6586,17 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             }
         } else {
             mapping = getMapping(PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC);
+        }
+    } else if (step.name == "laea") {
+        if (hasParamValue(step, "lat_0") &&
+            std::fabs(std::fabs(getAngularValue(getParamValue(step, "lat_0"))) -
+                      90.0) < 1e-10) {
+            const double lat_0 = getAngularValue(getParamValue(step, "lat_0"));
+            if (lat_0 > 0) {
+                axisType = AxisType::NORTH_POLE;
+            } else {
+                axisType = AxisType::SOUTH_POLE;
+            }
         }
     }
 

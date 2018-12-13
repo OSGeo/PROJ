@@ -6943,6 +6943,36 @@ TEST(io, projparse_utm_south) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_laea_north_pole) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=laea +lat_0=90");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f.get());
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("AXIS[\"(E)\",south") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("AXIS[\"(N)\",south") != std::string::npos) << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_laea_south_pole) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=laea +lat_0=-90");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f.get());
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("AXIS[\"(E)\",north") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("AXIS[\"(N)\",north") != std::string::npos) << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_non_earth_ellipsoid) {
     std::string input("+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +R=1 +units=m "
                       "+no_defs");
