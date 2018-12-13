@@ -158,10 +158,14 @@ class Measure : public util::BaseObject {
 
     PROJ_DLL bool operator==(const Measure &other) PROJ_CONST_DECL;
 
+    /** Default maximum resulative error. */
+    static constexpr double DEFAULT_MAX_REL_ERROR = 1e-10;
+
     PROJ_INTERNAL bool
     _isEquivalentTo(const Measure &other,
                     util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const;
+                        util::IComparable::Criterion::STRICT,
+                    double maxRelativeError = DEFAULT_MAX_REL_ERROR) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

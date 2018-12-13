@@ -370,15 +370,17 @@ bool Measure::operator==(const Measure &other) PROJ_CONST_DEFN {
 /** \brief Returns whether an object is equivalent to another one.
  * @param other other object to compare to
  * @param criterion comparaison criterion.
+ * @param maxRelativeError Maximum relative error allowed.
  * @return true if objects are equivalent.
  */
 bool Measure::_isEquivalentTo(const Measure &other,
-                              util::IComparable::Criterion criterion) const {
+                              util::IComparable::Criterion criterion,
+                              double maxRelativeError) const {
     if (criterion == util::IComparable::Criterion::STRICT) {
         return operator==(other);
     }
     return std::fabs(getSIValue() - other.getSIValue()) <=
-           1e-10 * std::fabs(getSIValue());
+           maxRelativeError * std::fabs(getSIValue());
 }
 
 // ---------------------------------------------------------------------------

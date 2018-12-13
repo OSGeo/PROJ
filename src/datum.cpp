@@ -388,7 +388,10 @@ bool PrimeMeridian::_isEquivalentTo(
         !IdentifiedObject::_isEquivalentTo(other, criterion)) {
         return false;
     }
-    return longitude()._isEquivalentTo(otherPM->longitude(), criterion);
+    // In MapInfo, the Paris prime meridian is returned as 2.3372291666667
+    // instead of the official value of 2.33722917, which is a relative
+    // error in the 1e-9 range.
+    return longitude()._isEquivalentTo(otherPM->longitude(), criterion, 1e-8);
 }
 //! @endcond
 
