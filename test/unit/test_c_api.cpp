@@ -2310,23 +2310,51 @@ TEST_F(CApi, proj_obj_crs_alter_cs_angular_unit) {
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
-    auto alteredCRS =
-        proj_obj_crs_alter_cs_angular_unit(m_ctxt, crs, "my unit", 2);
-    ObjectKeeper keeper_alteredCRS(alteredCRS);
-    ASSERT_NE(alteredCRS, nullptr);
+    {
+        auto alteredCRS = proj_obj_crs_alter_cs_angular_unit(
+            m_ctxt, crs, "my unit", 2, nullptr, nullptr);
+        ObjectKeeper keeper_alteredCRS(alteredCRS);
+        ASSERT_NE(alteredCRS, nullptr);
 
-    auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, alteredCRS);
-    ASSERT_NE(cs, nullptr);
-    ObjectKeeper keeperCs(cs);
-    double unitConvFactor = 0.0;
-    const char *unitName = nullptr;
+        auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, alteredCRS);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+        double unitConvFactor = 0.0;
+        const char *unitName = nullptr;
 
-    EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
-                                          nullptr, &unitConvFactor, &unitName,
-                                          nullptr, nullptr));
-    ASSERT_NE(unitName, nullptr);
-    EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
-    EXPECT_EQ(std::string(unitName), "my unit");
+        EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
+                                              nullptr, &unitConvFactor,
+                                              &unitName, nullptr, nullptr));
+        ASSERT_NE(unitName, nullptr);
+        EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
+        EXPECT_EQ(std::string(unitName), "my unit");
+    }
+
+    {
+        auto alteredCRS = proj_obj_crs_alter_cs_angular_unit(
+            m_ctxt, crs, "my unit", 2, "my auth", "my code");
+        ObjectKeeper keeper_alteredCRS(alteredCRS);
+        ASSERT_NE(alteredCRS, nullptr);
+
+        auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, alteredCRS);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+        double unitConvFactor = 0.0;
+        const char *unitName = nullptr;
+        const char *unitAuthName = nullptr;
+        const char *unitCode = nullptr;
+
+        EXPECT_TRUE(proj_obj_cs_get_axis_info(
+            m_ctxt, cs, 0, nullptr, nullptr, nullptr, &unitConvFactor,
+            &unitName, &unitAuthName, &unitCode));
+        ASSERT_NE(unitName, nullptr);
+        EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
+        EXPECT_EQ(std::string(unitName), "my unit");
+        ASSERT_NE(unitAuthName, nullptr);
+        EXPECT_EQ(std::string(unitAuthName), "my auth");
+        ASSERT_NE(unitCode, nullptr);
+        EXPECT_EQ(std::string(unitCode), "my code");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2339,23 +2367,51 @@ TEST_F(CApi, proj_obj_crs_alter_cs_linear_unit) {
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
-    auto alteredCRS =
-        proj_obj_crs_alter_cs_linear_unit(m_ctxt, crs, "my unit", 2);
-    ObjectKeeper keeper_alteredCRS(alteredCRS);
-    ASSERT_NE(alteredCRS, nullptr);
+    {
+        auto alteredCRS = proj_obj_crs_alter_cs_linear_unit(
+            m_ctxt, crs, "my unit", 2, nullptr, nullptr);
+        ObjectKeeper keeper_alteredCRS(alteredCRS);
+        ASSERT_NE(alteredCRS, nullptr);
 
-    auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, alteredCRS);
-    ASSERT_NE(cs, nullptr);
-    ObjectKeeper keeperCs(cs);
-    double unitConvFactor = 0.0;
-    const char *unitName = nullptr;
+        auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, alteredCRS);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+        double unitConvFactor = 0.0;
+        const char *unitName = nullptr;
 
-    EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
-                                          nullptr, &unitConvFactor, &unitName,
-                                          nullptr, nullptr));
-    ASSERT_NE(unitName, nullptr);
-    EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
-    EXPECT_EQ(std::string(unitName), "my unit");
+        EXPECT_TRUE(proj_obj_cs_get_axis_info(m_ctxt, cs, 0, nullptr, nullptr,
+                                              nullptr, &unitConvFactor,
+                                              &unitName, nullptr, nullptr));
+        ASSERT_NE(unitName, nullptr);
+        EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
+        EXPECT_EQ(std::string(unitName), "my unit");
+    }
+
+    {
+        auto alteredCRS = proj_obj_crs_alter_cs_linear_unit(
+            m_ctxt, crs, "my unit", 2, "my auth", "my code");
+        ObjectKeeper keeper_alteredCRS(alteredCRS);
+        ASSERT_NE(alteredCRS, nullptr);
+
+        auto cs = proj_obj_crs_get_coordinate_system(m_ctxt, alteredCRS);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+        double unitConvFactor = 0.0;
+        const char *unitName = nullptr;
+        const char *unitAuthName = nullptr;
+        const char *unitCode = nullptr;
+
+        EXPECT_TRUE(proj_obj_cs_get_axis_info(
+            m_ctxt, cs, 0, nullptr, nullptr, nullptr, &unitConvFactor,
+            &unitName, &unitAuthName, &unitCode));
+        ASSERT_NE(unitName, nullptr);
+        EXPECT_EQ(unitConvFactor, 2) << unitConvFactor;
+        EXPECT_EQ(std::string(unitName), "my unit");
+        ASSERT_NE(unitAuthName, nullptr);
+        EXPECT_EQ(std::string(unitAuthName), "my auth");
+        ASSERT_NE(unitCode, nullptr);
+        EXPECT_EQ(std::string(unitCode), "my code");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2370,7 +2426,7 @@ TEST_F(CApi, proj_obj_crs_alter_parameters_linear_unit) {
 
     {
         auto alteredCRS = proj_obj_crs_alter_parameters_linear_unit(
-            m_ctxt, crs, "my unit", 2, false);
+            m_ctxt, crs, "my unit", 2, nullptr, nullptr, false);
         ObjectKeeper keeper_alteredCRS(alteredCRS);
         ASSERT_NE(alteredCRS, nullptr);
 
@@ -2384,7 +2440,7 @@ TEST_F(CApi, proj_obj_crs_alter_parameters_linear_unit) {
 
     {
         auto alteredCRS = proj_obj_crs_alter_parameters_linear_unit(
-            m_ctxt, crs, "my unit", 2, true);
+            m_ctxt, crs, "my unit", 2, nullptr, nullptr, true);
         ObjectKeeper keeper_alteredCRS(alteredCRS);
         ASSERT_NE(alteredCRS, nullptr);
 

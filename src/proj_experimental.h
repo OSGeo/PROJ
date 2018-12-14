@@ -189,17 +189,24 @@ PJ_OBJ PROJ_DLL *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx,
 PJ_OBJ PROJ_DLL *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx,
                                                     const PJ_OBJ* obj,
                                                     const char *angular_units,
-                                                    double angular_units_conv);
+                                                    double angular_units_conv,
+                                                    const char *unit_auth_name,
+                                                    const char *unit_code);
 
 PJ_OBJ PROJ_DLL *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx,
                                                    const PJ_OBJ* obj,
-                                                    const char *linear_units,
-                                                    double linear_units_conv);
+                                                   const char *linear_units,
+                                                   double linear_units_conv,
+                                                   const char *unit_auth_name,
+                                                   const char *unit_code);
 
-PJ_OBJ PROJ_DLL *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
-                                                           const PJ_OBJ* obj,
+PJ_OBJ PROJ_DLL *proj_obj_crs_alter_parameters_linear_unit(
+                                                    PJ_CONTEXT *ctx,
+                                                    const PJ_OBJ* obj,
                                                     const char *linear_units,
                                                     double linear_units_conv,
+                                                    const char *unit_auth_name,
+                                                    const char *unit_code,
                                                     int convert_to_new_unit);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_engineering_crs(PJ_CONTEXT *ctx,

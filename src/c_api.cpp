@@ -2019,21 +2019,30 @@ static PropertyMap createPropertyMapName(const char *c_name) {
 
 // ---------------------------------------------------------------------------
 
-static UnitOfMeasure createLinearUnit(const char *name, double convFactor) {
+static UnitOfMeasure createLinearUnit(const char *name, double convFactor,
+                                      const char *unit_auth_name = nullptr,
+                                      const char *unit_code = nullptr) {
     return name == nullptr
                ? UnitOfMeasure::METRE
-               : UnitOfMeasure(name, convFactor, UnitOfMeasure::Type::LINEAR);
+               : UnitOfMeasure(name, convFactor, UnitOfMeasure::Type::LINEAR,
+                               unit_auth_name ? unit_auth_name : "",
+                               unit_code ? unit_code : "");
 }
 
 // ---------------------------------------------------------------------------
 
-static UnitOfMeasure createAngularUnit(const char *name, double convFactor) {
+static UnitOfMeasure createAngularUnit(const char *name, double convFactor,
+                                       const char *unit_auth_name = nullptr,
+                                       const char *unit_code = nullptr) {
     return name ? (ci_equal(name, "degree")
                        ? UnitOfMeasure::DEGREE
                        : ci_equal(name, "grad")
                              ? UnitOfMeasure::GRAD
                              : UnitOfMeasure(name, convFactor,
-                                             UnitOfMeasure::Type::ANGULAR))
+                                             UnitOfMeasure::Type::ANGULAR,
+                                             unit_auth_name ? unit_auth_name
+                                                            : "",
+                                             unit_code ? unit_code : ""))
                 : UnitOfMeasure::DEGREE;
 }
 
@@ -2506,15 +2515,18 @@ PJ_OBJ *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  * @param obj Object of type CRS. Must not be NULL
  * @param angular_units Name of the angular units. Or NULL for Degree
  * @param angular_units_conv Conversion factor from the angular unit to radian.
- * Or
- * 0 for Degree if angular_units == NULL. Otherwise should be not NULL
+ * Or 0 for Degree if angular_units == NULL. Otherwise should be not NULL
+ * @param unit_auth_name Unit authority name. Or NULL.
+ * @param unit_code Unit code. Or NULL.
  *
  * @return Object that must be unreferenced with
  * proj_obj_destroy(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
                                            const char *angular_units,
-                                           double angular_units_conv) {
+                                           double angular_units_conv,
+                                           const char *unit_auth_name,
+                                           const char *unit_code) {
 
     SANITIZE_CTX(ctx);
     auto geodCRS = proj_obj_crs_get_geodetic_crs(ctx, obj);
@@ -2529,8 +2541,8 @@ PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
 
     PJ_OBJ *geogCRSAltered = nullptr;
     try {
-        const UnitOfMeasure angUnit(
-            createAngularUnit(angular_units, angular_units_conv));
+        const UnitOfMeasure angUnit(createAngularUnit(
+            angular_units, angular_units_conv, unit_auth_name, unit_code));
         geogCRSAltered = PJ_OBJ::create(GeographicCRS::create(
             createPropertyMapName(proj_obj_get_name(geodCRS)), geogCRS->datum(),
             geogCRS->datumEnsemble(),
@@ -2563,13 +2575,17 @@ PJ_OBJ *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  * @param linear_units Name of the linear units. Or NULL for Metre
  * @param linear_units_conv Conversion factor from the linear unit to metre. Or
  * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
+ * @param unit_auth_name Unit authority name. Or NULL.
+ * @param unit_code Unit code. Or NULL.
  *
  * @return Object that must be unreferenced with
  * proj_obj_destroy(), or NULL in case of error.
  */
 PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
                                           const char *linear_units,
-                                          double linear_units_conv) {
+                                          double linear_units_conv,
+                                          const char *unit_auth_name,
+                                          const char *unit_code) {
     SANITIZE_CTX(ctx);
     auto crs = dynamic_cast<const CRS *>(obj->obj.get());
     if (!crs) {
@@ -2577,8 +2593,8 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
     }
 
     try {
-        const UnitOfMeasure linearUnit(
-            createLinearUnit(linear_units, linear_units_conv));
+        const UnitOfMeasure linearUnit(createLinearUnit(
+            linear_units, linear_units_conv, unit_auth_name, unit_code));
         return PJ_OBJ::create(crs->alterCSLinearUnit(linearUnit));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2602,6 +2618,8 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  * @param linear_units Name of the linear units. Or NULL for Metre
  * @param linear_units_conv Conversion factor from the linear unit to metre. Or
  * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
+ * @param unit_auth_name Unit authority name. Or NULL.
+ * @param unit_code Unit code. Or NULL.
  * @param convert_to_new_unit TRUE if exisiting values should be converted from
  * their current unit to the new unit. If FALSE, their value will be left
  * unchanged and the unit overriden (so the resulting CRS will not be
@@ -2610,11 +2628,10 @@ PJ_OBJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
  * @return Object that must be unreferenced with
  * proj_obj_destroy(), or NULL in case of error.
  */
-PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
-                                                  const PJ_OBJ *obj,
-                                                  const char *linear_units,
-                                                  double linear_units_conv,
-                                                  int convert_to_new_unit) {
+PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(
+    PJ_CONTEXT *ctx, const PJ_OBJ *obj, const char *linear_units,
+    double linear_units_conv, const char *unit_auth_name, const char *unit_code,
+    int convert_to_new_unit) {
     SANITIZE_CTX(ctx);
     auto crs = dynamic_cast<const ProjectedCRS *>(obj->obj.get());
     if (!crs) {
@@ -2622,8 +2639,8 @@ PJ_OBJ *proj_obj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx,
     }
 
     try {
-        const UnitOfMeasure linearUnit(
-            createLinearUnit(linear_units, linear_units_conv));
+        const UnitOfMeasure linearUnit(createLinearUnit(
+            linear_units, linear_units_conv, unit_auth_name, unit_code));
         return PJ_OBJ::create(crs->alterParametersLinearUnit(
             linearUnit, convert_to_new_unit == TRUE));
     } catch (const std::exception &e) {
