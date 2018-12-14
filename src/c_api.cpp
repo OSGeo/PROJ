@@ -1778,7 +1778,7 @@ PJ_OBJ *proj_obj_get_target_crs(PJ_CONTEXT *ctx, const PJ_OBJ *obj) {
  * (0-100). There are as many elements in this array as
  * proj_obj_list_get_count()
  * returns on the return value of this function. *confidence should be
- * released with proj_destroy_int_list().
+ * released with proj_int_list_destroy().
  * @return a list of matching reference CRS, or nullptr in case of error.
  */
 PJ_OBJ_LIST *proj_obj_identify(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
@@ -1828,7 +1828,7 @@ PJ_OBJ_LIST *proj_obj_identify(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
 // ---------------------------------------------------------------------------
 
 /** \brief Free an array of integer. */
-void proj_destroy_int_list(int *list) { delete[] list; }
+void proj_int_list_destroy(int *list) { delete[] list; }
 
 // ---------------------------------------------------------------------------
 
@@ -1849,12 +1849,12 @@ static PROJ_STRING_LIST set_to_string_list(std::set<std::string> &&set) {
 /** \brief Return the list of authorities used in the database.
  *
  * The returned list is NULL terminated and must be freed with
- * proj_destroy_string_list().
+ * proj_string_list_destroy().
  *
  * @param ctx PROJ context, or NULL for default context
  *
  * @return a NULL terminated list of NUL-terminated strings that must be
- * freed with proj_destroy_string_list(), or NULL in case of error.
+ * freed with proj_string_list_destroy(), or NULL in case of error.
  */
 PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
     SANITIZE_CTX(ctx);
@@ -1871,7 +1871,7 @@ PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
 /** \brief Returns the set of authority codes of the given object type.
  *
  * The returned list is NULL terminated and must be freed with
- * proj_destroy_string_list().
+ * proj_string_list_destroy().
  *
  * @param ctx PROJ context, or NULL for default context.
  * @param auth_name Authority name (must not be NULL)
@@ -1879,7 +1879,7 @@ PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
  * @param allow_deprecated whether we should return deprecated objects as well.
  *
  * @return a NULL terminated list of NUL-terminated strings that must be
- * freed with proj_destroy_string_list(), or NULL in case of error.
+ * freed with proj_string_list_destroy(), or NULL in case of error.
  */
 PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                               const char *auth_name,
@@ -1906,7 +1906,7 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
 // ---------------------------------------------------------------------------
 
 /** Free a list of NULL terminated strings. */
-void proj_destroy_string_list(PROJ_STRING_LIST list) {
+void proj_string_list_destroy(PROJ_STRING_LIST list) {
     if (list) {
         for (size_t i = 0; list[i] != nullptr; i++) {
             delete[] list[i];

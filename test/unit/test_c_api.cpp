@@ -927,7 +927,7 @@ TEST_F(CApi, proj_obj_get_source_target_crs_invalid_object) {
 struct ListFreer {
     PROJ_STRING_LIST list;
     ListFreer(PROJ_STRING_LIST ptrIn) : list(ptrIn) {}
-    ~ListFreer() { proj_destroy_string_list(list); }
+    ~ListFreer() { proj_string_list_destroy(list); }
     ListFreer(const ListFreer &) = delete;
     ListFreer &operator=(const ListFreer &) = delete;
 };
@@ -1479,7 +1479,7 @@ TEST_F(CApi, proj_obj_identify) {
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 1);
         EXPECT_EQ(confidence[0], 100);
-        proj_destroy_int_list(confidence);
+        proj_int_list_destroy(confidence);
     }
     {
         auto objEllps = proj_obj_create_from_wkt(

@@ -673,7 +673,7 @@ PJ_OBJ_LIST PROJ_DLL *proj_obj_identify(PJ_CONTEXT *ctx,
                                         const char* const *options,
                                         int **out_confidence);
 
-void PROJ_DLL proj_destroy_int_list(int* list);
+void PROJ_DLL proj_int_list_destroy(int* list);
 
 /* ------------------------------------------------------------------------- */
 
@@ -687,7 +687,7 @@ PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                              PJ_OBJ_TYPE type,
                                              int allow_deprecated);
 
-void PROJ_DLL proj_destroy_string_list(PROJ_STRING_LIST list);
+void PROJ_DLL proj_string_list_destroy(PROJ_STRING_LIST list);
 
 /* ------------------------------------------------------------------------- */
 
