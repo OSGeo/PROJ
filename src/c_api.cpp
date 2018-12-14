@@ -2629,6 +2629,77 @@ PJ_OBJ PROJ_DLL *proj_obj_create_engineering_crs(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+static void setSingleOperationElements(
+    const char *name, const char *auth_name, const char *code,
+    const char *method_name, const char *method_auth_name,
+    const char *method_code, int param_count,
+    const PJ_PARAM_DESCRIPTION *params, PropertyMap &propSingleOp,
+    PropertyMap &propMethod, std::vector<OperationParameterNNPtr> &parameters,
+    std::vector<ParameterValueNNPtr> &values) {
+    propSingleOp.set(common::IdentifiedObject::NAME_KEY,
+                     name ? name : "unnamed");
+    if (auth_name && code) {
+        propSingleOp.set(metadata::Identifier::CODESPACE_KEY, auth_name)
+            .set(metadata::Identifier::CODE_KEY, code);
+    }
+
+    propMethod.set(common::IdentifiedObject::NAME_KEY,
+                   method_name ? method_name : "unnamed");
+    if (method_auth_name && method_code) {
+        propMethod.set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
+            .set(metadata::Identifier::CODE_KEY, method_code);
+    }
+
+    for (int i = 0; i < param_count; i++) {
+        PropertyMap propParam;
+        propParam.set(common::IdentifiedObject::NAME_KEY,
+                      params[i].name ? params[i].name : "unnamed");
+        if (params[i].auth_name && params[i].code) {
+            propParam
+                .set(metadata::Identifier::CODESPACE_KEY, params[i].auth_name)
+                .set(metadata::Identifier::CODE_KEY, params[i].code);
+        }
+        parameters.emplace_back(OperationParameter::create(propParam));
+        auto unit_type = UnitOfMeasure::Type::UNKNOWN;
+        switch (params[i].unit_type) {
+        case PJ_UT_ANGULAR:
+            unit_type = UnitOfMeasure::Type::ANGULAR;
+            break;
+        case PJ_UT_LINEAR:
+            unit_type = UnitOfMeasure::Type::LINEAR;
+            break;
+        case PJ_UT_SCALE:
+            unit_type = UnitOfMeasure::Type::SCALE;
+            break;
+        case PJ_UT_TIME:
+            unit_type = UnitOfMeasure::Type::TIME;
+            break;
+        case PJ_UT_PARAMETRIC:
+            unit_type = UnitOfMeasure::Type::PARAMETRIC;
+            break;
+        }
+
+        Measure measure(
+            params[i].value,
+            params[i].unit_type == PJ_UT_ANGULAR
+                ? createAngularUnit(params[i].unit_name,
+                                    params[i].unit_conv_factor)
+                : params[i].unit_type == PJ_UT_LINEAR
+                      ? createLinearUnit(params[i].unit_name,
+                                         params[i].unit_conv_factor)
+                      : UnitOfMeasure(params[i].unit_name ? params[i].unit_name
+                                                          : "unnamed",
+                                      params[i].unit_conv_factor, unit_type));
+        values.emplace_back(ParameterValue::create(measure));
+    }
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a Conversion
  *
  * The returned object must be unreferenced with proj_obj_unref() after
@@ -2657,69 +2728,104 @@ PJ_OBJ *proj_obj_create_conversion(PJ_CONTEXT *ctx, const char *name,
                                    const PJ_PARAM_DESCRIPTION *params) {
     SANITIZE_CTX(ctx);
     try {
-        PropertyMap propConv;
-        propConv.set(common::IdentifiedObject::NAME_KEY,
-                     name ? name : "unnamed");
-        if (auth_name && code) {
-            propConv.set(metadata::Identifier::CODESPACE_KEY, auth_name)
-                .set(metadata::Identifier::CODE_KEY, code);
-        }
+        PropertyMap propSingleOp;
         PropertyMap propMethod;
-        propMethod.set(common::IdentifiedObject::NAME_KEY,
-                       method_name ? method_name : "unnamed");
-        if (method_auth_name && method_code) {
-            propMethod
-                .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
-                .set(metadata::Identifier::CODE_KEY, method_code);
-        }
         std::vector<OperationParameterNNPtr> parameters;
         std::vector<ParameterValueNNPtr> values;
-        for (int i = 0; i < param_count; i++) {
-            PropertyMap propParam;
-            propParam.set(common::IdentifiedObject::NAME_KEY,
-                          params[i].name ? params[i].name : "unnamed");
-            if (params[i].auth_name && params[i].code) {
-                propParam
-                    .set(metadata::Identifier::CODESPACE_KEY,
-                         params[i].auth_name)
-                    .set(metadata::Identifier::CODE_KEY, params[i].code);
-            }
-            parameters.emplace_back(OperationParameter::create(propParam));
-            auto unit_type = UnitOfMeasure::Type::UNKNOWN;
-            switch (params[i].unit_type) {
-            case PJ_UT_ANGULAR:
-                unit_type = UnitOfMeasure::Type::ANGULAR;
-                break;
-            case PJ_UT_LINEAR:
-                unit_type = UnitOfMeasure::Type::LINEAR;
-                break;
-            case PJ_UT_SCALE:
-                unit_type = UnitOfMeasure::Type::SCALE;
-                break;
-            case PJ_UT_TIME:
-                unit_type = UnitOfMeasure::Type::TIME;
-                break;
-            case PJ_UT_PARAMETRIC:
-                unit_type = UnitOfMeasure::Type::PARAMETRIC;
-                break;
-            }
 
-            Measure measure(
-                params[i].value,
-                params[i].unit_type == PJ_UT_ANGULAR
-                    ? createAngularUnit(params[i].unit_name,
-                                        params[i].unit_conv_factor)
-                    : params[i].unit_type == PJ_UT_LINEAR
-                          ? createLinearUnit(params[i].unit_name,
-                                             params[i].unit_conv_factor)
-                          : UnitOfMeasure(
-                                params[i].unit_name ? params[i].unit_name
-                                                    : "unnamed",
-                                params[i].unit_conv_factor, unit_type));
-            values.emplace_back(ParameterValue::create(measure));
-        }
+        setSingleOperationElements(
+            name, auth_name, code, method_name, method_auth_name, method_code,
+            param_count, params, propSingleOp, propMethod, parameters, values);
+
         return PJ_OBJ::create(
-            Conversion::create(propConv, propMethod, parameters, values));
+            Conversion::create(propSingleOp, propMethod, parameters, values));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a Transformation
+ *
+ * The returned object must be unreferenced with proj_obj_unref() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param name Transformation name. Or NULL.
+ * @param auth_name Transformation authority name. Or NULL.
+ * @param code Transformation code. Or NULL.
+ * @param source_crs Object of type CRS representing the source CRS.
+ * Must not be NULL.
+ * @param target_crs Object of type CRS representing the target CRS.
+ * Must not be NULL.
+ * @param interpolation_crs Object of type CRS representing the interpolation
+ * CRS. Or NULL.
+ * @param method_name Method name. Or NULL.
+ * @param method_auth_name Method authority name. Or NULL.
+ * @param method_code Method code. Or NULL.
+ * @param param_count Number of parameters (size of params argument)
+ * @param params Parameter descriptions (array of size param_count)
+ * @param accuracy Accuracy of the transformation in meters. A negative
+ * values means unknown.
+ *
+ * @return Object that must be unreferenced with
+ * proj_obj_unref(), or NULL in case of error.
+ */
+
+PJ_OBJ *proj_obj_create_transformation(
+    PJ_CONTEXT *ctx, const char *name, const char *auth_name, const char *code,
+    PJ_OBJ *source_crs, PJ_OBJ *target_crs, PJ_OBJ *interpolation_crs,
+    const char *method_name, const char *method_auth_name,
+    const char *method_code, int param_count,
+    const PJ_PARAM_DESCRIPTION *params, double accuracy) {
+    SANITIZE_CTX(ctx);
+    assert(source_crs);
+    assert(target_crs);
+
+    auto l_sourceCRS = util::nn_dynamic_pointer_cast<CRS>(source_crs->obj);
+    if (!l_sourceCRS) {
+        proj_log_error(ctx, __FUNCTION__, "source_crs is not a CRS");
+        return nullptr;
+    }
+
+    auto l_targetCRS = util::nn_dynamic_pointer_cast<CRS>(target_crs->obj);
+    if (!l_targetCRS) {
+        proj_log_error(ctx, __FUNCTION__, "target_crs is not a CRS");
+        return nullptr;
+    }
+
+    CRSPtr l_interpolationCRS;
+    if (interpolation_crs) {
+        l_interpolationCRS =
+            util::nn_dynamic_pointer_cast<CRS>(interpolation_crs->obj);
+        if (!l_interpolationCRS) {
+            proj_log_error(ctx, __FUNCTION__, "interpolation_crs is not a CRS");
+            return nullptr;
+        }
+    }
+
+    try {
+        PropertyMap propSingleOp;
+        PropertyMap propMethod;
+        std::vector<OperationParameterNNPtr> parameters;
+        std::vector<ParameterValueNNPtr> values;
+
+        setSingleOperationElements(
+            name, auth_name, code, method_name, method_auth_name, method_code,
+            param_count, params, propSingleOp, propMethod, parameters, values);
+
+        std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+        if (accuracy >= 0.0) {
+            accuracies.emplace_back(
+                PositionalAccuracy::create(toString(accuracy)));
+        }
+
+        return PJ_OBJ::create(Transformation::create(
+            propSingleOp, NN_NO_CHECK(l_sourceCRS), NN_NO_CHECK(l_targetCRS),
+            l_interpolationCRS, propMethod, parameters, values, accuracies));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;

@@ -240,6 +240,21 @@ PJ_OBJ PROJ_DLL *proj_obj_create_conversion(PJ_CONTEXT *ctx,
                                             int param_count,
                                             const PJ_PARAM_DESCRIPTION* params);
 
+PJ_OBJ PROJ_DLL *proj_obj_create_transformation(
+                                            PJ_CONTEXT *ctx,
+                                            const char* name,
+                                            const char* auth_name,
+                                            const char* code,
+                                            PJ_OBJ* source_crs,
+                                            PJ_OBJ* target_crs,
+                                            PJ_OBJ* interpolation_crs,
+                                            const char* method_name,
+                                            const char* method_auth_name,
+                                            const char* method_code,
+                                            int param_count,
+                                            const PJ_PARAM_DESCRIPTION* params,
+                                            double accuracy);
+
 PJ_OBJ PROJ_DLL *proj_obj_convert_conversion_to_other_method(PJ_CONTEXT *ctx,
                                              const PJ_OBJ *conversion,
                                              int new_method_epsg_code,

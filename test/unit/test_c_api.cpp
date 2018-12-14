@@ -430,7 +430,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
     EXPECT_TRUE(proj_coordoperation_get_towgs84_values(m_ctxt, transf,
                                                        values.data(), 7, true));
     auto expected = std::vector<double>{2.329, -147.042, -92.08, -0.309,
-                                        0.325, 0.497, 5.69};
+                                        0.325, 0.497,    5.69};
     EXPECT_EQ(values, expected);
 
     auto res2 =
@@ -2483,6 +2483,76 @@ TEST_F(CApi, proj_obj_create_projected_crs) {
         proj_obj_create_projected_crs(m_ctxt, "my CRS", geogCRS, conv, cs);
     ObjectKeeper keeper_projCRS(projCRS);
     ASSERT_NE(projCRS, nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_obj_create_transformation) {
+
+    PJ_PARAM_DESCRIPTION param;
+    param.name = "param name";
+    param.auth_name = nullptr;
+    param.code = nullptr;
+    param.value = 0.99;
+    param.unit_name = nullptr;
+    param.unit_conv_factor = 1.0;
+    param.unit_type = PJ_UT_SCALE;
+
+    auto geog_cs = proj_obj_create_ellipsoidal_2D_cs(
+        m_ctxt, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
+    ObjectKeeper keeper_geog_cs(geog_cs);
+    ASSERT_NE(geog_cs, nullptr);
+
+    auto source_crs = proj_obj_create_geographic_crs(
+        m_ctxt, "Source CRS", "World Geodetic System 1984", "WGS 84", 6378137,
+        298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433, geog_cs);
+    ObjectKeeper keeper_source_crs(source_crs);
+    ASSERT_NE(source_crs, nullptr);
+
+    auto target_crs = proj_obj_create_geographic_crs(
+        m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
+        298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433, geog_cs);
+    ObjectKeeper keeper_target_crs(target_crs);
+    ASSERT_NE(target_crs, nullptr);
+
+    auto interp_crs = proj_obj_create_geographic_crs(
+        m_ctxt, "Interpolation CRS", "World Geodetic System 1984", "WGS 84",
+        6378137, 298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433,
+        geog_cs);
+    ObjectKeeper keeper_interp_crs(interp_crs);
+    ASSERT_NE(interp_crs, nullptr);
+
+    {
+        auto transf = proj_obj_create_transformation(
+            m_ctxt, "transf", "transf auth", "transf code", source_crs,
+            target_crs, interp_crs, "method", "method auth", "method code", 1,
+            &param, 0);
+        ObjectKeeper keeper_transf(transf);
+        ASSERT_NE(transf, nullptr);
+
+        EXPECT_EQ(proj_coordoperation_get_param_count(m_ctxt, transf), 1);
+
+        auto got_source_crs = proj_obj_get_source_crs(m_ctxt, transf);
+        ObjectKeeper keeper_got_source_crs(got_source_crs);
+        ASSERT_NE(got_source_crs, nullptr);
+        EXPECT_TRUE(proj_obj_is_equivalent_to(source_crs, got_source_crs,
+                                              PJ_COMP_STRICT));
+
+        auto got_target_crs = proj_obj_get_target_crs(m_ctxt, transf);
+        ObjectKeeper keeper_got_target_crs(got_target_crs);
+        ASSERT_NE(got_target_crs, nullptr);
+        EXPECT_TRUE(proj_obj_is_equivalent_to(target_crs, got_target_crs,
+                                              PJ_COMP_STRICT));
+    }
+
+    {
+        auto transf = proj_obj_create_transformation(
+            m_ctxt, "transf", "transf auth", "transf code", source_crs,
+            target_crs, nullptr, "method", "method auth", "method code", 1,
+            &param, -1);
+        ObjectKeeper keeper_transf(transf);
+        ASSERT_NE(transf, nullptr);
+    }
 }
 
 // ---------------------------------------------------------------------------
