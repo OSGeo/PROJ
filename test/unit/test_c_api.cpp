@@ -2446,6 +2446,29 @@ TEST_F(CApi, proj_obj_alter_name) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_obj_alter_id) {
+
+    auto cs = proj_obj_create_ellipsoidal_2D_cs(
+        m_ctxt, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
+    ObjectKeeper keeper_cs(cs);
+    ASSERT_NE(cs, nullptr);
+
+    auto obj = proj_obj_create_geographic_crs(
+        m_ctxt, "WGS 84", "World Geodetic System 1984", "WGS 84", 6378137,
+        298.257223563, "Greenwich", 0.0, "Degree", 0.0174532925199433, cs);
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    auto alteredObj = proj_obj_alter_id(m_ctxt, obj, "auth", "code");
+    ObjectKeeper keeper_alteredObj(alteredObj);
+    ASSERT_NE(alteredObj, nullptr);
+
+    EXPECT_EQ(std::string(proj_obj_get_id_auth_name(alteredObj, 0)), "auth");
+    EXPECT_EQ(std::string(proj_obj_get_id_code(alteredObj, 0)), "code");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_obj_create_projected_crs) {
 
     PJ_PARAM_DESCRIPTION param;

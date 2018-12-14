@@ -574,6 +574,22 @@ CRSNNPtr CRS::alterName(const std::string &newName) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+CRSNNPtr CRS::alterId(const std::string &authName,
+                      const std::string &code) const {
+    auto crs = shallowClone();
+    auto props = util::PropertyMap();
+    props.set(metadata::Identifier::CODESPACE_KEY, authName)
+        .set(metadata::Identifier::CODE_KEY, code);
+    crs->setProperties(props);
+    return crs;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Identify the CRS with reference CRSs.
  *
  * The candidate CRSs are either hard-coded, or looked in the database when

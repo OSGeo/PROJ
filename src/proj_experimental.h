@@ -177,6 +177,11 @@ PJ_OBJ PROJ_DLL *proj_obj_create_geocentric_crs_from_datum(
 PJ_OBJ PROJ_DLL *proj_obj_alter_name(PJ_CONTEXT *ctx,
                                      const PJ_OBJ* obj, const char* name);
 
+PJ_OBJ PROJ_DLL *proj_obj_alter_id(PJ_CONTEXT *ctx,
+                                   const PJ_OBJ* obj,
+                                   const char* auth_name,
+                                   const char* code);
+
 PJ_OBJ PROJ_DLL *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx,
                                                  const PJ_OBJ* obj,
                                                  const PJ_OBJ* new_geod_crs);

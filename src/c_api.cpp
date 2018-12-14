@@ -2415,6 +2415,39 @@ PJ_OBJ PROJ_DLL *proj_obj_alter_name(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a copy of the object with its identifier changed/set
+ *
+ * Currently, only implemented on CRS objects.
+ *
+ * The returned object must be unreferenced with proj_obj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param obj Object of type CRS. Must not be NULL
+ * @param auth_name Authority name. Must not be NULL
+ * @param code Code. Must not be NULL
+ *
+ * @return Object that must be unreferenced with
+ * proj_obj_destroy(), or NULL in case of error.
+ */
+PJ_OBJ PROJ_DLL *proj_obj_alter_id(PJ_CONTEXT *ctx, const PJ_OBJ *obj,
+                                   const char *auth_name, const char *code) {
+    SANITIZE_CTX(ctx);
+    auto crs = dynamic_cast<const CRS *>(obj->obj.get());
+    if (!crs) {
+        return nullptr;
+    }
+    try {
+        return PJ_OBJ::create(crs->alterId(auth_name, code));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return a copy of the CRS with its geodetic CRS changed
  *
  * Currently, when obj is a GeodeticCRS, it returns a clone of new_geod_crs

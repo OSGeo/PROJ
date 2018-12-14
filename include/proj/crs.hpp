@@ -114,6 +114,9 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
 
     PROJ_FOR_TEST CRSNNPtr alterName(const std::string &newName) const;
 
+    PROJ_FOR_TEST CRSNNPtr alterId(const std::string &authName,
+                                   const std::string &code) const;
+
     PROJ_INTERNAL const std::string &getExtensionProj4() const noexcept;
 
     PROJ_FOR_TEST CRSNNPtr
