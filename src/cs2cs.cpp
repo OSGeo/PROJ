@@ -226,7 +226,7 @@ static PJ_OBJ *instanciate_crs(const std::string &definition,
     auto type = proj_obj_get_type(crs);
     if (type == PJ_OBJ_TYPE_BOUND_CRS) {
         auto base = proj_obj_get_source_crs(nullptr, crs);
-        proj_obj_unref(crs);
+        proj_obj_destroy(crs);
         crs = base;
         type = proj_obj_get_type(crs);
     }
@@ -250,7 +250,7 @@ static PJ_OBJ *instanciate_crs(const std::string &definition,
             NS_PROJ::internal::ci_find(std::string(axisName), "latitude") !=
             std::string::npos;
 
-        proj_obj_unref(cs);
+        proj_obj_destroy(cs);
     }
 
     return crs;
@@ -267,7 +267,7 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
     if (srcType == PJ_OBJ_TYPE_BOUND_CRS) {
         auto base = proj_obj_get_source_crs(nullptr, src);
         assert(base);
-        proj_obj_unref(src);
+        proj_obj_destroy(src);
         src = base;
         srcType = proj_obj_get_type(src);
     }
@@ -280,7 +280,7 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
     auto baseType = proj_obj_get_type(base);
     if (baseType != PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS &&
         baseType != PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS) {
-        proj_obj_unref(base);
+        proj_obj_destroy(base);
         return std::string();
     }
 
@@ -300,11 +300,11 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
     isLatFirst = NS_PROJ::internal::ci_find(std::string(axisName),
                                             "latitude") != std::string::npos;
 
-    proj_obj_unref(cs);
+    proj_obj_destroy(cs);
 
     auto retCStr = proj_obj_as_proj_string(nullptr, base, PJ_PROJ_5, nullptr);
     std::string ret(retCStr ? retCStr : "");
-    proj_obj_unref(base);
+    proj_obj_destroy(base);
     return ret;
 }
 
@@ -581,8 +581,8 @@ int main(int argc, char **argv) {
         srcIsGeog = true;
     }
 
-    proj_obj_unref(src);
-    proj_obj_unref(dst);
+    proj_obj_destroy(src);
+    proj_obj_destroy(dst);
 
     transformation = proj_create_crs_to_crs(nullptr, fromStr.c_str(),
                                             toStr.c_str(), nullptr);

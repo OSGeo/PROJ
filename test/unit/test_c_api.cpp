@@ -113,7 +113,7 @@ class CApi : public ::testing::Test {
     struct ObjectKeeper {
         PJ_OBJ *m_obj = nullptr;
         explicit ObjectKeeper(PJ_OBJ *obj) : m_obj(obj) {}
-        ~ObjectKeeper() { proj_obj_unref(m_obj); }
+        ~ObjectKeeper() { proj_obj_destroy(m_obj); }
 
         ObjectKeeper(const ObjectKeeper &) = delete;
         ObjectKeeper &operator=(const ObjectKeeper &) = delete;
@@ -123,7 +123,7 @@ class CApi : public ::testing::Test {
         PJ_OPERATION_FACTORY_CONTEXT *m_op_ctxt = nullptr;
         explicit ContextKeeper(PJ_OPERATION_FACTORY_CONTEXT *op_ctxt)
             : m_op_ctxt(op_ctxt) {}
-        ~ContextKeeper() { proj_operation_factory_context_unref(m_op_ctxt); }
+        ~ContextKeeper() { proj_operation_factory_context_destroy(m_op_ctxt); }
 
         ContextKeeper(const ContextKeeper &) = delete;
         ContextKeeper &operator=(const ContextKeeper &) = delete;
@@ -132,7 +132,7 @@ class CApi : public ::testing::Test {
     struct ObjListKeeper {
         PJ_OBJ_LIST *m_res = nullptr;
         explicit ObjListKeeper(PJ_OBJ_LIST *res) : m_res(res) {}
-        ~ObjListKeeper() { proj_obj_list_unref(m_res); }
+        ~ObjListKeeper() { proj_obj_list_destroy(m_res); }
 
         ObjListKeeper(const ObjListKeeper &) = delete;
         ObjListKeeper &operator=(const ObjListKeeper &) = delete;
@@ -142,7 +142,7 @@ class CApi : public ::testing::Test {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_from_user_input) {
-    proj_obj_unref(nullptr);
+    proj_obj_destroy(nullptr);
     EXPECT_EQ(proj_obj_create_from_user_input(m_ctxt, "invalid", nullptr),
               nullptr);
     {
@@ -165,7 +165,7 @@ TEST_F(CApi, proj_obj_create_from_user_input) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_from_wkt) {
-    proj_obj_unref(nullptr);
+    proj_obj_destroy(nullptr);
     EXPECT_EQ(proj_obj_create_from_wkt(m_ctxt, "invalid", nullptr), nullptr);
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
@@ -179,7 +179,7 @@ TEST_F(CApi, proj_obj_create_from_wkt) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_from_proj_string) {
-    proj_obj_unref(nullptr);
+    proj_obj_destroy(nullptr);
     EXPECT_EQ(proj_obj_create_from_proj_string(m_ctxt, "invalid", nullptr),
               nullptr);
     auto obj =
@@ -927,7 +927,7 @@ TEST_F(CApi, proj_obj_get_source_target_crs_invalid_object) {
 struct ListFreer {
     PROJ_STRING_LIST list;
     ListFreer(PROJ_STRING_LIST ptrIn) : list(ptrIn) {}
-    ~ListFreer() { proj_free_string_list(list); }
+    ~ListFreer() { proj_destroy_string_list(list); }
     ListFreer(const ListFreer &) = delete;
     ListFreer &operator=(const ListFreer &) = delete;
 };
@@ -1479,7 +1479,7 @@ TEST_F(CApi, proj_obj_identify) {
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_obj_list_get_count(res), 1);
         EXPECT_EQ(confidence[0], 100);
-        proj_free_int_list(confidence);
+        proj_destroy_int_list(confidence);
     }
     {
         auto objEllps = proj_obj_create_from_wkt(

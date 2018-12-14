@@ -524,7 +524,7 @@ int PROJ_DLL proj_uom_get_info_from_database(PJ_CONTEXT *ctx,
                                double *out_conv_factor,
                                const char **out_category);
 
-void PROJ_DLL proj_obj_unref(PJ_OBJ *obj);
+void PROJ_DLL proj_obj_destroy(PJ_OBJ *obj);
 
 PJ_OBJ PROJ_DLL *proj_obj_clone(PJ_CONTEXT *ctx, const PJ_OBJ *obj);
 
@@ -673,7 +673,7 @@ PJ_OBJ_LIST PROJ_DLL *proj_obj_identify(PJ_CONTEXT *ctx,
                                         const char* const *options,
                                         int **out_confidence);
 
-void PROJ_DLL proj_free_int_list(int* list);
+void PROJ_DLL proj_destroy_int_list(int* list);
 
 /* ------------------------------------------------------------------------- */
 
@@ -687,7 +687,7 @@ PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                              PJ_OBJ_TYPE type,
                                              int allow_deprecated);
 
-void PROJ_DLL proj_free_string_list(PROJ_STRING_LIST list);
+void PROJ_DLL proj_destroy_string_list(PROJ_STRING_LIST list);
 
 /* ------------------------------------------------------------------------- */
 
@@ -700,7 +700,7 @@ PJ_OPERATION_FACTORY_CONTEXT PROJ_DLL *proj_create_operation_factory_context(
                                             PJ_CONTEXT *ctx,
                                             const char *authority);
 
-void PROJ_DLL proj_operation_factory_context_unref(
+void PROJ_DLL proj_operation_factory_context_destroy(
                                             PJ_OPERATION_FACTORY_CONTEXT *ctx);
 
 void PROJ_DLL proj_operation_factory_context_set_desired_accuracy(
@@ -806,7 +806,7 @@ PJ_OBJ PROJ_DLL *proj_obj_list_get(PJ_CONTEXT *ctx,
                                    const PJ_OBJ_LIST *result,
                                    int index);
 
-void PROJ_DLL proj_obj_list_unref(PJ_OBJ_LIST *result);
+void PROJ_DLL proj_obj_list_destroy(PJ_OBJ_LIST *result);
 
 /* ------------------------------------------------------------------------- */
 

@@ -758,14 +758,14 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
     dst = proj_obj_create_from_user_input(ctx, target_crs, optionsImportCRS);
     if( !dst ) {
-        proj_obj_unref(src);
+        proj_obj_destroy(src);
         return NULL;
     }
 
     operation_ctx = proj_create_operation_factory_context(ctx, NULL);
     if( !operation_ctx ) {
-        proj_obj_unref(src);
-        proj_obj_unref(dst);
+        proj_obj_destroy(src);
+        proj_obj_destroy(dst);
         return NULL;
     }
 
@@ -784,28 +784,28 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
     op_list = proj_obj_create_operations(ctx, src, dst, operation_ctx);
 
-    proj_operation_factory_context_unref(operation_ctx);
-    proj_obj_unref(src);
-    proj_obj_unref(dst);
+    proj_operation_factory_context_destroy(operation_ctx);
+    proj_obj_destroy(src);
+    proj_obj_destroy(dst);
 
     if( !op_list ) {
         return NULL;
     }
 
     if( proj_obj_list_get_count(op_list) == 0 ) {
-        proj_obj_list_unref(op_list);
+        proj_obj_list_destroy(op_list);
         return NULL;
     }
 
     op = proj_obj_list_get(ctx, op_list, 0);
-    proj_obj_list_unref(op_list);
+    proj_obj_list_destroy(op_list);
     if( !op ) {
         return NULL;
     }
 
     proj_string = proj_obj_as_proj_string(ctx, op, PJ_PROJ_5, NULL);
     if( !proj_string) {
-        proj_obj_unref(op);
+        proj_obj_destroy(op);
         return NULL;
     }
 
@@ -816,7 +816,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         P = proj_create(ctx, proj_string);
     }
 
-    proj_obj_unref(op);
+    proj_obj_destroy(op);
 
     return P;
 }
