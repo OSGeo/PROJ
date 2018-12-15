@@ -541,6 +541,7 @@ TEST(operation, transformation_createGeocentricTranslations) {
     auto transf = Transformation::createGeocentricTranslations(
         PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, std::vector<PositionalAccuracyNNPtr>());
+    EXPECT_TRUE(transf->validateParameters().empty());
 
     auto params = transf->getTOWGS84Parameters();
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0};
@@ -659,6 +660,8 @@ TEST(operation, transformation_createPositionVector) {
         PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>{
                                           PositionalAccuracy::create("100")});
+    EXPECT_TRUE(transf->validateParameters().empty());
+
     ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1);
 
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
@@ -727,6 +730,7 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
         PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, -4.0, -5.0, -6.0, 7.0,
         std::vector<PositionalAccuracyNNPtr>());
+    EXPECT_TRUE(transf->validateParameters().empty());
 
     auto params = transf->getTOWGS84Parameters();
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
@@ -795,6 +799,7 @@ TEST(operation, transformation_createTimeDependentPositionVector) {
         PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 2018.5,
         std::vector<PositionalAccuracyNNPtr>());
+    EXPECT_TRUE(transf->validateParameters().empty());
 
     auto inv_transf = transf->inverse();
 
@@ -867,6 +872,7 @@ TEST(operation, transformation_createTimeDependentCoordinateFrameRotation) {
         PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 2018.5,
         std::vector<PositionalAccuracyNNPtr>());
+    EXPECT_TRUE(transf->validateParameters().empty());
 
     auto inv_transf = transf->inverse();
 
@@ -1001,6 +1007,7 @@ TEST(operation, transformation_createMolodensky) {
     auto transf = Transformation::createMolodensky(
         PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
         2.0, 3.0, 4.0, 5.0, std::vector<PositionalAccuracyNNPtr>());
+    EXPECT_TRUE(transf->validateParameters().empty());
 
     auto wkt = transf->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(replaceAll(replaceAll(wkt, " ", ""), "\n", "")
@@ -1144,6 +1151,15 @@ TEST(operation, transformation_createTOWGS84) {
 
 TEST(operation, createAxisOrderReversal) {
 
+    {
+        auto conv = Conversion::createAxisOrderReversal(false);
+        EXPECT_TRUE(conv->validateParameters().empty());
+    }
+    {
+        auto conv = Conversion::createAxisOrderReversal(true);
+        EXPECT_TRUE(conv->validateParameters().empty());
+    }
+
     auto latLongDeg = GeographicCRS::create(
         PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
@@ -1174,6 +1190,7 @@ TEST(operation, createAxisOrderReversal) {
 
 TEST(operation, utm_export) {
     auto conv = Conversion::createUTM(PropertyMap(), 1, false);
+    EXPECT_TRUE(conv->validateParameters().empty());
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=utm +zone=1 +south");
 
@@ -1214,6 +1231,7 @@ TEST(operation, utm_export) {
 TEST(operation, tmerc_export) {
     auto conv = Conversion::createTransverseMercator(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=tmerc +lat_0=1 +lon_0=2 +k=3 +x_0=4 +y_0=5");
 
@@ -1260,6 +1278,7 @@ TEST(operation, tmerc_export) {
 TEST(operation, gstmerc_export) {
     auto conv = Conversion::createGaussSchreiberTransverseMercator(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=gstmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
@@ -1298,6 +1317,7 @@ TEST(operation, gstmerc_export) {
 TEST(operation, tmerc_south_oriented_export) {
     auto conv = Conversion::createTransverseMercatorSouthOriented(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=tmerc +axis=wsu +lat_0=1 +lon_0=2 +k=3 +x_0=4 +y_0=5");
@@ -1368,6 +1388,8 @@ TEST(operation, tped_export) {
     auto conv = Conversion::createTwoPointEquidistant(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
         Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=tpeqd +lat_1=1 +lon_1=2 +lat_2=3 +lon_2=4 +x_0=5 +y_0=6");
 
@@ -1408,6 +1430,8 @@ TEST(operation, tped_export) {
 TEST(operation, tmg_export) {
     auto conv = Conversion::createTunisiaMappingGrid(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create().get()),
                  FormattingException);
 
@@ -1444,6 +1468,7 @@ TEST(operation, aea_export) {
     auto conv = Conversion::createAlbersEqualArea(PropertyMap(), Angle(1),
                                                   Angle(2), Angle(3), Angle(4),
                                                   Length(5), Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=aea +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
@@ -1488,6 +1513,7 @@ TEST(operation, aea_export) {
 TEST(operation, azimuthal_equidistant_export) {
     auto conv = Conversion::createAzimuthalEquidistant(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=aeqd +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
@@ -1524,6 +1550,7 @@ TEST(operation, azimuthal_equidistant_export) {
 TEST(operation, guam_projection_export) {
     auto conv = Conversion::createGuamProjection(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=aeqd +guam +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
@@ -1556,6 +1583,7 @@ TEST(operation, guam_projection_export) {
 TEST(operation, bonne_export) {
     auto conv = Conversion::createBonne(PropertyMap(), Angle(1), Angle(2),
                                         Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=bonne +lat_1=1 +lon_0=2 +x_0=3 +y_0=4");
@@ -1611,6 +1639,7 @@ TEST(operation, bonne_export) {
 TEST(operation, lambert_cylindrical_equal_area_spherical_export) {
     auto conv = Conversion::createLambertCylindricalEqualAreaSpherical(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=cea +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
@@ -1647,6 +1676,7 @@ TEST(operation, lambert_cylindrical_equal_area_spherical_export) {
 TEST(operation, lambert_cylindrical_equal_area_export) {
     auto conv = Conversion::createLambertCylindricalEqualArea(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=cea +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
@@ -1683,6 +1713,8 @@ TEST(operation, lambert_cylindrical_equal_area_export) {
 TEST(operation, lcc1sp_export) {
     auto conv = Conversion::createLambertConicConformal_1SP(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=lcc +lat_1=1 +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
@@ -1723,6 +1755,8 @@ TEST(operation, lcc2sp_export) {
     auto conv = Conversion::createLambertConicConformal_2SP(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
         Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
 
@@ -1788,6 +1822,8 @@ TEST(operation, lcc2sp_michigan_export) {
     auto conv = Conversion::createLambertConicConformal_2SP_Michigan(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
         Length(6), Scale(7));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(
         conv->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6 +k_0=7");
@@ -1873,6 +1909,7 @@ TEST(operation, lcc2sp_belgium_export) {
 TEST(operation, cassini_soldner_export) {
     auto conv = Conversion::createCassiniSoldner(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=cass +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
@@ -1910,6 +1947,7 @@ TEST(operation, equidistant_conic_export) {
     auto conv = Conversion::createEquidistantConic(PropertyMap(), Angle(1),
                                                    Angle(2), Angle(3), Angle(4),
                                                    Length(5), Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=eqdc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
@@ -1979,6 +2017,8 @@ TEST(operation, eckert_export) {
                                                       PropertyMap(), Angle(1),
                                                       Length(2), Length(3));
 
+        EXPECT_TRUE(conv->validateParameters().empty());
+
         EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=eck" + numbers[i] + " +lon_0=1 +x_0=2 +y_0=3");
 
@@ -2014,6 +2054,7 @@ TEST(operation, eckert_export) {
 TEST(operation, createEquidistantCylindrical) {
     auto conv = Conversion::createEquidistantCylindrical(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=eqc +lat_ts=1 +lat_0=0 +lon_0=2 +x_0=3 +y_0=4");
@@ -2050,6 +2091,7 @@ TEST(operation, createEquidistantCylindrical) {
 TEST(operation, createEquidistantCylindricalSpherical) {
     auto conv = Conversion::createEquidistantCylindricalSpherical(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=eqc +lat_ts=1 +lat_0=0 +lon_0=2 +x_0=3 +y_0=4");
@@ -2109,6 +2151,7 @@ TEST(operation, gall_export) {
 
     auto conv =
         Conversion::createGall(PropertyMap(), Angle(1), Length(2), Length(3));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=gall +lon_0=1 +x_0=2 +y_0=3");
@@ -2141,6 +2184,7 @@ TEST(operation, goode_homolosine_export) {
 
     auto conv = Conversion::createGoodeHomolosine(PropertyMap(), Angle(1),
                                                   Length(2), Length(3));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=goode +lon_0=1 +x_0=2 +y_0=3");
@@ -2173,6 +2217,7 @@ TEST(operation, interrupted_goode_homolosine_export) {
 
     auto conv = Conversion::createInterruptedGoodeHomolosine(
         PropertyMap(), Angle(1), Length(2), Length(3));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=igh +lon_0=1 +x_0=2 +y_0=3");
@@ -2205,6 +2250,7 @@ TEST(operation, geostationary_satellite_sweep_x_export) {
 
     auto conv = Conversion::createGeostationarySatelliteSweepX(
         PropertyMap(), Angle(1), Length(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=geos +sweep=x +lon_0=1 +h=2 +x_0=3 +y_0=4");
@@ -2245,6 +2291,7 @@ TEST(operation, geostationary_satellite_sweep_y_export) {
 
     auto conv = Conversion::createGeostationarySatelliteSweepY(
         PropertyMap(), Angle(1), Length(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=geos +lon_0=1 +h=2 +x_0=3 +y_0=4");
@@ -2280,6 +2327,8 @@ TEST(operation, geostationary_satellite_sweep_y_export) {
 TEST(operation, gnomonic_export) {
     auto conv = Conversion::createGnomonic(PropertyMap(), Angle(1), Angle(2),
                                            Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=gnom +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
 
@@ -2315,6 +2364,8 @@ TEST(operation, hotine_oblique_mercator_variant_A_export) {
     auto conv = Conversion::createHotineObliqueMercatorVariantA(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Scale(5),
         Length(6), Length(7));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=omerc +no_uoff +lat_0=1 +lonc=2 +alpha=3 +gamma=4 +k=5 "
               "+x_0=6 +y_0=7");
@@ -2375,6 +2426,8 @@ TEST(operation, hotine_oblique_mercator_variant_B_export) {
     auto conv = Conversion::createHotineObliqueMercatorVariantB(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Scale(5),
         Length(6), Length(7));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=omerc +lat_0=1 +lonc=2 +alpha=3 +gamma=4 +k=5 "
               "+x_0=6 +y_0=7");
@@ -2435,6 +2488,8 @@ TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
     auto conv = Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Angle(5),
         Scale(6), Length(7), Length(8));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=omerc +lat_0=1 +lat_1=2 +lon_1=3 +lat_2=4 +lon_2=5 +k=6 "
               "+x_0=7 +y_0=8");
@@ -2486,6 +2541,8 @@ TEST(operation, laborde_oblique_mercator_export) {
     auto conv = Conversion::createLabordeObliqueMercator(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Scale(4), Length(5),
         Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
+
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=labrd +lat_0=1 +lon_0=2 +azi=3 +k=4 +x_0=5 +y_0=6");
 
@@ -2531,6 +2588,7 @@ TEST(operation, laborde_oblique_mercator_export) {
 TEST(operation, imw_polyconic_export) {
     auto conv = Conversion::createInternationalMapWorldPolyconic(
         PropertyMap(), Angle(1), Angle(3), Angle(4), Length(5), Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=imw_p +lon_0=1 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
@@ -2571,6 +2629,7 @@ TEST(operation, krovak_north_oriented_export) {
     auto conv = Conversion::createKrovakNorthOriented(
         PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.28813972222222),
         Angle(78.5), Scale(0.9999), Length(5), Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=krovak +lat_0=49.5 +lon_0=42.5 +alpha=30.2881397222222 "
@@ -2622,6 +2681,7 @@ TEST(operation, krovak_export) {
     auto conv = Conversion::createKrovak(
         PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.28813972222222),
         Angle(78.5), Scale(0.9999), Length(5), Length(6));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=krovak +axis=swu +lat_0=49.5 +lon_0=42.5 "
@@ -2673,6 +2733,7 @@ TEST(operation, krovak_export) {
 TEST(operation, lambert_azimuthal_equal_area_export) {
     auto conv = Conversion::createLambertAzimuthalEqualArea(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=laea +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
@@ -2709,6 +2770,7 @@ TEST(operation, lambert_azimuthal_equal_area_export) {
 TEST(operation, miller_cylindrical_export) {
     auto conv = Conversion::createMillerCylindrical(PropertyMap(), Angle(2),
                                                     Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=mill +R_A +lon_0=2 +x_0=3 +y_0=4");
@@ -2740,6 +2802,7 @@ TEST(operation, miller_cylindrical_export) {
 TEST(operation, mercator_variant_A_export) {
     auto conv = Conversion::createMercatorVariantA(
         PropertyMap(), Angle(0), Angle(1), Scale(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=merc +lon_0=1 +k=2 +x_0=3 +y_0=4");
@@ -2847,6 +2910,7 @@ TEST(operation, wkt1_import_mercator_variant_A_that_is_variant_B) {
 TEST(operation, mercator_variant_B_export) {
     auto conv = Conversion::createMercatorVariantB(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=merc +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
@@ -2947,6 +3011,7 @@ TEST(operation, odd_mercator_2sp_with_latitude_of_origin) {
 TEST(operation, webmerc_export) {
     auto conv = Conversion::createPopularVisualisationPseudoMercator(
         PropertyMap(), Angle(0), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=webmerc +lat_0=0 +lon_0=2 +x_0=3 +y_0=4");
@@ -3275,6 +3340,7 @@ TEST(operation, mollweide_export) {
 
     auto conv = Conversion::createMollweide(PropertyMap(), Angle(1), Length(2),
                                             Length(3));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=moll +lon_0=1 +x_0=2 +y_0=3");
@@ -3305,6 +3371,7 @@ TEST(operation, mollweide_export) {
 TEST(operation, nzmg_export) {
     auto conv = Conversion::createNewZealandMappingGrid(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=nzmg +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
@@ -3341,6 +3408,7 @@ TEST(operation, nzmg_export) {
 TEST(operation, oblique_stereographic_export) {
     auto conv = Conversion::createObliqueStereographic(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=sterea +lat_0=1 +lon_0=2 +k=3 +x_0=4 +y_0=5");
@@ -3381,6 +3449,7 @@ TEST(operation, oblique_stereographic_export) {
 TEST(operation, orthographic_export) {
     auto conv = Conversion::createOrthographic(PropertyMap(), Angle(1),
                                                Angle(2), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=ortho +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
@@ -3417,6 +3486,7 @@ TEST(operation, orthographic_export) {
 TEST(operation, american_polyconic_export) {
     auto conv = Conversion::createAmericanPolyconic(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=poly +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
@@ -3453,6 +3523,7 @@ TEST(operation, american_polyconic_export) {
 TEST(operation, polar_stereographic_variant_A_export) {
     auto conv = Conversion::createPolarStereographicVariantA(
         PropertyMap(), Angle(90), Angle(2), Scale(3), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=stere +lat_0=90 +lon_0=2 +k=3 +x_0=4 +y_0=5");
@@ -3493,6 +3564,7 @@ TEST(operation, polar_stereographic_variant_A_export) {
 TEST(operation, polar_stereographic_variant_B_export_positive_lat) {
     auto conv = Conversion::createPolarStereographicVariantB(
         PropertyMap(), Angle(70), Angle(2), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=2 +x_0=4 +y_0=5");
@@ -3658,6 +3730,7 @@ TEST(operation, robinson_export) {
 
     auto conv = Conversion::createRobinson(PropertyMap(), Angle(1), Length(2),
                                            Length(3));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=robin +lon_0=1 +x_0=2 +y_0=3");
@@ -3690,6 +3763,7 @@ TEST(operation, sinusoidal_export) {
 
     auto conv = Conversion::createSinusoidal(PropertyMap(), Angle(1), Length(2),
                                              Length(3));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=sinu +lon_0=1 +x_0=2 +y_0=3");
@@ -3721,6 +3795,7 @@ TEST(operation, sinusoidal_export) {
 TEST(operation, stereographic_export) {
     auto conv = Conversion::createStereographic(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=stere +lat_0=1 +lon_0=2 +k=3 +x_0=4 +y_0=5");
@@ -3761,6 +3836,7 @@ TEST(operation, vandergrinten_export) {
 
     auto conv = Conversion::createVanDerGrinten(PropertyMap(), Angle(1),
                                                 Length(2), Length(3));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=vandg +R_A +lon_0=1 +x_0=2 +y_0=3");
@@ -3821,6 +3897,7 @@ TEST(operation, wagner_export) {
                                                   Conversion::createWagnerVII(
                                                       PropertyMap(), Angle(1),
                                                       Length(2), Length(3));
+        EXPECT_TRUE(conv->validateParameters().empty());
 
         EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=wag" + numbers[i] + " +lon_0=1 +x_0=2 +y_0=3");
@@ -3897,6 +3974,7 @@ TEST(operation, qsc_export) {
 
     auto conv = Conversion::createQuadrilateralizedSphericalCube(
         PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=qsc +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
@@ -3933,6 +4011,7 @@ TEST(operation, sch_export) {
 
     auto conv = Conversion::createSphericalCrossTrackHeight(
         PropertyMap(), Angle(1), Angle(2), Angle(3), Length(4));
+    EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=sch +plat_0=1 +plon_0=2 +phdg_0=3 +h_0=4");
@@ -5576,6 +5655,7 @@ TEST(operation, transformation_longitude_rotation_to_PROJ_string) {
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto transformation = Transformation::createLongitudeRotation(
         PropertyMap(), src, dest, Angle(10));
+    EXPECT_TRUE(transformation->validateParameters().empty());
     EXPECT_EQ(
         transformation->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -5597,6 +5677,8 @@ TEST(operation, transformation_Geographic2D_offsets_to_PROJ_string) {
     auto transformation = Transformation::createGeographic2DOffsets(
         PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326,
         Angle(0.5), Angle(-1), {});
+    EXPECT_TRUE(transformation->validateParameters().empty());
+
     EXPECT_EQ(
         transformation->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -5618,6 +5700,8 @@ TEST(operation, transformation_Geographic3D_offsets_to_PROJ_string) {
     auto transformation = Transformation::createGeographic3DOffsets(
         PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326,
         Angle(0.5), Angle(-1), Length(2), {});
+    EXPECT_TRUE(transformation->validateParameters().empty());
+
     EXPECT_EQ(
         transformation->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -5642,6 +5726,8 @@ TEST(operation,
         CompoundCRS::create(PropertyMap(),
                             {GeographicCRS::EPSG_4326, createVerticalCRS()}),
         GeographicCRS::EPSG_4326, Angle(0.5), Angle(-1), Length(2), {});
+    EXPECT_TRUE(transformation->validateParameters().empty());
+
     EXPECT_EQ(
         transformation->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -5662,6 +5748,8 @@ TEST(operation, transformation_vertical_offset_to_PROJ_string) {
 
     auto transformation = Transformation::createVerticalOffset(
         PropertyMap(), createVerticalCRS(), createVerticalCRS(), Length(1), {});
+    EXPECT_TRUE(transformation->validateParameters().empty());
+
     EXPECT_EQ(
         transformation->exportToPROJString(PROJStringFormatter::create().get()),
         "+proj=geogoffset +dh=1");
@@ -6965,4 +7053,124 @@ TEST(operation,
 
     EXPECT_TRUE(
         conv1->isEquivalentTo(conv2.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createChangeVerticalUnit) {
+    auto conv = Conversion::createChangeVerticalUnit(PropertyMap(), Scale(1));
+    EXPECT_TRUE(conv->validateParameters().empty());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createGeographicGeocentric) {
+    auto conv = Conversion::createGeographicGeocentric(PropertyMap());
+    EXPECT_TRUE(conv->validateParameters().empty());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, validateParameters) {
+    {
+        auto conv = Conversion::create(
+            PropertyMap(),
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), {}, {});
+        auto validation = conv->validateParameters();
+        EXPECT_EQ(validation, std::list<std::string>{"Unknown method unknown"});
+    }
+
+    {
+        auto conv = Conversion::create(
+            PropertyMap(), PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             "change of vertical unit"),
+            {}, {});
+        auto validation = conv->validateParameters();
+        auto expected = std::list<std::string>{
+            "Method name change of vertical unit is equivalent to official "
+            "Change of Vertical Unit but not strictly equal",
+            "Cannot find expected parameter Unit conversion scalar"};
+        EXPECT_EQ(validation, expected);
+    }
+
+    {
+        auto conv = Conversion::create(
+            PropertyMap(), PropertyMap()
+                               .set(IdentifiedObject::NAME_KEY,
+                                    EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT)
+                               .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
+                               .set(Identifier::CODE_KEY, "1234"),
+            {}, {});
+        auto validation = conv->validateParameters();
+        auto expected = std::list<std::string>{
+            "Method of EPSG code 1234 does not match official code (1069)",
+            "Cannot find expected parameter Unit conversion scalar"};
+        EXPECT_EQ(validation, expected);
+    }
+
+    {
+        auto conv = Conversion::create(
+            PropertyMap(),
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, "some fancy name")
+                .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
+                .set(Identifier::CODE_KEY,
+                     EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT),
+            {}, {});
+        auto validation = conv->validateParameters();
+        auto expected = std::list<std::string>{
+            "Method name some fancy name, matched to Change of Vertical Unit, "
+            "through its EPSG code has not an equivalent name",
+            "Cannot find expected parameter Unit conversion scalar"};
+        EXPECT_EQ(validation, expected);
+    }
+
+    {
+        auto conv = Conversion::create(
+            PropertyMap(),
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT),
+            {OperationParameter::create(PropertyMap().set(
+                IdentifiedObject::NAME_KEY, "unit conversion scalar"))},
+            {ParameterValue::create(Measure(1.0, UnitOfMeasure::SCALE_UNITY))});
+        auto validation = conv->validateParameters();
+        auto expected = std::list<std::string>{
+            "Parameter name unit conversion scalar is equivalent to official "
+            "Unit conversion scalar but not strictly equal"};
+        EXPECT_EQ(validation, expected);
+    }
+
+    {
+        auto conv = Conversion::create(
+            PropertyMap(),
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT),
+            {OperationParameter::create(
+                PropertyMap()
+                    .set(IdentifiedObject::NAME_KEY, "fancy name")
+                    .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
+                    .set(Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR))},
+            {ParameterValue::create(Measure(1.0, UnitOfMeasure::SCALE_UNITY))});
+        auto validation = conv->validateParameters();
+        auto expected = std::list<std::string>{
+            "Parameter name fancy name, matched to Unit conversion scalar, "
+            "through its EPSG code has not an equivalent name"};
+        EXPECT_EQ(validation, expected);
+    }
+
+    {
+        auto conv = Conversion::create(
+            PropertyMap(),
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT),
+            {OperationParameter::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "extra param"))},
+            {ParameterValue::create(Measure(1.0, UnitOfMeasure::SCALE_UNITY))});
+        auto validation = conv->validateParameters();
+        auto expected = std::list<std::string>{
+            "Cannot find expected parameter Unit conversion scalar",
+            "Parameter extra param found but not expected for this method"};
+        EXPECT_EQ(validation, expected);
+    }
 }

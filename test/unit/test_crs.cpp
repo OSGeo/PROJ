@@ -4068,6 +4068,7 @@ TEST(crs, derivedGeographicCRS_with_affine_transform_to_PROJ) {
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(crs->derivingConversion()->validateParameters().empty());
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=affine +xoff=0.5 +s11=1 +s12=0 +yoff=2.5 +s21=0 +s22=1");
 }

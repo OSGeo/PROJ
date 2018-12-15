@@ -565,6 +565,11 @@ const RealizationMethod RealizationMethod::TIDAL("tidal");
 /** \brief The Greenwich PrimeMeridian */
 const PrimeMeridianNNPtr
     PrimeMeridian::GREENWICH(PrimeMeridian::createGREENWICH());
+/** \brief The "Reference Meridian" PrimeMeridian.
+ *
+ * This is a meridian of longitude 0 to be used with non-Earth bodies. */
+const PrimeMeridianNNPtr PrimeMeridian::REFERENCE_MERIDIAN(
+    PrimeMeridian::createREFERENCE_MERIDIAN());
 /** \brief The Paris PrimeMeridian */
 const PrimeMeridianNNPtr PrimeMeridian::PARIS(PrimeMeridian::createPARIS());
 

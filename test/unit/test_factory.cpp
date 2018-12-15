@@ -825,6 +825,11 @@ TEST(factory,
      AuthorityFactory_createCoordinateOperation_molodensky_badekas_PV) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto op = factory->createCoordinateOperation("1066", false);
+
+    auto so = nn_dynamic_pointer_cast<SingleOperation>(op);
+    ASSERT_TRUE(so != nullptr);
+    EXPECT_TRUE(so->validateParameters().empty());
+
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "

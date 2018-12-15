@@ -565,6 +565,8 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
     PROJ_DLL std::set<GridDescription>
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
+    PROJ_DLL std::list<std::string> validateParameters() const;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
 

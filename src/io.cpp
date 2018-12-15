@@ -1876,21 +1876,12 @@ optional<std::string> WKTParser::Private::getAnchor(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
-static const PrimeMeridianNNPtr &createReferenceMeridian() {
-    static const PrimeMeridianNNPtr meridian = PrimeMeridian::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "Reference meridian"),
-        common::Angle(0));
-    return meridian;
-}
-
-// ---------------------------------------------------------------------------
-
 static const PrimeMeridianNNPtr &
 fixupPrimeMeridan(const EllipsoidNNPtr &ellipsoid,
                   const PrimeMeridianNNPtr &pm) {
     return (ellipsoid->celestialBody() != Ellipsoid::EARTH &&
             pm.get() == PrimeMeridian::GREENWICH.get())
-               ? createReferenceMeridian()
+               ? PrimeMeridian::REFERENCE_MERIDIAN
                : pm;
 }
 

@@ -2071,8 +2071,9 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
                 ? prime_meridian_name
                 : prime_meridian_offset == 0.0
                       ? (ellps->celestialBody() == Ellipsoid::EARTH
-                             ? "Greenwich"
-                             : "Reference meridian")
+                             ? PrimeMeridian::GREENWICH->nameStr().c_str()
+                             : PrimeMeridian::REFERENCE_MERIDIAN->nameStr()
+                                   .c_str())
                       : "unnamed"),
         Angle(prime_meridian_offset, angUnit));
 

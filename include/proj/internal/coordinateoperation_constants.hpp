@@ -490,7 +490,7 @@ static const ParamMapping *const paramsLabordeObliqueMercator[] = {
     &paramFalseNorthing,
     nullptr};
 
-static const MethodMapping methodMappings[] = {
+static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
      "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
 
@@ -886,6 +886,357 @@ static const struct ParamNameCode {
     PARAM_NAME_CODE(ORDINATE_1_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_2_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_3_EVAL_POINT),
+};
+
+static const ParamMapping paramUnitConversionScalar = {
+    EPSG_NAME_PARAMETER_UNIT_CONVERSION_SCALAR,
+    EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR, nullptr,
+    common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping *const paramsChangeVerticalUnit[] = {
+    &paramUnitConversionScalar, nullptr};
+
+static const ParamMapping paramLongitudeOffset = {
+    EPSG_NAME_PARAMETER_LONGITUDE_OFFSET, EPSG_CODE_PARAMETER_LONGITUDE_OFFSET,
+    nullptr, common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping *const paramsLongitudeRotation[] = {
+    &paramLongitudeOffset, nullptr};
+
+static const ParamMapping paramA0 = {
+    EPSG_NAME_PARAMETER_A0, EPSG_CODE_PARAMETER_A0, nullptr,
+    common::UnitOfMeasure::Type::UNKNOWN, nullptr};
+
+static const ParamMapping paramA1 = {
+    EPSG_NAME_PARAMETER_A1, EPSG_CODE_PARAMETER_A1, nullptr,
+    common::UnitOfMeasure::Type::UNKNOWN, nullptr};
+
+static const ParamMapping paramA2 = {
+    EPSG_NAME_PARAMETER_A2, EPSG_CODE_PARAMETER_A2, nullptr,
+    common::UnitOfMeasure::Type::UNKNOWN, nullptr};
+
+static const ParamMapping paramB0 = {
+    EPSG_NAME_PARAMETER_B0, EPSG_CODE_PARAMETER_B0, nullptr,
+    common::UnitOfMeasure::Type::UNKNOWN, nullptr};
+
+static const ParamMapping paramB1 = {
+    EPSG_NAME_PARAMETER_B1, EPSG_CODE_PARAMETER_B1, nullptr,
+    common::UnitOfMeasure::Type::UNKNOWN, nullptr};
+
+static const ParamMapping paramB2 = {
+    EPSG_NAME_PARAMETER_B2, EPSG_CODE_PARAMETER_B2, nullptr,
+    common::UnitOfMeasure::Type::UNKNOWN, nullptr};
+
+static const ParamMapping *const paramsAffineParametricTransformation[] = {
+    &paramA0, &paramA1, &paramA2, &paramB0, &paramB1, &paramB2, nullptr};
+
+static const ParamMapping paramXTranslation = {
+    EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+    EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramYTranslation = {
+    EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+    EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramZTranslation = {
+    EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+    EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramXRotation = {
+    EPSG_NAME_PARAMETER_X_AXIS_ROTATION, EPSG_CODE_PARAMETER_X_AXIS_ROTATION,
+    nullptr, common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramYRotation = {
+    EPSG_NAME_PARAMETER_Y_AXIS_ROTATION, EPSG_CODE_PARAMETER_Y_AXIS_ROTATION,
+    nullptr, common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramZRotation = {
+    EPSG_NAME_PARAMETER_Z_AXIS_ROTATION, EPSG_CODE_PARAMETER_Z_AXIS_ROTATION,
+    nullptr, common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramScaleDifference = {
+    EPSG_NAME_PARAMETER_SCALE_DIFFERENCE, EPSG_CODE_PARAMETER_SCALE_DIFFERENCE,
+    nullptr, common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping *const paramsHelmert3[] = {
+    &paramXTranslation, &paramYTranslation, &paramZTranslation, nullptr};
+
+static const ParamMapping *const paramsHelmert7[] = {
+    &paramXTranslation,    &paramYTranslation,
+    &paramZTranslation,    &paramXRotation,
+    &paramYRotation,       &paramZRotation,
+    &paramScaleDifference, nullptr};
+
+static const ParamMapping paramRateXTranslation = {
+    EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION,
+    EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramRateYTranslation = {
+    EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION,
+    EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramRateZTranslation = {
+    EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION,
+    EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramRateXRotation = {
+    EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION,
+    EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramRateYRotation = {
+    EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION,
+    EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramRateZRotation = {
+    EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION,
+    EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramRateScaleDifference = {
+    EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE,
+    EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE, nullptr,
+    common::UnitOfMeasure::Type::SCALE, nullptr};
+
+static const ParamMapping paramReferenceEpoch = {
+    EPSG_NAME_PARAMETER_REFERENCE_EPOCH, EPSG_CODE_PARAMETER_REFERENCE_EPOCH,
+    nullptr, common::UnitOfMeasure::Type::TIME, nullptr};
+
+static const ParamMapping *const paramsHelmert15[] = {
+    &paramXTranslation,     &paramYTranslation,
+    &paramZTranslation,     &paramXRotation,
+    &paramYRotation,        &paramZRotation,
+    &paramScaleDifference,  &paramRateXTranslation,
+    &paramRateYTranslation, &paramRateZTranslation,
+    &paramRateXRotation,    &paramRateYRotation,
+    &paramRateZRotation,    &paramRateScaleDifference,
+    &paramReferenceEpoch,   nullptr};
+
+static const ParamMapping paramOrdinate1EvalPoint = {
+    EPSG_NAME_PARAMETER_ORDINATE_1_EVAL_POINT,
+    EPSG_CODE_PARAMETER_ORDINATE_1_EVAL_POINT, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramOrdinate2EvalPoint = {
+    EPSG_NAME_PARAMETER_ORDINATE_2_EVAL_POINT,
+    EPSG_CODE_PARAMETER_ORDINATE_2_EVAL_POINT, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramOrdinate3EvalPoint = {
+    EPSG_NAME_PARAMETER_ORDINATE_3_EVAL_POINT,
+    EPSG_CODE_PARAMETER_ORDINATE_3_EVAL_POINT, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping *const paramsMolodenskyBadekas[] = {
+    &paramXTranslation,
+    &paramYTranslation,
+    &paramZTranslation,
+    &paramXRotation,
+    &paramYRotation,
+    &paramZRotation,
+    &paramScaleDifference,
+    &paramOrdinate1EvalPoint,
+    &paramOrdinate2EvalPoint,
+    &paramOrdinate3EvalPoint,
+    nullptr};
+
+static const ParamMapping paramSemiMajorAxisDifference = {
+    EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE,
+    EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping paramFlatteningDifference = {
+    EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE,
+    EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping *const paramsMolodensky[] = {
+    &paramXTranslation,         &paramYTranslation,
+    &paramZTranslation,         &paramSemiMajorAxisDifference,
+    &paramFlatteningDifference, nullptr};
+
+static const ParamMapping paramLatitudeOffset = {
+    EPSG_NAME_PARAMETER_LATITUDE_OFFSET, EPSG_CODE_PARAMETER_LATITUDE_OFFSET,
+    nullptr, common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping *const paramsGeographic2DOffsets[] = {
+    &paramLatitudeOffset, &paramLongitudeOffset, nullptr};
+
+static const ParamMapping paramGeoidUndulation = {
+    EPSG_NAME_PARAMETER_GEOID_UNDULATION, EPSG_CODE_PARAMETER_GEOID_UNDULATION,
+    nullptr, common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping *const paramsGeographic2DWithHeightOffsets[] = {
+    &paramLatitudeOffset, &paramLongitudeOffset, &paramGeoidUndulation,
+    nullptr};
+
+static const ParamMapping paramVerticalOffset = {
+    EPSG_NAME_PARAMETER_VERTICAL_OFFSET, EPSG_CODE_PARAMETER_VERTICAL_OFFSET,
+    nullptr, common::UnitOfMeasure::Type::LINEAR, nullptr};
+
+static const ParamMapping *const paramsGeographic3DOffsets[] = {
+    &paramLatitudeOffset, &paramLongitudeOffset, &paramVerticalOffset, nullptr};
+
+static const ParamMapping *const paramsVerticalOffsets[] = {
+    &paramVerticalOffset, nullptr};
+
+static const ParamMapping paramLatitudeLongitudeDifferenceFile = {
+    EPSG_NAME_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE,
+    EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping *const paramsNTV2[] = {
+    &paramLatitudeLongitudeDifferenceFile, nullptr};
+
+static const ParamMapping paramLatitudeDifferenceFile = {
+    EPSG_NAME_PARAMETER_LATITUDE_DIFFERENCE_FILE,
+    EPSG_CODE_PARAMETER_LATITUDE_DIFFERENCE_FILE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping paramLongitudeDifferenceFile = {
+    EPSG_NAME_PARAMETER_LONGITUDE_DIFFERENCE_FILE,
+    EPSG_CODE_PARAMETER_LONGITUDE_DIFFERENCE_FILE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping *const paramsNADCON[] = {
+    &paramLatitudeDifferenceFile, &paramLongitudeDifferenceFile, nullptr};
+
+static const ParamMapping paramVerticalOffsetFile = {
+    EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
+    EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping *const paramsVERTCON[] = {&paramVerticalOffsetFile,
+                                                    nullptr};
+
+static const MethodMapping otherMethodMappings[] = {
+    {EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT,
+     EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT, nullptr, nullptr, nullptr,
+     paramsChangeVerticalUnit},
+    {EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_2D,
+     EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D, nullptr, nullptr, nullptr,
+     nullptr},
+    {EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_3D,
+     EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_3D, nullptr, nullptr, nullptr,
+     nullptr},
+    {EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC,
+     EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC, nullptr, nullptr, nullptr,
+     nullptr},
+    {EPSG_NAME_METHOD_LONGITUDE_ROTATION, EPSG_CODE_METHOD_LONGITUDE_ROTATION,
+     nullptr, nullptr, nullptr, paramsLongitudeRotation},
+    {EPSG_NAME_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION,
+     EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION, nullptr, nullptr,
+     nullptr, paramsAffineParametricTransformation},
+
+    {EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC,
+     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC, nullptr, nullptr,
+     nullptr, paramsHelmert3},
+    {EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D,
+     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D, nullptr, nullptr,
+     nullptr, paramsHelmert3},
+    {EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D,
+     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D, nullptr, nullptr,
+     nullptr, paramsHelmert3},
+
+    {EPSG_NAME_METHOD_COORDINATE_FRAME_GEOCENTRIC,
+     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC, nullptr, nullptr, nullptr,
+     paramsHelmert7},
+    {EPSG_NAME_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D,
+     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D, nullptr, nullptr, nullptr,
+     paramsHelmert7},
+    {EPSG_NAME_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D,
+     EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D, nullptr, nullptr, nullptr,
+     paramsHelmert7},
+
+    {EPSG_NAME_METHOD_POSITION_VECTOR_GEOCENTRIC,
+     EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC, nullptr, nullptr, nullptr,
+     paramsHelmert7},
+    {EPSG_NAME_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D,
+     EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D, nullptr, nullptr, nullptr,
+     paramsHelmert7},
+    {EPSG_NAME_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D,
+     EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D, nullptr, nullptr, nullptr,
+     paramsHelmert7},
+
+    {EPSG_NAME_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC,
+     EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC, nullptr,
+     nullptr, nullptr, paramsHelmert15},
+    {EPSG_NAME_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D,
+     EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D, nullptr,
+     nullptr, nullptr, paramsHelmert15},
+    {EPSG_NAME_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D,
+     EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D, nullptr,
+     nullptr, nullptr, paramsHelmert15},
+
+    {EPSG_NAME_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC,
+     EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC, nullptr,
+     nullptr, nullptr, paramsHelmert15},
+    {EPSG_NAME_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D,
+     EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D, nullptr,
+     nullptr, nullptr, paramsHelmert15},
+    {EPSG_NAME_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D,
+     EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D, nullptr,
+     nullptr, nullptr, paramsHelmert15},
+
+    {EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOCENTRIC,
+     EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOCENTRIC, nullptr, nullptr,
+     nullptr, paramsMolodenskyBadekas},
+    {EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D,
+     EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D, nullptr, nullptr,
+     nullptr, paramsMolodenskyBadekas},
+    {EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_3D,
+     EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_3D, nullptr, nullptr,
+     nullptr, paramsMolodenskyBadekas},
+
+    {EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOCENTRIC,
+     EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOCENTRIC, nullptr, nullptr,
+     nullptr, paramsMolodenskyBadekas},
+    {EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D,
+     EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D, nullptr, nullptr,
+     nullptr, paramsMolodenskyBadekas},
+    {EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_3D,
+     EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_3D, nullptr, nullptr,
+     nullptr, paramsMolodenskyBadekas},
+
+    {EPSG_NAME_METHOD_MOLODENSKY, EPSG_CODE_METHOD_MOLODENSKY, nullptr, nullptr,
+     nullptr, paramsMolodensky},
+
+    {EPSG_NAME_METHOD_ABRIDGED_MOLODENSKY, EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY,
+     nullptr, nullptr, nullptr, paramsMolodensky},
+
+    {EPSG_NAME_METHOD_GEOGRAPHIC2D_OFFSETS,
+     EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS, nullptr, nullptr, nullptr,
+     paramsGeographic2DOffsets},
+
+    {EPSG_NAME_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS,
+     EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS, nullptr, nullptr,
+     nullptr, paramsGeographic2DWithHeightOffsets},
+
+    {EPSG_NAME_METHOD_GEOGRAPHIC3D_OFFSETS,
+     EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS, nullptr, nullptr, nullptr,
+     paramsGeographic3DOffsets},
+
+    {EPSG_NAME_METHOD_VERTICAL_OFFSET, EPSG_CODE_METHOD_VERTICAL_OFFSET,
+     nullptr, nullptr, nullptr, paramsVerticalOffsets},
+
+    {EPSG_NAME_METHOD_NTV2, EPSG_CODE_METHOD_NTV2, nullptr, nullptr, nullptr,
+     paramsNTV2},
+
+    {EPSG_NAME_METHOD_NTV1, EPSG_CODE_METHOD_NTV1, nullptr, nullptr, nullptr,
+     paramsNTV2},
+
+    {EPSG_NAME_METHOD_NADCON, EPSG_CODE_METHOD_NADCON, nullptr, nullptr,
+     nullptr, paramsNADCON},
+
+    {EPSG_NAME_METHOD_VERTCON, EPSG_CODE_METHOD_VERTCON, nullptr, nullptr,
+     nullptr, paramsVERTCON},
 };
 
 // end of anonymous namespace

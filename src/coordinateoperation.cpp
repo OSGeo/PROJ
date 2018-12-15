@@ -200,7 +200,7 @@ bool areEquivalentParameters(const std::string &a, const std::string &b) {
 // ---------------------------------------------------------------------------
 
 PROJ_NO_INLINE const MethodMapping *getMapping(int epsg_code) noexcept {
-    for (const auto &mapping : methodMappings) {
+    for (const auto &mapping : projectionMethodMappings) {
         if (mapping.epsg_code == epsg_code) {
             return &mapping;
         }
@@ -213,7 +213,7 @@ PROJ_NO_INLINE const MethodMapping *getMapping(int epsg_code) noexcept {
 const MethodMapping *getMapping(const OperationMethod *method) noexcept {
     const std::string &name(method->nameStr());
     const int epsg_code = method->getEPSGCode();
-    for (const auto &mapping : methodMappings) {
+    for (const auto &mapping : projectionMethodMappings) {
         if ((epsg_code != 0 && mapping.epsg_code == epsg_code) ||
             metadata::Identifier::isEquivalentName(mapping.wkt2_name,
                                                    name.c_str())) {
@@ -231,7 +231,7 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) noexcept {
         return getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
     }
 
-    for (const auto &mapping : methodMappings) {
+    for (const auto &mapping : projectionMethodMappings) {
         if (mapping.wkt1_name && metadata::Identifier::isEquivalentName(
                                      mapping.wkt1_name, wkt1_name.c_str())) {
             return &mapping;
@@ -242,7 +242,7 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) noexcept {
 // ---------------------------------------------------------------------------
 
 const MethodMapping *getMapping(const char *wkt2_name) noexcept {
-    for (const auto &mapping : methodMappings) {
+    for (const auto &mapping : projectionMethodMappings) {
         if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
                                                    wkt2_name)) {
             return &mapping;
@@ -256,7 +256,7 @@ const MethodMapping *getMapping(const char *wkt2_name) noexcept {
 std::vector<const MethodMapping *>
 getMappingsFromPROJName(const std::string &projName) {
     std::vector<const MethodMapping *> res;
-    for (const auto &mapping : methodMappings) {
+    for (const auto &mapping : projectionMethodMappings) {
         if (mapping.proj_name_main && projName == mapping.proj_name_main) {
             res.push_back(&mapping);
         }
@@ -268,6 +268,10 @@ getMappingsFromPROJName(const std::string &projName) {
 
 static const ParamMapping *getMapping(const MethodMapping *mapping,
                                       const OperationParameterNNPtr &param) {
+    if (mapping->params == nullptr) {
+        return nullptr;
+    }
+
     // First try with id
     const int epsg_code = param->getEPSGCode();
     if (epsg_code) {
@@ -1761,6 +1765,140 @@ std::set<GridDescription> SingleOperation::gridsNeeded(
             }
         }
     }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Validate the parameters used by a coodinate operation.
+ *
+ * Return whether the method is known or not, or a list of missing or extra
+ * parameters for the operations recognized by this implementation.
+ */
+std::list<std::string> SingleOperation::validateParameters() const {
+    std::list<std::string> res;
+
+    const auto &l_method = method();
+    const auto &methodName = l_method->nameStr();
+    const MethodMapping *methodMapping = nullptr;
+    const auto methodEPSGCode = l_method->getEPSGCode();
+    for (const auto &mapping : projectionMethodMappings) {
+        if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
+                                                   methodName.c_str()) ||
+            (methodEPSGCode != 0 && methodEPSGCode == mapping.epsg_code)) {
+            methodMapping = &mapping;
+        }
+    }
+    if (methodMapping == nullptr) {
+        for (const auto &mapping : otherMethodMappings) {
+            if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
+                                                       methodName.c_str()) ||
+                (methodEPSGCode != 0 && methodEPSGCode == mapping.epsg_code)) {
+                methodMapping = &mapping;
+            }
+        }
+    }
+    if (!methodMapping) {
+        res.emplace_back("Unknown method " + methodName);
+        return res;
+    }
+    if (methodMapping->wkt2_name != methodName) {
+        if (metadata::Identifier::isEquivalentName(methodMapping->wkt2_name,
+                                                   methodName.c_str())) {
+            std::string msg("Method name ");
+            msg += methodName;
+            msg += " is equivalent to official ";
+            msg += methodMapping->wkt2_name;
+            msg += " but not strictly equal";
+            res.emplace_back(msg);
+        } else {
+            std::string msg("Method name ");
+            msg += methodName;
+            msg += ", matched to ";
+            msg += methodMapping->wkt2_name;
+            msg += ", through its EPSG code has not an equivalent name";
+            res.emplace_back(msg);
+        }
+    }
+    if (methodEPSGCode != 0 && methodEPSGCode != methodMapping->epsg_code) {
+        std::string msg("Method of EPSG code ");
+        msg += toString(methodEPSGCode);
+        msg += " does not match official code (";
+        msg += toString(methodMapping->epsg_code);
+        msg += ')';
+        res.emplace_back(msg);
+    }
+
+    // Check if expected parameters are found
+    for (int i = 0;
+         methodMapping->params && methodMapping->params[i] != nullptr; ++i) {
+        const auto *paramMapping = methodMapping->params[i];
+
+        const OperationParameterValue *opv = nullptr;
+        for (const auto &genOpParamvalue : parameterValues()) {
+            auto opParamvalue = dynamic_cast<const OperationParameterValue *>(
+                genOpParamvalue.get());
+            if (opParamvalue) {
+                const auto &parameter = opParamvalue->parameter();
+                if ((paramMapping->epsg_code != 0 &&
+                     parameter->getEPSGCode() == paramMapping->epsg_code) ||
+                    ci_equal(parameter->nameStr(), paramMapping->wkt2_name)) {
+                    opv = opParamvalue;
+                    break;
+                }
+            }
+        }
+
+        if (!opv) {
+            std::string msg("Cannot find expected parameter ");
+            msg += paramMapping->wkt2_name;
+            res.emplace_back(msg);
+            continue;
+        }
+        const auto &parameter = opv->parameter();
+        if (paramMapping->wkt2_name != parameter->nameStr()) {
+            if (ci_equal(parameter->nameStr(), paramMapping->wkt2_name)) {
+                std::string msg("Parameter name ");
+                msg += parameter->nameStr();
+                msg += " is equivalent to official ";
+                msg += paramMapping->wkt2_name;
+                msg += " but not strictly equal";
+                res.emplace_back(msg);
+            } else {
+                std::string msg("Parameter name ");
+                msg += parameter->nameStr();
+                msg += ", matched to ";
+                msg += paramMapping->wkt2_name;
+                msg += ", through its EPSG code has not an equivalent name";
+                res.emplace_back(msg);
+            }
+        }
+        const auto paramEPSGCode = parameter->getEPSGCode();
+        if (paramEPSGCode != 0 && paramEPSGCode != paramMapping->epsg_code) {
+            std::string msg("Paramater of EPSG code ");
+            msg += toString(paramEPSGCode);
+            msg += " does not match official code (";
+            msg += toString(paramMapping->epsg_code);
+            msg += ')';
+            res.emplace_back(msg);
+        }
+    }
+
+    // Check if there are extra parameters
+    for (const auto &genOpParamvalue : parameterValues()) {
+        auto opParamvalue = dynamic_cast<const OperationParameterValue *>(
+            genOpParamvalue.get());
+        if (opParamvalue) {
+            const auto &parameter = opParamvalue->parameter();
+            if (!getMapping(methodMapping, parameter)) {
+                std::string msg("Parameter ");
+                msg += parameter->nameStr();
+                msg += " found but not expected for this method";
+                res.emplace_back(msg);
+            }
+        }
+    }
+
     return res;
 }
 
@@ -7865,8 +8003,6 @@ static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
     }
 }
 
-inline static void consume_unused(const std::string &) {}
-
 //! @endcond
 // ---------------------------------------------------------------------------
 
@@ -8027,12 +8163,7 @@ void Transformation::_exportToPROJString(
             EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D ||
         methodEPSGCode ==
             EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D) {
-        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOCENTRIC);
-        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOCENTRIC);
-        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_3D);
-        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_3D);
-        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D);
-        consume_unused(EPSG_NAME_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D);
+
         positionVectorConvention =
             isPositionVector ||
             methodEPSGCode ==

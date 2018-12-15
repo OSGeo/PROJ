@@ -185,6 +185,7 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
            const common::Angle &longitudeIn);
 
     PROJ_DLL static const PrimeMeridianNNPtr GREENWICH;
+    PROJ_DLL static const PrimeMeridianNNPtr REFERENCE_MERIDIAN;
     PROJ_DLL static const PrimeMeridianNNPtr PARIS;
 
     PROJ_PRIVATE :
@@ -221,6 +222,7 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
     PrimeMeridian &operator=(const PrimeMeridian &other) = delete;
 
     PROJ_INTERNAL static const PrimeMeridianNNPtr createGREENWICH();
+    PROJ_INTERNAL static const PrimeMeridianNNPtr createREFERENCE_MERIDIAN();
     PROJ_INTERNAL static const PrimeMeridianNNPtr createPARIS();
 };
 

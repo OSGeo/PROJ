@@ -295,6 +295,14 @@ const PrimeMeridianNNPtr PrimeMeridian::createGREENWICH() {
 
 // ---------------------------------------------------------------------------
 
+const PrimeMeridianNNPtr PrimeMeridian::createREFERENCE_MERIDIAN() {
+    return create(util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          "Reference meridian"),
+                  common::Angle(0));
+}
+
+// ---------------------------------------------------------------------------
+
 const PrimeMeridianNNPtr PrimeMeridian::createPARIS() {
     return create(createMapNameEPSGCode("Paris", 8903),
                   common::Angle(2.5969213, common::UnitOfMeasure::GRAD));
