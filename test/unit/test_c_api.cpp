@@ -166,14 +166,128 @@ TEST_F(CApi, proj_obj_create_from_user_input) {
 
 TEST_F(CApi, proj_obj_create_from_wkt) {
     proj_obj_destroy(nullptr);
-    EXPECT_EQ(proj_obj_create_from_wkt(m_ctxt, "invalid", nullptr), nullptr);
-    auto obj = proj_obj_create_from_wkt(
-        m_ctxt,
-        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
-            .c_str(),
-        nullptr);
-    ObjectKeeper keeper(obj);
-    EXPECT_NE(obj, nullptr);
+    {
+        EXPECT_EQ(proj_obj_create_from_wkt(m_ctxt, "invalid", nullptr, nullptr,
+                                           nullptr),
+                  nullptr);
+    }
+    {
+        PROJ_STRING_LIST warningList = nullptr;
+        PROJ_STRING_LIST errorList = nullptr;
+        EXPECT_EQ(proj_obj_create_from_wkt(m_ctxt, "invalid", nullptr,
+                                           &warningList, &errorList),
+                  nullptr);
+        EXPECT_EQ(warningList, nullptr);
+        proj_string_list_destroy(warningList);
+        EXPECT_NE(errorList, nullptr);
+        proj_string_list_destroy(errorList);
+    }
+    {
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt,
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr, nullptr, nullptr);
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+    }
+    {
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt,
+            "GEOGCS[\"WGS 84\",\n"
+            "    DATUM[\"WGS_1984\",\n"
+            "        SPHEROID[\"WGS 84\",6378137,298.257223563,\"unused\"]],\n"
+            "    PRIMEM[\"Greenwich\",0],\n"
+            "    UNIT[\"degree\",0.0174532925199433]]",
+            nullptr, nullptr, nullptr);
+        EXPECT_EQ(obj, nullptr);
+    }
+    {
+        PROJ_STRING_LIST warningList = nullptr;
+        PROJ_STRING_LIST errorList = nullptr;
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt,
+            "GEOGCS[\"WGS 84\",\n"
+            "    DATUM[\"WGS_1984\",\n"
+            "        SPHEROID[\"WGS 84\",6378137,298.257223563,\"unused\"]],\n"
+            "    PRIMEM[\"Greenwich\",0],\n"
+            "    UNIT[\"degree\",0.0174532925199433]]",
+            nullptr, &warningList, &errorList);
+        EXPECT_EQ(obj, nullptr);
+        EXPECT_EQ(warningList, nullptr);
+        proj_string_list_destroy(warningList);
+        EXPECT_NE(errorList, nullptr);
+        proj_string_list_destroy(errorList);
+    }
+    {
+        PROJ_STRING_LIST warningList = nullptr;
+        PROJ_STRING_LIST errorList = nullptr;
+        const char *const options[] = {"STRICT=NO", nullptr};
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt,
+            "GEOGCS[\"WGS 84\",\n"
+            "    DATUM[\"WGS_1984\",\n"
+            "        SPHEROID[\"WGS 84\",6378137,298.257223563,\"unused\"]],\n"
+            "    PRIMEM[\"Greenwich\",0],\n"
+            "    UNIT[\"degree\",0.0174532925199433]]",
+            options, &warningList, &errorList);
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+        EXPECT_EQ(warningList, nullptr);
+        proj_string_list_destroy(warningList);
+        EXPECT_NE(errorList, nullptr);
+        proj_string_list_destroy(errorList);
+    }
+    {
+        PROJ_STRING_LIST warningList = nullptr;
+        PROJ_STRING_LIST errorList = nullptr;
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt,
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
+                .c_str(),
+            nullptr, &warningList, &errorList);
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+        EXPECT_EQ(warningList, nullptr);
+        EXPECT_EQ(errorList, nullptr);
+    }
+    // Warnings: missing projection parameters
+    {
+        PROJ_STRING_LIST warningList = nullptr;
+        PROJ_STRING_LIST errorList = nullptr;
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt, "PROJCS[\"test\",\n"
+                    "  GEOGCS[\"WGS 84\",\n"
+                    "    DATUM[\"WGS_1984\",\n"
+                    "        SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+                    "    PRIMEM[\"Greenwich\",0],\n"
+                    "    UNIT[\"degree\",0.0174532925199433]],\n"
+                    "  PROJECTION[\"Transverse_Mercator\"],\n"
+                    "  PARAMETER[\"latitude_of_origin\",31],\n"
+                    "  UNIT[\"metre\",1]]",
+            nullptr, &warningList, &errorList);
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+        EXPECT_NE(warningList, nullptr);
+        proj_string_list_destroy(warningList);
+        EXPECT_EQ(errorList, nullptr);
+        proj_string_list_destroy(errorList);
+    }
+    {
+        auto obj = proj_obj_create_from_wkt(
+            m_ctxt, "PROJCS[\"test\",\n"
+                    "  GEOGCS[\"WGS 84\",\n"
+                    "    DATUM[\"WGS_1984\",\n"
+                    "        SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+                    "    PRIMEM[\"Greenwich\",0],\n"
+                    "    UNIT[\"degree\",0.0174532925199433]],\n"
+                    "  PROJECTION[\"Transverse_Mercator\"],\n"
+                    "  PARAMETER[\"latitude_of_origin\",31],\n"
+                    "  UNIT[\"metre\",1]]",
+            nullptr, nullptr, nullptr);
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -195,7 +309,7 @@ TEST_F(CApi, proj_obj_as_wkt) {
         m_ctxt,
         GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -298,7 +412,7 @@ TEST_F(CApi, proj_obj_as_wkt_check_db_use) {
         m_ctxt, "GEOGCS[\"AGD66\",DATUM[\"Australian_Geodetic_Datum_1966\","
                 "SPHEROID[\"Australian National Spheroid\",6378160,298.25]],"
                 "PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433]]",
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -316,7 +430,7 @@ TEST_F(CApi, proj_obj_as_wkt_incompatible_WKT1) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
         createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -331,7 +445,7 @@ TEST_F(CApi, proj_obj_as_proj_string) {
         m_ctxt,
         GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -356,7 +470,7 @@ TEST_F(CApi, proj_obj_as_proj_string_incompatible_WKT1) {
     auto obj = proj_obj_create_from_wkt(
         m_ctxt,
         createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -449,7 +563,7 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84_on_invalid_type) {
                     ->derivingConversion()
                     ->exportToWKT(WKTFormatter::create().get())
                     .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -464,7 +578,7 @@ TEST_F(CApi, proj_obj_get_name) {
         m_ctxt,
         GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
     auto name = proj_obj_get_name(obj);
@@ -480,7 +594,7 @@ TEST_F(CApi, proj_obj_get_id_auth_name) {
         m_ctxt,
         GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
     auto auth = proj_obj_get_id_auth_name(obj, 0);
@@ -498,7 +612,7 @@ TEST_F(CApi, proj_obj_get_id_code) {
         m_ctxt,
         GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
     auto code = proj_obj_get_id_code(obj, 0);
@@ -517,7 +631,7 @@ TEST_F(CApi, proj_obj_get_type) {
             m_ctxt,
             GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
                 .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS);
@@ -527,7 +641,7 @@ TEST_F(CApi, proj_obj_get_type) {
             m_ctxt,
             GeographicCRS::EPSG_4979->exportToWKT(WKTFormatter::create().get())
                 .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS);
@@ -537,7 +651,7 @@ TEST_F(CApi, proj_obj_get_type) {
             m_ctxt,
             GeographicCRS::EPSG_4978->exportToWKT(WKTFormatter::create().get())
                 .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_GEOCENTRIC_CRS);
@@ -547,7 +661,7 @@ TEST_F(CApi, proj_obj_get_type) {
             m_ctxt, GeographicCRS::EPSG_4326->datum()
                         ->exportToWKT(WKTFormatter::create().get())
                         .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_GEODETIC_REFERENCE_FRAME);
@@ -557,7 +671,7 @@ TEST_F(CApi, proj_obj_get_type) {
             m_ctxt, GeographicCRS::EPSG_4326->ellipsoid()
                         ->exportToWKT(WKTFormatter::create().get())
                         .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_ELLIPSOID);
@@ -567,7 +681,7 @@ TEST_F(CApi, proj_obj_get_type) {
             m_ctxt, createProjectedCRS()
                         ->exportToWKT(WKTFormatter::create().get())
                         .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_PROJECTED_CRS);
@@ -577,7 +691,7 @@ TEST_F(CApi, proj_obj_get_type) {
             m_ctxt, createVerticalCRS()
                         ->exportToWKT(WKTFormatter::create().get())
                         .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_VERTICAL_CRS);
@@ -588,7 +702,7 @@ TEST_F(CApi, proj_obj_get_type) {
                         ->datum()
                         ->exportToWKT(WKTFormatter::create().get())
                         .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_VERTICAL_REFERENCE_FRAME);
@@ -599,7 +713,7 @@ TEST_F(CApi, proj_obj_get_type) {
                         ->derivingConversion()
                         ->exportToWKT(WKTFormatter::create().get())
                         .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_CONVERSION);
@@ -608,7 +722,7 @@ TEST_F(CApi, proj_obj_get_type) {
         auto obj = proj_obj_create_from_wkt(
             m_ctxt,
             createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_BOUND_CRS);
@@ -619,14 +733,14 @@ TEST_F(CApi, proj_obj_get_type) {
                         ->transformation()
                         ->exportToWKT(WKTFormatter::create().get())
                         .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_obj_get_type(obj), PJ_OBJ_TYPE_TRANSFORMATION);
     }
     {
         auto obj = proj_obj_create_from_wkt(m_ctxt, "AUTHORITY[\"EPSG\", 4326]",
-                                            nullptr);
+                                            nullptr, nullptr, nullptr);
         ObjectKeeper keeper(obj);
         ASSERT_EQ(obj, nullptr);
     }
@@ -703,7 +817,7 @@ TEST_F(CApi, proj_crs) {
             ->exportToWKT(
                 WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
     EXPECT_TRUE(proj_obj_is_crs(crs));
@@ -772,7 +886,7 @@ TEST_F(CApi, proj_obj_get_prime_meridian) {
             ->exportToWKT(
                 WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
@@ -811,7 +925,7 @@ TEST_F(CApi, proj_crs_compound) {
     auto crs = proj_obj_create_from_wkt(
         m_ctxt,
         createCompoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
     EXPECT_EQ(proj_obj_get_type(crs), PJ_OBJ_TYPE_COMPOUND_CRS);
@@ -837,7 +951,7 @@ TEST_F(CApi, proj_obj_get_source_target_crs_bound_crs) {
     auto crs = proj_obj_create_from_wkt(
         m_ctxt,
         createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
@@ -860,7 +974,7 @@ TEST_F(CApi, proj_obj_get_source_target_crs_transformation) {
                     ->transformation()
                     ->exportToWKT(WKTFormatter::create().get())
                     .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
 
@@ -881,7 +995,7 @@ TEST_F(CApi, proj_obj_get_source_crs_of_projected_crs) {
     auto crs = proj_obj_create_from_wkt(
         m_ctxt,
         createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
@@ -911,7 +1025,8 @@ TEST_F(CApi, proj_obj_get_source_target_crs_conversion_without_crs) {
 
 TEST_F(CApi, proj_obj_get_source_target_crs_invalid_object) {
     auto obj = proj_obj_create_from_wkt(
-        m_ctxt, "ELLIPSOID[\"WGS 84\",6378137,298.257223563]", nullptr);
+        m_ctxt, "ELLIPSOID[\"WGS 84\",6378137,298.257223563]", nullptr, nullptr,
+        nullptr);
     ASSERT_NE(obj, nullptr);
     ObjectKeeper keeper(obj);
 
@@ -1089,7 +1204,7 @@ TEST_F(CApi, transformation_from_boundCRS) {
     auto crs = proj_obj_create_from_wkt(
         m_ctxt,
         createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ASSERT_NE(crs, nullptr);
     ObjectKeeper keeper(crs);
 
@@ -1465,7 +1580,7 @@ TEST_F(CApi, proj_obj_identify) {
         m_ctxt,
         GeographicCRS::EPSG_4807->exportToWKT(WKTFormatter::create().get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
     {
@@ -1486,7 +1601,7 @@ TEST_F(CApi, proj_obj_identify) {
             m_ctxt,
             Ellipsoid::GRS1980->exportToWKT(WKTFormatter::create().get())
                 .c_str(),
-            nullptr);
+            nullptr, nullptr, nullptr);
         ObjectKeeper keeperEllps(objEllps);
         auto res =
             proj_obj_identify(m_ctxt, objEllps, nullptr, nullptr, nullptr);
@@ -2245,7 +2360,7 @@ TEST_F(CApi, proj_obj_crs_alter_geodetic_crs) {
     auto projCRS = proj_obj_create_from_wkt(
         m_ctxt,
         createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(projCRS);
     ASSERT_NE(projCRS, nullptr);
 
@@ -2306,7 +2421,7 @@ TEST_F(CApi, proj_obj_crs_alter_cs_angular_unit) {
         m_ctxt,
         GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
             .c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
@@ -2363,7 +2478,7 @@ TEST_F(CApi, proj_obj_crs_alter_cs_linear_unit) {
     auto crs = proj_obj_create_from_wkt(
         m_ctxt,
         createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 
@@ -2420,7 +2535,7 @@ TEST_F(CApi, proj_obj_crs_alter_parameters_linear_unit) {
     auto crs = proj_obj_create_from_wkt(
         m_ctxt,
         createProjectedCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr);
+        nullptr, nullptr, nullptr);
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
 

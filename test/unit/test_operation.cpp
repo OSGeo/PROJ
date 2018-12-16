@@ -3310,7 +3310,7 @@ TEST(operation, webmerc_import_from_broken_esri_WGS_84_Pseudo_Mercator) {
                 "PARAMETER[\"false_northing\",0],UNIT[\"Meter\",1],"
                 "PARAMETER[\"standard_parallel_1\",0.0]]";
 
-    auto obj = WKTParser().createFromWKT(wkt1);
+    auto obj = WKTParser().setStrict(false).createFromWKT(wkt1);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
@@ -3620,7 +3620,7 @@ TEST(operation, wkt1_import_polar_stereographic_variantA) {
                "    PARAMETER[\"central_meridian\",2],\n"
                "    PARAMETER[\"scale_factor\",3],\n"
                "    PARAMETER[\"false_easting\",4],\n"
-               "    PARAMETER[\"false_northing\",5]"
+               "    PARAMETER[\"false_northing\",5],\n"
                "    UNIT[\"metre\",1]]";
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
@@ -3649,7 +3649,7 @@ TEST(operation, wkt1_import_polar_stereographic_variantB) {
                "    PARAMETER[\"central_meridian\",2],\n"
                "    PARAMETER[\"scale_factor\",1],\n"
                "    PARAMETER[\"false_easting\",4],\n"
-               "    PARAMETER[\"false_northing\",5]"
+               "    PARAMETER[\"false_northing\",5],\n"
                "    UNIT[\"metre\",1]]";
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
@@ -3678,7 +3678,7 @@ TEST(operation, wkt1_import_polar_stereographic_ambiguous) {
                "    PARAMETER[\"central_meridian\",2],\n"
                "    PARAMETER[\"scale_factor\",3],\n"
                "    PARAMETER[\"false_easting\",4],\n"
-               "    PARAMETER[\"false_northing\",5]"
+               "    PARAMETER[\"false_northing\",5],\n"
                "    UNIT[\"metre\",1]]";
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
@@ -6827,9 +6827,9 @@ TEST(operation, conversion_missing_parameter) {
                 "    PARAMETER[\"false_easting\",500000],"
                 "    UNIT[\"metre\",1,"
                 "        AUTHORITY[\"EPSG\",\"9001\"]],"
-                "    AUTHORITY[\"EPSG\",\"2038\"],"
                 "    AXIS[\"Easting\",EAST],"
-                "    AXIS[\"Northing\",NORTH]]";
+                "    AXIS[\"Northing\",NORTH],"
+                "    AUTHORITY[\"EPSG\",\"2038\"]]";
     auto obj1 = WKTParser().createFromWKT(wkt1);
     auto crs1 = nn_dynamic_pointer_cast<ProjectedCRS>(obj1);
     ASSERT_TRUE(crs1 != nullptr);
@@ -6854,9 +6854,9 @@ TEST(operation, conversion_missing_parameter) {
                 "    PARAMETER[\"false_northing\",0],"
                 "    UNIT[\"metre\",1,"
                 "        AUTHORITY[\"EPSG\",\"9001\"]],"
-                "    AUTHORITY[\"EPSG\",\"2038\"],"
                 "    AXIS[\"Easting\",EAST],"
-                "    AXIS[\"Northing\",NORTH]]";
+                "    AXIS[\"Northing\",NORTH],"
+                "    AUTHORITY[\"EPSG\",\"2038\"]]";
     auto obj2 = WKTParser().createFromWKT(wkt2);
     auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj2);
     ASSERT_TRUE(crs2 != nullptr);
@@ -6881,9 +6881,9 @@ TEST(operation, conversion_missing_parameter) {
                 "    PARAMETER[\"false_northing\",0],"
                 "    UNIT[\"metre\",1,"
                 "        AUTHORITY[\"EPSG\",\"9001\"]],"
-                "    AUTHORITY[\"EPSG\",\"2038\"],"
                 "    AXIS[\"Easting\",EAST],"
-                "    AXIS[\"Northing\",NORTH]]";
+                "    AXIS[\"Northing\",NORTH],"
+                "    AUTHORITY[\"EPSG\",\"2038\"]]";
     auto obj3 = WKTParser().createFromWKT(wkt3);
     auto crs3 = nn_dynamic_pointer_cast<ProjectedCRS>(obj3);
     ASSERT_TRUE(crs3 != nullptr);
@@ -6909,9 +6909,9 @@ TEST(operation, conversion_missing_parameter) {
                 "    PARAMETER[\"UNKNOWN\",13],"
                 "    UNIT[\"metre\",1,"
                 "        AUTHORITY[\"EPSG\",\"9001\"]],"
-                "    AUTHORITY[\"EPSG\",\"2038\"],"
                 "    AXIS[\"Easting\",EAST],"
-                "    AXIS[\"Northing\",NORTH]]";
+                "    AXIS[\"Northing\",NORTH],"
+                "    AUTHORITY[\"EPSG\",\"2038\"]]";
     auto obj4 = WKTParser().createFromWKT(wkt4);
     auto crs4 = nn_dynamic_pointer_cast<ProjectedCRS>(obj4);
     ASSERT_TRUE(crs4 != nullptr);
@@ -6936,9 +6936,9 @@ TEST(operation, conversion_missing_parameter) {
                 "    PARAMETER[\"false_northing\",-99999],"
                 "    UNIT[\"metre\",1,"
                 "        AUTHORITY[\"EPSG\",\"9001\"]],"
-                "    AUTHORITY[\"EPSG\",\"2038\"],"
                 "    AXIS[\"Easting\",EAST],"
-                "    AXIS[\"Northing\",NORTH]]";
+                "    AXIS[\"Northing\",NORTH],"
+                "    AUTHORITY[\"EPSG\",\"2038\"]]";
     auto obj5 = WKTParser().createFromWKT(wkt5);
     auto crs5 = nn_dynamic_pointer_cast<ProjectedCRS>(obj5);
     ASSERT_TRUE(crs5 != nullptr);

@@ -456,6 +456,11 @@ typedef struct PJ_OBJ PJ_OBJ;
 typedef struct PJ_OBJ_LIST PJ_OBJ_LIST;
 /*! @endcond */
 
+/** \brief Type representing a NULL terminated list of NUL-terminate strings. */
+typedef char **PROJ_STRING_LIST;
+
+void PROJ_DLL proj_string_list_destroy(PROJ_STRING_LIST list);
+
 int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
                                             const char *dbPath,
                                             const char *const *auxDbPaths,
@@ -494,7 +499,9 @@ PJ_OBJ PROJ_DLL *proj_obj_create_from_user_input(PJ_CONTEXT *ctx,
                                                  const char* const *options);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
-                                          const char* const *options);
+                                          const char* const *options,
+                                          PROJ_STRING_LIST *out_warnings,
+                                          PROJ_STRING_LIST *out_grammar_errors);
 
 PJ_OBJ PROJ_DLL *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
                                                   const char *proj_string,
@@ -677,17 +684,12 @@ void PROJ_DLL proj_int_list_destroy(int* list);
 
 /* ------------------------------------------------------------------------- */
 
-/** \brief Type representing a NULL terminated list of NUL-terminate strings. */
-typedef char **PROJ_STRING_LIST;
-
 PROJ_STRING_LIST PROJ_DLL proj_get_authorities_from_database(PJ_CONTEXT *ctx);
 
 PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                              const char *auth_name,
                                              PJ_OBJ_TYPE type,
                                              int allow_deprecated);
-
-void PROJ_DLL proj_string_list_destroy(PROJ_STRING_LIST list);
 
 /* ------------------------------------------------------------------------- */
 

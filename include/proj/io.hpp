@@ -620,7 +620,7 @@ class PROJ_GCC_DLL WKTParser {
     attachDatabaseContext(const DatabaseContextPtr &dbContext);
 
     PROJ_DLL WKTParser &setStrict(bool strict);
-    PROJ_DLL std::vector<std::string> warningList() const;
+    PROJ_DLL std::list<std::string> warningList() const;
 
     PROJ_DLL util::BaseObjectNNPtr
     createFromWKT(const std::string &wkt); // throw(ParsingException)

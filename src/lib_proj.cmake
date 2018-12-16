@@ -244,6 +244,7 @@ SET(SRC_LIBPROJ_CORE
         rtodms.c
         vector1.c
         pj_strtod.c
+        pj_wkt1_generated_parser.c
         ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
@@ -260,6 +261,7 @@ set(SRC_LIBPROJ_CPP
         internal.cpp
         factory.cpp
         c_api.cpp
+        pj_wkt1_parser.cpp
 )
 
 set(HEADERS_LIBPROJ

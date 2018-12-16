@@ -136,8 +136,8 @@ static std::string c_ify_string(const std::string &str) {
 static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
                                    const std::string &user_string,
                                    bool kindIsCRS, const std::string &context,
-                                   bool buildBoundCRSToWGS84,
-                                   bool allowPivots) {
+                                   bool buildBoundCRSToWGS84, bool allowPivots,
+                                   bool quiet) {
     BaseObjectPtr obj;
 
     std::string l_user_string(user_string);
@@ -182,7 +182,24 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
                 l_user_string.find("\\\"") != std::string::npos) {
                 l_user_string = un_c_ify_string(l_user_string);
             }
-            obj = createFromUserInput(l_user_string, dbContext).as_nullable();
+            WKTParser wktParser;
+            if (wktParser.guessDialect(l_user_string) !=
+                WKTParser::WKTGuessedDialect::NOT_WKT) {
+                wktParser.setStrict(false);
+                wktParser.attachDatabaseContext(dbContext);
+                obj = wktParser.createFromWKT(l_user_string).as_nullable();
+                if (!quiet) {
+                    auto warnings = wktParser.warningList();
+                    if (!warnings.empty()) {
+                        for (const auto &str : warnings) {
+                            std::cerr << "Warning: " << str << std::endl;
+                        }
+                    }
+                }
+            } else {
+                obj =
+                    createFromUserInput(l_user_string, dbContext).as_nullable();
+            }
         }
     } catch (const std::exception &e) {
         std::cerr << context << ": parsing of user string failed: " << e.what()
@@ -509,16 +526,16 @@ static void outputOperations(
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
     bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
-    auto sourceObj =
-        buildObject(dbContext, sourceCRSStr, true, "source CRS", false, false);
+    auto sourceObj = buildObject(dbContext, sourceCRSStr, true, "source CRS",
+                                 false, false, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
 
-    auto targetObj =
-        buildObject(dbContext, targetCRSStr, true, "target CRS", false, false);
+    auto targetObj = buildObject(dbContext, targetCRSStr, true, "target CRS",
+                                 false, false, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -910,7 +927,8 @@ int main(int argc, char **argv) {
 
     if (!user_string.empty()) {
         auto obj(buildObject(dbContext, user_string, kindIsCRS, "input string",
-                             buildBoundCRSToWGS84, allowPivots));
+                             buildBoundCRSToWGS84, allowPivots,
+                             outputOpt.quiet));
         if (guessDialect) {
             auto dialect = WKTParser().guessDialect(user_string);
             std::cout << "Guessed WKT dialect: ";

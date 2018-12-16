@@ -392,6 +392,28 @@ PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text,
 
 // ---------------------------------------------------------------------------
 
+template <class T> static PROJ_STRING_LIST to_string_list(T &&set) {
+    auto ret = new char *[set.size() + 1];
+    size_t i = 0;
+    for (const auto &str : set) {
+        try {
+            ret[i] = new char[str.size() + 1];
+        } catch (const std::exception &) {
+            while (--i > 0) {
+                delete[] ret[i];
+            }
+            delete[] ret;
+            throw;
+        }
+        std::memcpy(ret[i], str.c_str(), str.size() + 1);
+        i++;
+    }
+    ret[i] = nullptr;
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate an object from a WKT string.
  *
  * This function calls osgeo::proj::io::WKTParser::createFromWKT()
@@ -401,28 +423,97 @@ PJ_OBJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param wkt WKT string (must not be NULL)
- * @param options should be set to NULL for now
+ * @param options null-terminated list of options, or NULL. Currently
+ * supported options are:
+ * <ul>
+ * <li>STRICT=YES/NO. Defaults to NO. When set to YES, strict validation will
+ * be enabled.</li>
+ * </ul>
+ * @param out_warnings Pointer to a PROJ_STRING_LIST object, or NULL.
+ * If provided, *out_warnings will contain a list of warnings, typically for
+ * non recognized projection method or parameters. It must be freed with
+ * proj_string_list_destroy().
+ * @param out_grammar_errors Pointer to a PROJ_STRING_LIST object, or NULL.
+ * If provided, *out_grammar_errors will contain a list of errors regarding the
+ * WKT grammaer. It must be freed with proj_string_list_destroy().
  * @return Object that must be unreferenced with proj_obj_destroy(), or NULL in
  * case of error.
  */
 PJ_OBJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
-                                 const char *const *options) {
+                                 const char *const *options,
+                                 PROJ_STRING_LIST *out_warnings,
+                                 PROJ_STRING_LIST *out_grammar_errors) {
     SANITIZE_CTX(ctx);
     assert(wkt);
-    (void)options;
+
+    if (out_warnings) {
+        *out_warnings = nullptr;
+    }
+    if (out_grammar_errors) {
+        *out_grammar_errors = nullptr;
+    }
+
     try {
         WKTParser parser;
         auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
         if (dbContext) {
             parser.attachDatabaseContext(NN_NO_CHECK(dbContext));
         }
-        auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
+        for (auto iter = options; iter && iter[0]; ++iter) {
+            const char *value;
+            if ((value = getOptionValue(*iter, "STRICT="))) {
+                parser.setStrict(ci_equal(value, "YES"));
+            } else {
+                std::string msg("Unknown option :");
+                msg += *iter;
+                proj_log_error(ctx, __FUNCTION__, msg.c_str());
+                return nullptr;
+            }
+        }
+        auto obj = nn_dynamic_pointer_cast<IdentifiedObject>(
             parser.createFromWKT(wkt));
-        if (identifiedObject) {
-            return PJ_OBJ::create(NN_NO_CHECK(identifiedObject));
+
+        if (out_grammar_errors) {
+            auto warnings = parser.warningList();
+            if (!warnings.empty()) {
+                *out_grammar_errors = to_string_list(warnings);
+            }
+        }
+
+        if (obj && out_warnings) {
+            auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(obj.get());
+            if (derivedCRS) {
+                auto warnings =
+                    derivedCRS->derivingConversionRef()->validateParameters();
+                if (!warnings.empty()) {
+                    *out_warnings = to_string_list(warnings);
+                }
+            } else {
+                auto singleOp =
+                    dynamic_cast<const operation::SingleOperation *>(obj.get());
+                if (singleOp) {
+                    auto warnings = singleOp->validateParameters();
+                    if (!warnings.empty()) {
+                        *out_warnings = to_string_list(warnings);
+                    }
+                }
+            }
+        }
+
+        if (obj) {
+            return PJ_OBJ::create(NN_NO_CHECK(obj));
         }
     } catch (const std::exception &e) {
-        proj_log_error(ctx, __FUNCTION__, e.what());
+        if (out_grammar_errors) {
+            std::list<std::string> exc{e.what()};
+            try {
+                *out_grammar_errors = to_string_list(exc);
+            } catch (const std::exception &) {
+                proj_log_error(ctx, __FUNCTION__, e.what());
+            }
+        } else {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+        }
     }
     return nullptr;
 }
@@ -1832,20 +1923,6 @@ void proj_int_list_destroy(int *list) { delete[] list; }
 
 // ---------------------------------------------------------------------------
 
-static PROJ_STRING_LIST set_to_string_list(std::set<std::string> &&set) {
-    auto ret = new char *[set.size() + 1];
-    size_t i = 0;
-    for (const auto &str : set) {
-        ret[i] = new char[str.size() + 1];
-        std::memcpy(ret[i], str.c_str(), str.size() + 1);
-        i++;
-    }
-    ret[i] = nullptr;
-    return ret;
-}
-
-// ---------------------------------------------------------------------------
-
 /** \brief Return the list of authorities used in the database.
  *
  * The returned list is NULL terminated and must be freed with
@@ -1859,7 +1936,7 @@ static PROJ_STRING_LIST set_to_string_list(std::set<std::string> &&set) {
 PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
     SANITIZE_CTX(ctx);
     try {
-        return set_to_string_list(getDBcontext(ctx)->getAuthorities());
+        return to_string_list(getDBcontext(ctx)->getAuthorities());
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -1894,7 +1971,7 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
         if (!valid) {
             return nullptr;
         }
-        return set_to_string_list(
+        return to_string_list(
             factory->getAuthorityCodes(typeInternal, allow_deprecated != 0));
 
     } catch (const std::exception &e) {

@@ -446,7 +446,7 @@ TEST(wkt_parse, wkt1_EPSG_4807_grad_mess) {
         "    PRIMEM[\"Paris\",2.33722917,\n"
         "        AUTHORITY[\"EPSG\",\"8903\"]],\n"
         "    UNIT[\"grad\",0.015707963267949,\n"
-        "        AUTHORITY[\"EPSG\",9105]],\n"
+        "        AUTHORITY[\"EPSG\",\"9105\"]],\n"
         "    AXIS[\"latitude\",NORTH],\n"
         "    AXIS[\"longitude\",EAST],\n"
         "    AUTHORITY[\"EPSG\",\"4807\"]]");
@@ -868,7 +868,7 @@ TEST(wkt_parse, wkt1_geocentric) {
                "    PRIMEM[\"Greenwich\",0,\n"
                "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
                "    UNIT[\"metre\",1,\n"
-               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                "    AXIS[\"Geocentric X\",OTHER],\n"
                "    AXIS[\"Geocentric Y\",OTHER],\n"
                "    AXIS[\"Geocentric Z\",NORTH],\n"
@@ -890,7 +890,7 @@ TEST(wkt_parse, wkt1_geocentric_with_z_OTHER) {
                "    PRIMEM[\"Greenwich\",0,\n"
                "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
                "    UNIT[\"metre\",1,\n"
-               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                "    AXIS[\"Geocentric X\",OTHER],\n"
                "    AXIS[\"Geocentric Y\",OTHER],\n"
                "    AXIS[\"Geocentric Z\",OTHER],\n"
@@ -1004,7 +1004,7 @@ TEST(wkt_parse, wkt1_projected) {
                "        PRIMEM[\"Greenwich\",0,\n"
                "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
                "        UNIT[\"degree\",0.0174532925199433,\n"
-               "            AUTHORITY[\"EPSG\",9122]],\n"
+               "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
                "        AXIS[\"latitude\",NORTH],\n"
                "        AXIS[\"longitude\",EAST],\n"
                "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
@@ -1015,7 +1015,7 @@ TEST(wkt_parse, wkt1_projected) {
                "    PARAMETER[\"false_easting\",500000],\n"
                "    PARAMETER[\"false_northing\",0],\n"
                "    UNIT[\"metre\",1,\n"
-               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                "    AXIS[\"(E)\",EAST],\n"
                "    AXIS[\"(N)\",NORTH],\n"
                "    AUTHORITY[\"EPSG\",\"32631\"]]";
@@ -1037,7 +1037,7 @@ TEST(wkt_parse, wkt1_projected_no_axis) {
                "        PRIMEM[\"Greenwich\",0,\n"
                "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
                "        UNIT[\"degree\",0.0174532925199433,\n"
-               "            AUTHORITY[\"EPSG\",9122]],\n"
+               "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
                "        AXIS[\"latitude\",NORTH],\n"
                "        AXIS[\"longitude\",EAST],\n"
                "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
@@ -1048,7 +1048,7 @@ TEST(wkt_parse, wkt1_projected_no_axis) {
                "    PARAMETER[\"false_easting\",500000],\n"
                "    PARAMETER[\"false_northing\",0],\n"
                "    UNIT[\"metre\",1,\n"
-               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                "    AUTHORITY[\"EPSG\",\"32631\"]]";
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
@@ -1753,7 +1753,7 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL) {
                "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
                "        AUTHORITY[\"EPSG\",\"5101\"]],\n"
                "    UNIT[\"metre\",1,\n"
-               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                "    AXIS[\"gravity-related height\",UP],\n"
                "    AUTHORITY[\"EPSG\",\"5701\"]]";
 
@@ -1922,7 +1922,7 @@ TEST(wkt_parse, COMPD_CS) {
         "            PRIMEM[\"Greenwich\",0,\n"
         "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
         "            UNIT[\"degree\",0.0174532925199433,\n"
-        "                AUTHORITY[\"EPSG\",9122]],\n"
+        "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
         "            AXIS[\"Latitude\",NORTH],\n"
         "            AXIS[\"Longitude\",EAST],\n"
         "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
@@ -1933,7 +1933,7 @@ TEST(wkt_parse, COMPD_CS) {
         "        PARAMETER[\"false_easting\",500000],\n"
         "        PARAMETER[\"false_northing\",0],\n"
         "        UNIT[\"metre\",1,\n"
-        "            AUTHORITY[\"EPSG\",9001]],\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
         "        AXIS[\"Easting\",EAST],\n"
         "        AXIS[\"Northing\",NORTH],\n"
         "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
@@ -1941,7 +1941,7 @@ TEST(wkt_parse, COMPD_CS) {
         "        VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
         "            AUTHORITY[\"EPSG\",\"5101\"]],\n"
         "        UNIT[\"metre\",1,\n"
-        "            AUTHORITY[\"EPSG\",9001]],\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
         "        AXIS[\"Gravity-related height\",UP],\n"
         "        AUTHORITY[\"EPSG\",\"5701\"]],\n"
         "    AUTHORITY[\"codespace\",\"code\"]]");
@@ -2213,7 +2213,7 @@ TEST(wkt_parse, projcs_TOWGS84_7terms) {
                "        PRIMEM[\"Greenwich\",0,\n"
                "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
                "        UNIT[\"degree\",0.0174532925199433,\n"
-               "            AUTHORITY[\"EPSG\",9122]],\n"
+               "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
                "        AXIS[\"Latitude\",NORTH],\n"
                "        AXIS[\"Longitude\",EAST]],\n"
                "    PROJECTION[\"Transverse_Mercator\"],\n"
@@ -2223,7 +2223,7 @@ TEST(wkt_parse, projcs_TOWGS84_7terms) {
                "    PARAMETER[\"false_easting\",500000],\n"
                "    PARAMETER[\"false_northing\",0],\n"
                "    UNIT[\"metre\",1,\n"
-               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                "    AXIS[\"Easting\",EAST],\n"
                "    AXIS[\"Northing\",NORTH]]";
 
@@ -4607,7 +4607,7 @@ TEST(wkt_parse, invalid_PROJCS) {
         "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
         "        PRIMEM[\"x\",0],\n"
         "        UNIT[\"degree\",0.0174532925199433,\n"
-        "            AUTHORITY[\"EPSG\",9122]],\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
         "        AXIS[\"latitude\",NORTH],\n"
         "        AXIS[\"longitude\",EAST],\n"
         "        AUTHORITY[\"EPSG\",\"4326\"]]\n");
@@ -4627,17 +4627,17 @@ TEST(wkt_parse, invalid_PROJCS) {
                  ParsingException);
 
     // not enough children in PARAMETER
-    EXPECT_THROW(
-        WKTParser().createFromWKT(
-            startWKT +
-            ",PROJECTION[\"x\"],PARAMETER[\"z\",\"foo\"],UNIT[\"metre\",1]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     startWKT +
+                     ",PROJECTION[\"x\"],PARAMETER[\"z\"],UNIT[\"metre\",1]]"),
+                 ParsingException);
 
     EXPECT_NO_THROW(WKTParser().createFromWKT(
-        startWKT + ",PROJECTION[\"x\"],UNIT[\"metre\",1]]"));
+        startWKT + ",PROJECTION[\"x\"],PARAMETER[\"z\",1],UNIT[\"metre\",1]]"));
 
     // missing UNIT
-    EXPECT_THROW(WKTParser().createFromWKT(startWKT + ",PROJECTION[\"x\"]]"),
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     startWKT + ",PROJECTION[\"x\"],PARAMETER[\"z\",1]]"),
                  ParsingException);
 }
 

@@ -60,6 +60,8 @@
 
 #include "proj_constants.h"
 
+#include "pj_wkt1_parser.h"
+
 // PROJ include order is sensitive
 // clang-format off
 #include "proj.h"
@@ -1125,7 +1127,7 @@ std::string WKTNode::toString() const {
 //! @cond Doxygen_Suppress
 struct WKTParser::Private {
     bool strict_ = true;
-    std::vector<std::string> warningList_{};
+    std::list<std::string> warningList_{};
     std::vector<double> toWGS84Parameters_{};
     std::string datumPROJ4Grids_{};
     bool esriStyle_ = false;
@@ -1321,7 +1323,7 @@ WKTParser &WKTParser::setStrict(bool strict) {
  *
  * \note The list might be non-empty only is setStrict(false) has been called.
  */
-std::vector<std::string> WKTParser::warningList() const {
+std::list<std::string> WKTParser::warningList() const {
     return d->warningList_;
 }
 
@@ -4205,8 +4207,10 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
 
     for (const auto &wktConstants : WKTConstants::constants()) {
         if (ci_starts_with(text, wktConstants)) {
-            return WKTParser().attachDatabaseContext(dbContext).createFromWKT(
-                text);
+            return WKTParser()
+                .attachDatabaseContext(dbContext)
+                .setStrict(false)
+                .createFromWKT(text);
         }
     }
     const char *textWithoutPlusPrefix = text.c_str();
@@ -4339,11 +4343,32 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
 // ---------------------------------------------------------------------------
 
 /** \brief Instanciate a sub-class of BaseObject from a WKT string.
+ *
+ * By default, validation is strict (to the extent of the checks that are
+ * actually implemented. Currently only WKT1 strict grammar is checked), and
+ * any issue detected will cause an exception to be thrown, unless
+ * setStrict(false) is called priorly.
+ *
+ * In non-strict mode, non-fatal issues will be recovered and simply listed
+ * in warningList(). This does not prevent more severe errors to cause an
+ * exception to be thrown.
+ *
  * @throw ParsingException
  */
 BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
     WKTNodeNNPtr root = WKTNode::createFrom(wkt);
-    return d->build(root);
+    auto obj = d->build(root);
+
+    const auto dialect = guessDialect(wkt);
+    if (dialect == WKTGuessedDialect::WKT1_GDAL ||
+        dialect == WKTGuessedDialect::WKT1_ESRI) {
+        auto errorMsg = pj_wkt1_parse(wkt);
+        if (!errorMsg.empty()) {
+            d->emitRecoverableAssertion(errorMsg);
+        }
+    }
+
+    return obj;
 }
 
 // ---------------------------------------------------------------------------

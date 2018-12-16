@@ -523,3 +523,28 @@ PROJCRS["Monte Mario (Rome) / Italy zone 1",
     BBOX[36.53,5.94,47.04,12],
     ID["EPSG",26591]]
 
+Testing non compliant WKT1
+Warning: GEOGCS should have a PRIMEM node
+Warning: Parsing error : syntax error, unexpected UNIT, expecting PRIMEM. Error occurred around:
+HEROID["WGS 84",6378137,298.257223563]],UNIT["degree",0.0174532925199433]]
+                                        ^
+PROJ string:
++proj=pipeline +step +proj=longlat +ellps=WGS84 +step +proj=unitconvert +xy_in=rad +xy_out=deg
+
+WKT2_2015 string:
+GEODCRS["WGS 84",
+    DATUM["World Geodetic System 1984",
+        ELLIPSOID["WGS 84",6378137,298.257223563,
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433],
+        ID["EPSG",8901]],
+    CS[ellipsoidal,2],
+        AXIS["longitude",east,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["latitude",north,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]]]
+
