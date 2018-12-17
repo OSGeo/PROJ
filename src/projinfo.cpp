@@ -784,7 +784,7 @@ int main(int argc, char **argv) {
                 spatialCriterion = CoordinateOperationContext::
                     SpatialCriterion::PARTIAL_INTERSECTION;
             } else {
-                std::cerr << "Unrecognized value for option --patial-test: "
+                std::cerr << "Unrecognized value for option --spatial-test: "
                           << value << std::endl;
                 usage();
             }
