@@ -664,12 +664,12 @@ int main(int argc, char **argv) {
                 } else if (ci_equal(format, "-PROJ")) {
                     outputOpt.PROJ5 = false;
                 } else if (ci_equal(format, "WKT_ALL") ||
-                           ci_equal(format, "WKT_ALL")) {
+                           ci_equal(format, "WKT-ALL")) {
                     outputOpt.WKT2_2018 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                 } else if (ci_equal(format, "-WKT_ALL") ||
-                           ci_equal(format, "-WKT_ALL")) {
+                           ci_equal(format, "-WKT-ALL")) {
                     outputOpt.WKT2_2018 = false;
                     outputOpt.WKT2_2015 = false;
                     outputOpt.WKT1_GDAL = false;
@@ -784,7 +784,7 @@ int main(int argc, char **argv) {
                 spatialCriterion = CoordinateOperationContext::
                     SpatialCriterion::PARTIAL_INTERSECTION;
             } else {
-                std::cerr << "Unrecognized value for option --patial-test: "
+                std::cerr << "Unrecognized value for option --spatial-test: "
                           << value << std::endl;
                 usage();
             }
