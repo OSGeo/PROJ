@@ -1656,7 +1656,8 @@ TEST(wkt_parse, cs_with_MERIDIAN) {
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
         "        UNIT[\"degree\",0.0174532925199433]],\n"
         "    CONVERSION[\"dummy\",\n"
-        "        METHOD[\"dummy\"]]\n"
+        "        METHOD[\"dummy\"],\n"
+        "        PARAMETER[\"dummy\",1.0]],\n"
         "    CS[Cartesian,2],\n"
         "        AXIS[\"easting "
         "(X)\",south,MERIDIAN[90,ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
@@ -2450,7 +2451,8 @@ TEST(wkt_parse, DerivedGeodeticCRS) {
                "        PRIMEM[\"Greenwich\",0,\n"
                "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
                "    DERIVINGCONVERSION[\"Some conversion\",\n"
-               "        METHOD[\"Some method\"]],\n"
+               "        METHOD[\"Some method\"],\n"
+               "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
                "    CS[Cartesian,3],\n"
                "        AXIS[\"(X)\",geocentricX,\n"
                "            ORDER[1],\n"
@@ -2513,7 +2515,8 @@ TEST(wkt_parse, DerivedProjectedCRS) {
         "                LENGTHUNIT[\"metre\",1],\n"
         "                ID[\"EPSG\",8807]]]],\n"
         "    DERIVINGCONVERSION[\"unnamed\",\n"
-        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "        METHOD[\"PROJ unimplemented\"],\n"
+        "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
         "    CS[Cartesian,2],\n"
         "        AXIS[\"(E)\",east,\n"
         "            ORDER[1],\n"
@@ -2553,9 +2556,15 @@ TEST(wkt_parse, DerivedProjectedCRS_ordinal) {
                "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
                "                ID[\"EPSG\",8901]]],\n"
                "        CONVERSION[\"unnamed\",\n"
-               "            METHOD[\"PROJ unimplemented\"]]],\n"
+               "            METHOD[\"PROJ unimplemented\"],\n"
+               "            PARAMETER[\"foo\",1,\n"
+               "                LENGTHUNIT[\"metre\",1,\n"
+               "                    ID[\"EPSG\",9001]]]]],\n"
                "    DERIVINGCONVERSION[\"unnamed\",\n"
-               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "        METHOD[\"PROJ unimplemented\"],\n"
+               "        PARAMETER[\"foo\",1,\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]],\n"
                "    CS[ordinal,2],\n"
                "        AXIS[\"inline (I)\",northNorthWest,\n"
                "            ORDER[1]],\n"
@@ -2692,7 +2701,7 @@ TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2018) {
     auto wkt = "TIMECRS[\"Calendar hours from 1979-12-29\",\n"
                "    TDATUM[\"29 December 1979\",\n"
                "        CALENDAR[\"proleptic Gregorian\"],\n"
-               "        TIMEORIGIN[1979-12-29T00]],\n"
+               "        TIMEORIGIN[1979-12-29T00Z]],\n"
                "    CS[TemporalCount,1],\n"
                "        AXIS[\"time\",future,\n"
                "            TIMEUNIT[\"hour\"]]]";
@@ -2704,7 +2713,7 @@ TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2018) {
     EXPECT_EQ(crs->nameStr(), "Calendar hours from 1979-12-29");
     auto tdatum = crs->datum();
     EXPECT_EQ(tdatum->nameStr(), "29 December 1979");
-    EXPECT_EQ(tdatum->temporalOrigin().toString(), "1979-12-29T00");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "1979-12-29T00Z");
     EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalCountCS>(
                     crs->coordinateSystem()) != nullptr);
     ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
@@ -2959,7 +2968,10 @@ TEST(wkt_parse, DerivedVerticalCRS) {
                "    BASEVERTCRS[\"ODN height\",\n"
                "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
                "    DERIVINGCONVERSION[\"unnamed\",\n"
-               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "        METHOD[\"PROJ unimplemented\"],\n"
+               "        PARAMETER[\"foo\",1,\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]],\n"
                "    CS[vertical,1],\n"
                "        AXIS[\"gravity-related height (H)\",up,\n"
                "            LENGTHUNIT[\"metre\",1,\n"
@@ -2978,7 +2990,10 @@ TEST(wkt_parse, DerivedEngineeringCRS) {
                "    BASEENGCRS[\"Engineering CRS\",\n"
                "        EDATUM[\"Engineering datum\"]],\n"
                "    DERIVINGCONVERSION[\"unnamed\",\n"
-               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "        METHOD[\"PROJ unimplemented\"],\n"
+               "        PARAMETER[\"foo\",1,\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]],\n"
                "    CS[Cartesian,2],\n"
                "        AXIS[\"(E)\",east,\n"
                "            ORDER[1],\n"
@@ -3002,7 +3017,10 @@ TEST(wkt_parse, DerivedParametricCRS) {
                "    BASEPARAMCRS[\"Parametric CRS\",\n"
                "        PDATUM[\"Parametric datum\"]],\n"
                "    DERIVINGCONVERSION[\"unnamed\",\n"
-               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "        METHOD[\"PROJ unimplemented\"],\n"
+               "        PARAMETER[\"foo\",1,\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]],\n"
                "    CS[parametric,1],\n"
                "        AXIS[\"pressure (hPa)\",up,\n"
                "            PARAMETRICUNIT[\"HectoPascal\",100]]]";
@@ -3022,7 +3040,10 @@ TEST(wkt_parse, DerivedTemporalCRS) {
                "            CALENDAR[\"proleptic Gregorian\"],\n"
                "            TIMEORIGIN[0000-01-01]]],\n"
                "    DERIVINGCONVERSION[\"unnamed\",\n"
-               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "        METHOD[\"PROJ unimplemented\"],\n"
+               "        PARAMETER[\"foo\",1,\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]],\n"
                "    CS[TemporalDateTime,1],\n"
                "        AXIS[\"time (T)\",future]]";
 
@@ -4346,7 +4367,7 @@ TEST(wkt_parse, invalid_UNIT) {
                          "\"longitude\",east],");
 
     EXPECT_NO_THROW(WKTParser().createFromWKT(
-        startWKT + "UNIT[\"degree\",0.0174532925199433]]]"));
+        startWKT + "UNIT[\"degree\",0.0174532925199433]]"));
 
     // not enough children
     EXPECT_THROW(WKTParser().createFromWKT(startWKT + "UNIT[\"x\"]]]"),
@@ -4887,14 +4908,15 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
         Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
-    EXPECT_NO_THROW(WKTParser().createFromWKT(
+    auto valid_wkt =
         "BOUNDCRS[SOURCECRS[" +
         projcrs->exportToWKT(WKTFormatter::create().get()) + "],\n" +
         "TARGETCRS[" +
         GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get()) +
         "],\n"
         "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
-        "        METHOD[\"bar\"]]]"));
+        "        METHOD[\"bar\"],PARAMETER[\"foo\",1.0]]]";
+    EXPECT_NO_THROW(WKTParser().createFromWKT(valid_wkt)) << valid_wkt;
 
     // Missing SOURCECRS
     EXPECT_THROW(
@@ -4903,7 +4925,8 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
                                       WKTFormatter::create().get()) +
                                   "],\n"
                                   "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
-                                  "        METHOD[\"bar\"]]]"),
+                                  "        METHOD[\"bar\"],"
+                                  "PARAMETER[\"foo\",1.0]]]"),
         ParsingException);
 
     // Invalid SOURCECRS
@@ -4913,7 +4936,8 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
                                       WKTFormatter::create().get()) +
                                   "],\n"
                                   "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
-                                  "        METHOD[\"bar\"]]]"),
+                                  "        METHOD[\"bar\"],"
+                                  "PARAMETER[\"foo\",1.0]]]"),
         ParsingException);
 
     // Missing TARGETCRS
@@ -4922,7 +4946,8 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
                      projcrs->exportToWKT(WKTFormatter::create().get()) +
                      "],\n"
                      "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
-                     "        METHOD[\"bar\"]]]"),
+                     "        METHOD[\"bar\"],"
+                     "PARAMETER[\"foo\",1.0]]]"),
                  ParsingException);
 
     // Invalid TARGETCRS
@@ -4931,7 +4956,8 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
                      projcrs->exportToWKT(WKTFormatter::create().get()) +
                      "],TARGETCRS[\"foo\"],\n"
                      "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
-                     "        METHOD[\"bar\"]]]"),
+                     "        METHOD[\"bar\"],"
+                     "PARAMETER[\"foo\",1.0]]]"),
                  ParsingException);
 
     // Missing ABRIDGEDTRANSFORMATION
@@ -4952,7 +4978,8 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
                      GeographicCRS::EPSG_4326->exportToWKT(
                          WKTFormatter::create().get()) +
                      "],"
-                     "ABRIDGEDTRANSFORMATION[\"foo\"]]"),
+                     "ABRIDGEDTRANSFORMATION[\"foo\"],"
+                     "PARAMETER[\"foo\",1.0]]"),
                  ParsingException);
 
     // Invalid METHOD
@@ -4963,7 +4990,8 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
                      GeographicCRS::EPSG_4326->exportToWKT(
                          WKTFormatter::create().get()) +
                      "],"
-                     "ABRIDGEDTRANSFORMATION[\"foo\",METHOD[]]]"),
+                     "ABRIDGEDTRANSFORMATION[\"foo\",METHOD[],"
+                     "PARAMETER[\"foo\",1.0]]]"),
                  ParsingException);
 }
 
@@ -4999,7 +5027,8 @@ TEST(wkt_parse, invalid_DerivedGeographicCRS) {
         "        DATUM[\"World Geodetic System 1984\",\n"
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
         "    DERIVINGCONVERSION[\"foo\",\n"
-        "        METHOD[\"bar\"]],\n"
+        "        METHOD[\"bar\"],\n"
+        "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
         "    CS[ellipsoidal,2],\n"
         "        AXIS[\"latitude\",north],\n"
         "        AXIS[\"longitude\",east],\n"
@@ -5026,7 +5055,8 @@ TEST(wkt_parse, invalid_DerivedGeographicCRS) {
             "        DATUM[\"World Geodetic System 1984\",\n"
             "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
             "    DERIVINGCONVERSION[\"foo\",\n"
-            "        METHOD[\"bar\"]]]"),
+            "        METHOD[\"bar\"],\n"
+            "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]]"),
         ParsingException);
 
     // CS should be ellipsoidal given root node is GEOGCRS
@@ -5037,7 +5067,8 @@ TEST(wkt_parse, invalid_DerivedGeographicCRS) {
             "        DATUM[\"World Geodetic System 1984\",\n"
             "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
             "    DERIVINGCONVERSION[\"foo\",\n"
-            "        METHOD[\"bar\"]],\n"
+            "        METHOD[\"bar\"],\n"
+            "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
             "    CS[Cartesian,3],\n"
             "        AXIS[\"(X)\",geocentricX],\n"
             "        AXIS[\"(Y)\",geocentricY],\n"
@@ -5053,7 +5084,8 @@ TEST(wkt_parse, invalid_DerivedGeographicCRS) {
             "        DATUM[\"World Geodetic System 1984\",\n"
             "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
             "    DERIVINGCONVERSION[\"foo\",\n"
-            "        METHOD[\"bar\"]],\n"
+            "        METHOD[\"bar\"],\n"
+            "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
             "    CS[Cartesian,2],\n"
             "        AXIS[\"(X)\",geocentricX],\n"
             "        AXIS[\"(Y)\",geocentricY],\n"
@@ -5068,7 +5100,8 @@ TEST(wkt_parse, invalid_DerivedGeographicCRS) {
             "        DATUM[\"World Geodetic System 1984\",\n"
             "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
             "    DERIVINGCONVERSION[\"foo\",\n"
-            "        METHOD[\"bar\"]],\n"
+            "        METHOD[\"bar\"],\n"
+            "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
             "    CS[vertical,1],\n"
             "        AXIS[\"gravity-related height (H)\",up],\n"
             "        UNIT[\"metre\",1]]"),
@@ -5243,23 +5276,26 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
         "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
         "                    LENGTHUNIT[\"metre\",1]]]],\n"
         "        CONVERSION[\"unnamed\",\n"
-        "            METHOD[\"PROJ unimplemented\"]]],\n"
+        "            METHOD[\"PROJ unimplemented\"],\n"
+        "            PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]],\n"
         "    DERIVINGCONVERSION[\"unnamed\",\n"
-        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "        METHOD[\"PROJ unimplemented\"],\n"
+        "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
         "    CS[Cartesian,2],\n"
         "        AXIS[\"(E)\",east],\n"
         "        AXIS[\"(N)\",north],\n"
         "        UNIT[\"metre\",1]]"));
 
-    EXPECT_THROW(
-        WKTParser().createFromWKT("DERIVEDPROJCRS[\"derived projectedCRS\",\n"
-                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
-                                  "        METHOD[\"PROJ unimplemented\"]],\n"
-                                  "    CS[Cartesian,2],\n"
-                                  "        AXIS[\"(E)\",east],\n"
-                                  "        AXIS[\"(N)\",north],\n"
-                                  "        UNIT[\"metre\",1]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
+                     "    DERIVINGCONVERSION[\"unnamed\",\n"
+                     "        METHOD[\"PROJ unimplemented\"],\n"
+                     "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
+                     "    CS[Cartesian,2],\n"
+                     "        AXIS[\"(E)\",east],\n"
+                     "        AXIS[\"(N)\",north],\n"
+                     "        UNIT[\"metre\",1]]"),
+                 ParsingException);
 
     // Missing DERIVINGCONVERSION
     EXPECT_THROW(
@@ -5271,7 +5307,8 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
             "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
             "                    LENGTHUNIT[\"metre\",1]]]],\n"
             "        CONVERSION[\"unnamed\",\n"
-            "            METHOD[\"PROJ unimplemented\"]]],\n"
+            "            METHOD[\"PROJ unimplemented\"],\n"
+            "            PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]],\n"
             "    CS[Cartesian,2],\n"
             "        AXIS[\"(E)\",east],\n"
             "        AXIS[\"(N)\",north],\n"
@@ -5288,9 +5325,11 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
             "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
             "                    LENGTHUNIT[\"metre\",1]]]],\n"
             "        CONVERSION[\"unnamed\",\n"
-            "            METHOD[\"PROJ unimplemented\"]]],\n"
+            "            METHOD[\"PROJ unimplemented\"],\n"
+            "            PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]],\n"
             "    DERIVINGCONVERSION[\"unnamed\",\n"
-            "        METHOD[\"PROJ unimplemented\"]]]"),
+            "        METHOD[\"PROJ unimplemented\"],\n"
+            "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]]"),
         ParsingException);
 }
 
@@ -5302,7 +5341,8 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
         "    BASEVERTCRS[\"ODN height\",\n"
         "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
         "    DERIVINGCONVERSION[\"unnamed\",\n"
-        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "        METHOD[\"PROJ unimplemented\"],\n"
+        "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
         "    CS[vertical,1],\n"
         "        AXIS[\"gravity-related height (H)\",up],\n"
         "        UNIT[\"metre\",1]]"));
@@ -5323,7 +5363,8 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
                      "    BASEVERTCRS[\"ODN height\",\n"
                      "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
                      "    DERIVINGCONVERSION[\"unnamed\",\n"
-                     "        METHOD[\"PROJ unimplemented\"]]]"),
+                     "        METHOD[\"PROJ unimplemented\"],\n"
+                     "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]]"),
                  ParsingException);
 
     // Wrong CS type
@@ -5332,7 +5373,8 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
                      "    BASEVERTCRS[\"ODN height\",\n"
                      "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
                      "    DERIVINGCONVERSION[\"unnamed\",\n"
-                     "        METHOD[\"PROJ unimplemented\"]],\n"
+                     "        METHOD[\"PROJ unimplemented\"],\n"
+                     "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
                      "    CS[parametric,1],\n"
                      "        AXIS[\"gravity-related height (H)\",up],\n"
                      "        UNIT[\"metre\",1]]"),
@@ -5342,16 +5384,17 @@ TEST(wkt_parse, invalid_DerivedVerticalCRS) {
 // ---------------------------------------------------------------------------
 
 TEST(wkt_parse, invalid_DerivedEngineeringCRS) {
-    EXPECT_NO_THROW(
-        WKTParser().createFromWKT("ENGCRS[\"Derived EngineeringCRS\",\n"
-                                  "    BASEENGCRS[\"Engineering CRS\",\n"
-                                  "        EDATUM[\"Engineering datum\"]],\n"
-                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
-                                  "        METHOD[\"PROJ unimplemented\"]],\n"
-                                  "    CS[Cartesian,2],\n"
-                                  "        AXIS[\"(E)\",east],\n"
-                                  "        AXIS[\"(N)\",north],\n"
-                                  "        LENGTHUNIT[\"metre\",1]]"));
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "ENGCRS[\"Derived EngineeringCRS\",\n"
+        "    BASEENGCRS[\"Engineering CRS\",\n"
+        "        EDATUM[\"Engineering datum\"]],\n"
+        "    DERIVINGCONVERSION[\"unnamed\",\n"
+        "        METHOD[\"PROJ unimplemented\"],\n"
+        "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east],\n"
+        "        AXIS[\"(N)\",north],\n"
+        "        LENGTHUNIT[\"metre\",1]]"));
 
     // Missing DERIVINGCONVERSION
     EXPECT_THROW(
@@ -5365,13 +5408,14 @@ TEST(wkt_parse, invalid_DerivedEngineeringCRS) {
         ParsingException);
 
     // Missing CS
-    EXPECT_THROW(
-        WKTParser().createFromWKT("ENGCRS[\"Derived EngineeringCRS\",\n"
-                                  "    BASEENGCRS[\"Engineering CRS\",\n"
-                                  "        EDATUM[\"Engineering datum\"]],\n"
-                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
-                                  "        METHOD[\"PROJ unimplemented\"]]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "ENGCRS[\"Derived EngineeringCRS\",\n"
+                     "    BASEENGCRS[\"Engineering CRS\",\n"
+                     "        EDATUM[\"Engineering datum\"]],\n"
+                     "    DERIVINGCONVERSION[\"unnamed\",\n"
+                     "        METHOD[\"PROJ unimplemented\"],\n"
+                     "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]]"),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -5382,7 +5426,8 @@ TEST(wkt_parse, invalid_DerivedParametricCRS) {
         "    BASEPARAMCRS[\"Parametric CRS\",\n"
         "        PDATUM[\"Parametric datum\"]],\n"
         "    DERIVINGCONVERSION[\"unnamed\",\n"
-        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "        METHOD[\"PROJ unimplemented\"],\n"
+        "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
         "    CS[parametric,1],\n"
         "        AXIS[\"pressure (hPa)\",up,\n"
         "            PARAMETRICUNIT[\"HectoPascal\",100]]]"));
@@ -5398,24 +5443,26 @@ TEST(wkt_parse, invalid_DerivedParametricCRS) {
                  ParsingException);
 
     // Missing CS
-    EXPECT_THROW(
-        WKTParser().createFromWKT("PARAMETRICCRS[\"Derived ParametricCRS\",\n"
-                                  "    BASEPARAMCRS[\"Parametric CRS\",\n"
-                                  "        PDATUM[\"Parametric datum\"]],\n"
-                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
-                                  "        METHOD[\"PROJ unimplemented\"]]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "PARAMETRICCRS[\"Derived ParametricCRS\",\n"
+                     "    BASEPARAMCRS[\"Parametric CRS\",\n"
+                     "        PDATUM[\"Parametric datum\"]],\n"
+                     "    DERIVINGCONVERSION[\"unnamed\",\n"
+                     "        METHOD[\"PROJ unimplemented\"],\n"
+                     "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]]"),
+                 ParsingException);
 
     // Wrong CS type
-    EXPECT_THROW(
-        WKTParser().createFromWKT("PARAMETRICCRS[\"Derived ParametricCRS\",\n"
-                                  "    BASEPARAMCRS[\"Parametric CRS\",\n"
-                                  "        PDATUM[\"Parametric datum\"]],\n"
-                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
-                                  "        METHOD[\"PROJ unimplemented\"]],\n"
-                                  "    CS[TemporalDateTime,1],\n"
-                                  "        AXIS[\"time (T)\",future]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "PARAMETRICCRS[\"Derived ParametricCRS\",\n"
+                     "    BASEPARAMCRS[\"Parametric CRS\",\n"
+                     "        PDATUM[\"Parametric datum\"]],\n"
+                     "    DERIVINGCONVERSION[\"unnamed\",\n"
+                     "        METHOD[\"PROJ unimplemented\"],\n"
+                     "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
+                     "    CS[TemporalDateTime,1],\n"
+                     "        AXIS[\"time (T)\",future]]"),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -5428,7 +5475,8 @@ TEST(wkt_parse, invalid_DerivedTemporalCRS) {
         "            CALENDAR[\"proleptic Gregorian\"],\n"
         "            TIMEORIGIN[0000-01-01]]],\n"
         "    DERIVINGCONVERSION[\"unnamed\",\n"
-        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "        METHOD[\"PROJ unimplemented\"],\n"
+        "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
         "    CS[TemporalDateTime,1],\n"
         "        AXIS[\"time (T)\",future]]"));
 
@@ -5451,7 +5499,8 @@ TEST(wkt_parse, invalid_DerivedTemporalCRS) {
                      "            CALENDAR[\"proleptic Gregorian\"],\n"
                      "            TIMEORIGIN[0000-01-01]]],\n"
                      "    DERIVINGCONVERSION[\"unnamed\",\n"
-                     "        METHOD[\"PROJ unimplemented\"]]]"),
+                     "        METHOD[\"PROJ unimplemented\"],\n"
+                     "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]]]"),
                  ParsingException);
 
     // Wrong CS type
@@ -5462,7 +5511,8 @@ TEST(wkt_parse, invalid_DerivedTemporalCRS) {
                      "            CALENDAR[\"proleptic Gregorian\"],\n"
                      "            TIMEORIGIN[0000-01-01]]],\n"
                      "    DERIVINGCONVERSION[\"unnamed\",\n"
-                     "        METHOD[\"PROJ unimplemented\"]],\n"
+                     "        METHOD[\"PROJ unimplemented\"],\n"
+                     "        PARAMETER[\"foo\",1.0,UNIT[\"metre\",1]]],\n"
                      "    CS[parametric,1],\n"
                      "        AXIS[\"pressure (hPa)\",up,\n"
                      "            PARAMETRICUNIT[\"HectoPascal\",100]]]"),

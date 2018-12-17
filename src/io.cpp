@@ -61,6 +61,7 @@
 #include "proj_constants.h"
 
 #include "pj_wkt1_parser.h"
+#include "pj_wkt2_parser.h"
 
 // PROJ include order is sensitive
 // clang-format off
@@ -1778,6 +1779,12 @@ UnitOfMeasure WKTParser::Private::buildUnitInSubNode(const WKTNodeNNPtr &node,
 
     {
         auto &unitNode = nodeP->lookForChild(WKTConstants::TIMEUNIT);
+        if (!isNull(unitNode)) {
+            return buildUnit(unitNode, UnitOfMeasure::Type::TIME);
+        }
+    }
+    {
+        auto &unitNode = nodeP->lookForChild(WKTConstants::TEMPORALQUANTITY);
         if (!isNull(unitNode)) {
             return buildUnit(unitNode, UnitOfMeasure::Type::TIME);
         }
@@ -4363,6 +4370,12 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
     if (dialect == WKTGuessedDialect::WKT1_GDAL ||
         dialect == WKTGuessedDialect::WKT1_ESRI) {
         auto errorMsg = pj_wkt1_parse(wkt);
+        if (!errorMsg.empty()) {
+            d->emitRecoverableAssertion(errorMsg);
+        }
+    } else if (dialect == WKTGuessedDialect::WKT2_2015 ||
+               dialect == WKTGuessedDialect::WKT2_2018) {
+        auto errorMsg = pj_wkt2_parse(wkt);
         if (!errorMsg.empty()) {
             d->emitRecoverableAssertion(errorMsg);
         }

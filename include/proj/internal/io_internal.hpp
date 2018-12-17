@@ -143,6 +143,7 @@ class WKTConstants {
     static const std::string VERTICALDATUM;
     static const std::string VRF; // WKT2-2018
     static const std::string TIMEDATUM;
+    static const std::string TEMPORALQUANTITY;
     static const std::string ENGINEERINGDATUM;
     static const std::string ENGINEERINGCRS;
     static const std::string PARAMETRICDATUM;

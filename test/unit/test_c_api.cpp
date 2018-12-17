@@ -67,9 +67,14 @@ class CApi : public ::testing::Test {
     static BoundCRSNNPtr createBoundCRS() {
         return BoundCRS::create(
             GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
-            Transformation::create(PropertyMap(), GeographicCRS::EPSG_4807,
-                                   GeographicCRS::EPSG_4326, nullptr,
-                                   PropertyMap(), {}, {}, {}));
+            Transformation::create(
+                PropertyMap(), GeographicCRS::EPSG_4807,
+                GeographicCRS::EPSG_4326, nullptr, PropertyMap(),
+                {OperationParameter::create(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY, "foo"))},
+                {ParameterValue::create(
+                    Measure(1.0, UnitOfMeasure::SCALE_UNITY))},
+                {}));
     }
 
     static ProjectedCRSNNPtr createProjectedCRS() {
@@ -427,12 +432,11 @@ TEST_F(CApi, proj_obj_as_wkt_check_db_use) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_as_wkt_incompatible_WKT1) {
-    auto obj = proj_obj_create_from_wkt(
-        m_ctxt,
-        createBoundCRS()->exportToWKT(WKTFormatter::create().get()).c_str(),
-        nullptr, nullptr, nullptr);
+    auto wkt = createBoundCRS()->exportToWKT(WKTFormatter::create().get());
+    auto obj = proj_obj_create_from_wkt(m_ctxt, wkt.c_str(), nullptr, nullptr,
+                                        nullptr);
     ObjectKeeper keeper(obj);
-    ASSERT_NE(obj, nullptr);
+    ASSERT_NE(obj, nullptr) << wkt;
 
     auto wkt1_GDAL = proj_obj_as_wkt(m_ctxt, obj, PJ_WKT1_GDAL, nullptr);
     ASSERT_EQ(wkt1_GDAL, nullptr);
@@ -558,14 +562,12 @@ TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_crs_create_bound_crs_to_WGS84_on_invalid_type) {
-    auto obj = proj_obj_create_from_wkt(
-        m_ctxt, createProjectedCRS()
-                    ->derivingConversion()
-                    ->exportToWKT(WKTFormatter::create().get())
-                    .c_str(),
-        nullptr, nullptr, nullptr);
+    auto wkt = createProjectedCRS()->derivingConversion()->exportToWKT(
+        WKTFormatter::create().get());
+    auto obj = proj_obj_create_from_wkt(m_ctxt, wkt.c_str(), nullptr, nullptr,
+                                        nullptr);
     ObjectKeeper keeper(obj);
-    ASSERT_NE(obj, nullptr);
+    ASSERT_NE(obj, nullptr) << wkt;
 
     auto res = proj_obj_crs_create_bound_crs_to_WGS84(m_ctxt, obj, nullptr);
     ASSERT_EQ(res, nullptr);
@@ -1603,6 +1605,7 @@ TEST_F(CApi, proj_obj_identify) {
                 .c_str(),
             nullptr, nullptr, nullptr);
         ObjectKeeper keeperEllps(objEllps);
+        ASSERT_NE(objEllps, nullptr);
         auto res =
             proj_obj_identify(m_ctxt, objEllps, nullptr, nullptr, nullptr);
         ObjListKeeper keeper_res(res);

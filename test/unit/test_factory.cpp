@@ -2023,9 +2023,9 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
                "                AXIS[\"geodetic longitude (Lon)\",east],\n"
                "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
                "    METHOD[\"Geocentric translations (geog2D domain)\"],\n"
-               "    PARAMETER[\"X-axis translation\",1],\n"
-               "    PARAMETER[\"Y-axis translation\",2],\n"
-               "    PARAMETER[\"Z-axis translation\",3]]";
+               "    PARAMETER[\"X-axis translation\",1,UNIT[\"metre\",1]],\n"
+               "    PARAMETER[\"Y-axis translation\",2,UNIT[\"metre\",1]],\n"
+               "    PARAMETER[\"Z-axis translation\",3,UNIT[\"metre\",1]]]";
 
     ASSERT_TRUE(
         execute("INSERT INTO other_transformation "

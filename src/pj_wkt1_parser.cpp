@@ -36,6 +36,7 @@
 #include <string>
 
 #include "pj_wkt1_parser.h"
+#include "pj_wkt_parser.hpp"
 
 using namespace NS_PROJ::internal;
 
@@ -43,44 +44,12 @@ using namespace NS_PROJ::internal;
 
 // ---------------------------------------------------------------------------
 
-struct pj_wkt1_parse_context {
-    const char *pszInput = nullptr;
-    const char *pszLastSuccess = nullptr;
-    const char *pszNext = nullptr;
-    std::string errorMsg{};
-
-    pj_wkt1_parse_context() = default;
-    pj_wkt1_parse_context(const pj_wkt1_parse_context &) = delete;
-    pj_wkt1_parse_context &operator=(const pj_wkt1_parse_context &) = delete;
-};
+struct pj_wkt1_parse_context : public pj_wkt_parse_context {};
 
 // ---------------------------------------------------------------------------
 
 void pj_wkt1_error(pj_wkt1_parse_context *context, const char *msg) {
-    context->errorMsg = "Parsing error : ";
-    context->errorMsg += msg;
-    context->errorMsg += ". Error occurred around:\n";
-
-    std::string ctxtMsg;
-    const int n = static_cast<int>(context->pszLastSuccess - context->pszInput);
-    int start_i = std::max(0, n - 40);
-    for (int i = start_i; i < n + 40 && context->pszInput[i]; i++) {
-        if (context->pszInput[i] == '\r' || context->pszInput[i] == '\n') {
-            if (i > n) {
-                break;
-            } else {
-                ctxtMsg.clear();
-                start_i = i + 1;
-            }
-        } else {
-            ctxtMsg += context->pszInput[i];
-        }
-    }
-    context->errorMsg += ctxtMsg;
-    context->errorMsg += '\n';
-    for (int i = start_i; i < n; i++)
-        context->errorMsg += ' ';
-    context->errorMsg += '^';
+    pj_wkt_error(context, msg);
 }
 
 // ---------------------------------------------------------------------------
@@ -141,10 +110,13 @@ int pj_wkt1_lex(YYSTYPE * /*pNode */, pj_wkt1_parse_context *context) {
     /* -------------------------------------------------------------------- */
     /*      Recognize node names.                                           */
     /* -------------------------------------------------------------------- */
-    for (i = 0; i < sizeof(tokens) / sizeof(tokens[0]); i++) {
-        if (ci_starts_with(pszInput, tokens[i].pszToken)) {
-            context->pszNext = pszInput + strlen(tokens[i].pszToken);
-            return tokens[i].nTokenVal;
+    if (isalpha(*pszInput)) {
+        for (i = 0; i < sizeof(tokens) / sizeof(tokens[0]); i++) {
+            if (ci_starts_with(pszInput, tokens[i].pszToken) &&
+                !isalpha(pszInput[strlen(tokens[i].pszToken)])) {
+                context->pszNext = pszInput + strlen(tokens[i].pszToken);
+                return tokens[i].nTokenVal;
+            }
         }
     }
 

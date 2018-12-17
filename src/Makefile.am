@@ -16,7 +16,7 @@ include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesi
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake bin_projinfo.cmake \
 	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c \
-	pj_wkt1_grammar.y
+	pj_wkt1_grammar.y pj_wkt2_grammar.y
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 projinfo_SOURCES = projinfo.cpp
@@ -96,8 +96,11 @@ libproj_la_SOURCES = \
 	proj_4D_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
 	PJ_vgridshift.c PJ_hgridshift.c PJ_unitconvert.c PJ_molodensky.c \
 	PJ_deformation.c pj_internal.c PJ_axisswap.c PJ_affine.c \
+	pj_wkt_parser.hpp pj_wkt_parser.cpp \
 	pj_wkt1_parser.h pj_wkt1_parser.cpp \
-	pj_wkt1_generated_parser.h pj_wkt1_generated_parser.c
+	pj_wkt1_generated_parser.h pj_wkt1_generated_parser.c \
+	pj_wkt2_parser.h pj_wkt2_parser.cpp \
+	pj_wkt2_generated_parser.h pj_wkt2_generated_parser.c
 
 
 # The sed hack is to please MSVC
@@ -105,6 +108,11 @@ wkt1_parser:
 	bison --no-lines -d  -p pj_wkt1_ -o$(top_srcdir)/src/pj_wkt1_generated_parser.c $(top_srcdir)/src/pj_wkt1_grammar.y
 	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/pj_wkt1_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"  > $(top_srcdir)/src/pj_wkt1_generated_parser.c.tmp
 	mv $(top_srcdir)/src/pj_wkt1_generated_parser.c.tmp $(top_srcdir)/src/pj_wkt1_generated_parser.c
+
+wkt2_parser:
+	bison --no-lines -d  -p pj_wkt2_ -o$(top_srcdir)/src/pj_wkt2_generated_parser.c $(top_srcdir)/src/pj_wkt2_grammar.y
+	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/pj_wkt2_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"  > $(top_srcdir)/src/pj_wkt2_generated_parser.c.tmp
+	mv $(top_srcdir)/src/pj_wkt2_generated_parser.c.tmp $(top_srcdir)/src/pj_wkt2_generated_parser.c
 
 
 install-exec-local:
