@@ -1084,8 +1084,8 @@ vertical_cs_opt_geoid_model_id_scope_extent_identifier_remark:
 
 opt_separator_cs_unit_opt_geoid_model_id_scope_extent_identifier_remark:
   | wkt_separator cs_unit opt_separator_scope_extent_identifier_remark
-  | wkt_separator cs_unit wkt_separator geoid_model_id wkt_separator cs_unit opt_separator_scope_extent_identifier_remark
-  | wkt_separator geoid_model_id wkt_separator cs_unit opt_separator_scope_extent_identifier_remark
+  | wkt_separator cs_unit wkt_separator geoid_model_id opt_separator_scope_extent_identifier_remark
+  | wkt_separator geoid_model_id opt_separator_scope_extent_identifier_remark
   | wkt_separator no_opt_separator_scope_extent_identifier_remark
 
 geoid_model_id: geoid_model_keyword left_delimiter

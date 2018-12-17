@@ -1749,6 +1749,21 @@ TEST(wkt_parse, vertcrs_VRF_WKT2) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, vertcrs_with_GEOIDMODEL) {
+    auto wkt = "VERTCRS[\"CGVD2013\","
+               "    VRF[\"Canadian Geodetic Vertical Datum of 2013\"],"
+               "    CS[vertical,1],"
+               "        AXIS[\"gravity-related height (H)\",up],"
+               "        LENGTHUNIT[\"metre\",1.0],"
+               "    GEOIDMODEL[\"CGG2013\",ID[\"EPSG\",6648]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, vertcrs_WKT1_GDAL) {
     auto wkt = "VERT_CS[\"ODN height\",\n"
                "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
