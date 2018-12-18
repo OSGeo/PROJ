@@ -31,22 +31,9 @@
 #include <math.h>
 #include <string.h>
 
+#include "proj.h"
 #include "projects.h"
 #include "geocent.h"
-
-
-/* Apply transformation to observation - in forward or inverse direction */
-/* Copied from proj.h */
-enum PJ_DIRECTION {
-    PJ_FWD   =  1,   /* Forward    */
-    PJ_IDENT =  0,   /* Do nothing */
-    PJ_INV   = -1    /* Inverse    */
-};
-typedef enum PJ_DIRECTION PJ_DIRECTION;
-
-/* Copied from proj.h FIXME */
-extern "C" int  proj_errno_reset (const PJ *P);
-
 
 static int adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
                            long point_count, int point_offset,
@@ -209,11 +196,11 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
             XYZ projected_loc;
             LPZ geodetic_loc;
 
-            geodetic_loc.u = x[dist*i];
-            geodetic_loc.v = y[dist*i];
-            geodetic_loc.w = z[dist*i];
+            geodetic_loc.lam = x[dist*i];
+            geodetic_loc.phi = y[dist*i];
+            geodetic_loc.z = z[dist*i];
 
-            if (geodetic_loc.u == HUGE_VAL)
+            if (geodetic_loc.lam == HUGE_VAL)
                 continue;
 
             proj_errno_reset( P );
@@ -230,15 +217,15 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
                 }
                 else
                 {
-                    projected_loc.u = HUGE_VAL;
-                    projected_loc.v = HUGE_VAL;
-                    projected_loc.w = HUGE_VAL;
+                    projected_loc.x = HUGE_VAL;
+                    projected_loc.y = HUGE_VAL;
+                    projected_loc.z = HUGE_VAL;
                 }
             }
 
-            x[dist*i] = projected_loc.u;
-            y[dist*i] = projected_loc.v;
-            z[dist*i] = projected_loc.w;
+            x[dist*i] = projected_loc.x;
+            y[dist*i] = projected_loc.y;
+            z[dist*i] = projected_loc.z;
         }
         return 0;
     }
@@ -248,10 +235,10 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
         XY         projected_loc;
         LP	       geodetic_loc;
 
-        geodetic_loc.u = x[dist*i];
-        geodetic_loc.v = y[dist*i];
+        geodetic_loc.lam = x[dist*i];
+        geodetic_loc.phi = y[dist*i];
 
-        if( geodetic_loc.u == HUGE_VAL )
+        if( geodetic_loc.lam == HUGE_VAL )
             continue;
 
         proj_errno_reset( P );
@@ -268,13 +255,13 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
             }
             else
             {
-                projected_loc.u = HUGE_VAL;
-                projected_loc.v = HUGE_VAL;
+                projected_loc.x = HUGE_VAL;
+                projected_loc.y = HUGE_VAL;
             }
         }
 
-        x[dist*i] = projected_loc.u;
-        y[dist*i] = projected_loc.v;
+        x[dist*i] = projected_loc.x;
+        y[dist*i] = projected_loc.y;
     }
     return 0;
 }
@@ -317,13 +304,13 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
         for (i=0; i < n; i++)
         {
             XYZ projected_loc;
-            XYZ geodetic_loc;
+            LPZ geodetic_loc;
 
-            projected_loc.u = x[dist*i];
-            projected_loc.v = y[dist*i];
-            projected_loc.w = z[dist*i];
+            projected_loc.x = x[dist*i];
+            projected_loc.y = y[dist*i];
+            projected_loc.z = z[dist*i];
 
-            if (projected_loc.u == HUGE_VAL)
+            if (projected_loc.x == HUGE_VAL)
                 continue;
 
             proj_errno_reset( P );
@@ -340,15 +327,15 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
                 }
                 else
                 {
-                    geodetic_loc.u = HUGE_VAL;
-                    geodetic_loc.v = HUGE_VAL;
-                    geodetic_loc.w = HUGE_VAL;
+                    geodetic_loc.lam = HUGE_VAL;
+                    geodetic_loc.phi = HUGE_VAL;
+                    geodetic_loc.z = HUGE_VAL;
                 }
             }
 
-            x[dist*i] = geodetic_loc.u;
-            y[dist*i] = geodetic_loc.v;
-            z[dist*i] = geodetic_loc.w;
+            x[dist*i] = geodetic_loc.lam;
+            y[dist*i] = geodetic_loc.phi;
+            z[dist*i] = geodetic_loc.z;
 
         }
         return 0;
@@ -359,10 +346,10 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
         XY         projected_loc;
         LP	       geodetic_loc;
 
-        projected_loc.u = x[dist*i];
-        projected_loc.v = y[dist*i];
+        projected_loc.x = x[dist*i];
+        projected_loc.y = y[dist*i];
 
-        if( projected_loc.u == HUGE_VAL )
+        if( projected_loc.x == HUGE_VAL )
             continue;
 
         proj_errno_reset( P );
@@ -379,13 +366,13 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
             }
             else
             {
-                geodetic_loc.u = HUGE_VAL;
-                geodetic_loc.v = HUGE_VAL;
+                geodetic_loc.lam = HUGE_VAL;
+                geodetic_loc.phi = HUGE_VAL;
             }
         }
 
-        x[dist*i] = geodetic_loc.u;
-        y[dist*i] = geodetic_loc.v;
+        x[dist*i] = geodetic_loc.lam;
+        y[dist*i] = geodetic_loc.phi;
     }
     return 0;
 }
