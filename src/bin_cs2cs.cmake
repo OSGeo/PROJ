@@ -1,6 +1,6 @@
 set(CS2CS_SRC cs2cs.cpp
-              gen_cheb.c 
-              p_series.c)
+              gen_cheb.cpp 
+              p_series.cpp)
 
 source_group("Source Files\\Bin" FILES ${CS2CS_SRC})
 

@@ -1,6 +1,6 @@
-set(PROJ_SRC proj.c 
-             gen_cheb.c 
-             p_series.c)
+set(PROJ_SRC proj.cpp 
+             gen_cheb.cpp 
+             p_series.cpp)
 
 source_group("Source Files\\Bin" FILES ${PROJ_SRC})
 

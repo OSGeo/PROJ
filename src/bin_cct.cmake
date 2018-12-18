@@ -1,4 +1,4 @@
-set(CCT_SRC cct.c proj_strtod.c proj_strtod.h)
+set(CCT_SRC cct.cpp proj_strtod.cpp proj_strtod.h)
 set(CCT_INCLUDE optargpm.h)
 
 source_group("Source Files\\Bin" FILES ${CCT_SRC})

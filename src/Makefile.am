@@ -15,20 +15,20 @@ include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesi
 
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake bin_projinfo.cmake \
-	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c \
+	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.cpp \
 	pj_wkt1_grammar.y pj_wkt2_grammar.y
 
-proj_SOURCES = proj.c gen_cheb.c p_series.c
+proj_SOURCES = proj.cpp gen_cheb.cpp p_series.cpp
 projinfo_SOURCES = projinfo.cpp
-cs2cs_SOURCES = cs2cs.cpp gen_cheb.c p_series.c
-cct_SOURCES = cct.c proj_strtod.c proj_strtod.h optargpm.h
-nad2bin_SOURCES = nad2bin.c
-geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
+cs2cs_SOURCES = cs2cs.cpp gen_cheb.cpp p_series.cpp
+cct_SOURCES = cct.cpp proj_strtod.cpp proj_strtod.h optargpm.h
+nad2bin_SOURCES = nad2bin.cpp
+geod_SOURCES = geod.cpp geod_set.cpp geod_interface.cpp geod_interface.h
 
-gie_SOURCES = gie.c proj_strtod.c proj_strtod.h optargpm.h
-multistresstest_SOURCES = multistresstest.c
-test228_SOURCES = test228.c
-geodtest_SOURCES = geodtest.c
+gie_SOURCES = gie.cpp proj_strtod.cpp proj_strtod.h optargpm.h
+multistresstest_SOURCES = multistresstest.cpp
+test228_SOURCES = test228.cpp
+geodtest_SOURCES = geodtest.cpp
 
 cct_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
@@ -51,51 +51,51 @@ libproj_la_SOURCES = \
 	pj_list.h proj_internal.h proj_math.h projects.h\
 	static.cpp util.cpp metadata.cpp common.cpp crs.cpp datum.cpp coordinatesystem.cpp coordinateoperation.cpp io.cpp \
 	internal.cpp factory.cpp c_api.cpp \
-	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
-	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
-	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c PJ_ccon.c\
-	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_poly.c \
-	PJ_rpoly.c PJ_sconics.c proj_rouss.c \
-	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c PJ_gall.c PJ_geoc.c \
-	PJ_labrd.c PJ_lsat.c PJ_misrsom.c PJ_merc.c \
-	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c \
-	PJ_tcc.c PJ_tcea.c PJ_times.c PJ_tmerc.c PJ_tobmerc.c \
-	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c \
-	PJ_bertin1953.c PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c \
-	PJ_lask.c PJ_latlong.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
-	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c \
-	PJ_wag7.c PJ_lcca.c PJ_geos.c proj_etmerc.c \
-	PJ_boggs.c PJ_collg.c PJ_comill.c PJ_crast.c PJ_denoy.c \
-	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c \
-	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c PJ_gstmerc.c \
-	PJ_gn_sinu.c PJ_goode.c PJ_igh.c PJ_hatano.c PJ_loxim.c \
-	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c \
-	PJ_nell.c PJ_nell_h.c PJ_patterson.c PJ_putp2.c PJ_putp3.c \
-	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_qsc.c PJ_robin.c \
-	PJ_sch.c PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
-	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_geocent.c \
-	aasincos.c adjlon.c bch2bps.c bchgen.c \
-	biveval.c dmstor.c mk_cheby.c pj_auth.c \
-	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c \
-	pj_factors.c pj_fwd.c pj_init.c pj_inv.c \
-	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c proj_mdist.c \
-	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
-	pj_qsfn.c pj_strerrno.c \
-	pj_tsfn.c pj_units.c pj_ctx.c pj_log.c pj_zpoly1.c rtodms.c \
-	vector1.c pj_release.c pj_gauss.c \
-	PJ_healpix.c PJ_natearth.c PJ_natearth2.c PJ_calcofi.c pj_fileapi.c \
-	PJ_eqearth.c \
+	PJ_aeqd.cpp PJ_gnom.cpp PJ_laea.cpp PJ_mod_ster.cpp \
+	PJ_nsper.cpp PJ_nzmg.cpp PJ_ortho.cpp PJ_stere.cpp PJ_sterea.cpp \
+	PJ_aea.cpp PJ_bipc.cpp PJ_bonne.cpp PJ_eqdc.cpp PJ_isea.cpp PJ_ccon.cpp \
+	PJ_imw_p.cpp PJ_krovak.cpp PJ_lcc.cpp PJ_poly.cpp \
+	PJ_rpoly.cpp PJ_sconics.cpp proj_rouss.cpp \
+	PJ_cass.cpp PJ_cc.cpp PJ_cea.cpp PJ_eqc.cpp PJ_gall.cpp PJ_geoc.cpp \
+	PJ_labrd.cpp PJ_lsat.cpp PJ_misrsom.cpp PJ_merc.cpp \
+	PJ_mill.cpp PJ_ocea.cpp PJ_omerc.cpp PJ_somerc.cpp \
+	PJ_tcc.cpp PJ_tcea.cpp PJ_times.cpp PJ_tmerc.cpp PJ_tobmerc.cpp \
+	PJ_airy.cpp PJ_aitoff.cpp PJ_august.cpp PJ_bacon.cpp \
+	PJ_bertin1953.cpp PJ_chamb.cpp PJ_hammer.cpp PJ_lagrng.cpp PJ_larr.cpp \
+	PJ_lask.cpp PJ_latlong.cpp PJ_nocol.cpp PJ_ob_tran.cpp PJ_oea.cpp \
+	PJ_tpeqd.cpp PJ_vandg.cpp PJ_vandg2.cpp PJ_vandg4.cpp \
+	PJ_wag7.cpp PJ_lcca.cpp PJ_geos.cpp proj_etmerc.cpp \
+	PJ_boggs.cpp PJ_collg.cpp PJ_comill.cpp PJ_crast.cpp PJ_denoy.cpp \
+	PJ_eck1.cpp PJ_eck2.cpp PJ_eck3.cpp PJ_eck4.cpp \
+	PJ_eck5.cpp PJ_fahey.cpp PJ_fouc_s.cpp PJ_gins8.cpp PJ_gstmerc.cpp \
+	PJ_gn_sinu.cpp PJ_goode.cpp PJ_igh.cpp PJ_hatano.cpp PJ_loxim.cpp \
+	PJ_mbt_fps.cpp PJ_mbtfpp.cpp PJ_mbtfpq.cpp PJ_moll.cpp \
+	PJ_nell.cpp PJ_nell_h.cpp PJ_patterson.cpp PJ_putp2.cpp PJ_putp3.cpp \
+	PJ_putp4p.cpp PJ_putp5.cpp PJ_putp6.cpp PJ_qsc.cpp PJ_robin.cpp \
+	PJ_sch.cpp PJ_sts.cpp PJ_urm5.cpp PJ_urmfps.cpp PJ_wag2.cpp \
+	PJ_wag3.cpp PJ_wink1.cpp PJ_wink2.cpp pj_geocent.cpp \
+	aasincos.cpp adjlon.cpp bch2bps.cpp bchgen.cpp \
+	biveval.cpp dmstor.cpp mk_cheby.cpp pj_auth.cpp \
+	pj_deriv.cpp pj_ell_set.cpp pj_ellps.cpp pj_errno.cpp \
+	pj_factors.cpp pj_fwd.cpp pj_init.cpp pj_inv.cpp \
+	pj_list.cpp pj_malloc.cpp pj_mlfn.cpp pj_msfn.cpp proj_mdist.cpp \
+	pj_open_lib.cpp pj_param.cpp pj_phi2.cpp pj_pr_list.cpp \
+	pj_qsfn.cpp pj_strerrno.cpp \
+	pj_tsfn.cpp pj_units.cpp pj_ctx.cpp pj_log.cpp pj_zpoly1.cpp rtodms.cpp \
+	vector1.cpp pj_release.cpp pj_gauss.cpp \
+	PJ_healpix.cpp PJ_natearth.cpp PJ_natearth2.cpp PJ_calcofi.cpp pj_fileapi.cpp \
+	PJ_eqearth.cpp \
 	\
-	pj_gc_reader.c pj_gridcatalog.c \
-	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
-	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
-	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
-	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
-	pj_strtod.c pj_math.c\
+	pj_gc_reader.cpp pj_gridcatalog.cpp \
+	nad_cvt.cpp nad_init.cpp nad_intr.cpp emess.cpp emess.h \
+	pj_apply_gridshift.cpp pj_datums.cpp pj_datum_set.cpp pj_transform.cpp \
+	geocent.cpp geocent.h pj_utils.cpp pj_gridinfo.cpp pj_gridlist.cpp \
+	jniproj.cpp pj_mutex.cpp pj_initcache.cpp pj_apply_vgridshift.cpp geodesic.cpp \
+	pj_strtod.cpp pj_math.cpp \
 	\
-	proj_4D_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
-	PJ_vgridshift.c PJ_hgridshift.c PJ_unitconvert.c PJ_molodensky.c \
-	PJ_deformation.c pj_internal.c PJ_axisswap.c PJ_affine.c \
+	proj_4D_api.cpp PJ_cart.cpp PJ_pipeline.cpp PJ_horner.cpp PJ_helmert.cpp \
+	PJ_vgridshift.cpp PJ_hgridshift.cpp PJ_unitconvert.cpp PJ_molodensky.cpp \
+	PJ_deformation.cpp pj_internal.cpp PJ_axisswap.cpp PJ_affine.cpp \
 	pj_wkt_parser.hpp pj_wkt_parser.cpp \
 	pj_wkt1_parser.h pj_wkt1_parser.cpp \
 	pj_wkt1_generated_parser.h pj_wkt1_generated_parser.c \

@@ -197,7 +197,6 @@ struct PJconsts;
 
 union  PJ_COORD;
 struct geod_geodesic;
-struct pj_opaque;
 struct ARG_list;
 struct PJ_REGION_S;
 typedef struct PJ_REGION_S  PJ_Region;
@@ -260,7 +259,7 @@ PJ_OPERATOR:
 
 *****************************************************************************/
 typedef    PJ       *(* PJ_CONSTRUCTOR) (PJ *);
-typedef    void     *(* PJ_DESTRUCTOR)  (PJ *, int);
+typedef    PJ       *(* PJ_DESTRUCTOR)  (PJ *, int);
 typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
 /****************************************************************************/
 
@@ -290,7 +289,7 @@ struct PJconsts {
     char *def_ellps;
 
     struct geod_geodesic *geod;    /* For geodesic computations */
-    struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
+    void *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
     int inverted;                  /* Tell high level API functions to swap inv/fwd */
 
 
@@ -828,7 +827,7 @@ extern char const PROJ_DLL pj_release[];
 
 struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
 
-void *pj_default_destructor (PJ *P, int errlev);
+PJ *pj_default_destructor (PJ *P, int errlev);
 
 double PROJ_DLL pj_atof( const char* nptr );
 double pj_strtod( const char *nptr, char **endptr );

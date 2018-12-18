@@ -1,4 +1,4 @@
-set(GIE_SRC gie.c proj_strtod.c proj_strtod.h)
+set(GIE_SRC gie.cpp proj_strtod.cpp proj_strtod.h)
 set(GIE_INCLUDE optargpm.h)
 
 source_group("Source Files\\Bin" FILES ${GIE_SRC})
