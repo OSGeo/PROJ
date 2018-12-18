@@ -41,3 +41,9 @@ Visual Basic
 
 `PROJ VB Wrappers <http://ftp.dfg.ca.gov/Public/BDB/Tools/proj4/proj_api.zip>`_:
 By Eric G. Miller.
+
+Fortran
+=======
+
+`Fortran-Proj <https://gitlab.com/likeno/fortran-proj>`_:
+Bindings for PROJ in Fortran (By João Macedo @likeno)
