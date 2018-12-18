@@ -34,13 +34,16 @@
 PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv\n\tno_cut lat_b=";
 
 
+namespace { // anonymous namespace
 enum Mode {
     N_POLE = 0,
     S_POLE = 1,
     EQUIT  = 2,
     OBLIQ  = 3
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  p_halfpi;
     double  sinph0;
@@ -49,6 +52,7 @@ struct pj_opaque {
     enum Mode mode;
     int     no_cut; /* do not cut at hemisphere limit */
 };
+} // anonymous namespace
 
 
 # define EPS 1.e-10

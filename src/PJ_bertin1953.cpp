@@ -21,9 +21,11 @@
 PROJ_HEAD(bertin1953, "Bertin 1953")
     "\n\tMisc Sph no inv.";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double cos_delta_phi, sin_delta_phi, cos_delta_gamma, sin_delta_gamma, deltaLambda;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {

@@ -5,9 +5,11 @@
 
 #include "projects.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  A, B;
 };
+} // anonymous namespace
 
 PROJ_HEAD(putp5, "Putnins P5") "\n\tPCyl, Sph";
 PROJ_HEAD(putp5p, "Putnins P5'") "\n\tPCyl, Sph";

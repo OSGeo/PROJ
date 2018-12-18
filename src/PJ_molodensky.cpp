@@ -56,6 +56,7 @@ PROJ_HEAD(molodensky, "Molodensky transform");
 static XYZ forward_3d(LPZ lpz, PJ *P);
 static LPZ reverse_3d(XYZ xyz, PJ *P);
 
+namespace { // anonymous namespace
 struct pj_opaque_molodensky {
     double dx;
     double dy;
@@ -64,6 +65,7 @@ struct pj_opaque_molodensky {
     double df;
     int    abridged;
 };
+} // anonymous namespace
 
 
 static double RN (double a, double es, double phi) {

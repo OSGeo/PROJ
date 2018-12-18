@@ -5,6 +5,7 @@
 #include "proj_math.h"
 
 
+namespace { // anonymous namespace
 enum Type {
     EULER  = 0,
     MURD1  = 1,
@@ -14,7 +15,9 @@ enum Type {
     TISSOT = 5,
     VITK1  = 6
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  n;
     double  rho_c;
@@ -23,6 +26,7 @@ struct pj_opaque {
     double  c1, c2;
     enum Type type;
 };
+} // anonymous namespace
 
 
 #define EPS10   1.e-10

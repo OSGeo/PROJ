@@ -109,12 +109,14 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 PROJ_HEAD(pipeline,         "Transformation pipeline manager");
 
 /* Projection specific elements for the PJ object */
+namespace { // anonymous namespace
 struct pj_opaque {
     int steps;
     char **argv;
     char **current_argv;
     PJ **pipeline;
 };
+} // anonymous namespace
 
 
 

@@ -32,10 +32,12 @@ static const double d180 = 180 * DEG_TO_RAD;
 
 static const double EPSLN = 1.e-10; /* allow a little 'slack' on zone edge positions */
 
+namespace { // anonymous namespace
 struct pj_opaque {
     struct PJconsts* pj[12]; \
     double dy0;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

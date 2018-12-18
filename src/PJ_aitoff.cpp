@@ -37,15 +37,19 @@
 #include "projects.h"
 
 
+namespace { // anonymous namespace
 enum Mode {
     AITOFF = 0,
     WINKEL_TRIPEL = 1
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  cosphi1;
     enum Mode mode;
 };
+} // anonymous namespace
 
 
 PROJ_HEAD(aitoff, "Aitoff") "\n\tMisc Sph";

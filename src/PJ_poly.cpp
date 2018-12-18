@@ -9,10 +9,12 @@
 PROJ_HEAD(poly, "Polyconic (American)")
     "\n\tConic, Sph&Ell";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double ml0; \
     double *en;
 };
+} // anonymous namespace
 
 #define TOL 1e-10
 #define CONV    1e-10

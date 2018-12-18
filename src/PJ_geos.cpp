@@ -36,6 +36,7 @@
 #include "projects.h"
 #include "proj_math.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double h;
     double radius_p;
@@ -46,6 +47,7 @@ struct pj_opaque {
     double C;
     int flip_axis;
 };
+} // anonymous namespace
 
 PROJ_HEAD(geos, "Geostationary Satellite View") "\n\tAzi, Sph&Ell\n\th=";
 

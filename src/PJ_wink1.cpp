@@ -7,9 +7,11 @@
 
 PROJ_HEAD(wink1, "Winkel I") "\n\tPCyl, Sph\n\tlat_ts=";
 
+namespace { // anonymous namespace
 struct pj_opaque {
 	double	cosphi1;
 };
+} // anonymous namespace
 
 
 

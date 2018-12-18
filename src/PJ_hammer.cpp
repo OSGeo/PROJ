@@ -11,10 +11,12 @@ PROJ_HEAD(hammer, "Hammer & Eckert-Greifendorff")
 
 #define EPS 1.0e-10
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double w;
     double m, rm;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

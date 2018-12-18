@@ -12,9 +12,11 @@ PROJ_HEAD(wag5, "Wagner V") "\n\tPCyl, Sph";
 #define MAX_ITER    10
 #define LOOP_TOL    1e-7
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  C_x, C_y, C_p;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

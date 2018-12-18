@@ -10,11 +10,13 @@ PROJ_HEAD(loxim, "Loximuthal") "\n\tPCyl Sph";
 
 #define EPS 1e-8
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double phi1;
     double cosphi1;
     double tanphi1;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

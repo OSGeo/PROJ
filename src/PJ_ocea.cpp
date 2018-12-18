@@ -8,6 +8,7 @@
 PROJ_HEAD(ocea, "Oblique Cylindrical Equal Area") "\n\tCyl, Sph"
     "lonc= alpha= or\n\tlat_1= lat_2= lon_1= lon_2=";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  rok;
     double  rtk;
@@ -16,6 +17,7 @@ struct pj_opaque {
     double  singam;
     double  cosgam;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

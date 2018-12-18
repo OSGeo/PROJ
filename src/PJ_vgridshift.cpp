@@ -10,11 +10,13 @@
 
 PROJ_HEAD(vgridshift, "Vertical grid shift");
 
+namespace { // anonymous namespace
 struct pj_opaque_vgridshift {
     double t_final;
     double t_epoch;
     double forward_multiplier;
 };
+} // anonymous namespace
 
 static XYZ forward_3d(LPZ lpz, PJ *P) {
     struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;

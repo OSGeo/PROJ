@@ -92,13 +92,7 @@ PROJ_HEAD(horner, "Horner polynomial evaluation");
 #define horner_dealloc(x) pj_dealloc(x)
 #define horner_calloc(n,x) pj_calloc(n,x)
 
-
-struct horner;
-typedef struct horner HORNER;
-static UV      horner (const HORNER *transformation, PJ_DIRECTION direction, UV position);
-static HORNER *horner_alloc (size_t order, int complex_polynomia);
-static void    horner_free (HORNER *h);
-
+namespace { // anonymous namespace
 struct horner {
     int    uneg;     /* u axis negated? */
     int    vneg;     /* v axis negated? */
@@ -118,6 +112,12 @@ struct horner {
     UV *fwd_origin;  /* False longitude/latitude */
     UV *inv_origin;  /* False easting/northing   */
 };
+} // anonymous namespace
+
+typedef struct horner HORNER;
+static UV      horner_func (const HORNER *transformation, PJ_DIRECTION direction, UV position);
+static HORNER *horner_alloc (size_t order, int complex_polynomia);
+static void    horner_free (HORNER *h);
 
 /* e.g. degree = 2: a + bx + cy + dxx + eyy + fxy, i.e. 6 coefficients */
 #define horner_number_of_coefficients(order) \
@@ -181,7 +181,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
 
 /**********************************************************************/
-static UV horner (const HORNER *transformation, PJ_DIRECTION direction, UV position) {
+static UV horner_func (const HORNER *transformation, PJ_DIRECTION direction, UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -297,12 +297,12 @@ summing the tiny high order elements first.
 
 
 static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
-    point.uv = horner ((HORNER *) P->opaque, PJ_FWD, point.uv);
+    point.uv = horner_func ((HORNER *) P->opaque, PJ_FWD, point.uv);
     return point;
 }
 
 static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
-    point.uv = horner ((HORNER *) P->opaque, PJ_INV, point.uv);
+    point.uv = horner_func ((HORNER *) P->opaque, PJ_INV, point.uv);
     return point;
 }
 

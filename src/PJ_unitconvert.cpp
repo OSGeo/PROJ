@@ -78,19 +78,23 @@ PROJ_HEAD(unitconvert, "Unit conversion");
 
 typedef double (*tconvert)(double);
 
+namespace { // anonymous namespace
 struct TIME_UNITS {
     char        *id;        /* units keyword */
     tconvert     t_in;      /* unit -> mod. julian date function pointer */
     tconvert     t_out;     /* mod. julian date > unit function pointer */
     char        *name;      /* comments */
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque_unitconvert {
     int     t_in_id;        /* time unit id for the time input unit   */
     int     t_out_id;       /* time unit id for the time output unit  */
     double  xy_factor;      /* unit conversion factor for horizontal components */
     double  z_factor;       /* unit conversion factor for vertical components */
 };
+} // anonymous namespace
 
 
 /***********************************************************************/

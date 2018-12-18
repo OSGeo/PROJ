@@ -2,9 +2,11 @@
 #include <errno.h>
 #include "projects.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  A;
 };
+} // anonymous namespace
 
 PROJ_HEAD(putp3, "Putnins P3") "\n\tPCyl, Sph";
 PROJ_HEAD(putp3p, "Putnins P3'") "\n\tPCyl, Sph";

@@ -11,10 +11,12 @@ PROJ_HEAD(fouc,    "Foucaut")             "\n\tPCyl, Sph";
 PROJ_HEAD(mbt_s,   "McBryde-Thomas Flat-Polar Sine (No. 1)") "\n\tPCyl, Sph";
 
 
+namespace { // anonymous namespace
 struct pj_opaque {
 	double C_x, C_y, C_p;
 	int tan_mode;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

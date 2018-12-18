@@ -9,9 +9,11 @@
 PROJ_HEAD(urmfps, "Urmaev Flat-Polar Sinusoidal") "\n\tPCyl, Sph\n\tn=";
 PROJ_HEAD(wag1, "Wagner I (Kavraisky VI)") "\n\tPCyl, Sph";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  n, C_y;
 };
+} // anonymous namespace
 
 #define C_x 0.8773826753
 #define Cy 1.139753528477

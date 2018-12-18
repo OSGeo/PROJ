@@ -8,10 +8,12 @@
 PROJ_HEAD(tpeqd, "Two Point Equidistant")
     "\n\tMisc Sph\n\tlat_1= lon_1= lat_2= lon_2=";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double cp1, sp1, cp2, sp2, ccs, cs, sc, r2z0, z02, dlam2;
     double hz0, thz0, rhshz0, ca, sa, lp, lamc;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

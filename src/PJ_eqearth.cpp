@@ -31,11 +31,13 @@ PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl, Sph&Ell";
 #define EPS 1e-11
 #define MAX_ITER 12
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  qp;
     double  rqda;
     double *apa;
 };
+} // anonymous namespace
 
 static XY e_forward (LP lp, PJ *P) {           /* Ellipsoidal/spheroidal, forward */
     XY xy = {0.0,0.0};

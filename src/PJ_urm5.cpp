@@ -8,9 +8,11 @@
 
 PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl, Sph, no inv\n\tn= q= alpha=";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double m, rmn, q3, n;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

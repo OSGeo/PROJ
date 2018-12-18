@@ -7,7 +7,11 @@
 
 PROJ_HEAD(wink2, "Winkel II") "\n\tPCyl, Sph, no inv\n\tlat_1=";
 
-struct pj_opaque { double	cosphi1; };
+namespace { // anonymous namespace
+struct pj_opaque {
+    double	cosphi1;
+};
+} // anonymous namespace
 
 #define MAX_ITER    10
 #define LOOP_TOL    1e-7

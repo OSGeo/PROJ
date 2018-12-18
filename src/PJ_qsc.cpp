@@ -46,6 +46,7 @@
 #include "projects.h"
 
 /* The six cube faces. */
+namespace { // anonymous namespace
 enum Face {
     FACE_FRONT  = 0,
     FACE_RIGHT  = 1,
@@ -54,7 +55,9 @@ enum Face {
     FACE_TOP    = 4,
     FACE_BOTTOM = 5
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque {
         enum Face face;
         double a_squared;
@@ -62,18 +65,21 @@ struct pj_opaque {
         double one_minus_f;
         double one_minus_f_squared;
 };
+} // anonymous namespace
 PROJ_HEAD(qsc, "Quadrilateralized Spherical Cube") "\n\tAzi, Sph";
 
 #define EPS10 1.e-10
 
 /* The four areas on a cube face. AREA_0 is the area of definition,
  * the other three areas are counted counterclockwise. */
+namespace { // anonymous namespace
 enum Area {
     AREA_0 = 0,
     AREA_1 = 1,
     AREA_2 = 2,
     AREA_3 = 3
 };
+} // anonymous namespace
 
 /* Helper function for forward projection: compute the theta angle
  * and determine the area number. */

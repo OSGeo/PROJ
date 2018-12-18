@@ -9,6 +9,7 @@ PROJ_HEAD(bonne, "Bonne (Werner lat_1=90)")
     "\n\tConic Sph&Ell\n\tlat_1=";
 #define EPS10   1e-10
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double phi1;
     double cphi1;
@@ -16,6 +17,7 @@ struct pj_opaque {
     double m1;
     double *en;
 };
+} // anonymous namespace
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */

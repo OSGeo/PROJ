@@ -8,9 +8,11 @@
 PROJ_HEAD(labrd, "Laborde") "\n\tCyl, Sph\n\tSpecial for Madagascar";
 #define EPS 1.e-10
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  kRg, p0s, A, C, Ca, Cb, Cc, Cd;
 };
+} // anonymous namespace
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */

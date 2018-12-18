@@ -18,9 +18,11 @@ http://article.gmane.org/gmane.comp.gis.proj-4.devel/6039
 http://trac.osgeo.org/proj/ticket/113
 */
 
+namespace { // anonymous namespace
 struct COEFS {
     float c0, c1, c2, c3;
 };
+} // anonymous namespace
 
 static const struct COEFS X[] = {
     {1.0f, 2.2199e-17f, -7.15515e-05f, 3.1103e-06f},

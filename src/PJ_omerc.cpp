@@ -33,11 +33,13 @@ PROJ_HEAD(omerc, "Oblique Mercator")
     "\n\tCyl, Sph&Ell no_rot\n\t"
     "alpha= [gamma=] [no_off] lonc= or\n\t lon_1= lat_1= lon_2= lat_2=";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  A, B, E, AB, ArB, BrA, rB, singam, cosgam, sinrot, cosrot;
     double  v_pole_n, v_pole_s, u_0;
     int no_rot;
 };
+} // anonymous namespace
 
 #define TOL 1.e-7
 #define EPS 1.e-10

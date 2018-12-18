@@ -7,6 +7,7 @@
 #include "projects.h"
 #include "proj_math.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double phi1;
     double phi2;
@@ -17,6 +18,7 @@ struct pj_opaque {
     double *en;
     int     ellips;
 };
+} // anonymous namespace
 
 PROJ_HEAD(eqdc, "Equidistant Conic")
     "\n\tConic, Sph&Ell\n\tlat_1= lat_2=";

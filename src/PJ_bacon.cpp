@@ -7,10 +7,12 @@
 #include "projects.h"
 
 
+namespace { // anonymous namespace
 struct pj_opaque {
 	int bacn;
 	int ortl;
 };
+} // anonymous namespace
 
 PROJ_HEAD(apian, "Apian Globular I") "\n\tMisc Sph, no inv";
 PROJ_HEAD(ortel, "Ortelius Oval") "\n\tMisc Sph, no inv";

@@ -5,12 +5,14 @@
 
 #include "projects.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  phi1;
     double  fxa;
     double  fxb;
     int     mode;
 };
+} // anonymous namespace
 
 PROJ_HEAD(rpoly, "Rectangular Polyconic")
     "\n\tConic, Sph, no inv\n\tlat_ts=";

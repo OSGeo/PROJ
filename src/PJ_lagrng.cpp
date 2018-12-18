@@ -9,6 +9,7 @@ PROJ_HEAD(lagrng, "Lagrange") "\n\tMisc Sph\n\tW=";
 
 #define TOL 1e-10
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  a1;
     double  a2;
@@ -17,6 +18,7 @@ struct pj_opaque {
     double  rw;
     double  w;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

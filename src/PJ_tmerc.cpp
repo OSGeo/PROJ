@@ -9,11 +9,13 @@
 PROJ_HEAD(tmerc, "Transverse Mercator") "\n\tCyl, Sph&Ell";
 
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  esp;
     double  ml0;
     double  *en;
 };
+} // anonymous namespace
 
 #define EPS10   1.e-10
 #define FC1 1.

@@ -7,11 +7,13 @@
 #include "proj.h"
 #include "projects.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     struct PJconsts *link;
     double  lamp;
     double  cphip, sphip;
 };
+} // anonymous namespace
 
 PROJ_HEAD(ob_tran, "General Oblique Transformation") "\n\tMisc Sph"
 "\n\to_proj= plus parameters for projection"

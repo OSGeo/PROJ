@@ -63,11 +63,13 @@ PROJ_HEAD(deformation, "Kinematic grid shift");
 #define TOL 1e-8
 #define MAX_ITERATIONS 10
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double t_obs;
     double t_epoch;
     PJ *cart;
 };
+} // anonymous namespace
 
 /********************************************************************************/
 static XYZ get_grid_shift(PJ* P, XYZ cartesian) {

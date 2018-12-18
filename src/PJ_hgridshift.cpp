@@ -10,10 +10,12 @@
 
 PROJ_HEAD(hgridshift, "Horizontal grid shift");
 
+namespace { // anonymous namespace
 struct pj_opaque_hgridshift {
     double t_final;
     double t_epoch;
 };
+} // anonymous namespace
 
 static XYZ forward_3d(LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};

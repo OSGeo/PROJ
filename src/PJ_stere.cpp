@@ -8,13 +8,16 @@ PROJ_HEAD(stere, "Stereographic") "\n\tAzi, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(ups, "Universal Polar Stereographic") "\n\tAzi, Sph&Ell\n\tsouth";
 
 
+namespace { // anonymous namespace
 enum Mode {
     S_POLE = 0,
     N_POLE = 1,
     OBLIQ  = 2,
     EQUIT  = 3
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double phits;
     double sinX1;
@@ -22,6 +25,7 @@ struct pj_opaque {
     double akm1;
     enum Mode mode;
 };
+} // anonymous namespace
 
 #define sinph0  static_cast<struct pj_opaque*>(P->opaque)->sinX1
 #define cosph0  static_cast<struct pj_opaque*>(P->opaque)->cosX1

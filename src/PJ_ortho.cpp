@@ -7,18 +7,22 @@
 
 PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph";
 
+namespace { // anonymous namespace
 enum Mode {
     N_POLE = 0,
     S_POLE = 1,
     EQUIT  = 2,
     OBLIQ  = 3
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  sinph0;
     double  cosph0;
     enum Mode mode;
 };
+} // anonymous namespace
 
 #define EPS10 1.e-10
 

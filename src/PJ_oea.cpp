@@ -6,12 +6,14 @@
 
 PROJ_HEAD(oea, "Oblated Equal Area") "\n\tMisc Sph\n\tn= m= theta=";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  theta;
     double  m, n;
     double  two_r_m, two_r_n, rm, rn, hm, hn;
     double  cp0, sp0;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

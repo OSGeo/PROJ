@@ -12,18 +12,22 @@ PROJ_HEAD(imw_p, "International Map of the World Polyconic")
 #define TOL 1e-10
 #define EPS 1e-10
 
+namespace { // anonymous namespace
 enum Mode {
     NONE_IS_ZERO  =  0, /* phi_1 and phi_2 != 0 */
     PHI_1_IS_ZERO =  1, /* phi_1 = 0 */
     PHI_2_IS_ZERO = -1  /* phi_2 = 0 */
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  P, Pp, Q, Qp, R_1, R_2, sphi_1, sphi_2, C2;
     double  phi_1, phi_2, lam_1;
     double  *en;
     enum Mode mode;
 };
+} // anonymous namespace
 
 
 static int phi12(PJ *P, double *del, double *sig) {

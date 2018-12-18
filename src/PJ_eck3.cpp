@@ -10,9 +10,11 @@ PROJ_HEAD(putp1, "Putnins P1") "\n\tPCyl, Sph";
 PROJ_HEAD(wag6, "Wagner VI") "\n\tPCyl, Sph";
 PROJ_HEAD(kav7, "Kavraisky VII") "\n\tPCyl, Sph";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double C_x, C_y, A, B;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

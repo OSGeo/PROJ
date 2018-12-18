@@ -5,9 +5,11 @@
 
 #include "projects.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     int vdg3;
 };
+} // anonymous namespace
 
 PROJ_HEAD(vandg2, "van der Grinten II") "\n\tMisc Sph, no inv";
 PROJ_HEAD(vandg3, "van der Grinten III") "\n\tMisc Sph, no inv";

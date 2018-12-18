@@ -31,6 +31,7 @@
 #include "proj.h"
 #include "projects.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double s0;
     double A1, A2, A3, A4, A5, A6;
@@ -39,6 +40,7 @@ struct pj_opaque {
     double D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11;
     void *en;
 };
+} // anonymous namespace
 PROJ_HEAD(rouss, "Roussilhe Stereographic") "\n\tAzi, Ell";
 
 

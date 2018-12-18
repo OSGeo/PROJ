@@ -32,12 +32,14 @@
 
 #define MAX_ITER 20
 
+namespace { // anonymous namespace
 struct GAUSS {
     double C;
     double K;
     double e;
     double ratexp;
 };
+} // anonymous namespace
 #define DEL_TOL 1e-14
 
 static double srat(double esinp, double ratexp) {

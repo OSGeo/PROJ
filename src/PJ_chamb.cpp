@@ -7,6 +7,7 @@
 #include "projects.h"
 
 typedef struct { double r, Az; } VECT;
+namespace { // anonymous namespace
 struct pj_opaque {
     struct { /* control point data */
         double phi, lam;
@@ -18,6 +19,7 @@ struct pj_opaque {
     XY p;
     double beta_0, beta_1, beta_2;
 };
+} // anonymous namespace
 
 PROJ_HEAD(chamb, "Chamberlin Trimetric") "\n\tMisc Sph, no inv"
 "\n\tlat_1= lon_1= lat_2= lon_2= lat_3= lon_3=";

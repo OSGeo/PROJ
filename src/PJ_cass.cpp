@@ -15,10 +15,12 @@ PROJ_HEAD(cass, "Cassini") "\n\tCyl, Sph&Ell";
 # define C5 .06666666666666666666
 
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double *en;
     double m0;
 };
+} // anonymous namespace
 
 
 

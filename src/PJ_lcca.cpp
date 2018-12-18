@@ -59,11 +59,13 @@ PROJ_HEAD(lcca, "Lambert Conformal Conic Alternative")
 #define MAX_ITER 10
 #define DEL_TOL 1e-12
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double *en;
     double r0, l, M0;
     double C;
 };
+} // anonymous namespace
 
 
 static double fS(double S, double C) {        /* func to compute dr */

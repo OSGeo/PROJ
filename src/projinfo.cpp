@@ -56,6 +56,7 @@ using namespace NS_PROJ::internal;
 
 // ---------------------------------------------------------------------------
 
+namespace { // anonymous namespace
 struct OutputOptions {
     bool quiet = false;
     bool PROJ5 = false;
@@ -69,6 +70,7 @@ struct OutputOptions {
     bool c_ify = false;
     bool singleLine = false;
 };
+} // anonymous namespace
 
 // ---------------------------------------------------------------------------
 

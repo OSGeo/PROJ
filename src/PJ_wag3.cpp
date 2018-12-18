@@ -9,9 +9,11 @@ PROJ_HEAD(wag3, "Wagner III") "\n\tPCyl, Sph\n\tlat_ts=";
 
 #define TWOTHIRD 0.6666666666666666666667
 
+namespace { // anonymous namespace
 struct pj_opaque {
 	double	C_x;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

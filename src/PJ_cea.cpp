@@ -6,10 +6,12 @@
 #include "proj.h"
 #include "projects.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double qp;
     double *apa;
 };
+} // anonymous namespace
 
 PROJ_HEAD(cea, "Equal Area Cylindrical") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 # define EPS    1e-10

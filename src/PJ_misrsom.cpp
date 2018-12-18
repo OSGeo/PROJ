@@ -33,10 +33,12 @@ PROJ_HEAD(misrsom, "Space oblique for MISR")
 
 #define TOL 1e-7
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double a2, a4, b, c1, c3;
     double q, t, u, w, p22, sa, ca, xj, rlm, rlm2;
 };
+} // anonymous namespace
 
 static void seraz0(double lam, double mult, PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);

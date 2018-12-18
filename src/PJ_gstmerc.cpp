@@ -8,6 +8,7 @@
 PROJ_HEAD(gstmerc, "Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reunion)")
     "\n\tCyl, Sph&Ell\n\tlat_0= lon_0= k_0=";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double lamc;
     double phic;
@@ -17,6 +18,7 @@ struct pj_opaque {
     double XS;
     double YS;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

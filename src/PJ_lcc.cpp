@@ -9,6 +9,7 @@ PROJ_HEAD(lcc, "Lambert Conformal Conic")
 
 #define EPS10 1.e-10
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double phi1;
     double phi2;
@@ -16,6 +17,7 @@ struct pj_opaque {
     double rho0;
     double c;
 };
+} // anonymous namespace
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */

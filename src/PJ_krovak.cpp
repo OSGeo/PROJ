@@ -90,6 +90,7 @@ PROJ_HEAD(krovak, "Krovak") "\n\tPCyl, Ell";
 /* Not sure at all of the appropriate number for MAX_ITER... */
 #define MAX_ITER 100
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double alpha;
     double k;
@@ -98,6 +99,7 @@ struct pj_opaque {
     double ad;
     int czech;
 };
+} // anonymous namespace
 
 
 static XY e_forward (LP lp, PJ *P) {                /* Ellipsoidal, forward */

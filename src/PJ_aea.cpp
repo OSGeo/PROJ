@@ -67,6 +67,7 @@ static double phi1_(double qs, double Te, double Tone_es) {
 }
 
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double  ec;
     double  n;
@@ -80,6 +81,7 @@ struct pj_opaque {
     double  *en;
     int     ellips;
 };
+} // anonymous namespace
 
 
 static PJ *destructor (PJ *P, int errlev) {                        /* Destructor */

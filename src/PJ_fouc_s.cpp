@@ -11,9 +11,11 @@ PROJ_HEAD(fouc_s, "Foucaut Sinusoidal") "\n\tPCyl, Sph";
 #define MAX_ITER    10
 #define LOOP_TOL    1e-7
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double n, n1;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

@@ -15,10 +15,12 @@ PROJ_HEAD(mbtfps, "McBryde-Thomas Flat-Polar Sinusoidal") "\n\tPCyl, Sph";
 #define MAX_ITER 8
 #define LOOP_TOL 1e-7
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double *en;
     double m, n, C_x, C_y;
 };
+} // anonymous namespace
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */

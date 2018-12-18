@@ -28,6 +28,7 @@
 
 #define EPS10   1e-10
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double phi1;
     double ctgphi1;
@@ -35,6 +36,7 @@ struct pj_opaque {
     double cosphi1;
     double *en;
 };
+} // anonymous namespace
 
 PROJ_HEAD(ccon, "Central Conic")
     "\n\tCentral Conic, Sph\n\tlat_1=";

@@ -47,6 +47,7 @@
 #include "proj_math.h"
 
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double    Qn;    /* Merid. quad., scaled to the projection */ \
     double    Zb;    /* Radius vector in polar coord. systems  */ \
@@ -55,6 +56,7 @@ struct pj_opaque {
     double    utg[6]; /* Constants for transv. merc. -> geo */ \
     double    gtu[6]; /* Constants for geo -> transv. merc. */
 };
+} // anonymous namespace
 
 PROJ_HEAD(etmerc, "Extended Transverse Mercator")
     "\n\tCyl, Sph\n\tlat_ts=(0)\nlat_0=(0)";

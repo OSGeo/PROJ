@@ -32,6 +32,7 @@
 PROJ_HEAD(affine, "Affine transformation");
 PROJ_HEAD(geogoffset, "Geographic Offset");
 
+namespace { // anonymous namespace
 struct pj_affine_coeffs {
     double s11;
     double s12;
@@ -44,7 +45,9 @@ struct pj_affine_coeffs {
     double s33;
     double tscale;
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct pj_opaque_affine {
     double xoff;
     double yoff;
@@ -53,6 +56,7 @@ struct pj_opaque_affine {
     struct pj_affine_coeffs forward;
     struct pj_affine_coeffs reverse;
 };
+} // anonymous namespace
 
 
 static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {

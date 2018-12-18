@@ -29,12 +29,14 @@
 #include "proj_math.h"
 
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double phic0;
     double cosc0, sinc0;
     double R2;
     void *en;
 };
+} // anonymous namespace
 
 
 PROJ_HEAD(sterea, "Oblique Stereographic Alternative") "\n\tAzimuthal, Sph&Ell";

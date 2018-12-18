@@ -6,9 +6,11 @@
 #include "proj.h"
 #include "projects.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double rc;
 };
+} // anonymous namespace
 
 PROJ_HEAD(eqc, "Equidistant Cylindrical (Plate Carree)")
     "\n\tCyl, Sph\n\tlat_ts=[, lat_0=0]";

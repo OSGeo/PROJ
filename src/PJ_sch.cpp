@@ -39,6 +39,7 @@
 #include "projects.h"
 #include "geocent.h"
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double plat; /*Peg Latitude */
     double plon; /*Peg Longitude*/
@@ -50,6 +51,7 @@ struct pj_opaque {
     GeocentricInfo sph;
     GeocentricInfo elp_0;
 };
+} // anonymous namespace
 
 PROJ_HEAD(sch, "Spherical Cross-track Height") "\n\tMisc\n\tplat_0= plon_0= phdg_0= [h_0=]";
 

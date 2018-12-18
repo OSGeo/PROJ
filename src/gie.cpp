@@ -1020,6 +1020,7 @@ static int dispatch (const char *cmnd, const char *args) {
 
 
 
+namespace { // anonymous namespace
 struct errno_vs_err_const {const char *the_err_const; int the_errno;};
 static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_no_args"                  ,  -1},
@@ -1084,6 +1085,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_unknown"                  ,  9999},
     {"pjd_err_enomem"                   ,  ENOMEM},
 };
+} // anonymous namespace
 
 static const struct errno_vs_err_const unknown = {"PJD_ERR_UNKNOWN", 9999};
 

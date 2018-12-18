@@ -46,10 +46,12 @@
 #define ISEA_STD_LAT 1.01722196792335072101
 #define ISEA_STD_LON .19634954084936207740
 
+namespace { // anonymous namespace
 struct hex {
         int iso;
         long x, y, z;
 };
+} // anonymous namespace
 
 /* y *must* be positive down as the xy /iso conversion assumes this */
 static void hex_xy(struct hex *h) {
@@ -124,12 +126,15 @@ static void hexbin2(double width, double x, double y, long *i, long *j) {
     *j = h.y;
 }
 
+namespace { // anonymous namespace
 enum isea_poly { ISEA_NONE, ISEA_ICOSAHEDRON = 20 };
 enum isea_topology { ISEA_HEXAGON=6, ISEA_TRIANGLE=3, ISEA_DIAMOND=4 };
 enum isea_address_form { ISEA_GEO, ISEA_Q2DI, ISEA_SEQNUM, ISEA_INTERLEAVE,
     ISEA_PLANE, ISEA_Q2DD, ISEA_PROJTRI, ISEA_VERTEX2DD, ISEA_HEX
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct isea_dgg {
     int polyhedron; /* ignored, icosahedron */
     double  o_lat, o_lon, o_az; /* orientation, radians */
@@ -143,29 +148,38 @@ struct isea_dgg {
     int quad; /* quad of last transformed point */
     unsigned long serial;
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct isea_pt {
     double x, y;
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct isea_geo {
     double lon, lat;
 };
+} // anonymous namespace
 
 /* ENDINC */
 
+namespace { // anonymous namespace
 enum snyder_polyhedron {
     SNYDER_POLY_HEXAGON, SNYDER_POLY_PENTAGON,
     SNYDER_POLY_TETRAHEDRON, SNYDER_POLY_CUBE,
     SNYDER_POLY_OCTAHEDRON, SNYDER_POLY_DODECAHEDRON,
     SNYDER_POLY_ICOSAHEDRON
 };
+} // anonymous namespace
 
+namespace { // anonymous namespace
 struct snyder_constants {
     double          g, G, theta;
     /* cppcheck-suppress unusedStructMember */
     double ea_w, ea_a, ea_b, g_w, g_a, g_b;
 };
+} // anonymous namespace
 
 /* TODO put these in radians to avoid a later conversion */
 static const struct snyder_constants constants[] = {
@@ -974,9 +988,11 @@ static struct isea_pt isea_forward(struct isea_dgg *g, struct isea_geo *in)
 
 PROJ_HEAD(isea, "Icosahedral Snyder Equal Area") "\n\tSph";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     struct isea_dgg dgg;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

@@ -62,10 +62,12 @@ operation:
 
 PROJ_HEAD(axisswap, "Axis ordering");
 
+namespace { // anonymous namespace
 struct pj_opaque {
     unsigned int axis[4];
     int sign[4];
 };
+} // anonymous namespace
 
 static int sign(int x) {
     return (x > 0) - (x < 0);

@@ -8,9 +8,11 @@
 
 PROJ_HEAD(somerc, "Swiss. Obl. Mercator") "\n\tCyl, Ell\n\tFor CH1903";
 
+namespace { // anonymous namespace
 struct pj_opaque {
     double K, c, hlf_e, kR, cosp0, sinp0;
 };
+} // anonymous namespace
 
 #define EPS 1.e-10
 #define NITER 6

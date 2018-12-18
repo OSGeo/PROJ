@@ -53,12 +53,14 @@ PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph&Ell\n\tnorth_square= south_square=";
 /* Fuzz to handle rounding errors: */
 # define EPS 1e-15
 
+namespace { // anonymous namespace
 struct pj_opaque {
     int north_square;
     int south_square;
     double qp;
     double *apa;
 };
+} // anonymous namespace
 
 typedef struct {
     int cn;         /* An integer 0--3 indicating the position of the polar cap. */

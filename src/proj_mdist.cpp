@@ -37,12 +37,14 @@
 #define MAX_ITER 20
 #define TOL 1e-14
 
+namespace { // anonymous namespace
 struct MDIST {
 	int nb;
 	double es;
 	double E;
 	double b[1];
 };
+} // anonymous namespace
 	void *
 proj_mdist_ini(double es) {
 	double numf, numfi, twon1, denf, denfi, ens, T, twon;

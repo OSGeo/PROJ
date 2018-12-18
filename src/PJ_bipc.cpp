@@ -29,9 +29,11 @@ PROJ_HEAD(bipc, "Bipolar conic of western hemisphere") "\n\tConic Sph";
 # define R104   1.81514242207410275904
 
 
+namespace { // anonymous namespace
 struct pj_opaque {
     int noskew;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

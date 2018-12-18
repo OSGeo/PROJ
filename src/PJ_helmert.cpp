@@ -65,6 +65,7 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P);
 
 
 /***********************************************************************/
+namespace { // anonymous namespace
 struct pj_opaque_helmert {
 /************************************************************************
     Projection specific elements for the "helmert" PJ object
@@ -87,6 +88,7 @@ struct pj_opaque_helmert {
     int no_rotation, exact, fourparam;
     int is_position_vector; /* 1 = position_vector, 0 = coordinate_frame */
 };
+} // anonymous namespace
 
 
 /* Make the maths of the rotation operations somewhat more readable and textbook like */

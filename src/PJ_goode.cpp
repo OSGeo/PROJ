@@ -13,10 +13,12 @@ PROJ_HEAD(goode, "Goode Homolosine") "\n\tPCyl, Sph";
 
 C_NAMESPACE PJ *pj_sinu(PJ *), *pj_moll(PJ *);
 
+namespace { // anonymous namespace
 struct pj_opaque {
     PJ *sinu;
     PJ *moll;
 };
+} // anonymous namespace
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

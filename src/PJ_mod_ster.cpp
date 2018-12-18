@@ -12,11 +12,13 @@ PROJ_HEAD(gs50, "Mod. Stereographic of 50 U.S.") "\n\tAzi(mod)";
 
 #define EPSLN 1e-12
 
+namespace { // anonymous namespace
 struct pj_opaque {
     const COMPLEX *zcoeff; \
     double  cchio, schio; \
     int     n;
 };
+} // anonymous namespace
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
