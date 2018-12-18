@@ -952,9 +952,9 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
     char *p;
     size_t len, applen = 0, buflen = 0;
 #ifdef _WIN32
-    char *delim = ";";
+    const char *delim = ";";
 #else
-    char *delim = ":";
+    const char *delim = ":";
 #endif
 
     /* Nothing to do? */

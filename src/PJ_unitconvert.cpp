@@ -80,10 +80,10 @@ typedef double (*tconvert)(double);
 
 namespace { // anonymous namespace
 struct TIME_UNITS {
-    char        *id;        /* units keyword */
+    const char  *id;        /* units keyword */
     tconvert     t_in;      /* unit -> mod. julian date function pointer */
     tconvert     t_out;     /* mod. julian date > unit function pointer */
-    char        *name;      /* comments */
+    const char  *name;      /* comments */
 };
 } // anonymous namespace
 
@@ -436,7 +436,7 @@ static double get_unit_conversion_factor(const char* name,
 PJ *CONVERSION(unitconvert,0) {
 /***********************************************************************/
     struct pj_opaque_unitconvert *Q = static_cast<struct pj_opaque_unitconvert*>(pj_calloc (1, sizeof (struct pj_opaque_unitconvert)));
-    char *s, *name;
+    const char *s, *name;
     int i;
     double f;
     int xy_in_is_linear = -1; /* unknown */

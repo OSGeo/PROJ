@@ -34,7 +34,9 @@
 #endif
 
 /* For PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP */
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 
 #ifndef _WIN32
 #include "proj_config.h"

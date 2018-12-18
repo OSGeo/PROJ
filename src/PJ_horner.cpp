@@ -408,7 +408,7 @@ static PJ *horner_freeup (PJ *P, int errlev) {                        /* Destruc
 }
 
 
-static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
+static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
     char *buf, *init, *next = nullptr;
     int i;
 

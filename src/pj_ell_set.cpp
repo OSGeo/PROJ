@@ -15,9 +15,9 @@ static int ellps_size (PJ *P);
 static int ellps_shape (PJ *P);
 static int ellps_spherification (PJ *P);
 
-static paralist *pj_get_param (paralist *list, char *key);
+static paralist *pj_get_param (paralist *list, const char *key);
 static char     *pj_param_value (paralist *list);
-static const PJ_ELLPS *pj_find_ellps (char *name);
+static const PJ_ELLPS *pj_find_ellps (const char *name);
 
 
 /***************************************************************************************/
@@ -75,7 +75,7 @@ int pj_ellipsoid (PJ *P) {
 
 ****************************************************************************************/
     int err = proj_errno_reset (P);
-    char *empty = {""};
+    const char *empty = {""};
 
     P->def_size = P->def_shape = P->def_spherification = P->def_ellps = nullptr;
 
@@ -211,7 +211,7 @@ static int ellps_size (PJ *P) {
 /***************************************************************************************/
 static int ellps_shape (PJ *P) {
 /***************************************************************************************/
-    char *keys[]  = {"rf", "f", "es", "e", "b"};
+    const char *keys[]  = {"rf", "f", "es", "e", "b"};
     paralist *par = nullptr;
     char *def = nullptr;
     size_t i, len;
@@ -317,7 +317,7 @@ static const double RV6   = 55/1296.;
 /***************************************************************************************/
 static int ellps_spherification (PJ *P) {
 /***************************************************************************************/
-    char *keys[] =  {"R_A", "R_V", "R_a", "R_g", "R_h", "R_lat_a", "R_lat_g"};
+    const char *keys[] =  {"R_A", "R_V", "R_a", "R_g", "R_h", "R_lat_a", "R_lat_g"};
     size_t len, i;
     paralist *par = nullptr;
     char *def = nullptr;
@@ -400,7 +400,7 @@ static int ellps_spherification (PJ *P) {
 
 
 /* locate parameter in list */
-static paralist *pj_get_param (paralist *list, char *key) {
+static paralist *pj_get_param (paralist *list, const char *key) {
     size_t l = strlen(key);
 	while (list && !(0==strncmp(list->param, key, l) && (0==list->param[l] || list->param[l] == '=') ) )
 		list = list->next;
@@ -421,7 +421,7 @@ static char *pj_param_value (paralist *list) {
 }
 
 
-static const PJ_ELLPS *pj_find_ellps (char *name) {
+static const PJ_ELLPS *pj_find_ellps (const char *name) {
     int i;
     const char *s;
     const PJ_ELLPS *ellps;

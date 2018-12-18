@@ -16,12 +16,14 @@ fullout = 0,	/* output full set of geodesic values */
 tag = '#',	/* beginning of line tag character */
 pos_azi = 0,	/* output azimuths as positive values */
 inverse = 0;	/* != 0 then inverse geodesic */
-	static char
-*oform = (char *)nullptr,	/* output format for decimal degrees */
-*osform = "%.3f",	/* output format for S */
-pline[50],		/* work string */
-*usage =
+
+static const char *oform = nullptr; /* output format for decimal degrees */
+static const char *osform = "%.3f"; /* output format for S */
+
+static char pline[50];              /* work string */
+static const char *usage =
 "%s\nusage: %s [ -afFIlptwW [args] ] [ +opts[=arg] ] [ files ]\n";
+
 	static void
 printLL(double p, double l) {
 	if (oform) {
@@ -146,7 +148,7 @@ int main(int argc, char **argv) {
 		if(**++argv == '-') for(arg = *argv;;) {
 			switch(*++arg) {
 			case '\0': /* position of "stdin" */
-				if (arg[-1] == '-') eargv[eargc++] = "-";
+				if (arg[-1] == '-') eargv[eargc++] = const_cast<char*>("-");
 				break;
 			case 'a': /* output full set of values */
 				fullout = 1;
@@ -217,11 +219,11 @@ noargument:		   emess(1,"missing argument for -%c",*arg);
 		do_geod();
 	else { /* process input file list */
 		if (eargc == 0) /* if no specific files force sysin */
-			eargv[eargc++] = "-";
+			eargv[eargc++] = const_cast<char*>("-");
 		for ( ; eargc-- ; ++eargv) {
 			if (**eargv == '-') {
 				fid = stdin;
-				emess_dat.File_name = "<stdin>";
+				emess_dat.File_name = const_cast<char*>("<stdin>");
 			} else {
 				if ((fid = fopen(*eargv, "r")) == nullptr) {
 					emess(-2, *eargv, "input file");

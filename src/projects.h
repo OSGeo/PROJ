@@ -492,10 +492,10 @@ typedef union { double  f; int  i; char *s; } PROJVALUE;
 
 
 struct PJ_DATUMS {
-    char    *id;           /* datum keyword */
-    char    *defn;         /* ie. "to_wgs84=..." */
-    char    *ellipse_id;   /* ie from ellipse table */
-    char    *comments;     /* EPSG code, etc */
+    const char    *id;           /* datum keyword */
+    const char    *defn;         /* ie. "to_wgs84=..." */
+    const char    *ellipse_id;   /* ie from ellipse table */
+    const char    *comments;     /* EPSG code, etc */
 };
 
 

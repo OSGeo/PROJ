@@ -2,10 +2,6 @@
 #ifndef EMESS_H
 #define EMESS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct EMESS {
 	char	*File_name,	/* input file name */
 			*Prog_name;	/* name of program */
@@ -15,7 +11,7 @@ struct EMESS {
 
 #ifdef EMESS_ROUTINE	/* use type */
 /* for emess procedure */
-struct EMESS PROJ_DLL emess_dat = { (char *)0, (char *)0, 0 };
+struct EMESS PROJ_DLL emess_dat = { nullptr, nullptr, 0 };
 
 #ifdef sun /* Archaic SunOs 4.1.1, etc. */
 extern char *sys_errlist[];
@@ -29,9 +25,5 @@ extern struct EMESS PROJ_DLL emess_dat;
 #endif /* use type */
 
 void PROJ_DLL emess(int, const char *, ...);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* end EMESS_H */

@@ -256,7 +256,7 @@ static size_t argc_params (paralist *params) {
 }
 
 /* Sentinel for argument list */
-static char *argv_sentinel = "step";
+static const char *argv_sentinel = "step";
 
 /* turn paralist into argc/argv style argument list */
 static char **argv_params (paralist *params, size_t argc) {
@@ -267,7 +267,7 @@ static char **argv_params (paralist *params, size_t argc) {
         return nullptr;
     for (; params != nullptr; params = params->next)
         argv[i++] = params->param;
-    argv[i++] = argv_sentinel;
+    argv[i++] = const_cast<char*>(argv_sentinel);
     return argv;
 }
 

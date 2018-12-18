@@ -20,7 +20,7 @@
 #define MAX_PARGS 100
 #define PJ_INVERS(P) (P->inv ? 1 : 0)
 
-extern void gen_cheb(int, projUV(*)(projUV), char *, PJ *, int, char **);
+extern void gen_cheb(int, projUV(*)(projUV), const char *, PJ *, int, char **);
 
 static PJ *Proj;
 static union {
@@ -42,10 +42,10 @@ static int
     very_verby = 0, /* very verbose mode */
     postscale = 0;
 
-static char
+static const char
     *cheby_str,         /* string controlling Chebychev evaluation */
-    *oform = (char *)nullptr, /* output format for x-y or decimal degrees */
-    oform_buffer[16];   /* Buffer for oform when using -d */
+    *oform = nullptr; /* output format for x-y or decimal degrees */
+static char oform_buffer[16];   /* Buffer for oform when using -d */
 
 static const char
     *oterr = "*\t*",    /* output line for unprojectable input */
@@ -309,7 +309,8 @@ static void vprocess(FILE *fid) {
 }
 
 int main(int argc, char **argv) {
-    char *arg, **eargv = argv, *pargv[MAX_PARGS], **iargv = argv;
+    char *arg, *pargv[MAX_PARGS], **iargv = argv;
+    char **eargv = argv;
     FILE *fid;
     int pargc = 0, iargc = argc, eargc = 0, mon = 0;
 
@@ -327,7 +328,7 @@ int main(int argc, char **argv) {
         if(**++argv == '-') for(arg = *argv;;) {
             switch(*++arg) {
               case '\0': /* position of "stdin" */
-                if (arg[-1] == '-') eargv[eargc++] = "-";
+                if (arg[-1] == '-') eargv[eargc++] = const_cast<char*>("-");
                 break;
               case 'b': /* binary I/O */
                 bin_in = bin_out = 1;
@@ -482,7 +483,7 @@ int main(int argc, char **argv) {
             eargv[eargc++] = *argv;
     }
     if (eargc == 0 && !cheby_str) /* if no specific files force sysin */
-        eargv[eargc++] = "-";
+        eargv[eargc++] = const_cast<char*>("-");
     else if (eargc > 0 && cheby_str) /* warning */
         emess(4, "data files when generating Chebychev prohibited");
     /* done with parameter and control input */
@@ -551,7 +552,7 @@ int main(int argc, char **argv) {
     for ( ; eargc-- ; ++eargv) {
         if (**eargv == '-') {
             fid = stdin;
-            emess_dat.File_name = "<stdin>";
+            emess_dat.File_name = const_cast<char*>("<stdin>");
 
             if (bin_in)
             {

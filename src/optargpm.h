@@ -201,9 +201,9 @@ int opt_record (OPTARGS *opt);
 int opt_input_loop (OPTARGS *opt, int binary);
 static int opt_is_flag (OPTARGS *opt, int ordinal);
 static int opt_raise_flag (OPTARGS *opt, int ordinal);
-static int opt_ordinal (OPTARGS *opt, char *option);
-int opt_given (OPTARGS *opt, char *option);
-char *opt_arg (OPTARGS *opt, char *option);
+static int opt_ordinal (OPTARGS *opt, const char *option);
+int opt_given (OPTARGS *opt, const char *option);
+char *opt_arg (OPTARGS *opt, const char *option);
 const char *opt_strip_path (const char *full_name);
 OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys);
 
@@ -315,7 +315,7 @@ static int opt_raise_flag (OPTARGS *opt, int ordinal) {
 }
 
 /* Find the ordinal value of any (short or long) option */
-static int opt_ordinal (OPTARGS *opt, char *option) {
+static int opt_ordinal (OPTARGS *opt, const char *option) {
     int i;
     if (nullptr==opt)
         return 0;
@@ -379,7 +379,7 @@ static int opt_ordinal (OPTARGS *opt, char *option) {
 
 
 /* Returns 0 if option was not given on command line, non-0 otherwise */
-int opt_given (OPTARGS *opt, char *option) {
+int opt_given (OPTARGS *opt, const char *option) {
     int ordinal = opt_ordinal (opt, option);
     if (0==ordinal)
         return 0;
@@ -391,7 +391,7 @@ int opt_given (OPTARGS *opt, char *option) {
 
 
 /* Returns the argument to a given option */
-char *opt_arg (OPTARGS *opt, char *option) {
+char *opt_arg (OPTARGS *opt, const char *option) {
     int ordinal = opt_ordinal (opt, option);
     if (0==ordinal)
         return nullptr;

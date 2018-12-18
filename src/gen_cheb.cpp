@@ -9,12 +9,40 @@
 #define COEF_LINE_MAX 50
 #endif
 
+static double strtod_type_safe(const char *s, const char ** endptr)
+{
+    char* l_endptr = nullptr;
+    double ret= strtod(s, &l_endptr);
+    if( endptr )
+        *endptr = static_cast<const char*>(l_endptr);
+    return ret;
+}
+
+static double dmstor_type_safe(const char *s, const char ** endptr)
+{
+    char* l_endptr = nullptr;
+    double ret= dmstor(s, &l_endptr);
+    if( endptr )
+        *endptr = static_cast<const char*>(l_endptr);
+    return ret;
+}
+
+static long strtol_type_safe(const char *s, const char ** endptr, int base)
+{
+    char* l_endptr = nullptr;
+    long ret = strtol(s, &l_endptr, base);
+    if( endptr )
+        *endptr = static_cast<const char*>(l_endptr);
+    return ret;
+}
+
+
 /* FIXME: put the declaration in a header. Also used in proj.c */
-void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
+void gen_cheb(int inverse, projUV (*proj)(projUV), const char *s, PJ *P,
               int iargc, char **iargv);
 extern void p_series(Tseries *, FILE *, char *);
 
-void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
+void gen_cheb(int inverse, projUV (*proj)(projUV), const char *s, PJ *P,
               int iargc, char **iargv) {
 	long NU = 15, NV = 15;
 	int errin = 0, pwr;
@@ -22,18 +50,18 @@ void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
 	char *arg, fmt[32];
 	projUV low, upp, resid;
 	Tseries *F;
-	double (*input)(const char *, char **);
+	double (*input)(const char *, const char **);
 
-	input = inverse ? strtod : dmstor;
+	input = inverse ? strtod_type_safe : dmstor_type_safe;
 	if (*s) low.u = input(s, &s); else { low.u = 0; ++errin; }
 	if (*s == ',') upp.u = input(s+1, &s); else { upp.u = 0; ++errin; }
 	if (*s == ',') low.v = input(s+1, &s); else { low.v = 0; ++errin; }
 	if (*s == ',') upp.v = input(s+1, &s); else { upp.v = 0; ++errin; }
 	if (errin)
 		emess(16,"null or absent -T parameters");
-	if (*s == ',') if (*++s != ',') res = strtol(s, &s, 10);
-	if (*s == ',') if (*++s != ',') NU = strtol(s, &s, 10);
-	if (*s == ',') if (*++s != ',') NV = strtol(s, &s, 10);
+	if (*s == ',') if (*++s != ',') res = strtol_type_safe(s, &s, 10);
+	if (*s == ',') if (*++s != ',') NU = strtol_type_safe(s, &s, 10);
+	if (*s == ',') if (*++s != ',') NV = strtol_type_safe(s, &s, 10);
 	pwr = s && *s && !strcmp(s, ",P");
 	(void)printf("#proj_%s\n#    run-line:\n",
 		pwr ? "Power" : "Chebyshev");
