@@ -14,6 +14,7 @@ noinst_PROGRAMS += pj_phi2_test
 noinst_PROGRAMS += proj_errno_string_test
 noinst_PROGRAMS += test_cpp_api
 noinst_PROGRAMS += gie_self_tests
+noinst_PROGRAMS += include_proj_h_from_c
 
 pj_transform_test_SOURCES = pj_transform_test.cpp main.cpp
 pj_transform_test_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la
@@ -44,5 +45,7 @@ gie_self_tests_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la @S
 
 gie_self_tests-check: gie_self_tests
 	PROJ_LIB=$(PROJ_LIB) ./gie_self_tests
+
+include_proj_h_from_c_SOURCES = include_proj_h_from_c.c
 
 check-local: pj_transform_test-check pj_phi2_test-check proj_errno_string_test-check test_cpp_api-check gie_self_tests-check
