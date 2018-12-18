@@ -21,7 +21,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
-    if (P->gridlist != NULL) {
+    if (P->gridlist != nullptr) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
         point.lp = proj_hgrid_apply(P, point.lp, PJ_FWD);
@@ -35,7 +35,7 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 
-    if (P->gridlist != NULL) {
+    if (P->gridlist != nullptr) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
         point.lp = proj_hgrid_apply(P, point.lp, PJ_INV);
@@ -82,7 +82,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
 
 PJ *TRANSFORMATION(hgridshift,0) {
     struct pj_opaque_hgridshift *Q = static_cast<struct pj_opaque_hgridshift*>(pj_calloc (1, sizeof (struct pj_opaque_hgridshift)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
@@ -90,8 +90,8 @@ PJ *TRANSFORMATION(hgridshift,0) {
     P->inv4d  = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
-    P->fwd    = 0;
-    P->inv    = 0;
+    P->fwd    = nullptr;
+    P->inv    = nullptr;
 
     P->left  = PJ_IO_UNITS_ANGULAR;
     P->right = PJ_IO_UNITS_ANGULAR;

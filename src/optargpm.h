@@ -107,8 +107,8 @@ int main(int argc, char **argv) {
     char *longkeys[]   = {"o=output", "hello", 0};
 
     o = opt_parse (argc, argv, "hv", "o", longflags, longkeys);
-    if (0==o)
-        return 0;
+    if (nullptr==o)
+        return nullptr;
 
 
     if (opt_given (o, "h")) {
@@ -135,14 +135,14 @@ int main(int argc, char **argv) {
         char buf[1000];
         int ret = fgets (buf, 1000, o->input);
         opt_eof_handler (o);
-        if (0==ret) {
+        if (nullptr==ret) {
             fprintf (stderr, "Read error in record %d\n", (int) o->record_index);
             continue;
         }
         do_what_needs_to_be_done (buf);
     }
 
-    return 0;
+    return nullptr;
 }
 
 
@@ -229,22 +229,22 @@ struct OPTARGS {
 
 /* name of file currently read from */
 char *opt_filename (OPTARGS *opt) {
-    if (0==opt)
-        return 0;
+    if (nullptr==opt)
+        return nullptr;
     if (0==opt->fargc)
         return opt->flaglevel;
     return opt->fargv[opt->input_index];
 }
 
 static int opt_eof (OPTARGS *opt) {
-    if (0==opt)
+    if (nullptr==opt)
         return 1;
     return feof (opt->input);
 }
 
 /* record number of most recently read record */
 int opt_record (OPTARGS *opt) {
-    if (0==opt)
+    if (nullptr==opt)
         return 0;
     return opt->record_index + 1;
 }
@@ -252,11 +252,11 @@ int opt_record (OPTARGS *opt) {
 
 /* handle closing/opening of a "stream-of-streams" */
 int opt_input_loop (OPTARGS *opt, int binary) {
-    if (0==opt)
+    if (nullptr==opt)
         return 0;
 
     /* most common case: increment record index and read on */
-    if ( (opt->input!=0) && !feof (opt->input) ) {
+    if ( (opt->input!=nullptr) && !feof (opt->input) ) {
         opt->record_index++;
         return 1;
     }
@@ -264,7 +264,7 @@ int opt_input_loop (OPTARGS *opt, int binary) {
     opt->record_index = 0;
 
     /* no input files specified - read from stdin */
-    if ((0==opt->fargc) && (0==opt->input)) {
+    if ((0==opt->fargc) && (nullptr==opt->input)) {
         opt->input = stdin;
         return 1;
     }
@@ -275,18 +275,18 @@ int opt_input_loop (OPTARGS *opt, int binary) {
         return 0;
 
     /* end if no more input */
-    if (0!=opt->input)
+    if (nullptr!=opt->input)
         fclose (opt->input);
     if (opt->input_index >= opt->fargc)
         return 0;
 
     /* otherwise, open next input file */
     opt->input = fopen (opt->fargv[opt->input_index++], binary? "rb": "rt");
-    if (0 != opt->input)
+    if (nullptr != opt->input)
         return 1;
 
     /* ignore non-existing files - go on! */
-    if (0==opt->input)
+    if (nullptr==opt->input)
         return opt_input_loop (opt, binary);
     return 0;
 }
@@ -317,16 +317,16 @@ static int opt_raise_flag (OPTARGS *opt, int ordinal) {
 /* Find the ordinal value of any (short or long) option */
 static int opt_ordinal (OPTARGS *opt, char *option) {
     int i;
-    if (0==opt)
+    if (nullptr==opt)
         return 0;
-    if (0==option)
+    if (nullptr==option)
         return 0;
     if (0==option[0])
         return 0;
     /* An ordinary -o style short option */
     if (strlen (option)==1) {
         /* Undefined option? */
-        if (0==opt->optarg[(int) option[0]])
+        if (nullptr==opt->optarg[(int) option[0]])
             return 0;
         return (int) option[0];
     }
@@ -334,9 +334,9 @@ static int opt_ordinal (OPTARGS *opt, char *option) {
     /* --longname style long options are slightly harder */
     for (i = 0; i < 64; i++) {
         const char **f = opt->longflags;
-        if (0==f)
+        if (nullptr==f)
             break;
-        if (0==f[i])
+        if (nullptr==f[i])
             break;
         if (0==strcmp(f[i], "END"))
             break;
@@ -346,7 +346,7 @@ static int opt_ordinal (OPTARGS *opt, char *option) {
         /* long alias? - return ordinal for corresponding short */
         if ((strlen(f[i]) > 2) && (f[i][1]=='=') && (0==strcmp(f[i]+2, option))) {
                 /* Undefined option? */
-                if (0==opt->optarg[(int) f[i][0]])
+                if (nullptr==opt->optarg[(int) f[i][0]])
                     return 0;
                 return (int) f[i][0];
         }
@@ -354,9 +354,9 @@ static int opt_ordinal (OPTARGS *opt, char *option) {
 
     for (i = 0; i < 64; i++) {
         const char **v = opt->longkeys;
-        if (0==v)
+        if (nullptr==v)
             return 0;
-        if (0==v[i])
+        if (nullptr==v[i])
             return 0;
         if (0==strcmp (v[i], "END"))
             return 0;
@@ -366,14 +366,14 @@ static int opt_ordinal (OPTARGS *opt, char *option) {
         /* long alias? - return ordinal for corresponding short */
         if ((strlen(v[i]) > 2) && (v[i][1]=='=') && (0==strcmp(v[i]+2, option))) {
             /* Undefined option? */
-            if (0==opt->optarg[(int) v[i][0]])
+            if (nullptr==opt->optarg[(int) v[i][0]])
                 return 0;
             return (int) v[i][0];
         }
 
     }
     /* kill some potential compiler warnings about unused functions */
-    (void) opt_eof (0);
+    (void) opt_eof (nullptr);
     return 0;
 }
 
@@ -394,7 +394,7 @@ int opt_given (OPTARGS *opt, char *option) {
 char *opt_arg (OPTARGS *opt, char *option) {
     int ordinal = opt_ordinal (opt, option);
     if (0==ordinal)
-        return 0;
+        return nullptr;
     return opt->optarg[ordinal];
 }
 
@@ -418,8 +418,8 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     OPTARGS *o;
 
     o = (OPTARGS *) calloc (1, sizeof(OPTARGS));
-    if (0==o)
-        return 0;
+    if (nullptr==o)
+        return nullptr;
 
     o->argc = argc;
     o->argv = argv;
@@ -448,10 +448,10 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
             continue;
         if ('='!=longflags[i][1])
             continue;
-        if (0==strchr (flags, longflags[i][0])) {
+        if (nullptr==strchr (flags, longflags[i][0])) {
             fprintf (stderr, "%s: Invalid alias - '%s'. Valid short flags are '%s'\n", o->progname, longflags[i], flags);
             free (o);
-            return 0;
+            return nullptr;
         }
     }
     for (i = 0;  longkeys && longkeys[i]; i++) {
@@ -460,10 +460,10 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
             continue;
         if ('='!=longkeys[i][1])
             continue;
-        if (0==strchr (keys, longkeys[i][0])) {
+        if (nullptr==strchr (keys, longkeys[i][0])) {
             fprintf (stderr, "%s: Invalid alias - '%s'. Valid short flags are '%s'\n", o->progname, longkeys[i], keys);
             free (o);
-            return 0;
+            return nullptr;
         }
     }
 
@@ -471,20 +471,20 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     /* flaglevel array to provide a pseudo-filename for the case of reading from stdin      */
     strcpy (o->flaglevel, "<stdin>");
 
-    for (i = 128; (longflags != 0) && (longflags[i - 128] != 0); i++) {
+    for (i = 128; (longflags != nullptr) && (longflags[i - 128] != nullptr); i++) {
         if (i==192) {
             free (o);
             fprintf (stderr, "Too many flag style long options\n");
-            return 0;
+            return nullptr;
         }
         o->optarg[i] = o->flaglevel;
     }
 
-    for (i = 192;  (longkeys != 0) && (longkeys[i - 192] != 0);  i++) {
+    for (i = 192;  (longkeys != nullptr) && (longkeys[i - 192] != nullptr);  i++) {
         if (i==256) {
             free (o);
             fprintf (stderr, "Too many value style long options\n");
-            return 0;
+            return nullptr;
         }
         o->optarg[i] = argv[0];
     }
@@ -500,7 +500,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
         if ('-' != argv[i][0])
             break;
 
-        if (0==o->margv)
+        if (nullptr==o->margv)
             o->margv = argv + i;
         o->margc++;
 
@@ -526,7 +526,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 c = opt_ordinal (o, crepr);
                 if (0==c) {
                     fprintf (stderr, "Invalid option \"%s\"\n", crepr);
-                    return (OPTARGS *) 0;
+                    return nullptr;
                 }
 
                 /* inline (gnu) --foo=bar style arg */
@@ -534,7 +534,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                     *equals = '=';
                     if (opt_is_flag (o, c)) {
                         fprintf (stderr, "Option \"%s\" takes no arguments\n", crepr);
-                        return (OPTARGS *) 0;
+                        return nullptr;
                     }
                     o->optarg[c] = equals + 1;
                     break;
@@ -544,7 +544,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 if (!opt_is_flag (o, c)) {
                     if ((argc==i + 1) || ('+'==argv[i+1][0]) || ('-'==argv[i+1][0])) {
                         fprintf (stderr, "Missing argument for option \"%s\"\n", crepr);
-                        return (OPTARGS *) 0;
+                        return nullptr;
                     }
                     o->optarg[c] = argv[i + 1];
                     i++; /* eat the arg */
@@ -553,7 +553,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
 
                 if (!opt_is_flag (o, c)) {
                     fprintf (stderr, "Expected flag style long option here, but got \"%s\"\n", crepr);
-                    return (OPTARGS *) 0;
+                    return nullptr;
                 }
 
                 /* Flag style option, i.e. taking no arguments */
@@ -562,9 +562,9 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
             }
 
             /* classic short options */
-            if (0==o->optarg[c]) {
+            if (nullptr==o->optarg[c]) {
                 fprintf (stderr, "Invalid option \"%s\"\n", crepr);
-                return (OPTARGS *) 0;
+                return nullptr;
             }
 
             /* Flag style option, i.e. taking no arguments */
@@ -580,7 +580,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 if ((argc==i + 1) || ('+'==argv[i+1][0]) || ('-'==argv[i+1][0]))
                 {
                     fprintf (stderr, "Bad or missing arg for option \"%s\"\n", crepr);
-                    return (OPTARGS *) 0;
+                    return nullptr;
                 }
                 o->optarg[(int) c] = argv[i + 1];
                 i++;
@@ -617,7 +617,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
         if ('-' == argv[i][0]) {
             free (o);
             fprintf (stderr, "+ and - style options must not be mixed\n");
-            return 0;
+            return nullptr;
         }
 
         if ('+' != argv[i][0])

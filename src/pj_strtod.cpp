@@ -65,7 +65,7 @@
  */
 double pj_atof( const char* nptr )
 {
-    return pj_strtod(nptr, NULL);
+    return pj_strtod(nptr, nullptr);
 }
 
 
@@ -134,7 +134,7 @@ static char* replace_point_by_locale_point(const char* pszNumber, char point,
                 else {
                     pszNew = pj_strdup(pszNumber);
                     if (!pszNew)
-                        return NULL;
+                        return nullptr;
                 }
                 if( pszLocalePoint )
                     pszNew[pszLocalePoint - pszNumber] = ' ';

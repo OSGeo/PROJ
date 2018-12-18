@@ -43,7 +43,7 @@
 int pj_is_latlong( PJ *pj )
 
 {
-    return pj == NULL || pj->is_latlong;
+    return pj == nullptr || pj->is_latlong;
 }
 
 /************************************************************************/
@@ -55,7 +55,7 @@ int pj_is_latlong( PJ *pj )
 int pj_is_geocent( PJ *pj )
 
 {
-    return pj != NULL && pj->is_geocent;
+    return pj != nullptr && pj->is_geocent;
 }
 
 /************************************************************************/
@@ -118,7 +118,7 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
     {
         pj_ctx_set_errno( pj_in->ctx, PJD_ERR_MAJOR_AXIS_NOT_GIVEN );
 
-        return NULL;
+        return nullptr;
     }
 
     if( !got_datum )

@@ -73,8 +73,8 @@ proj_mdist_ini(double es) {
 		El = Es;
 	}
 	if ((b = (struct MDIST *)malloc(sizeof(struct MDIST)+
-		(i*sizeof(double)))) == NULL)
-		return(NULL);
+		(i*sizeof(double)))) == nullptr)
+		return(nullptr);
 	b->nb = i - 1;
 	b->es = es;
 	b->E = Es;

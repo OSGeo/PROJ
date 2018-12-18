@@ -138,10 +138,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 static PJ *destructor (PJ *P, int errlev) {
     int i;
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     for (i = 0; i < 12; ++i) {
@@ -175,7 +175,7 @@ static PJ *destructor (PJ *P, int errlev) {
 */
 
 #define SETUP(n, proj, x_0, y_0, lon_0) \
-    if (!(Q->pj[n-1] = pj_##proj(0))) return destructor(P, ENOMEM); \
+    if (!(Q->pj[n-1] = pj_##proj(nullptr))) return destructor(P, ENOMEM); \
     if (!(Q->pj[n-1] = pj_##proj(Q->pj[n-1]))) return destructor(P, ENOMEM); \
     Q->pj[n-1]->ctx = P->ctx; \
     Q->pj[n-1]->x0 = x_0; \
@@ -187,7 +187,7 @@ PJ *PROJECTION(igh) {
     XY xy1, xy3;
     LP lp = { 0, d4044118 };
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 

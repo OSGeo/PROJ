@@ -67,7 +67,7 @@ char *pj_get_def( PJ *P, int options )
 
     definition = (char *) pj_malloc(def_max);
     if (!definition)
-        return NULL;
+        return nullptr;
     definition[0] = '\0';
 
     for (t = P->params; t; t = t->next)
@@ -91,7 +91,7 @@ char *pj_get_def( PJ *P, int options )
             }
             else {
                 pj_dalloc( definition );
-                return NULL;
+                return nullptr;
             }
         }
 

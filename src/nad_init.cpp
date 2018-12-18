@@ -83,11 +83,11 @@ int nad_ctable_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
     /* read all the actual shift values */
     a_size = ct->lim.lam * ct->lim.phi;
     ct->cvs = (FLP *) pj_malloc(sizeof(FLP) * a_size);
-    if( ct->cvs == NULL 
+    if( ct->cvs == nullptr 
         || pj_ctx_fread(ctx, ct->cvs, sizeof(FLP), a_size, fid) != a_size )
     {
         pj_dalloc( ct->cvs );
-        ct->cvs = NULL;
+        ct->cvs = nullptr;
 
         pj_log( ctx, PJ_LOG_ERROR, 
                 "ctable loading failed on fread() - binary incompatible?" );
@@ -111,12 +111,12 @@ struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
 
     /* read the table header */
     ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
-    if( ct == NULL 
+    if( ct == nullptr 
         || pj_ctx_fread( ctx, ct, sizeof(struct CTABLE), 1, fid ) != 1 )
     {
         pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
         pj_dalloc( ct );
-        return NULL;
+        return nullptr;
     }
 
     /* do some minimal validation to ensure the structure isn't corrupt */
@@ -125,7 +125,7 @@ struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
     {
         pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
         pj_dalloc( ct );
-        return NULL;
+        return nullptr;
     }
     
     /* trim white space and newlines off id */
@@ -137,7 +137,7 @@ struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
             break;
     }
 
-    ct->cvs = NULL;
+    ct->cvs = nullptr;
 
     return ct;
 }
@@ -158,13 +158,13 @@ int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
     /* read all the actual shift values */
     a_size = ct->lim.lam * ct->lim.phi;
     ct->cvs = (FLP *) pj_malloc(sizeof(FLP) * a_size);
-    if( ct->cvs == NULL 
+    if( ct->cvs == nullptr 
         || pj_ctx_fread(ctx, ct->cvs, sizeof(FLP), a_size, fid) != a_size )
     {
         pj_dalloc( ct->cvs );
-        ct->cvs = NULL;
+        ct->cvs = nullptr;
 
-        if( getenv("PROJ_DEBUG") != NULL )
+        if( getenv("PROJ_DEBUG") != nullptr )
         {
             fprintf( stderr,
             "ctable2 loading failed on fread() - binary incompatible?\n" );
@@ -197,7 +197,7 @@ struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
     if( pj_ctx_fread( ctx, header, sizeof(header), 1, fid ) != 1 )
     {
         pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-        return NULL;
+        return nullptr;
     }
 
     if( !IS_LSB )
@@ -210,15 +210,15 @@ struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
     {
         pj_log( ctx, PJ_LOG_ERROR, "ctable2 - wrong header!" );
         pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-        return NULL;
+        return nullptr;
     }
 
     /* read the table header */
     ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
-    if( ct == NULL )
+    if( ct == nullptr )
     {
         pj_ctx_set_errno( ctx, ENOMEM );
-        return NULL;
+        return nullptr;
     }
 
     memcpy( ct->id,       header +  16, 80 );
@@ -235,7 +235,7 @@ struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
     {
         pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
         pj_dalloc( ct );
-        return NULL;
+        return nullptr;
     }
     
     /* trim white space and newlines off id */
@@ -247,7 +247,7 @@ struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
             break;
     }
 
-    ct->cvs = NULL;
+    ct->cvs = nullptr;
 
     return ct;
 }
@@ -271,16 +271,16 @@ struct CTABLE *nad_init(projCtx ctx, char *name)
 /* -------------------------------------------------------------------- */
     strcpy(fname, name);
     if (!(fid = pj_open_lib(ctx, fname, "rb"))) {
-        return 0;
+        return nullptr;
     }
 
     ct = nad_ctable_init( ctx, fid );
-    if( ct != NULL )
+    if( ct != nullptr )
     {
         if( !nad_ctable_load( ctx, ct, fid ) )
         {
             nad_free( ct );
-            ct = NULL;
+            ct = nullptr;
         }
     }
 
@@ -297,7 +297,7 @@ struct CTABLE *nad_init(projCtx ctx, char *name)
 void nad_free(struct CTABLE *ct) 
 {
     if (ct) {
-        if( ct->cvs != NULL )
+        if( ct->cvs != nullptr )
             pj_dalloc(ct->cvs);
 
         pj_dalloc(ct);

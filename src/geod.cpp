@@ -17,7 +17,7 @@ tag = '#',	/* beginning of line tag character */
 pos_azi = 0,	/* output azimuths as positive values */
 inverse = 0;	/* != 0 then inverse geodesic */
 	static char
-*oform = (char *)0,	/* output format for decimal degrees */
+*oform = (char *)nullptr,	/* output format for decimal degrees */
 *osform = "%.3f",	/* output format for S */
 pline[50],		/* work string */
 *usage =
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 	FILE *fid;
 	static int eargc = 0, c;
 
-	if ((emess_dat.Prog_name = strrchr(*argv,'/')) != NULL) ++emess_dat.Prog_name;
+	if ((emess_dat.Prog_name = strrchr(*argv,'/')) != nullptr) ++emess_dat.Prog_name;
 	else emess_dat.Prog_name = *argv;
 	inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
 	if (argc <= 1 ) {
@@ -223,7 +223,7 @@ noargument:		   emess(1,"missing argument for -%c",*arg);
 				fid = stdin;
 				emess_dat.File_name = "<stdin>";
 			} else {
-				if ((fid = fopen(*eargv, "r")) == NULL) {
+				if ((fid = fopen(*eargv, "r")) == nullptr) {
 					emess(-2, *eargv, "input file");
 					continue;
 				}
@@ -232,7 +232,7 @@ noargument:		   emess(1,"missing argument for -%c",*arg);
 			emess_dat.File_line = 0;
 			process(fid);
 			(void)fclose(fid);
-			emess_dat.File_name = (char *)0;
+			emess_dat.File_name = (char *)nullptr;
 		}
 	}
 	exit(0); /* normal completion */

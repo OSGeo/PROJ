@@ -73,7 +73,7 @@ Behave mostly as proj_trans, but attempt to use 2D interfaces only.
 Used in gie.c, to enforce testing 2D code, and by PJ_pipeline.c to implement
 chained calls starting out with a call to its 2D interface.
 ***************************************************************************************/
-    if (0==P)
+    if (nullptr==P)
         return coo;
     if (P->inverted)
         direction = static_cast<PJ_DIRECTION>(-direction);
@@ -103,7 +103,7 @@ Behave mostly as proj_trans, but attempt to use 3D interfaces only.
 Used in gie.c, to enforce testing 3D code, and by PJ_pipeline.c to implement
 chained calls starting out with a call to its 3D interface.
 ***************************************************************************************/
-    if (0==P)
+    if (nullptr==P)
         return coo;
     if (P->inverted)
         direction = static_cast<PJ_DIRECTION>(-direction);
@@ -135,14 +135,14 @@ Check if a a PJ has an inverse.
 
 /* Move P to a new context - or to the default context if 0 is specified */
 void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
-    if (0==ctx)
+    if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
     pj_set_ctx (P, ctx);
 }
 
 
 void proj_context_inherit (PJ *parent, PJ *child) {
-    if (0==parent)
+    if (nullptr==parent)
         pj_set_ctx (child, pj_get_default_ctx());
     else
         pj_set_ctx (child, pj_get_ctx(parent));
@@ -160,8 +160,8 @@ considered whitespace.
     char *comment;
     char *start = c;
 
-    if (0==c)
-        return 0;
+    if (nullptr==c)
+        return nullptr;
 
     comment = strchr (c, '#');
     if (comment)
@@ -202,8 +202,8 @@ consuming their surrounding whitespace.
     /* Flag showing that a whitespace (ws) has been written after last non-ws */
     size_t ws;
 
-    if (0==c)
-       return 0;
+    if (nullptr==c)
+       return nullptr;
 
     pj_chomp (c);
     n = strlen (c);
@@ -303,16 +303,16 @@ It is the duty of the caller to free this array.
     size_t i, j;
     char **argv;
 
-    if (0==args)
-        return 0;
+    if (nullptr==args)
+        return nullptr;
     if (0==argc)
-        return 0;
+        return nullptr;
 
 
     /* turn the input string into an array of strings */
     argv = (char **) calloc (argc, sizeof (char *));
-    if (0==argv)
-        return 0;
+    if (nullptr==argv)
+        return nullptr;
     argv[0] = args;
     j = 1;
     for (i = 0;  ;  i++) {
@@ -344,8 +344,8 @@ array.
         n += strlen (argv[i]);
 
     p = static_cast<char*>(pj_calloc (n + argc + 1, sizeof (char)));
-    if (0==p)
-        return 0;
+    if (nullptr==p)
+        return nullptr;
     if (0==argc)
         return p;
 
@@ -364,7 +364,7 @@ void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
 Raise an error directly on a context, without going through a PJ belonging
 to that context.
 ******************************************************************************/
-    if (0==ctx)
+    if (nullptr==ctx)
         ctx = pj_get_default_ctx();
     pj_ctx_set_errno (ctx, err);
 }
@@ -381,9 +381,9 @@ PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level) {
    Set logging level 0-3. Higher number means more debug info. 0 turns it off
 ****************************************************************************************/
     PJ_LOG_LEVEL previous;
-    if (0==ctx)
+    if (nullptr==ctx)
         ctx = pj_get_default_ctx();
-    if (0==ctx)
+    if (nullptr==ctx)
         return PJ_LOG_TELL;
     previous = static_cast<PJ_LOG_LEVEL>(abs (ctx->debug_level));
     if (PJ_LOG_TELL==log_level)
@@ -435,11 +435,11 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
     Put a new logging function into P's context. The opaque object app_data is
     passed as first arg at each call to the logger
 ******************************************************************************/
-    if (0==ctx)
+    if (nullptr==ctx)
         pj_get_default_ctx ();
-    if (0==ctx)
+    if (nullptr==ctx)
         return;
     ctx->app_data = app_data;
-    if (0!=logf)
+    if (nullptr!=logf)
         ctx->logger = logf;
 }

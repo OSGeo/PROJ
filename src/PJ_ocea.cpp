@@ -54,7 +54,7 @@ PJ *PROJECTION(ocea) {
     double phi_0=0.0, phi_1, phi_2, lam_1, lam_2, lonz, alpha;
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 

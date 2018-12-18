@@ -27,8 +27,8 @@ double *pj_enfn(double es) {
     double t, *en;
 
 	en = (double *) pj_malloc(EN_SIZE * sizeof (double));
-	if (0==en)
-	    return 0;
+	if (nullptr==en)
+	    return nullptr;
 
     en[0] = C00 - es * (C02 + es * (C04 + es * (C06 + es * C08)));
     en[1] = es * (C22 - es * (C04 + es * (C06 + es * C08)));

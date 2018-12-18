@@ -106,7 +106,7 @@ double proj_strtod(const char *str, char **endptr) {
     int num_digits_after_comma  = 0;
     int num_prefixed_zeros      = 0;
 
-    if (0==str) {
+    if (nullptr==str) {
         errno = EFAULT;
         if (endptr)
             *endptr = p;
@@ -125,7 +125,7 @@ double proj_strtod(const char *str, char **endptr) {
     }
 
     /* non-numeric? */
-    if (0==strchr("0123456789+-._", *p)) {
+    if (nullptr==strchr("0123456789+-._", *p)) {
         if (endptr)
             *endptr = (char *) str;
         return 0;
@@ -150,7 +150,7 @@ double proj_strtod(const char *str, char **endptr) {
     }
 
     /* stray sign, as in "+/-"? */
-    if (0!=sign && (0==strchr ("0123456789._", *p) || 0==*p)) {
+    if (0!=sign && (nullptr==strchr ("0123456789._", *p) || 0==*p)) {
         if (endptr)
             *endptr = (char *) str;
         return 0;
@@ -161,7 +161,7 @@ double proj_strtod(const char *str, char **endptr) {
         p++;
 
     /* zero? */
-    if ((0==*p) || 0==strchr ("0123456789eE.", *p) || isspace(*p)) {
+    if ((0==*p) || nullptr==strchr ("0123456789eE.", *p) || isspace(*p)) {
         if (endptr)
             *endptr = p;
         return sign==-1? -0: 0;
@@ -202,7 +202,7 @@ double proj_strtod(const char *str, char **endptr) {
             }
 
         /* if the next character is nonnumeric, we have reached the end */
-        if (0==*p || 0==strchr ("_0123456789eE+-", *p)) {
+        if (0==*p || nullptr==strchr ("_0123456789eE+-", *p)) {
             if (endptr)
                 *endptr = p;
             if (sign==-1)
@@ -249,7 +249,7 @@ double proj_strtod(const char *str, char **endptr) {
         p++;
 
         /* Just a stray "e", as in 100elephants? */
-        if (0==*p || 0==strchr ("0123456789+-_", *p)) {
+        if (0==*p || nullptr==strchr ("0123456789+-_", *p)) {
             p--;
             break;
         }

@@ -62,7 +62,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 PJ *PROJECTION(tpeqd) {
     double lam_1, lam_2, phi_1, phi_2, A12, pp;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 

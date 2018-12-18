@@ -211,14 +211,14 @@ static LP pipeline_reverse (XY xy, PJ *P) {
 
 static PJ *destructor (PJ *P, int errlev) {
     int i;
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     /* Deallocate each pipeine step, then pipeline array */
-    if (0!=static_cast<struct pj_opaque*>(P->opaque)->pipeline)
+    if (nullptr!=static_cast<struct pj_opaque*>(P->opaque)->pipeline)
         for (i = 0;  i < static_cast<struct pj_opaque*>(P->opaque)->steps; i++)
             proj_destroy (static_cast<struct pj_opaque*>(P->opaque)->pipeline[i+1]);
     pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->pipeline);
@@ -234,8 +234,8 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
 
     /* Room for the pipeline: An array of PJ * with room for sentinels at both ends */
     static_cast<struct pj_opaque*>(P->opaque)->pipeline = static_cast<PJ**>(pj_calloc (steps + 2, sizeof(PJ *)));
-    if (0==static_cast<struct pj_opaque*>(P->opaque)->pipeline)
-        return 0;
+    if (nullptr==static_cast<struct pj_opaque*>(P->opaque)->pipeline)
+        return nullptr;
 
     static_cast<struct pj_opaque*>(P->opaque)->steps = (int)steps;
 
@@ -248,7 +248,7 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
 /* count the number of args in pipeline definition, and mark all args as used */
 static size_t argc_params (paralist *params) {
     size_t argc = 0;
-    for (; params != 0; params = params->next) {
+    for (; params != nullptr; params = params->next) {
         argc++;
         params->used = 1;
     }
@@ -263,9 +263,9 @@ static char **argv_params (paralist *params, size_t argc) {
     char **argv;
     size_t i = 0;
     argv = static_cast<char**>(pj_calloc (argc, sizeof (char *)));
-    if (0==argv)
-        return 0;
-    for (; params != 0; params = params->next)
+    if (nullptr==argv)
+        return nullptr;
+    for (; params != nullptr; params = params->next)
         argv[i++] = params->param;
     argv[i++] = argv_sentinel;
     return argv;
@@ -290,13 +290,13 @@ static void set_ellipsoid(PJ *P) {
     int err = proj_errno_reset (P);
 
     /* Break the linked list after the global args */
-    attachment = 0;
-    for (cur = P->params; cur != 0; cur = cur->next)
+    attachment = nullptr;
+    for (cur = P->params; cur != nullptr; cur = cur->next)
         /* cur->next will always be non 0 given argv_sentinel presence, */
         /* but this is far from being obvious for a static analyzer */
-        if (cur->next != 0 && strcmp(argv_sentinel, cur->next->param) == 0) {
+        if (cur->next != nullptr && strcmp(argv_sentinel, cur->next->param) == 0) {
             attachment = cur->next;
-            cur->next = 0;
+            cur->next = nullptr;
             break;
         }
 
@@ -322,7 +322,7 @@ static void set_ellipsoid(PJ *P) {
     /* Re-attach the dangling list */
     /* Note: cur will always be non 0 given argv_sentinel presence, */
     /* but this is far from being obvious for a static analyzer */
-    if( cur != 0 )
+    if( cur != nullptr )
         cur->next = attachment;
     proj_errno_restore (P, err);
 }
@@ -353,16 +353,16 @@ PJ *OPERATION(pipeline,0) {
 
 
     P->opaque = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof(struct pj_opaque)));
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return destructor(P, ENOMEM);
 
     argc = (int)argc_params (P->params);
     static_cast<struct pj_opaque*>(P->opaque)->argv = argv = argv_params (P->params, argc);
-    if (0==argv)
+    if (nullptr==argv)
         return destructor (P, ENOMEM);
 
     static_cast<struct pj_opaque*>(P->opaque)->current_argv = current_argv = static_cast<char**>(pj_calloc (argc, sizeof (char *)));
-    if (0==current_argv)
+    if (nullptr==current_argv)
         return destructor (P, ENOMEM);
 
     /* Do some syntactical sanity checking */
@@ -396,7 +396,7 @@ PJ *OPERATION(pipeline,0) {
         return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: no pipeline def */
 
     /* Make room for the pipeline and execution indicators */
-    if (0==pj_create_pipeline (P, nsteps))
+    if (nullptr==pj_create_pipeline (P, nsteps))
         return destructor (P, ENOMEM);
 
     set_ellipsoid(P);
@@ -407,7 +407,7 @@ PJ *OPERATION(pipeline,0) {
         int j;
         int  current_argc = 0;
         int  err;
-        PJ     *next_step = 0;
+        PJ     *next_step = nullptr;
 
         /* Build a set of setup args for the current step */
         proj_log_trace (P, "Pipeline: Building arg list for step no. %d", i);
@@ -431,7 +431,7 @@ PJ *OPERATION(pipeline,0) {
         next_step = proj_create_argv (P->ctx, current_argc, current_argv);
         proj_log_trace (P, "Pipeline: Step %d (%s) at %p", i, current_argv[0], next_step);
 
-        if (0==next_step) {
+        if (nullptr==next_step) {
             /* The step init failed, but possibly without setting errno. If so, we say "malformed" */
             int err_to_report = proj_errno(P);
             if (0==err_to_report)
@@ -472,9 +472,9 @@ PJ *OPERATION(pipeline,0) {
         if ( pj_has_inverse(Q) ) {
             continue;
         } else {
-            P->inv   = 0;
-            P->inv3d = 0;
-            P->inv4d = 0;
+            P->inv   = nullptr;
+            P->inv3d = nullptr;
+            P->inv4d = nullptr;
             break;
         }
     }

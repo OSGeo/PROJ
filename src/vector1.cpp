@@ -15,14 +15,14 @@ freev2(void **v, int nrows) {
 vector2(int nrows, int ncols, int size) {
 	void **s;
 
-	if ((s = (void **)pj_malloc(sizeof(void *) * nrows)) != NULL) {
+	if ((s = (void **)pj_malloc(sizeof(void *) * nrows)) != nullptr) {
 		int rsize, i;
 
 		rsize = size * ncols;
 		for (i = 0; i < nrows; ++i)
 			if (!(s[i] = pj_malloc(rsize))) {
 				freev2(s, i);
-				return (void **)0;
+				return (void **)nullptr;
 			}
 	}
 	return s;

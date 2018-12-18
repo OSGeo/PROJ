@@ -54,7 +54,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 /*      definition will last into the pj_ell_set() function called      */
 /*      after this one.                                                 */
 /* -------------------------------------------------------------------- */
-    if( (name = pj_param(ctx, pl,"sdatum").s) != NULL )
+    if( (name = pj_param(ctx, pl,"sdatum").s) != nullptr )
     {
         paralist *curr;
         const char *s;
@@ -96,7 +96,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 /*      Check for nadgrids parameter.                                   */
 /* -------------------------------------------------------------------- */
     nadgrids = pj_param(ctx, pl,"snadgrids").s;
-    if( nadgrids != NULL )
+    if( nadgrids != nullptr )
     {
         /* We don't actually save the value separately.  It will continue
            to exist int he param list for use in pj_apply_gridshift.c */
@@ -107,7 +107,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 /* -------------------------------------------------------------------- */
 /*      Check for grid catalog parameter, and optional date.            */
 /* -------------------------------------------------------------------- */
-    else if( (catalog = pj_param(ctx, pl,"scatalog").s) != NULL )
+    else if( (catalog = pj_param(ctx, pl,"scatalog").s) != nullptr )
     {
         const char *date;
 
@@ -119,14 +119,14 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
         }
 
         date = pj_param(ctx, pl, "sdate").s;
-        if( date != NULL) 
+        if( date != nullptr) 
             projdef->datum_date = pj_gc_parsedate( ctx, date);
     }
 
 /* -------------------------------------------------------------------- */
 /*      Check for towgs84 parameter.                                    */
 /* -------------------------------------------------------------------- */
-    else if( (towgs84 = pj_param(ctx, pl,"stowgs84").s) != NULL )
+    else if( (towgs84 = pj_param(ctx, pl,"stowgs84").s) != nullptr )
     {
         int    parm_count = 0;
         const char *s;

@@ -21,10 +21,10 @@ int pj_factors(LP lp, const PJ *P, double h, struct FACTORS *fac) {
 
     /* Failing the 3 initial checks will most likely be due to */
     /* earlier errors, so we leave errno alone */
-    if (0==fac)
+    if (nullptr==fac)
         return 1;
 
-    if (0==P)
+    if (nullptr==P)
         return 1;
 
     if (HUGE_VAL==lp.lam)

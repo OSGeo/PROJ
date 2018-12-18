@@ -77,7 +77,7 @@ int pj_ellipsoid (PJ *P) {
     int err = proj_errno_reset (P);
     char *empty = {""};
 
-    P->def_size = P->def_shape = P->def_spherification = P->def_ellps = 0;
+    P->def_size = P->def_shape = P->def_spherification = P->def_ellps = nullptr;
 
     /* Specifying R overrules everything */
     if (pj_get_param (P->params, "R")) {
@@ -129,13 +129,13 @@ static int ellps_ellps (PJ *P) {
 /***************************************************************************************/
     PJ B;
     const PJ_ELLPS *ellps;
-    paralist *par = 0;
+    paralist *par = nullptr;
     char *name;
     int err;
 
     /* Sail home if ellps=xxx is not specified */
     par = pj_get_param (P->params, "ellps");
-    if (0==par)
+    if (nullptr==par)
         return 0;
 
     /* Otherwise produce a fake PJ to make ellps_size/ellps_shape do the hard work for us */
@@ -148,7 +148,7 @@ static int ellps_ellps (PJ *P) {
         return proj_errno_set (P, PJD_ERR_INVALID_ARG);
     name = par->param + 6;
     ellps = pj_find_ellps (name);
-    if (0==ellps)
+    if (nullptr==ellps)
         return proj_errno_set (P, PJD_ERR_UNKNOWN_ELLP_PARAM);
 
     /* Now, get things ready for ellps_size/ellps_shape, make them do their thing, and clean up */
@@ -178,7 +178,7 @@ static int ellps_ellps (PJ *P) {
 /***************************************************************************************/
 static int ellps_size (PJ *P) {
 /***************************************************************************************/
-    paralist *par = 0;
+    paralist *par = nullptr;
     int a_was_set = 0;
 
     /* A size parameter *must* be given, but may have been given as ellps prior */
@@ -187,9 +187,9 @@ static int ellps_size (PJ *P) {
 
     /* Check which size key is specified */
     par = pj_get_param (P->params, "R");
-    if (0==par)
+    if (nullptr==par)
         par = pj_get_param (P->params, "a");
-    if (0==par)
+    if (nullptr==par)
         return a_was_set? 0: proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
 
     P->def_size = par->param;
@@ -212,11 +212,11 @@ static int ellps_size (PJ *P) {
 static int ellps_shape (PJ *P) {
 /***************************************************************************************/
     char *keys[]  = {"rf", "f", "es", "e", "b"};
-    paralist *par = 0;
-    char *def = 0;
+    paralist *par = nullptr;
+    char *def = nullptr;
     size_t i, len;
 
-    par = 0;
+    par = nullptr;
     len = sizeof (keys) / sizeof (char *);
 
     /* Check which shape key is specified */
@@ -228,9 +228,9 @@ static int ellps_shape (PJ *P) {
 
     /* Not giving a shape parameter means selecting a sphere, unless shape */
     /* has been selected previously via ellps=xxx */
-    if (0==par && P->es != 0)
+    if (nullptr==par && P->es != 0)
         return 0;
-    if (0==par && P->es==0) {
+    if (nullptr==par && P->es==0) {
         P->es = P->f = 0;
         P->b = P->a;
         return 0;
@@ -319,14 +319,14 @@ static int ellps_spherification (PJ *P) {
 /***************************************************************************************/
     char *keys[] =  {"R_A", "R_V", "R_a", "R_g", "R_h", "R_lat_a", "R_lat_g"};
     size_t len, i;
-    paralist *par = 0;
-    char *def = 0;
+    paralist *par = nullptr;
+    char *def = nullptr;
 
     double t;
     char *v, *endp;
 
     len = sizeof (keys) /  sizeof (char *);
-    P->def_spherification = 0;
+    P->def_spherification = nullptr;
 
     /* Check which spherification key is specified */
     for (i = 0;  i < len;  i++) {
@@ -410,8 +410,8 @@ static paralist *pj_get_param (paralist *list, char *key) {
 
 static char *pj_param_value (paralist *list) {
     char *key, *value;
-    if (0==list)
-        return 0;
+    if (nullptr==list)
+        return nullptr;
 
     key = list->param;
     value = strchr (key, '=');
@@ -426,15 +426,15 @@ static const PJ_ELLPS *pj_find_ellps (char *name) {
     const char *s;
     const PJ_ELLPS *ellps;
 
-    if (0==name)
-        return 0;
+    if (nullptr==name)
+        return nullptr;
 
     ellps = proj_list_ellps();
 
     /* Search through internal ellipsoid list for name */
     for (i = 0; (s = ellps[i].id) && strcmp(name, s) ; ++i);
-    if (0==s)
-        return 0;
+    if (nullptr==s)
+        return nullptr;
     return ellps + i;
 }
 

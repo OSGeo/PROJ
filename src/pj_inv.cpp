@@ -114,7 +114,7 @@ static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
             return coo;
         if (P->hgridshift)
             coo = proj_trans (P->hgridshift, PJ_FWD, coo);
-        else if (P->helmert || (P->cart_wgs84 != 0 && P->cart != 0)) {
+        else if (P->helmert || (P->cart_wgs84 != nullptr && P->cart != nullptr)) {
             coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
             if( P->helmert )
                 coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */

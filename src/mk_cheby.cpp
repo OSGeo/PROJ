@@ -23,36 +23,36 @@ makeT(int nru, int nrv) {
     int i;
 
     if (!(T = (Tseries *)pj_malloc(sizeof(Tseries))))
-        return 0;
+        return nullptr;
     if (!(T->cu = (struct PW_COEF *)pj_malloc(sizeof(struct PW_COEF) * nru))) {
         pj_dalloc(T);
-        return 0;
+        return nullptr;
     }
     if (!(T->cv = (struct PW_COEF *)pj_malloc(sizeof(struct PW_COEF) * nrv))) {
         pj_dalloc(T->cu);
         pj_dalloc(T);
-        return 0;
+        return nullptr;
     }
 
     for (i = 0; i < nru; ++i)
-        T->cu[i].c = 0;
+        T->cu[i].c = nullptr;
     for (i = 0; i < nrv; ++i)
-        T->cv[i].c = 0;
+        T->cv[i].c = nullptr;
     return T;
 }
 Tseries *
 mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV), 
          int nu, int nv, int power) {
     int j, i, nru, nrv, *ncu, *ncv;
-    Tseries *T = NULL;
+    Tseries *T = nullptr;
     projUV **w;
     double cutres;
 
     if (!(w = (projUV **)vector2(nu, nv, sizeof(projUV))))
-        return 0;
+        return nullptr;
     if (!(ncu = (int *)vector1(nu + nv, sizeof(int)))) {
         freev2((void **)w, nu);
-        return 0;
+        return nullptr;
     }
     ncv = ncu + nu;
     if (!bchgen(a, b, nu, nv, w, func)) {
@@ -106,7 +106,7 @@ mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV),
                 if (ncu[j]) nru = j + 1;	/* update row max */
                 if (ncv[j]) nrv = j + 1;
             }
-            if ((T = makeT(nru, nrv)) != NULL ) {
+            if ((T = makeT(nru, nrv)) != nullptr ) {
                 T->a = a;
                 T->b = b;
                 T->mu = nru - 1;
@@ -137,7 +137,7 @@ mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV),
                     }
                 }
             }
-        } else if ((T = makeT(nru, nrv)) != NULL) {
+        } else if ((T = makeT(nru, nrv)) != nullptr) {
             /* else make returned Chebyshev coefficient structure */
             T->mu = nru - 1; /* save row degree */
             T->mv = nrv - 1;
@@ -184,7 +184,7 @@ mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV),
                 pj_dalloc(T->cv[i].c);
         pj_dalloc(T);
     }
-    T = 0;
+    T = nullptr;
   gohome:
     freev2((void **) w, nu);
     pj_dalloc(ncu);

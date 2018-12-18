@@ -28,7 +28,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 PJ *PROJECTION(tcc) {
     P->es  = 0.;
     P->fwd = s_forward;
-    P->inv = 0;
+    P->inv = nullptr;
 
     return P;
 }

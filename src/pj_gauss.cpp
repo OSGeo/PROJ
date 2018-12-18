@@ -50,8 +50,8 @@ void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
     double sphi, cphi, es;
     struct GAUSS *en;
 
-    if ((en = (struct GAUSS *)malloc(sizeof(struct GAUSS))) == NULL)
-        return (NULL);
+    if ((en = (struct GAUSS *)malloc(sizeof(struct GAUSS))) == nullptr)
+        return (nullptr);
     es = e * e;
     en->e = e;
     sphi = sin(phi0);
@@ -60,7 +60,7 @@ void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
     en->C = sqrt(1. + es * cphi * cphi / (1. - es));
     if (en->C == 0.0) {
         free(en);
-        return NULL;
+        return nullptr;
     }
     *chi = asin(sphi / en->C);
     en->ratexp = 0.5 * en->C * e;

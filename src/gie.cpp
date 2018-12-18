@@ -194,7 +194,7 @@ typedef struct {
     FILE *fout;
 } gie_ctx;
 
-ffio *F = 0;
+ffio *F = nullptr;
 
 static gie_ctx T;
 int tests=0, succs=0, succ_fails=0, fail_fails=0, succ_rtps=0, fail_rtps=0;
@@ -236,8 +236,8 @@ static const char usage[] = {
 
 int main (int argc, char **argv) {
     int  i;
-    const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", "version", 0};
-    const char *longkeys[]   = {"o=output", 0};
+    const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", "version", nullptr};
+    const char *longkeys[]   = {"o=output", nullptr};
     OPTARGS *o;
 
     memset (&T, 0, sizeof (T));
@@ -248,7 +248,7 @@ int main (int argc, char **argv) {
     T.use_proj4_init_rules = FALSE;
 
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
-    if (0==o)
+    if (nullptr==o)
         return 0;
 
     if (opt_given (o, "h") || argc==1) {
@@ -274,7 +274,7 @@ int main (int argc, char **argv) {
     if (opt_given (o, "o"))
         T.fout = fopen (opt_arg (o, "output"), "rt");
 
-    if (0==T.fout) {
+    if (nullptr==T.fout) {
         fprintf (stderr, "%s: Cannot open '%s' for output\n", o->progname, opt_arg (o, "output"));
         free (o);
         return 1;
@@ -294,7 +294,7 @@ int main (int argc, char **argv) {
     }
 
     F = ffio_create (gie_tags, n_gie_tags, 1000);
-    if (0==F) {
+    if (nullptr==F) {
         fprintf (stderr, "%s: No memory\n", o->progname);
         free (o);
         return 1;
@@ -379,12 +379,12 @@ static int process_file (const char *fname) {
 
     if (T.skip) {
         proj_destroy (T.P);
-        T.P = 0;
+        T.P = nullptr;
         return 0;
     }
 
     f = fopen (fname, "rt");
-    if (0==f) {
+    if (nullptr==f) {
         if (T.verbosity > 0) {
             fprintf (T.fout, "%sCannot open spec'd input file '%s' - bye!\n", delim, fname);
             return 2;
@@ -400,7 +400,7 @@ static int process_file (const char *fname) {
     while (get_inp(F)) {
         if (SKIP==dispatch (F->tag, F->args)) {
             proj_destroy (T.P);
-            T.P = 0;
+            T.P = nullptr;
             return 0;
         }
     }
@@ -591,10 +591,10 @@ either a conversion or a transformation)
 
     if (T.P)
         proj_destroy (T.P);
-    proj_errno_reset (0);
-    proj_context_use_proj4_init_rules(0, T.use_proj4_init_rules);
+    proj_errno_reset (nullptr);
+    proj_context_use_proj4_init_rules(nullptr, T.use_proj4_init_rules);
 
-    T.P = proj_create (0, F->args);
+    T.P = proj_create (nullptr, F->args);
 
     /* Checking that proj_create succeeds is first done at "expect" time, */
     /* since we want to support "expect"ing specific error codes */
@@ -715,7 +715,7 @@ Always returns 0.
     char *endp;
     PJ_COORD coo;
 
-    if (0==T.P) {
+    if (nullptr==T.P) {
         if (T.ignore == proj_errno(T.P))
             return another_skip();
 
@@ -840,7 +840,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     if (T.ignore==proj_errno(T.P))
         return another_skip ();
 
-    if (0==T.P) {
+    if (nullptr==T.P) {
         /* If we expect failure, and fail, then it's a success... */
         if (expect_failure) {
             /* Failed to fail correctly? */
@@ -1198,23 +1198,23 @@ static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_si
 Constructor for the ffio object.
 ****************************************************************************************/
     ffio *G = static_cast<ffio*>(calloc (1, sizeof (ffio)));
-    if (0==G)
-        return 0;
+    if (nullptr==G)
+        return nullptr;
 
     if (0==max_record_size)
         max_record_size = 1000;
 
     G->args = static_cast<char*>(calloc (1, 5*max_record_size));
-    if (0==G->args) {
+    if (nullptr==G->args) {
         free (G);
-        return 0;
+        return nullptr;
     }
 
     G->next_args = static_cast<char*>(calloc (1, max_record_size));
-    if (0==G->args) {
+    if (nullptr==G->args) {
         free (G->args);
         free (G);
-        return 0;
+        return nullptr;
     }
 
     G->args_size = 5*max_record_size;
@@ -1238,7 +1238,7 @@ fclose has been called prior to ffio_destroy.
     free (G->args);
     free (G->next_args);
     free (G);
-    return 0;
+    return nullptr;
 }
 
 
@@ -1255,10 +1255,10 @@ continues until a gie command verb is found at the start of a line
 ****************************************************************************************/
     int i;
     char *c;
-    if (0==G)
+    if (nullptr==G)
         return 0;
     c = G->next_args;
-    if (0==c)
+    if (nullptr==c)
         return 0;
     if (0==c[0])
         return 0;
@@ -1279,7 +1279,7 @@ A start of a new command serves as an end delimiter for the current command
     for (j = 0;  j < G->n_tags;  j++)
         if (strncmp (G->next_args, G->tags[j], strlen(G->tags[j]))==0)
             return G->tags[j];
-    return 0;
+    return nullptr;
 }
 
 
@@ -1293,7 +1293,7 @@ instruction, or a "decorative element", i.e. one of the "ascii art" style
 block delimiters typically used to mark up block comments in a free format
 file.
 ****************************************************************************************/
-    if (G==0)
+    if (G==nullptr)
         return 0;
     if (at_decorative_element (G))
         return 1;
@@ -1312,7 +1312,7 @@ Read next line of input file. Returns 1 on success, 0 on failure.
     G->next_args[0] = 0;
     if (T.skip)
         return 0;
-    if (0==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
+    if (nullptr==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
         return 0;
     if (feof (G->f))
         return 0;
@@ -1356,7 +1356,7 @@ Make sure we're inside a <gie>-block. Return 1 on success, 0 otherwise.
         G->next_args[0] = 0;
         if (feof (G->f))
             return 0;
-        if (0==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
+        if (nullptr==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
             return 0;
         pj_chomp (G->next_args);
         G->next_lineno++;
@@ -1415,7 +1415,7 @@ static int append_args (ffio *G) {
     /* +2: 1 for the space separator and 1 for the NUL termination. */
     if (G->args_size < args_len + next_len - skip_chars + 2) {
         char *p = static_cast<char*>(realloc (G->args, 2 * G->args_size));
-        if (0==p)
+        if (nullptr==p)
             return 0;
         G->args = p;
         G->args_size = 2 * G->args_size;
@@ -1444,7 +1444,7 @@ whitespace etc. The block is stored in G->args. Returns 1 on success, 0 otherwis
         return 0;
     G->tag = at_tag (G);
 
-    if (0==G->tag)
+    if (nullptr==G->tag)
         return 0;
 
     do {

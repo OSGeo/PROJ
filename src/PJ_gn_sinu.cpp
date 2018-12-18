@@ -93,10 +93,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 
 static PJ *destructor (PJ *P, int errlev) {                        /* Destructor */
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
@@ -118,7 +118,7 @@ static void setup(PJ *P) {
 
 PJ *PROJECTION(sinu) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;
@@ -140,7 +140,7 @@ PJ *PROJECTION(sinu) {
 
 PJ *PROJECTION(eck6) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;
@@ -155,7 +155,7 @@ PJ *PROJECTION(eck6) {
 
 PJ *PROJECTION(mbtfps) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;
@@ -170,7 +170,7 @@ PJ *PROJECTION(mbtfps) {
 
 PJ *PROJECTION(gn_sinu) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;

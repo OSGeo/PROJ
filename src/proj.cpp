@@ -44,7 +44,7 @@ static int
 
 static char
     *cheby_str,         /* string controlling Chebychev evaluation */
-    *oform = (char *)0, /* output format for x-y or decimal degrees */
+    *oform = (char *)nullptr, /* output format for x-y or decimal degrees */
     oform_buffer[16];   /* Buffer for oform when using -d */
 
 static const char
@@ -74,7 +74,7 @@ static projUV int_proj(projUV data) {
 
 /* file processing function */
 static void process(FILE *fid) {
-    char line[MAX_LINE+3], *s = 0, pline[40];
+    char line[MAX_LINE+3], *s = nullptr, pline[40];
     PJ_COORD data;
 
     for (;;) {
@@ -313,7 +313,7 @@ int main(int argc, char **argv) {
     FILE *fid;
     int pargc = 0, iargc = argc, eargc = 0, mon = 0;
 
-    if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
+    if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != nullptr)
         ++emess_dat.Prog_name;
     else emess_dat.Prog_name = *argv;
     inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
@@ -410,7 +410,7 @@ int main(int argc, char **argv) {
                     {
                         printf("%12s %-12s %-30s\n",
                                ld->id, ld->ellipse_id, ld->defn);
-                        if( ld->comments != NULL && strlen(ld->comments) > 0 )
+                        if( ld->comments != nullptr && strlen(ld->comments) > 0 )
                             printf( "%25s %s\n", " ", ld->comments );
                     }
                 } else
@@ -559,7 +559,7 @@ int main(int argc, char **argv) {
             }
 
         } else {
-            if ((fid = fopen(*eargv, "rb")) == NULL) {
+            if ((fid = fopen(*eargv, "rb")) == nullptr) {
                 emess(-2, *eargv, "input file");
                 continue;
             }
@@ -571,7 +571,7 @@ int main(int argc, char **argv) {
         else
             process(fid);
         (void)fclose(fid);
-        emess_dat.File_name = 0;
+        emess_dat.File_name = nullptr;
     }
 
     if( Proj )

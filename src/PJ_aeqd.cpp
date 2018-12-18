@@ -63,10 +63,10 @@ PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 
 
 static PJ *destructor (PJ *P, int errlev) {                        /* Destructor */
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
@@ -270,7 +270,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(aeqd) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;

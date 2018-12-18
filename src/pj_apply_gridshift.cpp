@@ -57,7 +57,7 @@ int pj_apply_gridshift( projCtx ctx, const char *nadgrids, int inverse,
 
     gridlist = pj_gridlist_from_nadgrids( ctx, nadgrids, &grid_count );
 
-    if( gridlist == NULL || grid_count == 0 )
+    if( gridlist == nullptr || grid_count == 0 )
         return ctx->last_errno;
 
     ret = pj_apply_gridshift_3( ctx, gridlist, grid_count, inverse,
@@ -86,18 +86,18 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
                           double *x, double *y, double *z )
 
 {
-    if( defn->catalog_name != NULL )
+    if( defn->catalog_name != nullptr )
         return pj_gc_apply_gridshift( defn, inverse, point_count, point_offset,
                                       x, y, z );
 
-    if( defn->gridlist == NULL )
+    if( defn->gridlist == nullptr )
     {
         defn->gridlist =
             pj_gridlist_from_nadgrids( pj_get_ctx( defn ),
                                        pj_param(defn->ctx, defn->params,"snadgrids").s,
                                        &(defn->gridlist_count) );
 
-        if( defn->gridlist == NULL || defn->gridlist_count == 0 )
+        if( defn->gridlist == nullptr || defn->gridlist_count == 0 )
             return defn->ctx->last_errno;
     }
 
@@ -135,7 +135,7 @@ static struct CTABLE* find_ctable(projCtx ctx, LP input, int grid_count, PJ_GRID
         {
             PJ_GRIDINFO *child;
 
-            for( child = gi->child; child != NULL; child = child->next )
+            for( child = gi->child; child != nullptr; child = child->next )
             {
                 struct CTABLE *ct1 = child->ct;
                 epsilon = (fabs(ct1->del.phi)+fabs(ct1->del.lam))/10000.0;
@@ -150,24 +150,24 @@ static struct CTABLE* find_ctable(projCtx ctx, LP input, int grid_count, PJ_GRID
             }
 
             /* If we didn't find a child then nothing more to do */
-            if( child == NULL ) break;
+            if( child == nullptr ) break;
 
             /* Otherwise use the child, first checking it's children */
             gi = child;
             ct = child->ct;
         }
         /* load the grid shift info if we don't have it. */
-        if( ct->cvs == NULL) {
+        if( ct->cvs == nullptr) {
             if (!pj_gridinfo_load( ctx, gi ) ) {
                 pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-                return NULL;
+                return nullptr;
             }
         }
         /* if we get this far we have found a suitable grid */
         return ct;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /************************************************************************/
@@ -185,7 +185,7 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **gridlist, int gridlist_coun
     static int debug_count = 0;
     (void) z;
 
-    if( gridlist== NULL || gridlist_count == 0 )
+    if( gridlist== nullptr || gridlist_count == 0 )
     {
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return PJD_ERR_FAILED_TO_LOAD_GRID;
@@ -205,7 +205,7 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **gridlist, int gridlist_coun
         output.lam = HUGE_VAL;
 
         ct = find_ctable(ctx, input, gridlist_count, gridlist);
-        if( ct != NULL )
+        if( ct != nullptr )
         {
             output = nad_cvt( input, inverse, ct );
 
@@ -280,14 +280,14 @@ int proj_hgrid_init(PJ* P, const char *grids) {
     char *sgrids = (char *) pj_malloc( (strlen(grids)+1+1) *sizeof(char) );
     sprintf(sgrids, "%s%s", "s", grids);
 
-    if (P->gridlist == NULL) {
+    if (P->gridlist == nullptr) {
         P->gridlist = pj_gridlist_from_nadgrids(
             P->ctx,
             pj_param(P->ctx, P->params, sgrids).s,
             &(P->gridlist_count)
         );
 
-        if( P->gridlist == NULL || P->gridlist_count == 0 ) {
+        if( P->gridlist == nullptr || P->gridlist_count == 0 ) {
             pj_dealloc(sgrids);
             return 0;
         }
@@ -311,7 +311,7 @@ LP proj_hgrid_value(PJ *P, LP lp) {
     LP out = proj_coord_error().lp;
 
     ct = find_ctable(P->ctx, lp, P->gridlist_count, P->gridlist);
-    if (ct == 0) {
+    if (ct == nullptr) {
         pj_ctx_set_errno( P->ctx, PJD_ERR_GRID_AREA);
         return out;
     }
@@ -340,7 +340,7 @@ LP proj_hgrid_apply(PJ *P, LP lp, PJ_DIRECTION direction) {
 
     ct = find_ctable(P->ctx, lp, P->gridlist_count, P->gridlist);
 
-    if (ct == NULL || ct->cvs == NULL) {
+    if (ct == nullptr || ct->cvs == nullptr) {
         pj_ctx_set_errno( P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
         return out;
     }

@@ -179,7 +179,7 @@ static LP e_inverse (XY xy, PJ *P) {                /* Ellipsoidal, inverse */
 PJ *PROJECTION(krovak) {
     double u0, n0, g;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 

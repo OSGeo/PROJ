@@ -24,7 +24,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
 PJ *PROJECTION(wag7) {
     P->fwd = s_forward;
-    P->inv = 0;
+    P->inv = nullptr;
     P->es = 0.;
     return P;
 }

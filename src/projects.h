@@ -627,8 +627,8 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     if (P)                                                   \
         return pj_projection_specific_setup_##name (P);      \
     P = (PJ*) pj_calloc (1, sizeof(PJ));                     \
-    if (0==P)                                                \
-        return 0;                                            \
+    if (nullptr==P)                                          \
+        return nullptr;                                      \
     P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
     P->need_ellps = NEED_ELLPS;                              \

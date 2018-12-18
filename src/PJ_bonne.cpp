@@ -90,10 +90,10 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
 
 static PJ *destructor (PJ *P, int errlev) {                        /* Destructor */
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
@@ -104,7 +104,7 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
 PJ *PROJECTION(bonne) {
     double c;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;
@@ -115,7 +115,7 @@ PJ *PROJECTION(bonne) {
 
     if (P->es != 0.0) {
         Q->en = pj_enfn(P->es);
-        if (0==Q->en)
+        if (nullptr==Q->en)
             return destructor(P, ENOMEM);
         Q->m1 = pj_mlfn(Q->phi1, Q->am1 = sin(Q->phi1),
             c = cos(Q->phi1), Q->en);

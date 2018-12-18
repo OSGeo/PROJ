@@ -156,7 +156,7 @@ PJ *PROJECTION(lsat) {
     int land, path;
     double lam, alf, esc, ess;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 

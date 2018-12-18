@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     long lam, laml, phi, phil;
     FILE *fp;
 
-    const char *output_file = NULL;
+    const char *output_file = nullptr;
 
     const char *format   = "ctable2";
     const char *GS_TYPE  = "SECONDS";
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
         {
             format = argv[++i];
         }
-        else if( output_file == NULL )
+        else if( output_file == nullptr )
         {
             output_file = argv[i];
         }
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
             Usage();
     }
 
-    if( output_file == NULL )
+    if( output_file == nullptr )
         Usage();
 
     fprintf( stdout, "Output Binary File Format: %s\n", format );
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 /* ==================================================================== */
 
     memset(ct.id,0,MAX_TAB_ID);
-    if ( NULL == fgets(ct.id, MAX_TAB_ID, stdin) ) {
+    if ( nullptr == fgets(ct.id, MAX_TAB_ID, stdin) ) {
         perror("fgets");
         exit(1);
     }

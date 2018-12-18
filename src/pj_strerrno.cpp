@@ -79,7 +79,7 @@ char *pj_strerrno(int err) {
     size_t adjusted_err;
 
     if (0==err)
-        return 0;
+        return nullptr;
 
     /* System error codes are positive */
     if (err > 0) {

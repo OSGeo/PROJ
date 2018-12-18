@@ -130,10 +130,10 @@ static LP e_inverse (XY xy, PJ *P) {           /* Ellipsoidal/spheroidal, invers
 }
 
 static PJ *destructor (PJ *P, int errlev) { /* Destructor */
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->apa);
@@ -143,7 +143,7 @@ static PJ *destructor (PJ *P, int errlev) { /* Destructor */
 
 PJ *PROJECTION(eqearth) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;
@@ -154,7 +154,7 @@ PJ *PROJECTION(eqearth) {
     /* Ellipsoidal case */
     if (P->es != 0.0) {
        Q->apa = pj_authset(P->es); /* For auth_lat(). */
-       if (0 == Q->apa)
+       if (nullptr == Q->apa)
           return destructor(P, ENOMEM);
        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
        Q->rqda = sqrt(0.5*Q->qp); /* Authalic radius divided by major axis */

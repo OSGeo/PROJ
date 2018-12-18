@@ -276,7 +276,7 @@ static const struct TIME_UNITS time_units[] = {
     {"decimalyear", decimalyear_to_mjd, mjd_to_decimalyear, "Decimal year"},
     {"gps_week",    gps_week_to_mjd,    mjd_to_gps_week,    "GPS Week"},
     {"yyyymmdd",    yyyymmdd_to_mjd,    mjd_to_yyyymmdd,    "YYYYMMDD date"},
-    {NULL,          NULL,               NULL,               NULL}
+    {nullptr,          nullptr,               nullptr,               nullptr}
 };
 
 
@@ -424,7 +424,7 @@ static double get_unit_conversion_factor(const char* name,
         }
     }
     if( p_normalized_name ) {
-        *p_normalized_name = NULL;
+        *p_normalized_name = nullptr;
     }
     if( p_is_linear ) {
         *p_is_linear = -1;
@@ -444,7 +444,7 @@ PJ *CONVERSION(unitconvert,0) {
     int z_in_is_linear = -1; /* unknown */
     int z_out_is_linear = -1; /* unknown */
 
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
@@ -465,8 +465,8 @@ PJ *CONVERSION(unitconvert,0) {
     Q->xy_factor = 1.0;
     Q->z_factor  = 1.0;
 
-    if ((name = pj_param (P->ctx, P->params, "sxy_in").s) != NULL) {
-        const char* normalized_name = NULL;
+    if ((name = pj_param (P->ctx, P->params, "sxy_in").s) != nullptr) {
+        const char* normalized_name = nullptr;
         f = get_unit_conversion_factor(name, &xy_in_is_linear, &normalized_name);
         if (f != 0.0) {
             proj_log_debug(P, "xy_in unit: %s", normalized_name);
@@ -478,8 +478,8 @@ PJ *CONVERSION(unitconvert,0) {
             Q->xy_factor *= f;
     }
 
-    if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != NULL) {
-        const char* normalized_name = NULL;
+    if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != nullptr) {
+        const char* normalized_name = nullptr;
         f = get_unit_conversion_factor(name, &xy_out_is_linear, &normalized_name);
         if (f != 0.0) {
             proj_log_debug(P, "xy_out unit: %s", normalized_name);
@@ -497,8 +497,8 @@ PJ *CONVERSION(unitconvert,0) {
         return pj_default_destructor(P, PJD_ERR_INCONSISTENT_UNIT);
     }
 
-    if ((name = pj_param (P->ctx, P->params, "sz_in").s) != NULL) {
-        const char* normalized_name = NULL;
+    if ((name = pj_param (P->ctx, P->params, "sz_in").s) != nullptr) {
+        const char* normalized_name = nullptr;
         f = get_unit_conversion_factor(name, &z_in_is_linear, &normalized_name);
         if (f != 0.0) {
             proj_log_debug(P, "z_in unit: %s", normalized_name);
@@ -510,8 +510,8 @@ PJ *CONVERSION(unitconvert,0) {
             Q->z_factor *= f;
     }
 
-    if ((name = pj_param (P->ctx, P->params, "sz_out").s) != NULL) {
-        const char* normalized_name = NULL;
+    if ((name = pj_param (P->ctx, P->params, "sz_out").s) != nullptr) {
+        const char* normalized_name = nullptr;
         f = get_unit_conversion_factor(name, &z_out_is_linear, &normalized_name);
         if (f != 0.0) {
             proj_log_debug(P, "z_out unit: %s", normalized_name);
@@ -529,7 +529,7 @@ PJ *CONVERSION(unitconvert,0) {
         return pj_default_destructor(P, PJD_ERR_INCONSISTENT_UNIT);
     }
 
-    if ((name = pj_param (P->ctx, P->params, "st_in").s) != NULL) {
+    if ((name = pj_param (P->ctx, P->params, "st_in").s) != nullptr) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
 
         if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID); /* unknown unit conversion id */
@@ -538,8 +538,8 @@ PJ *CONVERSION(unitconvert,0) {
         proj_log_debug(P, "t_in unit: %s", time_units[i].name);
     }
 
-    s = 0;
-    if ((name = pj_param (P->ctx, P->params, "st_out").s) != NULL) {
+    s = nullptr;
+    if ((name = pj_param (P->ctx, P->params, "st_out").s) != nullptr) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
 
         if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID); /* unknown unit conversion id */

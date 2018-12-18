@@ -71,7 +71,7 @@ static PJ *setup(PJ *P, double p, double q, int mode) {
 
 PJ *PROJECTION(fouc) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
     return setup(P, 2., 2., 1);
@@ -81,7 +81,7 @@ PJ *PROJECTION(fouc) {
 
 PJ *PROJECTION(kav5) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
@@ -92,7 +92,7 @@ PJ *PROJECTION(kav5) {
 
 PJ *PROJECTION(qua_aut) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
     return setup(P, 2., 2., 0);
@@ -102,7 +102,7 @@ PJ *PROJECTION(qua_aut) {
 
 PJ *PROJECTION(mbt_s) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
     return setup(P, 1.48875, 1.36509, 0);

@@ -167,7 +167,7 @@ PJ *CONVERSION(axisswap,0) {
     char *s;
     unsigned int i, j, n = 0;
 
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
@@ -189,7 +189,7 @@ PJ *CONVERSION(axisswap,0) {
 
         /* check that all characters are valid */
         for (i=0; i<strlen(order); i++)
-            if (strchr("1234-,", order[i]) == 0) {
+            if (strchr("1234-,", order[i]) == nullptr) {
                 proj_log_error(P, "axisswap: unknown axis '%c'", order[i]);
                 return pj_default_destructor(P, PJD_ERR_AXIS);
             }
@@ -275,7 +275,7 @@ PJ *CONVERSION(axisswap,0) {
     }
 
 
-    if (P->fwd4d == NULL && P->fwd3d == NULL && P->fwd == NULL) {
+    if (P->fwd4d == nullptr && P->fwd3d == nullptr && P->fwd == nullptr) {
         proj_log_error(P, "swapaxis: bad axis order");
         return pj_default_destructor(P, PJD_ERR_AXIS);
     }

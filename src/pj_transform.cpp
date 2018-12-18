@@ -140,7 +140,7 @@ static int geographic_to_cartesian (PJ *P, PJ_DIRECTION dir, long n, int dist, d
     if (!P->is_geocent)
         return 0;
 
-    if ( z == NULL ) {
+    if ( z == nullptr ) {
         pj_ctx_set_errno( pj_get_ctx(P), PJD_ERR_GEOCENTRIC);
         return PJD_ERR_GEOCENTRIC;
     }
@@ -195,10 +195,10 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
     if (P->is_geocent)
         return 0;
 
-    if(P->fwd3d != NULL && !(z == NULL && P->is_latlong))
+    if(P->fwd3d != nullptr && !(z == nullptr && P->is_latlong))
     {
         /* Three dimensions must be defined */
-        if ( z == NULL)
+        if ( z == nullptr)
         {
             pj_ctx_set_errno( pj_get_ctx(P), PJD_ERR_GEOCENTRIC);
             return PJD_ERR_GEOCENTRIC;
@@ -296,7 +296,7 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
         return 0;
 
     /* Check first if projection is invertible. */
-    if( (P->inv3d == NULL) && (P->inv == NULL))
+    if( (P->inv3d == nullptr) && (P->inv == nullptr))
     {
         pj_ctx_set_errno(pj_get_ctx(P), PJD_ERR_NON_CONV_INV_MERI_DIST);
         pj_log( pj_get_ctx(P), PJ_LOG_ERROR,
@@ -305,10 +305,10 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
     }
 
     /* If invertible - First try inv3d if defined */
-    if (P->inv3d != NULL && !(z == NULL && P->is_latlong))
+    if (P->inv3d != nullptr && !(z == nullptr && P->is_latlong))
     {
         /* Three dimensions must be defined */
-        if ( z == NULL)
+        if ( z == nullptr)
         {
             pj_ctx_set_errno( pj_get_ctx(P), PJD_ERR_GEOCENTRIC);
             return PJD_ERR_GEOCENTRIC;
@@ -430,7 +430,7 @@ static int height_unit (PJ *P, PJ_DIRECTION dir, long n, int dist, double *z) {
     /* Nothing to do? */
     if (fac==1.0)
         return 0;
-    if (0==z)
+    if (nullptr==z)
         return 0;
     if (P->is_latlong)
         return 0; /* done in pj_inv3d() / pj_fwd3d() */
@@ -451,7 +451,7 @@ static int geometric_to_orthometric (PJ *P, PJ_DIRECTION dir, long n, int dist, 
     int err;
     if (0==P->has_geoid_vgrids)
         return 0;
-    if (z==0)
+    if (z==nullptr)
         return PJD_ERR_GEOCENTRIC;
     err = pj_apply_vgridshift (P, "sgeoidgrids",
               &(P->vgridlist_geoid),
@@ -713,7 +713,7 @@ int pj_compare_datums( PJ *srcdefn, PJ *dstdefn )
             pj_param(srcdefn->ctx, srcdefn->params,"snadgrids").s;
         const char* dstnadgrids =
             pj_param(dstdefn->ctx, dstdefn->params,"snadgrids").s;
-        return srcnadgrids != 0 && dstnadgrids != 0 &&
+        return srcnadgrids != nullptr && dstnadgrids != nullptr &&
                strcmp( srcnadgrids, dstnadgrids ) == 0;
     }
     else
@@ -859,7 +859,7 @@ int pj_datum_transform( PJ *src, PJ *dst,
 /* -------------------------------------------------------------------- */
 /*      Create a temporary Z array if one is not provided.              */
 /* -------------------------------------------------------------------- */
-    if( z == NULL )
+    if( z == nullptr )
     {
         size_t	bytes = sizeof(double) * point_count * point_offset;
         z = (double *) pj_malloc(bytes);
@@ -1024,7 +1024,7 @@ static int adjust_axis( projCtx ctx,
             {
                 double *target;
 
-                if( i_axis == 2 && z == NULL )
+                if( i_axis == 2 && z == nullptr )
                     continue;
 
                 if( i_axis == 0 )

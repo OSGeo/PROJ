@@ -34,7 +34,7 @@
 
 #include "projects.h"
 
-static PJ_GridCatalog *grid_catalog_list = NULL;
+static PJ_GridCatalog *grid_catalog_list = nullptr;
 
 /************************************************************************/
 /*                          pj_gc_unloadall()                           */
@@ -47,7 +47,7 @@ void pj_gc_unloadall( projCtx ctx )
 {
     (void) ctx;
 
-    while( grid_catalog_list != NULL )
+    while( grid_catalog_list != nullptr )
     {
         int i;
         PJ_GridCatalog *catalog = grid_catalog_list;
@@ -75,7 +75,7 @@ PJ_GridCatalog *pj_gc_findcatalog( projCtx ctx, const char *name )
 
     pj_acquire_lock();
 
-    for( catalog=grid_catalog_list; catalog != NULL; catalog = catalog->next ) 
+    for( catalog=grid_catalog_list; catalog != nullptr; catalog = catalog->next ) 
     {
         if( strcmp(catalog->catalog_name, name) == 0 )
         {
@@ -87,8 +87,8 @@ PJ_GridCatalog *pj_gc_findcatalog( projCtx ctx, const char *name )
     pj_release_lock();
 
     catalog = pj_gc_readcatalog( ctx, name );
-    if( catalog == NULL )
-        return NULL;
+    if( catalog == nullptr )
+        return nullptr;
 
     pj_acquire_lock();
     catalog->next = grid_catalog_list;
@@ -110,10 +110,10 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
     int i;
     (void) z;
 
-    if( defn->catalog == NULL ) 
+    if( defn->catalog == nullptr ) 
     {
         defn->catalog = pj_gc_findcatalog( defn->ctx, defn->catalog_name );
-        if( defn->catalog == NULL )
+        if( defn->catalog == nullptr )
             return defn->ctx->last_errno;
     }
 
@@ -130,7 +130,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
         input.lam = x[io];
 
         /* make sure we have appropriate "after" shift file available */
-        if( defn->last_after_grid == NULL
+        if( defn->last_after_grid == nullptr
             || input.lam < defn->last_after_region.ll_long
             || input.lam > defn->last_after_region.ur_long
             || input.phi < defn->last_after_region.ll_lat
@@ -140,17 +140,17 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                                 1, input, defn->datum_date, 
                                 &(defn->last_after_region), 
                                 &(defn->last_after_date));
-            if( defn->last_after_grid == NULL )
+            if( defn->last_after_grid == nullptr )
             {
                 pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
                 return PJD_ERR_FAILED_TO_LOAD_GRID;
             }
         }
         gi = defn->last_after_grid;
-        assert( gi->child == NULL );
+        assert( gi->child == nullptr );
 
         /* load the grid shift info if we don't have it. */
-        if( gi->ct->cvs == NULL && !pj_gridinfo_load( defn->ctx, gi ) )
+        if( gi->ct->cvs == nullptr && !pj_gridinfo_load( defn->ctx, gi ) )
         {
             pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             return PJD_ERR_FAILED_TO_LOAD_GRID;
@@ -178,7 +178,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
         }
 
         /* make sure we have appropriate "before" shift file available */
-        if( defn->last_before_grid == NULL
+        if( defn->last_before_grid == nullptr
             || input.lam < defn->last_before_region.ll_long
             || input.lam > defn->last_before_region.ur_long
             || input.phi < defn->last_before_region.ll_lat
@@ -188,7 +188,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                                 0, input, defn->datum_date, 
                                 &(defn->last_before_region), 
                                 &(defn->last_before_date));
-            if( defn->last_before_grid == NULL )
+            if( defn->last_before_grid == nullptr )
             {
                 pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
                 return PJD_ERR_FAILED_TO_LOAD_GRID;
@@ -196,10 +196,10 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
         }
 
         gi = defn->last_before_grid;
-        assert( gi->child == NULL );
+        assert( gi->child == nullptr );
 
         /* load the grid shift info if we don't have it. */
-        if( gi->ct->cvs == NULL && !pj_gridinfo_load( defn->ctx, gi ) )
+        if( gi->ct->cvs == nullptr && !pj_gridinfo_load( defn->ctx, gi ) )
         {
             pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             return PJD_ERR_FAILED_TO_LOAD_GRID;
@@ -241,7 +241,7 @@ PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
                              double *grid_date ) 
 {
     int iEntry;
-    PJ_GridCatalogEntry *entry = NULL;
+    PJ_GridCatalogEntry *entry = nullptr;
 
     for( iEntry = 0; iEntry < catalog->entry_count; iEntry++ ) 
     {
@@ -263,13 +263,13 @@ PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
         break;
     }
 
-    if( entry == NULL )
+    if( entry == nullptr )
     {
         if( grid_date )
             *grid_date = 0.0;
-        if( optional_region != NULL )
+        if( optional_region != nullptr )
             memset( optional_region, 0, sizeof(PJ_Region));
-        return NULL;
+        return nullptr;
     }
 
     if( grid_date )
@@ -280,9 +280,9 @@ PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
         
     }
 
-    if( entry->gridinfo == NULL )
+    if( entry->gridinfo == nullptr )
     {
-        PJ_GRIDINFO **gridlist = NULL;
+        PJ_GRIDINFO **gridlist = nullptr;
         int grid_count = 0;
         gridlist = pj_gridlist_from_nadgrids( ctx, entry->definition, 
                                               &grid_count);

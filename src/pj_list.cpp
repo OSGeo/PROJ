@@ -22,7 +22,7 @@
 #define PROJ_HEAD(id, name) {#id, pj_##id, &pj_s_##id},
 const struct PJ_LIST pj_list[] = {
 #include "pj_list.h"
-    {0,     0,  0},
+    {nullptr,     nullptr,  nullptr},
 };
 #undef PROJ_HEAD
 

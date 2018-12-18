@@ -187,7 +187,7 @@ static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...) {
     va_start( args, fmt );
 
     msg_buf = (char *) malloc(100000);
-    if( msg_buf == NULL ) {
+    if( msg_buf == nullptr ) {
         va_end( args );
         return;
     }
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
     int decimals_angles = 10;
     int decimals_distances = 4;
     int columns_xyzt[] = {1, 2, 3, 4};
-    const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", "version", 0};
+    const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", "version", nullptr};
     const char *longkeys[]   = {
         "o=output",
         "c=columns",
@@ -224,12 +224,12 @@ int main(int argc, char **argv) {
         "z=height",
         "t=time",
         "s=skip-lines",
-        0};
+        nullptr};
 
     fout = stdout;
 
     o = opt_parse (argc, argv, "hvI", "cdozts", longflags, longkeys);
-    if (0==o)
+    if (nullptr==o)
         return 0;
 
     if (opt_given (o, "h") || argc==1) {
@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
 
     if (opt_given (o, "o"))
         fout = fopen (opt_arg (o, "output"), "wt");
-    if (0==fout) {
+    if (nullptr==fout) {
         print (PJ_LOG_ERROR, "%s: Cannot open '%s' for output\n", o->progname, opt_arg (o, "output"));
         free (o);
         return 1;
@@ -296,8 +296,8 @@ int main(int argc, char **argv) {
     }
 
     /* Setup transformation */
-    P = proj_create_argv (0, o->pargc, o->pargv);
-    if ((0==P) || (0==o->pargc)) {
+    P = proj_create_argv (nullptr, o->pargc, o->pargv);
+    if ((nullptr==P) || (0==o->pargc)) {
         print (PJ_LOG_ERROR, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help\n",
                  o->progname, pj_strerrno (proj_errno(P)), o->progname);
         free (o);
@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
 
     /* Allocate input buffer */
     buf = static_cast<char*>(calloc (1, 10000));
-    if (0==buf) {
+    if (nullptr==buf) {
         print (PJ_LOG_ERROR, "%s: Out of memory\n", o->progname);
         pj_free (P);
         free (o);
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
         void *ret = fgets (buf, 10000, o->input);
         char *c = column (buf, 1);
         opt_eof_handler (o);
-        if (0==ret) {
+        if (nullptr==ret) {
             print (PJ_LOG_ERROR, "Read error in record %d\n", (int) o->record_index);
             continue;
         }

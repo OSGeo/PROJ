@@ -95,8 +95,8 @@ It allocates space for an array of <n> elements of size <size>.
 The array is initialized to zeros.
 ***********************************************************************/
     void *res = pj_malloc (n*size);
-    if (0==res)
-        return 0;
+    if (nullptr==res)
+        return nullptr;
     memset (res, 0, n*size);
     return res;
 }
@@ -128,10 +128,10 @@ pointer" to signal an error in a multi level allocation:
     return p;  // success
 
 ***********************************************************************/
-    if (0==ptr)
-        return 0;
+    if (nullptr==ptr)
+        return nullptr;
     pj_dalloc (ptr);
-    return 0;
+    return nullptr;
 }
 
 /**********************************************************************/
@@ -161,7 +161,7 @@ void *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
         pj_dealloc(t);
     }
     pj_ctx_set_errno (ctx, errlev);
-    return (void *) 0;
+    return (void *) nullptr;
 }
 
 
@@ -178,7 +178,7 @@ void *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
 /************************************************************************/
 
 void pj_free(PJ *P) {
-    if (0==P)
+    if (nullptr==P)
         return;
     /* free projection parameters - all the hard work is done by */
     /* pj_default_destructor, which is supposed */
@@ -205,8 +205,8 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     if (0!=errlev)
         pj_ctx_set_errno (pj_get_ctx(P), errlev);
 
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
     /* free grid lists */
     pj_dealloc( P->gridlist );

@@ -248,10 +248,10 @@ static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
 }
 
 static PJ *destructor(PJ *P, int errlev) {
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     if (static_cast<struct pj_opaque*>(P->opaque)->cart)
@@ -265,12 +265,12 @@ PJ *TRANSFORMATION(deformation,1) {
     int has_xy_grids = 0;
     int has_z_grids  = 0;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return destructor(P, ENOMEM);
     P->opaque = (void *) Q;
 
     Q->cart = proj_create(P->ctx, "+proj=cart");
-    if (Q->cart == 0)
+    if (Q->cart == nullptr)
         return destructor(P, ENOMEM);
 
     /* inherit ellipsoid definition from P to Q->cart */
@@ -313,8 +313,8 @@ PJ *TRANSFORMATION(deformation,1) {
     P->inv4d = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
-    P->fwd    = 0;
-    P->inv    = 0;
+    P->fwd    = nullptr;
+    P->inv    = nullptr;
 
     P->left  = PJ_IO_UNITS_CARTESIAN;
     P->right = PJ_IO_UNITS_CARTESIAN;

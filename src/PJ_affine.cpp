@@ -112,8 +112,8 @@ static LP reverse_2d(XY xy, PJ *P) {
 
 static struct pj_opaque_affine * initQ() {
     struct pj_opaque_affine *Q = static_cast<struct pj_opaque_affine *>(pj_calloc(1, sizeof(struct pj_opaque_affine)));
-    if (0==Q)
-        return 0;
+    if (nullptr==Q)
+        return nullptr;
 
     /* default values */
     Q->forward.s11 = 1.0;
@@ -157,9 +157,9 @@ static void computeReverseParameters(PJ* P)
         if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
             proj_log_debug(P, "Affine: matrix non invertible");
         }
-        P->inv4d = NULL;
-        P->inv3d = NULL;
-        P->inv = NULL;
+        P->inv4d = nullptr;
+        P->inv3d = nullptr;
+        P->inv = nullptr;
     } else {
         Q->reverse.s11 = A / det;
         Q->reverse.s12 = D / det;
@@ -176,7 +176,7 @@ static void computeReverseParameters(PJ* P)
 
 PJ *TRANSFORMATION(affine,0 /* no need for ellipsoid */) {
     struct pj_opaque_affine *Q = initQ();
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = (void *) Q;
 
@@ -227,7 +227,7 @@ PJ *TRANSFORMATION(affine,0 /* no need for ellipsoid */) {
 
 PJ *TRANSFORMATION(geogoffset,0 /* no need for ellipsoid */) {
     struct pj_opaque_affine *Q = initQ();
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = (void *) Q;
 

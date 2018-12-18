@@ -70,11 +70,11 @@ static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GR
             continue;
 
         /* If we have child nodes, check to see if any of them apply. */
-        while( gi->child != NULL )
+        while( gi->child != nullptr )
         {
             PJ_GRIDINFO *child;
 
-            for( child = gi->child; child != NULL; child = child->next )
+            for( child = gi->child; child != nullptr; child = child->next )
             {
                 struct CTABLE *ct1 = child->ct;
 
@@ -87,7 +87,7 @@ static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GR
             }
 
             /* we didn't find a more refined child node to use, so go with current grid */
-            if( child == NULL )
+            if( child == nullptr )
             {
                 break;
             }
@@ -98,7 +98,7 @@ static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GR
         }
 
         /* load the grid shift info if we don't have it. */
-        if( ct->cvs == NULL && !pj_gridinfo_load( pj_get_ctx(defn), gi ) )
+        if( ct->cvs == nullptr && !pj_gridinfo_load( pj_get_ctx(defn), gi ) )
         {
             pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             return PJD_ERR_FAILED_TO_LOAD_GRID;
@@ -189,14 +189,14 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
     PJ_GRIDINFO **tables;
     struct CTABLE ct;
 
-    if( *gridlist_p == NULL )
+    if( *gridlist_p == nullptr )
     {
         *gridlist_p =
             pj_gridlist_from_nadgrids( pj_get_ctx(defn),
                                        pj_param(defn->ctx,defn->params,listname).s,
                                        gridlist_count_p );
 
-        if( *gridlist_p == NULL || *gridlist_count_p == 0 )
+        if( *gridlist_p == nullptr || *gridlist_count_p == 0 )
             return defn->ctx->last_errno;
     }
 
@@ -288,14 +288,14 @@ int proj_vgrid_init(PJ* P, const char *grids) {
     char *sgrids = (char *) pj_malloc( (strlen(grids)+1+1) *sizeof(char) );
     sprintf(sgrids, "%s%s", "s", grids);
 
-    if (P->vgridlist_geoid == NULL) {
+    if (P->vgridlist_geoid == nullptr) {
         P->vgridlist_geoid = pj_gridlist_from_nadgrids(
             P->ctx,
             pj_param(P->ctx, P->params, sgrids).s,
             &(P->vgridlist_geoid_count)
         );
 
-        if( P->vgridlist_geoid == NULL || P->vgridlist_geoid_count == 0 ) {
+        if( P->vgridlist_geoid == nullptr || P->vgridlist_geoid_count == 0 ) {
             pj_dealloc(sgrids);
             return 0;
         }

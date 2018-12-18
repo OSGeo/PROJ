@@ -87,9 +87,9 @@ static LP t_inverse(XY xy, PJ *P) {             /* spheroid */
 
 
 static PJ *destructor(PJ *P, int errlev) {
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
+    if (nullptr==P)
+        return nullptr;
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     if (static_cast<struct pj_opaque*>(P->opaque)->link)
@@ -122,7 +122,7 @@ typedef struct {int argc; char **argv;} ARGS;
 /* count the number of args in the linked list <params> */
 static size_t paralist_params_argc (paralist *params) {
     size_t argc = 0;
-    for (; params != 0; params = params->next)
+    for (; params != nullptr; params = params->next)
         argc++;
     return argc;
 }
@@ -131,18 +131,18 @@ static size_t paralist_params_argc (paralist *params) {
 /* turn paralist into argc/argv style argument list */
 static ARGS ob_tran_target_params (paralist *params) {
     int i = 0;
-    ARGS args = {0, 0};
+    ARGS args = {0, nullptr};
     size_t argc = paralist_params_argc (params);
     if (argc < 2)
         return args;
 
     /* all args except the proj_ob_tran */
     args.argv = static_cast<char**>(pj_calloc (argc - 1, sizeof (char *)));
-    if (0==args.argv)
+    if (nullptr==args.argv)
         return args;
 
     /* Copy all args *except* the proj=ob_tran arg to the argv array */
-    for (i = 0;  params != 0;  params = params->next) {
+    for (i = 0;  params != nullptr;  params = params->next) {
         if (0==strcmp (params->param, "proj=ob_tran"))
             continue;
         args.argv[i++] = params->param;
@@ -169,7 +169,7 @@ PJ *PROJECTION(ob_tran) {
     PJ *R; /* projection to rotate */
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return destructor(P, ENOMEM);
 
     P->opaque = Q;
@@ -188,7 +188,7 @@ PJ *PROJECTION(ob_tran) {
     R = pj_init_ctx (pj_get_ctx(P), args.argc, args.argv);
     pj_dealloc (args.argv);
 
-    if (0==R)
+    if (nullptr==R)
         return destructor (P, PJD_ERR_UNKNOWN_PROJECTION_ID);
     Q->link = R;
 
@@ -228,11 +228,11 @@ PJ *PROJECTION(ob_tran) {
     if (fabs(phip) > TOL) { /* oblique */
         Q->cphip = cos(phip);
         Q->sphip = sin(phip);
-        P->fwd = Q->link->fwd ? o_forward : 0;
-        P->inv = Q->link->inv ? o_inverse : 0;
+        P->fwd = Q->link->fwd ? o_forward : nullptr;
+        P->inv = Q->link->inv ? o_inverse : nullptr;
     } else { /* transverse */
-        P->fwd = Q->link->fwd ? t_forward : 0;
-        P->inv = Q->link->inv ? t_inverse : 0;
+        P->fwd = Q->link->fwd ? t_forward : nullptr;
+        P->inv = Q->link->inv ? t_inverse : nullptr;
     }
 
     /* Support some rather speculative test cases, where the rotated projection */

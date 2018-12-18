@@ -49,7 +49,7 @@ static void* thread_main(void* unused)
         x = -5.2*DEG_TO_RAD;
         y = 50*DEG_TO_RAD;
         proj_ret = pj_transform(p_WGS84_proj,
-                                p_OSGB36_proj, 1, 1, &x, &y, NULL );
+                                p_OSGB36_proj, 1, 1, &x, &y, nullptr );
         x *= RAD_TO_DEG;
         y *= RAD_TO_DEG;
         /*printf("%.18f %.18f\n", x, y); */
@@ -60,7 +60,7 @@ static void* thread_main(void* unused)
 
     pj_free (p_OSGB36_proj);
     pj_free (p_WGS84_proj);
-    return NULL;
+    return nullptr;
 }
 
 int main()
@@ -73,8 +73,8 @@ int main()
     pthread_attr_init(&attr1);
     pthread_attr_init(&attr2);
 
-    pthread_create(&tid1, &attr1, thread_main, NULL);
-    pthread_create(&tid2, &attr2, thread_main, NULL);
+    pthread_create(&tid1, &attr1, thread_main, nullptr);
+    pthread_create(&tid2, &attr2, thread_main, nullptr);
     while(started != 2);
     run = 1;
     for(i=0;i<2;i++)

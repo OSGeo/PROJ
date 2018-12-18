@@ -65,7 +65,7 @@ C_NAMESPACE_VAR const struct PJ_DATUMS pj_datums[] = {
                                                      "intl",  "New Zealand Geodetic Datum 1949"},
 {"OSGB36",  "towgs84=446.448,-125.157,542.060,0.1502,0.2470,0.8421,-20.4894",
                                                      "airy",  "Airy 1830"},
-{NULL,      NULL,                                    NULL,    NULL}
+{nullptr,      nullptr,                                    nullptr,    nullptr}
 };
 
 struct PJ_DATUMS *pj_get_datums_ref()
@@ -90,7 +90,7 @@ static const struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     {"athens",    "23d42'58.815\"E"},
     {"oslo",      "10d43'22.5\"E"},
     {"copenhagen","12d34'40.35\"E"},
-    {NULL,        NULL}
+    {nullptr,        nullptr}
 };
 
 const PJ_PRIME_MERIDIANS *proj_list_prime_meridians(void)

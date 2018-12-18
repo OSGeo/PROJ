@@ -9,7 +9,7 @@ int pj_deriv(LP lp, double h, const PJ *P, struct DERIVS *der) {
     XY t;
     /* get rid of constness until we can do it for real */
     PJ *Q = (PJ *) P;
-    if (0==Q->fwd)
+    if (nullptr==Q->fwd)
         return 1;
 
     lp.lam += h;

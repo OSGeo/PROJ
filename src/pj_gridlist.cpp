@@ -34,7 +34,7 @@
 
 #include "projects.h"
 
-static PJ_GRIDINFO *grid_list = NULL;
+static PJ_GRIDINFO *grid_list = nullptr;
 #define PJ_MAX_PATH_LENGTH 1024
 
 /************************************************************************/
@@ -46,11 +46,11 @@ static PJ_GRIDINFO *grid_list = NULL;
 void pj_deallocate_grids()
 
 {
-    while( grid_list != NULL )
+    while( grid_list != nullptr )
     {
         PJ_GRIDINFO *item = grid_list;
         grid_list = grid_list->next;
-        item->next = NULL;
+        item->next = nullptr;
 
         pj_gridinfo_free( pj_get_default_ctx(), item );
     }
@@ -71,21 +71,21 @@ static int pj_gridlist_merge_gridfile( projCtx ctx,
 
 {
     int got_match=0;
-    PJ_GRIDINFO *this_grid, *tail = NULL;
+    PJ_GRIDINFO *this_grid, *tail = nullptr;
 
 /* -------------------------------------------------------------------- */
 /*      Try to find in the existing list of loaded grids.  Add all      */
 /*      matching grids as with NTv2 we can get many grids from one      */
 /*      file (one shared gridname).                                     */
 /* -------------------------------------------------------------------- */
-    for( this_grid = grid_list; this_grid != NULL; this_grid = this_grid->next)
+    for( this_grid = grid_list; this_grid != nullptr; this_grid = this_grid->next)
     {
         if( strcmp(this_grid->gridname,gridname) == 0 )
         {
             got_match = 1;
 
             /* don't add to the list if it is invalid. */
-            if( this_grid->ct == NULL )
+            if( this_grid->ct == nullptr )
                 return 0;
 
             /* do we need to grow the list? */
@@ -99,7 +99,7 @@ static int pj_gridlist_merge_gridfile( projCtx ctx,
                     pj_ctx_set_errno( ctx, ENOMEM );
                     return 0;
                 }
-                if( *p_gridlist != NULL )
+                if( *p_gridlist != nullptr )
                 {
                     memcpy( new_list, *p_gridlist,
                             sizeof(void *) * (*p_gridmax) );
@@ -112,7 +112,7 @@ static int pj_gridlist_merge_gridfile( projCtx ctx,
 
             /* add to the list */
             (*p_gridlist)[(*p_gridcount)++] = this_grid;
-            (*p_gridlist)[*p_gridcount] = NULL;
+            (*p_gridlist)[*p_gridcount] = nullptr;
         }
 
         tail = this_grid;
@@ -126,12 +126,12 @@ static int pj_gridlist_merge_gridfile( projCtx ctx,
 /* -------------------------------------------------------------------- */
     this_grid = pj_gridinfo_init( ctx, gridname );
 
-    if( this_grid == NULL )
+    if( this_grid == nullptr )
     {
         return 0;
     }
     
-    if( tail != NULL )
+    if( tail != nullptr )
         tail->next = this_grid;
     else
         grid_list = this_grid;
@@ -158,7 +158,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
 
 {
     const char *s;
-    PJ_GRIDINFO **gridlist = NULL;
+    PJ_GRIDINFO **gridlist = nullptr;
     int grid_max = 0;
 
     pj_errno = 0;
@@ -190,7 +190,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
             pj_dalloc( gridlist );
             pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
-            return NULL;
+            return nullptr;
         }
         
         strncpy( name, s, end_char );
@@ -207,7 +207,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
             pj_dalloc( gridlist );
             pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
-            return NULL;
+            return nullptr;
         }
         else
             pj_errno = 0;

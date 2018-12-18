@@ -31,7 +31,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 PJ *PROJECTION(urm5) {
     double alpha, t;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
@@ -49,7 +49,7 @@ PJ *PROJECTION(urm5) {
     Q->rmn = 1. / (Q->m * Q->n);
 
     P->es = 0.;
-    P->inv = 0;
+    P->inv = nullptr;
     P->fwd = s_forward;
 
     return P;

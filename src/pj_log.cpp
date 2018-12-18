@@ -68,7 +68,7 @@ void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args )
         return;
 
     msg_buf = (char *) malloc(100000);
-    if( msg_buf == NULL )
+    if( msg_buf == nullptr )
         return;
 
     /* we should use vsnprintf where available once we add configure detect.*/

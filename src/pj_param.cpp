@@ -12,9 +12,9 @@
 paralist *pj_mkparam(const char *str) {
     paralist *newitem;
 
-    if((newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) != NULL) {
+    if((newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) != nullptr) {
         newitem->used = 0;
-        newitem->next = 0;
+        newitem->next = nullptr;
         if (*str == '+')
             ++str;
         (void)strcpy(newitem->param, str);
@@ -28,8 +28,8 @@ paralist *pj_mkparam_ws (const char *str) {
     paralist *newitem;
     size_t len = 0;
 
-    if (0==str)
-        return 0;
+    if (nullptr==str)
+        return nullptr;
 
     /* Find start and length of string */
     while (isspace (*str))
@@ -43,12 +43,12 @@ paralist *pj_mkparam_ws (const char *str) {
 
     /* Use calloc to automagically 0-terminate the copy */
     newitem = (paralist *) pj_calloc (1, sizeof(paralist) + len + 1);
-    if (0==newitem)
-        return 0;
+    if (nullptr==newitem)
+        return nullptr;
     memmove(newitem->param, str, len);
 
     newitem->used = 0;
-    newitem->next = 0;
+    newitem->next = nullptr;
 
     return newitem;
 }
@@ -74,8 +74,8 @@ paralist *pj_param_exists (paralist *list, const char *parameter) {
     size_t len = strlen (parameter);
     if (c)
         len = c - parameter;
-    if (list==0)
-        return 0;
+    if (list==nullptr)
+        return nullptr;
 
     for (next = list; next; next = next->next) {
         if (0==strncmp (parameter, next->param, len) && (next->param[len]=='=' || next->param[len]==0)) {
@@ -83,10 +83,10 @@ paralist *pj_param_exists (paralist *list, const char *parameter) {
             return next;
         }
         if (0==strcmp (parameter, "step"))
-            return 0;
+            return nullptr;
     }
 
-    return 0;
+    return nullptr;
 }
 
 
@@ -116,24 +116,24 @@ PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
     unsigned l;
     PROJVALUE value = {0};
 
-    if ( ctx == NULL )
+    if ( ctx == nullptr )
         ctx = pj_get_default_ctx();
 
     type = *opt++;
 
-    if (0==strchr ("tbirds", type)) {
+    if (nullptr==strchr ("tbirds", type)) {
         fprintf(stderr, "invalid request to pj_param, fatal\n");
         exit(1);
     }
 
     pl = pj_param_exists (pl, opt);
     if (type == 't') {
-        value.i = pl != 0;
+        value.i = pl != nullptr;
         return value;
     }
 
     /* Not found */
-    if (0==pl) {
+    if (nullptr==pl) {
         /* Return value after the switch, so that the return path is */
         /* taken in all cases */
         switch (type) {
@@ -144,7 +144,7 @@ PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
             value.f = 0.;
             break;
         case 's':
-            value.s = 0;
+            value.s = nullptr;
             break;
         }
         return value;
@@ -165,7 +165,7 @@ PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
         value.f = pj_atof(opt);
         break;
     case 'r':    /* degrees input */
-        value.f = dmstor_ctx(ctx, opt, 0);
+        value.f = dmstor_ctx(ctx, opt, nullptr);
         break;
     case 's':    /* char string */
         value.s = (char *) opt;

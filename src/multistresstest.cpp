@@ -243,7 +243,7 @@ static void TestThread()
                 dst_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->dst_def );
 
                 {
-                    int skipTest = (src_pj_list[i] == NULL || dst_pj_list[i] == NULL);
+                    int skipTest = (src_pj_list[i] == nullptr || dst_pj_list[i] == nullptr);
 
                     if ( skipTest != test->skip )
                         fprintf( stderr, "Threaded projection initialization does not match unthreaded initialization\n" );
@@ -335,7 +335,7 @@ static void *PosixTestThread( void *pData )
 {
     (void)pData;
     TestThread();
-    return NULL;
+    return nullptr;
 }
 #endif
 
@@ -363,7 +363,7 @@ static int do_main(void)
         src_pj = custom_pj_init_plus_ctx( pj_get_default_ctx(), test->src_def );
         dst_pj = custom_pj_init_plus_ctx( pj_get_default_ctx(), test->dst_def );
 
-        if( src_pj == NULL )
+        if( src_pj == nullptr )
         {
             printf( "Unable to translate:\n%s\n", test->src_def );
             test->skip = 1;
@@ -371,7 +371,7 @@ static int do_main(void)
             continue;
         }
 
-        if( dst_pj == NULL )
+        if( dst_pj == nullptr )
         {
             printf( "Unable to translate:\n%s\n", test->dst_def );
             test->skip = 1;
@@ -439,7 +439,7 @@ static int do_main(void)
         active_thread_count++;
 
         pthread_create( &(ahThread[i]), &hThreadAttr,
-            PosixTestThread, NULL );
+            PosixTestThread, nullptr );
     }
 
     printf( "%d test threads launched.\n", num_threads );

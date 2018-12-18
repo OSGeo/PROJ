@@ -75,9 +75,9 @@ static PAFile stdio_fopen(projCtx ctx, const char *filename,
     FILE *fp;
 
     fp = fopen(filename, access);
-    if (fp == NULL)
+    if (fp == nullptr)
     {
-        return NULL;
+        return nullptr;
     }
 
     pafile = (stdio_pafile *) malloc(sizeof(stdio_pafile));
@@ -85,7 +85,7 @@ static PAFile stdio_fopen(projCtx ctx, const char *filename,
     {
         pj_ctx_set_errno(ctx, ENOMEM);
         fclose(fp);
-        return NULL;
+        return nullptr;
     }
 
     pafile->fp = fp;
@@ -193,7 +193,7 @@ char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
     line[size-1] = '\0';
     bytes_read = pj_ctx_fread(ctx, line, 1, size-1, file);
     if(bytes_read == 0)
-        return NULL;
+        return nullptr;
     if(bytes_read < (size_t)size)
     {
         line[bytes_read] = '\0';

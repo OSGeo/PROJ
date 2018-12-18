@@ -143,8 +143,8 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
     int polynomia_ok = 0;
     HORNER *h = static_cast<HORNER*>(horner_calloc (1, sizeof (HORNER)));
 
-    if (0==h)
-        return 0;
+    if (nullptr==h)
+        return nullptr;
 
     if (complex_polynomia)
         n = 2*(int)order + 2;
@@ -174,7 +174,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
     /* safe, since all pointers are null-initialized (by calloc) */
     horner_free (h);
-    return 0;
+    return nullptr;
 }
 
 
@@ -226,7 +226,7 @@ summing the tiny high order elements first.
     UV uv_error;
     uv_error.u = uv_error.v = HUGE_VAL;
 
-    if (0==transformation)
+    if (nullptr==transformation)
         return uv_error;
 
     /* Check for valid value of direction (-1, 0, 1) */
@@ -326,7 +326,7 @@ polynomial evaluation engine.
     UV uv_error;
     uv_error.u = uv_error.v = HUGE_VAL;
 
-    if (0==transformation)
+    if (nullptr==transformation)
         return uv_error;
 
     /* Check for valid value of direction (-1, 0, 1) */
@@ -398,22 +398,22 @@ static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
 
 
 static PJ *horner_freeup (PJ *P, int errlev) {                        /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
+    if (nullptr==P)
+        return nullptr;
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
     horner_free ((HORNER *) P->opaque);
-    P->opaque = 0;
+    P->opaque = nullptr;
     return pj_default_destructor (P, errlev);
 }
 
 
 static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
-    char *buf, *init, *next = 0;
+    char *buf, *init, *next = nullptr;
     int i;
 
     buf = static_cast<char*>(pj_calloc (strlen (param) + 2, sizeof(char)));
-    if (0==buf) {
+    if (nullptr==buf) {
         proj_log_error (P, "Horner: No memory left");
         return 0;
     }
@@ -429,7 +429,7 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
 
     for (i = 0; i < ncoefs; i++) {
         if (i > 0) {
-            if ( next == 0 || ','!=*next) {
+            if ( next == nullptr || ','!=*next) {
                 proj_log_error (P, "Horner: Malformed polynomium set %s. need %d coefs", param, ncoefs);
                 return 0;
             }
@@ -448,10 +448,10 @@ PJ *PROJECTION(horner) {
     HORNER *Q;
     P->fwd4d  = horner_forward_4d;
     P->inv4d  = horner_reverse_4d;
-    P->fwd3d  =  0;
-    P->inv3d  =  0;
-    P->fwd    =  0;
-    P->inv    =  0;
+    P->fwd3d  =  nullptr;
+    P->inv3d  =  nullptr;
+    P->fwd    =  nullptr;
+    P->inv    =  nullptr;
     P->left   =  P->right  =  PJ_IO_UNITS_PROJECTED;
     P->destructor = horner_freeup;
 
@@ -472,7 +472,7 @@ PJ *PROJECTION(horner) {
 		complex_polynomia = 1;
 
     Q = horner_alloc (degree, complex_polynomia);
-    if (Q == 0)
+    if (Q == nullptr)
         return horner_freeup (P, ENOMEM);
     P->opaque = Q;
 

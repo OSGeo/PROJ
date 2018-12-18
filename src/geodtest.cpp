@@ -157,7 +157,7 @@ static int testdirect() {
     s12 = testcases[i][6]; a12 = testcases[i][7]; m12 = testcases[i][8];
     M12 = testcases[i][9]; M21 = testcases[i][10]; S12 = testcases[i][11];
     a12a = geod_gendirect(&g, lat1, lon1, azi1, flags, s12,
-              &lat2a, &lon2a, &azi2a, 0,
+              &lat2a, &lon2a, &azi2a, nullptr,
               &m12a, &M12a, &M21a, &S12a);
     result += checkEquals(lat2, lat2a, 1e-13);
     result += checkEquals(lon2, lon2a, 1e-13);
@@ -246,7 +246,7 @@ static int GeodSolve4() {
   int result = 0;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_inverse(&g, 36.493349428792, 0, 36.49334942879201, .0000008,
-               &s12, 0, 0);
+               &s12, nullptr, nullptr);
   result += checkEquals(s12, 0.072, 0.5e-3);
   return result;
 }
@@ -277,13 +277,13 @@ static int GeodSolve6() {
   int result = 0;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_inverse(&g, 88.202499451857, 0,
-               -88.202499451857, 179.981022032992859592, &s12, 0, 0);
+               -88.202499451857, 179.981022032992859592, &s12, nullptr, nullptr);
   result += checkEquals(s12, 20003898.214, 0.5e-3);
   geod_inverse(&g, 89.262080389218, 0,
-               -89.262080389218, 179.992207982775375662, &s12, 0, 0);
+               -89.262080389218, 179.992207982775375662, &s12, nullptr, nullptr);
   result += checkEquals(s12, 20003925.854, 0.5e-3);
   geod_inverse(&g, 89.333123580033, 0,
-               -89.333123580032997687, 179.99295812360148422, &s12, 0, 0);
+               -89.333123580032997687, 179.99295812360148422, &s12, nullptr, nullptr);
   result += checkEquals(s12, 20003926.881, 0.5e-3);
   return result;
 }
@@ -295,7 +295,7 @@ static int GeodSolve9() {
   int result = 0;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_inverse(&g, 56.320923501171, 0,
-               -56.320923501171, 179.664747671772880215, &s12, 0, 0);
+               -56.320923501171, 179.664747671772880215, &s12, nullptr, nullptr);
   result += checkEquals(s12, 19993558.287, 0.5e-3);
   return result;
 }
@@ -308,7 +308,7 @@ static int GeodSolve10() {
   int result = 0;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_inverse(&g, 52.784459512564, 0,
-               -52.784459512563990912, 179.634407464943777557, &s12, 0, 0);
+               -52.784459512563990912, 179.634407464943777557, &s12, nullptr, nullptr);
   result += checkEquals(s12, 19991596.095, 0.5e-3);
   return result;
 }
@@ -321,7 +321,7 @@ static int GeodSolve11() {
   int result = 0;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_inverse(&g, 48.522876735459, 0,
-               -48.52287673545898293, 179.599720456223079643, &s12, 0, 0);
+               -48.52287673545898293, 179.599720456223079643, &s12, nullptr, nullptr);
   result += checkEquals(s12, 19989144.774, 0.5e-3);
   return result;
 }
@@ -367,7 +367,7 @@ static int GeodSolve15() {
   int result = 0;
   geod_init(&g, 6.4e6, -1/150.0);
   geod_gendirect(&g, 1, 2, 3, 0, 4,
-                 0, 0, 0, 0, 0, 0, 0, &S12);
+                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &S12);
   result += checkEquals(S12, 23700, 0.5);
   return result;
 }
@@ -381,12 +381,12 @@ static int GeodSolve17() {
   unsigned flags = GEOD_LONG_UNROLL;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_gendirect(&g, 40, -75, -10, flags, 2e7,
-                 &lat2, &lon2, &azi2, 0, 0, 0, 0, 0);
+                 &lat2, &lon2, &azi2, nullptr, nullptr, nullptr, nullptr, nullptr);
   result += checkEquals(lat2, -39, 1);
   result += checkEquals(lon2, -254, 1);
   result += checkEquals(azi2, -170, 1);
   geod_lineinit(&l, &g, 40, -75, -10, 0);
-  geod_genposition(&l, flags, 2e7, &lat2, &lon2, &azi2, 0, 0, 0, 0, 0);
+  geod_genposition(&l, flags, 2e7, &lat2, &lon2, &azi2, nullptr, nullptr, nullptr, nullptr, nullptr);
   result += checkEquals(lat2, -39, 1);
   result += checkEquals(lon2, -254, 1);
   result += checkEquals(azi2, -170, 1);
@@ -407,7 +407,7 @@ static int GeodSolve26() {
   struct geod_geodesic g;
   int result = 0;
   geod_init(&g, 6.4e6, 0);
-  geod_geninverse(&g, 1, 2, 3, 4, 0, 0, 0, 0, 0, 0, &S12);
+  geod_geninverse(&g, 1, 2, 3, 4, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &S12);
   result += checkEquals(S12, 49911046115.0, 0.5);
   return result;
 }
@@ -419,7 +419,7 @@ static int GeodSolve28() {
   struct geod_geodesic g;
   int result = 0;
   geod_init(&g, 6.4e6, 0.1);
-  a12 = geod_gendirect(&g, 1, 2, 10, 0, 5e6, 0, 0, 0, 0, 0, 0, 0, 0);
+  a12 = geod_gendirect(&g, 1, 2, 10, 0, 5e6, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
   result += checkEquals(a12, 48.55570690, 0.5e-8);
   return result;
 }
@@ -527,12 +527,12 @@ static int GeodSolve61() {
   unsigned flags = GEOD_LONG_UNROLL;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_gendirect(&g, 45, 0, -0.000000000000000003, flags, 1e7,
-                 &lat2, &lon2, &azi2, 0, 0, 0, 0, 0);
+                 &lat2, &lon2, &azi2, nullptr, nullptr, nullptr, nullptr, nullptr);
   result += checkEquals(lat2, 45.30632, 0.5e-5);
   result += checkEquals(lon2, -180, 0.5e-5);
   result += checkEquals(fabs(azi2), 180, 0.5e-5);
   geod_inverseline(&l, &g, 45, 0, 80, -0.000000000000000003, 0);
-  geod_genposition(&l, flags, 1e7, &lat2, &lon2, &azi2, 0, 0, 0, 0, 0);
+  geod_genposition(&l, flags, 1e7, &lat2, &lon2, &azi2, nullptr, nullptr, nullptr, nullptr, nullptr);
   result += checkEquals(lat2, 45.30632, 0.5e-5);
   result += checkEquals(lon2, -180, 0.5e-5);
   result += checkEquals(fabs(azi2), 180, 0.5e-5);
@@ -585,11 +585,11 @@ static int GeodSolve67() {
   unsigned flags = GEOD_LONG_UNROLL;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_inverseline(&l, &g, -5, -0.000000000000002, -10, 180, 0);
-  geod_genposition(&l, flags, 2e7, &lat2, &lon2, &azi2, 0, 0, 0, 0, 0);
+  geod_genposition(&l, flags, 2e7, &lat2, &lon2, &azi2, nullptr, nullptr, nullptr, nullptr, nullptr);
   result += checkEquals(lat2, 4.96445, 0.5e-5);
   result += checkEquals(lon2, -180.00000, 0.5e-5);
   result += checkEquals(azi2, -0.00000, 0.5e-5);
-  geod_genposition(&l, flags, 0.5 * l.s13, &lat2, &lon2, &azi2, 0, 0, 0, 0, 0);
+  geod_genposition(&l, flags, 0.5 * l.s13, &lat2, &lon2, &azi2, nullptr, nullptr, nullptr, nullptr, nullptr);
   result += checkEquals(lat2, -87.52461, 0.5e-5);
   result += checkEquals(lon2, -0.00000, 0.5e-5);
   result += checkEquals(azi2, -180.00000, 0.5e-5);
@@ -647,7 +647,7 @@ static void polylength(const struct geod_geodesic* g,
   geod_polygon_init(&p, 1);
   for (i = 0; i < N; ++i)
     geod_polygon_addpoint(g, &p, points[i][0], points[i][1]);
-  geod_polygon_compute(g, &p, 0, 1, 0, perimeter);
+  geod_polygon_compute(g, &p, 0, 1, nullptr, perimeter);
 }
 
 static int GeodSolve74() {
@@ -707,10 +707,10 @@ static int GeodSolve80() {
   struct geod_geodesicline l;
   int result = 0;
   geod_init(&g, wgs84_a, wgs84_f);
-  geod_geninverse(&g, 0, 0, 0, 90, 0, 0, 0, 0, &M12, &M21, 0);
+  geod_geninverse(&g, 0, 0, 0, 90, nullptr, nullptr, nullptr, nullptr, &M12, &M21, nullptr);
   result += checkEquals(M12, -0.00528427534, 0.5e-10);
   result += checkEquals(M21, -0.00528427534, 0.5e-10);
-  geod_geninverse(&g, 0, 0, 1e-6, 1e-6, 0, 0, 0, 0, &M12, &M21, 0);
+  geod_geninverse(&g, 0, 0, 1e-6, 1e-6, nullptr, nullptr, nullptr, nullptr, &M12, &M21, nullptr);
   result += checkEquals(M12, 1, 0.5e-10);
   result += checkEquals(M21, 1, 0.5e-10);
   a12 = geod_geninverse(&g, 20.001, 0, 20.001, 0,
@@ -735,7 +735,7 @@ static int GeodSolve80() {
   result += checkEquals(S12, 127516405431022, 0.5);
   /* An incapable line which can't take distance as input */
   geod_lineinit(&l, &g, 1, 2, 90, GEOD_LATITUDE);
-  a12 = geod_genposition(&l, 0, 1000, 0, 0, 0, 0, 0, 0, 0, 0);
+  a12 = geod_genposition(&l, 0, 1000, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
   result += checkNaN(a12);
   return result;
 }
@@ -853,33 +853,33 @@ static int Planimeter15() {
   geod_polygon_init(&p, 0);
   geod_polygon_addpoint(&g, &p, lat[0], lon[0]);
   geod_polygon_addpoint(&g, &p, lat[1], lon[1]);
-  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 0, 1, &area, 0);
+  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 0, 1, &area, nullptr);
   result += checkEquals(area, r, 0.5);
-  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 0, 0, &area, 0);
+  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 0, 0, &area, nullptr);
   result += checkEquals(area, r, 0.5);
-  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 1, 1, &area, 0);
+  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 1, 1, &area, nullptr);
   result += checkEquals(area, -r, 0.5);
-  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 1, 0, &area, 0);
+  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 1, 0, &area, nullptr);
   result += checkEquals(area, a0-r, 0.5);
-  geod_inverse(&g, lat[1], lon[1], lat[2], lon[2], &s12, &azi1, 0);
-  geod_polygon_testedge(&g, &p, azi1, s12, 0, 1, &area, 0);
+  geod_inverse(&g, lat[1], lon[1], lat[2], lon[2], &s12, &azi1, nullptr);
+  geod_polygon_testedge(&g, &p, azi1, s12, 0, 1, &area, nullptr);
   result += checkEquals(area, r, 0.5);
-  geod_polygon_testedge(&g, &p, azi1, s12, 0, 0, &area, 0);
+  geod_polygon_testedge(&g, &p, azi1, s12, 0, 0, &area, nullptr);
   result += checkEquals(area, r, 0.5);
-  geod_polygon_testedge(&g, &p, azi1, s12, 1, 1, &area, 0);
+  geod_polygon_testedge(&g, &p, azi1, s12, 1, 1, &area, nullptr);
   result += checkEquals(area, -r, 0.5);
-  geod_polygon_testedge(&g, &p, azi1, s12, 1, 0, &area, 0);
+  geod_polygon_testedge(&g, &p, azi1, s12, 1, 0, &area, nullptr);
   result += checkEquals(area, a0-r, 0.5);
   geod_polygon_addpoint(&g, &p, lat[2], lon[2]);
-  geod_polygon_compute(&g, &p, 0, 1, &area, 0);
+  geod_polygon_compute(&g, &p, 0, 1, &area, nullptr);
   result += checkEquals(area, r, 0.5);
-  geod_polygon_compute(&g, &p, 0, 0, &area, 0);
+  geod_polygon_compute(&g, &p, 0, 0, &area, nullptr);
   result += checkEquals(area, r, 0.5);
-  geod_polygon_compute(&g, &p, 1, 1, &area, 0);
+  geod_polygon_compute(&g, &p, 1, 1, &area, nullptr);
   result += checkEquals(area, -r, 0.5);
-  geod_polygon_compute(&g, &p, 1, 0, &area, 0);
+  geod_polygon_compute(&g, &p, 1, 0, &area, nullptr);
   result += checkEquals(area, a0-r, 0.5);
-  geod_polygonarea(&g, lat, lon, 3, &area, 0);
+  geod_polygonarea(&g, lat, lon, 3, &area, nullptr);
   result += checkEquals(area, r, 0.5);
   return result;
 }
@@ -907,14 +907,14 @@ static int Planimeter19() {
   result += area == 0 ? 0 : 1;
   result += perim == 0 ? 0 : 1;
   geod_polygon_init(&p, 1);
-  geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
+  geod_polygon_compute(&g, &p, 0, 1, nullptr, &perim);
   result += perim == 0 ? 0 : 1;
-  geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, 0, &perim);
+  geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, nullptr, &perim);
   result += perim == 0 ? 0 : 1;
-  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
+  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, nullptr, &perim);
   result += checkNaN(perim);
   geod_polygon_addpoint(&g, &p, 1, 1);
-  geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
+  geod_polygon_compute(&g, &p, 0, 1, nullptr, &perim);
   result += perim == 0 ? 0 : 1;
   return result;
 }
@@ -944,30 +944,30 @@ static int Planimeter21() {
   for (i = 3; i <= 4; ++i) {
     geod_polygon_addpoint(&g, &p, lat,  60);
     geod_polygon_addpoint(&g, &p, lat, 180);
-    geod_polygon_testpoint(&g, &p, lat, -60, 0, 1, &area, 0);
+    geod_polygon_testpoint(&g, &p, lat, -60, 0, 1, &area, nullptr);
     if (i != 4) result += checkEquals(area,  i*r, 0.5);
-    geod_polygon_testpoint(&g, &p, lat, -60, 0, 0, &area, 0);
+    geod_polygon_testpoint(&g, &p, lat, -60, 0, 0, &area, nullptr);
     if (i != 4) result += checkEquals(area,  i*r, 0.5);
-    geod_polygon_testpoint(&g, &p, lat, -60, 1, 1, &area, 0);
+    geod_polygon_testpoint(&g, &p, lat, -60, 1, 1, &area, nullptr);
     if (i != 4) result += checkEquals(area, -i*r, 0.5);
-    geod_polygon_testpoint(&g, &p, lat, -60, 1, 0, &area, 0);
+    geod_polygon_testpoint(&g, &p, lat, -60, 1, 0, &area, nullptr);
     result += checkEquals(area, -i*r + a0, 0.5);
-    geod_polygon_testedge(&g, &p, a, s, 0, 1, &area, 0);
+    geod_polygon_testedge(&g, &p, a, s, 0, 1, &area, nullptr);
     if (i != 4) result += checkEquals(area,  i*r, 0.5);
-    geod_polygon_testedge(&g, &p, a, s, 0, 0, &area, 0);
+    geod_polygon_testedge(&g, &p, a, s, 0, 0, &area, nullptr);
     if (i != 4) result += checkEquals(area,  i*r, 0.5);
-    geod_polygon_testedge(&g, &p, a, s, 1, 1, &area, 0);
+    geod_polygon_testedge(&g, &p, a, s, 1, 1, &area, nullptr);
     if (i != 4) result += checkEquals(area, -i*r, 0.5);
-    geod_polygon_testedge(&g, &p, a, s, 1, 0, &area, 0);
+    geod_polygon_testedge(&g, &p, a, s, 1, 0, &area, nullptr);
     result += checkEquals(area, -i*r + a0, 0.5);
     geod_polygon_addpoint(&g, &p, lat, -60);
-    geod_polygon_compute(&g, &p, 0, 1, &area, 0);
+    geod_polygon_compute(&g, &p, 0, 1, &area, nullptr);
     if (i != 4) result += checkEquals(area,  i*r, 0.5);
-    geod_polygon_compute(&g, &p, 0, 0, &area, 0);
+    geod_polygon_compute(&g, &p, 0, 0, &area, nullptr);
     if (i != 4) result += checkEquals(area,  i*r, 0.5);
-    geod_polygon_compute(&g, &p, 1, 1, &area, 0);
+    geod_polygon_compute(&g, &p, 1, 1, &area, nullptr);
     if (i != 4) result += checkEquals(area, -i*r, 0.5);
-    geod_polygon_compute(&g, &p, 1, 0, &area, 0);
+    geod_polygon_compute(&g, &p, 1, 0, &area, nullptr);
     result += checkEquals(area, -i*r + a0, 0.5);
   }
   return result;
@@ -985,7 +985,7 @@ static int AddEdge1() {
   geod_polygon_addedge(&g, &p,  90, 1000);
   geod_polygon_addedge(&g, &p,   0, 1000);
   geod_polygon_addedge(&g, &p, -90, 1000);
-  geod_polygon_compute(&g, &p, 0, 1, &area, 0);
+  geod_polygon_compute(&g, &p, 0, 1, &area, nullptr);
   result += checkEquals(area, 1000000.0, 0.01);
   return result;
 }
@@ -1007,16 +1007,16 @@ static int EmptyPoly() {
   result += area == 0 ? 0 : 1;
   result += perim == 0 ? 0 : 1;
   geod_polygon_init(&p, 1);
-  geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, 0, &perim);
+  geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, nullptr, &perim);
   result += perim == 0 ? 0 : 1;
-  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
+  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, nullptr, &perim);
   result += checkNaN(perim);
-  geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
+  geod_polygon_compute(&g, &p, 0, 1, nullptr, &perim);
   result += perim == 0 ? 0 : 1;
   geod_polygon_addpoint(&g, &p, 1, 1);
-  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
+  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, nullptr, &perim);
   result += checkEquals(perim, 1000, 1e-10);
-  geod_polygon_testpoint(&g, &p, 2, 2, 0, 1, 0, &perim);
+  geod_polygon_testpoint(&g, &p, 2, 2, 0, 1, nullptr, &perim);
   result += checkEquals(perim, 156876.149, 0.5e-3);
   return result;
 }

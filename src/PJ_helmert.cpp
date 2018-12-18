@@ -479,7 +479,7 @@ static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
 
 static PJ* init_helmert_six_parameters(PJ* P) {
     struct pj_opaque_helmert *Q = static_cast<struct pj_opaque_helmert*>(pj_calloc (1, sizeof (struct pj_opaque_helmert)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
@@ -560,7 +560,7 @@ PJ *TRANSFORMATION(helmert, 0) {
     struct pj_opaque_helmert *Q;
 
     if( !init_helmert_six_parameters(P) ) {
-        return 0;
+        return nullptr;
     }
 
     /* In the 2D case, the coordinates are projected */
@@ -663,7 +663,7 @@ PJ *TRANSFORMATION(helmert, 0) {
     }
 
     if( !read_convention(P) ) {
-        return 0;
+        return nullptr;
     }
 
     /* Let's help with debugging */
@@ -699,7 +699,7 @@ PJ *TRANSFORMATION(molobadekas, 0) {
     struct pj_opaque_helmert *Q;
 
     if( !init_helmert_six_parameters(P) ) {
-        return 0;
+        return nullptr;
     }
 
     P->fwd3d  = helmert_forward_3d;
@@ -716,7 +716,7 @@ PJ *TRANSFORMATION(molobadekas, 0) {
     Q->scale  =  Q->scale_0;
 
     if( !read_convention(P) ) {
-        return 0;
+        return nullptr;
     }
 
     /* Reference point */

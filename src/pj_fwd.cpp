@@ -74,7 +74,7 @@ static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
 
         if (P->hgridshift)
             coo = proj_trans (P->hgridshift, PJ_INV, coo);
-        else if (P->helmert || (P->cart_wgs84 != 0 && P->cart != 0)) {
+        else if (P->helmert || (P->cart_wgs84 != nullptr && P->cart != nullptr)) {
             coo = proj_trans (P->cart_wgs84, PJ_FWD, coo); /* Go cartesian in WGS84 frame */
             if( P->helmert )
                 coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into local frame */

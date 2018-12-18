@@ -39,14 +39,14 @@
 #include "proj_internal.h"
 #include "projects.h"
 
-static const char *(*pj_finder)(const char *) = NULL;
+static const char *(*pj_finder)(const char *) = nullptr;
 static int path_count = 0;
-static char **search_path = NULL;
+static char **search_path = nullptr;
 static const char * proj_lib_name =
 #ifdef PROJ_LIB
 PROJ_LIB;
 #else
-0;
+nullptr;
 #endif
 
 /************************************************************************/
@@ -71,7 +71,7 @@ void pj_set_searchpath ( int count, const char **path )
 {
     int i;
 
-    if (path_count > 0 && search_path != NULL)
+    if (path_count > 0 && search_path != nullptr)
     {
         for (i = 0; i < path_count; i++)
         {
@@ -79,7 +79,7 @@ void pj_set_searchpath ( int count, const char **path )
         }
         pj_dalloc(search_path);
         path_count = 0;
-        search_path = NULL;
+        search_path = nullptr;
     }
 
     if( count > 0 )
@@ -122,15 +122,15 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     static const char dir_chars[] = "/";
 #endif
 
-    if( out_full_filename != NULL && out_full_filename_size > 0 )
+    if( out_full_filename != nullptr && out_full_filename_size > 0 )
         out_full_filename[0] = '\0';
 
     /* check if ~/name */
     if (*name == '~' && strchr(dir_chars,name[1]) )
-        if ((sysname = getenv("HOME")) != NULL) {
+        if ((sysname = getenv("HOME")) != nullptr) {
             if( strlen(sysname) + 1 + strlen(name) + 1 > sizeof(fname) )
             {
-                return NULL;
+                return nullptr;
             }
             (void)strcpy(fname, sysname);
             fname[n = (int)strlen(fname)] = DIR_CHAR;
@@ -138,7 +138,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             (void)strcpy(fname+n, name + 1);
             sysname = fname;
         } else
-            return NULL;
+            return nullptr;
 
     /* or fixed path: /name, ./name or ../name */
     else if (strchr(dir_chars,*name)
@@ -148,14 +148,14 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         sysname = name;
 
     /* or try to use application provided file finder */
-    else if( pj_finder != NULL && pj_finder( name ) != NULL )
+    else if( pj_finder != nullptr && pj_finder( name ) != nullptr )
         sysname = pj_finder( name );
 
     /* or is environment PROJ_LIB defined */
     else if ((sysname = getenv("PROJ_LIB")) || (sysname = proj_lib_name)) {
         if( strlen(sysname) + 1 + strlen(name) + 1 > sizeof(fname) )
         {
-            return NULL;
+            return nullptr;
         }
         (void)strcpy(fname, sysname);
         fname[n = (int)strlen(fname)] = DIR_CHAR;
@@ -165,9 +165,9 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     } else /* just try it bare bones */
         sysname = name;
 
-    if ((fid = pj_ctx_fopen(ctx, sysname, mode)) != NULL)
+    if ((fid = pj_ctx_fopen(ctx, sysname, mode)) != nullptr)
     {
-        if( out_full_filename != NULL && out_full_filename_size > 0 )
+        if( out_full_filename != nullptr && out_full_filename_size > 0 )
         {
             strncpy(out_full_filename, sysname, out_full_filename_size);
             out_full_filename[out_full_filename_size-1] = '\0';
@@ -178,7 +178,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     /* If none of those work and we have a search path, try it */
     if (!fid && path_count > 0)
     {
-        for (i = 0; fid == NULL && i < path_count; i++)
+        for (i = 0; fid == nullptr && i < path_count; i++)
         {
             if( strlen(search_path[i]) + 1 + strlen(name) + 1 <= sizeof(fname) )
             {
@@ -189,7 +189,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         }
         if (fid)
         {
-            if( out_full_filename != NULL && out_full_filename_size > 0 )
+            if( out_full_filename != nullptr && out_full_filename_size > 0 )
             {
                 strncpy(out_full_filename, sysname, out_full_filename_size);
                 out_full_filename[out_full_filename_size-1] = '\0';
@@ -204,7 +204,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
             "pj_open_lib(%s): call fopen(%s) - %s",
             name, sysname,
-            fid == NULL ? "failed" : "succeeded" );
+            fid == nullptr ? "failed" : "succeeded" );
 
     return(fid);
 }
@@ -215,7 +215,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
 
 PAFile
 pj_open_lib(projCtx ctx, const char *name, const char *mode) {
-    return pj_open_lib_ex(ctx, name, mode, NULL, 0);
+    return pj_open_lib_ex(ctx, name, mode, nullptr, 0);
 }
 
 /************************************************************************/
@@ -238,7 +238,7 @@ int pj_find_file(projCtx ctx, const char *short_filename,
 {
     PAFile f = pj_open_lib_ex(ctx, short_filename, "rb", out_full_filename,
                               out_full_filename_size);
-    if( f != NULL )
+    if( f != nullptr )
     {
         pj_ctx_fclose(ctx, f);
         return 1;

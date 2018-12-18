@@ -33,7 +33,7 @@ pj_units[] = {
     {"ind-yd",  "0.91439523",           "Indian Yard",                  0.91439523},
     {"ind-ft",  "0.30479841",           "Indian Foot",                  0.30479841},
     {"ind-ch",  "20.11669506",          "Indian Chain",                 20.11669506},
-    {NULL,      NULL,                   NULL,                           0.0}
+    {nullptr,      nullptr,                   nullptr,                           0.0}
 };
 
 const PJ_UNITS *proj_list_units()
@@ -49,7 +49,7 @@ pj_angular_units[] = {
     {"rad",         "1.0",                   "Radian", 1.0},
     {"deg",         "0.017453292519943296",  "Degree", DEG_TO_RAD},
     {"grad",        "0.015707963267948967",  "Grad",   GRAD_TO_RAD},
-    {NULL,          NULL,                     NULL,    0.0}
+    {nullptr,          nullptr,                     nullptr,    0.0}
 };
 
 const PJ_UNITS *proj_list_angular_units()

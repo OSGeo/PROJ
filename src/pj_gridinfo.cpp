@@ -89,25 +89,25 @@ static double to_double( unsigned char* data )
 void pj_gridinfo_free( projCtx ctx, PJ_GRIDINFO *gi )
 
 {
-    if( gi == NULL )
+    if( gi == nullptr )
         return;
 
-    if( gi->child != NULL )
+    if( gi->child != nullptr )
     {
         PJ_GRIDINFO *child, *next;
 
-        for( child = gi->child; child != NULL; child=next)
+        for( child = gi->child; child != nullptr; child=next)
         {
             next=child->next;
             pj_gridinfo_free( ctx, child );
         }
     }
 
-    if( gi->ct != NULL )
+    if( gi->ct != nullptr )
         nad_free( gi->ct );
 
     free( gi->gridname );
-    if( gi->filename != NULL )
+    if( gi->filename != nullptr )
         free( gi->filename );
 
     pj_dalloc( gi );
@@ -126,11 +126,11 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 {
     struct CTABLE ct_tmp;
 
-    if( gi == NULL || gi->ct == NULL )
+    if( gi == nullptr || gi->ct == nullptr )
         return 0;
 
     pj_acquire_lock();
-    if( gi->ct->cvs != NULL )
+    if( gi->ct->cvs != nullptr )
     {
         pj_release_lock();
         return 1;
@@ -148,7 +148,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
 
-        if( fid == NULL )
+        if( fid == nullptr )
         {
             pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
@@ -175,7 +175,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
 
-        if( fid == NULL )
+        if( fid == nullptr )
         {
             pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
@@ -207,7 +207,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
 
-        if( fid == NULL )
+        if( fid == nullptr )
         {
             pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
@@ -218,7 +218,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         row_buf = (double *) pj_malloc(gi->ct->lim.lam * sizeof(double) * 2);
         ct_tmp.cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
-        if( row_buf == NULL || ct_tmp.cvs == NULL )
+        if( row_buf == nullptr || ct_tmp.cvs == nullptr )
         {
             pj_dalloc( row_buf );
             pj_dalloc( ct_tmp.cvs );
@@ -288,7 +288,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
 
-        if( fid == NULL )
+        if( fid == nullptr )
         {
             pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
@@ -299,7 +299,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         row_buf = (float *) pj_malloc(gi->ct->lim.lam * sizeof(float) * 4);
         ct_tmp.cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
-        if( row_buf == NULL || ct_tmp.cvs == NULL )
+        if( row_buf == nullptr || ct_tmp.cvs == nullptr )
         {
             pj_dalloc( row_buf );
             pj_dalloc( ct_tmp.cvs );
@@ -363,7 +363,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
 
-        if( fid == NULL )
+        if( fid == nullptr )
         {
             pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
@@ -373,7 +373,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         pj_ctx_fseek( ctx, fid, gi->grid_offset, SEEK_SET );
 
         ct_tmp.cvs = (FLP *) pj_malloc(words*sizeof(float));
-        if( ct_tmp.cvs == NULL )
+        if( ct_tmp.cvs == nullptr )
         {
             pj_ctx_set_errno( ctx, ENOMEM );
             pj_release_lock();
@@ -563,7 +563,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
             return 0;
         }
 
-        ct->cvs = NULL;
+        ct->cvs = nullptr;
 
 /* -------------------------------------------------------------------- */
 /*      Create a new gridinfo for this if we aren't processing the      */
@@ -590,7 +590,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
                 pj_ctx_set_errno(ctx, ENOMEM);
                 return 0;
             }
-            gi->next = NULL;
+            gi->next = nullptr;
         }
 
         gi->must_swap = must_swap;
@@ -607,7 +607,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
             {
                 PJ_GRIDINFO *lnk;
 
-                for( lnk = gilist; lnk->next != NULL; lnk = lnk->next ) {}
+                for( lnk = gilist; lnk->next != nullptr; lnk = lnk->next ) {}
                 lnk->next = gi;
             }
         }
@@ -618,25 +618,25 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
             PJ_GRIDINFO *gp = gridinfo_parent(gilist,
                                                  (const char*)header+24,8);
 
-            if( gp == NULL )
+            if( gp == nullptr )
             {
                 pj_log( ctx, PJ_LOG_ERROR,
                         "pj_gridinfo_init_ntv2(): "
                         "failed to find parent %8.8s for %s.",
                         (const char *) header+24, gi->ct->id );
 
-                for( lnk = gilist; lnk->next != NULL; lnk = lnk->next ) {}
+                for( lnk = gilist; lnk->next != nullptr; lnk = lnk->next ) {}
                 lnk->next = gi;
             }
             else
             {
-                if( gp->child == NULL )
+                if( gp->child == nullptr )
                 {
                     gp->child = gi;
                 }
                 else
                 {
-                    for( lnk = gp->child; lnk->next != NULL; lnk = lnk->next ) {}
+                    for( lnk = gp->child; lnk->next != nullptr; lnk = lnk->next ) {}
                     lnk->next = gi;
                 }
             }
@@ -728,7 +728,7 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     ct->ll.phi *= DEG_TO_RAD;
     ct->del.lam *= DEG_TO_RAD;
     ct->del.phi *= DEG_TO_RAD;
-    ct->cvs = NULL;
+    ct->cvs = nullptr;
 
     gi->ct = ct;
     gi->grid_offset = (long) sizeof(header);
@@ -830,7 +830,7 @@ static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     ct->ll.phi *= DEG_TO_RAD;
     ct->del.lam *= DEG_TO_RAD;
     ct->del.phi *= DEG_TO_RAD;
-    ct->cvs = NULL;
+    ct->cvs = nullptr;
 
     gi->ct = ct;
     gi->grid_offset = 40;
@@ -867,20 +867,20 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
     gilist = (PJ_GRIDINFO *) pj_calloc(1, sizeof(PJ_GRIDINFO));
     if (!gilist) {
         pj_ctx_set_errno(ctx, ENOMEM);
-        return NULL;
+        return nullptr;
     }
 
     gilist->gridname = pj_strdup( gridname );
     if (!gilist->gridname) {
         pj_dalloc(gilist);
         pj_ctx_set_errno(ctx, ENOMEM);
-        return NULL;
+        return nullptr;
     }
-    gilist->filename = NULL;
+    gilist->filename = nullptr;
     gilist->format = "missing";
     gilist->grid_offset = 0;
-    gilist->ct = NULL;
-    gilist->next = NULL;
+    gilist->ct = nullptr;
+    gilist->next = nullptr;
 
 /* -------------------------------------------------------------------- */
 /*      Open the file using the usual search rules.                     */
@@ -896,7 +896,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         pj_dalloc(gilist->gridname);
         pj_dalloc(gilist);
         pj_ctx_set_errno(ctx, ENOMEM);
-        return NULL;
+        return nullptr;
     }
 
 /* -------------------------------------------------------------------- */
@@ -946,7 +946,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         gilist->format = "ctable2";
         gilist->ct = ct;
 
-        if (ct == NULL)
+        if (ct == nullptr)
         {
             pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
                     "CTABLE V2 ct is NULL.");
@@ -966,7 +966,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
     else
     {
         struct CTABLE *ct = nad_ctable_init( ctx, fp );
-        if (ct == NULL)
+        if (ct == nullptr)
         {
             pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
                     "CTABLE ct is NULL.");

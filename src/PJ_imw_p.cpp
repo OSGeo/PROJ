@@ -143,10 +143,10 @@ static void xy(PJ *P, double phi, double *x, double *y, double *sp, double *R) {
 
 
 static PJ *destructor (PJ *P, int errlev) {
-    if (0==P)
-        return 0;
+    if (nullptr==P)
+        return nullptr;
 
-    if (0==P->opaque)
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
     if( static_cast<struct pj_opaque*>(P->opaque)->en )
@@ -160,7 +160,7 @@ PJ *PROJECTION(imw_p) {
     double del, sig, s, t, x1, x2, T2, y1, m1, m2, y2;
     int err;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 

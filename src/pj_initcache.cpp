@@ -31,8 +31,8 @@
 
 static int cache_count = 0;
 static int cache_alloc = 0;
-static char **cache_key = NULL;
-static paralist **cache_paralist = NULL;
+static char **cache_key = nullptr;
+static paralist **cache_paralist = nullptr;
 
 /************************************************************************/
 /*                            pj_clone_paralist()                       */
@@ -42,18 +42,18 @@ static paralist **cache_paralist = NULL;
 
 paralist *pj_clone_paralist( const paralist *list)
 {
-  paralist *list_copy = NULL, *next_copy = NULL;
+  paralist *list_copy = nullptr, *next_copy = nullptr;
 
-  for( ; list != NULL; list = list->next )
+  for( ; list != nullptr; list = list->next )
     {
       paralist *newitem = (paralist *)
 	pj_malloc(sizeof(paralist) + strlen(list->param));
 
       newitem->used = 0;
-      newitem->next = 0;
+      newitem->next = nullptr;
       strcpy( newitem->param, list->param );
 
-      if( list_copy == NULL )
+      if( list_copy == nullptr )
 	list_copy = newitem;
       else
 	next_copy->next = newitem;
@@ -85,7 +85,7 @@ void pj_clear_initcache()
             pj_dalloc( cache_key[i] );
 
             /* free parameter list elements */
-            for (; t != NULL; t = n) {
+            for (; t != nullptr; t = n) {
                 n = t->next;
                 pj_dalloc(t);
             }
@@ -95,8 +95,8 @@ void pj_clear_initcache()
         pj_dalloc( cache_paralist );
         cache_count = 0;
         cache_alloc= 0;
-        cache_key = NULL;
-        cache_paralist = NULL;
+        cache_key = nullptr;
+        cache_paralist = nullptr;
 
         pj_release_lock();
     }
@@ -112,11 +112,11 @@ paralist *pj_search_initcache( const char *filekey )
 
 {
     int i;
-    paralist *result = NULL;
+    paralist *result = nullptr;
 
     pj_acquire_lock();
 
-    for( i = 0; result == NULL && i < cache_count; i++)
+    for( i = 0; result == nullptr && i < cache_count; i++)
     {
         if( strcmp(filekey,cache_key[i]) == 0 )
 	{

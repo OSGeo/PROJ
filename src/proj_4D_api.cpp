@@ -130,7 +130,7 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     int i;
     PJ_COORD t, org;
 
-    if (0==P)
+    if (nullptr==P)
         return HUGE_VAL;
 
     if (n < 1) {
@@ -169,7 +169,7 @@ available.
 See also pj_approx_2D_trans and pj_approx_3D_trans in pj_internal.c, which work
 similarly, but prefers the 2D resp. 3D interfaces if available.
 ***************************************************************************************/
-    if (0==P)
+    if (nullptr==P)
         return coord;
     if (P->inverted)
         direction = opposite_direction(direction);
@@ -274,17 +274,17 @@ size_t proj_trans_generic (
     size_t i, nmin;
     double null_broadcast = 0;
 
-    if (0==P)
+    if (nullptr==P)
         return 0;
 
     if (P->inverted)
         direction = opposite_direction(direction);
 
     /* ignore lengths of null arrays */
-    if (0==x) nx = 0;
-    if (0==y) ny = 0;
-    if (0==z) nz = 0;
-    if (0==t) nt = 0;
+    if (nullptr==x) nx = 0;
+    if (nullptr==y) ny = 0;
+    if (nullptr==z) nz = 0;
+    if (nullptr==t) nt = 0;
 
     /* and make the nullities point to some real world memory for broadcasting nulls */
     if (0==nx) x = &null_broadcast;
@@ -433,7 +433,7 @@ Returns 1 on success, 0 on failure
     PJ *Q;
     paralist *p;
     int do_cart = 0;
-    if (0==P)
+    if (nullptr==P)
         return 0;
 
     /* Don't recurse when calling proj_create (which calls us back) */
@@ -446,12 +446,12 @@ Returns 1 on success, 0 on failure
     /* Don't axisswap if data are already in "enu" order */
     if (p && (0!=strcmp ("enu", p->param))) {
         char *def = static_cast<char*>(malloc (100+strlen(P->axis)));
-        if (0==def)
+        if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=axisswap  axis=%s", P->axis);
         Q = proj_create (P->ctx, def);
         free (def);
-        if (0==Q)
+        if (nullptr==Q)
             return 0;
         P->axisswap = skip_prep_fin(Q);
     }
@@ -461,12 +461,12 @@ Returns 1 on success, 0 on failure
     if (p  &&  strlen (p->param) > strlen ("geoidgrids=")) {
         char *gridnames = p->param + strlen ("geoidgrids=");
         char *def = static_cast<char*>(malloc (100+strlen(gridnames)));
-        if (0==def)
+        if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=vgridshift  grids=%s", gridnames);
         Q = proj_create (P->ctx, def);
         free (def);
-        if (0==Q)
+        if (nullptr==Q)
             return 0;
         P->vgridshift = skip_prep_fin(Q);
     }
@@ -476,18 +476,18 @@ Returns 1 on success, 0 on failure
     if (p  &&  strlen (p->param) > strlen ("nadgrids=")) {
         char *gridnames = p->param + strlen ("nadgrids=");
         char *def = static_cast<char*>(malloc (100+strlen(gridnames)));
-        if (0==def)
+        if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=hgridshift  grids=%s", gridnames);
         Q = proj_create (P->ctx, def);
         free (def);
-        if (0==Q)
+        if (nullptr==Q)
             return 0;
         P->hgridshift = skip_prep_fin(Q);
     }
 
     /* We ignore helmert if we have grid shift */
-    p = P->hgridshift ? 0 : pj_param_exists (P->params, "towgs84");
+    p = P->hgridshift ? nullptr : pj_param_exists (P->params, "towgs84");
     while (p) {
         char *def;
         char *s = p->param;
@@ -508,12 +508,12 @@ Returns 1 on success, 0 on failure
             return 0;
 
         def = static_cast<char*>(malloc (100+n));
-        if (0==def)
+        if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=helmert exact %s convention=position_vector", s);
         Q = proj_create (P->ctx, def);
         free(def);
-        if (0==Q)
+        if (nullptr==Q)
             return 0;
         pj_inherit_ellipsoid_def (P, Q);
         P->helmert = skip_prep_fin (Q);
@@ -533,19 +533,19 @@ Returns 1 on success, 0 on failure
             /* TODO later: use C++ ostringstream with imbue(std::locale::classic()) */
             /* to be locale unaware */
             char* next_pos;
-            for (next_pos = def; (next_pos = strchr (next_pos, ',')) != NULL; next_pos++) {
+            for (next_pos = def; (next_pos = strchr (next_pos, ',')) != nullptr; next_pos++) {
                 *next_pos = '.';
             }
         }
         Q = proj_create (P->ctx, def);
-        if (0==Q)
+        if (nullptr==Q)
             return 0;
         P->cart = skip_prep_fin (Q);
 
         if (!P->is_geocent) {
             sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
             Q = proj_create (P->ctx, def);
-            if (0==Q)
+            if (nullptr==Q)
                 return 0;
             P->cart_wgs84 = skip_prep_fin (Q);
         }
@@ -573,15 +573,15 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     int    ret;
     int    allow_init_epsg;
 
-    if (0==ctx)
+    if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
 
     /* Make a copy that we can manipulate */
     n = strlen (definition);
     args = (char *) malloc (n + 1);
-    if (0==args) {
+    if (nullptr==args) {
         proj_context_errno_set(ctx, ENOMEM);
-        return 0;
+        return nullptr;
     }
     strcpy (args, definition);
 
@@ -589,7 +589,7 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     if (argc==0) {
         pj_dealloc (args);
         proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
-        return 0;
+        return nullptr;
     }
 
     argv = pj_trim_argv (argc, args);
@@ -624,18 +624,18 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
     PJ *P;
     const char *c;
 
-    if (0==ctx)
+    if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
-    if (0==argv) {
+    if (nullptr==argv) {
         proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
-        return 0;
+        return nullptr;
     }
 
     /* We assume that free format is used, and build a full proj_create compatible string */
     c = pj_make_args (argc, argv);
-    if (0==c) {
+    if (nullptr==c) {
         proj_context_errno_set(ctx, ENOMEM);
-        return 0;
+        return nullptr;
     }
 
     P = proj_create (ctx, c);
@@ -672,7 +672,7 @@ void proj_area_destroy(PJ_AREA* area) {
 /************************************************************************/
 
 void proj_context_use_proj4_init_rules(PJ_CONTEXT *ctx, int enable) {
-    if( ctx == NULL ) {
+    if( ctx == nullptr ) {
         ctx = pj_get_default_ctx();
     }
     ctx->use_proj4_init_rules = enable;
@@ -697,7 +697,7 @@ static int EQUAL(const char* a, const char* b) {
 int proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_path) {
     const char* val = getenv("PROJ_USE_PROJ4_INIT_RULES");
 
-    if( ctx == NULL ) {
+    if( ctx == nullptr ) {
         ctx = pj_get_default_ctx();
     }
 
@@ -751,26 +751,26 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     PJ_OBJ_LIST* op_list;
     PJ_OBJ* op;
     const char* proj_string;
-    const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", NULL };
+    const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", nullptr };
     const char* const* optionsImportCRS =
-        proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : NULL;
+        proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : nullptr;
 
     src = proj_obj_create_from_user_input(ctx, source_crs, optionsImportCRS);
     if( !src ) {
-        return NULL;
+        return nullptr;
     }
 
     dst = proj_obj_create_from_user_input(ctx, target_crs, optionsImportCRS);
     if( !dst ) {
         proj_obj_destroy(src);
-        return NULL;
+        return nullptr;
     }
 
-    operation_ctx = proj_create_operation_factory_context(ctx, NULL);
+    operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
     if( !operation_ctx ) {
         proj_obj_destroy(src);
         proj_obj_destroy(dst);
-        return NULL;
+        return nullptr;
     }
 
     if( area && area->bbox_set ) {
@@ -793,24 +793,24 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     proj_obj_destroy(dst);
 
     if( !op_list ) {
-        return NULL;
+        return nullptr;
     }
 
     if( proj_obj_list_get_count(op_list) == 0 ) {
         proj_obj_list_destroy(op_list);
-        return NULL;
+        return nullptr;
     }
 
     op = proj_obj_list_get(ctx, op_list, 0);
     proj_obj_list_destroy(op_list);
     if( !op ) {
-        return NULL;
+        return nullptr;
     }
 
-    proj_string = proj_obj_as_proj_string(ctx, op, PJ_PROJ_5, NULL);
+    proj_string = proj_obj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
     if( !proj_string) {
         proj_obj_destroy(op);
-        return NULL;
+        return nullptr;
     }
 
     if( proj_string[0] == '\0' ) {
@@ -827,7 +827,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
 PJ *proj_destroy (PJ *P) {
     pj_free (P);
-    return 0;
+    return nullptr;
 }
 
 /*****************************************************************************/
@@ -844,7 +844,7 @@ int proj_context_errno (PJ_CONTEXT *ctx) {
     Read an error directly from a context, without going through a PJ
     belonging to that context.
 ******************************************************************************/
-    if (0==ctx)
+    if (nullptr==ctx)
         ctx = pj_get_default_ctx();
     return pj_ctx_get_errno (ctx);
 }
@@ -925,15 +925,15 @@ PJ_CONTEXT *proj_context_create (void) {
 
 
 PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx) {
-    if (0==ctx)
-        return 0;
+    if (nullptr==ctx)
+        return nullptr;
 
     /* Trying to free the default context is a no-op (since it is statically allocated) */
     if (pj_get_default_ctx ()==ctx)
-        return 0;
+        return nullptr;
 
     pj_ctx_free (ctx);
-    return 0;
+    return nullptr;
 }
 
 
@@ -958,26 +958,26 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
 #endif
 
     /* Nothing to do? */
-    if (0 == app)
+    if (nullptr == app)
         return buf;
     applen = strlen (app);
     if (0 == applen)
         return buf;
 
     /* Start checking whether buf is long enough */
-    if (0 != buf)
+    if (nullptr != buf)
         buflen = strlen (buf);
     len = buflen+applen+strlen (delim) + 1;
 
     /* "pj_realloc", so to speak */
     if (*buf_size < len) {
         p = static_cast<char*>(pj_calloc (2 * len, sizeof (char)));
-        if (0==p) {
+        if (nullptr==p) {
             pj_dealloc (buf);
-            return 0;
+            return nullptr;
         }
         *buf_size = 2 * len;
-        if (buf != 0)
+        if (buf != nullptr)
             strcpy (p, buf);
         pj_dealloc (buf);
         buf = p;
@@ -992,7 +992,7 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
 
 static const char *empty = {""};
 static char version[64]  = {""};
-static PJ_INFO info = {0, 0, 0, 0, 0, 0, 0, 0};
+static PJ_INFO info = {0, 0, 0, nullptr, nullptr, nullptr, nullptr, 0};
 static volatile int info_initialized = 0;
 
 /*****************************************************************************/
@@ -1006,7 +1006,7 @@ PJ_INFO proj_info (void) {
     size_t i, n;
 
     size_t  buf_size = 0;
-    char   *buf = 0;
+    char   *buf = nullptr;
 
     pj_acquire_lock ();
 
@@ -1065,7 +1065,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
     /* proj_create_crs_to_crs in a future version that leverages the EPSG database. */
     pjinfo.accuracy = -1.0;
 
-    if (0==P)
+    if (nullptr==P)
         return pjinfo;
 
     /* projection id */
@@ -1080,7 +1080,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
         def = P->def_full;
     else
         def = pj_get_def(P, 0); /* pj_get_def takes a non-const PJ pointer */
-    if (0==def)
+    if (nullptr==def)
         pjinfo.definition = empty;
     else
         pjinfo.definition = pj_shrink (def);
@@ -1107,7 +1107,7 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
     memset(&grinfo, 0, sizeof(PJ_GRID_INFO));
 
     /* in case the grid wasn't found */
-    if (gridinfo->filename == NULL) {
+    if (gridinfo->filename == nullptr) {
         pj_gridinfo_free(ctx, gridinfo);
         strcpy(grinfo.format, "missing");
         return grinfo;
@@ -1258,7 +1258,7 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
     PJ_FACTORS factors = {0,0,0,  0,0,0,  0,0,  0,0,0,0};
     struct FACTORS f;
 
-    if (0==P)
+    if (nullptr==P)
         return factors;
 
     if (pj_factors(lp.lp, P, 0.0, &f))

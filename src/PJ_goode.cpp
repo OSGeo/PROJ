@@ -50,9 +50,9 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 
 static PJ *destructor (PJ *P, int errlev) {              /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
+    if (nullptr==P)
+        return nullptr;
+    if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
     pj_free (static_cast<struct pj_opaque*>(P->opaque)->sinu);
     pj_free (static_cast<struct pj_opaque*>(P->opaque)->moll);
@@ -63,13 +63,13 @@ static PJ *destructor (PJ *P, int errlev) {              /* Destructor */
 
 PJ *PROJECTION(goode) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (0==Q)
+    if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;
 
     P->es = 0.;
-    if (!(Q->sinu = pj_sinu(0)) || !(Q->moll = pj_moll(0)))
+    if (!(Q->sinu = pj_sinu(nullptr)) || !(Q->moll = pj_moll(nullptr)))
         return destructor (P, ENOMEM);
     Q->sinu->es = 0.;
     Q->sinu->ctx = P->ctx;

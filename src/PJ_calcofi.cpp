@@ -141,7 +141,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 
 PJ *PROJECTION(calcofi) {
-    P->opaque = 0;
+    P->opaque = nullptr;
 
     /* if the user has specified +lon_0 or +k0 for some reason,
     we're going to ignore it so that xy is consistent with point O */

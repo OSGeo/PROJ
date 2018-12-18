@@ -42,9 +42,9 @@ static volatile int       default_context_initialized = 0;
 projCtx pj_get_ctx( projPJ pj )
 
 {
-    if (0==pj)
+    if (nullptr==pj)
         return pj_get_default_ctx ();
-    if (0==pj->ctx)
+    if (nullptr==pj->ctx)
         return pj_get_default_ctx ();
     return pj->ctx;
 }
@@ -58,7 +58,7 @@ projCtx pj_get_ctx( projPJ pj )
 void pj_set_ctx( projPJ pj, projCtx ctx )
 
 {
-    if (pj==0)
+    if (pj==nullptr)
         return;
     pj->ctx = ctx;
 }
@@ -82,13 +82,13 @@ projCtx pj_get_default_ctx()
         default_context.last_errno = 0;
         default_context.debug_level = PJ_LOG_NONE;
         default_context.logger = pj_stderr_logger;
-        default_context.app_data = NULL;
+        default_context.app_data = nullptr;
         default_context.fileapi = pj_get_default_fileapi();
-        default_context.cpp_context = NULL;
+        default_context.cpp_context = nullptr;
         default_context.use_proj4_init_rules = -1;
         default_context.epsg_file_exists = -1;
 
-        if( getenv("PROJ_DEBUG") != NULL )
+        if( getenv("PROJ_DEBUG") != nullptr )
         {
             if( atoi(getenv("PROJ_DEBUG")) >= -PJ_LOG_DEBUG_MINOR )
                 default_context.debug_level = atoi(getenv("PROJ_DEBUG"));
@@ -111,11 +111,11 @@ projCtx pj_ctx_alloc()
 
 {
     projCtx ctx = (projCtx_t *) malloc(sizeof(projCtx_t));
-    if (0==ctx)
-        return 0;
+    if (nullptr==ctx)
+        return nullptr;
     memcpy( ctx, pj_get_default_ctx(), sizeof(projCtx_t) );
     ctx->last_errno = 0;
-    ctx->cpp_context = NULL;
+    ctx->cpp_context = nullptr;
     ctx->use_proj4_init_rules = -1;
 
     return ctx;
@@ -139,7 +139,7 @@ void pj_ctx_free( projCtx ctx )
 int pj_ctx_get_errno( projCtx ctx )
 
 {
-    if (0==ctx)
+    if (nullptr==ctx)
         return pj_get_default_ctx ()->last_errno;
     return ctx->last_errno;
 }
@@ -167,7 +167,7 @@ void pj_ctx_set_errno( projCtx ctx, int new_errno )
 void pj_ctx_set_debug( projCtx ctx, int new_debug )
 
 {
-    if (0==ctx)
+    if (nullptr==ctx)
         return;
     ctx->debug_level = new_debug;
 }
@@ -179,7 +179,7 @@ void pj_ctx_set_debug( projCtx ctx, int new_debug )
 void pj_ctx_set_logger( projCtx ctx, void (*new_logger)(void*,int,const char*) )
 
 {
-    if (0==ctx)
+    if (nullptr==ctx)
         return;
     ctx->logger = new_logger;
 }
@@ -191,7 +191,7 @@ void pj_ctx_set_logger( projCtx ctx, void (*new_logger)(void*,int,const char*) )
 void pj_ctx_set_app_data( projCtx ctx, void *new_app_data )
 
 {
-    if (0==ctx)
+    if (nullptr==ctx)
         return;
     ctx->app_data = new_app_data;
 }
@@ -203,8 +203,8 @@ void pj_ctx_set_app_data( projCtx ctx, void *new_app_data )
 void *pj_ctx_get_app_data( projCtx ctx )
 
 {
-    if (0==ctx)
-        return 0;
+    if (nullptr==ctx)
+        return nullptr;
     return ctx->app_data;
 }
 
@@ -215,7 +215,7 @@ void *pj_ctx_get_app_data( projCtx ctx )
 void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
 
 {
-    if (0==ctx)
+    if (nullptr==ctx)
         return;
     ctx->fileapi = fileapi;
 }
@@ -227,7 +227,7 @@ void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
 projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
 
 {
-    if (0==ctx)
-        return 0;
+    if (nullptr==ctx)
+        return nullptr;
     return ctx->fileapi;
 }
