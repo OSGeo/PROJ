@@ -54,217 +54,177 @@ endif()
 ##############################################
 ###  library source list and include_list  ###
 ##############################################
-SET(SRC_LIBPROJ_PJ
-        nad_init.cpp
-        PJ_aea.cpp
-        PJ_aeqd.cpp
-        PJ_affine.cpp
-        PJ_airy.cpp
-        PJ_aitoff.cpp
-        PJ_august.cpp
-        PJ_axisswap.cpp
-        PJ_bacon.cpp
-        PJ_bertin1953.cpp
-        PJ_bipc.cpp
-        PJ_boggs.cpp
-        PJ_bonne.cpp
-        PJ_calcofi.cpp
-        PJ_cart.cpp
-        PJ_cass.cpp
-        PJ_cc.cpp
-        PJ_ccon.cpp
-        PJ_cea.cpp
-        PJ_chamb.cpp
-        PJ_collg.cpp
-        PJ_comill.cpp
-        PJ_crast.cpp
-        PJ_deformation.cpp
-        PJ_denoy.cpp
-        PJ_eck1.cpp
-        PJ_eck2.cpp
-        PJ_eck3.cpp
-        PJ_eck4.cpp
-        PJ_eck5.cpp
-        PJ_eqc.cpp
-        PJ_eqdc.cpp
-        PJ_eqearth.cpp
-        PJ_fahey.cpp
-        PJ_fouc_s.cpp
-        PJ_gall.cpp
-        PJ_geoc.cpp
-        PJ_geos.cpp
-        PJ_gins8.cpp
-        PJ_gnom.cpp
-        PJ_gn_sinu.cpp
-        PJ_goode.cpp
-        PJ_gstmerc.cpp
-        PJ_hammer.cpp
-        PJ_hatano.cpp
-        PJ_helmert.cpp
-        PJ_hgridshift.cpp
-        PJ_horner.cpp
-        PJ_igh.cpp
-        PJ_isea.cpp
-        PJ_imw_p.cpp
-        PJ_krovak.cpp
-        PJ_labrd.cpp
-        PJ_laea.cpp
-        PJ_lagrng.cpp
-        PJ_larr.cpp
-        PJ_lask.cpp
-        PJ_latlong.cpp
-        PJ_lcca.cpp
-        PJ_lcc.cpp
-        PJ_loxim.cpp
-        PJ_lsat.cpp
-        PJ_misrsom.cpp
-        PJ_mbt_fps.cpp
-        PJ_mbtfpp.cpp
-        PJ_mbtfpq.cpp
-        PJ_merc.cpp
-        PJ_mill.cpp
-        PJ_mod_ster.cpp
-        PJ_moll.cpp
-        PJ_molodensky.cpp
-        PJ_natearth.cpp
-        PJ_natearth2.cpp
-        PJ_nell.cpp
-        PJ_nell_h.cpp
-        PJ_nocol.cpp
-        PJ_nsper.cpp
-        PJ_nzmg.cpp
-        PJ_ob_tran.cpp
-        PJ_ocea.cpp
-        PJ_oea.cpp
-        PJ_omerc.cpp
-        PJ_ortho.cpp
-        PJ_patterson.cpp
-        PJ_pipeline.cpp
-        PJ_poly.cpp
-        PJ_putp2.cpp
-        PJ_putp3.cpp
-        PJ_putp4p.cpp
-        PJ_putp5.cpp
-        PJ_putp6.cpp
-        PJ_qsc.cpp
-        PJ_robin.cpp
-        PJ_rpoly.cpp
-        PJ_sch.cpp
-        PJ_sconics.cpp
-        PJ_somerc.cpp
-        PJ_sterea.cpp
-        PJ_stere.cpp
-        PJ_sts.cpp
-        PJ_tcc.cpp
-        PJ_tcea.cpp
-        PJ_times.cpp
-        PJ_tmerc.cpp
-        PJ_tobmerc.cpp
-        PJ_tpeqd.cpp
-        PJ_unitconvert.cpp
-        PJ_urm5.cpp
-        PJ_urmfps.cpp
-        PJ_vandg.cpp
-        PJ_vandg2.cpp
-        PJ_vandg4.cpp
-        PJ_vgridshift.cpp
-        PJ_wag2.cpp
-        PJ_wag3.cpp
-        PJ_wag7.cpp
-        PJ_wink1.cpp
-        PJ_wink2.cpp
-        proj_etmerc.cpp
+
+SET(SRC_LIBPROJ_PROJECTIONS
+        projections/PJ_aeqd.cpp
+        projections/PJ_gnom.cpp
+        projections/PJ_laea.cpp
+        projections/PJ_mod_ster.cpp
+        projections/PJ_nsper.cpp
+        projections/PJ_nzmg.cpp
+        projections/PJ_ortho.cpp
+        projections/PJ_stere.cpp
+        projections/PJ_sterea.cpp
+        projections/PJ_aea.cpp
+        projections/PJ_bipc.cpp
+        projections/PJ_bonne.cpp
+        projections/PJ_eqdc.cpp
+        projections/PJ_isea.cpp
+        projections/PJ_ccon.cpp
+        projections/PJ_imw_p.cpp
+        projections/PJ_krovak.cpp
+        projections/PJ_lcc.cpp
+        projections/PJ_poly.cpp
+        projections/PJ_rpoly.cpp
+        projections/PJ_sconics.cpp
+        projections/proj_rouss.cpp
+        projections/PJ_cass.cpp
+        projections/PJ_cc.cpp
+        projections/PJ_cea.cpp
+        projections/PJ_eqc.cpp
+        projections/PJ_gall.cpp
+        projections/PJ_labrd.cpp
+        projections/PJ_lsat.cpp
+        projections/PJ_misrsom.cpp
+        projections/PJ_merc.cpp
+        projections/PJ_mill.cpp
+        projections/PJ_ocea.cpp
+        projections/PJ_omerc.cpp
+        projections/PJ_somerc.cpp
+        projections/PJ_tcc.cpp
+        projections/PJ_tcea.cpp
+        projections/PJ_times.cpp
+        projections/PJ_tmerc.cpp
+        projections/PJ_tobmerc.cpp
+        projections/PJ_airy.cpp
+        projections/PJ_aitoff.cpp
+        projections/PJ_august.cpp
+        projections/PJ_bacon.cpp
+        projections/PJ_bertin1953.cpp
+        projections/PJ_chamb.cpp
+        projections/PJ_hammer.cpp
+        projections/PJ_lagrng.cpp
+        projections/PJ_larr.cpp
+        projections/PJ_lask.cpp
+        projections/PJ_latlong.cpp
+        projections/PJ_nocol.cpp
+        projections/PJ_ob_tran.cpp
+        projections/PJ_oea.cpp
+        projections/PJ_tpeqd.cpp
+        projections/PJ_vandg.cpp
+        projections/PJ_vandg2.cpp
+        projections/PJ_vandg4.cpp
+        projections/PJ_wag7.cpp
+        projections/PJ_lcca.cpp
+        projections/PJ_geos.cpp
+        projections/proj_etmerc.cpp
+        projections/PJ_boggs.cpp
+        projections/PJ_collg.cpp
+        projections/PJ_comill.cpp
+        projections/PJ_crast.cpp
+        projections/PJ_denoy.cpp
+        projections/PJ_eck1.cpp
+        projections/PJ_eck2.cpp
+        projections/PJ_eck3.cpp
+        projections/PJ_eck4.cpp
+        projections/PJ_eck5.cpp
+        projections/PJ_fahey.cpp
+        projections/PJ_fouc_s.cpp
+        projections/PJ_gins8.cpp
+        projections/PJ_gstmerc.cpp
+        projections/PJ_gn_sinu.cpp
+        projections/PJ_goode.cpp
+        projections/PJ_igh.cpp
+        projections/PJ_hatano.cpp
+        projections/PJ_loxim.cpp
+        projections/PJ_mbt_fps.cpp
+        projections/PJ_mbtfpp.cpp
+        projections/PJ_mbtfpq.cpp
+        projections/PJ_moll.cpp
+        projections/PJ_nell.cpp
+        projections/PJ_nell_h.cpp
+        projections/PJ_patterson.cpp
+        projections/PJ_putp2.cpp
+        projections/PJ_putp3.cpp
+        projections/PJ_putp4p.cpp
+        projections/PJ_putp5.cpp
+        projections/PJ_putp6.cpp
+        projections/PJ_qsc.cpp
+        projections/PJ_robin.cpp
+        projections/PJ_sch.cpp
+        projections/PJ_sts.cpp
+        projections/PJ_urm5.cpp
+        projections/PJ_urmfps.cpp
+        projections/PJ_wag2.cpp
+        projections/PJ_wag3.cpp
+        projections/PJ_wink1.cpp
+        projections/PJ_wink2.cpp
+        projections/PJ_healpix.cpp
+        projections/PJ_natearth.cpp
+        projections/PJ_natearth2.cpp
+        projections/PJ_calcofi.cpp
+        projections/PJ_eqearth.cpp
+)
+
+SET(SRC_LIBPROJ_CONVERSIONS
+        conversions/PJ_axisswap.cpp
+        conversions/PJ_cart.cpp
+        conversions/PJ_geoc.cpp
+        conversions/pj_geocent.cpp
+        conversions/PJ_unitconvert.cpp
+)
+
+SET(SRC_LIBPROJ_TRANSFORMATIONS
+        transformations/PJ_affine.cpp
+        transformations/PJ_deformation.cpp
+        transformations/PJ_helmert.cpp
+        transformations/PJ_hgridshift.cpp
+        transformations/PJ_horner.cpp
+        transformations/PJ_molodensky.cpp
+        transformations/PJ_vgridshift.cpp
+)
+
+SET(SRC_LIBPROJ_ISO19111
+        iso19111/static.cpp
+        iso19111/util.cpp
+        iso19111/metadata.cpp
+        iso19111/common.cpp
+        iso19111/crs.cpp
+        iso19111/datum.cpp
+        iso19111/coordinatesystem.cpp
+        iso19111/coordinateoperation.cpp
+        iso19111/io.cpp
+        iso19111/internal.cpp
+        iso19111/factory.cpp
+        iso19111/c_api.cpp
 )
 
 SET(SRC_LIBPROJ_CORE
-        aasincos.cpp
-        adjlon.cpp
-        bch2bps.cpp
-        bchgen.cpp
-        biveval.cpp
-        dmstor.cpp
-        emess.cpp
-        emess.h
-        geocent.cpp
-        geocent.h
-        geodesic.cpp
-        mk_cheby.cpp
-        nad_cvt.cpp
-        nad_init.cpp
-        nad_intr.cpp
-        pj_apply_gridshift.cpp
-        pj_apply_vgridshift.cpp
-        pj_auth.cpp
-        pj_ctx.cpp
+        pj_list.h proj_internal.h proj_math.h projects.h
+        aasincos.cpp adjlon.cpp bch2bps.cpp bchgen.cpp
+        biveval.cpp dmstor.cpp mk_cheby.cpp pj_auth.cpp
+        pj_deriv.cpp pj_ell_set.cpp pj_ellps.cpp pj_errno.cpp
+        pj_factors.cpp pj_fwd.cpp pj_init.cpp pj_inv.cpp
+        pj_list.cpp pj_malloc.cpp pj_mlfn.cpp pj_msfn.cpp proj_mdist.cpp
+        pj_open_lib.cpp pj_param.cpp pj_phi2.cpp pj_pr_list.cpp
+        pj_qsfn.cpp pj_strerrno.cpp
+        pj_tsfn.cpp pj_units.cpp pj_ctx.cpp pj_log.cpp pj_zpoly1.cpp rtodms.cpp
+        vector1.cpp pj_release.cpp pj_gauss.cpp
         pj_fileapi.cpp
-        pj_datum_set.cpp
-        pj_datums.cpp
-        pj_deriv.cpp
-        pj_ell_set.cpp
-        pj_ellps.cpp
-        pj_errno.cpp
-        pj_factors.cpp
-        pj_fwd.cpp
-        pj_gauss.cpp
-        pj_gc_reader.cpp
-        pj_geocent.cpp
-        pj_gridcatalog.cpp
-        pj_gridinfo.cpp
-        pj_gridlist.cpp
-        PJ_healpix.cpp
-        pj_init.cpp
-        pj_initcache.cpp
-        pj_inv.cpp
-        pj_list.cpp
-        pj_list.h
-        pj_log.cpp
-        pj_malloc.cpp
-        pj_math.cpp
-        pj_mlfn.cpp
-        pj_msfn.cpp
-        pj_mutex.cpp
-        proj_4D_api.cpp
+        pj_gc_reader.cpp pj_gridcatalog.cpp
+        nad_cvt.cpp nad_init.cpp nad_intr.cpp
+        pj_apply_gridshift.cpp pj_datums.cpp pj_datum_set.cpp pj_transform.cpp
+        geocent.cpp geocent.h pj_utils.cpp pj_gridinfo.cpp pj_gridlist.cpp
+        jniproj.cpp pj_mutex.cpp pj_initcache.cpp pj_apply_vgridshift.cpp geodesic.cpp
+        pj_strtod.cpp pj_math.cpp
+        proj_4D_api.cpp PJ_pipeline.cpp
         pj_internal.cpp
-        proj_internal.h
-        pj_open_lib.cpp
-        pj_param.cpp
-        pj_phi2.cpp
-        pj_pr_list.cpp
-        pj_qsfn.cpp
-        pj_release.cpp
-        pj_strerrno.cpp
-        pj_transform.cpp
-        pj_tsfn.cpp
-        pj_units.cpp
-        pj_utils.cpp
-        pj_zpoly1.cpp
-        proj_mdist.cpp
-        proj_math.h
-        proj_rouss.cpp
-        rtodms.cpp
-        vector1.cpp
-        pj_strtod.cpp
-        pj_wkt1_generated_parser.c
-        pj_wkt2_generated_parser.c
+        pj_wkt_parser.hpp pj_wkt_parser.cpp
+        pj_wkt1_parser.h pj_wkt1_parser.cpp
+        pj_wkt1_generated_parser.h pj_wkt1_generated_parser.c
+        pj_wkt2_parser.h pj_wkt2_parser.cpp
+        pj_wkt2_generated_parser.h pj_wkt2_generated_parser.c
         ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
-)
-
-set(SRC_LIBPROJ_CPP
-        static.cpp
-        common.cpp
-        coordinateoperation.cpp
-        coordinatesystem.cpp
-        crs.cpp
-        datum.cpp
-        io.cpp
-        metadata.cpp
-        util.cpp
-        internal.cpp
-        factory.cpp
-        c_api.cpp
-        pj_wkt_parser.cpp
-        pj_wkt1_parser.cpp
-        pj_wkt2_parser.cpp
 )
 
 set(HEADERS_LIBPROJ
@@ -278,8 +238,10 @@ set(HEADERS_LIBPROJ
 # Group source files for IDE source explorers (e.g. Visual Studio)
 source_group("Header Files" FILES ${HEADERS_LIBPROJ})
 source_group("Source Files\\Core" FILES ${SRC_LIBPROJ_CORE})
-source_group("Source Files\\PJ" FILES ${SRC_LIBPROJ_PJ})
-source_group("Source Files\\C++" FILES ${SRC_LIBPROJ_CPP})
+source_group("Source Files\\Conversions" FILES ${SRC_LIBPROJ_CONVERSIONS})
+source_group("Source Files\\Projections" FILES ${SRC_LIBPROJ_PROJECTIONS})
+source_group("Source Files\\Transformations" FILES ${SRC_LIBPROJ_TRANSFORMATIONS})
+source_group("Source Files\\ISO19111" FILES ${SRC_LIBPROJ_ISO19111})
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
@@ -313,7 +275,12 @@ endif(JNI_SUPPORT)
 #################################################
 ## targets: libproj and proj_config.h
 #################################################
-set(ALL_LIBPROJ_SOURCES ${SRC_LIBPROJ_PJ} ${SRC_LIBPROJ_CORE} ${SRC_LIBPROJ_CPP})
+set(ALL_LIBPROJ_SOURCES ${SRC_LIBPROJ_CORE}
+                        ${SRC_LIBPROJ_CONVERSIONS}
+                        ${SRC_LIBPROJ_PROJECTIONS}
+                        ${SRC_LIBPROJ_TRANSFORMATIONS}
+                        ${SRC_LIBPROJ_ISO19111}
+)
 set(ALL_LIBPROJ_HEADERS ${HEADERS_LIBPROJ} )
 
 # Core targets configuration

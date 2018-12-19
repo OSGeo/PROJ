@@ -1,4 +1,4 @@
-set(GEODTEST_SRC geodtest.cpp )
+set(GEODTEST_SRC tests/geodtest.cpp )
 set(GEODTEST_INCLUDE)
 
 source_group("Source Files\\Bin" FILES ${GEODTEST_SRC} ${GEODTEST_INCLUDE})
