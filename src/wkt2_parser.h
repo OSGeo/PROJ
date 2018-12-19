@@ -36,7 +36,7 @@ extern "C" {
 
 typedef struct pj_wkt2_parse_context pj_wkt2_parse_context;
 
-#include "pj_wkt2_generated_parser.h"
+#include "wkt2_generated_parser.h"
 
 void pj_wkt2_error( pj_wkt2_parse_context *context, const char *msg );
 int pj_wkt2_lex(YYSTYPE* pNode, pj_wkt2_parse_context *context);

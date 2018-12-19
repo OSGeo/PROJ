@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_PJ_WKT1_SRC_PJ_WKT1_GENERATED_PARSER_H_INCLUDED
-# define YY_PJ_WKT1_SRC_PJ_WKT1_GENERATED_PARSER_H_INCLUDED
+#ifndef YY_PJ_WKT1_SRC_WKT1_GENERATED_PARSER_H_INCLUDED
+# define YY_PJ_WKT1_SRC_WKT1_GENERATED_PARSER_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -86,4 +86,4 @@ typedef int YYSTYPE;
 
 int pj_wkt1_parse (pj_wkt1_parse_context *context);
 
-#endif /* !YY_PJ_WKT1_SRC_PJ_WKT1_GENERATED_PARSER_H_INCLUDED  */
+#endif /* !YY_PJ_WKT1_SRC_WKT1_GENERATED_PARSER_H_INCLUDED  */

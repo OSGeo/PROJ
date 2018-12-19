@@ -60,8 +60,8 @@
 
 #include "proj_constants.h"
 
-#include "pj_wkt1_parser.h"
-#include "pj_wkt2_parser.h"
+#include "wkt1_parser.h"
+#include "wkt2_parser.h"
 
 // PROJ include order is sensitive
 // clang-format off

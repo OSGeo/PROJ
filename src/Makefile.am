@@ -16,7 +16,7 @@ include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesi
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake bin_projinfo.cmake \
 	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake tests/geodtest.cpp \
-	pj_wkt1_grammar.y pj_wkt2_grammar.y apps/emess.h
+	wkt1_grammar.y wkt2_grammar.y apps/emess.h
 
 proj_SOURCES = apps/proj.cpp apps/gen_cheb.cpp apps/p_series.cpp apps/emess.cpp
 projinfo_SOURCES = apps/projinfo.cpp
@@ -63,166 +63,166 @@ libproj_la_SOURCES = \
 	iso19111/factory.cpp \
 	iso19111/c_api.cpp \
 	\
-	projections/PJ_aeqd.cpp \
-	projections/PJ_gnom.cpp \
-	projections/PJ_laea.cpp \
-	projections/PJ_mod_ster.cpp \
-	projections/PJ_nsper.cpp \
-	projections/PJ_nzmg.cpp \
-	projections/PJ_ortho.cpp \
-	projections/PJ_stere.cpp \
-	projections/PJ_sterea.cpp \
-	projections/PJ_aea.cpp \
-	projections/PJ_bipc.cpp \
-	projections/PJ_bonne.cpp \
-	projections/PJ_eqdc.cpp \
-	projections/PJ_isea.cpp \
-	projections/PJ_ccon.cpp \
-	projections/PJ_imw_p.cpp \
-	projections/PJ_krovak.cpp \
-	projections/PJ_lcc.cpp \
-	projections/PJ_poly.cpp \
-	projections/PJ_rpoly.cpp \
-	projections/PJ_sconics.cpp \
-	projections/proj_rouss.cpp \
-	projections/PJ_cass.cpp \
-	projections/PJ_cc.cpp \
-	projections/PJ_cea.cpp \
-	projections/PJ_eqc.cpp \
-	projections/PJ_gall.cpp \
-	projections/PJ_labrd.cpp \
-	projections/PJ_lsat.cpp \
-	projections/PJ_misrsom.cpp \
-	projections/PJ_merc.cpp \
-	projections/PJ_mill.cpp \
-	projections/PJ_ocea.cpp \
-	projections/PJ_omerc.cpp \
-	projections/PJ_somerc.cpp \
-	projections/PJ_tcc.cpp \
-	projections/PJ_tcea.cpp \
-	projections/PJ_times.cpp \
-	projections/PJ_tmerc.cpp \
-	projections/PJ_tobmerc.cpp \
-	projections/PJ_airy.cpp \
-	projections/PJ_aitoff.cpp \
-	projections/PJ_august.cpp \
-	projections/PJ_bacon.cpp \
-	projections/PJ_bertin1953.cpp \
-	projections/PJ_chamb.cpp \
-	projections/PJ_hammer.cpp \
-	projections/PJ_lagrng.cpp \
-	projections/PJ_larr.cpp \
-	projections/PJ_lask.cpp \
-	projections/PJ_latlong.cpp \
-	projections/PJ_nocol.cpp \
-	projections/PJ_ob_tran.cpp \
-	projections/PJ_oea.cpp \
-	projections/PJ_tpeqd.cpp \
-	projections/PJ_vandg.cpp \
-	projections/PJ_vandg2.cpp \
-	projections/PJ_vandg4.cpp \
-	projections/PJ_wag7.cpp \
-	projections/PJ_lcca.cpp \
-	projections/PJ_geos.cpp \
-	projections/proj_etmerc.cpp \
-	projections/PJ_boggs.cpp \
-	projections/PJ_collg.cpp \
-	projections/PJ_comill.cpp \
-	projections/PJ_crast.cpp \
-	projections/PJ_denoy.cpp \
-	projections/PJ_eck1.cpp \
-	projections/PJ_eck2.cpp \
-	projections/PJ_eck3.cpp \
-	projections/PJ_eck4.cpp \
-	projections/PJ_eck5.cpp \
-	projections/PJ_fahey.cpp \
-	projections/PJ_fouc_s.cpp \
-	projections/PJ_gins8.cpp \
-	projections/PJ_gstmerc.cpp \
-	projections/PJ_gn_sinu.cpp \
-	projections/PJ_goode.cpp \
-	projections/PJ_igh.cpp \
-	projections/PJ_hatano.cpp \
-	projections/PJ_loxim.cpp \
-	projections/PJ_mbt_fps.cpp \
-	projections/PJ_mbtfpp.cpp \
-	projections/PJ_mbtfpq.cpp \
-	projections/PJ_moll.cpp \
-	projections/PJ_nell.cpp \
-	projections/PJ_nell_h.cpp \
-	projections/PJ_patterson.cpp \
-	projections/PJ_putp2.cpp \
-	projections/PJ_putp3.cpp \
-	projections/PJ_putp4p.cpp \
-	projections/PJ_putp5.cpp \
-	projections/PJ_putp6.cpp \
-	projections/PJ_qsc.cpp \
-	projections/PJ_robin.cpp \
-	projections/PJ_sch.cpp \
-	projections/PJ_sts.cpp \
-	projections/PJ_urm5.cpp \
-	projections/PJ_urmfps.cpp \
-	projections/PJ_wag2.cpp \
-	projections/PJ_wag3.cpp \
-	projections/PJ_wink1.cpp \
-	projections/PJ_wink2.cpp \
-	projections/PJ_healpix.cpp \
-	projections/PJ_natearth.cpp \
-	projections/PJ_natearth2.cpp \
-	projections/PJ_calcofi.cpp \
-	projections/PJ_eqearth.cpp \
+	projections/aeqd.cpp \
+	projections/gnom.cpp \
+	projections/laea.cpp \
+	projections/mod_ster.cpp \
+	projections/nsper.cpp \
+	projections/nzmg.cpp \
+	projections/ortho.cpp \
+	projections/stere.cpp \
+	projections/sterea.cpp \
+	projections/aea.cpp \
+	projections/bipc.cpp \
+	projections/bonne.cpp \
+	projections/eqdc.cpp \
+	projections/isea.cpp \
+	projections/ccon.cpp \
+	projections/imw_p.cpp \
+	projections/krovak.cpp \
+	projections/lcc.cpp \
+	projections/poly.cpp \
+	projections/rpoly.cpp \
+	projections/sconics.cpp \
+	projections/rouss.cpp \
+	projections/cass.cpp \
+	projections/cc.cpp \
+	projections/cea.cpp \
+	projections/eqc.cpp \
+	projections/gall.cpp \
+	projections/labrd.cpp \
+	projections/lsat.cpp \
+	projections/misrsom.cpp \
+	projections/merc.cpp \
+	projections/mill.cpp \
+	projections/ocea.cpp \
+	projections/omerc.cpp \
+	projections/somerc.cpp \
+	projections/tcc.cpp \
+	projections/tcea.cpp \
+	projections/times.cpp \
+	projections/tmerc.cpp \
+	projections/tobmerc.cpp \
+	projections/airy.cpp \
+	projections/aitoff.cpp \
+	projections/august.cpp \
+	projections/bacon.cpp \
+	projections/bertin1953.cpp \
+	projections/chamb.cpp \
+	projections/hammer.cpp \
+	projections/lagrng.cpp \
+	projections/larr.cpp \
+	projections/lask.cpp \
+	projections/latlong.cpp \
+	projections/nocol.cpp \
+	projections/ob_tran.cpp \
+	projections/oea.cpp \
+	projections/tpeqd.cpp \
+	projections/vandg.cpp \
+	projections/vandg2.cpp \
+	projections/vandg4.cpp \
+	projections/wag7.cpp \
+	projections/lcca.cpp \
+	projections/geos.cpp \
+	projections/etmerc.cpp \
+	projections/boggs.cpp \
+	projections/collg.cpp \
+	projections/comill.cpp \
+	projections/crast.cpp \
+	projections/denoy.cpp \
+	projections/eck1.cpp \
+	projections/eck2.cpp \
+	projections/eck3.cpp \
+	projections/eck4.cpp \
+	projections/eck5.cpp \
+	projections/fahey.cpp \
+	projections/fouc_s.cpp \
+	projections/gins8.cpp \
+	projections/gstmerc.cpp \
+	projections/gn_sinu.cpp \
+	projections/goode.cpp \
+	projections/igh.cpp \
+	projections/hatano.cpp \
+	projections/loxim.cpp \
+	projections/mbt_fps.cpp \
+	projections/mbtfpp.cpp \
+	projections/mbtfpq.cpp \
+	projections/moll.cpp \
+	projections/nell.cpp \
+	projections/nell_h.cpp \
+	projections/patterson.cpp \
+	projections/putp2.cpp \
+	projections/putp3.cpp \
+	projections/putp4p.cpp \
+	projections/putp5.cpp \
+	projections/putp6.cpp \
+	projections/qsc.cpp \
+	projections/robin.cpp \
+	projections/sch.cpp \
+	projections/sts.cpp \
+	projections/urm5.cpp \
+	projections/urmfps.cpp \
+	projections/wag2.cpp \
+	projections/wag3.cpp \
+	projections/wink1.cpp \
+	projections/wink2.cpp \
+	projections/healpix.cpp \
+	projections/natearth.cpp \
+	projections/natearth2.cpp \
+	projections/calcofi.cpp \
+	projections/eqearth.cpp \
 	\
-	conversions/PJ_axisswap.cpp \
-	conversions/PJ_cart.cpp \
-	conversions/PJ_geoc.cpp \
-	conversions/pj_geocent.cpp \
-	conversions/PJ_unitconvert.cpp \
+	conversions/axisswap.cpp \
+	conversions/cart.cpp \
+	conversions/geoc.cpp \
+	conversions/geocent.cpp \
+	conversions/unitconvert.cpp \
 	\
-	transformations/PJ_affine.cpp \
-	transformations/PJ_deformation.cpp \
-	transformations/PJ_helmert.cpp \
-	transformations/PJ_hgridshift.cpp \
-	transformations/PJ_horner.cpp \
-	transformations/PJ_molodensky.cpp \
-	transformations/PJ_vgridshift.cpp \
+	transformations/affine.cpp \
+	transformations/deformation.cpp \
+	transformations/helmert.cpp \
+	transformations/hgridshift.cpp \
+	transformations/horner.cpp \
+	transformations/molodensky.cpp \
+	transformations/vgridshift.cpp \
 	\
 	aasincos.cpp adjlon.cpp bch2bps.cpp bchgen.cpp \
-	biveval.cpp dmstor.cpp mk_cheby.cpp pj_auth.cpp \
-	pj_deriv.cpp pj_ell_set.cpp pj_ellps.cpp pj_errno.cpp \
-	pj_factors.cpp pj_fwd.cpp pj_init.cpp pj_inv.cpp \
-	pj_list.cpp pj_malloc.cpp pj_mlfn.cpp pj_msfn.cpp proj_mdist.cpp \
-	pj_open_lib.cpp pj_param.cpp pj_phi2.cpp pj_pr_list.cpp \
-	pj_qsfn.cpp pj_strerrno.cpp \
-	pj_tsfn.cpp pj_units.cpp pj_ctx.cpp pj_log.cpp pj_zpoly1.cpp rtodms.cpp \
-	vector1.cpp pj_release.cpp pj_gauss.cpp \
-	pj_fileapi.cpp \
+	biveval.cpp dmstor.cpp mk_cheby.cpp auth.cpp \
+	deriv.cpp ell_set.cpp ellps.cpp errno.cpp \
+	factors.cpp fwd.cpp init.cpp inv.cpp \
+	list.cpp malloc.cpp mlfn.cpp msfn.cpp proj_mdist.cpp \
+	open_lib.cpp param.cpp phi2.cpp pr_list.cpp \
+	qsfn.cpp strerrno.cpp \
+	tsfn.cpp units.cpp ctx.cpp log.cpp zpoly1.cpp rtodms.cpp \
+	vector1.cpp release.cpp gauss.cpp \
+	fileapi.cpp \
 	\
-	pj_gc_reader.cpp pj_gridcatalog.cpp \
+	gc_reader.cpp gridcatalog.cpp \
 	nad_cvt.cpp nad_init.cpp nad_intr.cpp \
-	pj_apply_gridshift.cpp pj_datums.cpp pj_datum_set.cpp pj_transform.cpp \
-	geocent.cpp geocent.h pj_utils.cpp pj_gridinfo.cpp pj_gridlist.cpp \
-	jniproj.cpp pj_mutex.cpp pj_initcache.cpp pj_apply_vgridshift.cpp geodesic.cpp \
-	pj_strtod.cpp pj_math.cpp \
+	apply_gridshift.cpp datums.cpp datum_set.cpp transform.cpp \
+	geocent.cpp geocent.h utils.cpp gridinfo.cpp gridlist.cpp \
+	jniproj.cpp mutex.cpp initcache.cpp apply_vgridshift.cpp geodesic.cpp \
+	strtod.cpp math.cpp \
 	\
-	proj_4D_api.cpp PJ_pipeline.cpp \
-	pj_internal.cpp \
-	pj_wkt_parser.hpp pj_wkt_parser.cpp \
-	pj_wkt1_parser.h pj_wkt1_parser.cpp \
-	pj_wkt1_generated_parser.h pj_wkt1_generated_parser.c \
-	pj_wkt2_parser.h pj_wkt2_parser.cpp \
-	pj_wkt2_generated_parser.h pj_wkt2_generated_parser.c
+	4D_api.cpp pipeline.cpp \
+	internal.cpp \
+	wkt_parser.hpp wkt_parser.cpp \
+	wkt1_parser.h wkt1_parser.cpp \
+	wkt1_generated_parser.h wkt1_generated_parser.c \
+	wkt2_parser.h wkt2_parser.cpp \
+	wkt2_generated_parser.h wkt2_generated_parser.c
 
 
 # The sed hack is to please MSVC
 wkt1_parser:
-	bison --no-lines -d  -p pj_wkt1_ -o$(top_srcdir)/src/pj_wkt1_generated_parser.c $(top_srcdir)/src/pj_wkt1_grammar.y
-	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/pj_wkt1_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"  > $(top_srcdir)/src/pj_wkt1_generated_parser.c.tmp
-	mv $(top_srcdir)/src/pj_wkt1_generated_parser.c.tmp $(top_srcdir)/src/pj_wkt1_generated_parser.c
+	bison --no-lines -d  -p pj_wkt1_ -o$(top_srcdir)/src/wkt1_generated_parser.c $(top_srcdir)/src/wkt1_grammar.y
+	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/wkt1_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"  > $(top_srcdir)/src/wkt1_generated_parser.c.tmp
+	mv $(top_srcdir)/src/wkt1_generated_parser.c.tmp $(top_srcdir)/src/wkt1_generated_parser.c
 
 wkt2_parser:
-	bison --no-lines -d  -p pj_wkt2_ -o$(top_srcdir)/src/pj_wkt2_generated_parser.c $(top_srcdir)/src/pj_wkt2_grammar.y
-	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/pj_wkt2_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"  > $(top_srcdir)/src/pj_wkt2_generated_parser.c.tmp
-	mv $(top_srcdir)/src/pj_wkt2_generated_parser.c.tmp $(top_srcdir)/src/pj_wkt2_generated_parser.c
+	bison --no-lines -d  -p pj_wkt2_ -o$(top_srcdir)/src/wkt2_generated_parser.c $(top_srcdir)/src/wkt2_grammar.y
+	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/wkt2_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"  > $(top_srcdir)/src/wkt2_generated_parser.c.tmp
+	mv $(top_srcdir)/src/wkt2_generated_parser.c.tmp $(top_srcdir)/src/wkt2_generated_parser.c
 
 
 install-exec-local: install-binPROGRAMS

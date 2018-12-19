@@ -97,7 +97,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "pj_wkt2_parser.h"
+#include "wkt2_parser.h"
 
 
 
@@ -119,9 +119,9 @@
 #endif
 
 /* In a future release of Bison, this section will be replaced
-   by #include "pj_wkt2_generated_parser.h".  */
-#ifndef YY_PJ_WKT2_SRC_PJ_WKT2_GENERATED_PARSER_H_INCLUDED
-# define YY_PJ_WKT2_SRC_PJ_WKT2_GENERATED_PARSER_H_INCLUDED
+   by #include "wkt2_generated_parser.h".  */
+#ifndef YY_PJ_WKT2_SRC_WKT2_GENERATED_PARSER_H_INCLUDED
+# define YY_PJ_WKT2_SRC_WKT2_GENERATED_PARSER_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -295,7 +295,7 @@ typedef int YYSTYPE;
 
 int pj_wkt2_parse (pj_wkt2_parse_context *context);
 
-#endif /* !YY_PJ_WKT2_SRC_PJ_WKT2_GENERATED_PARSER_H_INCLUDED  */
+#endif /* !YY_PJ_WKT2_SRC_WKT2_GENERATED_PARSER_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 

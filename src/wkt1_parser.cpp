@@ -35,8 +35,8 @@
 #include <cstring>
 #include <string>
 
-#include "pj_wkt1_parser.h"
-#include "pj_wkt_parser.hpp"
+#include "wkt1_parser.h"
+#include "wkt_parser.hpp"
 
 using namespace NS_PROJ::internal;
 

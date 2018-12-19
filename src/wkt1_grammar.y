@@ -26,7 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "pj_wkt1_parser.h"
+#include "wkt1_parser.h"
 
 %}
 
