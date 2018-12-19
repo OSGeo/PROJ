@@ -114,7 +114,7 @@ libproj_la_SOURCES = \
 	projections/larr.cpp \
 	projections/lask.cpp \
 	projections/latlong.cpp \
-	projections/nocol.cpp \
+	projections/nicol.cpp \
 	projections/ob_tran.cpp \
 	projections/oea.cpp \
 	projections/tpeqd.cpp \
