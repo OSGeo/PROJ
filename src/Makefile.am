@@ -115,7 +115,7 @@ wkt2_parser:
 	mv $(top_srcdir)/src/pj_wkt2_generated_parser.c.tmp $(top_srcdir)/src/pj_wkt2_generated_parser.c
 
 
-install-exec-local:
+install-exec-local: install-binPROGRAMS
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
 	(cd $(DESTDIR)$(bindir); ln -s proj$(EXEEXT) invproj$(EXEEXT))
 	rm -f $(DESTDIR)$(bindir)/invgeod$(EXEEXT)
