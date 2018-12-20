@@ -201,7 +201,7 @@ libproj_la_SOURCES = \
 	nad_cvt.cpp nad_init.cpp nad_intr.cpp \
 	apply_gridshift.cpp datums.cpp datum_set.cpp transform.cpp \
 	geocent.cpp geocent.h utils.cpp gridinfo.cpp gridlist.cpp \
-	jniproj.cpp mutex.cpp initcache.cpp apply_vgridshift.cpp geodesic.cpp \
+	jniproj.cpp mutex.cpp initcache.cpp apply_vgridshift.cpp geodesic.c \
 	strtod.cpp math.cpp \
 	\
 	4D_api.cpp pipeline.cpp \

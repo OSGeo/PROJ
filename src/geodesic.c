@@ -34,6 +34,10 @@
 #define HAVE_C99_MATH 0
 #endif
 
+#if !defined(__cplusplus)
+#define nullptr 0
+#endif
+
 #define GEOGRAPHICLIB_GEODESIC_ORDER 6
 #define nA1   GEOGRAPHICLIB_GEODESIC_ORDER
 #define nC1   GEOGRAPHICLIB_GEODESIC_ORDER
