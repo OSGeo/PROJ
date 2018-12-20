@@ -8,6 +8,6 @@ RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 RUN pip install Sphinx breathe \
     sphinx_bootstrap_theme awscli sphinxcontrib-bibtex \
-    sphinx_rtd_theme
+    sphinx_rtd_theme recommonmark sphinx-markdown-tables
 
 
