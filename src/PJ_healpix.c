@@ -499,8 +499,8 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
         double a[2];
         /* Workaround cppcheck git issue */
         double* pa = a;
-        pa[0] = -3*M_FORTPI + ((inverse == 0) ? 0 : capmap.cn) *M_HALFPI;
-        pa[1] = M_HALFPI;
+        pa[0] = -3*M_FORTPI + ((inverse == 0) ? pole : capmap.cn) *M_HALFPI;
+        pa[1] = ((capmap.region == north) ? 1 : -1) *M_HALFPI;
         vector_add(ret_dot, a, vector);
     }
 
