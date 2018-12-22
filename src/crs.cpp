@@ -2686,7 +2686,10 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         l_baseCRS->primeMeridian()->_exportToWKT(formatter);
         formatter->endNode();
     } else {
+        const auto oldAxisOutputRule = formatter->outputAxis();
+        formatter->setOutputAxis(io::WKTFormatter::OutputAxisRule::NO);
         l_baseCRS->_exportToWKT(formatter);
+        formatter->setOutputAxis(oldAxisOutputRule);
     }
 
     formatter->pushAxisLinearUnit(

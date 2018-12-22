@@ -1702,6 +1702,11 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
         crs->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         expected);
+
+    EXPECT_EQ(crs->exportToWKT(
+                  &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
+                        ->setOutputAxis(WKTFormatter::OutputAxisRule::YES))),
+              expected);
 }
 
 // ---------------------------------------------------------------------------
