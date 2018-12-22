@@ -1060,7 +1060,7 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (formatter->useESRIDialect()) {
         if (axisList.size() != 2) {
             io::FormattingException::Throw(
-                "Only export of Geographic 2D CRS is supported in ESRI_WKT1");
+                "Only export of Geographic 2D CRS is supported in WKT1_ESRI");
         }
 
         if (l_name == "WGS 84") {
@@ -2590,6 +2590,10 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     const auto &l_coordinateSystem = d->coordinateSystem();
     const auto &axisList = l_coordinateSystem->axisList();
+    if (axisList.size() == 3 && !(isWKT2 && formatter->use2018Keywords())) {
+        io::FormattingException::Throw(
+            "Projected 3D CRS can only be exported since WKT2:2018");
+    }
 
     const auto exportAxis = [&l_coordinateSystem, &axisList, &formatter]() {
         const auto oldAxisOutputRule = formatter->outputAxis();

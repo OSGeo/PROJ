@@ -1617,6 +1617,96 @@ TEST(wkt_parse, wkt2_2018_simplified_projected) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt2_2018_projected_3D) {
+    auto wkt =
+        "PROJCRS[\"WGS 84 (G1762) / UTM zone 31N 3D\","
+        "    BASEGEOGCRS[\"WGS 84\","
+        "        DATUM[\"World Geodetic System of 1984 (G1762)\","
+        "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+        "           LENGTHUNIT[\"metre\",1.0]]]],"
+        "    CONVERSION[\"Some conversion 3D\","
+        "        METHOD[\"Transverse Mercator (3D)\"],"
+        "        PARAMETER[\"Latitude of origin\",0.0,"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "        PARAMETER[\"Longitude of origin\",3.0,"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "        PARAMETER[\"Scale factor\",1,SCALEUNIT[\"unity\",1.0]],"
+        "        PARAMETER[\"False easting\",0.0,"
+        "           LENGTHUNIT[\"metre\",1.0]],"
+        "        PARAMETER[\"False northing\",0.0,LENGTHUNIT[\"metre\",1.0]]],"
+        "        CS[Cartesian,3],"
+        "            AXIS[\"(E)\",east,ORDER[1]],"
+        "            AXIS[\"(N)\",north,ORDER[2]],"
+        "            AXIS[\"ellipsoidal height (h)\",up,ORDER[3]],"
+        "            LENGTHUNIT[\"metre\",1.0]"
+        "]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=tmerc +lat_0=0 +lon_0=3 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 "
+        "+units=m +no_defs");
+
+    EXPECT_THROW(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2015).get()),
+        FormattingException);
+
+    EXPECT_NO_THROW(crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt2_2018_projected_utm_3D) {
+    // Example from WKT2:2018
+    auto wkt =
+        "PROJCRS[\"WGS 84 (G1762) / UTM zone 31N 3D\","
+        "    BASEGEOGCRS[\"WGS 84\","
+        "        DATUM[\"World Geodetic System of 1984 (G1762)\","
+        "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+        "           LENGTHUNIT[\"metre\",1.0]]]],"
+        "    CONVERSION[\"UTM zone 31N 3D\","
+        "        METHOD[\"Transverse Mercator (3D)\"],"
+        "        PARAMETER[\"Latitude of origin\",0.0,"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "        PARAMETER[\"Longitude of origin\",3.0,"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "        PARAMETER[\"Scale factor\",0.9996,SCALEUNIT[\"unity\",1.0]],"
+        "        PARAMETER[\"False easting\",500000.0,"
+        "           LENGTHUNIT[\"metre\",1.0]],"
+        "        PARAMETER[\"False northing\",0.0,LENGTHUNIT[\"metre\",1.0]]],"
+        "        CS[Cartesian,3],"
+        "            AXIS[\"(E)\",east,ORDER[1]],"
+        "            AXIS[\"(N)\",north,ORDER[2]],"
+        "            AXIS[\"ellipsoidal height (h)\",up,ORDER[3]],"
+        "            LENGTHUNIT[\"metre\",1.0]"
+        "]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=utm +zone=31 +ellps=WGS84 +units=m +no_defs");
+
+    EXPECT_THROW(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2015).get()),
+        FormattingException);
+
+    EXPECT_NO_THROW(crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projected_angular_unit_from_primem) {
     auto obj = WKTParser().createFromWKT(
         "PROJCRS[\"NTF (Paris) / Lambert Nord France\",\n"

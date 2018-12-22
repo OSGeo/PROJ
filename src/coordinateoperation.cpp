@@ -159,6 +159,10 @@ static std::set<std::string> buildSetEquivalentParameters() {
          EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN,
          EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE, nullptr},
 
+        {EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
+         EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE,
+         EPSG_NAME_PARAMETER_SCALE_FACTOR_PSEUDO_STANDARD_PARALLEL, nullptr},
+
         {WKT1_LATITUDE_OF_ORIGIN, WKT1_LATITUDE_OF_CENTER,
          EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
          EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN,
@@ -826,7 +830,10 @@ OperationMethodNNPtr OperationMethod::create(
 int OperationMethod::getEPSGCode() PROJ_CONST_DEFN {
     int epsg_code = IdentifiedObject::getEPSGCode();
     if (epsg_code == 0) {
-        const auto &l_name = nameStr();
+        auto l_name = nameStr();
+        if (ends_with(l_name, " (3D)")) {
+            l_name.resize(l_name.size() - strlen(" (3D)"));
+        }
         for (const auto &tuple : methodNameCodes) {
             if (metadata::Identifier::isEquivalentName(l_name.c_str(),
                                                        tuple.name)) {
@@ -1268,6 +1275,14 @@ int OperationParameter::getEPSGCode() PROJ_CONST_DEFN {
                 return tuple.epsg_code;
             }
         }
+        if (metadata::Identifier::isEquivalentName(l_name.c_str(),
+                                                   "Latitude of origin")) {
+            return EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN;
+        }
+        if (metadata::Identifier::isEquivalentName(l_name.c_str(),
+                                                   "Scale factor")) {
+            return EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN;
+        }
     }
     return epsg_code;
 }
@@ -1350,13 +1365,35 @@ static const ParameterValuePtr nullParameterValue;
 const ParameterValuePtr &
 SingleOperation::parameterValue(const std::string &paramName,
                                 int epsg_code) const noexcept {
+    if (epsg_code) {
+        for (const auto &genOpParamvalue : parameterValues()) {
+            auto opParamvalue = dynamic_cast<const OperationParameterValue *>(
+                genOpParamvalue.get());
+            if (opParamvalue) {
+                const auto &parameter = opParamvalue->parameter();
+                if (parameter->getEPSGCode() == epsg_code) {
+                    return opParamvalue->parameterValue();
+                }
+            }
+        }
+    }
     for (const auto &genOpParamvalue : parameterValues()) {
         auto opParamvalue = dynamic_cast<const OperationParameterValue *>(
             genOpParamvalue.get());
         if (opParamvalue) {
             const auto &parameter = opParamvalue->parameter();
-            if ((epsg_code != 0 && parameter->getEPSGCode() == epsg_code) ||
-                ci_equal(paramName, parameter->nameStr())) {
+            if (metadata::Identifier::isEquivalentName(
+                    paramName.c_str(), parameter->nameStr().c_str())) {
+                return opParamvalue->parameterValue();
+            }
+        }
+    }
+    for (const auto &genOpParamvalue : parameterValues()) {
+        auto opParamvalue = dynamic_cast<const OperationParameterValue *>(
+            genOpParamvalue.get());
+        if (opParamvalue) {
+            const auto &parameter = opParamvalue->parameter();
+            if (areEquivalentParameters(paramName, parameter->nameStr())) {
                 return opParamvalue->parameterValue();
             }
         }
@@ -5739,8 +5776,10 @@ bool Conversion::isUTM(int &zone, bool &north) const {
                                   UTM_LATITUDE_OF_NATURAL_ORIGIN) < 1e-10) {
                         bLatitudeNatOriginUTM = true;
                     } else if (
-                        epsg_code ==
-                            EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN &&
+                        (epsg_code ==
+                             EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN ||
+                         epsg_code ==
+                             EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN) &&
                         measure.unit()._isEquivalentTo(
                             common::UnitOfMeasure::DEGREE,
                             util::IComparable::Criterion::EQUIVALENT)) {
