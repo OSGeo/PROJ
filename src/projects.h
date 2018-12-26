@@ -29,6 +29,10 @@
 #ifndef PROJECTS_H
 #define PROJECTS_H
 
+#ifndef __cplusplus
+#error "projects.h can only be included from a C++ file"
+#endif
+
 #ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #endif
@@ -74,14 +78,8 @@
 #endif
 #endif
 
-#ifdef __cplusplus
 #define C_NAMESPACE extern "C"
 #define C_NAMESPACE_VAR extern "C"
-extern "C" {
-#else
-#define C_NAMESPACE extern
-#define C_NAMESPACE_VAR
-#endif
 
 #ifndef NULL
 #  define NULL 0
@@ -630,7 +628,7 @@ struct projCtx_t {
 
 /* Generate pj_list external or make list from include file */
 #ifndef PJ_DATUMS__
-extern struct PJ_DATUMS pj_datums[];
+C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[];
 #endif
 
 
@@ -846,8 +844,6 @@ void  *pj_gauss_ini(double, double, double *,double *);
 LP     pj_gauss(projCtx, LP, const void *);
 LP     pj_inv_gauss(projCtx, LP, const void *);
 
-extern char const PROJ_DLL pj_release[];
-
 struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
 
 PJ *pj_new(void);
@@ -858,10 +854,6 @@ double pj_strtod( const char *nptr, char **endptr );
 void   pj_freeup_plain (PJ *P);
 
 projPJ pj_init_ctx_with_allow_init_epsg( projCtx ctx, int argc, char **argv, int allow_init_epsg );
-
-#ifdef __cplusplus
-}
-#endif
 
 #ifndef PROJECTS_H_ATEND
 #define PROJECTS_H_ATEND

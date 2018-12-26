@@ -35,6 +35,7 @@
 #include <string.h>
 
 #include "proj_internal.h"
+#include "proj.h"
 #include "projects.h"
 
 /************************************************************************/

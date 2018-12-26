@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "proj.h"
 #include "projects.h"
 #include "proj_math.h"
 

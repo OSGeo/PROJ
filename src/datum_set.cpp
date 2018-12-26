@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include "proj.h"
 #include "projects.h"
 
 /* SEC_TO_RAD = Pi/180/3600 */

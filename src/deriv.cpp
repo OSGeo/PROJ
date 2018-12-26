@@ -3,6 +3,7 @@
 
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 int pj_deriv(LP lp, double h, const PJ *P, struct DERIVS *der) {

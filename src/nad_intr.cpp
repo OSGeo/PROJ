@@ -2,6 +2,7 @@
 #define PJ_LIB__
 #include "proj_internal.h"
 #include "proj_math.h"
+#include "proj.h"
 #include "projects.h"
 
 	LP
