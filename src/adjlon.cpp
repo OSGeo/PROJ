@@ -2,7 +2,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 double adjlon (double lon) {
     /* Let lon slightly overshoot, to avoid spurious sign switching at the date line */

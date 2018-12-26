@@ -1,6 +1,6 @@
 #define PJ_LIB__
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(vandg, "van der Grinten (I)") "\n\tMisc Sph";
 

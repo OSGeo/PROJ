@@ -1,7 +1,7 @@
 /* convert bivariate w Chebyshev series to w Power series */
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 /* basic support procedures */
 	static void /* clear vector to zero */
 clear(PJ_UV *p, int n) { static const PJ_UV c = {0., 0.}; while (n--) *p++ = c; }

@@ -47,7 +47,7 @@
 #include <new>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 /**********************************************************************/
 void *pj_malloc(size_t size) {

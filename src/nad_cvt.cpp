@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "proj_math.h"
 
 #define MAX_ITERATIONS 10

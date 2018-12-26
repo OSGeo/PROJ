@@ -30,7 +30,7 @@
 #define PJ_LIB__
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(geocent, "Geocentric")  "\n\t";
 

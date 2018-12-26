@@ -2,7 +2,7 @@
 #include "proj_math.h"
 #include "proj_internal.h"
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(robin, "Robinson") "\n\tPCyl, Sph";
 

@@ -32,7 +32,7 @@
 #include <string.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 /************************************************************************/
 /*                           pj_is_latlong()                            */

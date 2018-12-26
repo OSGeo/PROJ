@@ -28,7 +28,7 @@
 #include <string.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 static int cache_count = 0;
 static int cache_alloc = 0;

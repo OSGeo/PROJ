@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(lsat, "Space oblique for LANDSAT")
     "\n\tCyl, Sph&Ell\n\tlsat= path=";

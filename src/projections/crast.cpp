@@ -2,7 +2,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(crast, "Craster Parabolic (Putnins P4)") "\n\tPCyl, Sph";
 

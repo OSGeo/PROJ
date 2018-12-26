@@ -30,7 +30,7 @@
 /* very loosely based upon DMA code by Bradford W. Drew */
 #define PJ_LIB__
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(lonlat, "Lat/long (Geodetic)")  "\n\t";
 PROJ_HEAD(latlon, "Lat/long (Geodetic alias)")  "\n\t";

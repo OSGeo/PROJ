@@ -16,7 +16,7 @@
 
 #include "proj_internal.h"
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(bertin1953, "Bertin 1953")
     "\n\tMisc Sph no inv.";

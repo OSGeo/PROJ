@@ -29,7 +29,7 @@
 #define PJ_LIB__
 #include "proj.h"
 #include <errno.h>
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv\n\tno_cut lat_b=";
 

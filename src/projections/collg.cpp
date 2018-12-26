@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(collg, "Collignon") "\n\tPCyl, Sph";
 #define FXC 1.12837916709551257390

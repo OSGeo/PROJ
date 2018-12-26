@@ -32,7 +32,7 @@
 
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 #define INPUT_UNITS  P->right
 #define OUTPUT_UNITS P->left

@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 /*
 ** RES is fractional second figures

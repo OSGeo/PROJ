@@ -1,7 +1,7 @@
 /* <<<< Geodesic filter program >>>> */
 
 #include "proj.h"
-# include "projects.h"
+# include "proj_internal.h"
 # include "geod_interface.h"
 # include "emess.h"
 # include <ctype.h>

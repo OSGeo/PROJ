@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(eck3, "Eckert III") "\n\tPCyl, Sph";
 PROJ_HEAD(putp1, "Putnins P1") "\n\tPCyl, Sph";

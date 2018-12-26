@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(urmfps, "Urmaev Flat-Polar Sinusoidal") "\n\tPCyl, Sph\n\tn=";
 PROJ_HEAD(wag1, "Wagner I (Kavraisky VI)") "\n\tPCyl, Sph";

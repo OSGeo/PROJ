@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 /* create parameter list entry */
 paralist *pj_mkparam(const char *str) {

@@ -1,5 +1,5 @@
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 static void /* sum coefficients less than res */
 eval(PJ_UV **w, int nu, int nv, double res, PJ_UV *resid) {
     int i, j;

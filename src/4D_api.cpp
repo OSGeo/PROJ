@@ -39,7 +39,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "geodesic.h"
 
 #include "proj/common.hpp"

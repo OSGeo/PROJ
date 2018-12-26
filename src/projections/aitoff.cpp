@@ -34,7 +34,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 
 namespace { // anonymous namespace

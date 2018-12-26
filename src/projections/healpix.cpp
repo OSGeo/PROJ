@@ -35,7 +35,7 @@
 
 #include "proj_internal.h"
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(healpix, "HEAPJ_LPix") "\n\tSph&Ell";
 PROJ_HEAD(rhealpix, "rHEAPJ_LPix") "\n\tSph&Ell\n\tnorth_square= south_square=";

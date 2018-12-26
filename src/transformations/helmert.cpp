@@ -53,7 +53,7 @@ Last update: 2018-10-26
 #include <math.h>
 
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "geocent.h"
 
 PROJ_HEAD(helmert, "3(6)-, 4(8)- and 7(14)-parameter Helmert shift");

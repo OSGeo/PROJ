@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(hatano, "Hatano Asymmetrical Equal Area") "\n\tPCyl, Sph";
 

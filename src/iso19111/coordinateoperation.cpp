@@ -44,7 +44,7 @@
 // PROJ include order is sensitive
 // clang-format off
 #include "proj.h"
-#include "projects.h" // M_PI
+#include "proj_internal.h" // M_PI
 // clang-format on
 
 #include <algorithm>

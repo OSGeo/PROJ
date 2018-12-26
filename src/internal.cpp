@@ -39,7 +39,7 @@
 
 #include "geodesic.h"
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 
 enum pj_io_units pj_left (PJ *P) {

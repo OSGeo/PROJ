@@ -30,7 +30,7 @@
 #include "proj.h"
 
 #define PJ_DATUMS__
-#include "projects.h"
+#include "proj_internal.h"
 
 /*
  * The ellipse code must match one from pj_ellps.c.  The datum id should

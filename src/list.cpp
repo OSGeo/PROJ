@@ -5,7 +5,7 @@
 #include "proj.h"
 
 #define USE_PJ_LIST_H 1
-#include "projects.h"
+#include "proj_internal.h"
 
 
 /* Generate prototypes for projection functions */

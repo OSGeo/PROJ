@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(cc, "Central Cylindrical") "\n\tCyl, Sph";
 #define EPS10 1.e-10

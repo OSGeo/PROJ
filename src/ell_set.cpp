@@ -6,7 +6,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 
 /* Prototypes of the pj_ellipsoid helper functions */

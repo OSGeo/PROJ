@@ -26,13 +26,14 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "proj.h"
-
 #ifndef PROJ_EXPERIMENTAL_H
 #define PROJ_EXPERIMENTAL_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "proj.h"
 
 /**
  * \file proj_experimental.h

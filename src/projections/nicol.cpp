@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(nicol, "Nicolosi Globular") "\n\tMisc Sph, no inv";
 

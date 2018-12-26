@@ -33,7 +33,7 @@
 #include <string.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 static PJ_GridCatalog *grid_catalog_list = nullptr;
 

@@ -1,6 +1,6 @@
 /* procedures for evaluating Tseries */
 #include "proj.h"
-# include "projects.h"
+#include "proj_internal.h"
 # define NEAR_ONE	1.00001
 static double ceval(struct PW_COEF *C, int n, PJ_UV w, PJ_UV w2) {
     double d=0, dd=0, vd, vdd, tmp, *c;

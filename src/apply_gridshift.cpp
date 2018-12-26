@@ -36,7 +36,7 @@
 
 #include "proj_internal.h"
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 /************************************************************************/
 /*                         pj_apply_gridshift()                         */

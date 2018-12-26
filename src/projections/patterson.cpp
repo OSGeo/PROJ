@@ -43,7 +43,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(patterson, "Patterson Cylindrical") "\n\tCyl";
 

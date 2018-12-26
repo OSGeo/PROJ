@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(labrd, "Laborde") "\n\tCyl, Sph\n\tSpecial for Madagascar";
 #define EPS 1.e-10

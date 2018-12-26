@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(kav5,    "Kavraisky V")         "\n\tPCyl, Sph";
 PROJ_HEAD(qua_aut, "Quartic Authalic")    "\n\tPCyl, Sph";

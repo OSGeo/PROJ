@@ -14,7 +14,7 @@
 #include "proj_internal.h"
 #include "proj_math.h"
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 #define DEG36 0.62831853071795864768
 #define DEG72 1.25663706143591729537

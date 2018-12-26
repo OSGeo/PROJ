@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 typedef struct { double r, Az; } VECT;
 namespace { // anonymous namespace

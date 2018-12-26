@@ -113,12 +113,11 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#ifndef PROJ_H
+#define PROJ_H
+
 #include <stddef.h>  /* For size_t */
 
-
-#ifdef PROJECTS_H
-#error proj.h must be included before projects.h
-#endif
 #ifdef PROJ_API_H
 #error proj.h must be included before proj_api.h
 #endif
@@ -127,8 +126,6 @@
 #include "proj_symbol_rename.h"
 #endif
 
-#ifndef PROJ_H
-#define PROJ_H
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 # define P00 .33333333333333333333 /*   1 /     3 */
 # define P01 .17222222222222222222 /*  31 /   180 */

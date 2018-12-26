@@ -17,7 +17,7 @@ Added ellipsoidal equations by Bojan Savric, 22 August 2018
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl, Sph&Ell";
 

@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "proj_math.h"
 
 namespace { // anonymous namespace

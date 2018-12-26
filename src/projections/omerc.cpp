@@ -27,7 +27,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(omerc, "Oblique Mercator")
     "\n\tCyl, Sph&Ell no_rot\n\t"

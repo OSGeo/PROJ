@@ -1,5 +1,5 @@
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "geod_interface.h"
 
 void geod_ini(void) {

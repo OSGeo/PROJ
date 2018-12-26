@@ -59,7 +59,7 @@
 // PROJ include order is sensitive
 // clang-format off
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 // clang-format on
 
 #include <sqlite3.h>

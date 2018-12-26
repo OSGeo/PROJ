@@ -59,7 +59,7 @@ operation:
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(axisswap, "Axis ordering");
 

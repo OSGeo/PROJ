@@ -36,7 +36,7 @@
 #include <string.h>
 
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 /************************************************************************/
 /*                             swap_words()                             */

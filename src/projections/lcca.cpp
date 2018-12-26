@@ -51,7 +51,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(lcca, "Lambert Conformal Conic Alternative")
     "\n\tConic, Sph&Ell\n\tlat_0=";

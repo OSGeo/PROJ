@@ -6,7 +6,7 @@
 #include "proj_internal.h"
 #include "proj.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Ell\n\t";

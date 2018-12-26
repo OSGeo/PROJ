@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(imw_p, "International Map of the World Polyconic")
     "\n\tMod. Polyconic, Ell\n\tlat_1= and lat_2= [lon_1=]";

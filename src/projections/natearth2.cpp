@@ -10,7 +10,7 @@ Port to PROJ.4 by Bojan Savric, 4 April 2016
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(natearth2, "Natural Earth 2") "\n\tPCyl, Sph";
 

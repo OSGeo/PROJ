@@ -26,7 +26,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(misrsom, "Space oblique for MISR")
         "\n\tCyl, Sph&Ell\n\tpath=";

@@ -3,7 +3,7 @@
 #include <stddef.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 static const struct PJ_ELLPS
 pj_ellps[] = {

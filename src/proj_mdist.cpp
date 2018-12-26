@@ -33,7 +33,7 @@
 #include <stdlib.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 #define MAX_ITER 20
 #define TOL 1e-14

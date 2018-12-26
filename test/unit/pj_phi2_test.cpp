@@ -27,7 +27,7 @@
  ****************************************************************************/
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 #include <cmath>
 #include <limits>

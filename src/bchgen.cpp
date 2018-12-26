@@ -1,6 +1,6 @@
 /* generate double bivariate Chebychev polynomial */
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 	int
 bchgen(PJ_UV a, PJ_UV b, int nu, int nv, PJ_UV **f, PJ_UV(*func)(PJ_UV)) {
 	int i, j, k;

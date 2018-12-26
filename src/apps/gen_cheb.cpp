@@ -1,7 +1,7 @@
 /* generates 'T' option output */
 #define PJ_LIB__
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>

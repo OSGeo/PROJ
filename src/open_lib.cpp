@@ -37,7 +37,7 @@
 #include <string.h>
 
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 static const char *(*pj_finder)(const char *) = nullptr;
 static int path_count = 0;

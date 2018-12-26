@@ -6,7 +6,7 @@
 #include "proj_internal.h"
 #include "proj.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(tobmerc, "Tobler-Mercator") "\n\tCyl, Sph";
 

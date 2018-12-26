@@ -1,7 +1,7 @@
 /* <<< Release Notice for library >>> */
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)

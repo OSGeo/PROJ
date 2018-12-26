@@ -1,6 +1,6 @@
 /* <<<< Cartographic projection filter program >>>> */
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>

@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv";
 

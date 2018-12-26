@@ -41,7 +41,7 @@
 #include "proj.h"
 #ifndef _WIN32
 #include "proj_config.h"
-#include "projects.h"
+#include "proj_internal.h"
 #else
 #ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H

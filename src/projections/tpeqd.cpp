@@ -2,7 +2,7 @@
 #include <errno.h>
 #include "proj.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 
 PROJ_HEAD(tpeqd, "Two Point Equidistant")

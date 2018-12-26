@@ -30,7 +30,7 @@
 #define PJ_LIB__
 #include "proj.h"
 #include <errno.h>
-#include "projects.h"
+#include "proj_internal.h"
 #include "proj_math.h"
 
 
