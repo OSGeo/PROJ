@@ -3,7 +3,7 @@ if(WIN32 AND BUILD_LIBPROJ_SHARED)
 endif(WIN32 AND BUILD_LIBPROJ_SHARED)
 
 
-set(NAD2BIN_SRC nad2bin.c)
+set(NAD2BIN_SRC apps/nad2bin.cpp)
 source_group("Source Files\\Bin" FILES ${NAD2BIN_SRC})
 
 #Executable

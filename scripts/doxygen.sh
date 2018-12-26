@@ -34,7 +34,7 @@ fi
 mkdir -p docs/build/tmp_breathe
 python scripts/generate_breathe_friendly_general_doc.py
 rm -rf docs/build/xml/
-(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src include/proj src/proj.h docs/build/tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > /tmp/docs_log.txt 2>&1
+(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 include/proj src/proj.h docs/build/tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > /tmp/docs_log.txt 2>&1
 if grep -i warning /tmp/docs_log.txt; then
     echo "Doxygen warnings found" && cat /tmp/docs_log.txt && /bin/false;
 else

@@ -1,4 +1,4 @@
-set(PROJINFO_SRC projinfo.cpp)
+set(PROJINFO_SRC apps/projinfo.cpp)
 
 source_group("Source Files\\Bin" FILES ${PROJINFO_SRC})
 

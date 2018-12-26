@@ -1,6 +1,8 @@
-set(PROJ_SRC proj.c 
-             gen_cheb.c 
-             p_series.c)
+set(PROJ_SRC apps/proj.cpp 
+             apps/gen_cheb.cpp 
+             apps/p_series.cpp
+             apps/emess.cpp
+)
 
 source_group("Source Files\\Bin" FILES ${PROJ_SRC})
 

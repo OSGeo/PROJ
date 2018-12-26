@@ -7,7 +7,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C)
 
 AC_CONFIG_AUX_DIR([.])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AM_CONFIG_HEADER(src/proj_config.h)
 
 dnl Checks for programs.
