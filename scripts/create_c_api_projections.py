@@ -122,7 +122,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                 decl += "    const char* linear_unit_name, double linear_unit_conv_factor"
             decl += ")"
 
-            header.write("PJ_OBJ PROJ_DLL *" + decl + ";\n\n")
+            header.write("PJ PROJ_DLL *" + decl + ";\n\n")
 
             briefdescription = func.find('briefdescription/para').xpath("normalize-space()")
             briefdescription = briefdescription.replace("Instanciate ", "Instanciate a ProjectedCRS with ")
@@ -136,7 +136,7 @@ for sectiondef in compounddef.iter('sectiondef'):
             if has_angle:
                 cppfile.write(" * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).\n")
             cppfile.write(" */\n")
-            cppfile.write("PJ_OBJ* " + decl + "{\n");
+            cppfile.write("PJ* " + decl + "{\n");
             cppfile.write("  SANITIZE_CTX(ctx);\n");
             cppfile.write("  try {\n");
             if has_linear:

@@ -180,7 +180,7 @@ void *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
 /************************************************************************/
 
 void pj_free(PJ *P) {
-    if (nullptr==P)
+    if (nullptr==P || !P->destructor)
         return;
     /* free projection parameters - all the hard work is done by */
     /* pj_default_destructor, which is supposed */

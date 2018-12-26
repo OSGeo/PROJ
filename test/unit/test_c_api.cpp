@@ -28,6 +28,8 @@
 
 #include "gtest_include.h"
 
+#include <limits>
+
 #include "proj.h"
 #include "proj_constants.h"
 #include "proj_experimental.h"
@@ -116,9 +118,9 @@ class CApi : public ::testing::Test {
     PJ_CONTEXT *m_ctxt = nullptr;
 
     struct ObjectKeeper {
-        PJ_OBJ *m_obj = nullptr;
-        explicit ObjectKeeper(PJ_OBJ *obj) : m_obj(obj) {}
-        ~ObjectKeeper() { proj_obj_destroy(m_obj); }
+        PJ *m_obj = nullptr;
+        explicit ObjectKeeper(PJ *obj) : m_obj(obj) {}
+        ~ObjectKeeper() { proj_destroy(m_obj); }
 
         ObjectKeeper(const ObjectKeeper &) = delete;
         ObjectKeeper &operator=(const ObjectKeeper &) = delete;
@@ -147,7 +149,7 @@ class CApi : public ::testing::Test {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_from_user_input) {
-    proj_obj_destroy(nullptr);
+    proj_destroy(nullptr);
     EXPECT_EQ(proj_obj_create_from_user_input(m_ctxt, "invalid", nullptr),
               nullptr);
     {
@@ -158,6 +160,25 @@ TEST_F(CApi, proj_obj_create_from_user_input) {
             nullptr);
         ObjectKeeper keeper(obj);
         EXPECT_NE(obj, nullptr);
+
+        // Check that functions that operate on 'non-C++' PJ don't crash
+        PJ_COORD coord;
+        coord.xyzt.x = 0;
+        coord.xyzt.y = 0;
+        coord.xyzt.z = 0;
+        coord.xyzt.t = 0;
+        EXPECT_EQ(proj_trans (obj, PJ_FWD, coord).xyzt.x,
+                  std::numeric_limits<double>::infinity());
+
+        EXPECT_EQ(proj_geod(obj, coord, coord).xyzt.x,
+                  std::numeric_limits<double>::infinity());
+        EXPECT_EQ(proj_lp_dist(obj, coord, coord),
+                  std::numeric_limits<double>::infinity());
+        auto info = proj_pj_info(obj);
+        ASSERT_EQ(info.id, nullptr);
+        ASSERT_NE(info.description, nullptr);
+        ASSERT_NE(info.definition, nullptr);
+        EXPECT_EQ(info.definition, std::string(""));
     }
     {
         auto obj =
@@ -170,7 +191,7 @@ TEST_F(CApi, proj_obj_create_from_user_input) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_from_wkt) {
-    proj_obj_destroy(nullptr);
+
     {
         EXPECT_EQ(proj_obj_create_from_wkt(m_ctxt, "invalid", nullptr, nullptr,
                                            nullptr),
@@ -298,7 +319,7 @@ TEST_F(CApi, proj_obj_create_from_wkt) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_from_proj_string) {
-    proj_obj_destroy(nullptr);
+
     EXPECT_EQ(proj_obj_create_from_proj_string(m_ctxt, "invalid", nullptr),
               nullptr);
     auto obj =

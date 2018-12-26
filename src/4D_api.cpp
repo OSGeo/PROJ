@@ -83,6 +83,9 @@ int proj_angular_output (PJ *P, enum PJ_DIRECTION dir) {
 /* Geodesic distance (in meter) + fwd and rev azimuth between two points on the ellipsoid */
 PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b) {
     PJ_COORD c;
+    if( !P->geod ) {
+        return proj_coord_error();
+    }
     /* Note: the geodesic code takes arguments in degrees */
     geod_inverse (P->geod,
         PJ_TODEG(a.lpz.phi), PJ_TODEG(a.lpz.lam),
@@ -98,6 +101,9 @@ PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b) {
 double proj_lp_dist (const PJ *P, PJ_COORD a, PJ_COORD b) {
     double s12, azi1, azi2;
     /* Note: the geodesic code takes arguments in degrees */
+    if( !P->geod ) {
+        return HUGE_VAL;
+    }
     geod_inverse (P->geod,
         PJ_TODEG(a.lpz.phi), PJ_TODEG(a.lpz.lam),
         PJ_TODEG(b.lpz.phi), PJ_TODEG(b.lpz.lam),
@@ -744,12 +750,6 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         PJ *P = proj_create_crs_to_crs(0, "EPSG:25832", "EPSG:25833", NULL);
 
 ******************************************************************************/
-    PJ *P;
-    PJ_OBJ* src;
-    PJ_OBJ* dst;
-    PJ_OPERATION_FACTORY_CONTEXT* operation_ctx;
-    PJ_OBJ_LIST* op_list;
-    PJ_OBJ* op;
     const char* proj_string;
     const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", nullptr };
 
@@ -760,23 +760,23 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     const char* const* optionsImportCRS =
         proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : nullptr;
 
-    src = proj_obj_create_from_user_input(ctx, source_crs, optionsImportCRS);
+    auto src = proj_obj_create_from_user_input(ctx, source_crs, optionsImportCRS);
     if( !src ) {
         proj_context_log_debug(ctx, "Cannot instanciate source_crs");
         return nullptr;
     }
 
-    dst = proj_obj_create_from_user_input(ctx, target_crs, optionsImportCRS);
+    auto dst = proj_obj_create_from_user_input(ctx, target_crs, optionsImportCRS);
     if( !dst ) {
         proj_context_log_debug(ctx, "Cannot instanciate target_crs");
-        proj_obj_destroy(src);
+        proj_destroy(src);
         return nullptr;
     }
 
-    operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
+    auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
     if( !operation_ctx ) {
-        proj_obj_destroy(src);
-        proj_obj_destroy(dst);
+        proj_destroy(src);
+        proj_destroy(dst);
         return nullptr;
     }
 
@@ -793,11 +793,11 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
-    op_list = proj_obj_create_operations(ctx, src, dst, operation_ctx);
+    auto op_list = proj_obj_create_operations(ctx, src, dst, operation_ctx);
 
     proj_operation_factory_context_destroy(operation_ctx);
-    proj_obj_destroy(src);
-    proj_obj_destroy(dst);
+    proj_destroy(src);
+    proj_destroy(dst);
 
     if( !op_list ) {
         return nullptr;
@@ -809,7 +809,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         return nullptr;
     }
 
-    op = proj_obj_list_get(ctx, op_list, 0);
+    auto op = proj_obj_list_get(ctx, op_list, 0);
     proj_obj_list_destroy(op_list);
     if( !op ) {
         return nullptr;
@@ -817,11 +817,12 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
     proj_string = proj_obj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
     if( !proj_string) {
-        proj_obj_destroy(op);
+        proj_destroy(op);
         proj_context_log_debug(ctx, "Cannot export operation as a PROJ string");
         return nullptr;
     }
 
+    PJ* P;
     if( proj_string[0] == '\0' ) {
         /* Null transform ? */
         P = proj_create(ctx, "proj=affine");
@@ -829,7 +830,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         P = proj_create(ctx, proj_string);
     }
 
-    proj_obj_destroy(op);
+    proj_destroy(op);
 
     return P;
 }
