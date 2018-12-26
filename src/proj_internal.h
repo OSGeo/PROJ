@@ -663,10 +663,6 @@ struct projCtx_t {
     int     epsg_file_exists; /* -1 = unknown, 0 = no, 1 = yes */
 };
 
-/* classic public API */
-#include "proj_api.h"
-
-
 /* Generate pj_list external or make list from include file */
 #ifndef PJ_DATUMS__
 C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[];
@@ -762,37 +758,40 @@ typedef struct _PJ_GridCatalog {
 
 /* procedure prototypes */
 double PROJ_DLL dmstor(const char *, char **);
-double dmstor_ctx(projCtx ctx, const char *, char **);
+double dmstor_ctx(projCtx_t *ctx, const char *, char **);
 void   PROJ_DLL set_rtodms(int, int);
 char  PROJ_DLL *rtodms(char *, double, int, int);
 double PROJ_DLL adjlon(double);
-double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(double, double);
+double aacos(projCtx_t *,double);
+double aasin(projCtx_t *,double);
+double asqrt(double);
+double aatan2(double, double);
 
-PROJVALUE PROJ_DLL pj_param(projCtx ctx, paralist *, const char *);
+PROJVALUE PROJ_DLL pj_param(projCtx_t *ctx, paralist *, const char *);
 paralist PROJ_DLL *pj_param_exists (paralist *list, const char *parameter);
 paralist PROJ_DLL *pj_mkparam(const char *);
 paralist *pj_mkparam_ws (const char *str);
 
 
-int PROJ_DLL pj_ell_set(projCtx ctx, paralist *, double *, double *);
-int pj_datum_set(projCtx,paralist *, PJ *);
+int PROJ_DLL pj_ell_set(projCtx_t *ctx, paralist *, double *, double *);
+int pj_datum_set(projCtx_t *,paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
 
 paralist *pj_clone_paralist( const paralist* );
 paralist *pj_search_initcache( const char *filekey );
 void      pj_insert_initcache( const char *filekey, const paralist *list);
-paralist *pj_expand_init(projCtx ctx, paralist *init);
+paralist *pj_expand_init(projCtx_t *ctx, paralist *init);
 
-void     *pj_dealloc_params (projCtx ctx, paralist *start, int errlev);
+void     *pj_dealloc_params (projCtx_t *ctx, paralist *start, int errlev);
 
 
 double *pj_enfn(double);
 double  pj_mlfn(double, double, double, double *);
-double  pj_inv_mlfn(projCtx, double, double, double *);
+double  pj_inv_mlfn(projCtx_t *, double, double, double *);
 double  pj_qsfn(double, double, double);
 double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);
-double  PROJ_DLL pj_phi2(projCtx, double, double);
+double  PROJ_DLL pj_phi2(projCtx_t *, double, double);
 double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
@@ -830,11 +829,11 @@ int      bch2bps(PJ_UV, PJ_UV, PJ_UV **, int, int);
 /* nadcon related protos */
 PJ_LP             nad_intr(PJ_LP, struct CTABLE *);
 PJ_LP             nad_cvt(PJ_LP, int, struct CTABLE *);
-struct CTABLE *nad_init(projCtx ctx, char *);
-struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid );
-int            nad_ctable_load( projCtx ctx, struct CTABLE *, PAFile fid );
-struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid );
-int            nad_ctable2_load( projCtx ctx, struct CTABLE *, PAFile fid );
+struct CTABLE *nad_init(projCtx_t *ctx, char *);
+struct CTABLE *nad_ctable_init( projCtx_t *ctx, struct projFileAPI_t* fid );
+int            nad_ctable_load( projCtx_t *ctx, struct CTABLE *, struct projFileAPI_t* fid );
+struct CTABLE *nad_ctable2_init( projCtx_t *ctx, struct projFileAPI_t* fid );
+int            nad_ctable2_load( projCtx_t *ctx, struct CTABLE *, struct projFileAPI_t* fid );
 void           nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */
@@ -848,21 +847,20 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
 int pj_apply_gridshift_2( PJ *defn, int inverse,
                           long point_count, int point_offset,
                           double *x, double *y, double *z );
-int pj_apply_gridshift_3( projCtx ctx,
+int pj_apply_gridshift_3( projCtx_t *ctx,
                           PJ_GRIDINFO **gridlist, int gridlist_count,
                           int inverse, long point_count, int point_offset,
                           double *x, double *y, double *z );
 
-PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx, const char *, int * );
-void PROJ_DLL pj_deallocate_grids();
+PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx_t *, const char *, int * );
 
-PJ_GRIDINFO *pj_gridinfo_init( projCtx, const char * );
-int          pj_gridinfo_load( projCtx, PJ_GRIDINFO * );
-void         pj_gridinfo_free( projCtx, PJ_GRIDINFO * );
+PJ_GRIDINFO *pj_gridinfo_init( projCtx_t *, const char * );
+int          pj_gridinfo_load( projCtx_t *, PJ_GRIDINFO * );
+void         pj_gridinfo_free( projCtx_t *, PJ_GRIDINFO * );
 
-PJ_GridCatalog *pj_gc_findcatalog( projCtx, const char * );
-PJ_GridCatalog *pj_gc_readcatalog( projCtx, const char * );
-void pj_gc_unloadall( projCtx );
+PJ_GridCatalog *pj_gc_findcatalog( projCtx_t *, const char * );
+PJ_GridCatalog *pj_gc_readcatalog( projCtx_t *, const char * );
+void pj_gc_unloadall( projCtx_t *);
 int pj_gc_apply_gridshift( PJ *defn, int inverse,
                            long point_count, int point_offset,
                            double *x, double *y, double *z );
@@ -870,20 +868,20 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                            long point_count, int point_offset,
                            double *x, double *y, double *z );
 
-PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx,
+PJ_GRIDINFO *pj_gc_findgrid( projCtx_t *ctx,
                              PJ_GridCatalog *catalog, int after,
                              PJ_LP location, double date,
                              PJ_Region *optional_region,
                              double *grid_date );
 
-double pj_gc_parsedate( projCtx, const char * );
+double pj_gc_parsedate( projCtx_t *, const char * );
 
 void  *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
-double proj_inv_mdist(projCtx ctx, double, const void *);
+double proj_inv_mdist(projCtx_t *ctx, double, const void *);
 void  *pj_gauss_ini(double, double, double *,double *);
-PJ_LP     pj_gauss(projCtx, PJ_LP, const void *);
-PJ_LP     pj_inv_gauss(projCtx, PJ_LP, const void *);
+PJ_LP     pj_gauss(projCtx_t *, PJ_LP, const void *);
+PJ_LP     pj_inv_gauss(projCtx_t *, PJ_LP, const void *);
 
 struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
 
@@ -894,7 +892,9 @@ double PROJ_DLL pj_atof( const char* nptr );
 double pj_strtod( const char *nptr, char **endptr );
 void   pj_freeup_plain (PJ *P);
 
-projPJ pj_init_ctx_with_allow_init_epsg( projCtx ctx, int argc, char **argv, int allow_init_epsg );
+PJ* pj_init_ctx_with_allow_init_epsg( projCtx_t *ctx, int argc, char **argv, int allow_init_epsg );
 
+/* classic public API */
+#include "proj_api.h"
 
 #endif /* ndef PROJ_INTERNAL_H */

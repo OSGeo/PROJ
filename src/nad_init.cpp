@@ -74,9 +74,10 @@ static void swap_words( void *data_in, int word_size, int word_count )
 /*      Load the data portion of a ctable formatted grid.               */
 /************************************************************************/
 
-int nad_ctable_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
+int nad_ctable_load( projCtx ctx, struct CTABLE *ct, struct projFileAPI_t* fileapi )
 
 {
+    PAFile fid = (PAFile)fileapi;
     size_t a_size;
 
     pj_ctx_fseek( ctx, fid, sizeof(struct CTABLE), SEEK_SET );
@@ -105,8 +106,9 @@ int nad_ctable_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
 /*      Read the header portion of a "ctable" format grid.              */
 /************************************************************************/
 
-struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
+struct CTABLE *nad_ctable_init( projCtx ctx, struct projFileAPI_t* fileapi )
 {
+    PAFile fid = (PAFile)fileapi;
     struct CTABLE *ct;
     int		id_end;
 
@@ -149,9 +151,10 @@ struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
 /*      Load the data portion of a ctable2 formatted grid.              */
 /************************************************************************/
 
-int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
+int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, struct projFileAPI_t* fileapi )
 
 {
+    PAFile fid = (PAFile)fileapi;
     size_t a_size;
 
     pj_ctx_fseek( ctx, fid, 160, SEEK_SET );
@@ -189,8 +192,9 @@ int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
 /*      Read the header portion of a "ctable2" format grid.             */
 /************************************************************************/
 
-struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
+struct CTABLE *nad_ctable2_init( projCtx ctx, struct projFileAPI_t* fileapi )
 {
+    PAFile fid = (PAFile)fileapi;
     struct CTABLE *ct;
     int		id_end;
     char        header[160];
@@ -275,10 +279,10 @@ struct CTABLE *nad_init(projCtx ctx, char *name)
         return nullptr;
     }
 
-    ct = nad_ctable_init( ctx, fid );
+    ct = nad_ctable_init( ctx, (struct projFileAPI_t*)fid );
     if( ct != nullptr )
     {
-        if( !nad_ctable_load( ctx, ct, fid ) )
+        if( !nad_ctable_load( ctx, ct, (struct projFileAPI_t*)fid ) )
         {
             nad_free( ct );
             ct = nullptr;
