@@ -122,10 +122,10 @@ struct pj_opaque {
 
 static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P);
 static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P);
-static XYZ    pipeline_forward_3d (LPZ lpz, PJ *P);
-static LPZ    pipeline_reverse_3d (XYZ xyz, PJ *P);
-static XY     pipeline_forward (LP lp, PJ *P);
-static LP     pipeline_reverse (XY xy, PJ *P);
+static PJ_XYZ    pipeline_forward_3d (PJ_LPZ lpz, PJ *P);
+static PJ_LPZ    pipeline_reverse_3d (PJ_XYZ xyz, PJ *P);
+static PJ_XY     pipeline_forward (PJ_LP lp, PJ *P);
+static PJ_LP     pipeline_reverse (PJ_XY xy, PJ *P);
 
 
 
@@ -158,7 +158,7 @@ static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
 
 
 
-static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
+static PJ_XYZ pipeline_forward_3d (PJ_LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     int i;
     point.lpz = lpz;
@@ -170,7 +170,7 @@ static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
 }
 
 
-static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
+static PJ_LPZ pipeline_reverse_3d (PJ_XYZ xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     int i;
     point.xyz = xyz;
@@ -184,7 +184,7 @@ static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
 
 
 
-static XY pipeline_forward (LP lp, PJ *P) {
+static PJ_XY pipeline_forward (PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     int i;
     point.lp = lp;
@@ -196,7 +196,7 @@ static XY pipeline_forward (LP lp, PJ *P) {
 }
 
 
-static LP pipeline_reverse (XY xy, PJ *P) {
+static PJ_LP pipeline_reverse (PJ_XY xy, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     int i;
     point.xy = xy;

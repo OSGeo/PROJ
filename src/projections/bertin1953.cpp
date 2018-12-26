@@ -28,8 +28,8 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static XY s_forward (LP lp, PJ *P) {
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     double fu = 1.4, k = 12., w = 1.68, d;

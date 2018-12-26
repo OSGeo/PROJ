@@ -161,39 +161,7 @@ typedef long pj_int32;
 #define DIR_CHAR '/'
 #endif
 
-#define USE_PROJUV
-
-typedef struct { double u, v; } projUV;
 typedef struct { double r, i; } COMPLEX;
-typedef struct { double u, v, w; } projUVW;
-
-/* If user explicitly includes proj.h, before projects.h, then avoid implicit type-punning */
-#ifndef PROJ_H
-#ifndef PJ_LIB__
-#define XY projUV
-#define LP projUV
-#define XYZ projUVW
-#define LPZ projUVW
-
-#else
-typedef struct { double x, y; }        XY;
-typedef struct { double x, y, z; }     XYZ;
-typedef struct { double lam, phi; }    LP;
-typedef struct { double lam, phi, z; } LPZ;
-typedef struct { double u, v; }        UV;
-typedef struct { double u, v, w; }     UVW;
-#endif  /* ndef PJ_LIB__ */
-
-#else
-typedef PJ_XY XY;
-typedef PJ_LP LP;
-typedef PJ_UV UV;
-typedef PJ_XYZ XYZ;
-typedef PJ_LPZ LPZ;
-typedef PJ_UVW UVW;
-
-#endif  /* ndef PROJ_H   */
-
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
 struct PJconsts;
@@ -319,10 +287,10 @@ struct PJconsts {
     **************************************************************************************/
 
 
-    XY  (*fwd)(LP,    PJ *) = nullptr;
-    LP  (*inv)(XY,    PJ *) = nullptr;
-    XYZ (*fwd3d)(LPZ, PJ *) = nullptr;
-    LPZ (*inv3d)(XYZ, PJ *) = nullptr;
+    PJ_XY  (*fwd)(PJ_LP,    PJ *) = nullptr;
+    PJ_LP  (*inv)(PJ_XY,    PJ *) = nullptr;
+    PJ_XYZ (*fwd3d)(PJ_LPZ, PJ *) = nullptr;
+    PJ_LPZ (*inv3d)(PJ_XYZ, PJ *) = nullptr;
     PJ_OPERATOR fwd4d = nullptr;
     PJ_OPERATOR inv4d = nullptr;
 
@@ -638,7 +606,7 @@ C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[];
 #ifdef PJ_LIB__
 #define PROJ_HEAD(name, desc) static const char des_##name [] = desc
 
-#define OPERATION(name, NEED_ELLPS)                          \
+#define OPERATION(name, NEED_ELPJ_LPS)                          \
                                                              \
 pj_projection_specific_setup_##name (PJ *P);                 \
 C_NAMESPACE PJ *pj_##name (PJ *P);                           \
@@ -652,7 +620,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     if (nullptr==P)                                          \
         return nullptr;                                      \
     P->descr = des_##name;                                   \
-    P->need_ellps = NEED_ELLPS;                              \
+    P->need_ellps = NEED_ELPJ_LPS;                              \
     P->left  = PJ_IO_UNITS_ANGULAR;                          \
     P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
@@ -676,8 +644,8 @@ typedef struct { pj_int32 lam, phi; } ILP;
 
 struct CTABLE {
     char id[MAX_TAB_ID];    /* ascii info */
-    LP ll;                  /* lower left corner coordinates */
-    LP del;                 /* size of cells */
+    PJ_LP ll;               /* lower left corner coordinates */
+    PJ_LP del;              /* size of cells */
     ILP lim;                /* limits of conversion matrix */
     FLP *cvs;               /* conversion matrix */
 };
@@ -759,8 +727,8 @@ double  pj_authlat(double, double *);
 COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 
-int pj_deriv(LP, double, const PJ *, struct DERIVS *);
-int pj_factors(LP, const PJ *, double, struct FACTORS *);
+int pj_deriv(PJ_LP, double, const PJ *, struct DERIVS *);
+int pj_factors(PJ_LP, const PJ *, double, struct FACTORS *);
 
 struct PW_COEF {    /* row coefficient structure */
     int m;          /* number of c coefficients (=0 for none) */
@@ -769,26 +737,26 @@ struct PW_COEF {    /* row coefficient structure */
 
 /* Approximation structures and procedures */
 typedef struct {    /* Chebyshev or Power series structure */
-    projUV a, b;    /* power series range for evaluation */
+    PJ_UV a, b;    /* power series range for evaluation */
                     /* or Chebyshev argument shift/scaling */
     struct PW_COEF *cu, *cv;
     int mu, mv;     /* maximum cu and cv index (+1 for count) */
     int power;      /* != 0 if power series, else Chebyshev */
 } Tseries;
 
-Tseries PROJ_DLL *mk_cheby(projUV, projUV, double, projUV *, projUV (*)(projUV), int, int, int);
-projUV   bpseval(projUV, Tseries *);
-projUV   bcheval(projUV, Tseries *);
-projUV   biveval(projUV, Tseries *);
+Tseries PROJ_DLL *mk_cheby(PJ_UV, PJ_UV, double, PJ_UV *, PJ_UV (*)(PJ_UV), int, int, int);
+PJ_UV   bpseval(PJ_UV, Tseries *);
+PJ_UV   bcheval(PJ_UV, Tseries *);
+PJ_UV   biveval(PJ_UV, Tseries *);
 void    *vector1(int, int);
 void   **vector2(int, int, int);
 void     freev2(void **v, int nrows);
-int      bchgen(projUV, projUV, int, int, projUV **, projUV(*)(projUV));
-int      bch2bps(projUV, projUV, projUV **, int, int);
+int      bchgen(PJ_UV, PJ_UV, int, int, PJ_UV **, PJ_UV(*)(PJ_UV));
+int      bch2bps(PJ_UV, PJ_UV, PJ_UV **, int, int);
 
 /* nadcon related protos */
-LP             nad_intr(LP, struct CTABLE *);
-LP             nad_cvt(LP, int, struct CTABLE *);
+PJ_LP             nad_intr(PJ_LP, struct CTABLE *);
+PJ_LP             nad_cvt(PJ_LP, int, struct CTABLE *);
 struct CTABLE *nad_init(projCtx ctx, char *);
 struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid );
 int            nad_ctable_load( projCtx ctx, struct CTABLE *, PAFile fid );
@@ -831,7 +799,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
 
 PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx,
                              PJ_GridCatalog *catalog, int after,
-                             LP location, double date,
+                             PJ_LP location, double date,
                              PJ_Region *optional_region,
                              double *grid_date );
 
@@ -841,8 +809,8 @@ void  *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
 double proj_inv_mdist(projCtx ctx, double, const void *);
 void  *pj_gauss_ini(double, double, double *,double *);
-LP     pj_gauss(projCtx, LP, const void *);
-LP     pj_inv_gauss(projCtx, LP, const void *);
+PJ_LP     pj_gauss(projCtx, PJ_LP, const void *);
+PJ_LP     pj_inv_gauss(projCtx, PJ_LP, const void *);
 
 struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
 

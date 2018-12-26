@@ -1,4 +1,5 @@
 /* print row coefficients of Tseries structure */
+#include "proj.h"
 #include "projects.h"
 #include <stdio.h>
 #include <string.h>

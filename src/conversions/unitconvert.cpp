@@ -281,7 +281,7 @@ static const struct TIME_UNITS time_units[] = {
 
 
 /***********************************************************************/
-static XY forward_2d(LP lp, PJ *P) {
+static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
 /************************************************************************
     Forward unit conversions in the plane
 ************************************************************************/
@@ -297,7 +297,7 @@ static XY forward_2d(LP lp, PJ *P) {
 
 
 /***********************************************************************/
-static LP reverse_2d(XY xy, PJ *P) {
+static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
 /************************************************************************
     Reverse unit conversions in the plane
 ************************************************************************/
@@ -313,7 +313,7 @@ static LP reverse_2d(XY xy, PJ *P) {
 
 
 /***********************************************************************/
-static XYZ forward_3d(LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 /************************************************************************
     Forward unit conversions the vertical component
 ************************************************************************/
@@ -330,7 +330,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
 }
 
 /***********************************************************************/
-static LPZ reverse_3d(XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 /************************************************************************
     Reverse unit conversions the vertical component
 ************************************************************************/

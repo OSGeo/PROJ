@@ -19,8 +19,8 @@ static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
     return log(tan(M_FORTPI + .5 * x));
 }
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     double cosphi;
 
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
@@ -34,8 +34,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     return xy;
 }
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0, 0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     double cosphi;
 
     lp.phi = atan(sinh(xy.y / P->k0));

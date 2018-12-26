@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 #define ONE_TOL	 1.00000000000001

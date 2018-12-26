@@ -20,13 +20,13 @@
 #define MAX_PARGS 100
 #define PJ_INVERS(P) (P->inv ? 1 : 0)
 
-extern void gen_cheb(int, projUV(*)(projUV), const char *, PJ *, int, char **);
+extern void gen_cheb(int, PJ_UV(*)(PJ_UV), const char *, PJ *, int, char **);
 
 static PJ *Proj;
 static union {
-    projUV (*generic)(projUV, PJ *);
-    projXY (*fwd)(projLP, PJ *);
-    projLP (*inv)(projXY, PJ *);
+    PJ_UV (*generic)(PJ_UV, PJ *);
+    PJ_XY (*fwd)(PJ_LP, PJ *);
+    PJ_LP (*inv)(PJ_XY, PJ *);
 } proj;
 
 static int
@@ -56,7 +56,7 @@ static PJ_FACTORS facs;
 static double (*informat)(const char *, char **), /* input data deformatter function */
               fscale = 0.;                        /* cartesian scale factor */
 
-static projUV int_proj(projUV data) {
+static PJ_UV int_proj(PJ_UV data) {
     if (prescale) {
         data.u *= fscale;
         data.v *= fscale;
@@ -82,7 +82,7 @@ static void process(FILE *fid) {
         ++emess_dat.File_line;
 
         if (bin_in) {   /* binary input */
-            if (fread(&data, sizeof(projUV), 1, fid) != 1)
+            if (fread(&data, sizeof(PJ_UV), 1, fid) != 1)
                 break;
         } else {    /* ascii input */
             if (!(s = fgets(line, MAX_LINE, fid)))
@@ -144,7 +144,7 @@ static void process(FILE *fid) {
         }
 
         if (bin_out) { /* binary output */
-            (void)fwrite(&data, sizeof(projUV), 1, stdout);
+            (void)fwrite(&data, sizeof(PJ_UV), 1, stdout);
             continue;
         } else if (data.uv.u == HUGE_VAL) /* error output */
             (void)fputs(oterr, stdout);
@@ -196,8 +196,8 @@ static void process(FILE *fid) {
 /* file processing function --- verbosely */
 static void vprocess(FILE *fid) {
     char line[MAX_LINE+3], *s, pline[40];
-    LP dat_ll;
-    projXY dat_xy;
+    PJ_LP dat_ll;
+    PJ_XY dat_xy;
     int linvers;
     PJ_COORD coord;
 
@@ -247,7 +247,7 @@ static void vprocess(FILE *fid) {
             }
             if (prescale) { dat_xy.x *= fscale; dat_xy.y *= fscale; }
             if (reversein) {
-                projXY temp = dat_xy;
+                PJ_XY temp = dat_xy;
                 dat_xy.x = temp.y;
                 dat_xy.y = temp.x;
             }
@@ -260,7 +260,7 @@ static void vprocess(FILE *fid) {
                 continue;
             }
             if (reversein) {
-                LP temp = dat_ll;
+                PJ_LP temp = dat_ll;
                 dat_ll.lam = temp.phi;
                 dat_ll.phi = temp.lam;
             }

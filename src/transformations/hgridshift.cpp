@@ -17,7 +17,7 @@ struct pj_opaque_hgridshift {
 };
 } // anonymous namespace
 
-static XYZ forward_3d(LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
@@ -31,7 +31,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
 }
 
 
-static LPZ reverse_3d(XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 

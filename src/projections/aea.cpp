@@ -99,8 +99,8 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
 
 
 
-static XY e_forward (LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     Q->rho = Q->c - (Q->ellips ? Q->n * pj_qsfn(sin(lp.phi), P->e, P->one_es) : Q->n2 * sin(lp.phi));;
     if (Q->rho < 0.) {
@@ -114,8 +114,8 @@ static XY e_forward (LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     if( (Q->rho = hypot(xy.x, xy.y = Q->rho0 - xy.y)) != 0.0 ) {
         if (Q->n < 0.) {

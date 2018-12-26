@@ -1,9 +1,10 @@
 /* generate double bivariate Chebychev polynomial */
+#include "proj.h"
 #include "projects.h"
 	int
-bchgen(projUV a, projUV b, int nu, int nv, projUV **f, projUV(*func)(projUV)) {
+bchgen(PJ_UV a, PJ_UV b, int nu, int nv, PJ_UV **f, PJ_UV(*func)(PJ_UV)) {
 	int i, j, k;
-	projUV arg, *t, bma, bpa, *c;
+	PJ_UV arg, *t, bma, bpa, *c;
 	double d, fac;
 
 	bma.u = 0.5 * (b.u - a.u); bma.v = 0.5 * (b.v - a.v);
@@ -17,7 +18,7 @@ bchgen(projUV a, projUV b, int nu, int nv, projUV **f, projUV(*func)(projUV)) {
 				return(1);
 		}
 	}
-	if (!(c = (projUV *) vector1(nu, sizeof(projUV)))) return 1;
+	if (!(c = (PJ_UV *) vector1(nu, sizeof(PJ_UV)))) return 1;
 	fac = 2. / nu;
 	for ( j = 0; j < nv ; ++j) {
 		for ( i = 0; i < nu; ++i) {
@@ -35,7 +36,7 @@ bchgen(projUV a, projUV b, int nu, int nv, projUV **f, projUV(*func)(projUV)) {
 			f[i][j] = c[i];
 	}
 	pj_dalloc(c);
-	if (!(c = (projUV*) vector1(nv, sizeof(projUV)))) return 1;
+	if (!(c = (PJ_UV*) vector1(nv, sizeof(PJ_UV)))) return 1;
 	fac = 2. / nv;
 	for ( i = 0; i < nu; ++i) {
 		t = f[i];

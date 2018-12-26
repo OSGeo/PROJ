@@ -48,9 +48,9 @@ static int phi12(PJ *P, double *del, double *sig) {
 }
 
 
-static XY loc_for(LP lp, PJ *P, double *yc) {
+static PJ_XY loc_for(PJ_LP lp, PJ *P, double *yc) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    XY xy;
+    PJ_XY xy;
 
     if (lp.phi == 0.0) {
         xy.x = lp.lam;
@@ -97,17 +97,17 @@ static XY loc_for(LP lp, PJ *P, double *yc) {
 }
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double yc;
-    XY xy = loc_for(lp, P, &yc);
+    PJ_XY xy = loc_for(lp, P, &yc);
     return (xy);
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    XY t;
+    PJ_XY t;
     double yc = 0.0;
     int i = 0;
     const int N_MAX_ITER = 1000; /* Arbitrarily chosen number... */

@@ -83,7 +83,7 @@ static void process(FILE *fid)
 
 {
     char line[MAX_LINE + 3], *s, pline[40];
-    projUV data;
+    PJ_UV data;
 
     for (;;) {
         double z;

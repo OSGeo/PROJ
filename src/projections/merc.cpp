@@ -20,8 +20,8 @@ static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
     return log(tan(M_FORTPI + .5 * x));
 }
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
@@ -32,8 +32,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
@@ -44,8 +44,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return lp;
@@ -55,8 +55,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     lp.phi = atan(sinh(xy.y / P->k0));
     lp.lam = xy.x / P->k0;
     return lp;

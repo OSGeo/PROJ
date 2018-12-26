@@ -16,6 +16,7 @@ Added ellipsoidal equations by Bojan Savric, 22 August 2018
 #include <errno.h>
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl, Sph&Ell";
@@ -39,8 +40,8 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-static XY e_forward (LP lp, PJ *P) {           /* Ellipsoidal/spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {           /* Ellipsoidal/spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double sbeta;
     double psi, psi2, psi6;
@@ -73,8 +74,8 @@ static XY e_forward (LP lp, PJ *P) {           /* Ellipsoidal/spheroidal, forwar
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {           /* Ellipsoidal/spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal/spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double yc, y2, y6;
     int i;

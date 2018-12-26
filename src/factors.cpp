@@ -13,7 +13,7 @@
 
 #define EPS 1.0e-12
 
-int pj_factors(LP lp, const PJ *P, double h, struct FACTORS *fac) {
+int pj_factors(PJ_LP lp, const PJ *P, double h, struct FACTORS *fac) {
     double cosphi, t, n, r;
     int err;
     PJ_COORD coo = {{0, 0, 0, 0}};

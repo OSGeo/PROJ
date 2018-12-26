@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project: PROJ.4
- * Purpose: Implementation of the HEALPix and rHEALPix projections.
+ * Purpose: Implementation of the HEAPJ_LPix and rHEAPJ_LPix projections.
  *          For background see <http://code.scenzgrid.org/index.php/p/scenzgrid-py/source/tree/master/docs/rhealpix_dggs.pdf>.
  * Authors: Alex Raichev (raichev@cs.auckland.ac.nz)
  *          Michael Speth (spethm@landcareresearch.co.nz)
@@ -37,8 +37,8 @@
 #include "proj.h"
 #include "projects.h"
 
-PROJ_HEAD(healpix, "HEALPix") "\n\tSph&Ell";
-PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph&Ell\n\tnorth_square= south_square=";
+PROJ_HEAD(healpix, "HEAPJ_LPix") "\n\tSph&Ell";
+PROJ_HEAD(rhealpix, "rHEAPJ_LPix") "\n\tSph&Ell\n\tnorth_square= south_square=";
 
 /* Matrix for counterclockwise rotation by pi/2: */
 # define R1 {{ 0,-1},{ 1, 0}}
@@ -116,7 +116,7 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
     int i;
     int counter = 0;
     double xinters;
-    XY p1, p2;
+    PJ_XY p1, p2;
 
     /* Check for boundrary cases */
     for (i = 0; i < nvert; i++) {
@@ -153,10 +153,10 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
 
 /**
  * Return 1 if (x, y) lies in (the interior or boundary of) the image of the
- * HEALPix projection (in case proj=0) or in the image the rHEALPix projection
+ * HEAPJ_LPix projection (in case proj=0) or in the image the rHEAPJ_LPix projection
  * (in case proj=1), and return 0 otherwise.
- * @param north_square the position of the north polar square (rHEALPix only)
- * @param south_square the position of the south polar square (rHEALPix only)
+ * @param north_square the position of the north polar square (rHEAPJ_LPix only)
+ * @param south_square the position of the south polar square (rHEAPJ_LPix only)
  **/
 static int in_image(double x, double y, int proj, int north_square,
                     int south_square) {
@@ -251,14 +251,14 @@ static double auth_lat(PJ *P, double alpha, int inverse) {
 
 
 /**
- * Return the HEALPix projection of the longitude-latitude point lp on
+ * Return the HEAPJ_LPix projection of the longitude-latitude point lp on
  * the unit sphere.
 **/
-static XY healpix_sphere(LP lp) {
+static PJ_XY healpix_sphere(PJ_LP lp) {
     double lam = lp.lam;
     double phi = lp.phi;
     double phi0 = asin(2.0/3.0);
-    XY xy;
+    PJ_XY xy;
 
     /* equatorial region */
     if ( fabs(phi) <= phi0) {
@@ -282,8 +282,8 @@ static XY healpix_sphere(LP lp) {
 /**
  * Return the inverse of healpix_sphere().
 **/
-static LP healpix_sphere_inverse(XY xy) {
-    LP lp;
+static PJ_LP healpix_sphere_inverse(PJ_XY xy) {
+    PJ_LP lp;
     double x = xy.x;
     double y = xy.y;
     double y0 = M_FORTPI;
@@ -354,10 +354,10 @@ static void dot_product(const double a[2][2], const double b[2], double *ret) {
 /**
  * Return the number of the polar cap, the pole point coordinates, and
  * the region that (x, y) lies in.
- * If inverse=0, then assume (x,y) lies in the image of the HEALPix
+ * If inverse=0, then assume (x,y) lies in the image of the HEAPJ_LPix
  * projection of the unit sphere.
  * If inverse=1, then assume (x,y) lies in the image of the
- * (north_square, south_square)-rHEALPix projection of the unit sphere.
+ * (north_square, south_square)-rHEAPJ_LPix projection of the unit sphere.
  **/
 static CapMap get_cap(double x, double y, int north_square, int south_square,
                       int inverse) {
@@ -412,8 +412,8 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
             capmap.cn = 0;
             return capmap;
         }
-        /* Polar Region, find the HEALPix polar cap number that
-           x, y moves to when rHEALPix polar square is disassembled. */
+        /* Polar Region, find the HEAPJ_LPix polar cap number that
+           x, y moves to when rHEAPJ_LPix polar square is disassembled. */
         if (capmap.region == CapMap::north) {
             if (y >= -x - M_FORTPI - EPS && y < x + 5*M_FORTPI - EPS) {
                 capmap.cn = (north_square + 1) % 4;
@@ -441,7 +441,7 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
 
 
 /**
- * Rearrange point (x, y) in the HEALPix projection by
+ * Rearrange point (x, y) in the HEAPJ_LPix projection by
  * combining the polar caps into two polar squares.
  * Put the north polar square in position north_square and
  * the south polar square in position south_square.
@@ -449,9 +449,9 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
  * @param north_square integer between 0 and 3.
  * @param south_square integer between 0 and 3.
  **/
-static XY combine_caps(double x, double y, int north_square, int south_square,
+static PJ_XY combine_caps(double x, double y, int north_square, int south_square,
                        int inverse) {
-    XY xy;
+    PJ_XY xy;
     double v[2];
     double c[2];
     double vector[2];
@@ -512,22 +512,22 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
 }
 
 
-static XY s_healpix_forward(LP lp, PJ *P) { /* sphere  */
+static PJ_XY s_healpix_forward(PJ_LP lp, PJ *P) { /* sphere  */
     (void) P;
     return healpix_sphere(lp);
 }
 
 
-static XY e_healpix_forward(LP lp, PJ *P) { /* ellipsoid  */
+static PJ_XY e_healpix_forward(PJ_LP lp, PJ *P) { /* ellipsoid  */
     lp.phi = auth_lat(P, lp.phi, 0);
     return healpix_sphere(lp);
 }
 
 
-static LP s_healpix_inverse(XY xy, PJ *P) { /* sphere */
-    /* Check whether (x, y) lies in the HEALPix image */
+static PJ_LP s_healpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
+    /* Check whether (x, y) lies in the HEAPJ_LPix image */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
-        LP lp;
+        PJ_LP lp;
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
         pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
@@ -537,10 +537,10 @@ static LP s_healpix_inverse(XY xy, PJ *P) { /* sphere */
 }
 
 
-static LP e_healpix_inverse(XY xy, PJ *P) { /* ellipsoid */
-    LP lp = {0.0,0.0};
+static PJ_LP e_healpix_inverse(PJ_XY xy, PJ *P) { /* ellipsoid */
+    PJ_LP lp = {0.0,0.0};
 
-    /* Check whether (x, y) lies in the HEALPix image. */
+    /* Check whether (x, y) lies in the HEAPJ_LPix image. */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
@@ -553,29 +553,29 @@ static LP e_healpix_inverse(XY xy, PJ *P) { /* ellipsoid */
 }
 
 
-static XY s_rhealpix_forward(LP lp, PJ *P) { /* sphere */
+static PJ_XY s_rhealpix_forward(PJ_LP lp, PJ *P) { /* sphere */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    XY xy = healpix_sphere(lp);
+    PJ_XY xy = healpix_sphere(lp);
     return combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 0);
 }
 
 
-static XY e_rhealpix_forward(LP lp, PJ *P) { /* ellipsoid */
+static PJ_XY e_rhealpix_forward(PJ_LP lp, PJ *P) { /* ellipsoid */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    XY xy;
+    PJ_XY xy;
     lp.phi = auth_lat(P, lp.phi, 0);
     xy = healpix_sphere(lp);
     return combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 0);
 }
 
 
-static LP s_rhealpix_inverse(XY xy, PJ *P) { /* sphere */
+static PJ_LP s_rhealpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    /* Check whether (x, y) lies in the rHEALPix image. */
+    /* Check whether (x, y) lies in the rHEAPJ_LPix image. */
     if (in_image(xy.x, xy.y, 1, Q->north_square, Q->south_square) == 0) {
-        LP lp;
+        PJ_LP lp;
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
         pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
@@ -586,11 +586,11 @@ static LP s_rhealpix_inverse(XY xy, PJ *P) { /* sphere */
 }
 
 
-static LP e_rhealpix_inverse(XY xy, PJ *P) { /* ellipsoid */
+static PJ_LP e_rhealpix_inverse(PJ_XY xy, PJ *P) { /* ellipsoid */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    LP lp = {0.0,0.0};
+    PJ_LP lp = {0.0,0.0};
 
-    /* Check whether (x, y) lies in the rHEALPix image. */
+    /* Check whether (x, y) lies in the rHEAPJ_LPix image. */
     if (in_image(xy.x, xy.y, 1, Q->north_square, Q->south_square) == 0) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;

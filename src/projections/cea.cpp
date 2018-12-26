@@ -17,32 +17,32 @@ PROJ_HEAD(cea, "Equal Area Cylindrical") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 # define EPS    1e-10
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     xy.x = P->k0 * lp.lam;
     xy.y = 0.5 * pj_qsfn (sin (lp.phi), P->e, P->one_es) / P->k0;
     return xy;
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     xy.x = P->k0 * lp.lam;
     xy.y = sin(lp.phi) / P->k0;
     return xy;
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     lp.phi = pj_authlat(asin( 2. * xy.y * P->k0 / static_cast<struct pj_opaque*>(P->opaque)->qp), static_cast<struct pj_opaque*>(P->opaque)->apa);
     lp.lam = xy.x / P->k0;
     return lp;
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     double t;
 
     if ((t = fabs(xy.y *= P->k0)) - EPS <= 1.) {

@@ -483,7 +483,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
     for( subfile = 0; subfile < num_subfiles; subfile++ )
     {
         struct CTABLE *ct;
-        LP ur;
+        PJ_LP ur;
         int gs_count;
         PJ_GRIDINFO *gi;
 
@@ -662,7 +662,7 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 {
     unsigned char header[192]; /* 12 records of 16 bytes */
     struct CTABLE *ct;
-    LP		ur;
+    PJ_LP		ur;
 
     /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(pj_int32) == 4 );

@@ -33,13 +33,14 @@
 
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(times, "Times") "\n\tCyl, Sph";
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     double T, S, S2;
-    XY xy = {0.0,0.0};
+    PJ_XY xy = {0.0,0.0};
     (void) P;
 
     T = tan(lp.phi/2.0);
@@ -53,9 +54,9 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     double T, S, S2;
-    LP lp = {0.0,0.0};
+    PJ_LP lp = {0.0,0.0};
     (void) P;
 
     T = xy.y / 1.70711;

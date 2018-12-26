@@ -1,5 +1,7 @@
 /* reduce argument to range +/- PI */
 #include <math.h>
+
+#include "proj.h"
 #include "projects.h"
 
 double adjlon (double lon) {

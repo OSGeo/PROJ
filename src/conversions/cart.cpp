@@ -131,10 +131,10 @@ static double geocentric_radius (double a, double b, double phi) {
 
 
 /*********************************************************************/
-static XYZ cartesian (LPZ geod,  PJ *P) {
+static PJ_XYZ cartesian (PJ_LPZ geod,  PJ *P) {
 /*********************************************************************/
     double N, cosphi = cos(geod.phi);
-    XYZ xyz;
+    PJ_XYZ xyz;
 
     N   =  normal_radius_of_curvature(P->a, P->es, geod.phi);
 
@@ -148,10 +148,10 @@ static XYZ cartesian (LPZ geod,  PJ *P) {
 
 
 /*********************************************************************/
-static LPZ geodetic (XYZ cart,  PJ *P) {
+static PJ_LPZ geodetic (PJ_XYZ cart,  PJ *P) {
 /*********************************************************************/
     double N, p, theta, c, s;
-    LPZ lpz;
+    PJ_LPZ lpz;
 
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
     p = hypot (cart.x, cart.y);
@@ -185,7 +185,7 @@ static LPZ geodetic (XYZ cart,  PJ *P) {
 
 
 /* In effect, 2 cartesian coordinates of a point on the ellipsoid. Rather pointless, but... */
-static XY cart_forward (LP lp, PJ *P) {
+static PJ_XY cart_forward (PJ_LP lp, PJ *P) {
     PJ_COORD point;
     point.lp = lp;
     point.lpz.z = 0;
@@ -195,7 +195,7 @@ static XY cart_forward (LP lp, PJ *P) {
 }
 
 /* And the other way round. Still rather pointless, but... */
-static LP cart_reverse (XY xy, PJ *P) {
+static PJ_LP cart_reverse (PJ_XY xy, PJ *P) {
     PJ_COORD point;
     point.xy = xy;
     point.xyz.z = 0;

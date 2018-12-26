@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 namespace { // anonymous namespace
@@ -15,8 +16,8 @@ PROJ_HEAD(putp4p, "Putnins P4'") "\n\tPCyl, Sph";
 PROJ_HEAD(weren, "Werenskiold I") "\n\tPCyl, Sph";
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     lp.phi = aasin(P->ctx,0.883883476 * sin(lp.phi));
@@ -28,8 +29,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     lp.phi = aasin(P->ctx,xy.y / Q->C_y);

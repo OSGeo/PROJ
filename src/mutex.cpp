@@ -38,6 +38,7 @@
 #define _GNU_SOURCE
 #endif
 
+#include "proj.h"
 #ifndef _WIN32
 #include "proj_config.h"
 #include "projects.h"

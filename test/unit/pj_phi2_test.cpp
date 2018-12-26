@@ -26,6 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include "proj.h"
 #include "projects.h"
 
 #include <cmath>

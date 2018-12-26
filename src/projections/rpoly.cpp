@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 namespace { // anonymous namespace
@@ -19,8 +20,8 @@ PROJ_HEAD(rpoly, "Rectangular Polyconic")
 
 #define EPS 1e-9
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double fa;
 

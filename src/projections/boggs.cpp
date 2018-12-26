@@ -1,6 +1,7 @@
 #define PJ_LIB__
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(boggs, "Boggs Eumorphic") "\n\tPCyl, no inv, Sph";
@@ -11,8 +12,8 @@ PROJ_HEAD(boggs, "Boggs Eumorphic") "\n\tPCyl, no inv, Sph";
 # define FYC	0.49931
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
 	double theta, th1, c;
 	int i;
 	(void) P;

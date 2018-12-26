@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "proj.h"
 #include "projects.h"
 
 #define LINE_LEN 72

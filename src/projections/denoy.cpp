@@ -1,6 +1,7 @@
 #define PJ_LIB__
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(denoy, "Denoyer Semi-Elliptical") "\n\tPCyl, no inv, Sph";
@@ -12,8 +13,8 @@ PROJ_HEAD(denoy, "Denoyer Semi-Elliptical") "\n\tPCyl, no inv, Sph";
 #define D5  0.03
 
 
-static XY s_forward (LP lp, PJ *P) {            /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {            /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     (void) P;
     xy.y = lp.phi;
     xy.x = lp.lam;

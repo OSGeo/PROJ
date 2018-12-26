@@ -41,7 +41,11 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
+// PROJ include order is sensitive
+// clang-format off
+#include "proj.h"
 #include "projects.h" // M_PI
+// clang-format on
 
 #include <algorithm>
 #include <cassert>

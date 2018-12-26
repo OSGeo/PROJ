@@ -1,5 +1,6 @@
 /* generates 'T' option output */
 #define PJ_LIB__
+#include "proj.h"
 #include "projects.h"
 #include <stdio.h>
 #include <string.h>
@@ -38,17 +39,17 @@ static long strtol_type_safe(const char *s, const char ** endptr, int base)
 
 
 /* FIXME: put the declaration in a header. Also used in proj.c */
-void gen_cheb(int inverse, projUV (*proj)(projUV), const char *s, PJ *P,
+void gen_cheb(int inverse, PJ_UV (*proj)(PJ_UV), const char *s, PJ *P,
               int iargc, char **iargv);
 extern void p_series(Tseries *, FILE *, char *);
 
-void gen_cheb(int inverse, projUV (*proj)(projUV), const char *s, PJ *P,
+void gen_cheb(int inverse, PJ_UV (*proj)(PJ_UV), const char *s, PJ *P,
               int iargc, char **iargv) {
 	long NU = 15, NV = 15;
 	int errin = 0, pwr;
 	long res = -1;
 	char *arg, fmt[32];
-	projUV low, upp, resid;
+	PJ_UV low, upp, resid;
 	Tseries *F;
 	double (*input)(const char *, const char **);
 

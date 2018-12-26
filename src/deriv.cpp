@@ -6,8 +6,8 @@
 #include "proj.h"
 #include "projects.h"
 
-int pj_deriv(LP lp, double h, const PJ *P, struct DERIVS *der) {
-    XY t;
+int pj_deriv(PJ_LP lp, double h, const PJ *P, struct DERIVS *der) {
+    PJ_XY t;
     /* get rid of constness until we can do it for real */
     PJ *Q = (PJ *) P;
     if (nullptr==Q->fwd)

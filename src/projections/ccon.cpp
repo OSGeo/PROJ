@@ -43,8 +43,8 @@ PROJ_HEAD(ccon, "Central Conic")
 
 
 
-static XY forward (LP lp, PJ *P) {
-    XY xy = {0.0,0.0};
+static PJ_XY forward (PJ_LP lp, PJ *P) {
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double r;
 
@@ -56,8 +56,8 @@ static XY forward (LP lp, PJ *P) {
 }
 
 
-static LP inverse (XY xy, PJ *P) {
-    LP lp = {0.0,0.0};
+static PJ_LP inverse (PJ_XY xy, PJ *P) {
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     xy.y = Q->ctgphi1 - xy.y;

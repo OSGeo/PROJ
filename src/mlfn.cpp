@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 /* meridional distance for ellipsoid and inverse

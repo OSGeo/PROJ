@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(nell_h, "Nell-Hammer") "\n\tPCyl, Sph";
@@ -10,8 +11,8 @@ PROJ_HEAD(nell_h, "Nell-Hammer") "\n\tPCyl, Sph";
 #define EPS 1e-7
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     (void) P;
 
     xy.x = 0.5 * lp.lam * (1. + cos(lp.phi));
@@ -21,8 +22,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     double V, c, p;
     int i;
     (void) P;

@@ -19,7 +19,7 @@ returns cartesian coordinates as well.
 Corrections in the gridded model are in east, north, up (ENU) space.
 Hence the input coordinates needs to be converted to ENU-space when
 searching for corrections in the grid. The corrections are then converted
-to cartesian XYZ-space and applied to the input coordinates (also in
+to cartesian PJ_XYZ-space and applied to the input coordinates (also in
 cartesian space).
 
 A full deformation model is described by two grids, one for the horizontal
@@ -72,12 +72,12 @@ struct pj_opaque {
 } // anonymous namespace
 
 /********************************************************************************/
-static XYZ get_grid_shift(PJ* P, XYZ cartesian) {
+static PJ_XYZ get_grid_shift(PJ* P, PJ_XYZ cartesian) {
 /********************************************************************************
     Read correction values from grid. The cartesian input coordinates are
     converted to geodetic coordinates in order look up the correction values
     in the grid. Once the grid corrections are read we need to convert them
-    from ENU-space to cartesian XYZ-space. ENU -> XYZ formula described in:
+    from ENU-space to cartesian PJ_XYZ-space. ENU -> PJ_XYZ formula described in:
 
     Nørbech, T., et al, 2003(?), "Transformation from a Common Nordic Reference
     Frame to ETRS89 in Denmark, Finland, Norway, and Sweden – status report"
@@ -109,7 +109,7 @@ static XYZ get_grid_shift(PJ* P, XYZ cartesian) {
     sl = sin(geodetic.lp.lam);
     cl = cos(geodetic.lp.lam);
 
-    /* ENU -> XYZ */
+    /* ENU -> PJ_XYZ */
     temp.xyz.x = -sp*cl*shift.enu.n - sl*shift.enu.e + cp*cl*shift.enu.u;
     temp.xyz.y = -sp*sl*shift.enu.n + cl*shift.enu.e + cp*sl*shift.enu.u;
     temp.xyz.z =     cp*shift.enu.n +                     sp*shift.enu.u;
@@ -122,11 +122,11 @@ static XYZ get_grid_shift(PJ* P, XYZ cartesian) {
 }
 
 /********************************************************************************/
-static XYZ reverse_shift(PJ *P, XYZ input, double dt) {
+static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
 /********************************************************************************
     Iteratively determine the reverse grid shift correction values.
 *********************************************************************************/
-    XYZ out, delta, dif;
+    PJ_XYZ out, delta, dif;
     double z0;
     int i = MAX_ITERATIONS;
 
@@ -163,10 +163,10 @@ static XYZ reverse_shift(PJ *P, XYZ input, double dt) {
     return out;
 }
 
-static XYZ forward_3d(LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     PJ_COORD out, in;
-    XYZ shift;
+    PJ_XYZ shift;
     double dt = 0.0;
     in.lpz = lpz;
     out = in;
@@ -192,7 +192,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
 static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     double dt;
-    XYZ shift;
+    PJ_XYZ shift;
     PJ_COORD out = in;
 
     if (Q->t_obs != HUGE_VAL) {
@@ -212,7 +212,7 @@ static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
 }
 
 
-static LPZ reverse_3d(XYZ in, PJ *P) {
+static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     PJ_COORD out;
     double dt = 0.0;

@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "proj.h"
 #include "projects.h"
 
 /************************************************************************/

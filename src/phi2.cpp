@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 static const double TOL = 1.0e-10;

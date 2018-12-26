@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "proj.h"
 #include "projects.h"
 
 static int gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry);

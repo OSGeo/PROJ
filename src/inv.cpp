@@ -141,7 +141,7 @@ static PJ_COORD error_or_coord(PJ *P, PJ_COORD coord, int last_errno) {
 }
 
 
-LP pj_inv(XY xy, PJ *P) {
+PJ_LP pj_inv(PJ_XY xy, PJ *P) {
     int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.xy = xy;
@@ -175,7 +175,7 @@ LP pj_inv(XY xy, PJ *P) {
 
 
 
-LPZ pj_inv3d (XYZ xyz, PJ *P) {
+PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
     int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.xyz = xyz;

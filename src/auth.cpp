@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stddef.h>
 
+#include "proj.h"
 #include "projects.h"
 
 # define P00 .33333333333333333333 /*   1 /     3 */

@@ -38,8 +38,8 @@ PROJ_HEAD(latlong, "Lat/long (Geodetic alias)")  "\n\t";
 PROJ_HEAD(longlat, "Lat/long (Geodetic alias)")  "\n\t";
 
 
- static XY latlong_forward(LP lp, PJ *P) {
-    XY xy = {0.0,0.0};
+ static PJ_XY latlong_forward(PJ_LP lp, PJ *P) {
+    PJ_XY xy = {0.0,0.0};
     (void) P;
     xy.x = lp.lam;
     xy.y = lp.phi;
@@ -47,8 +47,8 @@ PROJ_HEAD(longlat, "Lat/long (Geodetic alias)")  "\n\t";
 }
 
 
-static LP latlong_inverse(XY xy, PJ *P) {
-    LP lp = {0.0,0.0};
+static PJ_LP latlong_inverse(PJ_XY xy, PJ *P) {
+    PJ_LP lp = {0.0,0.0};
     (void) P;
     lp.phi = xy.y;
     lp.lam = xy.x;
@@ -56,8 +56,8 @@ static LP latlong_inverse(XY xy, PJ *P) {
 }
 
 
- static XYZ latlong_forward_3d (LPZ lpz, PJ *P) {
-    XYZ xyz = {0,0,0};
+ static PJ_XYZ latlong_forward_3d (PJ_LPZ lpz, PJ *P) {
+    PJ_XYZ xyz = {0,0,0};
     (void) P;
     xyz.x = lpz.lam;
     xyz.y = lpz.phi;
@@ -66,8 +66,8 @@ static LP latlong_inverse(XY xy, PJ *P) {
 }
 
 
-static LPZ latlong_inverse_3d (XYZ xyz, PJ *P) {
-    LPZ lpz = {0,0,0};
+static PJ_LPZ latlong_inverse_3d (PJ_XYZ xyz, PJ *P) {
+    PJ_LPZ lpz = {0,0,0};
     (void) P;
     lpz.lam = xyz.x;
     lpz.phi = xyz.y;

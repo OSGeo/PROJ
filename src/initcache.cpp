@@ -27,6 +27,7 @@
 
 #include <string.h>
 
+#include "proj.h"
 #include "projects.h"
 
 static int cache_count = 0;

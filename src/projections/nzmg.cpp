@@ -29,6 +29,7 @@
 
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(nzmg, "New Zealand Map Grid") "\n\tfixed Earth";
@@ -57,8 +58,8 @@ static const double tpsi[] = { .6399175073, -.1358797613, .063294409, -.02526853
 #define Ntphi 8
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     COMPLEX p;
     const double *C;
     int i;
@@ -76,8 +77,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     int nn, i;
     COMPLEX p, f, fp, dp;
     double den;

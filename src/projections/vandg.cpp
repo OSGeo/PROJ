@@ -13,8 +13,8 @@ PROJ_HEAD(vandg, "van der Grinten (I)") "\n\tMisc Sph";
 # define HPISQ      4.93480220054467930934
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     double  al, al2, g, g2, p2;
 
     p2 = fabs(lp.phi / M_HALFPI);
@@ -58,8 +58,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     double t, c0, c1, c2, c3, al, r2, r, m, d, ay, x2, y2;
 
     x2 = xy.x * xy.x;

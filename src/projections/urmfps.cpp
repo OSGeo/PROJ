@@ -19,8 +19,8 @@ struct pj_opaque {
 #define Cy 1.139753528477
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     lp.phi = aasin (P->ctx,static_cast<struct pj_opaque*>(P->opaque)->n * sin (lp.phi));
     xy.x = C_x * lp.lam * cos (lp.phi);
     xy.y = static_cast<struct pj_opaque*>(P->opaque)->C_y * lp.phi;
@@ -28,8 +28,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0, 0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     xy.y /= static_cast<struct pj_opaque*>(P->opaque)->C_y;
     lp.phi = aasin(P->ctx, sin (xy.y) / static_cast<struct pj_opaque*>(P->opaque)->n);
     lp.lam = xy.x / (C_x * cos (xy.y));

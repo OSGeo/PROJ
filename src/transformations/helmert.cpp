@@ -59,8 +59,8 @@ Last update: 2018-10-26
 PROJ_HEAD(helmert, "3(6)-, 4(8)- and 7(14)-parameter Helmert shift");
 PROJ_HEAD(molobadekas, "Molodensky-Badekas transformation");
 
-static XYZ helmert_forward_3d (LPZ lpz, PJ *P);
-static LPZ helmert_reverse_3d (XYZ xyz, PJ *P);
+static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P);
+static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P);
 
 
 
@@ -70,10 +70,10 @@ struct pj_opaque_helmert {
 /************************************************************************
     Projection specific elements for the "helmert" PJ object
 ************************************************************************/
-    XYZ xyz;
-    XYZ xyz_0;
-    XYZ dxyz;
-    XYZ refp;
+    PJ_XYZ xyz;
+    PJ_XYZ xyz_0;
+    PJ_XYZ dxyz;
+    PJ_XYZ refp;
     PJ_OPK opk;
     PJ_OPK opk_0;
     PJ_OPK dopk;
@@ -322,7 +322,7 @@ static void build_rot_matrix(PJ *P) {
 
 
 /***********************************************************************/
-static XY helmert_forward (LP lp, PJ *P) {
+static PJ_XY helmert_forward (PJ_LP lp, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
@@ -342,7 +342,7 @@ static XY helmert_forward (LP lp, PJ *P) {
 
 
 /***********************************************************************/
-static LP helmert_reverse (XY xy, PJ *P) {
+static PJ_LP helmert_reverse (PJ_XY xy, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
@@ -362,7 +362,7 @@ static LP helmert_reverse (XY xy, PJ *P) {
 
 
 /***********************************************************************/
-static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
+static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
@@ -402,7 +402,7 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
 
 
 /***********************************************************************/
-static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
+static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};

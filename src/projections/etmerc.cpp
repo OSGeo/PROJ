@@ -145,8 +145,8 @@ static double clens(double *a, int size, double arg_r) {
 
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double sin_Cn, cos_Cn, cos_Ce, sin_Ce, dCn, dCe;
     double Cn = lp.phi, Ce = lp.lam;
@@ -181,8 +181,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double sin_Cn, cos_Cn, cos_Ce, sin_Ce, dCn, dCe;
     double Cn = xy.y, Ce = xy.x;

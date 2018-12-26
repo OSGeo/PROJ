@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "proj.h"
 #include "projects.h"
 
 static PAFile stdio_fopen(projCtx ctx, const char *filename,

@@ -62,8 +62,8 @@ static int phi12(PJ *P, double *del) {
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double rho;
 
@@ -85,8 +85,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {  /* Spheroidal, (and ellipsoidal?) inverse */
-    LP lp = {0.0, 0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {  /* Spheroidal, (and ellipsoidal?) inverse */
+    PJ_LP lp = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double rho;
 

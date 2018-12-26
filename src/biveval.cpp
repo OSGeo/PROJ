@@ -1,7 +1,8 @@
 /* procedures for evaluating Tseries */
+#include "proj.h"
 # include "projects.h"
 # define NEAR_ONE	1.00001
-static double ceval(struct PW_COEF *C, int n, projUV w, projUV w2) {
+static double ceval(struct PW_COEF *C, int n, PJ_UV w, PJ_UV w2) {
     double d=0, dd=0, vd, vdd, tmp, *c;
     int j;
 
@@ -28,10 +29,10 @@ static double ceval(struct PW_COEF *C, int n, projUV w, projUV w2) {
         return (w.u * d - dd);
 }
 
-projUV /* bivariate Chebyshev polynomial entry point */
-bcheval(projUV in, Tseries *T) {
-    projUV w2, w;
-    projUV out;
+PJ_UV /* bivariate Chebyshev polynomial entry point */
+bcheval(PJ_UV in, Tseries *T) {
+    PJ_UV w2, w;
+    PJ_UV out;
     /* scale to +-1 */
     w.u = ( in.u + in.u - T->a.u ) * T->b.u;
     w.v = ( in.v + in.v - T->a.v ) * T->b.v;
@@ -47,9 +48,9 @@ bcheval(projUV in, Tseries *T) {
     return out;
 }
 
-projUV /* bivariate power polynomial entry point */
-bpseval(projUV in, Tseries *T) {
-    projUV out;
+PJ_UV /* bivariate power polynomial entry point */
+bpseval(PJ_UV in, Tseries *T) {
+    PJ_UV out;
     double *c, row;
     int i, m;
 
@@ -75,8 +76,8 @@ bpseval(projUV in, Tseries *T) {
     return out;
 }
 
-projUV /* general entry point selecting evaluation mode */
-biveval(projUV in, Tseries *T) {
+PJ_UV /* general entry point selecting evaluation mode */
+biveval(PJ_UV in, Tseries *T) {
 
     if (T->power) {
         return bpseval(in, T);

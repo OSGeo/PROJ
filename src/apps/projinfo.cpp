@@ -35,6 +35,7 @@
 #include <iostream>
 #include <utility>
 
+#include "proj.h"
 #include "projects.h"
 
 #include <proj/common.hpp>

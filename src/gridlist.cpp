@@ -32,6 +32,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "proj.h"
 #include "projects.h"
 
 static PJ_GRIDINFO *grid_list = nullptr;

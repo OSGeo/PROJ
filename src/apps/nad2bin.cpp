@@ -274,7 +274,7 @@ int main(int argc, char **argv) {
             unsigned char achHeader[11*16];
             double dfValue;
             pj_int32 nGSCount = ct.lim.lam * ct.lim.phi;
-            LP ur;
+            PJ_LP ur;
 
             ur.lam = ct.ll.lam + (ct.lim.lam-1) * ct.del.lam;
             ur.phi = ct.ll.phi + (ct.lim.phi-1) * ct.del.phi;

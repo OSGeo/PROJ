@@ -32,6 +32,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "proj.h"
 #include "projects.h"
 
 #define MAX_ITER 20

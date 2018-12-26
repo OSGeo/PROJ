@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <math.h>
 
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(labrd, "Laborde") "\n\tCyl, Sph\n\tSpecial for Madagascar";
@@ -15,8 +16,8 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double V1, V2, ps, sinps, cosps, sinps2, cosps2;
     double I1, I2, I3, I4, I5, I6, x2, y2, t;
@@ -48,8 +49,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     /* t = 0.0 optimization is to avoid a false positive cppcheck warning */
     /* (cppcheck git beaf29c15867984aa3c2a15cf15bd7576ccde2b3). Might no */

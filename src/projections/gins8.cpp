@@ -1,4 +1,6 @@
 #define PJ_LIB__
+
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(gins8, "Ginsburg VIII (TsNIIGAiK)") "\n\tPCyl, Sph, no inv";
@@ -8,8 +10,8 @@ PROJ_HEAD(gins8, "Ginsburg VIII (TsNIIGAiK)") "\n\tPCyl, Sph, no inv";
 #define C12 0.08333333333333333
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     double t = lp.phi * lp.phi;
     (void) P;
 

@@ -11,8 +11,8 @@ PROJ_HEAD(collg, "Collignon") "\n\tPCyl, Sph";
 #define ONEEPS  1.0000001
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     (void) P;
     if ((xy.y = 1. - sin(lp.phi)) <= 0.)
         xy.y = 0.;
@@ -24,8 +24,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     lp.phi = xy.y / FYC - 1.;
     if (fabs(lp.phi = 1. - lp.phi * lp.phi) < 1.)
         lp.phi = asin(lp.phi);
