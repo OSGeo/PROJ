@@ -264,6 +264,13 @@ typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
 /****************************************************************************/
 
 
+/* datum_type values */
+#define PJD_UNKNOWN   0
+#define PJD_3PARAM    1
+#define PJD_7PARAM    2
+#define PJD_GRIDSHIFT 3
+#define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
+
 
 /* base projection data structure */
 struct PJconsts {
@@ -279,18 +286,18 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    projCtx_t *ctx;
-    const char *descr;             /* From pj_list.h or individual PJ_*.c file */
-    paralist *params;              /* Parameter list */
-    char *def_full;                /* Full textual definition (usually 0 - set by proj_pj_info) */
-    char *def_size;                /* Shape and size parameters extracted from params */
-    char *def_shape;
-    char *def_spherification;
-    char *def_ellps;
+    projCtx_t *ctx = nullptr;
+    const char *descr = nullptr;   /* From pj_list.h or individual PJ_*.c file */
+    paralist *params = nullptr;    /* Parameter list */
+    char *def_full = nullptr;      /* Full textual definition (usually 0 - set by proj_pj_info) */
+    char *def_size = nullptr;      /* Shape and size parameters extracted from params */
+    char *def_shape = nullptr;
+    char *def_spherification = nullptr;
+    char *def_ellps = nullptr;
 
-    struct geod_geodesic *geod;    /* For geodesic computations */
-    void *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
-    int inverted;                  /* Tell high level API functions to swap inv/fwd */
+    struct geod_geodesic *geod = nullptr;    /* For geodesic computations */
+    void *opaque = nullptr;                  /* Projection specific parameters, Defined in PJ_*.c */
+    int inverted = 0;                        /* Tell high level API functions to swap inv/fwd */
 
 
     /*************************************************************************************
@@ -309,14 +316,14 @@ struct PJconsts {
     **************************************************************************************/
 
 
-    XY  (*fwd)(LP,    PJ *);
-    LP  (*inv)(XY,    PJ *);
-    XYZ (*fwd3d)(LPZ, PJ *);
-    LPZ (*inv3d)(XYZ, PJ *);
-    PJ_OPERATOR fwd4d;
-    PJ_OPERATOR inv4d;
+    XY  (*fwd)(LP,    PJ *) = nullptr;
+    LP  (*inv)(XY,    PJ *) = nullptr;
+    XYZ (*fwd3d)(LPZ, PJ *) = nullptr;
+    LPZ (*inv3d)(XYZ, PJ *) = nullptr;
+    PJ_OPERATOR fwd4d = nullptr;
+    PJ_OPERATOR inv4d = nullptr;
 
-    PJ_DESTRUCTOR destructor;
+    PJ_DESTRUCTOR destructor = nullptr;
 
 
     /*************************************************************************************
@@ -341,36 +348,37 @@ struct PJconsts {
 
     /* The linear parameters */
 
-    double  a;                         /* semimajor axis (radius if eccentricity==0) */
-    double  b;                         /* semiminor axis */
-    double  ra;                        /* 1/a */
-    double  rb;                        /* 1/b */
+    double  a = 0.0;                   /* semimajor axis (radius if eccentricity==0) */
+    double  b = 0.0;                   /* semiminor axis */
+    double  ra = 0.0;                  /* 1/a */
+    double  rb = 0.0;                  /* 1/b */
 
     /* The eccentricities */
 
-    double  alpha;                     /* angular eccentricity */
-    double  e;                         /* first  eccentricity */
-    double  es;                        /* first  eccentricity squared */
-    double  e2;                        /* second eccentricity */
-    double  e2s;                       /* second eccentricity squared */
-    double  e3;                        /* third  eccentricity */
-    double  e3s;                       /* third  eccentricity squared */
-    double  one_es;                    /* 1 - e^2 */
-    double  rone_es;                   /* 1/one_es */
+    double  alpha = 0.0;               /* angular eccentricity */
+    double  e = 0.0;                   /* first  eccentricity */
+    double  es = 0.0;                  /* first  eccentricity squared */
+    double  e2 = 0.0;                  /* second eccentricity */
+    double  e2s = 0.0;                 /* second eccentricity squared */
+    double  e3 = 0.0;                  /* third  eccentricity */
+    double  e3s = 0.0;                 /* third  eccentricity squared */
+    double  one_es = 0.0;              /* 1 - e^2 */
+    double  rone_es = 0.0;             /* 1/one_es */
 
 
     /* The flattenings */
-    double  f;                         /* first  flattening */
-    double  f2;                        /* second flattening */
-    double  n;                         /* third  flattening */
-    double  rf;                        /* 1/f  */
-    double  rf2;                       /* 1/f2 */
-    double  rn;                        /* 1/n  */
+    double  f = 0.0;                   /* first  flattening */
+    double  f2 = 0.0;                  /* second flattening */
+    double  n = 0.0;                   /* third  flattening */
+    double  rf = 0.0;                  /* 1/f  */
+    double  rf2 = 0.0;                 /* 1/f2 */
+    double  rn = 0.0;                   /* 1/n  */
 
     /* This one's for GRS80 */
-    double  J;                         /* "Dynamic form factor" */
+    double  J = 0.0;                   /* "Dynamic form factor" */
 
-    double  es_orig, a_orig;           /* es and a before any +proj related adjustment */
+    double  es_orig = 0.0;    /* es and a before any +proj related adjustment */
+    double  a_orig = 0.0;
 
 
     /*************************************************************************************
@@ -379,27 +387,27 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    int  over;                      /* Over-range flag */
-    int  geoc;                      /* Geocentric latitude flag */
-    int  is_latlong;                /* proj=latlong ... not really a projection at all */
-    int  is_geocent;                /* proj=geocent ... not really a projection at all */
-    int  is_pipeline;               /* 1 if PJ represents a pipeline */
-    int  need_ellps;                /* 0 for operations that are purely cartesian */
-    int  skip_fwd_prepare;
-    int  skip_fwd_finalize;
-    int  skip_inv_prepare;
-    int  skip_inv_finalize;
+    int  over = 0;                  /* Over-range flag */
+    int  geoc = 0;                  /* Geocentric latitude flag */
+    int  is_latlong = 0;            /* proj=latlong ... not really a projection at all */
+    int  is_geocent = 0;            /* proj=geocent ... not really a projection at all */
+    int  is_pipeline = 0;           /* 1 if PJ represents a pipeline */
+    int  need_ellps = 0;            /* 0 for operations that are purely cartesian */
+    int  skip_fwd_prepare = 0;
+    int  skip_fwd_finalize = 0;
+    int  skip_inv_prepare = 0;
+    int  skip_inv_finalize = 0;
 
-    enum pj_io_units left;          /* Flags for input/output coordinate types */
-    enum pj_io_units right;
+    enum pj_io_units left =  PJ_IO_UNITS_WHATEVER; /* Flags for input/output coordinate types */
+    enum pj_io_units right =  PJ_IO_UNITS_WHATEVER;
 
     /* These PJs are used for implementing cs2cs style coordinate handling in the 4D API */
-    PJ *axisswap;
-    PJ *cart;
-    PJ *cart_wgs84;
-    PJ *helmert;
-    PJ *hgridshift;
-    PJ *vgridshift;
+    PJ *axisswap = nullptr;
+    PJ *cart = nullptr;
+    PJ *cart_wgs84 = nullptr;
+    PJ *helmert = nullptr;
+    PJ *hgridshift = nullptr;
+    PJ *vgridshift = nullptr;
 
 
     /*************************************************************************************
@@ -408,8 +416,12 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    double  lam0, phi0;                /* central meridian, parallel */
-    double  x0, y0, z0, t0;            /* false easting and northing (and height and time) */
+    double  lam0 = 0.0;    /* central meridian */
+    double  phi0 = 0.0;    /* central parallel */
+    double  x0 = 0.0;      /* false easting */
+    double  y0 = 0.0;      /* false northing  */
+    double  z0 = 0.0;      /* height origin */
+    double  t0 = 0.0;      /* time origin */
 
 
     /*************************************************************************************
@@ -418,9 +430,9 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    double  k0;                        /* General scaling factor - e.g. the 0.9996 of UTM */
-    double  to_meter, fr_meter;        /* Plane coordinate scaling. Internal unit [m] */
-    double  vto_meter, vfr_meter;      /* Vertical scaling. Internal unit [m] */
+    double  k0 = 0.0;                  /* General scaling factor - e.g. the 0.9996 of UTM */
+    double  to_meter = 0.0, fr_meter = 0.0;        /* Plane coordinate scaling. Internal unit [m] */
+    double  vto_meter = 0.0, vfr_meter = 0.0;      /* Vertical scaling. Internal unit [m] */
 
 
     /*************************************************************************************
@@ -434,33 +446,33 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    int     datum_type;                /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
-    double  datum_params[7];           /* Parameters for 3PARAM and 7PARAM */
-    struct _pj_gi **gridlist;          /* TODO: Description needed */
-    int     gridlist_count;
+    int     datum_type = PJD_UNKNOWN;  /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
+    double  datum_params[7] = {0,0,0,0,0,0,0}; /* Parameters for 3PARAM and 7PARAM */
+    struct _pj_gi **gridlist = nullptr;     /* TODO: Description needed */
+    int     gridlist_count = 0;
 
-    int     has_geoid_vgrids;          /* TODO: Description needed */
-    struct _pj_gi **vgridlist_geoid;   /* TODO: Description needed */
-    int     vgridlist_geoid_count;
+    int     has_geoid_vgrids = 0;      /* TODO: Description needed */
+    struct _pj_gi **vgridlist_geoid = nullptr;   /* TODO: Description needed */
+    int     vgridlist_geoid_count = 0;
 
-    double  from_greenwich;            /* prime meridian offset (in radians) */
-    double  long_wrap_center;          /* 0.0 for -180 to 180, actually in radians*/
-    int     is_long_wrap_set;
-    char    axis[4];                   /* Axis order, pj_transform/pj_adjust_axis */
+    double  from_greenwich = 0.0;       /* prime meridian offset (in radians) */
+    double  long_wrap_center = 0.0;     /* 0.0 for -180 to 180, actually in radians*/
+    int     is_long_wrap_set = 0;
+    char    axis[4] = {0,0,0,0};        /* Axis order, pj_transform/pj_adjust_axis */
 
     /* New Datum Shift Grid Catalogs */
-    char   *catalog_name;
-    struct _PJ_GridCatalog *catalog;
+    char   *catalog_name = nullptr;
+    struct _PJ_GridCatalog *catalog = nullptr;
 
-    double  datum_date;                 /* TODO: Description needed */
+    double  datum_date = 0.0;           /* TODO: Description needed */
 
-    struct _pj_gi *last_before_grid;    /* TODO: Description needed */
-    PJ_Region     last_before_region;   /* TODO: Description needed */
-    double        last_before_date;     /* TODO: Description needed */
+    struct _pj_gi *last_before_grid = nullptr;    /* TODO: Description needed */
+    PJ_Region     last_before_region = {0,0,0,0}; /* TODO: Description needed */
+    double        last_before_date = 0.0;         /* TODO: Description needed */
 
-    struct _pj_gi *last_after_grid;     /* TODO: Description needed */
-    PJ_Region     last_after_region;    /* TODO: Description needed */
-    double        last_after_date;      /* TODO: Description needed */
+    struct _pj_gi *last_after_grid = nullptr;     /* TODO: Description needed */
+    PJ_Region     last_after_region = {0,0,0,0};  /* TODO: Description needed */
+    double        last_after_date = 0.0;          /* TODO: Description needed */
 
 
     /*************************************************************************************
@@ -469,6 +481,7 @@ struct PJconsts {
 
     **************************************************************************************/
 
+    PJconsts();
 };
 
 
@@ -513,13 +526,6 @@ struct FACTORS {
     double a, b;           /* max-min scale error */
     int    code;           /* always 0 */
 };
-
-/* datum_type values */
-#define PJD_UNKNOWN   0
-#define PJD_3PARAM    1
-#define PJD_7PARAM    2
-#define PJD_GRIDSHIFT 3
-#define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
 
 /* library errors */
 #define PJD_ERR_NO_ARGS                  -1
@@ -626,10 +632,9 @@ C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
 C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     if (P)                                                   \
         return pj_projection_specific_setup_##name (P);      \
-    P = (PJ*) pj_calloc (1, sizeof(PJ));                     \
+    P = pj_new();                                            \
     if (nullptr==P)                                          \
         return nullptr;                                      \
-    P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
     P->need_ellps = NEED_ELLPS;                              \
     P->left  = PJ_IO_UNITS_ANGULAR;                          \
@@ -827,6 +832,7 @@ extern char const PROJ_DLL pj_release[];
 
 struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
 
+PJ *pj_new(void);
 PJ *pj_default_destructor (PJ *P, int errlev);
 
 double PROJ_DLL pj_atof( const char* nptr );

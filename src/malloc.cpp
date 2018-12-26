@@ -44,6 +44,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <new>
+
 #include "proj.h"
 #include "projects.h"
 
@@ -188,7 +190,16 @@ void pj_free(PJ *P) {
     P->destructor (P, proj_errno(P));
 }
 
+/*****************************************************************************/
+// cppcheck-suppress uninitMemberVar
+PJconsts::PJconsts(): destructor(pj_default_destructor) {}
+/*****************************************************************************/
 
+/*****************************************************************************/
+PJ *pj_new() {
+/*****************************************************************************/
+    return new(std::nothrow) PJ();
+}
 
 
 /*****************************************************************************/
@@ -235,6 +246,6 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     pj_free (P->vgridshift);
 
     pj_dealloc (static_cast<struct pj_opaque*>(P->opaque));
-    pj_dealloc(P);
+    delete P;
     return nullptr;
 }
