@@ -57,6 +57,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
+#include <string>
+#include <vector>
+
 #ifndef PROJ_DLL
 #ifdef PROJ_MSVC_DLL_EXPORT
 #define PROJ_DLL __declspec(dllexport)
@@ -474,6 +479,17 @@ struct PJconsts {
     PJ_Region     last_after_region = {0,0,0,0};  /* TODO: Description needed */
     double        last_after_date = 0.0;          /* TODO: Description needed */
 
+    /*************************************************************************************
+     ISO-19111 interface
+    **************************************************************************************/
+
+    NS_PROJ::common::IdentifiedObjectPtr iso_obj{};
+
+    // cached results
+    mutable std::string lastWKT{};
+    mutable std::string lastPROJString{};
+    mutable bool gridsNeededAsked = false;
+    mutable std::vector<NS_PROJ::operation::GridDescription> gridsNeeded{};
 
     /*************************************************************************************
 
@@ -482,6 +498,8 @@ struct PJconsts {
     **************************************************************************************/
 
     PJconsts();
+    PJconsts(const PJconsts &) = delete;
+    PJconsts &operator=(const PJconsts &) = delete;
 };
 
 

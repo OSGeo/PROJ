@@ -127,7 +127,6 @@ int pj_ellipsoid (PJ *P) {
 /***************************************************************************************/
 static int ellps_ellps (PJ *P) {
 /***************************************************************************************/
-    PJ B;
     const PJ_ELLPS *ellps;
     paralist *par = nullptr;
     char *name;
@@ -138,11 +137,6 @@ static int ellps_ellps (PJ *P) {
     if (nullptr==par)
         return 0;
 
-    /* Otherwise produce a fake PJ to make ellps_size/ellps_shape do the hard work for us */
-
-    /* First move B into P's context to get error messages onto the right channel */
-    B.ctx = P->ctx;
-
     /* Then look up the right size and shape parameters from the builtin list */
     if (strlen (par->param) < 7)
         return proj_errno_set (P, PJD_ERR_INVALID_ARG);
@@ -151,23 +145,28 @@ static int ellps_ellps (PJ *P) {
     if (nullptr==ellps)
         return proj_errno_set (P, PJD_ERR_UNKNOWN_ELLP_PARAM);
 
-    /* Now, get things ready for ellps_size/ellps_shape, make them do their thing, and clean up */
+    /* Now, get things ready for ellps_size/ellps_shape, make them do their thing */
     err = proj_errno_reset (P);
-    B = *P;
-    pj_erase_ellipsoid_def (&B);
-    B.params = pj_mkparam (ellps->major);
-    B.params->next = pj_mkparam (ellps->ell);
 
-    ellps_size (&B);
-    ellps_shape (&B);
+    paralist* new_params = pj_mkparam (ellps->major);
+    new_params->next = pj_mkparam (ellps->ell);
+    paralist* old_params = P->params;
+    P->params = new_params;
 
-    pj_dealloc (B.params->next);
-    pj_dealloc (B.params);
-    if (proj_errno (&B))
-        return proj_errno (&B);
+    {
+        PJ empty_PJ;
+        pj_inherit_ellipsoid_def(&empty_PJ, P);
+    }
+    ellps_size (P);
+    ellps_shape (P);
+
+    P->params = old_params;
+    pj_dealloc (new_params->next);
+    pj_dealloc (new_params);
+    if (proj_errno (P))
+        return proj_errno (P);
 
     /* Finally update P and sail home */
-    pj_inherit_ellipsoid_def (&B, P);
     P->def_ellps = par->param;
     par->used = 1;
 
@@ -436,21 +435,6 @@ static const PJ_ELLPS *pj_find_ellps (const char *name) {
     if (nullptr==s)
         return nullptr;
     return ellps + i;
-}
-
-
-/**************************************************************************************/
-void pj_erase_ellipsoid_def (PJ *P) {
-/***************************************************************************************
-    Erase all ellipsoidal parameters in P
-***************************************************************************************/
-    PJ B;
-
-    /* Make a blank PJ to copy from */
-    memset (&B, 0, sizeof (B));
-
-    /* And use it to overwrite all existing ellipsoid defs */
-    pj_inherit_ellipsoid_def (&B, P);
 }
 
 
