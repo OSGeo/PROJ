@@ -42,6 +42,9 @@
 #include "projects.h"
 #include "geodesic.h"
 
+#include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
+
 
 /* Initialize PJ_COORD struct */
 PJ_COORD proj_coord (double x, double y, double z, double t) {
@@ -1070,9 +1073,6 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
 
     memset(&pjinfo, 0, sizeof(PJ_PROJ_INFO));
 
-    /* Expected accuracy of the transformation. Hardcoded for now, will be improved */
-    /* later. Most likely to be used when a transformation is set up with           */
-    /* proj_create_crs_to_crs in a future version that leverages the EPSG database. */
     pjinfo.accuracy = -1.0;
 
     if (nullptr==P)
@@ -1082,8 +1082,30 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
     if (pj_param(P->ctx, P->params, "tproj").i)
         pjinfo.id = pj_param(P->ctx, P->params, "sproj").s;
 
-    /* projection description */
-    pjinfo.description = P->descr;
+    /* coordinate operation description */
+    if( P->iso_obj ) {
+        pjinfo.description = P->iso_obj->nameStr().c_str();
+    } else {
+        pjinfo.description = P->descr;
+    }
+
+    // accuracy
+    if( P->iso_obj ) {
+        auto conv = dynamic_cast<const NS_PROJ::operation::Conversion*>(P->iso_obj.get());
+        if( conv ) {
+            pjinfo.accuracy = 0.0;
+        } else {
+            auto op = dynamic_cast<const NS_PROJ::operation::CoordinateOperation*>(P->iso_obj.get());
+            if( op ) {
+                const auto& accuracies = op->coordinateOperationAccuracies();
+                if( !accuracies.empty() ) {
+                    try {
+                        pjinfo.accuracy = std::stod(accuracies[0]->value());
+                    } catch ( const std::exception& ) {}
+                }
+            }
+        }
+    }
 
     /* projection definition */
     if (P->def_full)

@@ -91,32 +91,6 @@ static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static PJ *pj_obj_create(const IdentifiedObjectNNPtr &objIn) {
-    auto pj = new PJ();
-    pj->descr = "ISO-19111 object";
-    pj->iso_obj = objIn;
-    return pj;
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-/** \brief Opaque object representing a set of operation results. */
-struct PJ_OBJ_LIST {
-    //! @cond Doxygen_Suppress
-    std::vector<IdentifiedObjectNNPtr> objects;
-
-    explicit PJ_OBJ_LIST(std::vector<IdentifiedObjectNNPtr> &&objectsIn)
-        : objects(std::move(objectsIn)) {}
-
-    PJ_OBJ_LIST(const PJ_OBJ_LIST &) = delete;
-    PJ_OBJ_LIST &operator=(const PJ_OBJ_LIST &) = delete;
-    //! @endcond
-};
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
 
 /** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
 struct projCppContext {
@@ -151,15 +125,6 @@ void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
 
 //! @cond Doxygen_Suppress
 
-#define SANITIZE_CTX(ctx)                                                      \
-    do {                                                                       \
-        if (ctx == nullptr) {                                                  \
-            ctx = pj_get_default_ctx();                                        \
-        }                                                                      \
-    } while (0)
-
-// ---------------------------------------------------------------------------
-
 static PROJ_NO_INLINE const DatabaseContextNNPtr &
 getDBcontext(PJ_CONTEXT *ctx) {
     if (ctx->cpp_context == nullptr) {
@@ -179,6 +144,57 @@ getDBcontextNoException(PJ_CONTEXT *ctx, const char *function) {
         return nullptr;
     }
 }
+// ---------------------------------------------------------------------------
+
+static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
+    auto coordop = dynamic_cast<const CoordinateOperation*>(objIn.get());
+    if( coordop ) {
+        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+        try {
+            auto formatter = PROJStringFormatter::create(
+                PROJStringFormatter::Convention::PROJ_5, dbContext);
+            auto pj = proj_create(ctx,
+                coordop->exportToPROJString(formatter.get()).c_str());
+            if( pj ) {
+                pj->iso_obj = objIn;
+                return pj;
+            }
+        } catch (const std::exception &e) {
+            proj_log_debug(ctx, __FUNCTION__, e.what());
+        }
+    }
+    auto pj = new PJ();
+    pj->descr = "ISO-19111 object";
+    pj->iso_obj = objIn;
+    return pj;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Opaque object representing a set of operation results. */
+struct PJ_OBJ_LIST {
+    //! @cond Doxygen_Suppress
+    std::vector<IdentifiedObjectNNPtr> objects;
+
+    explicit PJ_OBJ_LIST(std::vector<IdentifiedObjectNNPtr> &&objectsIn)
+        : objects(std::move(objectsIn)) {}
+
+    PJ_OBJ_LIST(const PJ_OBJ_LIST &) = delete;
+    PJ_OBJ_LIST &operator=(const PJ_OBJ_LIST &) = delete;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+#define SANITIZE_CTX(ctx)                                                      \
+    do {                                                                       \
+        if (ctx == nullptr) {                                                  \
+            ctx = pj_get_default_ctx();                                        \
+        }                                                                      \
+    } while (0)
 
 //! @endcond
 
@@ -312,7 +328,7 @@ PJ *proj_obj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
         return nullptr;
     }
     try {
-        return pj_obj_create(NN_NO_CHECK(obj->iso_obj));
+        return pj_obj_create(ctx, NN_NO_CHECK(obj->iso_obj));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -368,7 +384,7 @@ PJ *proj_obj_create_from_user_input(PJ_CONTEXT *ctx, const char *text,
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
             createFromUserInput(text, dbContext, usePROJ4InitRules));
         if (identifiedObject) {
-            return pj_obj_create(NN_NO_CHECK(identifiedObject));
+            return pj_obj_create(ctx, NN_NO_CHECK(identifiedObject));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -487,7 +503,7 @@ PJ *proj_obj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
         }
 
         if (obj) {
-            return pj_obj_create(NN_NO_CHECK(obj));
+            return pj_obj_create(ctx, NN_NO_CHECK(obj));
         }
     } catch (const std::exception &e) {
         if (out_grammar_errors) {
@@ -534,7 +550,7 @@ PJ *proj_obj_create_from_proj_string(PJ_CONTEXT *ctx,
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
             parser.createFromPROJString(proj_string));
         if (identifiedObject) {
-            return pj_obj_create(NN_NO_CHECK(identifiedObject));
+            return pj_obj_create(ctx, NN_NO_CHECK(identifiedObject));
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -594,7 +610,7 @@ PJ *proj_obj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                       .as_nullable();
             break;
         }
-        return pj_obj_create(NN_NO_CHECK(obj));
+        return pj_obj_create(ctx, NN_NO_CHECK(obj));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -1436,7 +1452,7 @@ PJ *proj_obj_crs_get_geodetic_crs(PJ_CONTEXT *ctx, const PJ *crs) {
     if (!geodCRS) {
         return nullptr;
     }
-    return pj_obj_create(NN_NO_CHECK(nn_dynamic_pointer_cast<IdentifiedObject>(
+    return pj_obj_create(ctx, NN_NO_CHECK(nn_dynamic_pointer_cast<IdentifiedObject>(
         geodCRS->shared_from_this())));
 }
 
@@ -1468,7 +1484,7 @@ PJ *proj_obj_crs_get_sub_crs(PJ_CONTEXT *ctx, const PJ *crs,
     if (static_cast<size_t>(index) >= components.size()) {
         return nullptr;
     }
-    return pj_obj_create(components[index]);
+    return pj_obj_create(ctx, components[index]);
 }
 
 // ---------------------------------------------------------------------------
@@ -1510,7 +1526,7 @@ PJ *proj_obj_crs_create_bound_crs(PJ_CONTEXT *ctx, const PJ *base_crs,
         return nullptr;
     }
     try {
-        return pj_obj_create(BoundCRS::create(NN_NO_CHECK(l_base_crs),
+        return pj_obj_create(ctx, BoundCRS::create(NN_NO_CHECK(l_base_crs),
                                                NN_NO_CHECK(l_hub_crs),
                                                NN_NO_CHECK(l_transformation)));
     } catch (const std::exception &e) {
@@ -1567,7 +1583,7 @@ PJ *proj_obj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx,
                 return nullptr;
             }
         }
-        return pj_obj_create(l_crs->createBoundCRSToWGS84IfPossible(
+        return pj_obj_create(ctx, l_crs->createBoundCRSToWGS84IfPossible(
             dbContext, allowIntermediateCRS));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -1594,12 +1610,12 @@ PJ *proj_obj_get_ellipsoid(PJ_CONTEXT *ctx, const PJ *obj) {
     if (dynamic_cast<const CRS *>(ptr)) {
         auto geodCRS = extractGeodeticCRS(ctx, obj, __FUNCTION__);
         if (geodCRS) {
-            return pj_obj_create(geodCRS->ellipsoid());
+            return pj_obj_create(ctx, geodCRS->ellipsoid());
         }
     } else {
         auto datum = dynamic_cast<const GeodeticReferenceFrame *>(ptr);
         if (datum) {
-            return pj_obj_create(datum->ellipsoid());
+            return pj_obj_create(ctx, datum->ellipsoid());
         }
     }
     proj_log_error(ctx, __FUNCTION__,
@@ -1628,12 +1644,12 @@ PJ *proj_obj_crs_get_horizontal_datum(PJ_CONTEXT *ctx, const PJ *crs) {
     }
     const auto &datum = geodCRS->datum();
     if (datum) {
-        return pj_obj_create(NN_NO_CHECK(datum));
+        return pj_obj_create(ctx, NN_NO_CHECK(datum));
     }
 
     const auto &datumEnsemble = geodCRS->datumEnsemble();
     if (datumEnsemble) {
-        return pj_obj_create(NN_NO_CHECK(datumEnsemble));
+        return pj_obj_create(ctx, NN_NO_CHECK(datumEnsemble));
     }
     proj_log_error(ctx, __FUNCTION__, "CRS has no datum");
     return nullptr;
@@ -1709,12 +1725,12 @@ PJ *proj_obj_get_prime_meridian(PJ_CONTEXT *ctx, const PJ *obj) {
     if (dynamic_cast<CRS *>(ptr)) {
         auto geodCRS = extractGeodeticCRS(ctx, obj, __FUNCTION__);
         if (geodCRS) {
-            return pj_obj_create(geodCRS->primeMeridian());
+            return pj_obj_create(ctx, geodCRS->primeMeridian());
         }
     } else {
         auto datum = dynamic_cast<const GeodeticReferenceFrame *>(ptr);
         if (datum) {
-            return pj_obj_create(datum->primeMeridian());
+            return pj_obj_create(ctx, datum->primeMeridian());
         }
     }
     proj_log_error(ctx, __FUNCTION__,
@@ -1782,17 +1798,17 @@ PJ *proj_obj_get_source_crs(PJ_CONTEXT *ctx, const PJ *obj) {
     auto ptr = obj->iso_obj.get();
     auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
-        return pj_obj_create(boundCRS->baseCRS());
+        return pj_obj_create(ctx, boundCRS->baseCRS());
     }
     auto derivedCRS = dynamic_cast<const DerivedCRS *>(ptr);
     if (derivedCRS) {
-        return pj_obj_create(derivedCRS->baseCRS());
+        return pj_obj_create(ctx, derivedCRS->baseCRS());
     }
     auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
         auto sourceCRS = co->sourceCRS();
         if (sourceCRS) {
-            return pj_obj_create(NN_NO_CHECK(sourceCRS));
+            return pj_obj_create(ctx, NN_NO_CHECK(sourceCRS));
         }
         return nullptr;
     }
@@ -1821,13 +1837,13 @@ PJ *proj_obj_get_target_crs(PJ_CONTEXT *ctx, const PJ *obj) {
     auto ptr = obj->iso_obj.get();
     auto boundCRS = dynamic_cast<const BoundCRS *>(ptr);
     if (boundCRS) {
-        return pj_obj_create(boundCRS->hubCRS());
+        return pj_obj_create(ctx, boundCRS->hubCRS());
     }
     auto co = dynamic_cast<const CoordinateOperation *>(ptr);
     if (co) {
         auto targetCRS = co->targetCRS();
         if (targetCRS) {
-            return pj_obj_create(NN_NO_CHECK(targetCRS));
+            return pj_obj_create(ctx, NN_NO_CHECK(targetCRS));
         }
         return nullptr;
     }
@@ -2024,7 +2040,7 @@ PJ *proj_obj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ *crs) {
         }
     }
 
-    return pj_obj_create(NN_NO_CHECK(co));
+    return pj_obj_create(ctx, NN_NO_CHECK(co));
 }
 
 // ---------------------------------------------------------------------------
@@ -2238,7 +2254,7 @@ PJ *proj_obj_create_geographic_crs(
             pm_angular_units_conv);
         auto geogCRS = GeographicCRS::create(createPropertyMapName(crs_name),
                                              datum, NN_NO_CHECK(cs));
-        return pj_obj_create(geogCRS);
+        return pj_obj_create(ctx, geogCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2282,7 +2298,7 @@ PJ *proj_obj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx,
         auto geogCRS =
             GeographicCRS::create(createPropertyMapName(crs_name),
                                   NN_NO_CHECK(l_datum), NN_NO_CHECK(cs));
-        return pj_obj_create(geogCRS);
+        return pj_obj_create(ctx, geogCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2336,7 +2352,7 @@ PJ *proj_obj_create_geocentric_crs(
         auto geodCRS =
             GeodeticCRS::create(createPropertyMapName(crs_name), datum,
                                 cs::CartesianCS::createGeocentric(linearUnit));
-        return pj_obj_create(geodCRS);
+        return pj_obj_create(ctx, geodCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2380,7 +2396,7 @@ PJ *proj_obj_create_geocentric_crs_from_datum(PJ_CONTEXT *ctx,
         auto geodCRS = GeodeticCRS::create(
             createPropertyMapName(crs_name), NN_NO_CHECK(l_datum),
             cs::CartesianCS::createGeocentric(linearUnit));
-        return pj_obj_create(geodCRS);
+        return pj_obj_create(ctx, geodCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2419,7 +2435,7 @@ PJ *proj_obj_create_vertical_crs(PJ_CONTEXT *ctx, const char *crs_name,
         auto vertCRS = VerticalCRS::create(
             createPropertyMapName(crs_name), datum,
             cs::VerticalCS::createGravityRelatedHeight(linearUnit));
-        return pj_obj_create(vertCRS);
+        return pj_obj_create(ctx, vertCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2460,7 +2476,7 @@ PJ *proj_obj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
         auto compoundCRS = CompoundCRS::create(
             createPropertyMapName(crs_name),
             {NN_NO_CHECK(l_horiz_crs), NN_NO_CHECK(l_vert_crs)});
-        return pj_obj_create(compoundCRS);
+        return pj_obj_create(ctx, compoundCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2492,7 +2508,7 @@ PJ PROJ_DLL *proj_obj_alter_name(PJ_CONTEXT *ctx, const PJ *obj,
         return nullptr;
     }
     try {
-        return pj_obj_create(crs->alterName(name));
+        return pj_obj_create(ctx, crs->alterName(name));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2525,7 +2541,7 @@ PJ PROJ_DLL *proj_obj_alter_id(PJ_CONTEXT *ctx, const PJ *obj,
         return nullptr;
     }
     try {
-        return pj_obj_create(crs->alterId(auth_name, code));
+        return pj_obj_create(ctx, crs->alterId(auth_name, code));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -2570,7 +2586,7 @@ PJ *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx, const PJ *obj,
     }
 
     try {
-        return pj_obj_create(
+        return pj_obj_create(ctx, 
             crs->alterGeodeticCRS(NN_NO_CHECK(l_new_geod_crs)));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2620,7 +2636,7 @@ PJ *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx, const PJ *obj,
     try {
         const UnitOfMeasure angUnit(createAngularUnit(
             angular_units, angular_units_conv, unit_auth_name, unit_code));
-        geogCRSAltered = pj_obj_create(GeographicCRS::create(
+        geogCRSAltered = pj_obj_create(ctx, GeographicCRS::create(
             createPropertyMapName(proj_obj_get_name(geodCRS)), geogCRS->datum(),
             geogCRS->datumEnsemble(),
             geogCRS->coordinateSystem()->alterAngularUnit(angUnit)));
@@ -2672,7 +2688,7 @@ PJ *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ *obj,
     try {
         const UnitOfMeasure linearUnit(createLinearUnit(
             linear_units, linear_units_conv, unit_auth_name, unit_code));
-        return pj_obj_create(crs->alterCSLinearUnit(linearUnit));
+        return pj_obj_create(ctx, crs->alterCSLinearUnit(linearUnit));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -2718,7 +2734,7 @@ PJ *proj_obj_crs_alter_parameters_linear_unit(
     try {
         const UnitOfMeasure linearUnit(createLinearUnit(
             linear_units, linear_units_conv, unit_auth_name, unit_code));
-        return pj_obj_create(crs->alterParametersLinearUnit(
+        return pj_obj_create(ctx, crs->alterParametersLinearUnit(
             linearUnit, convert_to_new_unit == TRUE));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2744,7 +2760,7 @@ PJ PROJ_DLL *proj_obj_create_engineering_crs(PJ_CONTEXT *ctx,
                                                  const char *crs_name) {
     SANITIZE_CTX(ctx);
     try {
-        return pj_obj_create(EngineeringCRS::create(
+        return pj_obj_create(ctx, EngineeringCRS::create(
             createPropertyMapName(crs_name),
             EngineeringDatum::create(PropertyMap()),
             CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)));
@@ -2864,7 +2880,7 @@ PJ *proj_obj_create_conversion(PJ_CONTEXT *ctx, const char *name,
             name, auth_name, code, method_name, method_auth_name, method_code,
             param_count, params, propSingleOp, propMethod, parameters, values);
 
-        return pj_obj_create(
+        return pj_obj_create(ctx, 
             Conversion::create(propSingleOp, propMethod, parameters, values));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2950,7 +2966,7 @@ PJ *proj_obj_create_transformation(
                 PositionalAccuracy::create(toString(accuracy)));
         }
 
-        return pj_obj_create(Transformation::create(
+        return pj_obj_create(ctx, Transformation::create(
             propSingleOp, NN_NO_CHECK(l_sourceCRS), NN_NO_CHECK(l_targetCRS),
             l_interpolationCRS, propMethod, parameters, values, accuracies));
     } catch (const std::exception &e) {
@@ -3018,7 +3034,7 @@ PJ *proj_obj_convert_conversion_to_other_method(
         auto new_conv = conv->convertToOtherMethod(new_method_epsg_code);
         if (!new_conv)
             return nullptr;
-        return pj_obj_create(NN_NO_CHECK(new_conv));
+        return pj_obj_create(ctx, NN_NO_CHECK(new_conv));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -3093,10 +3109,10 @@ PJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_CARTESIAN: {
             if (axis_count == 2) {
-                return pj_obj_create(CartesianCS::create(
+                return pj_obj_create(ctx, CartesianCS::create(
                     PropertyMap(), createAxis(axis[0]), createAxis(axis[1])));
             } else if (axis_count == 3) {
-                return pj_obj_create(CartesianCS::create(
+                return pj_obj_create(ctx, CartesianCS::create(
                     PropertyMap(), createAxis(axis[0]), createAxis(axis[1]),
                     createAxis(axis[2])));
             }
@@ -3105,10 +3121,10 @@ PJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_ELLIPSOIDAL: {
             if (axis_count == 2) {
-                return pj_obj_create(EllipsoidalCS::create(
+                return pj_obj_create(ctx, EllipsoidalCS::create(
                     PropertyMap(), createAxis(axis[0]), createAxis(axis[1])));
             } else if (axis_count == 3) {
-                return pj_obj_create(EllipsoidalCS::create(
+                return pj_obj_create(ctx, EllipsoidalCS::create(
                     PropertyMap(), createAxis(axis[0]), createAxis(axis[1]),
                     createAxis(axis[2])));
             }
@@ -3117,7 +3133,7 @@ PJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_VERTICAL: {
             if (axis_count == 1) {
-                return pj_obj_create(
+                return pj_obj_create(ctx, 
                     VerticalCS::create(PropertyMap(), createAxis(axis[0])));
             }
             break;
@@ -3125,7 +3141,7 @@ PJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_SPHERICAL: {
             if (axis_count == 3) {
-                return pj_obj_create(EllipsoidalCS::create(
+                return pj_obj_create(ctx, EllipsoidalCS::create(
                     PropertyMap(), createAxis(axis[0]), createAxis(axis[1]),
                     createAxis(axis[2])));
             }
@@ -3134,7 +3150,7 @@ PJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_PARAMETRIC: {
             if (axis_count == 1) {
-                return pj_obj_create(
+                return pj_obj_create(ctx, 
                     ParametricCS::create(PropertyMap(), createAxis(axis[0])));
             }
             break;
@@ -3146,12 +3162,12 @@ PJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
                 axisVector.emplace_back(createAxis(axis[i]));
             }
 
-            return pj_obj_create(OrdinalCS::create(PropertyMap(), axisVector));
+            return pj_obj_create(ctx, OrdinalCS::create(PropertyMap(), axisVector));
         }
 
         case PJ_CS_TYPE_DATETIMETEMPORAL: {
             if (axis_count == 1) {
-                return pj_obj_create(DateTimeTemporalCS::create(
+                return pj_obj_create(ctx, DateTimeTemporalCS::create(
                     PropertyMap(), createAxis(axis[0])));
             }
             break;
@@ -3159,7 +3175,7 @@ PJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_TEMPORALCOUNT: {
             if (axis_count == 1) {
-                return pj_obj_create(TemporalCountCS::create(
+                return pj_obj_create(ctx, TemporalCountCS::create(
                     PropertyMap(), createAxis(axis[0])));
             }
             break;
@@ -3167,7 +3183,7 @@ PJ *proj_obj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
         case PJ_CS_TYPE_TEMPORALMEASURE: {
             if (axis_count == 1) {
-                return pj_obj_create(TemporalMeasureCS::create(
+                return pj_obj_create(ctx, TemporalMeasureCS::create(
                     PropertyMap(), createAxis(axis[0])));
             }
             break;
@@ -3206,25 +3222,25 @@ PJ *proj_obj_create_cartesian_2D_cs(PJ_CONTEXT *ctx,
     try {
         switch (type) {
         case PJ_CART2D_EASTING_NORTHING:
-            return pj_obj_create(CartesianCS::createEastingNorthing(
+            return pj_obj_create(ctx, CartesianCS::createEastingNorthing(
                 createLinearUnit(unit_name, unit_conv_factor)));
 
         case PJ_CART2D_NORTHING_EASTING:
-            return pj_obj_create(CartesianCS::createNorthingEasting(
+            return pj_obj_create(ctx, CartesianCS::createNorthingEasting(
                 createLinearUnit(unit_name, unit_conv_factor)));
 
         case PJ_CART2D_NORTH_POLE_EASTING_SOUTH_NORTHING_SOUTH:
-            return pj_obj_create(
+            return pj_obj_create(ctx, 
                 CartesianCS::createNorthPoleEastingSouthNorthingSouth(
                     createLinearUnit(unit_name, unit_conv_factor)));
 
         case PJ_CART2D_SOUTH_POLE_EASTING_NORTH_NORTHING_NORTH:
-            return pj_obj_create(
+            return pj_obj_create(ctx, 
                 CartesianCS::createSouthPoleEastingNorthNorthingNorth(
                     createLinearUnit(unit_name, unit_conv_factor)));
 
         case PJ_CART2D_WESTING_SOUTHING:
-            return pj_obj_create(CartesianCS::createWestingSouthing(
+            return pj_obj_create(ctx, CartesianCS::createWestingSouthing(
                 createLinearUnit(unit_name, unit_conv_factor)));
         }
     } catch (const std::exception &e) {
@@ -3257,11 +3273,11 @@ PJ *proj_obj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
     try {
         switch (type) {
         case PJ_ELLPS2D_LONGITUDE_LATITUDE:
-            return pj_obj_create(EllipsoidalCS::createLongitudeLatitude(
+            return pj_obj_create(ctx, EllipsoidalCS::createLongitudeLatitude(
                 createAngularUnit(unit_name, unit_conv_factor)));
 
         case PJ_ELLPS2D_LATITUDE_LONGITUDE:
-            return pj_obj_create(EllipsoidalCS::createLatitudeLongitude(
+            return pj_obj_create(ctx, EllipsoidalCS::createLatitudeLongitude(
                 createAngularUnit(unit_name, unit_conv_factor)));
         }
     } catch (const std::exception &e) {
@@ -3308,7 +3324,7 @@ PJ *proj_obj_create_projected_crs(PJ_CONTEXT *ctx, const char *crs_name,
         return nullptr;
     }
     try {
-        return pj_obj_create(ProjectedCRS::create(
+        return pj_obj_create(ctx, ProjectedCRS::create(
             createPropertyMapName(crs_name), NN_NO_CHECK(geodCRS),
             NN_NO_CHECK(conv), NN_NO_CHECK(cs)));
     } catch (const std::exception &e) {
@@ -3321,8 +3337,9 @@ PJ *proj_obj_create_projected_crs(PJ_CONTEXT *ctx, const char *crs_name,
 
 //! @cond Doxygen_Suppress
 
-static PJ *proj_obj_create_conversion(const ConversionNNPtr &conv) {
-    return pj_obj_create(conv);
+static PJ *proj_obj_create_conversion(PJ_CONTEXT* ctx,
+                                      const ConversionNNPtr &conv) {
+    return pj_obj_create(ctx, conv);
 }
 
 //! @endcond
@@ -3343,7 +3360,7 @@ PJ *proj_obj_create_conversion_utm(PJ_CONTEXT *ctx, int zone, int north) {
     SANITIZE_CTX(ctx);
     try {
         auto conv = Conversion::createUTM(PropertyMap(), zone, north != 0);
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3376,7 +3393,7 @@ PJ *proj_obj_create_conversion_transverse_mercator(
             Angle(center_long, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3410,7 +3427,7 @@ PJ *proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
             Angle(center_long, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3444,7 +3461,7 @@ PJ *proj_obj_create_conversion_transverse_mercator_south_oriented(
             Angle(center_long, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3480,7 +3497,7 @@ PJ *proj_obj_create_conversion_two_point_equidistant(
             Angle(longitude_secon_point, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3512,7 +3529,7 @@ PJ *proj_obj_create_conversion_tunisia_mapping_grid(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3549,7 +3566,7 @@ PJ *proj_obj_create_conversion_albers_equal_area(
             Angle(latitude_second_parallel, angUnit),
             Length(easting_false_origin, linearUnit),
             Length(northing_false_origin, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3582,7 +3599,7 @@ PJ *proj_obj_create_conversion_lambert_conic_conformal_1sp(
             Angle(center_long, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3619,7 +3636,7 @@ PJ *proj_obj_create_conversion_lambert_conic_conformal_2sp(
             Angle(latitude_second_parallel, angUnit),
             Length(easting_false_origin, linearUnit),
             Length(northing_false_origin, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3658,7 +3675,7 @@ PJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
             Length(easting_false_origin, linearUnit),
             Length(northing_false_origin, linearUnit),
             Scale(ellipsoid_scaling_factor));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3696,7 +3713,7 @@ PJ *proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
             Angle(latitude_second_parallel, angUnit),
             Length(easting_false_origin, linearUnit),
             Length(northing_false_origin, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3729,7 +3746,7 @@ PJ *proj_obj_create_conversion_azimuthal_equidistant(
             Angle(longitude_nat_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3762,7 +3779,7 @@ PJ *proj_obj_create_conversion_guam_projection(
             Angle(longitude_nat_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3795,7 +3812,7 @@ PJ *proj_obj_create_conversion_bonne(
             Angle(longitude_nat_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3829,7 +3846,7 @@ PJ *proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical(
             Angle(longitude_nat_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3862,7 +3879,7 @@ PJ *proj_obj_create_conversion_lambert_cylindrical_equal_area(
             Angle(longitude_nat_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3894,7 +3911,7 @@ PJ *proj_obj_create_conversion_cassini_soldner(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3930,7 +3947,7 @@ PJ *proj_obj_create_conversion_equidistant_conic(
             Angle(latitude_second_parallel, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3964,7 +3981,7 @@ PJ *proj_obj_create_conversion_eckert_i(PJ_CONTEXT *ctx, double center_long,
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -3996,7 +4013,7 @@ PJ *proj_obj_create_conversion_eckert_ii(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4028,7 +4045,7 @@ PJ *proj_obj_create_conversion_eckert_iii(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4060,7 +4077,7 @@ PJ *proj_obj_create_conversion_eckert_iv(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4094,7 +4111,7 @@ PJ *proj_obj_create_conversion_eckert_v(PJ_CONTEXT *ctx, double center_long,
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4126,7 +4143,7 @@ PJ *proj_obj_create_conversion_eckert_vi(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4159,7 +4176,7 @@ PJ *proj_obj_create_conversion_equidistant_cylindrical(
             Angle(longitude_nat_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4193,7 +4210,7 @@ PJ *proj_obj_create_conversion_equidistant_cylindrical_spherical(
             Angle(longitude_nat_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4227,7 +4244,7 @@ PJ *proj_obj_create_conversion_gall(PJ_CONTEXT *ctx, double center_long,
             Conversion::createGall(PropertyMap(), Angle(center_long, angUnit),
                                    Length(false_easting, linearUnit),
                                    Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4259,7 +4276,7 @@ PJ *proj_obj_create_conversion_goode_homolosine(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4291,7 +4308,7 @@ PJ *proj_obj_create_conversion_interrupted_goode_homolosine(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4324,7 +4341,7 @@ PJ *proj_obj_create_conversion_geostationary_satellite_sweep_x(
             PropertyMap(), Angle(center_long, angUnit),
             Length(height, linearUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4357,7 +4374,7 @@ PJ *proj_obj_create_conversion_geostationary_satellite_sweep_y(
             PropertyMap(), Angle(center_long, angUnit),
             Length(height, linearUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4389,7 +4406,7 @@ PJ *proj_obj_create_conversion_gnomonic(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4427,7 +4444,7 @@ PJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
             Angle(angle_from_rectified_to_skrew_grid, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4465,7 +4482,7 @@ PJ *proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
             Angle(angle_from_rectified_to_skrew_grid, angUnit), Scale(scale),
             Length(easting_projection_centre, linearUnit),
             Length(northing_projection_centre, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4506,7 +4523,7 @@ proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
                 Angle(longitude_point2, angUnit), Scale(scale),
                 Length(easting_projection_centre, linearUnit),
                 Length(northing_projection_centre, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4542,7 +4559,7 @@ PJ *proj_obj_create_conversion_laborde_oblique_mercator(
             Angle(azimuth_initial_line, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4578,7 +4595,7 @@ PJ *proj_obj_create_conversion_international_map_world_polyconic(
             Angle(latitude_second_parallel, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4617,7 +4634,7 @@ PJ *proj_obj_create_conversion_krovak_north_oriented(
             Scale(scale_factor_pseudo_standard_parallel),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4656,7 +4673,7 @@ PJ *proj_obj_create_conversion_krovak(
             Scale(scale_factor_pseudo_standard_parallel),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4689,7 +4706,7 @@ PJ *proj_obj_create_conversion_lambert_azimuthal_equal_area(
             Angle(longitude_nat_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4721,7 +4738,7 @@ PJ *proj_obj_create_conversion_miller_cylindrical(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4754,7 +4771,7 @@ PJ *proj_obj_create_conversion_mercator_variant_a(
             Angle(center_long, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4786,7 +4803,7 @@ PJ *proj_obj_create_conversion_mercator_variant_b(
             PropertyMap(), Angle(latitude_first_parallel, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4819,7 +4836,7 @@ PJ *proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4851,7 +4868,7 @@ PJ *proj_obj_create_conversion_mollweide(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4883,7 +4900,7 @@ PJ *proj_obj_create_conversion_new_zealand_mapping_grid(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4916,7 +4933,7 @@ PJ *proj_obj_create_conversion_oblique_stereographic(
             Angle(center_long, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4948,7 +4965,7 @@ PJ *proj_obj_create_conversion_orthographic(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -4980,7 +4997,7 @@ PJ *proj_obj_create_conversion_american_polyconic(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5013,7 +5030,7 @@ PJ *proj_obj_create_conversion_polar_stereographic_variant_a(
             Angle(center_long, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5046,7 +5063,7 @@ PJ *proj_obj_create_conversion_polar_stereographic_variant_b(
             Angle(longitude_of_origin, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5080,7 +5097,7 @@ PJ *proj_obj_create_conversion_robinson(PJ_CONTEXT *ctx, double center_long,
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5112,7 +5129,7 @@ PJ *proj_obj_create_conversion_sinusoidal(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5145,7 +5162,7 @@ PJ *proj_obj_create_conversion_stereographic(
             Angle(center_long, angUnit), Scale(scale),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5177,7 +5194,7 @@ PJ *proj_obj_create_conversion_van_der_grinten(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5211,7 +5228,7 @@ PJ *proj_obj_create_conversion_wagner_i(PJ_CONTEXT *ctx, double center_long,
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5243,7 +5260,7 @@ PJ *proj_obj_create_conversion_wagner_ii(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5275,7 +5292,7 @@ PJ *proj_obj_create_conversion_wagner_iii(
             PropertyMap(), Angle(latitude_true_scale, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5307,7 +5324,7 @@ PJ *proj_obj_create_conversion_wagner_iv(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5341,7 +5358,7 @@ PJ *proj_obj_create_conversion_wagner_v(PJ_CONTEXT *ctx, double center_long,
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5373,7 +5390,7 @@ PJ *proj_obj_create_conversion_wagner_vi(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5405,7 +5422,7 @@ PJ *proj_obj_create_conversion_wagner_vii(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5438,7 +5455,7 @@ PJ *proj_obj_create_conversion_quadrilateralized_spherical_cube(
             PropertyMap(), Angle(center_lat, angUnit),
             Angle(center_long, angUnit), Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5470,7 +5487,7 @@ PJ *proj_obj_create_conversion_spherical_cross_track_height(
             PropertyMap(), Angle(peg_point_lat, angUnit),
             Angle(peg_point_long, angUnit), Angle(peg_point_heading, angUnit),
             Length(peg_point_height, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -5502,7 +5519,7 @@ PJ *proj_obj_create_conversion_equal_earth(
             PropertyMap(), Angle(center_long, angUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
-        return proj_obj_create_conversion(conv);
+        return proj_obj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
@@ -6309,7 +6326,7 @@ PJ *proj_obj_list_get(PJ_CONTEXT *ctx, const PJ_OBJ_LIST *result,
         proj_log_error(ctx, __FUNCTION__, "Invalid index");
         return nullptr;
     }
-    return pj_obj_create(result->objects[index]);
+    return pj_obj_create(ctx, result->objects[index]);
 }
 
 // ---------------------------------------------------------------------------
@@ -6378,7 +6395,7 @@ PJ *proj_obj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs) {
     if (!datum) {
         return nullptr;
     }
-    return pj_obj_create(NN_NO_CHECK(datum));
+    return pj_obj_create(ctx, NN_NO_CHECK(datum));
 }
 
 // ---------------------------------------------------------------------------
@@ -6402,7 +6419,7 @@ PJ *proj_obj_crs_get_coordinate_system(PJ_CONTEXT *ctx, const PJ *crs) {
         proj_log_error(ctx, __FUNCTION__, "Object is not a SingleCRS");
         return nullptr;
     }
-    return pj_obj_create(l_crs->coordinateSystem());
+    return pj_obj_create(ctx, l_crs->coordinateSystem());
 }
 
 // ---------------------------------------------------------------------------

@@ -167,16 +167,18 @@ TEST_F(CApi, proj_obj_create_from_user_input) {
         coord.xyzt.y = 0;
         coord.xyzt.z = 0;
         coord.xyzt.t = 0;
-        EXPECT_EQ(proj_trans (obj, PJ_FWD, coord).xyzt.x,
+        EXPECT_EQ(proj_trans(obj, PJ_FWD, coord).xyzt.x,
                   std::numeric_limits<double>::infinity());
 
         EXPECT_EQ(proj_geod(obj, coord, coord).xyzt.x,
                   std::numeric_limits<double>::infinity());
         EXPECT_EQ(proj_lp_dist(obj, coord, coord),
                   std::numeric_limits<double>::infinity());
+
         auto info = proj_pj_info(obj);
-        ASSERT_EQ(info.id, nullptr);
+        EXPECT_EQ(info.id, nullptr);
         ASSERT_NE(info.description, nullptr);
+        EXPECT_EQ(info.description, std::string("WGS 84"));
         ASSERT_NE(info.definition, nullptr);
         EXPECT_EQ(info.definition, std::string(""));
     }
@@ -828,6 +830,40 @@ TEST_F(CApi, proj_obj_create_from_database) {
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper(op);
         EXPECT_EQ(proj_obj_get_type(op), PJ_OBJ_TYPE_CONVERSION);
+
+        auto info = proj_pj_info(op);
+        EXPECT_NE(info.id, nullptr);
+        EXPECT_EQ(info.id, std::string("utm"));
+        ASSERT_NE(info.description, nullptr);
+        EXPECT_EQ(info.description, std::string("UTM zone 31N"));
+        ASSERT_NE(info.definition, nullptr);
+        EXPECT_EQ(info.definition, std::string("proj=utm zone=31 ellps=GRS80"));
+        EXPECT_EQ(info.accuracy, 0);
+    }
+    {
+        auto op = proj_obj_create_from_database(
+            m_ctxt, "EPSG", "1024", PJ_OBJ_CATEGORY_COORDINATE_OPERATION, false,
+            nullptr);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper(op);
+        EXPECT_EQ(proj_obj_get_type(op), PJ_OBJ_TYPE_TRANSFORMATION);
+
+        auto info = proj_pj_info(op);
+        EXPECT_NE(info.id, nullptr);
+        EXPECT_EQ(info.id, std::string("pipeline"));
+        ASSERT_NE(info.description, nullptr);
+        EXPECT_EQ(info.description, std::string("MGI to ETRS89 (4)"));
+        ASSERT_NE(info.definition, nullptr);
+        EXPECT_EQ(
+            info.definition,
+            std::string("proj=pipeline step proj=axisswap order=2,1 step "
+                        "proj=unitconvert xy_in=deg xy_out=rad step proj=cart "
+                        "ellps=bessel step proj=helmert x=601.705 y=84.263 "
+                        "z=485.227 rx=-4.7354 ry=-1.3145 rz=-5.393 s=-2.3887 "
+                        "convention=coordinate_frame step inv proj=cart "
+                        "ellps=GRS80 step proj=unitconvert xy_in=rad "
+                        "xy_out=deg step proj=axisswap order=2,1"));
+        EXPECT_EQ(info.accuracy, 1);
     }
 }
 
@@ -1855,6 +1891,25 @@ TEST_F(CApi, proj_obj_create_geocentric_crs) {
         ASSERT_NE(obj, nullptr);
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, check_coord_op_obj_can_be_used_with_proj_trans) {
+
+    {
+        auto projCRS = proj_obj_create_conversion_utm(m_ctxt, 31, true);
+        ObjectKeeper keeper_projCRS(projCRS);
+        ASSERT_NE(projCRS, nullptr);
+
+        PJ_COORD coord;
+        coord.xyzt.x = proj_torad(3.0);
+        coord.xyzt.y = 0;
+        coord.xyzt.z = 0;
+        coord.xyzt.t = 0;
+        EXPECT_NEAR(proj_trans(projCRS, PJ_FWD, coord).xyzt.x, 500000.0, 1e-9);
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_obj_create_projections) {
