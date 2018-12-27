@@ -58,3 +58,13 @@ should return the same output for both.
 
 Adding the ``+over`` flag to the projection definition provides
 the old behaviour.
+
+Version 6.0.0
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Removal of proj_def.dat
+-----------------------
+
+Before PROJ 6, the proj_def.dat was used to provide general and per-projection
+parameters, when +no_defs was not specified. It has now been removed. In
+particular, the +ellps=WGS84 is no longer a default.

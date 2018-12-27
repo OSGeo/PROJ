@@ -76,7 +76,10 @@ PJ *PROJECTION(lagrng) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
-    Q->w = pj_param(P->ctx, P->params, "dW").f;
+    if( pj_param(P->ctx, P->params, "tW").i )
+        Q->w = pj_param(P->ctx, P->params, "dW").f;
+    else
+        Q->w = 2;
     if (Q->w <= 0)
         return pj_default_destructor(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
     Q->hw = 0.5 * Q->w;

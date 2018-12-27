@@ -26,7 +26,6 @@ documenting the individual :doc:`projections<../operations/projections/index>`.
     +lat_0       Latitude of origin
     +lon_0       Central meridian
     +lon_wrap    Center longitude to use for wrapping (see below)
-    +no_defs     Don't use the /usr/share/proj/proj_def.dat defaults file
     +over        Allow longitude output outside -180 to 180 range, disables
                  wrapping (see below)
     +pm          Alternate prime meridian (typically a city name, see below)

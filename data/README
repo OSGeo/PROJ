@@ -5,8 +5,6 @@ File Contents:
 
 README  --- This file
 
-proj_def.dat --- basic default file used by proj.
-
 epsg    --- Translation of EPSG GCS/PCS codes into PROJ via init= mechanism.
 
 epsg-deprecated --- EPSG definitions that have been deprecated. They are

@@ -269,7 +269,8 @@ PJ *TRANSFORMATION(deformation,1) {
         return destructor(P, ENOMEM);
     P->opaque = (void *) Q;
 
-    Q->cart = proj_create(P->ctx, "+proj=cart");
+    // Pass a dummy ellipsoid definition that will be overridden just afterwards
+    Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart == nullptr)
         return destructor(P, ENOMEM);
 

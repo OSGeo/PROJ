@@ -36,10 +36,9 @@ static void* thread_main(void* unused)
 
     p_proj_ctxt=pj_ctx_alloc();
     p_WGS84_proj=pj_init_plus_ctx(p_proj_ctxt,"+proj=longlat "
-            "+ellps=WGS84 +datum=WGS84 +no_defs");
+            "+ellps=WGS84 +datum=WGS84");
     p_OSGB36_proj=pj_init_plus_ctx(p_proj_ctxt,
-            "+proj=longlat +ellps=airy +datum=OSGB36 +nadgrids=OSTN02_NTv2.gsb "
-            "+no_defs");
+            "+proj=longlat +ellps=airy +datum=OSGB36 +nadgrids=OSTN02_NTv2.gsb");
 
     while(run)
     {

@@ -330,76 +330,6 @@ Expand key from buffer or (if not in buffer) from init file
     return init_items;
 }
 
-
-
-static paralist *append_defaults_to_paralist (PJ_CONTEXT *ctx, paralist *start, const char *key, int allow_init_epsg) {
-    paralist *defaults, *last = nullptr;
-    char keystring[ID_TAG_MAX + 20];
-    paralist *next, *proj;
-    int err;
-
-    if (nullptr==start)
-        return nullptr;
-
-    if (strlen(key) > ID_TAG_MAX)
-        return nullptr;
-
-    /* Set defaults, unless inhibited (either explicitly through a "no_defs" token */
-    /* or implicitly, because we are initializing a pipeline) */
-    if (pj_param_exists (start, "no_defs"))
-        return start;
-    proj = pj_param_exists (start, "proj");
-    if (nullptr==proj)
-        return start;
-    if (strlen (proj->param) < 6)
-        return start;
-    if (0==strcmp ("pipeline", proj->param + 5))
-        return start;
-
-    err = pj_ctx_get_errno (ctx);
-    pj_ctx_set_errno (ctx, 0);
-
-    /* Locate end of start-list */
-    for (last = start;  last->next;  last = last->next);
-
-    strcpy (keystring, "proj_def.dat:");
-    strcat (keystring, key);
-    defaults = get_init (ctx, keystring, allow_init_epsg);
-
-    /* Defaults are optional - so we don't care if we cannot open the file */
-    pj_ctx_set_errno (ctx, err);
-
-    if (!defaults)
-        return last;
-
-    /* Loop over all default items */
-    for (next = defaults;  next;  next = next->next) {
-
-        /* Don't override existing parameter value of same name */
-        if (pj_param_exists (start, next->param))
-            continue;
-
-        /* Don't default ellipse if datum, ellps or any ellipsoid information is set */
-        if (0==strncmp(next->param,"ellps=", 6)) {
-            if  (pj_param_exists (start, "datum"))  continue;
-            if  (pj_param_exists (start, "ellps"))  continue;
-            if  (pj_param_exists (start, "a"))      continue;
-            if  (pj_param_exists (start, "b"))      continue;
-            if  (pj_param_exists (start, "rf"))     continue;
-            if  (pj_param_exists (start, "f"))      continue;
-            if  (pj_param_exists (start, "e"))      continue;
-            if  (pj_param_exists (start, "es"))     continue;
-        }
-
-        /* If we're here, it's OK to append the current default item */
-        last = last->next = pj_mkparam(next->param);
-    }
-    last->next = nullptr;
-
-    pj_dealloc_params (ctx, defaults, 0);
-    return last;
-}
-
 /*****************************************************************************/
 static paralist *pj_expand_init_internal(PJ_CONTEXT *ctx, paralist *init, int allow_init_epsg) {
 /******************************************************************************
@@ -663,12 +593,6 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
         pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
         return nullptr;
     }
-
-
-    /* Append general and projection specific defaults to the definition list */
-    append_defaults_to_paralist (ctx, start, "general", allow_init_epsg);
-    append_defaults_to_paralist (ctx, start, name, allow_init_epsg);
-
 
     /* Allocate projection structure */
     PIN = proj(nullptr);
