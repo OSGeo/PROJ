@@ -757,11 +757,13 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
     src = proj_obj_create_from_user_input(ctx, source_crs, optionsImportCRS);
     if( !src ) {
+        proj_context_log_debug(ctx, "Cannot instanciate source_crs");
         return nullptr;
     }
 
     dst = proj_obj_create_from_user_input(ctx, target_crs, optionsImportCRS);
     if( !dst ) {
+        proj_context_log_debug(ctx, "Cannot instanciate target_crs");
         proj_obj_destroy(src);
         return nullptr;
     }
@@ -798,6 +800,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
     if( proj_obj_list_get_count(op_list) == 0 ) {
         proj_obj_list_destroy(op_list);
+        proj_context_log_debug(ctx, "No operation found matching criteria");
         return nullptr;
     }
 
@@ -810,6 +813,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     proj_string = proj_obj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
     if( !proj_string) {
         proj_obj_destroy(op);
+        proj_context_log_debug(ctx, "Cannot export operation as a PROJ string");
         return nullptr;
     }
 

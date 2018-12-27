@@ -416,6 +416,16 @@ void proj_log_debug (PJ *P, const char *fmt, ...) {
     va_end( args );
 }
 
+/*****************************************************************************/
+void proj_context_log_debug (PJ_CONTEXT *ctx, const char *fmt, ...) {
+/******************************************************************************
+   For reporting debugging information.
+******************************************************************************/
+    va_list args;
+    va_start( args, fmt );
+    pj_vlog (ctx, PJ_LOG_DEBUG_MAJOR , fmt, args);
+    va_end( args );
+}
 
 /*****************************************************************************/
 void proj_log_trace (PJ *P, const char *fmt, ...) {
