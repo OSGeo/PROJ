@@ -5,9 +5,9 @@ Test 5201, Geographic Geocentric conversions, v2.0_2011-09-28. (EPSG 4979 - WGS8
 --------------------------------------------------------------------------------
 
 # WGS 84
-<4978> +proj=geocent +datum=WGS84 +units=m +no_defs  <>
+<4978> +proj=geocent +datum=WGS84 +units=m  <>
 # WGS 84
-<4326> +proj=longlat +datum=WGS84 +no_defs  <>
+<4326> +proj=longlat +datum=WGS84  <>
 
 
 <gie>

@@ -9,7 +9,7 @@ Test 5105 (part 1), Oblique Mercator (variant B), v2-0_2011-06-28.
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4742 +inv
-           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m +no_defs
+           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m
 --------------------------------------------------------------------------------
 tolerance  0.05 m
 accept    117 12
@@ -105,7 +105,7 @@ expect    479068.802 663798.63
 
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
-           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m +no_defs +inv
+           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m +inv
            +step +init=epsg:4742
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -203,7 +203,7 @@ expect    114 6
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4742 +inv
-           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m +no_defs
+           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m
 --------------------------------------------------------------------------------
 tolerance  0.006 m
 accept    117 12
