@@ -58,7 +58,8 @@ operation proj=merc +a=-1
 expect    failure errno major_axis_not_given
 
 operation proj=merc
-expect    failure errno major_axis_not_given
+accept    0 0
+expect    0 0
 
 operation proj=merc +es=-1
 expect    failure errno major_axis_not_given

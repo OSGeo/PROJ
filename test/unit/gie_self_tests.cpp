@@ -500,9 +500,9 @@ TEST(gie, io_predicates) {
     ASSERT_FALSE(proj_angular_output(P, PJ_FWD));
     ASSERT_FALSE(proj_angular_output(P, PJ_INV));
 
-    /* pj_init_ctx should default to WGS84 */
+    /* pj_init_ctx should default to GRS80 */
     ASSERT_EQ(P->a, 6378137.0);
-    ASSERT_EQ(P->f, 1.0 / 298.257223563);
+    ASSERT_EQ(P->f, 1.0 / 298.257222101);
     proj_destroy(P);
 
     /* Test that pj_fwd* and pj_inv* returns NaNs when receiving NaN input */

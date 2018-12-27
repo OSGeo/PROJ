@@ -66,5 +66,6 @@ Removal of proj_def.dat
 -----------------------
 
 Before PROJ 6, the proj_def.dat was used to provide general and per-projection
-parameters, when +no_defs was not specified. It has now been removed. In
-particular, the +ellps=WGS84 is no longer a default.
+parameters, when +no_defs was not specified. It has now been removed. In case,
+no ellipsoid or datum specification is provided in the PROJ string, the
+default ellipsoid is GRS80 (was WGS84 in previous PROJ versions).

@@ -330,6 +330,43 @@ Expand key from buffer or (if not in buffer) from init file
     return init_items;
 }
 
+
+
+static void append_default_ellipsoid_to_paralist (paralist *start) {
+    if (nullptr==start)
+        return;
+
+    /* Set defaults, unless inhibited (either explicitly through a "no_defs" token */
+    /* or implicitly, because we are initializing a pipeline) */
+    if (pj_param_exists (start, "no_defs"))
+        return;
+    auto proj = pj_param_exists (start, "proj");
+    if (nullptr==proj)
+        return;
+    if (strlen (proj->param) < 6)
+        return;
+    if (0==strcmp ("pipeline", proj->param + 5))
+        return;
+
+    /* Don't default ellipse if datum, ellps or any ellipsoid information is set */
+    if  (pj_param_exists (start, "datum"))  return;
+    if  (pj_param_exists (start, "ellps"))  return;
+    if  (pj_param_exists (start, "a"))      return;
+    if  (pj_param_exists (start, "b"))      return;
+    if  (pj_param_exists (start, "rf"))     return;
+    if  (pj_param_exists (start, "f"))      return;
+    if  (pj_param_exists (start, "e"))      return;
+    if  (pj_param_exists (start, "es"))     return;
+
+    /* Locate end of start-list */
+    paralist *last = nullptr;
+    for (last = start;  last->next;  last = last->next);
+
+    /* If we're here, it's OK to append the current default item */
+    last->next = pj_mkparam("ellps=GRS80");
+}
+
+
 /*****************************************************************************/
 static paralist *pj_expand_init_internal(PJ_CONTEXT *ctx, paralist *init, int allow_init_epsg) {
 /******************************************************************************
@@ -593,6 +630,8 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
         pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
         return nullptr;
     }
+
+    append_default_ellipsoid_to_paralist (start);
 
     /* Allocate projection structure */
     PIN = proj(nullptr);
