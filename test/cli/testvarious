@@ -631,7 +631,7 @@ echo "##############################################################" >> ${OUT}
 echo "Test laea" >> ${OUT}
 #
 $EXE -f '%.12f' \
-     +proj=laea +lat_0=45 +lon_0=-100 +units=m +datum=WGS84 +no_defs \
+     +proj=laea +lat_0=45 +lon_0=-100 +units=m +datum=WGS84 \
  +to +proj=latlong +datum=WGS84 \
  -E >>${OUT} <<EOF
 -6086629.0 4488761.0
@@ -682,7 +682,7 @@ echo "Test omerc sensitivity with locations 90d from origin(#114)" >> ${OUT}
 $EXE -f '%.8f' \
      +proj=latlong +ellps=WGS84 \
  +to +proj=omerc +ellps=WGS84 +lon_1=62.581150 +lat_1=74.856102 \
-                 +lon_2=53.942810 +lat_2=74.905884 +units=km +no_rot +no_defs \
+                 +lon_2=53.942810 +lat_2=74.905884 +units=km +no_rot \
  -E >>${OUT} <<EOF
 56.958381652832 72.8798
 56.9584 72.8798
@@ -718,12 +718,12 @@ echo "Test qsc" >> ${OUT}
 #
 $EXE -f '%.7f' \
      +proj=latlong +datum=WGS84 \
- +to +proj=qsc +datum=WGS84 +no_defs \
+ +to +proj=qsc +datum=WGS84 \
  -E >>${OUT} <<EOF
 13 -10
 EOF
 $EXE -f '%.13f' \
-     +proj=qsc +datum=WGS84 +no_defs \
+     +proj=qsc +datum=WGS84 \
  +to +proj=latlong +datum=WGS84 \
  -E >>${OUT} <<EOF
 2073986.94908809568733	-1680858.27222427958623
@@ -732,8 +732,8 @@ echo "##############################################################" >> ${OUT}
 echo "Test bug 229" >> ${OUT}
 #
 $EXE -f '%.13f' \
-     +init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0 \
- +to +proj=latlong +datum=WGS84 +no_defs \
+     +init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +towgs84=0,0,0 \
+ +to +proj=latlong +datum=WGS84 \
  -E >>${OUT} <<EOF
 13 -10
 EOF
@@ -750,7 +750,7 @@ echo "Test bug 244 " >> ${OUT}
 #
 $EXE -f '%.8f' \
      +init=epsg:4326 \
-     +to +proj=aeqd +lon_0=130.0 +lat_0=40.0 +a=6378137 +b=6378137 +units=m +no_defs \
+     +to +proj=aeqd +lon_0=130.0 +lat_0=40.0 +a=6378137 +b=6378137 +units=m \
  -E >>${OUT} <<EOF
 -140.100000 -87.000000
 EOF
@@ -758,7 +758,7 @@ echo "##############################################################" >> ${OUT}
 echo "Test bug 244 (2)" >> ${OUT}
 #
 $EXE -f '%.11f' \
-     +proj=aeqd +lon_0=130.0 +lat_0=40.0 +a=6378137 +b=6378137 +units=m +no_defs \
+     +proj=aeqd +lon_0=130.0 +lat_0=40.0 +a=6378137 +b=6378137 +units=m \
      +to +init=epsg:4326 \
  -E >>${OUT} <<EOF
 987122.418330284 -14429896.539530909
@@ -767,7 +767,7 @@ echo "##############################################################" >> ${OUT}
 echo "Test bug 245 (use +datum=carthage)" >> ${OUT}
 #
 $EXE -f '%.7f' \
-     +proj=longlat +datum=WGS84 +no_defs +to +proj=utm +zone=32 +datum=carthage +no_defs \
+     +proj=longlat +datum=WGS84 +to +proj=utm +zone=32 +datum=carthage \
  -E >>${OUT} <<EOF
 10 34
 EOF
@@ -775,7 +775,7 @@ echo "##############################################################" >> ${OUT}
 echo "Test bug 245 (use expansion of +datum=carthage)" >> ${OUT}
 #
 $EXE -f '%.7f' \
-     +proj=longlat +datum=WGS84 +no_defs +to +proj=utm +zone=32 +a=6378249.2 +b=6356515 +towgs84=-263.0,6.0,431.0 +no_defs \
+     +proj=longlat +datum=WGS84 +to +proj=utm +zone=32 +a=6378249.2 +b=6356515 +towgs84=-263.0,6.0,431.0 \
  -E >>${OUT} <<EOF
 10 34
 EOF
@@ -810,7 +810,7 @@ echo "##############################################################" >> ${OUT}
 echo "Test issue #316 (switch utm to use etmerc)" >> ${OUT}
 #
 $EXE -f '%.6f' \
-     +proj=latlong +datum=WGS84 +no_defs +to +proj=utm +zone=35 +datum=WGS84 +no_defs \
+     +proj=latlong +datum=WGS84 +to +proj=utm +zone=35 +datum=WGS84 \
  -E >>${OUT} <<EOF
 0 83
 EOF
@@ -819,7 +819,7 @@ echo "##############################################################" >> ${OUT}
 echo "Test issue #316 (switch utm to use etmerc)" >> ${OUT}
 #
 $EXE -f '%.6f' \
-     +proj=latlong +datum=WGS84 +no_defs +to +proj=etmerc +datum=WGS84 +no_defs +k=0.9996 +lon_0=27 +x_0=500000 -f %.6f \
+     +proj=latlong +datum=WGS84 +to +proj=etmerc +datum=WGS84 +k=0.9996 +lon_0=27 +x_0=500000 -f %.6f \
  -E >>${OUT} <<EOF
 0 83
 EOF
@@ -829,7 +829,7 @@ echo  "Test nzmg forward projection" >> ${OUT}
 #
 $EXE -f '%.7f' \
     +proj=latlong +datum=WGS84 +to \
-    +proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 +ellps=WGS84 +units=m +no_defs \
+    +proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 +ellps=WGS84 +units=m \
  -E >> ${OUT} <<EOF
 175. -40. 0.
 EOF
@@ -838,7 +838,7 @@ echo  "##############################################################" >> ${OUT}
 echo  "Test nzmg inverse projection" >> ${OUT}
 #
 $EXE -f '%.7f' \
-    +proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 +ellps=WGS84 +units=m +no_defs +to \
+    +proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 +ellps=WGS84 +units=m +to \
     +proj=latlong +datum=WGS84 \
  -E >> ${OUT} <<EOF
 2680778.57267967 6132228.07645127 0.
@@ -848,7 +848,7 @@ echo  "##############################################################" >> ${OUT}
 echo  "Test misrsom forward projection" >> ${OUT}
 #
 $EXE -f '%.7f' \
-    +proj=latlong +datum=WGS84 +no_defs +to \
+    +proj=latlong +datum=WGS84 +to \
     +proj=misrsom +path=41 +ellps=WGS84 +units=m \
  -E >> ${OUT} <<EOF
 48.64966165540372 66.2263195368941 0.
@@ -858,7 +858,7 @@ echo  "##############################################################" >> ${OUT}
 echo  "Test misrsom inverse projection" >> ${OUT}
 #
 $EXE -f '%.7f' \
-    +proj=misrsom +path=41 +ellps=WGS84 +units=m +no_defs +to \
+    +proj=misrsom +path=41 +ellps=WGS84 +units=m +to \
     +proj=latlong +datum=WGS84 -f '%0.7f' \
  -E >> ${OUT} <<EOF
 7461300.0 528000.0 0.0

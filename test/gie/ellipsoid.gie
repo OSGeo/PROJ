@@ -57,10 +57,6 @@ expect    failure errno unknown_ellp_param
 operation proj=merc +a=-1
 expect    failure errno major_axis_not_given
 
-operation proj=merc no_defs
-expect    failure errno major_axis_not_given
-
-# This one should succeed due to ellps=WGS84 in proj_def.dat
 operation proj=merc
 accept    0 0
 expect    0 0

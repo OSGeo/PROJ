@@ -8,7 +8,6 @@ set(PROJ_DICTIONARY  world
                      GL27
                      nad83
                      nad.lst
-                     proj_def.dat
                      CH
                      ITRF2000
                      ITRF2008

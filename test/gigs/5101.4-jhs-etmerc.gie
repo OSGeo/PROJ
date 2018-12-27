@@ -11,7 +11,7 @@ use_proj4_init_rules true
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4190 +inv
-           +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
+           +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
 --------------------------------------------------------------------------------
 tolerance  0.03 m
 accept    -63.9993433 80.0002644
@@ -107,7 +107,7 @@ expect    5756200.0 5568100.0
 
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
-           +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +inv
+           +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +inv
            +step +init=epsg:4190
 --------------------------------------------------------------------------------
 tolerance  0.03 m
@@ -205,7 +205,7 @@ expect    -57.0000158 -40.0002087
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4190 +inv
-           +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
+           +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
 --------------------------------------------------------------------------------
 tolerance  0.006 m
 accept    -63.9993433 80.0002644

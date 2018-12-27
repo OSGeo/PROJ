@@ -1,6 +1,6 @@
 DATAPATH = $(top_srcdir)/data
 
-pkgdata_DATA = GL27 nad.lst proj_def.dat nad27 nad83 world other.extra \
+pkgdata_DATA = GL27 nad.lst nad27 nad83 world other.extra \
 		CH \
 		ITRF2000 ITRF2008 ITRF2014 proj.db
 
@@ -36,7 +36,7 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/customizations.sql \
 		sql/commit.sql
 
-EXTRA_DIST = GL27 nad.lst proj_def.dat nad27 nad83 \
+EXTRA_DIST = GL27 nad.lst nad27 nad83 \
 		world other.extra \
 		CH \
 		ITRF2000 ITRF2008 ITRF2014 \

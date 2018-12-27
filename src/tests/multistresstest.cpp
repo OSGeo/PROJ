@@ -46,7 +46,6 @@
 #define num_threads    10
 static int num_iterations = 1000000;
 static int reinit_every_iteration=0;
-static int add_no_defs = 0;
 
 typedef struct {
     const char *src_def;
@@ -179,15 +178,7 @@ static volatile int active_thread_count = 0;
 
 static projPJ custom_pj_init_plus_ctx(projCtx ctx, const char* def)
 {
-    if( add_no_defs )
-    {
-        char szBuffer[256];
-        strcpy(szBuffer, def);
-        strcat(szBuffer, " +no_defs");
-        return pj_init_plus_ctx(ctx, szBuffer);
-    }
-    else
-        return pj_init_plus_ctx(ctx, def);
+    return pj_init_plus_ctx(ctx, def);
 }
 
 /************************************************************************/
@@ -462,8 +453,6 @@ int main( int argc, char **argv )
     {
         if( strcmp(argv[i], "-reinit") == 0 )
             reinit_every_iteration = 1;
-        else if( strcmp(argv[i], "-add_no_defs") == 0 )
-            add_no_defs = 1;
         else if( strcmp(argv[i], "-num_iterations") == 0 && i+1 < argc )
         {
             num_iterations = atoi(argv[i+1]);

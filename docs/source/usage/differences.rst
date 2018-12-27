@@ -58,3 +58,14 @@ should return the same output for both.
 
 Adding the ``+over`` flag to the projection definition provides
 the old behaviour.
+
+Version 6.0.0
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Removal of proj_def.dat
+-----------------------
+
+Before PROJ 6, the proj_def.dat was used to provide general and per-projection
+parameters, when +no_defs was not specified. It has now been removed. In case,
+no ellipsoid or datum specification is provided in the PROJ string, the
+default ellipsoid is GRS80 (was WGS84 in previous PROJ versions).

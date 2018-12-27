@@ -167,7 +167,7 @@ A test case from a comment by Github user c0nk
 operation  proj=somerc
            lat_0=46.95240555555556 lon_0=7.439583333333333 k_0=1
            x_0=2600000 y_0=1200000 ellps=bessel
-           towgs84=674.374,15.056,405.346 no_defs
+           towgs84=674.374,15.056,405.346
 -------------------------------------------------------------------------------
 tolerance 20 cm
 accept    7.438632495 46.951082877
@@ -178,11 +178,11 @@ where, at the end of pipeline creation, a false warning about missing ellps was
 left behind from the creation of the Helmert step  (now repaired in pj_init).
 -------------------------------------------------------------------------------
 operation proj=pipeline
-     step proj=cart ellps=WGS84 no_defs
-     step proj=helmert x=674.37400 y=15.05600 z=405.34600 inv no_defs
-     step proj=cart ellps=bessel no_defs inv
+     step proj=cart ellps=WGS84
+     step proj=helmert x=674.37400 y=15.05600 z=405.34600 inv
+     step proj=cart ellps=bessel inv
      step proj=somerc lat_0=46.95240555555556 lon_0=7.439583333333333
-                      k_0=1 x_0=2600000 y_0=1200000 ellps=bessel units=m no_defs
+                      k_0=1 x_0=2600000 y_0=1200000 ellps=bessel units=m
 -------------------------------------------------------------------------------
 tolerance 20 cm
 accept    7.438632495 46.951082877
@@ -219,7 +219,7 @@ expect      -10370728.80        5552839.74          0
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Test Google's Web Mercator with +proj=webmerc
+Test Google's Web Mercator with +proj=webmerc +ellps=WGS84
 -------------------------------------------------------------------------------
 use_proj4_init_rules true
 operation   proj=pipeline step init=epsg:26915 inv step proj=webmerc datum=WGS84
@@ -235,7 +235,7 @@ expect      -10370728.80        5552839.74          0
 -------------------------------------------------------------------------------
 Web Mercator test data from EPSG Guidance Note 7-2, p. 44.
 -------------------------------------------------------------------------------
-operation   proj=webmerc
+operation   proj=webmerc +ellps=WGS84
 tolerance   1 cm
 
 accept      -100.33333333       24.46358028
@@ -288,7 +288,7 @@ operation   +proj=pipeline
 expect      failure pjd_err_malformed_pipeline
 
 operation   +proj=pipeline
-            +step +proj=merc
+            +step +proj=merc +ellps=WGS84
             +step +proj=unitconvert +xy_in=m +xy_out=km
 accept      12          56
 expect      1335.8339   7522.963

@@ -393,15 +393,6 @@ Below is a list of the init files that are packaged with PROJ.
 The defaults file
 -------------------------------------------------------------------------------
 
-The ``proj_def.dat`` file supplies default parameters for PROJ. It uses the same
-syntax as the init files described above. The identifiers in the defaults file
-describe to what the parameters should apply. If the ``<general>`` identifier is
-used, then all parameters in that section applies for all proj-strings. Otherwise
-the identifier is connected to a specific projection. With the defaults file
-supplied with PROJ the default ellipsoid is set to WGS84 (for all proj-strings).
-Apart from that only the Albers Equal Area,
-:doc:`Lambert Conic Conformal<operations/projections/lcc>` and the
-:doc:`Lagrange<operations/projections/lagrng>` projections have default parameters.
-Defaults can be ignored by adding the ``+no_def`` parameter to a proj-string.
-
-
+Before PROJ 6.0, a ``proj_def.dat`` file could be used to supply default
+parameters to PROJ. It has been removed due to the confusion and errors it
+caused.

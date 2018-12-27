@@ -405,7 +405,7 @@ TEST(gie, info_functions) {
     ASSERT_NEAR(-2.0, proj_dmstor(&buf[0], NULL), 1e-7);
 
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
-    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc +ellps=WGS84");
     a = proj_coord(0, 0, 0, 0);
     a.lp.lam = proj_torad(12);
     a.lp.phi = proj_torad(55);
@@ -488,7 +488,7 @@ TEST(gie, io_predicates) {
                     " +rx=-0.00039 +ry=0.00080 +rz=-0.00114"
                     " +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +ds=0.00001"
                     " +drx=-0.00011 +dry=-0.00019 +drz=0.00007"
-                    " +t_epoch=1988.0 +convention=coordinate_frame +no_defs");
+                    " +t_epoch=1988.0 +convention=coordinate_frame");
     ASSERT_TRUE(P != nullptr);
     ASSERT_FALSE(proj_angular_input(P, PJ_FWD));
     ASSERT_FALSE(proj_angular_input(P, PJ_INV));
@@ -500,14 +500,13 @@ TEST(gie, io_predicates) {
     ASSERT_FALSE(proj_angular_output(P, PJ_FWD));
     ASSERT_FALSE(proj_angular_output(P, PJ_INV));
 
-    /* We specified "no_defs" but didn't give any ellipsoid info */
-    /* pj_init_ctx should default to WGS84 */
+    /* pj_init_ctx should default to GRS80 */
     ASSERT_EQ(P->a, 6378137.0);
-    ASSERT_EQ(P->f, 1.0 / 298.257223563);
+    ASSERT_EQ(P->f, 1.0 / 298.257222101);
     proj_destroy(P);
 
     /* Test that pj_fwd* and pj_inv* returns NaNs when receiving NaN input */
-    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc +ellps=WGS84");
     ASSERT_TRUE(P != nullptr);
     auto a = proj_coord(NAN, NAN, NAN, NAN);
     a = proj_trans(P, PJ_FWD, a);

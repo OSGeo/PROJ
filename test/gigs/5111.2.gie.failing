@@ -9,7 +9,7 @@ Test 5111 (part 2), Mercator (variant A), v2-0_2011-06-28.
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4813 +inv
-           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs
+           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m
 --------------------------------------------------------------------------------
 tolerance  0.05 m
 accept    -6.7200711 77.6534822
@@ -153,7 +153,7 @@ expect    -15964105.84 679490.65
 
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
-           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs +inv
+           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +inv
            +step +init=epsg:4813
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -299,7 +299,7 @@ expect    -175.8077194 2.0
 --------------------------------------------------------------------------------
 operation  +proj=pipeline
            +step +init=epsg:4813 +inv
-           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs
+           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m
 --------------------------------------------------------------------------------
 tolerance  0.006 m
 accept    -6.7200711 77.6534822

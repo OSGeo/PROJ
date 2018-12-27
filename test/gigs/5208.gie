@@ -13,10 +13,10 @@ To be on the safe side we, use 0.01 m as the tolerance.
 --------------------------------------------------------------------------------
 
 # NTF
-<4275> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +no_defs  <>
+<4275> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0  <>
 
 # NTF (Paris)
-<4807> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +no_defs  <>
+<4807> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris  <>
 
 
 
