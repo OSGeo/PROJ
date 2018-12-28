@@ -4224,7 +4224,8 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
         // Romania has a larger area than Poland (given our approx formula)
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
         EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
-        EXPECT_EQ(list[2]->nameStr(), "Null geographic offset from Pulkovo 1942(58) to ETRS89");
+        EXPECT_EQ(list[2]->nameStr(),
+                  "Null geographic offset from Pulkovo 1942(58) to ETRS89");
 
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),

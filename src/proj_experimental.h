@@ -90,7 +90,7 @@ typedef struct
     PJ_UNIT_TYPE unit_type;
 } PJ_AXIS_DESCRIPTION;
 
-PJ PROJ_DLL *proj_obj_create_cs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_create_cs(PJ_CONTEXT *ctx,
                                     PJ_COORDINATE_SYSTEM_TYPE type,
                                     int axis_count,
                                     const PJ_AXIS_DESCRIPTION* axis);
@@ -110,7 +110,7 @@ typedef enum
     PJ_CART2D_WESTING_SOUTHING,
 } PJ_CARTESIAN_CS_2D_TYPE;
 
-PJ PROJ_DLL *proj_obj_create_cartesian_2D_cs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_create_cartesian_2D_cs(PJ_CONTEXT *ctx,
                                                  PJ_CARTESIAN_CS_2D_TYPE type, 
                                                  const char* unit_name,
                                                  double unit_conv_factor);
@@ -125,19 +125,19 @@ typedef enum
     PJ_ELLPS2D_LATITUDE_LONGITUDE,
 } PJ_ELLIPSOIDAL_CS_2D_TYPE;
 
-PJ PROJ_DLL *proj_obj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
                                                    PJ_ELLIPSOIDAL_CS_2D_TYPE type, 
                                                    const char* unit_name,
                                                    double unit_conv_factor);
 
-PJ_OBJ_LIST PROJ_DLL *proj_obj_query_geodetic_crs_from_datum(
+PJ_OBJ_LIST PROJ_DLL *proj_query_geodetic_crs_from_datum(
                                                 PJ_CONTEXT *ctx,
                                                 const char *crs_auth_name,
                                                 const char *datum_auth_name,
                                                 const char *datum_code,
                                                 const char *crs_type);
 
-PJ PROJ_DLL *proj_obj_create_geographic_crs(
+PJ PROJ_DLL *proj_create_geographic_crs(
                             PJ_CONTEXT *ctx,
                             const char *crs_name,
                             const char *datum_name,
@@ -149,13 +149,13 @@ PJ PROJ_DLL *proj_obj_create_geographic_crs(
                             double pm_units_conv,
                             PJ* ellipsoidal_cs);
 
-PJ PROJ_DLL *proj_obj_create_geographic_crs_from_datum(
+PJ PROJ_DLL *proj_create_geographic_crs_from_datum(
                             PJ_CONTEXT *ctx,
                             const char *crs_name,
                             PJ* datum,
                             PJ* ellipsoidal_cs);
 
-PJ PROJ_DLL *proj_obj_create_geocentric_crs(
+PJ PROJ_DLL *proj_create_geocentric_crs(
                             PJ_CONTEXT *ctx,
                             const char *crs_name,
                             const char *datum_name,
@@ -168,40 +168,40 @@ PJ PROJ_DLL *proj_obj_create_geocentric_crs(
                             const char *linear_units,
                             double linear_units_conv);
 
-PJ PROJ_DLL *proj_obj_create_geocentric_crs_from_datum(
+PJ PROJ_DLL *proj_create_geocentric_crs_from_datum(
                             PJ_CONTEXT *ctx,
                             const char *crs_name,
                             const PJ* datum,
                             const char *linear_units,
                             double linear_units_conv);
 
-PJ PROJ_DLL *proj_obj_alter_name(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_alter_name(PJ_CONTEXT *ctx,
                                      const PJ* obj, const char* name);
 
-PJ PROJ_DLL *proj_obj_alter_id(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_alter_id(PJ_CONTEXT *ctx,
                                    const PJ* obj,
                                    const char* auth_name,
                                    const char* code);
 
-PJ PROJ_DLL *proj_obj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx,
                                                  const PJ* obj,
                                                  const PJ* new_geod_crs);
 
-PJ PROJ_DLL *proj_obj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_crs_alter_cs_angular_unit(PJ_CONTEXT *ctx,
                                                     const PJ* obj,
                                                     const char *angular_units,
                                                     double angular_units_conv,
                                                     const char *unit_auth_name,
                                                     const char *unit_code);
 
-PJ PROJ_DLL *proj_obj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx,
                                                    const PJ* obj,
                                                    const char *linear_units,
                                                    double linear_units_conv,
                                                    const char *unit_auth_name,
                                                    const char *unit_code);
 
-PJ PROJ_DLL *proj_obj_crs_alter_parameters_linear_unit(
+PJ PROJ_DLL *proj_crs_alter_parameters_linear_unit(
                                                     PJ_CONTEXT *ctx,
                                                     const PJ* obj,
                                                     const char *linear_units,
@@ -210,16 +210,16 @@ PJ PROJ_DLL *proj_obj_crs_alter_parameters_linear_unit(
                                                     const char *unit_code,
                                                     int convert_to_new_unit);
 
-PJ PROJ_DLL *proj_obj_create_engineering_crs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_create_engineering_crs(PJ_CONTEXT *ctx,
                                                  const char *crsName);
 
-PJ PROJ_DLL *proj_obj_create_vertical_crs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_create_vertical_crs(PJ_CONTEXT *ctx,
                                               const char *crs_name,
                                               const char *datum_name,
                                               const char *linear_units,
                                               double linear_units_conv);
 
-PJ PROJ_DLL *proj_obj_create_compound_crs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_create_compound_crs(PJ_CONTEXT *ctx,
                                               const char *crs_name,
                                               PJ* horiz_crs,
                                               PJ* vert_crs);
@@ -243,7 +243,7 @@ typedef struct
     PJ_UNIT_TYPE unit_type;
 } PJ_PARAM_DESCRIPTION;
 
-PJ PROJ_DLL *proj_obj_create_conversion(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_create_conversion(PJ_CONTEXT *ctx,
                                             const char* name,
                                             const char* auth_name,
                                             const char* code,
@@ -253,7 +253,7 @@ PJ PROJ_DLL *proj_obj_create_conversion(PJ_CONTEXT *ctx,
                                             int param_count,
                                             const PJ_PARAM_DESCRIPTION* params);
 
-PJ PROJ_DLL *proj_obj_create_transformation(
+PJ PROJ_DLL *proj_create_transformation(
                                             PJ_CONTEXT *ctx,
                                             const char* name,
                                             const char* auth_name,
@@ -268,33 +268,33 @@ PJ PROJ_DLL *proj_obj_create_transformation(
                                             const PJ_PARAM_DESCRIPTION* params,
                                             double accuracy);
 
-PJ PROJ_DLL *proj_obj_convert_conversion_to_other_method(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_convert_conversion_to_other_method(PJ_CONTEXT *ctx,
                                              const PJ *conversion,
                                              int new_method_epsg_code,
                                              const char *new_method_name);
 
-PJ PROJ_DLL *proj_obj_create_projected_crs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_create_projected_crs(PJ_CONTEXT *ctx,
                                                const char* crs_name,
                                                const PJ* geodetic_crs,
                                                const PJ* conversion,
                                                const PJ* coordinate_system);
 
-PJ PROJ_DLL *proj_obj_crs_create_bound_crs(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_crs_create_bound_crs(PJ_CONTEXT *ctx,
                                                const PJ *base_crs,
                                                const PJ *hub_crs,
                                                const PJ *transformation);
 
-PJ PROJ_DLL *proj_obj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx,
+PJ PROJ_DLL *proj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx,
                                                         const PJ *crs,
                                                         const char *const *options);
 
 /* BEGIN: Generated by scripts/create_c_api_projections.py*/
-PJ PROJ_DLL *proj_obj_create_conversion_utm(
+PJ PROJ_DLL *proj_create_conversion_utm(
     PJ_CONTEXT *ctx,
     int zone,
     int north);
 
-PJ PROJ_DLL *proj_obj_create_conversion_transverse_mercator(
+PJ PROJ_DLL *proj_create_conversion_transverse_mercator(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -304,7 +304,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_transverse_mercator(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
+PJ PROJ_DLL *proj_create_conversion_gauss_schreiber_transverse_mercator(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -314,7 +314,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_gauss_schreiber_transverse_mercator(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_transverse_mercator_south_oriented(
+PJ PROJ_DLL *proj_create_conversion_transverse_mercator_south_oriented(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -324,7 +324,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_transverse_mercator_south_oriented(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_two_point_equidistant(
+PJ PROJ_DLL *proj_create_conversion_two_point_equidistant(
     PJ_CONTEXT *ctx,
     double latitude_first_point,
     double longitude_first_point,
@@ -335,7 +335,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_two_point_equidistant(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_tunisia_mapping_grid(
+PJ PROJ_DLL *proj_create_conversion_tunisia_mapping_grid(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -344,7 +344,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_tunisia_mapping_grid(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_albers_equal_area(
+PJ PROJ_DLL *proj_create_conversion_albers_equal_area(
     PJ_CONTEXT *ctx,
     double latitude_false_origin,
     double longitude_false_origin,
@@ -355,7 +355,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_albers_equal_area(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_1sp(
+PJ PROJ_DLL *proj_create_conversion_lambert_conic_conformal_1sp(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -365,7 +365,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_1sp(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp(
+PJ PROJ_DLL *proj_create_conversion_lambert_conic_conformal_2sp(
     PJ_CONTEXT *ctx,
     double latitude_false_origin,
     double longitude_false_origin,
@@ -376,7 +376,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
+PJ PROJ_DLL *proj_create_conversion_lambert_conic_conformal_2sp_michigan(
     PJ_CONTEXT *ctx,
     double latitude_false_origin,
     double longitude_false_origin,
@@ -388,7 +388,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp_michigan(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
+PJ PROJ_DLL *proj_create_conversion_lambert_conic_conformal_2sp_belgium(
     PJ_CONTEXT *ctx,
     double latitude_false_origin,
     double longitude_false_origin,
@@ -399,7 +399,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_lambert_conic_conformal_2sp_belgium(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_azimuthal_equidistant(
+PJ PROJ_DLL *proj_create_conversion_azimuthal_equidistant(
     PJ_CONTEXT *ctx,
     double latitude_nat_origin,
     double longitude_nat_origin,
@@ -408,7 +408,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_azimuthal_equidistant(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_guam_projection(
+PJ PROJ_DLL *proj_create_conversion_guam_projection(
     PJ_CONTEXT *ctx,
     double latitude_nat_origin,
     double longitude_nat_origin,
@@ -417,7 +417,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_guam_projection(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_bonne(
+PJ PROJ_DLL *proj_create_conversion_bonne(
     PJ_CONTEXT *ctx,
     double latitude_nat_origin,
     double longitude_nat_origin,
@@ -426,7 +426,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_bonne(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical(
+PJ PROJ_DLL *proj_create_conversion_lambert_cylindrical_equal_area_spherical(
     PJ_CONTEXT *ctx,
     double latitude_first_parallel,
     double longitude_nat_origin,
@@ -435,7 +435,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_lambert_cylindrical_equal_area_spherical
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_lambert_cylindrical_equal_area(
+PJ PROJ_DLL *proj_create_conversion_lambert_cylindrical_equal_area(
     PJ_CONTEXT *ctx,
     double latitude_first_parallel,
     double longitude_nat_origin,
@@ -444,7 +444,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_lambert_cylindrical_equal_area(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_cassini_soldner(
+PJ PROJ_DLL *proj_create_conversion_cassini_soldner(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -453,7 +453,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_cassini_soldner(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_equidistant_conic(
+PJ PROJ_DLL *proj_create_conversion_equidistant_conic(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -464,7 +464,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_equidistant_conic(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_eckert_i(
+PJ PROJ_DLL *proj_create_conversion_eckert_i(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -472,7 +472,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_eckert_i(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_eckert_ii(
+PJ PROJ_DLL *proj_create_conversion_eckert_ii(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -480,7 +480,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_eckert_ii(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_eckert_iii(
+PJ PROJ_DLL *proj_create_conversion_eckert_iii(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -488,7 +488,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_eckert_iii(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_eckert_iv(
+PJ PROJ_DLL *proj_create_conversion_eckert_iv(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -496,7 +496,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_eckert_iv(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_eckert_v(
+PJ PROJ_DLL *proj_create_conversion_eckert_v(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -504,7 +504,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_eckert_v(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_eckert_vi(
+PJ PROJ_DLL *proj_create_conversion_eckert_vi(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -512,7 +512,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_eckert_vi(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_equidistant_cylindrical(
+PJ PROJ_DLL *proj_create_conversion_equidistant_cylindrical(
     PJ_CONTEXT *ctx,
     double latitude_first_parallel,
     double longitude_nat_origin,
@@ -521,7 +521,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_equidistant_cylindrical(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_equidistant_cylindrical_spherical(
+PJ PROJ_DLL *proj_create_conversion_equidistant_cylindrical_spherical(
     PJ_CONTEXT *ctx,
     double latitude_first_parallel,
     double longitude_nat_origin,
@@ -530,7 +530,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_equidistant_cylindrical_spherical(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_gall(
+PJ PROJ_DLL *proj_create_conversion_gall(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -538,7 +538,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_gall(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_goode_homolosine(
+PJ PROJ_DLL *proj_create_conversion_goode_homolosine(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -546,7 +546,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_goode_homolosine(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_interrupted_goode_homolosine(
+PJ PROJ_DLL *proj_create_conversion_interrupted_goode_homolosine(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -554,16 +554,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_interrupted_goode_homolosine(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_geostationary_satellite_sweep_x(
-    PJ_CONTEXT *ctx,
-    double center_long,
-    double height,
-    double false_easting,
-    double false_northing,
-    const char* ang_unit_name, double ang_unit_conv_factor,
-    const char* linear_unit_name, double linear_unit_conv_factor);
-
-PJ PROJ_DLL *proj_obj_create_conversion_geostationary_satellite_sweep_y(
+PJ PROJ_DLL *proj_create_conversion_geostationary_satellite_sweep_x(
     PJ_CONTEXT *ctx,
     double center_long,
     double height,
@@ -572,7 +563,16 @@ PJ PROJ_DLL *proj_obj_create_conversion_geostationary_satellite_sweep_y(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_gnomonic(
+PJ PROJ_DLL *proj_create_conversion_geostationary_satellite_sweep_y(
+    PJ_CONTEXT *ctx,
+    double center_long,
+    double height,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
+
+PJ PROJ_DLL *proj_create_conversion_gnomonic(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -581,7 +581,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_gnomonic(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
+PJ PROJ_DLL *proj_create_conversion_hotine_oblique_mercator_variant_a(
     PJ_CONTEXT *ctx,
     double latitude_projection_centre,
     double longitude_projection_centre,
@@ -593,7 +593,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_variant_a(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
+PJ PROJ_DLL *proj_create_conversion_hotine_oblique_mercator_variant_b(
     PJ_CONTEXT *ctx,
     double latitude_projection_centre,
     double longitude_projection_centre,
@@ -605,7 +605,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_variant_b(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
+PJ PROJ_DLL *proj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
     PJ_CONTEXT *ctx,
     double latitude_projection_centre,
     double latitude_point1,
@@ -618,7 +618,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_hotine_oblique_mercator_two_point_natura
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_laborde_oblique_mercator(
+PJ PROJ_DLL *proj_create_conversion_laborde_oblique_mercator(
     PJ_CONTEXT *ctx,
     double latitude_projection_centre,
     double longitude_projection_centre,
@@ -629,7 +629,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_laborde_oblique_mercator(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_international_map_world_polyconic(
+PJ PROJ_DLL *proj_create_conversion_international_map_world_polyconic(
     PJ_CONTEXT *ctx,
     double center_long,
     double latitude_first_parallel,
@@ -639,7 +639,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_international_map_world_polyconic(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_krovak_north_oriented(
+PJ PROJ_DLL *proj_create_conversion_krovak_north_oriented(
     PJ_CONTEXT *ctx,
     double latitude_projection_centre,
     double longitude_of_origin,
@@ -651,7 +651,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_krovak_north_oriented(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_krovak(
+PJ PROJ_DLL *proj_create_conversion_krovak(
     PJ_CONTEXT *ctx,
     double latitude_projection_centre,
     double longitude_of_origin,
@@ -663,7 +663,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_krovak(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_lambert_azimuthal_equal_area(
+PJ PROJ_DLL *proj_create_conversion_lambert_azimuthal_equal_area(
     PJ_CONTEXT *ctx,
     double latitude_nat_origin,
     double longitude_nat_origin,
@@ -672,7 +672,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_lambert_azimuthal_equal_area(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_miller_cylindrical(
+PJ PROJ_DLL *proj_create_conversion_miller_cylindrical(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -680,7 +680,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_miller_cylindrical(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_mercator_variant_a(
+PJ PROJ_DLL *proj_create_conversion_mercator_variant_a(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -690,7 +690,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_mercator_variant_a(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_mercator_variant_b(
+PJ PROJ_DLL *proj_create_conversion_mercator_variant_b(
     PJ_CONTEXT *ctx,
     double latitude_first_parallel,
     double center_long,
@@ -699,7 +699,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_mercator_variant_b(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
+PJ PROJ_DLL *proj_create_conversion_popular_visualisation_pseudo_mercator(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -708,7 +708,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_popular_visualisation_pseudo_mercator(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_mollweide(
+PJ PROJ_DLL *proj_create_conversion_mollweide(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -716,26 +716,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_mollweide(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_new_zealand_mapping_grid(
-    PJ_CONTEXT *ctx,
-    double center_lat,
-    double center_long,
-    double false_easting,
-    double false_northing,
-    const char* ang_unit_name, double ang_unit_conv_factor,
-    const char* linear_unit_name, double linear_unit_conv_factor);
-
-PJ PROJ_DLL *proj_obj_create_conversion_oblique_stereographic(
-    PJ_CONTEXT *ctx,
-    double center_lat,
-    double center_long,
-    double scale,
-    double false_easting,
-    double false_northing,
-    const char* ang_unit_name, double ang_unit_conv_factor,
-    const char* linear_unit_name, double linear_unit_conv_factor);
-
-PJ PROJ_DLL *proj_obj_create_conversion_orthographic(
+PJ PROJ_DLL *proj_create_conversion_new_zealand_mapping_grid(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -744,16 +725,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_orthographic(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_american_polyconic(
-    PJ_CONTEXT *ctx,
-    double center_lat,
-    double center_long,
-    double false_easting,
-    double false_northing,
-    const char* ang_unit_name, double ang_unit_conv_factor,
-    const char* linear_unit_name, double linear_unit_conv_factor);
-
-PJ PROJ_DLL *proj_obj_create_conversion_polar_stereographic_variant_a(
+PJ PROJ_DLL *proj_create_conversion_oblique_stereographic(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -763,7 +735,35 @@ PJ PROJ_DLL *proj_obj_create_conversion_polar_stereographic_variant_a(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_polar_stereographic_variant_b(
+PJ PROJ_DLL *proj_create_conversion_orthographic(
+    PJ_CONTEXT *ctx,
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
+
+PJ PROJ_DLL *proj_create_conversion_american_polyconic(
+    PJ_CONTEXT *ctx,
+    double center_lat,
+    double center_long,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
+
+PJ PROJ_DLL *proj_create_conversion_polar_stereographic_variant_a(
+    PJ_CONTEXT *ctx,
+    double center_lat,
+    double center_long,
+    double scale,
+    double false_easting,
+    double false_northing,
+    const char* ang_unit_name, double ang_unit_conv_factor,
+    const char* linear_unit_name, double linear_unit_conv_factor);
+
+PJ PROJ_DLL *proj_create_conversion_polar_stereographic_variant_b(
     PJ_CONTEXT *ctx,
     double latitude_standard_parallel,
     double longitude_of_origin,
@@ -772,7 +772,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_polar_stereographic_variant_b(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_robinson(
+PJ PROJ_DLL *proj_create_conversion_robinson(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -780,7 +780,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_robinson(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_sinusoidal(
+PJ PROJ_DLL *proj_create_conversion_sinusoidal(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -788,7 +788,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_sinusoidal(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_stereographic(
+PJ PROJ_DLL *proj_create_conversion_stereographic(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -798,7 +798,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_stereographic(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_van_der_grinten(
+PJ PROJ_DLL *proj_create_conversion_van_der_grinten(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -806,7 +806,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_van_der_grinten(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_wagner_i(
+PJ PROJ_DLL *proj_create_conversion_wagner_i(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -814,7 +814,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_wagner_i(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_wagner_ii(
+PJ PROJ_DLL *proj_create_conversion_wagner_ii(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -822,7 +822,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_wagner_ii(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_wagner_iii(
+PJ PROJ_DLL *proj_create_conversion_wagner_iii(
     PJ_CONTEXT *ctx,
     double latitude_true_scale,
     double center_long,
@@ -831,7 +831,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_wagner_iii(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_wagner_iv(
+PJ PROJ_DLL *proj_create_conversion_wagner_iv(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -839,7 +839,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_wagner_iv(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_wagner_v(
+PJ PROJ_DLL *proj_create_conversion_wagner_v(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -847,7 +847,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_wagner_v(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_wagner_vi(
+PJ PROJ_DLL *proj_create_conversion_wagner_vi(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -855,7 +855,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_wagner_vi(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_wagner_vii(
+PJ PROJ_DLL *proj_create_conversion_wagner_vii(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,
@@ -863,7 +863,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_wagner_vii(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_quadrilateralized_spherical_cube(
+PJ PROJ_DLL *proj_create_conversion_quadrilateralized_spherical_cube(
     PJ_CONTEXT *ctx,
     double center_lat,
     double center_long,
@@ -872,7 +872,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_quadrilateralized_spherical_cube(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_spherical_cross_track_height(
+PJ PROJ_DLL *proj_create_conversion_spherical_cross_track_height(
     PJ_CONTEXT *ctx,
     double peg_point_lat,
     double peg_point_long,
@@ -881,7 +881,7 @@ PJ PROJ_DLL *proj_obj_create_conversion_spherical_cross_track_height(
     const char* ang_unit_name, double ang_unit_conv_factor,
     const char* linear_unit_name, double linear_unit_conv_factor);
 
-PJ PROJ_DLL *proj_obj_create_conversion_equal_earth(
+PJ PROJ_DLL *proj_create_conversion_equal_earth(
     PJ_CONTEXT *ctx,
     double center_long,
     double false_easting,

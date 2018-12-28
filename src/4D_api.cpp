@@ -743,7 +743,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     - a PROJ string, like "+proj=longlat +datum=WGS84".
       When using that syntax, the axis order and unit for geographic CRS will
       be longitude, latitude, and the unit degrees.
-    - more generally any string accepted by proj_obj_create_from_user_input()
+    - more generally any string accepted by proj_create_from_user_input()
 
     An "area of use" can be specified in area. When it is supplied, the more
     accurate transformation between two given systems can be chosen.
@@ -763,13 +763,13 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     const char* const* optionsImportCRS =
         proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : nullptr;
 
-    auto src = proj_obj_create_from_user_input(ctx, source_crs, optionsImportCRS);
+    auto src = proj_create_from_user_input(ctx, source_crs, optionsImportCRS);
     if( !src ) {
         proj_context_log_debug(ctx, "Cannot instanciate source_crs");
         return nullptr;
     }
 
-    auto dst = proj_obj_create_from_user_input(ctx, target_crs, optionsImportCRS);
+    auto dst = proj_create_from_user_input(ctx, target_crs, optionsImportCRS);
     if( !dst ) {
         proj_context_log_debug(ctx, "Cannot instanciate target_crs");
         proj_destroy(src);
@@ -796,7 +796,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
-    auto op_list = proj_obj_create_operations(ctx, src, dst, operation_ctx);
+    auto op_list = proj_create_operations(ctx, src, dst, operation_ctx);
 
     proj_operation_factory_context_destroy(operation_ctx);
     proj_destroy(src);
@@ -806,19 +806,19 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         return nullptr;
     }
 
-    if( proj_obj_list_get_count(op_list) == 0 ) {
-        proj_obj_list_destroy(op_list);
+    if( proj_list_get_count(op_list) == 0 ) {
+        proj_list_destroy(op_list);
         proj_context_log_debug(ctx, "No operation found matching criteria");
         return nullptr;
     }
 
-    auto op = proj_obj_list_get(ctx, op_list, 0);
-    proj_obj_list_destroy(op_list);
+    auto op = proj_list_get(ctx, op_list, 0);
+    proj_list_destroy(op_list);
     if( !op ) {
         return nullptr;
     }
 
-    proj_string = proj_obj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
+    proj_string = proj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
     if( !proj_string) {
         proj_destroy(op);
         proj_context_log_debug(ctx, "Cannot export operation as a PROJ string");

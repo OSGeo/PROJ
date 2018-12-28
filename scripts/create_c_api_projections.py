@@ -96,7 +96,7 @@ for sectiondef in compounddef.iter('sectiondef'):
             shortName = name[len('create'):]
             c_shortName = snake_casify(shortName)
 
-            decl = "proj_obj_create_conversion_"
+            decl = "proj_create_conversion_"
             decl += c_shortName
             decl += "(\n"
             decl += "    PJ_CONTEXT *ctx,\n"
@@ -157,7 +157,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                     cppfile.write(", Scale(" + param[1] + ")")
 
             cppfile.write(");\n")
-            cppfile.write("    return proj_obj_create_conversion(conv);\n")
+            cppfile.write("    return proj_create_conversion(conv);\n")
             cppfile.write("  } catch (const std::exception &e) {\n");
             cppfile.write("    proj_log_error(ctx, __FUNCTION__, e.what());\n")
             cppfile.write("  }\n")
@@ -165,7 +165,7 @@ for sectiondef in compounddef.iter('sectiondef'):
             cppfile.write("}\n")
 
             test_cppfile.write("{\n")
-            test_cppfile.write("    auto projCRS = proj_obj_create_conversion_" + c_shortName + "(\n")
+            test_cppfile.write("    auto projCRS = proj_create_conversion_" + c_shortName + "(\n")
             test_cppfile.write("        m_ctxt")
             for param in params:
                 test_cppfile.write(", 0")

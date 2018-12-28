@@ -287,12 +287,12 @@ Expand key from buffer or (if not in buffer) from init file
             strcpy(szInitStr, "+init=");
             strcat(szInitStr, xkey);
 
-            src = proj_obj_create_from_user_input(ctx, szInitStr, optionsProj4Mode);
+            src = proj_create_from_user_input(ctx, szInitStr, optionsProj4Mode);
             if( !src ) {
                 return nullptr;
             }
 
-            proj_string = proj_obj_as_proj_string(ctx, src, PJ_PROJ_4, nullptr);
+            proj_string = proj_as_proj_string(ctx, src, PJ_PROJ_4, nullptr);
             if( !proj_string ) {
                 proj_destroy(src);
                 return nullptr;
