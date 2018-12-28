@@ -752,6 +752,11 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     PJ_OBJ* op;
     const char* proj_string;
     const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", nullptr };
+
+    if( !ctx ) {
+        ctx = pj_get_default_ctx();
+    }
+
     const char* const* optionsImportCRS =
         proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : nullptr;
 
