@@ -3773,7 +3773,12 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
         sourceTransformationCRS = sourceCRS->extractGeographicCRS();
         if (!sourceTransformationCRS) {
-            throw ParsingException("Cannot find GeographicCRS in sourceCRS");
+            sourceTransformationCRS =
+                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS);
+            if (!sourceTransformationCRS) {
+                throw ParsingException(
+                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
+            }
         }
     } else {
         sourceTransformationCRS = sourceCRS;

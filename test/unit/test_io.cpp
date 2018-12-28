@@ -2279,6 +2279,52 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_codes) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, boundcrs_of_verticalcrs_to_geog3Dcrs) {
+    auto wkt =
+        "BOUNDCRS[\n"
+        "    SOURCECRS[\n"
+        "        VERTCRS[\"my_height\",\n"
+        "            VDATUM[\"my_height\"],\n"
+        "            CS[vertical,1],\n"
+        "                AXIS[\"up\",up,\n"
+        "                    LENGTHUNIT[\"metre\",1,\n"
+        "                        ID[\"EPSG\",9001]]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEODCRS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"latitude\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"longitude\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",4979]]],\n"
+        "    ABRIDGEDTRANSFORMATION[\"my_height height to WGS84 ellipsoidal "
+        "height\",\n"
+        "        METHOD[\"GravityRelatedHeight to Geographic3D\"],\n"
+        "        PARAMETERFILE[\"Geoid (height correction) model file\","
+        "                      \"./tmp/fake.gtx\",\n"
+        "            ID[\"EPSG\",8666]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->baseCRS()->nameStr(), "my_height");
+
+    EXPECT_EQ(crs->hubCRS()->nameStr(), GeographicCRS::EPSG_4979->nameStr());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, geogcs_TOWGS84_3terms) {
     auto wkt = "GEOGCS[\"my GEOGCRS\",\n"
                "    DATUM[\"WGS_1984\",\n"
