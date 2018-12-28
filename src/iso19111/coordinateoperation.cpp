@@ -434,6 +434,10 @@ static const metadata::ExtentPtr &getExtent(const crs::CRSNNPtr &crs) {
     if (!domains.empty()) {
         return domains[0]->domainOfValidity();
     }
+    const auto *boundCRS = dynamic_cast<const crs::BoundCRS *>(crs.get());
+    if (boundCRS) {
+        return getExtent(boundCRS->baseCRS());
+    }
     return nullExtent;
 }
 
