@@ -111,6 +111,8 @@ void PROJ_DLL proj_log_error (PJ *P, const char *fmt, ...);
 void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
 
+void proj_context_log_debug (PJ_CONTEXT *ctx, const char *fmt, ...);
+
 int pj_ellipsoid (PJ *);
 void pj_inherit_ellipsoid_def (const PJ *src, PJ *dst);
 void pj_erase_ellipsoid_def (PJ *P);

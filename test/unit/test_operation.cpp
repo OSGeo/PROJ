@@ -4260,6 +4260,32 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_match_by_name) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setAllowUseIntermediateCRS(false);
+    auto NAD27 = GeographicCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                          GeographicCRS::EPSG_4267->nameStr()),
+        GeographicCRS::EPSG_4267->datum(),
+        GeographicCRS::EPSG_4267->datumEnsemble(),
+        GeographicCRS::EPSG_4267->coordinateSystem());
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NAD27, GeographicCRS::EPSG_4326, ctxt);
+    auto listInv = CoordinateOperationFactory::create()->createOperations(
+        GeographicCRS::EPSG_4326, NAD27, ctxt);
+    auto listRef = CoordinateOperationFactory::create()->createOperations(
+        GeographicCRS::EPSG_4267, GeographicCRS::EPSG_4326, ctxt);
+    EXPECT_EQ(list.size(), listRef.size());
+    EXPECT_EQ(listInv.size(), listRef.size());
+    EXPECT_GE(listRef.size(), 2U);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_context_filter_accuracy) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
@@ -5530,6 +5556,98 @@ TEST(operation, boundCRS_to_boundCRS_unralated_hub) {
               CoordinateOperationFactory::create()
                   ->createOperation(boundCRS1->baseCRS(), boundCRS2->baseCRS())
                   ->exportToPROJString(PROJStringFormatter::create().get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, boundCRS_with_basecrs_with_extent_to_geogCRS) {
+
+    auto wkt =
+        "BOUNDCRS[\n"
+        "    SOURCECRS[\n"
+        "        PROJCRS[\"NAD83 / California zone 3 (ftUS)\",\n"
+        "            BASEGEODCRS[\"NAD83\",\n"
+        "                DATUM[\"North American Datum 1983\",\n"
+        "                    ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "            CONVERSION[\"SPCS83 California zone 3 (US Survey "
+        "feet)\",\n"
+        "                METHOD[\"Lambert Conic Conformal (2SP)\",\n"
+        "                    ID[\"EPSG\",9802]],\n"
+        "                PARAMETER[\"Latitude of false origin\",36.5,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8821]],\n"
+        "                PARAMETER[\"Longitude of false origin\",-120.5,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8822]],\n"
+        "                PARAMETER[\"Latitude of 1st standard parallel\","
+        "                    38.4333333333333,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8823]],\n"
+        "                PARAMETER[\"Latitude of 2nd standard parallel\","
+        "                    37.0666666666667,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8824]],\n"
+        "                PARAMETER[\"Easting at false origin\",6561666.667,\n"
+        "                    LENGTHUNIT[\"US survey foot\","
+        "                    0.304800609601219],\n"
+        "                    ID[\"EPSG\",8826]],\n"
+        "                PARAMETER[\"Northing at false origin\",1640416.667,\n"
+        "                    LENGTHUNIT[\"US survey foot\","
+        "                    0.304800609601219],\n"
+        "                    ID[\"EPSG\",8827]]],\n"
+        "            CS[Cartesian,2],\n"
+        "                AXIS[\"easting (X)\",east,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"US survey foot\","
+        "                    0.304800609601219]],\n"
+        "                AXIS[\"northing (Y)\",north,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"US survey foot\","
+        "                    0.304800609601219]],\n"
+        "            SCOPE[\"unknown\"],\n"
+        "            AREA[\"USA - California - SPCS - 3\"],\n"
+        "            BBOX[36.73,-123.02,38.71,-117.83],\n"
+        "            ID[\"EPSG\",2227]]],\n"
+        "    TARGETCRS[\n"
+        "        GEODCRS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"latitude\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"longitude\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4326]]],\n"
+        "    ABRIDGEDTRANSFORMATION[\"NAD83 to WGS 84 (1)\",\n"
+        "        METHOD[\"Geocentric translations (geog2D domain)\",\n"
+        "            ID[\"EPSG\",9603]],\n"
+        "        PARAMETER[\"X-axis translation\",0,\n"
+        "            ID[\"EPSG\",8605]],\n"
+        "        PARAMETER[\"Y-axis translation\",0,\n"
+        "            ID[\"EPSG\",8606]],\n"
+        "        PARAMETER[\"Z-axis translation\",0,\n"
+        "            ID[\"EPSG\",8607]],\n"
+        "        SCOPE[\"unknown\"],\n"
+        "        AREA[\"North America - Canada and USA (CONUS, Alaska "
+        "mainland)\"],\n"
+        "        BBOX[23.81,-172.54,86.46,-47.74],\n"
+        "        ID[\"EPSG\",1188]]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(boundCRS != nullptr);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(boundCRS), GeographicCRS::EPSG_4326);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->nameStr(), "Inverse of SPCS83 California zone 3 (US Survey "
+                             "feet) + NAD83 to WGS 84 (1)");
 }
 
 // ---------------------------------------------------------------------------

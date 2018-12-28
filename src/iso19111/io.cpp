@@ -1149,7 +1149,7 @@ struct WKTParser::Private {
     Private(const Private &) = delete;
     Private &operator=(const Private &) = delete;
 
-    void emitRecoverableAssertion(const std::string &errorMsg);
+    void emitRecoverableWarning(const std::string &errorMsg);
 
     BaseObjectNNPtr build(const WKTNodeNNPtr &node);
 
@@ -1331,7 +1331,7 @@ std::list<std::string> WKTParser::warningList() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-void WKTParser::Private::emitRecoverableAssertion(const std::string &errorMsg) {
+void WKTParser::Private::emitRecoverableWarning(const std::string &errorMsg) {
     if (strict_) {
         throw ParsingException(errorMsg);
     } else {
@@ -1688,8 +1688,8 @@ UnitOfMeasure WKTParser::Private::buildUnit(const WKTNodeNNPtr &node,
         auto &idNode =
             nodeP->lookForChild(WKTConstants::ID, WKTConstants::AUTHORITY);
         if (!isNull(idNode) && idNode->GP()->childrenSize() < 2) {
-            emitRecoverableAssertion("not enough children in " +
-                                     idNode->GP()->value() + " node");
+            emitRecoverableWarning("not enough children in " +
+                                   idNode->GP()->value() + " node");
         }
         const bool hasValidIdNode =
             !isNull(idNode) && idNode->GP()->childrenSize() >= 2;
@@ -2553,7 +2553,7 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
         // PRIMEM is required in WKT1
         if (ci_equal(nodeName, WKTConstants::GEOGCS) ||
             ci_equal(nodeName, WKTConstants::GEOCCS)) {
-            emitRecoverableAssertion(nodeName + " should have a PRIMEM node");
+            emitRecoverableWarning(nodeName + " should have a PRIMEM node");
         }
     }
 
@@ -2596,8 +2596,43 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     if (ellipsoidalCS) {
         assert(!ci_equal(nodeName, WKTConstants::GEOCCS));
         try {
-            return GeographicCRS::create(props, datum, datumEnsemble,
-                                         NN_NO_CHECK(ellipsoidalCS));
+            auto crs = GeographicCRS::create(props, datum, datumEnsemble,
+                                             NN_NO_CHECK(ellipsoidalCS));
+            // In case of missing CS node, or to check it, query the coordinate
+            // system from the DB if possible (typically for the baseCRS of a
+            // ProjectedCRS)
+            if (!crs->identifiers().empty() && dbContext_) {
+                GeographicCRSPtr dbCRS;
+                try {
+                    const auto &id = crs->identifiers()[0];
+                    auto authFactory = AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext_), *id->codeSpace());
+                    dbCRS = authFactory->createGeographicCRS(id->code())
+                                .as_nullable();
+                } catch (const util::Exception &) {
+                }
+                if (dbCRS &&
+                    (!isNull(csNode) ||
+                     node->countChildrenOfName(WKTConstants::AXIS) != 0) &&
+                    !ellipsoidalCS->_isEquivalentTo(
+                        dbCRS->coordinateSystem().get(),
+                        util::IComparable::Criterion::EQUIVALENT)) {
+                    emitRecoverableWarning(
+                        "Coordinate system of GeographicCRS in the WKT "
+                        "definition is different from the one of the "
+                        "authority. Unsetting the identifier to avoid "
+                        "confusion");
+                    props.unset(Identifier::CODESPACE_KEY);
+                    props.unset(Identifier::AUTHORITY_KEY);
+                    props.unset(IdentifiedObject::IDENTIFIERS_KEY);
+                    crs = GeographicCRS::create(props, datum, datumEnsemble,
+                                                NN_NO_CHECK(ellipsoidalCS));
+                } else if (dbCRS) {
+                    crs = GeographicCRS::create(props, datum, datumEnsemble,
+                                                dbCRS->coordinateSystem());
+                }
+            }
+            return crs;
         } catch (const util::Exception &e) {
             throw ParsingException(std::string("buildGeodeticCRS: ") +
                                    e.what());
@@ -3773,7 +3808,12 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
         sourceTransformationCRS = sourceCRS->extractGeographicCRS();
         if (!sourceTransformationCRS) {
-            throw ParsingException("Cannot find GeographicCRS in sourceCRS");
+            sourceTransformationCRS =
+                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS);
+            if (!sourceTransformationCRS) {
+                throw ParsingException(
+                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
+            }
         }
     } else {
         sourceTransformationCRS = sourceCRS;
@@ -4371,13 +4411,13 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
         dialect == WKTGuessedDialect::WKT1_ESRI) {
         auto errorMsg = pj_wkt1_parse(wkt);
         if (!errorMsg.empty()) {
-            d->emitRecoverableAssertion(errorMsg);
+            d->emitRecoverableWarning(errorMsg);
         }
     } else if (dialect == WKTGuessedDialect::WKT2_2015 ||
                dialect == WKTGuessedDialect::WKT2_2018) {
         auto errorMsg = pj_wkt2_parse(wkt);
         if (!errorMsg.empty()) {
-            d->emitRecoverableAssertion(errorMsg);
+            d->emitRecoverableWarning(errorMsg);
         }
     }
 

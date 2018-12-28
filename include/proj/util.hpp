@@ -506,6 +506,7 @@ class PropertyMap {
     bool getStringValue(const std::string &key, std::string &outVal) const;
     bool getStringValue(const std::string &key,
                         optional<std::string> &outVal) const;
+    void unset(const std::string &key);
 
     static PropertyMap createAndSetName(const char *name);
     static PropertyMap createAndSetName(const std::string &name);
