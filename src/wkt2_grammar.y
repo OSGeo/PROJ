@@ -1345,12 +1345,15 @@ compound_crs_other_components:
   | temporal_crs opt_separator_scope_extent_identifier_remark
   | vertical_crs wkt_separator temporal_crs opt_separator_scope_extent_identifier_remark
   | parametric_crs wkt_separator temporal_crs opt_separator_scope_extent_identifier_remark
+// PROJ extension: allow bound CRS
+  | bound_crs opt_separator_scope_extent_identifier_remark
 
 compound_crs_keyword: T_COMPOUNDCRS
 
 compound_crs_name: quoted_latin_text
 
-horizontal_crs: geographic2D_crs | projected_crs | engineering_crs
+// PROJ extension: allow bound CRS
+horizontal_crs: geographic2D_crs | projected_crs | engineering_crs | bound_crs
 
 geographic2D_crs: static_geographic_crs | dynamic_geographic_crs
 
