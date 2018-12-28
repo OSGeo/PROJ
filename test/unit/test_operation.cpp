@@ -4260,6 +4260,32 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_match_by_name) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setAllowUseIntermediateCRS(false);
+    auto NAD27 = GeographicCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                          GeographicCRS::EPSG_4267->nameStr()),
+        GeographicCRS::EPSG_4267->datum(),
+        GeographicCRS::EPSG_4267->datumEnsemble(),
+        GeographicCRS::EPSG_4267->coordinateSystem());
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NAD27, GeographicCRS::EPSG_4326, ctxt);
+    auto listInv = CoordinateOperationFactory::create()->createOperations(
+        GeographicCRS::EPSG_4326, NAD27, ctxt);
+    auto listRef = CoordinateOperationFactory::create()->createOperations(
+        GeographicCRS::EPSG_4267, GeographicCRS::EPSG_4326, ctxt);
+    EXPECT_EQ(list.size(), listRef.size());
+    EXPECT_EQ(listInv.size(), listRef.size());
+    EXPECT_GE(listRef.size(), 2U);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_context_filter_accuracy) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
