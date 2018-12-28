@@ -8060,8 +8060,7 @@ TEST(io, projparse_init) {
     {
         auto obj = createFromUserInput(
             "proj=pipeline step init=epsg:4326 step proj=longlat ellps=WGS84",
-            dbContext,
-            true);
+            dbContext, true);
         auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
         ASSERT_TRUE(co != nullptr);
         EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),

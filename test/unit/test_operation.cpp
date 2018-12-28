@@ -4495,7 +4495,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
                           PROJStringFormatter::Convention::PROJ_5,
                           authFactory->databaseContext())
                           .get()),
-                  "+proj=vgridshift +grids=egm08_25.gtx");
+                  "+proj=vgridshift +grids=egm08_25.gtx +multiplier=1");
     }
     {
         auto ctxt =
@@ -4508,7 +4508,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
         ASSERT_EQ(list.size(), 2);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=vgridshift +grids=egm08_25.gtx");
+            "+proj=vgridshift +grids=egm08_25.gtx +multiplier=1");
     }
     {
         auto ctxt =
@@ -4521,7 +4521,8 @@ TEST(operation, vertCRS_to_geogCRS_context) {
         ASSERT_EQ(list.size(), 2);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=pipeline +step +inv +proj=vgridshift +grids=egm08_25.gtx");
+            "+proj=pipeline +step +inv +proj=vgridshift +grids=egm08_25.gtx "
+            "+multiplier=1");
     }
 }
 
@@ -5700,7 +5701,7 @@ static BoundCRSNNPtr createBoundVerticalCRS() {
 TEST(operation, transformation_height_to_PROJ_string) {
     auto transf = createBoundVerticalCRS()->transformation();
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=vgridshift +grids=egm08_25.gtx");
+              "+proj=vgridshift +grids=egm08_25.gtx +multiplier=1");
 
     auto grids = transf->gridsNeeded(DatabaseContext::create());
     ASSERT_EQ(grids.size(), 1);
@@ -5889,8 +5890,8 @@ TEST(operation, compoundCRS_with_boundVerticalCRS_to_geogCRS) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift "
-              "+grids=egm08_25.gtx +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg +step +proj=axisswap +order=2,1");
+              "+grids=egm08_25.gtx +multiplier=1 +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -5939,7 +5940,8 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
               "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=cart "
               "+ellps=clrk80ign +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
               "+rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
-              "+ellps=WGS84 +step +proj=vgridshift +grids=egm08_25.gtx +step "
+              "+ellps=WGS84 +step +proj=vgridshift +grids=egm08_25.gtx "
+              "+multiplier=1 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step "
               "+proj=axisswap +order=2,1");
 
@@ -5975,7 +5977,7 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
               "+pm=paris +step +proj=cart +ellps=clrk80ign +step +proj=helmert "
               "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
               "+convention=position_vector +step +inv +proj=cart +ellps=WGS84 "
-              "+step +proj=vgridshift +grids=egm08_25.gtx +step "
+              "+step +proj=vgridshift +grids=egm08_25.gtx +multiplier=1 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step "
               "+proj=axisswap +order=2,1");
 

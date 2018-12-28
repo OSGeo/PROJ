@@ -8540,6 +8540,7 @@ void Transformation::_exportToPROJString(
         }
         formatter->addStep("vgridshift");
         formatter->addParam("grids", heightFilename);
+        formatter->addParam("multiplier", 1.0);
         if (isMethodInverseOf) {
             formatter->stopInversion();
         }
@@ -8558,6 +8559,7 @@ void Transformation::_exportToPROJString(
             }
             formatter->addStep("vgridshift");
             formatter->addParam("grids", filename);
+            formatter->addParam("multiplier", 1.0);
             if (isMethodInverseOf) {
                 formatter->stopInversion();
             }
