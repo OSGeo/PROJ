@@ -9595,7 +9595,7 @@ struct FilterResults {
           sourceAndTargetCRSExtentUse(
               context->getSourceAndTargetCRSExtentUse()) {
 
-        computeAreaOfIntest();
+        computeAreaOfInterest();
         filterOut(forceStrictContainmentTest);
     }
 
@@ -9634,7 +9634,7 @@ struct FilterResults {
     std::vector<CoordinateOperationNNPtr> res{};
 
     // ----------------------------------------------------------------------
-    void computeAreaOfIntest() {
+    void computeAreaOfInterest() {
 
         // Compute an area of interest from the CRS extent if the user did
         // not specify one
@@ -9676,6 +9676,7 @@ struct FilterResults {
                 ? CoordinateOperationContext::SpatialCriterion::
                       STRICT_CONTAINMENT
                 : context->getSpatialCriterion();
+        bool hasFoundOpWithExtent = false;
         for (const auto &op : sourceList) {
             if (desiredAccuracy != 0) {
                 const double accuracy = getAccuracy(op);
@@ -9688,6 +9689,7 @@ struct FilterResults {
                 auto extent = getExtent(op, true, emptyIntersection);
                 if (!extent)
                     continue;
+                hasFoundOpWithExtent = true;
                 bool extentContains =
                     extent->contains(NN_NO_CHECK(areaOfInterest));
                 if (extentContains) {
@@ -9712,6 +9714,7 @@ struct FilterResults {
                 auto extent = getExtent(op, true, emptyIntersection);
                 if (!extent)
                     continue;
+                hasFoundOpWithExtent = true;
                 bool extentContainsSource =
                     !sourceCRSExtent ||
                     extent->contains(NN_NO_CHECK(sourceCRSExtent));
@@ -9742,6 +9745,20 @@ struct FilterResults {
                 }
             }
             res.emplace_back(op);
+        }
+
+        // In case no operation has an extent and no result is found,
+        // retain all initial operations that match accuracy criterion.
+        if (res.empty() && !hasFoundOpWithExtent) {
+            for (const auto &op : sourceList) {
+                if (desiredAccuracy != 0) {
+                    const double accuracy = getAccuracy(op);
+                    if (accuracy < 0 || accuracy > desiredAccuracy) {
+                        continue;
+                    }
+                }
+                res.emplace_back(op);
+            }
         }
     }
 

@@ -5340,6 +5340,25 @@ TEST(operation, boundCRS_of_geogCRS_to_geogCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, boundCRS_of_geogCRS_to_geogCRS_with_area) {
+    auto boundCRS = BoundCRS::createFromTOWGS84(
+        GeographicCRS::EPSG_4267, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        boundCRS, authFactory->createCoordinateReferenceSystem("4326"));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=clrk66 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
+              "+rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
+              "+ellps=WGS84 +step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_of_geogCRS_to_unrelated_geogCRS) {
     auto boundCRS = BoundCRS::createFromTOWGS84(
         GeographicCRS::EPSG_4807, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
