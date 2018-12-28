@@ -350,12 +350,16 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
     auto cs = crs->coordinateSystem();
     ASSERT_EQ(cs->axisList().size(), 2);
     if (latLong) {
-        EXPECT_EQ(cs->axisList()[0]->nameStr(), "Latitude");
-        EXPECT_EQ(cs->axisList()[0]->abbreviation(), "lat");
+        EXPECT_TRUE(cs->axisList()[0]->nameStr() == "Latitude" ||
+                    cs->axisList()[0]->nameStr() == "Geodetic latitude")
+            << cs->axisList()[0]->nameStr();
+        EXPECT_EQ(tolower(cs->axisList()[0]->abbreviation()), "lat");
         EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::NORTH);
 
-        EXPECT_EQ(cs->axisList()[1]->nameStr(), "Longitude");
-        EXPECT_EQ(cs->axisList()[1]->abbreviation(), "lon");
+        EXPECT_TRUE(cs->axisList()[1]->nameStr() == "Longitude" ||
+                    cs->axisList()[1]->nameStr() == "Geodetic longitude")
+            << cs->axisList()[1]->nameStr();
+        EXPECT_EQ(tolower(cs->axisList()[1]->abbreviation()), "lon");
         EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::EAST);
     } else {
         EXPECT_EQ(cs->axisList()[0]->nameStr(), "Longitude");
@@ -1005,8 +1009,6 @@ TEST(wkt_parse, wkt1_projected) {
                "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
                "        UNIT[\"degree\",0.0174532925199433,\n"
                "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
-               "        AXIS[\"latitude\",NORTH],\n"
-               "        AXIS[\"longitude\",EAST],\n"
                "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
                "    PROJECTION[\"Transverse_Mercator\"],\n"
                "    PARAMETER[\"latitude_of_origin\",0],\n"
@@ -1019,10 +1021,14 @@ TEST(wkt_parse, wkt1_projected) {
                "    AXIS[\"(E)\",EAST],\n"
                "    AXIS[\"(N)\",NORTH],\n"
                "    AUTHORITY[\"EPSG\",\"32631\"]]";
-    auto obj = WKTParser().createFromWKT(wkt);
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     checkProjected(crs);
+
+    EXPECT_TRUE(!crs->baseCRS()->identifiers().empty());
 }
 
 // ---------------------------------------------------------------------------
@@ -1054,6 +1060,46 @@ TEST(wkt_parse, wkt1_projected_no_axis) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     checkProjected(crs);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_projected_wrong_axis_geogcs) {
+    auto wkt = "PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+               "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+               "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+               "        UNIT[\"degree\",0.0174532925199433,\n"
+               "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+               "        AXIS[\"longitude\",EAST],\n"
+               "        AXIS[\"latitude\",NORTH],\n"
+               "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+               "    PROJECTION[\"Transverse_Mercator\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",0],\n"
+               "    PARAMETER[\"central_meridian\",3],\n"
+               "    PARAMETER[\"scale_factor\",0.9996],\n"
+               "    PARAMETER[\"false_easting\",500000],\n"
+               "    PARAMETER[\"false_northing\",0],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+               "    AUTHORITY[\"EPSG\",\"32631\"]]";
+    WKTParser parser;
+    parser.setStrict(false).attachDatabaseContext(DatabaseContext::create());
+    auto obj = parser.createFromWKT(wkt);
+    EXPECT_TRUE(!parser.warningList().empty());
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_TRUE(crs->baseCRS()->identifiers().empty());
+
+    auto cs = crs->baseCRS()->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 2);
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::EAST);
+    EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::NORTH);
 }
 
 // ---------------------------------------------------------------------------
