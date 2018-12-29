@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "proj_experimental.h"
 #include "proj_internal.h"
 #include "projects.h"
 
@@ -61,6 +62,22 @@ void pj_set_ctx( projPJ pj, projCtx ctx )
     if (pj==nullptr)
         return;
     pj->ctx = ctx;
+}
+
+/************************************************************************/
+/*                        proj_assign_context()                         */
+/************************************************************************/
+
+/** \brief Re-assign a context to a PJ* object.
+ *
+ * This may be useful if the PJ* has been created with a context that is
+ * thread-specific, and is later used in another thread. In that case,
+ * the user may want to assign another thread-specific context to the
+ * object.
+ */
+void proj_assign_context( PJ* pj, PJ_CONTEXT* ctx )
+{
+    pj_set_ctx( pj, ctx );
 }
 
 /************************************************************************/
