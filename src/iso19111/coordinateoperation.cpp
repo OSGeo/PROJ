@@ -9693,7 +9693,13 @@ struct FilterResults {
                 bool extentContains =
                     extent->contains(NN_NO_CHECK(areaOfInterest));
                 if (extentContains) {
-                    hasOpThatContainsAreaOfInterest = true;
+                    const auto &name = op->nameStr();
+                    if (name.find(NULL_GEOGRAPHIC_OFFSET) ==
+                            std::string::npos &&
+                        name.find(NULL_GEOCENTRIC_TRANSLATION) ==
+                            std::string::npos) {
+                        hasOpThatContainsAreaOfInterest = true;
+                    }
                 }
                 if (spatialCriterion ==
                         CoordinateOperationContext::SpatialCriterion::
@@ -9722,7 +9728,13 @@ struct FilterResults {
                     !targetCRSExtent ||
                     extent->contains(NN_NO_CHECK(targetCRSExtent));
                 if (extentContainsSource && extentContainsTarget) {
-                    hasOpThatContainsAreaOfInterest = true;
+                    const auto &name = op->nameStr();
+                    if (name.find(NULL_GEOGRAPHIC_OFFSET) ==
+                            std::string::npos &&
+                        name.find(NULL_GEOCENTRIC_TRANSLATION) ==
+                            std::string::npos) {
+                        hasOpThatContainsAreaOfInterest = true;
+                    }
                 }
                 if (spatialCriterion ==
                     CoordinateOperationContext::SpatialCriterion::

@@ -4220,10 +4220,11 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
             authFactory->createCoordinateReferenceSystem("4179"), // Pulkovo 42
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 3);
         // Romania has a larger area than Poland (given our approx formula)
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
         EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
+        EXPECT_EQ(list[2]->nameStr(), "Null geographic offset from Pulkovo 1942(58) to ETRS89");
 
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -4241,7 +4242,7 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4258"),
             authFactory->createCoordinateReferenceSystem("4179"), ctxt);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 3);
         // Romania has a larger area than Poland (given our approx formula)
         EXPECT_EQ(list[0]->nameStr(),
                   "Inverse of Pulkovo 1942(58) to ETRS89 (4)"); // Romania - 3m
