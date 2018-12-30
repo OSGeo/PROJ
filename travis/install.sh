@@ -22,7 +22,11 @@ cd $TAR_DIRECTORY
 # autoconf build from generated tarball
 mkdir build_autoconf
 cd build_autoconf
-../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
+if [ -f /usr/lib/jvm/java-7-openjdk-amd64/include/jni.h ]; then
+    CXXFLAGS="-I/usr/lib/jvm/java-7-openjdk-amd64/include -I/usr/lib/jvm/java-7-openjdk-amd64/include/linux" ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all --with-jni
+else
+    ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
+fi
 make -j3
 make check
 make install
