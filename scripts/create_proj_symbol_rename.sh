@@ -26,32 +26,12 @@ PROJ_ROOT=$(cd $(dirname ${BASH_SOURCE[0]})/..; pwd)
 rm -rf tmp_alias
 mkdir tmp_alias
 for i in ${PROJ_ROOT}/src/*.c; do
-    if ! echo "$i" | grep -q "test228.c"; then
-    if ! echo "$i" | grep -q "proj.c" ; then
-    if ! echo "$i" | grep -q "geod.c" ; then
-    if ! echo "$i" | grep -q "nad2bin.c" ; then
-    if ! echo "$i" | grep -q "geodtest.c" ; then
-    if ! echo "$i" | grep -q "multistresstest.c" ; then
-    if ! echo "$i" | grep -q "gie.c" ; then
-    if ! echo "$i" | grep -q "cs2cs.c" ; then
-    if ! echo "$i" | grep -q "cct.c" ; then
-        echo $i
-        (cd tmp_alias; gcc -fvisibility=hidden ${i} -I../src -I${PROJ_ROOT}/src -I${PROJ_ROOT}/include -fPIC -c)
-    fi
-    fi
-    fi
-    fi
-    fi
-    fi
-    fi
-    fi
-    fi
+    echo $i
+    (cd tmp_alias; gcc -fvisibility=hidden ${i} -I../src -I${PROJ_ROOT}/src -I${PROJ_ROOT}/include -fPIC -c)
 done
-for i in ${PROJ_ROOT}/src/*.cpp; do
-    if ! echo "$i" | grep -q "projinfo.cpp"; then
-        echo $i
-        (cd tmp_alias; g++ -fvisibility=hidden -std=c++11 ${i} -I../src -I${PROJ_ROOT}/src -I${PROJ_ROOT}/include -fPIC -c)
-    fi
+for i in ${PROJ_ROOT}/src/*.cpp ${PROJ_ROOT}/src/iso19111/*.cpp; do
+    echo $i
+    (cd tmp_alias; g++ -fvisibility=hidden -std=c++11 ${i} -I../src -I${PROJ_ROOT}/src -I${PROJ_ROOT}/include -fPIC -c)
 done
 
 (cd tmp_alias; g++ -fvisibility=hidden -std=c++11 *.o -shared -o libproj.so)
