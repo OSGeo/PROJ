@@ -2,7 +2,8 @@
 
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(gall, "Gall (Gall Stereographic)") "\n\tCyl, Sph";
 
@@ -12,8 +13,8 @@ PROJ_HEAD(gall, "Gall (Gall Stereographic)") "\n\tCyl, Sph";
 #define RXF 1.41421356237309504880
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     (void) P;
 
     xy.x = XF * lp.lam;
@@ -23,8 +24,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     (void) P;
 
     lp.lam = RXF * xy.x;

@@ -43,7 +43,7 @@
 // PROJ include order is sensitive
 // clang-format off
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "emess.h"
 // clang-format on
 
@@ -83,7 +83,7 @@ static void process(FILE *fid)
 
 {
     char line[MAX_LINE + 3], *s, pline[40];
-    projUV data;
+    PJ_UV data;
 
     for (;;) {
         double z;
@@ -209,11 +209,11 @@ static void process(FILE *fid)
 /*                          instanciate_crs()                           */
 /************************************************************************/
 
-static PJ_OBJ *instanciate_crs(const std::string &definition,
+static PJ *instanciate_crs(const std::string &definition,
                                const char *const *optionsImportCRS,
                                bool &isGeog, double &toRadians,
                                bool &isLatFirst) {
-    PJ_OBJ *crs = proj_obj_create_from_user_input(nullptr, definition.c_str(),
+    PJ *crs = proj_create_from_user_input(nullptr, definition.c_str(),
                                                   optionsImportCRS);
     if (!crs) {
         return nullptr;
@@ -223,21 +223,21 @@ static PJ_OBJ *instanciate_crs(const std::string &definition,
     toRadians = 0.0;
     isLatFirst = false;
 
-    auto type = proj_obj_get_type(crs);
-    if (type == PJ_OBJ_TYPE_BOUND_CRS) {
-        auto base = proj_obj_get_source_crs(nullptr, crs);
-        proj_obj_destroy(crs);
+    auto type = proj_get_type(crs);
+    if (type == PJ_TYPE_BOUND_CRS) {
+        auto base = proj_get_source_crs(nullptr, crs);
+        proj_destroy(crs);
         crs = base;
-        type = proj_obj_get_type(crs);
+        type = proj_get_type(crs);
     }
-    if (type == PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS ||
-        type == PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS) {
-        auto cs = proj_obj_crs_get_coordinate_system(nullptr, crs);
+    if (type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
+        type == PJ_TYPE_GEOGRAPHIC_3D_CRS) {
+        auto cs = proj_crs_get_coordinate_system(nullptr, crs);
         assert(cs);
 
         isGeog = true;
         const char *axisName = "";
-        proj_obj_cs_get_axis_info(nullptr, cs, 0,
+        proj_cs_get_axis_info(nullptr, cs, 0,
                                   &axisName, // name,
                                   nullptr,   // abbrev
                                   nullptr,   // direction
@@ -250,7 +250,7 @@ static PJ_OBJ *instanciate_crs(const std::string &definition,
             NS_PROJ::internal::ci_find(std::string(axisName), "latitude") !=
             std::string::npos;
 
-        proj_obj_destroy(cs);
+        proj_destroy(cs);
     }
 
     return crs;
@@ -260,35 +260,35 @@ static PJ_OBJ *instanciate_crs(const std::string &definition,
 /*               get_geog_crs_proj_string_from_proj_crs()               */
 /************************************************************************/
 
-static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
+static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
                                                           double &toRadians,
                                                           bool &isLatFirst) {
-    auto srcType = proj_obj_get_type(src);
-    if (srcType == PJ_OBJ_TYPE_BOUND_CRS) {
-        auto base = proj_obj_get_source_crs(nullptr, src);
+    auto srcType = proj_get_type(src);
+    if (srcType == PJ_TYPE_BOUND_CRS) {
+        auto base = proj_get_source_crs(nullptr, src);
         assert(base);
-        proj_obj_destroy(src);
+        proj_destroy(src);
         src = base;
-        srcType = proj_obj_get_type(src);
+        srcType = proj_get_type(src);
     }
-    if (srcType != PJ_OBJ_TYPE_PROJECTED_CRS) {
+    if (srcType != PJ_TYPE_PROJECTED_CRS) {
         return std::string();
     }
 
-    auto base = proj_obj_get_source_crs(nullptr, src);
+    auto base = proj_get_source_crs(nullptr, src);
     assert(base);
-    auto baseType = proj_obj_get_type(base);
-    if (baseType != PJ_OBJ_TYPE_GEOGRAPHIC_2D_CRS &&
-        baseType != PJ_OBJ_TYPE_GEOGRAPHIC_3D_CRS) {
-        proj_obj_destroy(base);
+    auto baseType = proj_get_type(base);
+    if (baseType != PJ_TYPE_GEOGRAPHIC_2D_CRS &&
+        baseType != PJ_TYPE_GEOGRAPHIC_3D_CRS) {
+        proj_destroy(base);
         return std::string();
     }
 
-    auto cs = proj_obj_crs_get_coordinate_system(nullptr, base);
+    auto cs = proj_crs_get_coordinate_system(nullptr, base);
     assert(cs);
 
     const char *axisName = "";
-    proj_obj_cs_get_axis_info(nullptr, cs, 0,
+    proj_cs_get_axis_info(nullptr, cs, 0,
                               &axisName, // name,
                               nullptr,   // abbrev
                               nullptr,   // direction
@@ -300,11 +300,11 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ_OBJ *src,
     isLatFirst = NS_PROJ::internal::ci_find(std::string(axisName),
                                             "latitude") != std::string::npos;
 
-    proj_obj_destroy(cs);
+    proj_destroy(cs);
 
-    auto retCStr = proj_obj_as_proj_string(nullptr, base, PJ_PROJ_5, nullptr);
+    auto retCStr = proj_as_proj_string(nullptr, base, PJ_PROJ_5, nullptr);
     std::string ret(retCStr ? retCStr : "");
-    proj_obj_destroy(base);
+    proj_destroy(base);
     return ret;
 }
 
@@ -541,7 +541,7 @@ int main(int argc, char **argv) {
         proj_context_get_use_proj4_init_rules(nullptr, TRUE) ? optionsProj4Mode
                                                              : nullptr;
 
-    PJ_OBJ *src = nullptr;
+    PJ *src = nullptr;
     if (!fromStr.empty()) {
         bool ignored;
         src = instanciate_crs(fromStr, optionsImportCRS, srcIsGeog,
@@ -551,7 +551,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    PJ_OBJ *dst = nullptr;
+    PJ *dst = nullptr;
     if (!toStr.empty()) {
         dst = instanciate_crs(toStr, optionsImportCRS, destIsGeog,
                               destToRadians, destIsLatLong);
@@ -581,8 +581,8 @@ int main(int argc, char **argv) {
         srcIsGeog = true;
     }
 
-    proj_obj_destroy(src);
-    proj_obj_destroy(dst);
+    proj_destroy(src);
+    proj_destroy(dst);
 
     transformation = proj_create_crs_to_crs(nullptr, fromStr.c_str(),
                                             toStr.c_str(), nullptr);

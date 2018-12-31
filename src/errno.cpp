@@ -1,6 +1,7 @@
 /* For full ANSI compliance of global variable */
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 int pj_errno = 0;
 

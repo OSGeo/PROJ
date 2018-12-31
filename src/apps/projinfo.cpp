@@ -35,7 +35,8 @@
 #include <iostream>
 #include <utility>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 #include <proj/common.hpp>
 #include <proj/coordinateoperation.hpp>

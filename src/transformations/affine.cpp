@@ -27,7 +27,7 @@
 
 #include "proj_internal.h"
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(affine, "Affine transformation");
 PROJ_HEAD(geogoffset, "Geographic Offset");
@@ -70,14 +70,14 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
     return newObs;
 }
 
-static XYZ forward_3d(LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
     return forward_4d(point, P).xyz;
 }
 
 
-static XY forward_2d(LP lp, PJ *P) {
+static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lp = lp;
     return forward_4d(point, P).xy;
@@ -98,13 +98,13 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     return newObs;
 }
 
-static LPZ reverse_3d(XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
     return reverse_4d(point, P).lpz;
 }
 
-static LP reverse_2d(XY xy, PJ *P) {
+static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xy = xy;
     return reverse_4d(point, P).lp;

@@ -3,14 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 #include "proj_math.h"
 
 #define MAX_ITERATIONS 10
 #define TOL 1e-12
 
-LP nad_cvt(LP in, int inverse, struct CTABLE *ct) {
-    LP t, tb,del, dif;
+PJ_LP nad_cvt(PJ_LP in, int inverse, struct CTABLE *ct) {
+    PJ_LP t, tb,del, dif;
     int i = MAX_ITERATIONS;
     const double toltol = TOL*TOL;
 

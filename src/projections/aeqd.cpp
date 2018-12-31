@@ -29,7 +29,7 @@
 #include "geodesic.h"
 #include "proj.h"
 #include <errno.h>
-#include "projects.h"
+#include "proj_internal.h"
 #include "proj_math.h"
 
 namespace { // anonymous namespace
@@ -75,8 +75,8 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
 
 
 
-static XY e_guam_fwd(LP lp, PJ *P) {        /* Guam elliptical */
-    XY xy = {0.0,0.0};
+static PJ_XY e_guam_fwd(PJ_LP lp, PJ *P) {        /* Guam elliptical */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  cosphi, sinphi, t;
 
@@ -91,8 +91,8 @@ static XY e_guam_fwd(LP lp, PJ *P) {        /* Guam elliptical */
 }
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi, rho;
     double azi1, azi2, s12;
@@ -130,8 +130,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi;
 
@@ -177,8 +177,8 @@ oblcon:
 }
 
 
-static LP e_guam_inv(XY xy, PJ *P) { /* Guam elliptical */
-    LP lp = {0.0,0.0};
+static PJ_LP e_guam_inv(PJ_XY xy, PJ *P) { /* Guam elliptical */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double x2, t = 0.0;
     int i;
@@ -195,8 +195,8 @@ static LP e_guam_inv(XY xy, PJ *P) { /* Guam elliptical */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double c;
     double azi1, azi2, s12, x2, y2, lat1, lon1, lat2, lon2;
@@ -227,8 +227,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosc, c_rh, sinc;
 

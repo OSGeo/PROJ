@@ -2,14 +2,15 @@
 
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(wag7, "Wagner VII") "\n\tMisc Sph, no inv";
 
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
 	double theta, ct, D;
 
 	(void) P; /* Shut up compiler warnnings about unused P */

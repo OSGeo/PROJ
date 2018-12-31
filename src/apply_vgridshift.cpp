@@ -33,7 +33,7 @@
 
 #include "proj_math.h"
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 static int is_nodata(float value)
 {
@@ -44,7 +44,7 @@ static int is_nodata(float value)
     return value > 1000 || value < -1000 || value == -88.88880f;
 }
 
-static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
+static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
     int  itable = 0;
     double value = HUGE_VAL;
     double grid_x, grid_y;
@@ -213,7 +213,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
     {
         double value;
         long io = i * point_offset;
-        LP   input;
+        PJ_LP   input;
 
         input.phi = y[io];
         input.lam = x[io];
@@ -310,7 +310,7 @@ int proj_vgrid_init(PJ* P, const char *grids) {
 }
 
 /***********************************************/
-double proj_vgrid_value(PJ *P, LP lp){
+double proj_vgrid_value(PJ *P, PJ_LP lp){
 /***********************************************
 
   Read grid value at position lp in grids loaded

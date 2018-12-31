@@ -2,7 +2,7 @@
 #include <errno.h>
 #include "proj.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 
 PROJ_HEAD(tpeqd, "Two Point Equidistant")
@@ -16,8 +16,8 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double t, z1, z2, dl1, dl2, sp, cp;
 
@@ -37,8 +37,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cz1, cz2, s, d, cp, sp;
 

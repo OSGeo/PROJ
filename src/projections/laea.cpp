@@ -1,7 +1,7 @@
 #define PJ_LIB__
 #include <errno.h>
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "proj_math.h"
 
 PROJ_HEAD(laea, "Lambert Azimuthal Equal Area") "\n\tAzi, Sph&Ell";
@@ -32,8 +32,8 @@ struct pj_opaque {
 
 #define EPS10   1.e-10
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double coslam, sinlam, sinphi, q, sinb=0.0, cosb=0.0, b=0.0;
 
@@ -94,8 +94,8 @@ eqcon:
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi;
 
@@ -136,8 +136,8 @@ oblcon:
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cCe, sCe, q, rho, ab=0.0;
 
@@ -185,8 +185,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  cosz=0.0, rh, sinz=0.0;
 

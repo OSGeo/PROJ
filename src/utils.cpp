@@ -31,7 +31,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 /************************************************************************/
 /*                           pj_is_latlong()                            */

@@ -49,12 +49,12 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(molodensky, "Molodensky transform");
 
-static XYZ forward_3d(LPZ lpz, PJ *P);
-static LPZ reverse_3d(XYZ xyz, PJ *P);
+static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P);
+static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P);
 
 namespace { // anonymous namespace
 struct pj_opaque_molodensky {
@@ -123,7 +123,7 @@ static double RM (double a, double es, double phi) {
 }
 
 
-static LPZ calc_standard_params(LPZ lpz, PJ *P) {
+static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
     double dphi, dlam, dh;
 
@@ -162,7 +162,7 @@ static LPZ calc_standard_params(LPZ lpz, PJ *P) {
 }
 
 
-static LPZ calc_abridged_params(LPZ lpz, PJ *P) {
+static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
     double dphi, dlam, dh;
 
@@ -197,7 +197,7 @@ static LPZ calc_abridged_params(LPZ lpz, PJ *P) {
 }
 
 
-static XY forward_2d(LP lp, PJ *P) {
+static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
 
     point.lp = lp;
@@ -207,7 +207,7 @@ static XY forward_2d(LP lp, PJ *P) {
 }
 
 
-static LP reverse_2d(XY xy, PJ *P) {
+static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
 
     point.xy = xy;
@@ -218,7 +218,7 @@ static LP reverse_2d(XY xy, PJ *P) {
 }
 
 
-static XYZ forward_3d(LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
 
@@ -246,10 +246,10 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
 }
 
 
-static LPZ reverse_3d(XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
-    LPZ lpz;
+    PJ_LPZ lpz;
 
     /* calculate parameters depending on the mode we are in */
     point.xyz = xyz;

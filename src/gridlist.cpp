@@ -32,7 +32,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 static PJ_GRIDINFO *grid_list = nullptr;
 #define PJ_MAX_PATH_LENGTH 1024

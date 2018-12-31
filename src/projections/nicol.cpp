@@ -2,15 +2,16 @@
 
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(nicol, "Nicolosi Globular") "\n\tMisc Sph, no inv";
 
 #define EPS 1e-10
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     (void) P;
 
     if (fabs(lp.lam) < EPS) {

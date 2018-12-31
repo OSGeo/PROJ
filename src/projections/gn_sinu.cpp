@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(gn_sinu, "General Sinusoidal Series") "\n\tPCyl, Sph\n\tm= n=";
 PROJ_HEAD(sinu, "Sinusoidal (Sanson-Flamsteed)") "\n\tPCyl, Sph&Ell";
@@ -23,8 +23,8 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     double s, c;
 
     xy.y = pj_mlfn(lp.phi, s = sin(lp.phi), c = cos(lp.phi), static_cast<struct pj_opaque*>(P->opaque)->en);
@@ -33,8 +33,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     double s;
 
     if ((s = fabs(lp.phi = pj_inv_mlfn(P->ctx, xy.y, P->es, static_cast<struct pj_opaque*>(P->opaque)->en))) < M_HALFPI) {
@@ -50,8 +50,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     if (Q->m == 0.0)
@@ -80,8 +80,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     xy.y /= Q->C_y;

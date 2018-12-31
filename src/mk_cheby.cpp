@@ -1,9 +1,10 @@
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 static void /* sum coefficients less than res */
-eval(projUV **w, int nu, int nv, double res, projUV *resid) {
+eval(PJ_UV **w, int nu, int nv, double res, PJ_UV *resid) {
     int i, j;
     double ab;
-    projUV *s;
+    PJ_UV *s;
 
     resid->u = resid->v = 0.;
     for (i = 0; i < nu; ++i) {
@@ -41,14 +42,14 @@ makeT(int nru, int nrv) {
     return T;
 }
 Tseries *
-mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV), 
+mk_cheby(PJ_UV a, PJ_UV b, double res, PJ_UV *resid, PJ_UV (*func)(PJ_UV), 
          int nu, int nv, int power) {
     int j, i, nru, nrv, *ncu, *ncv;
     Tseries *T = nullptr;
-    projUV **w;
+    PJ_UV **w;
     double cutres;
 
-    if (!(w = (projUV **)vector2(nu, nv, sizeof(projUV))))
+    if (!(w = (PJ_UV **)vector2(nu, nv, sizeof(PJ_UV))))
         return nullptr;
     if (!(ncu = (int *)vector1(nu + nv, sizeof(int)))) {
         freev2((void **)w, nu);
@@ -56,7 +57,7 @@ mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV),
     }
     ncv = ncu + nu;
     if (!bchgen(a, b, nu, nv, w, func)) {
-        projUV *s;
+        PJ_UV *s;
         double ab, *p;
 
         /* analyse coefficients and adjust until residual OK */

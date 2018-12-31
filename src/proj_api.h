@@ -82,7 +82,7 @@ extern "C" {
 #define DEG_TO_RAD   .017453292519943296
 
 
-#if defined(PROJECTS_H) || defined(PROJ_H)
+#if defined(PROJ_H)
 #define PROJ_API_H_NOT_INVOKED_AS_PRIMARY_API
 #endif
 
@@ -103,17 +103,10 @@ PROJ_DLL extern int pj_errno;    /* global error return code */
     /* These make the function declarations below conform with classic proj */
     typedef PJ *projPJ;          /* projPJ is a pointer to PJ */
     typedef struct projCtx_t *projCtx;  /* projCtx is a pointer to projCtx_t */
-#ifdef PROJ_H
 #   define projXY       PJ_XY
 #   define projLP       PJ_LP
 #   define projXYZ      PJ_XYZ
 #   define projLPZ      PJ_LPZ
-#else
-#   define projXY       XY
-#   define projLP       LP
-#   define projXYZ      XYZ
-#   define projLPZ      LPZ
-#endif
 
 #else
     /* i.e. proj_api invoked as primary API */

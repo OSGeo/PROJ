@@ -3,7 +3,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph";
 
@@ -26,15 +26,15 @@ struct pj_opaque {
 
 #define EPS10 1.e-10
 
-static XY forward_error(PJ *P, LP lp, XY xy) {
+static PJ_XY forward_error(PJ *P, PJ_LP lp, PJ_XY xy) {
     proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
     proj_log_trace(P, "Coordinate (%.3f, %.3f) is on the unprojected hemisphere",
                    proj_todeg(lp.lam), proj_todeg(lp.phi));
     return xy;
 }
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy;
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi;
 
@@ -67,8 +67,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp;
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  rh, cosc, sinc;
 

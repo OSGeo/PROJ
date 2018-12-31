@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 static double proj_strtod(char *nptr, char **endptr);
 

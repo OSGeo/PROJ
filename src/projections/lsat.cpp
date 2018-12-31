@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(lsat, "Space oblique for LANDSAT")
     "\n\tCyl, Sph&Ell\n\tlsat= path=";
@@ -44,8 +44,8 @@ static void seraz0(double lam, double mult, PJ *P) {
 }
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int l, nn;
     double lamt = 0.0, xlam, sdsq, c, d, s, lamdp = 0.0, phidp, lampp, tanph;
@@ -107,8 +107,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int nn;
     double lamt, sdsq, s, lamdp, phidp, sppsq, dd, sd, sl, fac, scl, sav, spp;

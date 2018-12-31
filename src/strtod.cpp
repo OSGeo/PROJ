@@ -32,7 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 /* Windows nmake build doesn't have a proj_config.h, but HAVE_LOCALECONV */
 /* is defined in the compilation line */

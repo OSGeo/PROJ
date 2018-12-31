@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 namespace { // anonymous namespace
 struct pj_opaque {
@@ -24,7 +24,7 @@ PROJ_HEAD(ob_tran, "General Oblique Transformation") "\n\tMisc Sph"
 #define TOL 1e-10
 
 
-static XY o_forward(LP lp, PJ *P) {             /* spheroid */
+static PJ_XY o_forward(PJ_LP lp, PJ *P) {             /* spheroid */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double coslam, sinphi, cosphi;
 
@@ -39,7 +39,7 @@ static XY o_forward(LP lp, PJ *P) {             /* spheroid */
 }
 
 
-static XY t_forward(LP lp, PJ *P) {             /* spheroid */
+static PJ_XY t_forward(PJ_LP lp, PJ *P) {             /* spheroid */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosphi, coslam;
 
@@ -52,12 +52,12 @@ static XY t_forward(LP lp, PJ *P) {             /* spheroid */
 }
 
 
-static LP o_inverse(XY xy, PJ *P) {             /* spheroid */
+static PJ_LP o_inverse(PJ_XY xy, PJ *P) {             /* spheroid */
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double coslam, sinphi, cosphi;
 
-    LP lp = Q->link->inv(xy, Q->link);
+    PJ_LP lp = Q->link->inv(xy, Q->link);
     if (lp.lam != HUGE_VAL) {
         coslam = cos(lp.lam -= Q->lamp);
         sinphi = sin(lp.phi);
@@ -70,12 +70,12 @@ static LP o_inverse(XY xy, PJ *P) {             /* spheroid */
 }
 
 
-static LP t_inverse(XY xy, PJ *P) {             /* spheroid */
+static PJ_LP t_inverse(PJ_XY xy, PJ *P) {             /* spheroid */
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosphi, t;
 
-    LP lp = Q->link->inv(xy, Q->link);
+    PJ_LP lp = Q->link->inv(xy, Q->link);
     if (lp.lam != HUGE_VAL) {
         cosphi = cos(lp.phi);
         t = lp.lam - Q->lamp;

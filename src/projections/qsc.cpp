@@ -43,7 +43,8 @@
 #include <errno.h>
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 /* The six cube faces. */
 namespace { // anonymous namespace
@@ -118,8 +119,8 @@ static double qsc_shift_lon_origin(double lon, double offset) {
 }
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double lat, lon;
     double theta, phi;
@@ -234,8 +235,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double mu, nu, cosmu, tannu;
     double tantheta, theta, cosphi, phi;

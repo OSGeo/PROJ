@@ -3,7 +3,8 @@
 #include <errno.h>
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 namespace { // anonymous namespace
 struct pj_opaque {
@@ -17,8 +18,8 @@ PROJ_HEAD(vandg3, "van der Grinten III") "\n\tMisc Sph, no inv";
 #define TOL    1e-10
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double x1, at, bt, ct;
 

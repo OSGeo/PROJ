@@ -2,15 +2,16 @@
 
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv";
 
 #define TOL 1e-10
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     double x1, t, bt, ct, ft, bt2, ct2, dt, dt2;
     (void) P;
 

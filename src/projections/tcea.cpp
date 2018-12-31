@@ -2,21 +2,22 @@
 
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(tcea, "Transverse Cylindrical Equal Area") "\n\tCyl, Sph";
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     xy.x = cos (lp.phi) * sin (lp.lam) / P->k0;
     xy.y = P->k0 * (atan2 (tan (lp.phi), cos (lp.lam)) - P->phi0);
     return xy;
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0, 0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0, 0.0};
     double t;
 
     xy.y = xy.y / P->k0 + P->phi0;

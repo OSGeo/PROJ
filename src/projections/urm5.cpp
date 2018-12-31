@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl, Sph, no inv\n\tn= q= alpha=";
 
@@ -15,8 +15,8 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double t;
 

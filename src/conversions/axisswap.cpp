@@ -57,8 +57,9 @@ operation:
 #include <stdlib.h>
 #include <string.h>
 
+#include "proj.h"
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(axisswap, "Axis ordering");
 
@@ -73,7 +74,7 @@ static int sign(int x) {
     return (x > 0) - (x < 0);
 }
 
-static XY forward_2d(LP lp, PJ *P) {
+static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out, in;
@@ -88,7 +89,7 @@ static XY forward_2d(LP lp, PJ *P) {
 }
 
 
-static LP reverse_2d(XY xy, PJ *P) {
+static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out, in;
@@ -103,7 +104,7 @@ static LP reverse_2d(XY xy, PJ *P) {
 }
 
 
-static XYZ forward_3d(LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out, in;
@@ -117,7 +118,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
     return out.xyz;
 }
 
-static LPZ reverse_3d(XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD in, out;

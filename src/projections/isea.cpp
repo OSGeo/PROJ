@@ -14,7 +14,7 @@
 #include "proj_internal.h"
 #include "proj_math.h"
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 #define DEG36 0.62831853071795864768
 #define DEG72 1.25663706143591729537
@@ -995,8 +995,8 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     struct isea_pt out;
     struct isea_geo in;

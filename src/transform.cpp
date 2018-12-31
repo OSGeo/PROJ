@@ -32,7 +32,7 @@
 #include <string.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "geocent.h"
 
 static int adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
@@ -193,8 +193,8 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
 
         for( i = 0; i < n; i++ )
         {
-            XYZ projected_loc;
-            LPZ geodetic_loc;
+            PJ_XYZ projected_loc;
+            PJ_LPZ geodetic_loc;
 
             geodetic_loc.lam = x[dist*i];
             geodetic_loc.phi = y[dist*i];
@@ -232,8 +232,8 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
 
     for( i = 0; i <n; i++ )
     {
-        XY         projected_loc;
-        LP	       geodetic_loc;
+        PJ_XY         projected_loc;
+        PJ_LP	       geodetic_loc;
 
         geodetic_loc.lam = x[dist*i];
         geodetic_loc.phi = y[dist*i];
@@ -303,8 +303,8 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
 
         for (i=0; i < n; i++)
         {
-            XYZ projected_loc;
-            LPZ geodetic_loc;
+            PJ_XYZ projected_loc;
+            PJ_LPZ geodetic_loc;
 
             projected_loc.x = x[dist*i];
             projected_loc.y = y[dist*i];
@@ -343,8 +343,8 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
 
     /* Fallback to the original PROJ.4 API 2d inversion - inv */
     for( i = 0; i < n; i++ ) {
-        XY         projected_loc;
-        LP	       geodetic_loc;
+        PJ_XY         projected_loc;
+        PJ_LP	       geodetic_loc;
 
         projected_loc.x = x[dist*i];
         projected_loc.y = y[dist*i];

@@ -3,7 +3,8 @@
 #include <errno.h>
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(cass, "Cassini") "\n\tCyl, Sph&Ell";
 
@@ -24,9 +25,9 @@ struct pj_opaque {
 
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double n, t, a1, c, a2, tn;
-    XY xy = {0.0, 0.0};
+    PJ_XY xy = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     xy.y = pj_mlfn (lp.phi, n = sin (lp.phi), c = cos (lp.phi), Q->en);
@@ -46,17 +47,17 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     xy.x  =  asin (cos (lp.phi) * sin (lp.lam));
     xy.y  =  atan2 (tan (lp.phi), cos (lp.lam)) - P->phi0;
     return xy;
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     double n, t, r, dd, d2, tn, ph1;
-    LP lp = {0.0, 0.0};
+    PJ_LP lp = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     ph1 = pj_inv_mlfn (P->ctx, Q->m0 + xy.y, P->es, Q->en);
@@ -75,8 +76,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     double dd;
     lp.phi = asin(sin(dd = xy.y + P->phi0) * cos(xy.x));
     lp.lam = atan2(tan(xy.x), cos(dd));

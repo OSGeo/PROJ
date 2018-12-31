@@ -10,7 +10,8 @@ Port to PROJ.4 by Bojan Savric, 4 April 2016
 
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(comill, "Compact Miller") "\n\tCyl, Sph";
 
@@ -25,8 +26,8 @@ PROJ_HEAD(comill, "Compact Miller") "\n\tCyl, Sph";
 /* Not sure at all of the appropriate number for MAX_ITER... */
 #define MAX_ITER 100
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     double lat_sq;
 
     (void) P;   /* silence unused parameter warnings */
@@ -38,8 +39,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     double yc, tol, y2, f, fder;
     int i;
 

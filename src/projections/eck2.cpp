@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(eck2, "Eckert II") "\n\tPCyl, Sph";
 
@@ -13,8 +13,8 @@ PROJ_HEAD(eck2, "Eckert II") "\n\tPCyl, Sph";
 #define ONEEPS  1.0000001
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     (void) P;
 
     xy.x = FXC * lp.lam * (xy.y = sqrt(4. - 3. * sin(fabs(lp.phi))));
@@ -25,8 +25,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     (void) P;
 
     lp.lam = xy.x / (FXC * ( lp.phi = 2. - fabs(xy.y) / FYC) );

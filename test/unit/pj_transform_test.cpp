@@ -33,7 +33,8 @@
 
 // PROJ include order is sensitive
 // clang-format off
-#include <projects.h>
+#include <proj.h>
+#include "proj_internal.h"
 #include <proj_api.h>
 // clang-format on
 

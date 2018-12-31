@@ -3,7 +3,8 @@
 #include <errno.h>
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(wink2, "Winkel II") "\n\tPCyl, Sph, no inv\n\tlat_1=";
 
@@ -17,8 +18,8 @@ struct pj_opaque {
 #define LOOP_TOL    1e-7
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
 	double k, V;
 	int i;
 

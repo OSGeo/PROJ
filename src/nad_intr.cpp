@@ -2,11 +2,11 @@
 #define PJ_LIB__
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
-	LP
-nad_intr(LP t, struct CTABLE *ct) {
-	LP val, frct;
+PJ_LP nad_intr(PJ_LP t, struct CTABLE *ct) {
+	PJ_LP val, frct;
 	ILP indx;
 	double m00, m10, m01, m11;
 	FLP *f00, *f10, *f01, *f11;

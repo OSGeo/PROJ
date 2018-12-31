@@ -80,7 +80,8 @@
 #include <errno.h>
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl, Ell";
 
@@ -102,9 +103,9 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static XY e_forward (LP lp, PJ *P) {                /* Ellipsoidal, forward */
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forward */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    XY xy = {0.0,0.0};
+    PJ_XY xy = {0.0,0.0};
 
     double gfi, u, deltav, s, d, eps, rho;
 
@@ -129,9 +130,9 @@ static XY e_forward (LP lp, PJ *P) {                /* Ellipsoidal, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {                /* Ellipsoidal, inverse */
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal, inverse */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    LP lp = {0.0,0.0};
+    PJ_LP lp = {0.0,0.0};
 
     double u, deltav, s, d, eps, rho, fi1, xy0;
     int i;

@@ -1,5 +1,6 @@
 /* print row coefficients of Tseries structure */
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 #include <stdio.h>
 #include <string.h>
 #define NF 20 /* length of final format string */

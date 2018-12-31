@@ -33,7 +33,7 @@
 
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 #define INPUT_UNITS  P->left
 #define OUTPUT_UNITS P->right
@@ -164,7 +164,7 @@ static PJ_COORD error_or_coord(PJ *P, PJ_COORD coord, int last_errno) {
 }
 
 
-XY pj_fwd(LP lp, PJ *P) {
+PJ_XY pj_fwd(PJ_LP lp, PJ *P) {
     int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.lp = lp;
@@ -198,7 +198,7 @@ XY pj_fwd(LP lp, PJ *P) {
 
 
 
-XYZ pj_fwd3d(LPZ lpz, PJ *P) {
+PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
     int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.lpz = lpz;

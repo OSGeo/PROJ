@@ -32,7 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 static PJ_GridCatalog *grid_catalog_list = nullptr;
 
@@ -122,7 +123,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
     for( i = 0; i < point_count; i++ )
     {
         long io = i * point_offset;
-        LP   input, output_after, output_before;
+        PJ_LP   input, output_after, output_before;
         double mix_ratio;
         PJ_GRIDINFO *gi;
 
@@ -236,7 +237,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
 /************************************************************************/
 
 PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
-                             LP location, double date,
+                             PJ_LP location, double date,
                              PJ_Region *optional_region,
                              double *grid_date ) 
 {

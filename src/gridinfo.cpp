@@ -36,7 +36,7 @@
 #include <string.h>
 
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 /************************************************************************/
 /*                             swap_words()                             */
@@ -121,7 +121,7 @@ void pj_gridinfo_free( projCtx ctx, PJ_GRIDINFO *gi )
 /*      stuff are loaded by pj_gridinfo_init().                         */
 /************************************************************************/
 
-int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
+int pj_gridinfo_load( projCtx_t* ctx, PJ_GRIDINFO *gi )
 
 {
     struct CTABLE ct_tmp;
@@ -155,7 +155,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             return 0;
         }
 
-        result = nad_ctable_load( ctx, &ct_tmp, fid );
+        result = nad_ctable_load( ctx, &ct_tmp, (struct projFileAPI_t*)fid );
 
         pj_ctx_fclose( ctx, fid );
 
@@ -182,7 +182,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             return 0;
         }
 
-        result = nad_ctable2_load( ctx, &ct_tmp, fid );
+        result = nad_ctable2_load( ctx, &ct_tmp, (struct projFileAPI_t*)fid );
 
         pj_ctx_fclose( ctx, fid );
 
@@ -483,7 +483,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
     for( subfile = 0; subfile < num_subfiles; subfile++ )
     {
         struct CTABLE *ct;
-        LP ur;
+        PJ_LP ur;
         int gs_count;
         PJ_GRIDINFO *gi;
 
@@ -662,7 +662,7 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 {
     unsigned char header[192]; /* 12 records of 16 bytes */
     struct CTABLE *ct;
-    LP		ur;
+    PJ_LP		ur;
 
     /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(pj_int32) == 4 );
@@ -941,7 +941,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 
     else if( header_size >= 9 && strncmp(header + 0,"CTABLE V2",9) == 0 )
     {
-        struct CTABLE *ct = nad_ctable2_init( ctx, fp );
+        struct CTABLE *ct = nad_ctable2_init( ctx, (struct projFileAPI_t*)fp );
 
         gilist->format = "ctable2";
         gilist->ct = ct;
@@ -965,7 +965,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 
     else
     {
-        struct CTABLE *ct = nad_ctable_init( ctx, fp );
+        struct CTABLE *ct = nad_ctable_init( ctx, (struct projFileAPI_t*)fp );
         if (ct == nullptr)
         {
             pj_log( ctx, PJ_LOG_DEBUG_MAJOR,

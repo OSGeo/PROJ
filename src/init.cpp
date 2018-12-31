@@ -40,7 +40,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 
 /**************************************************************************************/
@@ -272,7 +272,7 @@ Expand key from buffer or (if not in buffer) from init file
         if( !exists ) {
             const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", nullptr };
             char szInitStr[7 + 64];
-            PJ_OBJ* src;
+            PJ* src;
             const char* proj_string;
 
             pj_ctx_set_errno( ctx, 0 );
@@ -287,14 +287,14 @@ Expand key from buffer or (if not in buffer) from init file
             strcpy(szInitStr, "+init=");
             strcat(szInitStr, xkey);
 
-            src = proj_obj_create_from_user_input(ctx, szInitStr, optionsProj4Mode);
+            src = proj_create_from_user_input(ctx, szInitStr, optionsProj4Mode);
             if( !src ) {
                 return nullptr;
             }
 
-            proj_string = proj_obj_as_proj_string(ctx, src, PJ_PROJ_4, nullptr);
+            proj_string = proj_as_proj_string(ctx, src, PJ_PROJ_4, nullptr);
             if( !proj_string ) {
-                proj_obj_destroy(src);
+                proj_destroy(src);
                 return nullptr;
             }
             definition = (char*)calloc(1, strlen(proj_string)+1);
@@ -302,7 +302,7 @@ Expand key from buffer or (if not in buffer) from init file
                 strcpy(definition, proj_string);
             }
 
-            proj_obj_destroy(src);
+            proj_destroy(src);
         }
     }
 

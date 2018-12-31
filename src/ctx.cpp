@@ -31,7 +31,7 @@
 
 #include "proj_experimental.h"
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 static projCtx_t default_context;
 static volatile int       default_context_initialized = 0;

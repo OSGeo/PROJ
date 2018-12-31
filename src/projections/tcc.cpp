@@ -3,15 +3,15 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(tcc, "Transverse Central Cylindrical") "\n\tCyl, Sph, no inv";
 
 #define EPS10 1.e-10
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0, 0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0, 0.0};
     double b, bt;
 
     b = cos (lp.phi) * sin (lp.lam);

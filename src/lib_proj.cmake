@@ -200,7 +200,7 @@ SET(SRC_LIBPROJ_ISO19111
 )
 
 SET(SRC_LIBPROJ_CORE
-        pj_list.h proj_internal.h proj_math.h projects.h
+        pj_list.h proj_internal.h proj_math.h
         aasincos.cpp adjlon.cpp bch2bps.cpp bchgen.cpp
         biveval.cpp dmstor.cpp mk_cheby.cpp auth.cpp
         deriv.cpp ell_set.cpp ellps.cpp errno.cpp

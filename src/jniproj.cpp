@@ -48,7 +48,7 @@
 
 #include <math.h>
 #include <string.h>
-#include "projects.h"
+#include "proj_internal.h"
 #include "org_proj4_PJ.h"
 #include <jni.h>
 

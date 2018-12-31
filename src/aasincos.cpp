@@ -2,7 +2,8 @@
 
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 #define ONE_TOL	 1.00000000000001
 #define ATOL 1e-50

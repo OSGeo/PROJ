@@ -36,7 +36,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "geocent.h"
 
 namespace { // anonymous namespace
@@ -55,8 +55,8 @@ struct pj_opaque {
 
 PROJ_HEAD(sch, "Spherical Cross-track Height") "\n\tMisc\n\tplat_0= plon_0= phdg_0= [h_0=]";
 
-static LPZ inverse3d(XYZ xyz, PJ *P) {
-    LPZ lpz = {0.0, 0.0, 0.0};
+static PJ_LPZ inverse3d(PJ_XYZ xyz, PJ *P) {
+    PJ_LPZ lpz = {0.0, 0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double temp[3];
     double pxyz[3];
@@ -93,8 +93,8 @@ static LPZ inverse3d(XYZ xyz, PJ *P) {
     return lpz;
 }
 
-static XYZ forward3d(LPZ lpz, PJ *P) {
-    XYZ xyz = {0.0, 0.0, 0.0};
+static PJ_XYZ forward3d(PJ_LPZ lpz, PJ *P) {
+    PJ_XYZ xyz = {0.0, 0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double temp[3];
     double pxyz[3];

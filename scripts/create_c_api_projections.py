@@ -96,7 +96,7 @@ for sectiondef in compounddef.iter('sectiondef'):
             shortName = name[len('create'):]
             c_shortName = snake_casify(shortName)
 
-            decl = "proj_obj_create_conversion_"
+            decl = "proj_create_conversion_"
             decl += c_shortName
             decl += "(\n"
             decl += "    PJ_CONTEXT *ctx,\n"
@@ -122,7 +122,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                 decl += "    const char* linear_unit_name, double linear_unit_conv_factor"
             decl += ")"
 
-            header.write("PJ_OBJ PROJ_DLL *" + decl + ";\n\n")
+            header.write("PJ PROJ_DLL *" + decl + ";\n\n")
 
             briefdescription = func.find('briefdescription/para').xpath("normalize-space()")
             briefdescription = briefdescription.replace("Instanciate ", "Instanciate a ProjectedCRS with ")
@@ -136,7 +136,7 @@ for sectiondef in compounddef.iter('sectiondef'):
             if has_angle:
                 cppfile.write(" * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).\n")
             cppfile.write(" */\n")
-            cppfile.write("PJ_OBJ* " + decl + "{\n");
+            cppfile.write("PJ* " + decl + "{\n");
             cppfile.write("  SANITIZE_CTX(ctx);\n");
             cppfile.write("  try {\n");
             if has_linear:
@@ -157,7 +157,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                     cppfile.write(", Scale(" + param[1] + ")")
 
             cppfile.write(");\n")
-            cppfile.write("    return proj_obj_create_conversion(conv);\n")
+            cppfile.write("    return proj_create_conversion(conv);\n")
             cppfile.write("  } catch (const std::exception &e) {\n");
             cppfile.write("    proj_log_error(ctx, __FUNCTION__, e.what());\n")
             cppfile.write("  }\n")
@@ -165,7 +165,7 @@ for sectiondef in compounddef.iter('sectiondef'):
             cppfile.write("}\n")
 
             test_cppfile.write("{\n")
-            test_cppfile.write("    auto projCRS = proj_obj_create_conversion_" + c_shortName + "(\n")
+            test_cppfile.write("    auto projCRS = proj_create_conversion_" + c_shortName + "(\n")
             test_cppfile.write("        m_ctxt")
             for param in params:
                 test_cppfile.write(", 0")

@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 typedef struct { double r, Az; } VECT;
 namespace { // anonymous namespace
@@ -13,10 +13,10 @@ struct pj_opaque {
         double phi, lam;
         double cosphi, sinphi;
         VECT v;
-        XY  p;
+        PJ_XY  p;
         double Az;
     } c[3];
-    XY p;
+    PJ_XY p;
     double beta_0, beta_1, beta_2;
 };
 } // anonymous namespace
@@ -54,8 +54,8 @@ static double lc(projCtx ctx, double b,double c,double a) {
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy;
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double sinphi, cosphi, a;
     VECT v[3];

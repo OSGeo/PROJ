@@ -1,5 +1,7 @@
 #define PJ_LIB__
-#include "projects.h"
+
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(lask, "Laskowski") "\n\tMisc Sph, no inv";
 
@@ -15,8 +17,8 @@ PROJ_HEAD(lask, "Laskowski") "\n\tMisc Sph, no inv";
 #define b05 -0.0491032
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     double l2, p2;
     (void) P;
 

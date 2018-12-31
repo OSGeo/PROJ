@@ -26,7 +26,8 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 #include <cmath>
 #include <limits>

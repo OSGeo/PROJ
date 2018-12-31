@@ -35,7 +35,8 @@
 #include <string.h>
 
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 /************************************************************************/
 /*                         pj_apply_gridshift()                         */
@@ -112,7 +113,7 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
 /*    Determine which grid is the correct given an input coordinate.    */
 /************************************************************************/
 
-static struct CTABLE* find_ctable(projCtx ctx, LP input, int grid_count, PJ_GRIDINFO **tables) {
+static struct CTABLE* find_ctable(projCtx ctx, PJ_LP input, int grid_count, PJ_GRIDINFO **tables) {
     int itable;
 
     /* keep trying till we find a table that works */
@@ -196,7 +197,7 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **gridlist, int gridlist_coun
     for( i = 0; i < point_count; i++ )
     {
         long io = i * point_offset;
-        LP   input, output;
+        PJ_LP   input, output;
         int  itable;
 
         input.phi = y[io];
@@ -306,9 +307,9 @@ int proj_hgrid_init(PJ* P, const char *grids) {
 /*                                          */
 /*    Return coordinate offset in grid      */
 /********************************************/
-LP proj_hgrid_value(PJ *P, LP lp) {
+PJ_LP proj_hgrid_value(PJ *P, PJ_LP lp) {
     struct CTABLE *ct;
-    LP out = proj_coord_error().lp;
+    PJ_LP out = proj_coord_error().lp;
 
     ct = find_ctable(P->ctx, lp, P->gridlist_count, P->gridlist);
     if (ct == nullptr) {
@@ -331,10 +332,10 @@ LP proj_hgrid_value(PJ *P, LP lp) {
     return out;
 }
 
-LP proj_hgrid_apply(PJ *P, LP lp, PJ_DIRECTION direction) {
+PJ_LP proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction) {
     struct CTABLE *ct;
     int inverse;
-    LP out;
+    PJ_LP out;
 
     out.lam = HUGE_VAL; out.phi = HUGE_VAL;
 

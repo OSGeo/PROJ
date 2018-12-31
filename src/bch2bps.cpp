@@ -1,41 +1,43 @@
 /* convert bivariate w Chebyshev series to w Power series */
-#include "projects.h"
+
+#include "proj.h"
+#include "proj_internal.h"
 /* basic support procedures */
 	static void /* clear vector to zero */
-clear(projUV *p, int n) { static const projUV c = {0., 0.}; while (n--) *p++ = c; }
+clear(PJ_UV *p, int n) { static const PJ_UV c = {0., 0.}; while (n--) *p++ = c; }
 	static void /* clear matrix rows to zero */
-bclear(projUV **p, int n, int m) { while (n--) clear(*p++, m); }
+bclear(PJ_UV **p, int n, int m) { while (n--) clear(*p++, m); }
 	static void /* move vector */
-bmove(projUV *a, projUV *b, int n) { while (n--) *a++ = *b++; }
+bmove(PJ_UV *a, PJ_UV *b, int n) { while (n--) *a++ = *b++; }
 	static void /* a <- m * b - c */
-submop(projUV *a, double m, projUV *b, projUV *c, int n) {
+submop(PJ_UV *a, double m, PJ_UV *b, PJ_UV *c, int n) {
 	while (n--) {
 		a->u = m * b->u - c->u;
 		a++->v = m * b++->v - c++->v;
 	}
 }
 	static void /* a <- b - c */
-subop(projUV *a, projUV *b, projUV *c, int n) {
+subop(PJ_UV *a, PJ_UV *b, PJ_UV *c, int n) {
 	while (n--) {
 		a->u = b->u - c->u;
 		a++->v = b++->v - c++->v;
 	}
 }
 	static void /* multiply vector a by scalar m */
-dmult(projUV *a, double m, int n) { while(n--) { a->u *= m; a->v *= m; ++a; } }
+dmult(PJ_UV *a, double m, int n) { while(n--) { a->u *= m; a->v *= m; ++a; } }
 	static void /* row adjust a[] <- a[] - m * b[] */
-dadd(projUV *a, projUV *b, double m, int n) {
+dadd(PJ_UV *a, PJ_UV *b, double m, int n) {
 	while(n--) {
 		a->u -= m * b->u;
 		a++->v -= m * b++->v;
 	}
 }
 	static int /* convert row to power series */
-rows(projUV *c, projUV *d, int n) {
-	projUV sv, *dd;
+rows(PJ_UV *c, PJ_UV *d, int n) {
+	PJ_UV sv, *dd;
 	int j, k;
 
-	dd = (projUV *)vector1(n-1, sizeof(projUV));
+	dd = (PJ_UV *)vector1(n-1, sizeof(PJ_UV));
 	if (!dd)
 		return 0;
 	sv.u = sv.v = 0.;
@@ -63,14 +65,14 @@ rows(projUV *c, projUV *d, int n) {
 	return 1;
 }
 	static int /* convert columns to power series */
-cols(projUV **c, projUV **d, int nu, int nv) {
-	projUV *sv, **dd;
+cols(PJ_UV **c, PJ_UV **d, int nu, int nv) {
+	PJ_UV *sv, **dd;
 	int j, k;
 
-	dd = (projUV **)vector2(nu, nv, sizeof(projUV));
+	dd = (PJ_UV **)vector2(nu, nv, sizeof(PJ_UV));
 	if (!dd)
 		return 0;
-	sv = (projUV *)vector1(nv, sizeof(projUV));
+	sv = (PJ_UV *)vector1(nv, sizeof(PJ_UV));
 	if (!sv) {
 		freev2((void **)dd, nu);
 		return 0;
@@ -96,7 +98,7 @@ cols(projUV **c, projUV **d, int nu, int nv) {
 	return 1;
 }
 	static void /* row adjust for range -1 to 1 to a to b */
-rowshft(double a, double b, projUV *d, int n) {
+rowshft(double a, double b, PJ_UV *d, int n) {
 	int k, j;
 	double fac, cnst;
 
@@ -115,7 +117,7 @@ rowshft(double a, double b, projUV *d, int n) {
 		}
 }
 	static void /* column adjust for range -1 to 1 to a to b */
-colshft(double a, double b, projUV **d, int n, int m) {
+colshft(double a, double b, PJ_UV **d, int n, int m) {
 	int k, j;
 	double fac, cnst;
 
@@ -131,11 +133,11 @@ colshft(double a, double b, projUV **d, int n, int m) {
 			dadd(d[k], d[k+1], cnst, m);
 }
 	int /* entry point */
-bch2bps(projUV a, projUV b, projUV **c, int nu, int nv) {
-	projUV **d;
+bch2bps(PJ_UV a, PJ_UV b, PJ_UV **c, int nu, int nv) {
+	PJ_UV **d;
 	int i;
 
-	if (nu < 1 || nv < 1 || !(d = (projUV **)vector2(nu, nv, sizeof(projUV))))
+	if (nu < 1 || nv < 1 || !(d = (PJ_UV **)vector2(nu, nv, sizeof(PJ_UV))))
 		return 0;
 	/* do rows to power series */
 	for (i = 0; i < nu; ++i) {

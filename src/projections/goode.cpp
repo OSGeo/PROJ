@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(goode, "Goode Homolosine") "\n\tPCyl, Sph";
 
@@ -21,8 +21,8 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy;
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     if (fabs(lp.phi) <= PHI_LIM)
@@ -35,8 +35,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp;
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     if (fabs(xy.y) <= PHI_LIM)

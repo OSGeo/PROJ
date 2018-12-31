@@ -83,8 +83,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "proj.h"
 #include "proj_internal.h"
-#include "projects.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(horner, "Horner polynomial evaluation");
 
@@ -109,13 +110,13 @@ struct horner {
     double *fwd_c;   /* coefficients for the complex forward transformations */
     double *inv_c;   /* coefficients for the complex inverse transformations */
 
-    UV *fwd_origin;  /* False longitude/latitude */
-    UV *inv_origin;  /* False easting/northing   */
+    PJ_UV *fwd_origin;  /* False longitude/latitude */
+    PJ_UV *inv_origin;  /* False easting/northing   */
 };
 } // anonymous namespace
 
 typedef struct horner HORNER;
-static UV      horner_func (const HORNER *transformation, PJ_DIRECTION direction, UV position);
+static PJ_UV   horner_func (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position);
 static HORNER *horner_alloc (size_t order, int complex_polynomia);
 static void    horner_free (HORNER *h);
 
@@ -166,8 +167,8 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
             polynomia_ok = 1;
     }
 
-    h->fwd_origin = static_cast<UV*>(horner_calloc (1, sizeof(UV)));
-    h->inv_origin = static_cast<UV*>(horner_calloc (1, sizeof(UV)));
+    h->fwd_origin = static_cast<PJ_UV*>(horner_calloc (1, sizeof(PJ_UV)));
+    h->inv_origin = static_cast<PJ_UV*>(horner_calloc (1, sizeof(PJ_UV)));
 
     if (polynomia_ok && h->fwd_origin && h->inv_origin)
         return h;
@@ -181,7 +182,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
 
 /**********************************************************************/
-static UV horner_func (const HORNER *transformation, PJ_DIRECTION direction, UV position) {
+static PJ_UV horner_func (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -223,7 +224,7 @@ summing the tiny high order elements first.
     double *tcx, *tcy;                        /* Coefficient pointers */
     double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
     double  n, e;
-    UV uv_error;
+    PJ_UV uv_error;
     uv_error.u = uv_error.v = HUGE_VAL;
 
     if (nullptr==transformation)
@@ -310,7 +311,7 @@ static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
 
 
 /**********************************************************************/
-static UV complex_horner (const HORNER *transformation, PJ_DIRECTION direction, UV position) {
+static PJ_UV complex_horner (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
@@ -323,7 +324,7 @@ polynomial evaluation engine.
     double *c, *cb;                           /* Coefficient pointers */
     double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
     double  n, e, w, N, E;
-    UV uv_error;
+    PJ_UV uv_error;
     uv_error.u = uv_error.v = HUGE_VAL;
 
     if (nullptr==transformation)

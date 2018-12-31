@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "proj.h"
-#include "projects.h"
+#include "proj_internal.h"
 #include "proj_api.h"
 
 PROJ_HEAD(calcofi,
@@ -35,8 +35,8 @@ whatever ellipsoid is provided. */
 #define ROTATION_ANGLE 0.52359877559829882 /*CalCOFI angle of 30 deg in rad */
 
 
-static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    PJ_XY xy = {0.0,0.0};
     double oy; /* pt O y value in Mercator */
     double l1; /* l1 and l2 are distances calculated using trig that sum
                to the east/west distance between point O and point xy */
@@ -67,8 +67,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
     double oy;
     double l1;
     double l2;
@@ -93,8 +93,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     double ry;     /* y value of point r */
     double oymctr; /* Mercator-transformed y value of point O */
     double rymctr; /* Mercator-transformed ry */
@@ -116,8 +116,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
     double ry;
     double oymctr;
     double rymctr;

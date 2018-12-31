@@ -28,20 +28,22 @@
  *****************************************************************************/
 
 #define PJ_LIB__
-#include "projects.h"
+
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(geocent, "Geocentric")  "\n\t";
 
-static XY forward(LP lp, PJ *P) {
-    XY xy = {0.0,0.0};
+static PJ_XY forward(PJ_LP lp, PJ *P) {
+    PJ_XY xy = {0.0,0.0};
     (void) P;
     xy.x = lp.lam;
     xy.y = lp.phi;
     return xy;
 }
 
-static LP inverse(XY xy, PJ *P) {
-    LP lp = {0.0,0.0};
+static PJ_LP inverse(PJ_XY xy, PJ *P) {
+    PJ_LP lp = {0.0,0.0};
     (void) P;
     lp.phi = xy.y;
     lp.lam = xy.x;

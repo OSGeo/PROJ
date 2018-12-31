@@ -28,7 +28,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 #define MAX_ITER 20
 
@@ -70,9 +71,9 @@ void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
     return ((void *)en);
 }
 
-LP pj_gauss(projCtx ctx, LP elp, const void *data) {
+PJ_LP pj_gauss(projCtx ctx, PJ_LP elp, const void *data) {
     const struct GAUSS *en = (const struct GAUSS *)data;
-    LP slp;
+    PJ_LP slp;
     (void) ctx;
 
     slp.phi = 2. * atan( en->K *
@@ -82,9 +83,9 @@ LP pj_gauss(projCtx ctx, LP elp, const void *data) {
     return(slp);
 }
 
-LP pj_inv_gauss(projCtx ctx, LP slp, const void *data) {
+PJ_LP pj_inv_gauss(projCtx ctx, PJ_LP slp, const void *data) {
     const struct GAUSS *en = (const struct GAUSS *)data;
-    LP elp;
+    PJ_LP elp;
     double num;
     int i;
 

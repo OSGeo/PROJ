@@ -1,6 +1,8 @@
 #define PJ_LIB__
 #include <errno.h>
-#include "projects.h"
+
+#include "proj.h"
+#include "proj_internal.h"
 
 namespace { // anonymous namespace
 struct pj_opaque {
@@ -15,8 +17,8 @@ PROJ_HEAD(putp3p, "Putnins P3'") "\n\tPCyl, Sph";
 #define RPISQ   0.1013211836
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
 
     xy.x = C * lp.lam * (1. - static_cast<struct pj_opaque*>(P->opaque)->A * lp.phi * lp.phi);
     xy.y = C * lp.phi;
@@ -25,8 +27,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
 
     lp.phi = xy.y / C;
     lp.lam = xy.x / (C * (1. - static_cast<struct pj_opaque*>(P->opaque)->A * lp.phi * lp.phi));

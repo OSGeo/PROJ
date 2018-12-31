@@ -2,7 +2,8 @@
 
 #include <math.h>
 
-#include "projects.h"
+#include "proj.h"
+#include "proj_internal.h"
 
 PROJ_HEAD(wag2, "Wagner II") "\n\tPCyl, Sph";
 
@@ -12,8 +13,8 @@ PROJ_HEAD(wag2, "Wagner II") "\n\tPCyl, Sph";
 #define C_p2 0.88550
 
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+    PJ_XY xy = {0.0,0.0};
 	lp.phi = aasin (P->ctx,C_p1 * sin (C_p2 * lp.phi));
 	xy.x = C_x * lp.lam * cos (lp.phi);
 	xy.y = C_y * lp.phi;
@@ -21,8 +22,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+    PJ_LP lp = {0.0,0.0};
 	lp.phi = xy.y / C_y;
 	lp.lam = xy.x / (C_x * cos(lp.phi));
 	lp.phi = aasin (P->ctx,sin(lp.phi) / C_p1) / C_p2;
