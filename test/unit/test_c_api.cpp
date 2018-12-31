@@ -833,9 +833,9 @@ TEST_F(CApi, proj_create_from_database) {
         EXPECT_EQ(info.accuracy, 0);
     }
     {
-        auto op = proj_create_from_database(
-            m_ctxt, "EPSG", "1024", PJ_CATEGORY_COORDINATE_OPERATION, false,
-            nullptr);
+        auto op = proj_create_from_database(m_ctxt, "EPSG", "1024",
+                                            PJ_CATEGORY_COORDINATE_OPERATION,
+                                            false, nullptr);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper(op);
         EXPECT_EQ(proj_get_type(op), PJ_TYPE_TRANSFORMATION);

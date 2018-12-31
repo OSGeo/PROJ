@@ -158,8 +158,9 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
                 pj->iso_obj = objIn;
                 return pj;
             }
-        } catch (const std::exception &e) {
-            proj_log_debug(ctx, __FUNCTION__, e.what());
+        } catch (const std::exception &) {
+            // Silence, since we may not always be able to export as a
+            // PROJ string.
         }
     }
     auto pj = new PJ();
