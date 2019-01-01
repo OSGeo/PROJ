@@ -282,7 +282,7 @@ static char **argv_params (paralist *params, size_t argc) {
 /* This is problematic since that ellipsoid spec is then passed on to the    */
 /* pipeline children. This is rarely what we want, so here we implement our  */
 /* own logic instead. If an ellipsoid is set in the global args, it is used  */
-/* as the pipeline ellipsoid. Otherwise we use WGS84 parameters as default.  */
+/* as the pipeline ellipsoid. Otherwise we use GRS80 parameters as default.  */
 /* At last we calculate the rest of the ellipsoid parameters and             */
 /* re-initialize P->geod.                                                    */
 static void set_ellipsoid(PJ *P) {
@@ -301,10 +301,11 @@ static void set_ellipsoid(PJ *P) {
         }
 
     /* Check if there's any ellipsoid specification in the global params. */
-    /* If not, use WGS84 as default                                       */
+    /* If not, use GRS80 as default                                       */
     if (0 != pj_ellipsoid (P)) {
         P->a  = 6378137.0;
-        P->es = .00669438002290341575;
+        P->f = 1.0 / 298.257222101;
+        P->es = 2*P->f - P->f*P->f;
 
         /* reset an "unerror": In this special use case, the errno is    */
         /* not an error signal, but just a reply from pj_ellipsoid,      */
