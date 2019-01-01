@@ -794,3 +794,13 @@ Logging
 
 
     .. versionadded:: 5.1.0
+
+
+C API for ISO-19111 functionality
+-------------------------------------------------------------------------------
+
+.. doxygengroup:: iso19111_types
+   :project: cpp_stuff
+   :content-only:
+
+

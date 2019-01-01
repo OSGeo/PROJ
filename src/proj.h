@@ -444,30 +444,14 @@ char PROJ_DLL * proj_rtodms(char *s, double r, int pos, int neg);
 /* Binding in C of C++ API */
 /* ------------------------------------------------------------------------- */
 
-/**
- * \defgroup basic_cpp_binding Binding in C of basic methods from the C++ API
- * @{
+
+/** @defgroup iso19111_types Data types for ISO19111 C API
+ *  Data types for ISO19111 C API
+ *  @{
  */
 
-/*! @cond Doxygen_Suppress */
-typedef struct PJ_OBJ_LIST PJ_OBJ_LIST;
-/*! @endcond */
-
-/** \brief Type representing a NULL terminated list of NUL-terminate strings. */
+/** \brief Type representing a NULL terminated list of NULL-terminate strings. */
 typedef char **PROJ_STRING_LIST;
-
-void PROJ_DLL proj_string_list_destroy(PROJ_STRING_LIST list);
-
-int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
-                                            const char *dbPath,
-                                            const char *const *auxDbPaths,
-                                            const char* const *options);
-
-const char PROJ_DLL *proj_context_get_database_path(PJ_CONTEXT *ctx);
-
-const char PROJ_DLL *proj_context_get_database_metadata(PJ_CONTEXT* ctx,
-                                                        const char* key);
-
 
 /** \brief Guessed WKT "dialect". */
 typedef enum
@@ -488,22 +472,6 @@ typedef enum
     PJ_GUESSED_NOT_WKT
 } PJ_GUESSED_WKT_DIALECT;
 
-PJ_GUESSED_WKT_DIALECT PROJ_DLL proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
-                                                               const char *wkt);
-
-PJ PROJ_DLL *proj_create_from_user_input(PJ_CONTEXT *ctx,
-                                                 const char *text,
-                                                 const char* const *options);
-
-PJ PROJ_DLL *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
-                                          const char* const *options,
-                                          PROJ_STRING_LIST *out_warnings,
-                                          PROJ_STRING_LIST *out_grammar_errors);
-
-PJ PROJ_DLL *proj_create_from_proj_string(PJ_CONTEXT *ctx,
-                                                  const char *proj_string,
-                                                  const char* const *options);
-
 /** \brief Object category. */
 typedef enum
 {
@@ -513,22 +481,6 @@ typedef enum
     PJ_CATEGORY_CRS,
     PJ_CATEGORY_COORDINATE_OPERATION
 } PJ_CATEGORY;
-
-PJ PROJ_DLL *proj_create_from_database(PJ_CONTEXT *ctx,
-                                               const char *auth_name,
-                                               const char *code,
-                                               PJ_CATEGORY category,
-                                               int usePROJAlternativeGridNames,
-                                               const char* const *options);
-
-int PROJ_DLL proj_uom_get_info_from_database(PJ_CONTEXT *ctx,
-                               const char *auth_name,
-                               const char *code,
-                               const char **out_name,
-                               double *out_conv_factor,
-                               const char **out_category);
-
-PJ PROJ_DLL *proj_clone(PJ_CONTEXT *ctx, const PJ *obj);
 
 /** \brief Object type. */
 typedef enum
@@ -571,22 +523,6 @@ typedef enum
     PJ_TYPE_OTHER_COORDINATE_OPERATION,
 } PJ_TYPE;
 
-PJ_OBJ_LIST PROJ_DLL *proj_create_from_name(PJ_CONTEXT *ctx,
-                                                const char *auth_name,
-                                                const char *searchedName,
-                                                const PJ_TYPE* types,
-                                                size_t typesCount,
-                                                int approximateMatch,
-                                                size_t limitResultCount,
-                                                const char* const *options);
-
-PJ_TYPE PROJ_DLL proj_get_type(const PJ *obj);
-
-int PROJ_DLL proj_is_deprecated(const PJ *obj);
-
-PJ_OBJ_LIST PROJ_DLL *proj_get_non_deprecated(PJ_CONTEXT *ctx,
-                                                  const PJ *obj);
-
 /** Comparison criterion. */
 typedef enum
 {
@@ -609,6 +545,168 @@ typedef enum
     PJ_COMP_EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
 } PJ_COMPARISON_CRITERION;
 
+
+/** \brief WKT version. */
+typedef enum
+{
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2 */
+    PJ_WKT2_2015,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_SIMPLIFIED */
+    PJ_WKT2_2015_SIMPLIFIED,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018 */
+    PJ_WKT2_2018,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018_SIMPLIFIED */
+    PJ_WKT2_2018_SIMPLIFIED,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_GDAL */
+    PJ_WKT1_GDAL,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_ESRI */
+    PJ_WKT1_ESRI
+} PJ_WKT_TYPE;
+
+/** Specify how source and target CRS extent should be used to restrict
+  * candidate operations (only taken into account if no explicit area of
+  * interest is specified. */
+typedef enum
+{
+    /** Ignore CRS extent */
+    PJ_CRS_EXTENT_NONE,
+
+    /** Test coordinate operation extent against both CRS extent. */
+    PJ_CRS_EXTENT_BOTH,
+
+    /** Test coordinate operation extent against the intersection of both
+        CRS extent. */
+    PJ_CRS_EXTENT_INTERSECTION,
+
+    /** Test coordinate operation against the smallest of both CRS extent. */
+    PJ_CRS_EXTENT_SMALLEST
+} PROJ_CRS_EXTENT_USE;
+
+/** Describe how grid availability is used. */
+typedef enum {
+    /** Grid availability is only used for sorting results. Operations
+        * where some grids are missing will be sorted last. */
+    PROJ_GRID_AVAILABILITY_USED_FOR_SORTING,
+
+    /** Completely discard an operation if a required grid is missing. */
+    PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID,
+
+    /** Ignore grid availability at all. Results will be presented as if
+        * all grids were available. */
+    PROJ_GRID_AVAILABILITY_IGNORED,
+} PROJ_GRID_AVAILABILITY_USE;
+
+/** \brief PROJ string version. */
+typedef enum
+{
+    /** cf osgeo::proj::io::PROJStringFormatter::Convention::PROJ_5 */
+    PJ_PROJ_5,
+    /** cf osgeo::proj::io::PROJStringFormatter::Convention::PROJ_4 */
+    PJ_PROJ_4
+} PJ_PROJ_STRING_TYPE;
+
+/** Spatial criterion to restrict candiate operations. */
+typedef enum {
+    /** The area of validity of transforms should strictly contain the
+        * are of interest. */
+    PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT,
+
+    /** The area of validity of transforms should at least intersect the
+        * area of interest. */
+    PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION
+} PROJ_SPATIAL_CRITERION;
+
+/** Type of coordinate system. */
+typedef enum
+{
+    PJ_CS_TYPE_UNKNOWN,
+
+    PJ_CS_TYPE_CARTESIAN,
+    PJ_CS_TYPE_ELLIPSOIDAL,
+    PJ_CS_TYPE_VERTICAL,
+    PJ_CS_TYPE_SPHERICAL,
+    PJ_CS_TYPE_ORDINAL,
+    PJ_CS_TYPE_PARAMETRIC,
+    PJ_CS_TYPE_DATETIMETEMPORAL,
+    PJ_CS_TYPE_TEMPORALCOUNT,
+    PJ_CS_TYPE_TEMPORALMEASURE
+} PJ_COORDINATE_SYSTEM_TYPE;
+
+
+
+/**@}*/
+
+/**
+ * \defgroup iso19111_functions Binding in C of basic methods from the C++ API
+ *  Functions for ISO19111 C API
+ * @{
+ */
+
+/*! @cond Doxygen_Suppress */
+typedef struct PJ_OBJ_LIST PJ_OBJ_LIST;
+/*! @endcond */
+
+void PROJ_DLL proj_string_list_destroy(PROJ_STRING_LIST list);
+
+int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
+                                            const char *dbPath,
+                                            const char *const *auxDbPaths,
+                                            const char* const *options);
+
+const char PROJ_DLL *proj_context_get_database_path(PJ_CONTEXT *ctx);
+
+const char PROJ_DLL *proj_context_get_database_metadata(PJ_CONTEXT* ctx,
+                                                        const char* key);
+
+
+PJ_GUESSED_WKT_DIALECT PROJ_DLL proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
+                                                               const char *wkt);
+
+PJ PROJ_DLL *proj_create_from_user_input(PJ_CONTEXT *ctx,
+                                                 const char *text,
+                                                 const char* const *options);
+
+PJ PROJ_DLL *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
+                                          const char* const *options,
+                                          PROJ_STRING_LIST *out_warnings,
+                                          PROJ_STRING_LIST *out_grammar_errors);
+
+PJ PROJ_DLL *proj_create_from_proj_string(PJ_CONTEXT *ctx,
+                                                  const char *proj_string,
+                                                  const char* const *options);
+
+PJ PROJ_DLL *proj_create_from_database(PJ_CONTEXT *ctx,
+                                               const char *auth_name,
+                                               const char *code,
+                                               PJ_CATEGORY category,
+                                               int usePROJAlternativeGridNames,
+                                               const char* const *options);
+
+int PROJ_DLL proj_uom_get_info_from_database(PJ_CONTEXT *ctx,
+                               const char *auth_name,
+                               const char *code,
+                               const char **out_name,
+                               double *out_conv_factor,
+                               const char **out_category);
+
+PJ PROJ_DLL *proj_clone(PJ_CONTEXT *ctx, const PJ *obj);
+
+PJ_OBJ_LIST PROJ_DLL *proj_create_from_name(PJ_CONTEXT *ctx,
+                                                const char *auth_name,
+                                                const char *searchedName,
+                                                const PJ_TYPE* types,
+                                                size_t typesCount,
+                                                int approximateMatch,
+                                                size_t limitResultCount,
+                                                const char* const *options);
+
+PJ_TYPE PROJ_DLL proj_get_type(const PJ *obj);
+
+int PROJ_DLL proj_is_deprecated(const PJ *obj);
+
+PJ_OBJ_LIST PROJ_DLL *proj_get_non_deprecated(PJ_CONTEXT *ctx,
+                                                  const PJ *obj);
+
 int PROJ_DLL proj_is_equivalent_to(const PJ *obj, const PJ *other,
                                        PJ_COMPARISON_CRITERION criterion);
 
@@ -628,35 +726,9 @@ int PROJ_DLL proj_get_area_of_use(PJ_CONTEXT *ctx,
                                       double* out_north_lat_degree,
                                       const char **out_area_name);
 
-/** \brief WKT version. */
-typedef enum
-{
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2 */
-    PJ_WKT2_2015,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_SIMPLIFIED */
-    PJ_WKT2_2015_SIMPLIFIED,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018 */
-    PJ_WKT2_2018,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018_SIMPLIFIED */
-    PJ_WKT2_2018_SIMPLIFIED,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_GDAL */
-    PJ_WKT1_GDAL,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_ESRI */
-    PJ_WKT1_ESRI
-} PJ_WKT_TYPE;
-
 const char PROJ_DLL* proj_as_wkt(PJ_CONTEXT *ctx,
                                      const PJ *obj, PJ_WKT_TYPE type,
                                      const char* const *options);
-
-/** \brief PROJ string version. */
-typedef enum
-{
-    /** cf osgeo::proj::io::PROJStringFormatter::Convention::PROJ_5 */
-    PJ_PROJ_5,
-    /** cf osgeo::proj::io::PROJStringFormatter::Convention::PROJ_4 */
-    PJ_PROJ_4
-} PJ_PROJ_STRING_TYPE;
 
 const char PROJ_DLL* proj_as_proj_string(PJ_CONTEXT *ctx,
                                              const PJ *obj,
@@ -713,60 +785,16 @@ void PROJ_DLL proj_operation_factory_context_set_area_of_interest(
                                             double east_lon_degree,
                                             double north_lat_degree);
 
-/** Specify how source and target CRS extent should be used to restrict
-  * candidate operations (only taken into account if no explicit area of
-  * interest is specified. */
-typedef enum
-{
-    /** Ignore CRS extent */
-    PJ_CRS_EXTENT_NONE,
-
-    /** Test coordinate operation extent against both CRS extent. */
-    PJ_CRS_EXTENT_BOTH,
-
-    /** Test coordinate operation extent against the intersection of both
-        CRS extent. */
-    PJ_CRS_EXTENT_INTERSECTION,
-
-    /** Test coordinate operation against the smallest of both CRS extent. */
-    PJ_CRS_EXTENT_SMALLEST
-} PROJ_CRS_EXTENT_USE;
-
 void PROJ_DLL proj_operation_factory_context_set_crs_extent_use(
                                             PJ_CONTEXT *ctx,
                                             PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
                                             PROJ_CRS_EXTENT_USE use);
-
-/** Spatial criterion to restrict candiate operations. */
-typedef enum {
-    /** The area of validity of transforms should strictly contain the
-        * are of interest. */
-    PROJ_SPATIAL_CRITERION_STRICT_CONTAINMENT,
-
-    /** The area of validity of transforms should at least intersect the
-        * area of interest. */
-    PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION
-} PROJ_SPATIAL_CRITERION;
 
 void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
                                             PJ_CONTEXT *ctx,
                                             PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
                                             PROJ_SPATIAL_CRITERION criterion);
 
-
-/** Describe how grid availability is used. */
-typedef enum {
-    /** Grid availability is only used for sorting results. Operations
-        * where some grids are missing will be sorted last. */
-    PROJ_GRID_AVAILABILITY_USED_FOR_SORTING,
-
-    /** Completely discard an operation if a required grid is missing. */
-    PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID,
-
-    /** Ignore grid availability at all. Results will be presented as if
-        * all grids were available. */
-    PROJ_GRID_AVAILABILITY_IGNORED,
-} PROJ_GRID_AVAILABILITY_USE;
 
 void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
                                             PJ_CONTEXT *ctx,
@@ -816,22 +844,6 @@ PJ PROJ_DLL *proj_crs_get_sub_crs(PJ_CONTEXT *ctx, const PJ *crs, int index);
 PJ PROJ_DLL *proj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs);
 
 PJ PROJ_DLL *proj_crs_get_coordinate_system(PJ_CONTEXT *ctx, const PJ *crs);
-
-/** Type of coordinate system. */
-typedef enum
-{
-    PJ_CS_TYPE_UNKNOWN,
-
-    PJ_CS_TYPE_CARTESIAN,
-    PJ_CS_TYPE_ELLIPSOIDAL,
-    PJ_CS_TYPE_VERTICAL,
-    PJ_CS_TYPE_SPHERICAL,
-    PJ_CS_TYPE_ORDINAL,
-    PJ_CS_TYPE_PARAMETRIC,
-    PJ_CS_TYPE_DATETIMETEMPORAL,
-    PJ_CS_TYPE_TEMPORALCOUNT,
-    PJ_CS_TYPE_TEMPORALMEASURE
-} PJ_COORDINATE_SYSTEM_TYPE;
 
 PJ_COORDINATE_SYSTEM_TYPE PROJ_DLL proj_cs_get_type(PJ_CONTEXT *ctx,
                                                         const PJ *cs);

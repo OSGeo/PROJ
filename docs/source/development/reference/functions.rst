@@ -574,5 +574,7 @@ Various
 C API for ISO-19111 functionality
 +++++++++++++++++++++++++++++++++
 
-.. doxygenfile:: proj.h
+.. doxygengroup:: iso19111_functions
    :project: cpp_stuff
+   :content-only:
+
