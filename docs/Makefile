@@ -50,6 +50,7 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
+	rm -rf .doxygen_up_to_date
 
 .doxygen_up_to_date: ../Doxyfile ../src/*.cpp ../include/proj/*.hpp
 	../scripts/doxygen.sh
