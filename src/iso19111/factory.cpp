@@ -854,7 +854,7 @@ DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a database context, using the default proj.db file
+/** \brief Instantiate a database context, using the default proj.db file
  *
  * It will be searched in the directory pointed by the PROJ_LIB environment
  * variable. If not found, on Unix builds, it will be then searched first in
@@ -869,7 +869,7 @@ DatabaseContextNNPtr DatabaseContext::create() {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a database context from a full filename.
+/** \brief Instantiate a database context from a full filename.
  *
  * This database context should be used only by one thread at a time.
  * @param databasePath Path and filename of the database. Might be empty
@@ -882,7 +882,7 @@ DatabaseContextNNPtr DatabaseContext::create(const std::string &databasePath) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a database context from a full filename, and attach
+/** \brief Instantiate a database context from a full filename, and attach
  * auxiliary databases to it.
  *
  * This database context should be used only by one thread at a time.
@@ -1353,7 +1353,7 @@ AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
 // ---------------------------------------------------------------------------
 
 // clang-format off
-/** \brief Instanciate a AuthorityFactory.
+/** \brief Instantiate a AuthorityFactory.
  *
  * The authority name might be set to the empty string in the particular case
  * where createFromCoordinateReferenceSystemCodes(const std::string&,const std::string&,const std::string&,const std::string&) const
@@ -3288,7 +3288,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 /** \brief Returns a list operation::CoordinateOperation between two CRS.
  *
  * The list is ordered with preferred operations first. No attempt is made
- * at infering operations that are not explicitly in the database.
+ * at inferring operations that are not explicitly in the database.
  *
  * Deprecated operations are rejected.
  *
@@ -3312,7 +3312,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
 /** \brief Returns a list operation::CoordinateOperation between two CRS.
  *
  * The list is ordered with preferred operations first. No attempt is made
- * at infering operations that are not explicitly in the database (see
+ * at inferring operations that are not explicitly in the database (see
  * createFromCRSCodesWithIntermediates() for that), and only
  * source -> target operations are searched (ie if target -> source is present,
  * you need to call this method with the arguments reversed, and apply the

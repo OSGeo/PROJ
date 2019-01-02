@@ -64,7 +64,7 @@ TEST(factory, databasecontext_create) {
     DatabaseContext::create();
 #ifndef _WIN32
     // For some reason, no exception is thrown on AppVeyor Windows
-    EXPECT_THROW(DatabaseContext::create("/i/dont/exist"), FactoryException);
+    EXPECT_THROW(DatabaseContext::create("/i/do_not/exist"), FactoryException);
 #endif
 }
 

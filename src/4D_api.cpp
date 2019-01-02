@@ -765,13 +765,13 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
     auto src = proj_create_from_user_input(ctx, source_crs, optionsImportCRS);
     if( !src ) {
-        proj_context_log_debug(ctx, "Cannot instanciate source_crs");
+        proj_context_log_debug(ctx, "Cannot instantiate source_crs");
         return nullptr;
     }
 
     auto dst = proj_create_from_user_input(ctx, target_crs, optionsImportCRS);
     if( !dst ) {
-        proj_context_log_debug(ctx, "Cannot instanciate target_crs");
+        proj_context_log_debug(ctx, "Cannot instantiate target_crs");
         proj_destroy(src);
         return nullptr;
     }

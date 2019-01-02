@@ -605,7 +605,7 @@ typedef enum
     PJ_PROJ_4
 } PJ_PROJ_STRING_TYPE;
 
-/** Spatial criterion to restrict candiate operations. */
+/** Spatial criterion to restrict candidate operations. */
 typedef enum {
     /** The area of validity of transforms should strictly contain the
         * are of interest. */

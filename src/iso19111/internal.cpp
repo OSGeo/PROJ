@@ -330,7 +330,7 @@ std::string toString(double val, int precision) {
 #else
 
 std::string toString(int val) {
-    // use sqlite3 API that is slighly faster than std::ostringstream
+    // use sqlite3 API that is slightly faster than std::ostringstream
     // with forcing the C locale. sqlite3_snprintf() emulates a C locale.
     constexpr int BUF_SIZE = 16;
     char szBuffer[BUF_SIZE];
@@ -339,7 +339,7 @@ std::string toString(int val) {
 }
 
 std::string toString(double val, int precision) {
-    // use sqlite3 API that is slighly faster than std::ostringstream
+    // use sqlite3 API that is slightly faster than std::ostringstream
     // with forcing the C locale. sqlite3_snprintf() emulates a C locale.
     constexpr int BUF_SIZE = 32;
     char szBuffer[BUF_SIZE];

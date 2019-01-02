@@ -1215,7 +1215,7 @@ class PROJ_GCC_DLL DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
     */
     PROJ_DLL const BaseNNPtr baseCRS() const;
 
-    /** \brief Instanciate a DerivedCRSTemplate from a base CRS, a deriving
+    /** \brief Instantiate a DerivedCRSTemplate from a base CRS, a deriving
     * conversion and a cs::CoordinateSystem.
     *
     * @param properties See \ref general_properties.

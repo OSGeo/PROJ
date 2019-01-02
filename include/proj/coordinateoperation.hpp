@@ -1676,7 +1676,7 @@ class PROJ_GCC_DLL CoordinateOperationContext {
 
     PROJ_DLL SourceTargetCRSExtentUse getSourceAndTargetCRSExtentUse() const;
 
-    /** Spatial criterion to restrict candiate operations. */
+    /** Spatial criterion to restrict candidate operations. */
     enum class SpatialCriterion {
         /** The area of validity of transforms should strictly contain the
          * are of interest. */

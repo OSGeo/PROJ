@@ -950,7 +950,7 @@ bool GeodeticCRS::isGeocentric() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeodeticCRS from a datum::GeodeticReferenceFrame and a
+/** \brief Instantiate a GeodeticCRS from a datum::GeodeticReferenceFrame and a
  * cs::SphericalCS.
  *
  * @param properties See \ref general_properties.
@@ -968,7 +968,7 @@ GeodeticCRS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeodeticCRS from a datum::GeodeticReferenceFrame or
+/** \brief Instantiate a GeodeticCRS from a datum::GeodeticReferenceFrame or
  * datum::DatumEnsemble and a cs::SphericalCS.
  *
  * One and only one of datum or datumEnsemble should be set to a non-null value.
@@ -997,7 +997,7 @@ GeodeticCRS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeodeticCRS from a datum::GeodeticReferenceFrame and a
+/** \brief Instantiate a GeodeticCRS from a datum::GeodeticReferenceFrame and a
  * cs::CartesianCS.
  *
  * @param properties See \ref general_properties.
@@ -1015,7 +1015,7 @@ GeodeticCRS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeodeticCRS from a datum::GeodeticReferenceFrame or
+/** \brief Instantiate a GeodeticCRS from a datum::GeodeticReferenceFrame or
  * datum::DatumEnsemble and a cs::CartesianCS.
  *
  * One and only one of datum or datumEnsemble should be set to a non-null value.
@@ -1658,7 +1658,7 @@ GeographicCRS::coordinateSystem() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeographicCRS from a datum::GeodeticReferenceFrameNNPtr
+/** \brief Instantiate a GeographicCRS from a datum::GeodeticReferenceFrameNNPtr
  * and a
  * cs::EllipsoidalCS.
  *
@@ -1677,7 +1677,7 @@ GeographicCRS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeographicCRS from a datum::GeodeticReferenceFramePtr
+/** \brief Instantiate a GeographicCRS from a datum::GeodeticReferenceFramePtr
  * or
  * datum::DatumEnsemble and a
  * cs::EllipsoidalCS.
@@ -2120,7 +2120,7 @@ void VerticalCRS::addLinearUnitConvert(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a VerticalCRS from a datum::VerticalReferenceFrame and a
+/** \brief Instantiate a VerticalCRS from a datum::VerticalReferenceFrame and a
  * cs::VerticalCS.
  *
  * @param properties See \ref general_properties.
@@ -2138,7 +2138,7 @@ VerticalCRS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a VerticalCRS from a datum::VerticalReferenceFrame or
+/** \brief Instantiate a VerticalCRS from a datum::VerticalReferenceFrame or
  * datum::DatumEnsemble and a cs::VerticalCS.
  *
  * One and only one of datum or datumEnsemble should be set to a non-null value.
@@ -2748,7 +2748,7 @@ void ProjectedCRS::_exportToPROJString(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS from a base CRS, a deriving
+/** \brief Instantiate a ProjectedCRS from a base CRS, a deriving
  * operation::Conversion
  * and a coordinate system.
  *
@@ -3241,7 +3241,7 @@ CompoundCRS::componentReferenceSystems() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CompoundCRS from a vector of CRS.
+/** \brief Instantiate a CompoundCRS from a vector of CRS.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -3630,7 +3630,7 @@ BoundCRS::transformation() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a BoundCRS from a base CRS, a hub CRS and a
+/** \brief Instantiate a BoundCRS from a base CRS, a hub CRS and a
  * transformation.
  *
  * @param baseCRSIn base CRS.
@@ -3654,7 +3654,7 @@ BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a BoundCRS from a base CRS and TOWGS84 parameters
+/** \brief Instantiate a BoundCRS from a base CRS and TOWGS84 parameters
  *
  * @param baseCRSIn base CRS.
  * @param TOWGS84Parameters a vector of 3 or 7 double values representing WKT1
@@ -3680,7 +3680,7 @@ BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a BoundCRS from a base CRS and nadgrids parameters
+/** \brief Instantiate a BoundCRS from a base CRS and nadgrids parameters
  *
  * @param baseCRSIn base CRS.
  * @param filename Horizontal grid filename
@@ -3986,7 +3986,7 @@ const GeodeticCRSNNPtr DerivedGeodeticCRS::baseCRS() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DerivedGeodeticCRS from a base CRS, a deriving
+/** \brief Instantiate a DerivedGeodeticCRS from a base CRS, a deriving
  * conversion and a cs::CartesianCS.
  *
  * @param properties See \ref general_properties.
@@ -4011,7 +4011,7 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DerivedGeodeticCRS from a base CRS, a deriving
+/** \brief Instantiate a DerivedGeodeticCRS from a base CRS, a deriving
  * conversion and a cs::SphericalCS.
  *
  * @param properties See \ref general_properties.
@@ -4152,7 +4152,7 @@ const GeodeticCRSNNPtr DerivedGeographicCRS::baseCRS() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DerivedGeographicCRS from a base CRS, a deriving
+/** \brief Instantiate a DerivedGeographicCRS from a base CRS, a deriving
  * conversion and a cs::EllipsoidalCS.
  *
  * @param properties See \ref general_properties.
@@ -4288,7 +4288,7 @@ const ProjectedCRSNNPtr DerivedProjectedCRS::baseCRS() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DerivedProjectedCRS from a base CRS, a deriving
+/** \brief Instantiate a DerivedProjectedCRS from a base CRS, a deriving
  * conversion and a cs::CS.
  *
  * @param properties See \ref general_properties.
@@ -4439,7 +4439,7 @@ const cs::TemporalCSNNPtr TemporalCRS::coordinateSystem() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a TemporalCRS from a datum and a coordinate system.
+/** \brief Instantiate a TemporalCRS from a datum and a coordinate system.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -4531,7 +4531,7 @@ const datum::EngineeringDatumNNPtr EngineeringCRS::datum() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a EngineeringCRS from a datum and a coordinate system.
+/** \brief Instantiate a EngineeringCRS from a datum and a coordinate system.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -4647,7 +4647,7 @@ const cs::ParametricCSNNPtr ParametricCRS::coordinateSystem() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ParametricCRS from a datum and a coordinate system.
+/** \brief Instantiate a ParametricCRS from a datum and a coordinate system.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -4743,7 +4743,7 @@ const VerticalCRSNNPtr DerivedVerticalCRS::baseCRS() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DerivedVerticalCRS from a base CRS, a deriving
+/** \brief Instantiate a DerivedVerticalCRS from a base CRS, a deriving
  * conversion and a cs::VerticalCS.
  *
  * @param properties See \ref general_properties.

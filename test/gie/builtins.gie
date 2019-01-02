@@ -175,7 +175,7 @@ expect  0   -2_233_100.9
 roundtrip   100
 
 -------------------------------------------------------------------------------
-Test sourthern polar aspect of the ellipsoidal azimuthal equidistant. Test data
+Test southern polar aspect of the ellipsoidal azimuthal equidistant. Test data
 from Snyder p. 198, table 31.
 -------------------------------------------------------------------------------
 operation +proj=aeqd +ellps=intl +lat_0=-90
@@ -1699,7 +1699,7 @@ accept  90      0
 expect  failure errno tolerance_condition
 
 -------------------------------------------------------------------------------
-Test the sourthern polar aspect of the gnonomic projection
+Test the southern polar aspect of the gnonomic projection
 -------------------------------------------------------------------------------
 operation +proj=gnom +R=1 +lat_0=-90
 -------------------------------------------------------------------------------

@@ -886,7 +886,7 @@ const WKTNodeNNPtr &WKTNode::Private::lookForChild(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a WKTNode.
+/** \brief Instantiate a WKTNode.
  *
  * @param valueIn the name of the node.
  */
@@ -1076,7 +1076,7 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a WKTNode hierarchy from a WKT string.
+/** \brief Instantiate a WKTNode hierarchy from a WKT string.
  *
  * @param wkt the WKT string to parse.
  * @param indexStart the start index in the wkt string.
@@ -4222,7 +4222,7 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a sub-class of BaseObject from a user specified text.
+/** \brief Instantiate a sub-class of BaseObject from a user specified text.
  *
  * The text can be a:
  * <ul>
@@ -4236,7 +4236,7 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
  *     determine the appropriate best match.</li>
  * </ul>
  *
- * @param text One of the above mentionned text format
+ * @param text One of the above mentioned text format
  * @param dbContext Database context, or nullptr (in which case database
  * lookups will not work)
  * @param usePROJ4InitRules When set to true,
@@ -4389,7 +4389,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a sub-class of BaseObject from a WKT string.
+/** \brief Instantiate a sub-class of BaseObject from a WKT string.
  *
  * By default, validation is strict (to the extent of the checks that are
  * actually implemented. Currently only WKT1 strict grammar is checked), and
@@ -4673,7 +4673,7 @@ PROJStringFormatter::create(Convention conventionIn,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Set whether Extented Transverse Mercator (etmerc) should be used
+/** \brief Set whether Extended Transverse Mercator (etmerc) should be used
  * instead of tmerc */
 void PROJStringFormatter::setUseETMercForTMerc(bool flag) {
     d->useETMercForTMerc_ = flag;
@@ -5914,7 +5914,7 @@ PROJStringParser::Private::buildDatum(const Step &step,
     PropertyMap grfMap;
 
     // It is arguable that we allow the prime meridian of a datum defined by
-    // its name to be overriden, but this is found at least in a regression test
+    // its name to be overridden, but this is found at least in a regression test
     // of GDAL. So let's keep the ellipsoid part of the datum in that case and
     // use the specified prime meridian.
     const auto overridePmIfNeeded =
@@ -7174,7 +7174,7 @@ static const metadata::ExtentPtr &getExtent(const crs::CRS *crs) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a sub-class of BaseObject from a PROJ string.
+/** \brief Instantiate a sub-class of BaseObject from a PROJ string.
  * @throw ParsingException
  */
 BaseObjectNNPtr
@@ -7506,7 +7506,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
     };
 
-    // If the structure is not recognized, then try to instanciate the
+    // If the structure is not recognized, then try to instantiate the
     // pipeline, and if successful, wrap it in a PROJBasedOperation
     Logger logger;
     auto pj_context = proj_context_create();

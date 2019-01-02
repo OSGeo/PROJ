@@ -385,7 +385,7 @@ a kind of bootstrapping...)
 Building (for PROJ users)
 *************************
 
-The make process just runs the second stage mentionned above from the .sql
+The make process just runs the second stage mentioned above from the .sql
 files. The resulting proj.db is currently 5.3 MB large.
 
 Structure

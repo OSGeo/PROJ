@@ -547,7 +547,7 @@ int main(int argc, char **argv) {
         src = instanciate_crs(fromStr, optionsImportCRS, srcIsGeog,
                               srcToRadians, ignored);
         if (!src) {
-            emess(3, "cannot instanciate source coordinate system");
+            emess(3, "cannot instantiate source coordinate system");
         }
     }
 
@@ -556,7 +556,7 @@ int main(int argc, char **argv) {
         dst = instanciate_crs(toStr, optionsImportCRS, destIsGeog,
                               destToRadians, destIsLatLong);
         if (!dst) {
-            emess(3, "cannot instanciate target coordinate system");
+            emess(3, "cannot instantiate target coordinate system");
         }
     }
 

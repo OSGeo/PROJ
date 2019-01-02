@@ -273,7 +273,7 @@ const common::Angle &PrimeMeridian::longitude() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a PrimeMeridian.
+/** \brief Instantiate a PrimeMeridian.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -622,7 +622,7 @@ const std::string &Ellipsoid::celestialBody() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Ellipsoid as a sphere.
+/** \brief Instantiate a Ellipsoid as a sphere.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -641,7 +641,7 @@ EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Ellipsoid from its inverse/reverse flattening.
+/** \brief Instantiate a Ellipsoid from its inverse/reverse flattening.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -662,7 +662,7 @@ EllipsoidNNPtr Ellipsoid::createFlattenedSphere(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Ellipsoid from the value of its two semi axis.
+/** \brief Instantiate a Ellipsoid from the value of its two semi axis.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1019,7 +1019,7 @@ const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() PROJ_CONST_DEFN {
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeodeticReferenceFrame
+/** \brief Instantiate a GeodeticReferenceFrame
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1275,7 +1275,7 @@ void DynamicGeodeticReferenceFrame::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DyanmicGeodeticReferenceFrame
+/** \brief Instantiate a DyanmicGeodeticReferenceFrame
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1415,7 +1415,7 @@ void DatumEnsemble::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DatumEnsemble.
+/** \brief Instantiate a DatumEnsemble.
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1522,7 +1522,7 @@ VerticalReferenceFrame::realizationMethod() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a VerticalReferenceFrame
+/** \brief Instantiate a VerticalReferenceFrame
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1711,7 +1711,7 @@ void DynamicVerticalReferenceFrame::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DyanmicVerticalReferenceFrame
+/** \brief Instantiate a DyanmicVerticalReferenceFrame
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1785,7 +1785,7 @@ const std::string &TemporalDatum::calendar() const { return d->calendar_; }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a TemporalDatum
+/** \brief Instantiate a TemporalDatum
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1873,7 +1873,7 @@ EngineeringDatum::~EngineeringDatum() = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a EngineeringDatum
+/** \brief Instantiate a EngineeringDatum
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1944,7 +1944,7 @@ ParametricDatum::~ParametricDatum() = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ParametricDatum
+/** \brief Instantiate a ParametricDatum
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.

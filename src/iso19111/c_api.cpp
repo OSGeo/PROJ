@@ -337,7 +337,7 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate an object from a WKT string, PROJ string or object code
+/** \brief Instantiate an object from a WKT string, PROJ string or object code
  * (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
  * "urn:ogc:def:coordinateOperation:EPSG::1671").
  *
@@ -416,7 +416,7 @@ template <class T> static PROJ_STRING_LIST to_string_list(T &&set) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate an object from a WKT string.
+/** \brief Instantiate an object from a WKT string.
  *
  * This function calls osgeo::proj::io::WKTParser::createFromWKT()
  *
@@ -522,7 +522,7 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate an object from a PROJ string.
+/** \brief Instantiate an object from a PROJ string.
  *
  * This function calls osgeo::proj::io::PROJStringParser::createFromPROJString()
  *
@@ -559,7 +559,7 @@ PJ *proj_create_from_proj_string(PJ_CONTEXT *ctx, const char *proj_string,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate an object from a database lookup.
+/** \brief Instantiate an object from a database lookup.
  *
  * The returned object must be unreferenced with proj_destroy() after use.
  * It should be used by at most one thread at a time.
@@ -1183,7 +1183,7 @@ const char *proj_get_id_code(const PJ *obj, int index) {
  * <li>OUTPUT_AXIS=AUTO/YES/NO. In AUTO mode, axis will be output for WKT2
  * variants, for WKT1_GDAL for ProjectedCRS with easting/northing ordering
  * (otherwise stripped), but not for WKT1_ESRI. Setting to YES will output
- * them unconditionaly, and to NO will omit them unconditionaly.</li>
+ * them unconditionally, and to NO will omit them unconditionally.</li>
  * </ul>
  * @return a string, or NULL in case of error.
  */
@@ -1552,7 +1552,7 @@ PJ *proj_crs_create_bound_crs(PJ_CONTEXT *ctx, const PJ *base_crs,
  * <ul>
  * <li>ALLOW_INTERMEDIATE_CRS=YES/NO. Defaults to NO. When set to YES,
  * intermediate CRS may be considered when computing the possible
- * tranformations. Slower.</li>
+ * transformations. Slower.</li>
  * </ul>
  * @return Object that must be unreferenced with proj_destroy(), or NULL
  * in case of error.
@@ -2043,7 +2043,7 @@ PJ *proj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ *crs) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return informatin on the operation method of the SingleOperation.
+/** \brief Return information on the operation method of the SingleOperation.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param coordoperation Objet of type SingleOperation (typically a Conversion
@@ -2709,9 +2709,9 @@ PJ *proj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ *obj,
  * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
  * @param unit_auth_name Unit authority name. Or NULL.
  * @param unit_code Unit code. Or NULL.
- * @param convert_to_new_unit TRUE if exisiting values should be converted from
+ * @param convert_to_new_unit TRUE if existing values should be converted from
  * their current unit to the new unit. If FALSE, their value will be left
- * unchanged and the unit overriden (so the resulting CRS will not be
+ * unchanged and the unit overridden (so the resulting CRS will not be
  * equivalent to the original one for reprojection purposes).
  *
  * @return Object that must be unreferenced with
@@ -2742,7 +2742,7 @@ PJ *proj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx, const PJ *obj,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a EngineeringCRS with just a name
+/** \brief Instantiate a EngineeringCRS with just a name
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
@@ -2842,7 +2842,7 @@ static void setSingleOperationElements(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Conversion
+/** \brief Instantiate a Conversion
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
@@ -2889,7 +2889,7 @@ PJ *proj_create_conversion(PJ_CONTEXT *ctx, const char *name,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation
+/** \brief Instantiate a Transformation
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
@@ -3089,7 +3089,7 @@ static CoordinateSystemAxisNNPtr createAxis(const PJ_AXIS_DESCRIPTION &axis) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CoordinateSystem.
+/** \brief Instantiate a CoordinateSystem.
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
@@ -3216,7 +3216,7 @@ PJ *proj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesiansCS 2D
+/** \brief Instantiate a CartesiansCS 2D
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
@@ -3269,7 +3269,7 @@ PJ *proj_create_cartesian_2D_cs(PJ_CONTEXT *ctx, PJ_CARTESIAN_CS_2D_TYPE type,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Ellipsoidal 2D
+/** \brief Instantiate a Ellipsoidal 2D
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
@@ -3308,7 +3308,7 @@ PJ *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS
+/** \brief Instantiate a ProjectedCRS
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
@@ -3368,7 +3368,7 @@ static PJ *proj_create_conversion(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a Universal Transverse Mercator
+/** \brief Instantiate a ProjectedCRS with a Universal Transverse Mercator
  * conversion.
  *
  * See osgeo::proj::operation::Conversion::createUTM().
@@ -3388,7 +3388,7 @@ PJ *proj_create_conversion_utm(PJ_CONTEXT *ctx, int zone, int north) {
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Transverse
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Transverse
  * Mercator projection method.
  *
  * See osgeo::proj::operation::Conversion::createTransverseMercator().
@@ -3421,7 +3421,7 @@ PJ *proj_create_conversion_transverse_mercator(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Gauss
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Gauss
  * Schreiber Transverse Mercator projection method.
  *
  * See
@@ -3455,7 +3455,7 @@ PJ *proj_create_conversion_gauss_schreiber_transverse_mercator(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Transverse
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Transverse
  * Mercator South Orientated projection method.
  *
  * See
@@ -3489,7 +3489,7 @@ PJ *proj_create_conversion_transverse_mercator_south_oriented(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Two Point
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Two Point
  * Equidistant projection method.
  *
  * See osgeo::proj::operation::Conversion::createTwoPointEquidistant().
@@ -3525,7 +3525,7 @@ PJ *proj_create_conversion_two_point_equidistant(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Tunisia
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Tunisia
  * Mapping Grid projection method.
  *
  * See osgeo::proj::operation::Conversion::createTunisiaMappingGrid().
@@ -3557,7 +3557,7 @@ PJ *proj_create_conversion_tunisia_mapping_grid(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Albers
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Albers
  * Conic Equal Area projection method.
  *
  * See osgeo::proj::operation::Conversion::createAlbersEqualArea().
@@ -3594,7 +3594,7 @@ PJ *proj_create_conversion_albers_equal_area(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Lambert
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
  * Conic Conformal 1SP projection method.
  *
  * See osgeo::proj::operation::Conversion::createLambertConicConformal_1SP().
@@ -3627,7 +3627,7 @@ PJ *proj_create_conversion_lambert_conic_conformal_1sp(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Lambert
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
  * Conic Conformal (2SP) projection method.
  *
  * See osgeo::proj::operation::Conversion::createLambertConicConformal_2SP().
@@ -3664,7 +3664,7 @@ PJ *proj_create_conversion_lambert_conic_conformal_2sp(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Lambert
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
  * Conic Conformal (2SP Michigan) projection method.
  *
  * See
@@ -3703,7 +3703,7 @@ PJ *proj_create_conversion_lambert_conic_conformal_2sp_michigan(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Lambert
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
  * Conic Conformal (2SP Belgium) projection method.
  *
  * See
@@ -3741,7 +3741,7 @@ PJ *proj_create_conversion_lambert_conic_conformal_2sp_belgium(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Modified
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Modified
  * Azimuthal Equidistant projection method.
  *
  * See osgeo::proj::operation::Conversion::createAzimuthalEquidistant().
@@ -3774,7 +3774,7 @@ PJ *proj_create_conversion_azimuthal_equidistant(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Guam
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Guam
  * Projection projection method.
  *
  * See osgeo::proj::operation::Conversion::createGuamProjection().
@@ -3807,7 +3807,7 @@ PJ *proj_create_conversion_guam_projection(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Bonne
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Bonne
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createBonne().
@@ -3842,7 +3842,7 @@ PJ *proj_create_conversion_bonne(PJ_CONTEXT *ctx, double latitude_nat_origin,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Lambert
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
  * Cylindrical Equal Area (Spherical) projection method.
  *
  * See
@@ -3876,7 +3876,7 @@ PJ *proj_create_conversion_lambert_cylindrical_equal_area_spherical(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Lambert
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
  * Cylindrical Equal Area (ellipsoidal form) projection method.
  *
  * See osgeo::proj::operation::Conversion::createLambertCylindricalEqualArea().
@@ -3909,7 +3909,7 @@ PJ *proj_create_conversion_lambert_cylindrical_equal_area(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the
+/** \brief Instantiate a ProjectedCRS with a conversion based on the
  * Cassini-Soldner projection method.
  *
  * See osgeo::proj::operation::Conversion::createCassiniSoldner().
@@ -3941,7 +3941,7 @@ PJ *proj_create_conversion_cassini_soldner(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Equidistant
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Equidistant
  * Conic projection method.
  *
  * See osgeo::proj::operation::Conversion::createEquidistantConic().
@@ -3977,7 +3977,7 @@ PJ *proj_create_conversion_equidistant_conic(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Eckert I
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Eckert I
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createEckertI().
@@ -4010,7 +4010,7 @@ PJ *proj_create_conversion_eckert_i(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Eckert II
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Eckert II
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createEckertII().
@@ -4044,7 +4044,7 @@ PJ *proj_create_conversion_eckert_ii(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Eckert III
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Eckert III
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createEckertIII().
@@ -4078,7 +4078,7 @@ PJ *proj_create_conversion_eckert_iii(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Eckert IV
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Eckert IV
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createEckertIV().
@@ -4112,7 +4112,7 @@ PJ *proj_create_conversion_eckert_iv(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Eckert V
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Eckert V
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createEckertV().
@@ -4145,7 +4145,7 @@ PJ *proj_create_conversion_eckert_v(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Eckert VI
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Eckert VI
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createEckertVI().
@@ -4179,7 +4179,7 @@ PJ *proj_create_conversion_eckert_vi(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Equidistant
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Equidistant
  * Cylindrical projection method.
  *
  * See osgeo::proj::operation::Conversion::createEquidistantCylindrical().
@@ -4212,7 +4212,7 @@ PJ *proj_create_conversion_equidistant_cylindrical(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Equidistant
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Equidistant
  * Cylindrical (Spherical) projection method.
  *
  * See
@@ -4246,7 +4246,7 @@ PJ *proj_create_conversion_equidistant_cylindrical_spherical(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Gall
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Gall
  * (Stereographic) projection method.
  *
  * See osgeo::proj::operation::Conversion::createGall().
@@ -4279,7 +4279,7 @@ PJ *proj_create_conversion_gall(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Goode
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Goode
  * Homolosine projection method.
  *
  * See osgeo::proj::operation::Conversion::createGoodeHomolosine().
@@ -4313,7 +4313,7 @@ PJ *proj_create_conversion_goode_homolosine(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Interrupted
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Interrupted
  * Goode Homolosine projection method.
  *
  * See osgeo::proj::operation::Conversion::createInterruptedGoodeHomolosine().
@@ -4345,7 +4345,7 @@ PJ *proj_create_conversion_interrupted_goode_homolosine(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the
+/** \brief Instantiate a ProjectedCRS with a conversion based on the
  * Geostationary Satellite View projection method, with the sweep angle axis of
  * the viewing instrument being x.
  *
@@ -4378,7 +4378,7 @@ PJ *proj_create_conversion_geostationary_satellite_sweep_x(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the
+/** \brief Instantiate a ProjectedCRS with a conversion based on the
  * Geostationary Satellite View projection method, with the sweep angle axis of
  * the viewing instrument being y.
  *
@@ -4411,7 +4411,7 @@ PJ *proj_create_conversion_geostationary_satellite_sweep_y(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Gnomonic
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Gnomonic
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createGnomonic().
@@ -4445,7 +4445,7 @@ PJ *proj_create_conversion_gnomonic(PJ_CONTEXT *ctx, double center_lat,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Hotine
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Hotine
  * Oblique Mercator (Variant A) projection method.
  *
  * See
@@ -4483,7 +4483,7 @@ PJ *proj_create_conversion_hotine_oblique_mercator_variant_a(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Hotine
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Hotine
  * Oblique Mercator (Variant B) projection method.
  *
  * See
@@ -4521,7 +4521,7 @@ PJ *proj_create_conversion_hotine_oblique_mercator_variant_b(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Hotine
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Hotine
  * Oblique Mercator Two Point Natural Origin projection method.
  *
  * See
@@ -4561,7 +4561,7 @@ PJ *proj_create_conversion_hotine_oblique_mercator_two_point_natural_origin(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Laborde
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Laborde
  * Oblique Mercator projection method.
  *
  * See
@@ -4597,7 +4597,7 @@ PJ *proj_create_conversion_laborde_oblique_mercator(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the
+/** \brief Instantiate a ProjectedCRS with a conversion based on the
  * International Map of the World Polyconic projection method.
  *
  * See
@@ -4633,7 +4633,7 @@ PJ *proj_create_conversion_international_map_world_polyconic(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Krovak
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Krovak
  * (north oriented) projection method.
  *
  * See osgeo::proj::operation::Conversion::createKrovakNorthOriented().
@@ -4672,7 +4672,7 @@ PJ *proj_create_conversion_krovak_north_oriented(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Krovak
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Krovak
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createKrovak().
@@ -4711,7 +4711,7 @@ PJ *proj_create_conversion_krovak(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Lambert
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Lambert
  * Azimuthal Equal Area projection method.
  *
  * See osgeo::proj::operation::Conversion::createLambertAzimuthalEqualArea().
@@ -4744,7 +4744,7 @@ PJ *proj_create_conversion_lambert_azimuthal_equal_area(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Miller
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Miller
  * Cylindrical projection method.
  *
  * See osgeo::proj::operation::Conversion::createMillerCylindrical().
@@ -4776,7 +4776,7 @@ PJ *proj_create_conversion_miller_cylindrical(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Mercator
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Mercator
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createMercatorVariantA().
@@ -4809,7 +4809,7 @@ PJ *proj_create_conversion_mercator_variant_a(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Mercator
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Mercator
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createMercatorVariantB().
@@ -4841,7 +4841,7 @@ PJ *proj_create_conversion_mercator_variant_b(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Popular
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Popular
  * Visualisation Pseudo Mercator projection method.
  *
  * See
@@ -4874,7 +4874,7 @@ PJ *proj_create_conversion_popular_visualisation_pseudo_mercator(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Mollweide
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Mollweide
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createMollweide().
@@ -4908,7 +4908,7 @@ PJ *proj_create_conversion_mollweide(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the New Zealand
+/** \brief Instantiate a ProjectedCRS with a conversion based on the New Zealand
  * Map Grid projection method.
  *
  * See osgeo::proj::operation::Conversion::createNewZealandMappingGrid().
@@ -4940,7 +4940,7 @@ PJ *proj_create_conversion_new_zealand_mapping_grid(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Oblique
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Oblique
  * Stereographic (Alternative) projection method.
  *
  * See osgeo::proj::operation::Conversion::createObliqueStereographic().
@@ -4973,7 +4973,7 @@ PJ *proj_create_conversion_oblique_stereographic(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the
+/** \brief Instantiate a ProjectedCRS with a conversion based on the
  * Orthographic projection method.
  *
  * See osgeo::proj::operation::Conversion::createOrthographic().
@@ -5005,7 +5005,7 @@ PJ *proj_create_conversion_orthographic(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the American
+/** \brief Instantiate a ProjectedCRS with a conversion based on the American
  * Polyconic projection method.
  *
  * See osgeo::proj::operation::Conversion::createAmericanPolyconic().
@@ -5037,7 +5037,7 @@ PJ *proj_create_conversion_american_polyconic(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Polar
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Polar
  * Stereographic (Variant A) projection method.
  *
  * See osgeo::proj::operation::Conversion::createPolarStereographicVariantA().
@@ -5070,7 +5070,7 @@ PJ *proj_create_conversion_polar_stereographic_variant_a(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Polar
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Polar
  * Stereographic (Variant B) projection method.
  *
  * See osgeo::proj::operation::Conversion::createPolarStereographicVariantB().
@@ -5103,7 +5103,7 @@ PJ *proj_create_conversion_polar_stereographic_variant_b(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Robinson
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Robinson
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createRobinson().
@@ -5136,7 +5136,7 @@ PJ *proj_create_conversion_robinson(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Sinusoidal
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Sinusoidal
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createSinusoidal().
@@ -5170,7 +5170,7 @@ PJ *proj_create_conversion_sinusoidal(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the
+/** \brief Instantiate a ProjectedCRS with a conversion based on the
  * Stereographic projection method.
  *
  * See osgeo::proj::operation::Conversion::createStereographic().
@@ -5203,7 +5203,7 @@ PJ *proj_create_conversion_stereographic(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Van der
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Van der
  * Grinten projection method.
  *
  * See osgeo::proj::operation::Conversion::createVanDerGrinten().
@@ -5237,7 +5237,7 @@ PJ *proj_create_conversion_van_der_grinten(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Wagner I
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Wagner I
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createWagnerI().
@@ -5270,7 +5270,7 @@ PJ *proj_create_conversion_wagner_i(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Wagner II
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Wagner II
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createWagnerII().
@@ -5304,7 +5304,7 @@ PJ *proj_create_conversion_wagner_ii(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Wagner III
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Wagner III
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createWagnerIII().
@@ -5336,7 +5336,7 @@ PJ *proj_create_conversion_wagner_iii(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Wagner IV
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Wagner IV
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createWagnerIV().
@@ -5370,7 +5370,7 @@ PJ *proj_create_conversion_wagner_iv(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Wagner V
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Wagner V
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createWagnerV().
@@ -5403,7 +5403,7 @@ PJ *proj_create_conversion_wagner_v(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Wagner VI
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Wagner VI
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createWagnerVI().
@@ -5437,7 +5437,7 @@ PJ *proj_create_conversion_wagner_vi(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Wagner VII
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Wagner VII
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createWagnerVII().
@@ -5471,7 +5471,7 @@ PJ *proj_create_conversion_wagner_vii(PJ_CONTEXT *ctx, double center_long,
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the
+/** \brief Instantiate a ProjectedCRS with a conversion based on the
  * Quadrilateralized Spherical Cube projection method.
  *
  * See
@@ -5504,7 +5504,7 @@ PJ *proj_create_conversion_quadrilateralized_spherical_cube(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Spherical
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Spherical
  * Cross-Track Height projection method.
  *
  * See osgeo::proj::operation::Conversion::createSphericalCrossTrackHeight().
@@ -5536,7 +5536,7 @@ PJ *proj_create_conversion_spherical_cross_track_height(
 }
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ProjectedCRS with a conversion based on the Equal Earth
+/** \brief Instantiate a ProjectedCRS with a conversion based on the Equal Earth
  * projection method.
  *
  * See osgeo::proj::operation::Conversion::createEqualEarth().
@@ -5572,7 +5572,7 @@ PJ *proj_create_conversion_equal_earth(PJ_CONTEXT *ctx, double center_long,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return whether a coordinate operation can be instanciated as
+/** \brief Return whether a coordinate operation can be instantiated as
  * a PROJ pipeline, checking in particular that referenced grids are
  * available.
  *
@@ -5966,7 +5966,7 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a context for building coordinate operations between
+/** \brief Instantiate a context for building coordinate operations between
  * two CRS.
  *
  * The returned object must be unreferenced with

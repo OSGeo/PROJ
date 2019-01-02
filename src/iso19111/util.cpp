@@ -227,7 +227,7 @@ bool ArrayOfBaseObject::empty() const { return d->values_.empty(); }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ArrayOfBaseObject.
+/** \brief Instantiate a ArrayOfBaseObject.
  *
  * @return a new ArrayOfBaseObject.
  */
@@ -543,7 +543,7 @@ std::string LocalName::toString() const { return d->name; }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a NameSpace.
+/** \brief Instantiate a NameSpace.
  *
  * @param name name of the namespace.
  * @param properties Properties. Allowed keys are "separator" and
@@ -561,7 +561,7 @@ NameSpaceNNPtr NameFactory::createNameSpace(const GenericNameNNPtr &name,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a LocalName.
+/** \brief Instantiate a LocalName.
  *
  * @param scope scope.
  * @param name string of the local name.
@@ -574,7 +574,7 @@ LocalNameNNPtr NameFactory::createLocalName(const NameSpacePtr &scope,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GenericName.
+/** \brief Instantiate a GenericName.
  *
  * @param scope scope.
  * @param parsedNames the components of the name.

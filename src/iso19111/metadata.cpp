@@ -211,7 +211,7 @@ double GeographicBoundingBox::northBoundLatitude() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeographicBoundingBox.
+/** \brief Instantiate a GeographicBoundingBox.
  *
  * If east < west, then the bounding box crosses the anti-meridian.
  *
@@ -484,7 +484,7 @@ common::UnitOfMeasureNNPtr &VerticalExtent::unit() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a VerticalExtent.
+/** \brief Instantiate a VerticalExtent.
  *
  * @param minimumIn minimum.
  * @param maximumIn maximum.
@@ -572,7 +572,7 @@ const std::string &TemporalExtent::stop() PROJ_CONST_DEFN { return d->stop_; }
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a TemporalExtent.
+/** \brief Instantiate a TemporalExtent.
  *
  * @param start start.
  * @param stop stop.
@@ -682,7 +682,7 @@ Extent::temporalElements() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Extent.
+/** \brief Instantiate a Extent.
  *
  * @param descriptionIn Textual description, or empty.
  * @param geographicElementsIn Geographic element(s), or empty.
@@ -706,7 +706,7 @@ Extent::create(const optional<std::string> &descriptionIn,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Extent from a bounding box
+/** \brief Instantiate a Extent from a bounding box
  *
  * @param west Western-most coordinate of the limit of the dataset extent (in
  * degrees).
@@ -950,7 +950,7 @@ Identifier::~Identifier() = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Identifier.
+/** \brief Instantiate a Identifier.
  *
  * @param codeIn Alphanumeric value identifying an instance in the codespace
  * @param properties See \ref general_properties.
@@ -1272,7 +1272,7 @@ const std::string &PositionalAccuracy::value() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a PositionalAccuracy.
+/** \brief Instantiate a PositionalAccuracy.
  *
  * @param valueIn positional accuracy value.
  * @return a new PositionalAccuracy.

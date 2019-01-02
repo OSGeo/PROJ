@@ -110,7 +110,7 @@ const common::Angle &Meridian::longitude() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Meridian.
+/** \brief Instantiate a Meridian.
  *
  * @param longitudeIn longitude of the meridian that the axis follows from the
  * pole.
@@ -255,7 +255,7 @@ const MeridianPtr &CoordinateSystemAxis::meridian() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CoordinateSystemAxis.
+/** \brief Instantiate a CoordinateSystemAxis.
  *
  * @param properties See \ref general_properties. The name should generally be
  * defined.
@@ -313,7 +313,7 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
     formatter->startNode(io::WKTConstants::AXIS, !identifiers().empty());
     std::string axisName = *(name()->description());
     std::string abbrev = abbreviation();
-    std::string parenthesedAbbrev = "(" + abbrev + ")";
+    std::string parenthesizedAbbrev = "(" + abbrev + ")";
     std::string dir = direction().toString();
     std::string axisDesignation;
 
@@ -342,7 +342,7 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
             axisDesignation += " ";
         }
         if (!abbrev.empty()) {
-            axisDesignation += parenthesedAbbrev;
+            axisDesignation += parenthesizedAbbrev;
         }
     }
     if (!isWKT2) {
@@ -358,14 +358,14 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
         if (direction() == AxisDirection::GEOCENTRIC_X ||
             direction() == AxisDirection::GEOCENTRIC_Y ||
             direction() == AxisDirection::GEOCENTRIC_Z) {
-            axisDesignation = parenthesedAbbrev;
+            axisDesignation = parenthesizedAbbrev;
         }
         // For cartesian CS with Easting/Northing, export only the abbreviation
         else if ((order == 1 && axisName == AxisName::Easting &&
                   abbrev == AxisAbbreviation::E) ||
                  (order == 2 && axisName == AxisName::Northing &&
                   abbrev == AxisAbbreviation::N)) {
-            axisDesignation = parenthesedAbbrev;
+            axisDesignation = parenthesizedAbbrev;
         }
     }
     formatter->addQuotedString(axisDesignation);
@@ -579,7 +579,7 @@ SphericalCS::SphericalCS(const SphericalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a SphericalCS.
+/** \brief Instantiate a SphericalCS.
  *
  * @param properties See \ref general_properties.
  * @param axis1 The first axis.
@@ -617,7 +617,7 @@ EllipsoidalCS::EllipsoidalCS(const EllipsoidalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a EllipsoidalCS.
+/** \brief Instantiate a EllipsoidalCS.
  *
  * @param properties See \ref general_properties.
  * @param axis1 The first axis.
@@ -636,7 +636,7 @@ EllipsoidalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a EllipsoidalCS.
+/** \brief Instantiate a EllipsoidalCS.
  *
  * @param properties See \ref general_properties.
  * @param axis1 The first axis.
@@ -675,7 +675,7 @@ CoordinateSystemAxis::createLONG_EAST(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a EllipsoidalCS with a Latitude (first) and Longitude
+/** \brief Instantiate a EllipsoidalCS with a Latitude (first) and Longitude
  * (second) axis.
  *
  * @param unit Angular unit of the axes.
@@ -690,7 +690,7 @@ EllipsoidalCS::createLatitudeLongitude(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a EllipsoidalCS with a Latitude (first), Longitude
+/** \brief Instantiate a EllipsoidalCS with a Latitude (first), Longitude
  * (second) axis and ellipsoidal height (third) axis.
  *
  * @param angularUnit Angular unit of the latitude and longitude axes.
@@ -711,7 +711,7 @@ EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a EllipsoidalCS with a Longitude (first) and Latitude
+/** \brief Instantiate a EllipsoidalCS with a Longitude (first) and Latitude
  * (second) axis.
  *
  * @param unit Angular unit of the axes.
@@ -809,7 +809,7 @@ VerticalCS::VerticalCS(const VerticalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a VerticalCS.
+/** \brief Instantiate a VerticalCS.
  *
  * @param properties See \ref general_properties.
  * @param axis The axis.
@@ -824,7 +824,7 @@ VerticalCSNNPtr VerticalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a VerticalCS with a Gravity-related height axis
+/** \brief Instantiate a VerticalCS with a Gravity-related height axis
  *
  * @param unit linear unit.
  * @return a new VerticalCS.
@@ -867,7 +867,7 @@ CartesianCS::CartesianCS(const CartesianCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesianCS.
+/** \brief Instantiate a CartesianCS.
  *
  * @param properties See \ref general_properties.
  * @param axis1 The first axis.
@@ -885,7 +885,7 @@ CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesianCS.
+/** \brief Instantiate a CartesianCS.
  *
  * @param properties See \ref general_properties.
  * @param axis1 The first axis.
@@ -905,7 +905,7 @@ CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesianCS with a Easting (first) and Northing
+/** \brief Instantiate a CartesianCS with a Easting (first) and Northing
  * (second) axis.
  *
  * @param unit Linear unit of the axes.
@@ -926,7 +926,7 @@ CartesianCS::createEastingNorthing(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesianCS with a Northing (first) and Easting
+/** \brief Instantiate a CartesianCS with a Northing (first) and Easting
  * (second) axis.
  *
  * @param unit Linear unit of the axes.
@@ -947,7 +947,7 @@ CartesianCS::createNorthingEasting(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesianCS with a Westing (first) and Southing
+/** \brief Instantiate a CartesianCS with a Westing (first) and Southing
  * (second) axis.
  *
  * @param unit Linear unit of the axes.
@@ -968,7 +968,7 @@ CartesianCS::createWestingSouthing(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesianCS, north-pole centered,
+/** \brief Instantiate a CartesianCS, north-pole centered,
  * with a Easting (first) South-Oriented and
  * Northing (second) South-Oriented axis.
  *
@@ -992,7 +992,7 @@ CartesianCSNNPtr CartesianCS::createNorthPoleEastingSouthNorthingSouth(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesianCS, south-pole centered,
+/** \brief Instantiate a CartesianCS, south-pole centered,
  * with a Easting (first) North-Oriented and
  * Northing (second) North-Oriented axis.
  *
@@ -1016,7 +1016,7 @@ CartesianCSNNPtr CartesianCS::createSouthPoleEastingNorthNorthingNorth(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a CartesianCS with the three geocentric axes.
+/** \brief Instantiate a CartesianCS with the three geocentric axes.
  *
  * @param unit Liinear unit of the axes.
  * @return a new CartesianCS.
@@ -1076,7 +1076,7 @@ OrdinalCS::OrdinalCS(const OrdinalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a OrdinalCS.
+/** \brief Instantiate a OrdinalCS.
  *
  * @param properties See \ref general_properties.
  * @param axisIn List of axis.
@@ -1109,7 +1109,7 @@ ParametricCS::ParametricCS(const ParametricCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ParametricCS.
+/** \brief Instantiate a ParametricCS.
  *
  * @param properties See \ref general_properties.
  * @param axisIn Axis.
@@ -1189,7 +1189,7 @@ DateTimeTemporalCS::DateTimeTemporalCS(const CoordinateSystemAxisNNPtr &axisIn)
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DateTimeTemporalCS.
+/** \brief Instantiate a DateTimeTemporalCS.
  *
  * @param properties See \ref general_properties.
  * @param axisIn The axis.
@@ -1222,7 +1222,7 @@ TemporalCountCS::TemporalCountCS(const CoordinateSystemAxisNNPtr &axisIn)
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a TemporalCountCS.
+/** \brief Instantiate a TemporalCountCS.
  *
  * @param properties See \ref general_properties.
  * @param axisIn The axis.
@@ -1255,7 +1255,7 @@ TemporalMeasureCS::TemporalMeasureCS(const CoordinateSystemAxisNNPtr &axisIn)
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a TemporalMeasureCS.
+/** \brief Instantiate a TemporalMeasureCS.
  *
  * @param properties See \ref general_properties.
  * @param axisIn The axis.

@@ -309,7 +309,7 @@ struct Measure::Private {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Measure.
+/** \brief Instantiate a Measure.
  */
 Measure::Measure(double valueIn, const UnitOfMeasure &unitIn)
     : d(internal::make_unique<Private>(valueIn, unitIn)) {}
@@ -385,7 +385,7 @@ bool Measure::_isEquivalentTo(const Measure &other,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Scale.
+/** \brief Instantiate a Scale.
  *
  * @param valueIn value
  */
@@ -393,7 +393,7 @@ Scale::Scale(double valueIn) : Measure(valueIn, UnitOfMeasure::SCALE_UNITY) {}
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Scale.
+/** \brief Instantiate a Scale.
  *
  * @param valueIn value
  * @param unitIn unit. Constraint: unit.type() == UnitOfMeasure::Type::SCALE
@@ -415,7 +415,7 @@ Scale::~Scale() = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Angle.
+/** \brief Instantiate a Angle.
  *
  * @param valueIn value
  */
@@ -423,7 +423,7 @@ Angle::Angle(double valueIn) : Measure(valueIn, UnitOfMeasure::DEGREE) {}
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Angle.
+/** \brief Instantiate a Angle.
  *
  * @param valueIn value
  * @param unitIn unit. Constraint: unit.type() == UnitOfMeasure::Type::ANGULAR
@@ -445,7 +445,7 @@ Angle::~Angle() = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Length.
+/** \brief Instantiate a Length.
  *
  * @param valueIn value
  */
@@ -453,7 +453,7 @@ Length::Length(double valueIn) : Measure(valueIn, UnitOfMeasure::METRE) {}
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Length.
+/** \brief Instantiate a Length.
  *
  * @param valueIn value
  * @param unitIn unit. Constraint: unit.type() == UnitOfMeasure::Type::LINEAR
@@ -507,7 +507,7 @@ DateTime::~DateTime() = default;
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a DateTime. */
+/** \brief Instantiate a DateTime. */
 DateTime DateTime::create(const std::string &str) { return DateTime(str); }
 
 // ---------------------------------------------------------------------------
@@ -899,7 +899,7 @@ const ExtentPtr &ObjectDomain::domainOfValidity() PROJ_CONST_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a ObjectDomain.
+/** \brief Instantiate a ObjectDomain.
  */
 ObjectDomainNNPtr ObjectDomain::create(const optional<std::string> &scopeIn,
                                        const ExtentPtr &extent) {

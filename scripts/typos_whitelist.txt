@@ -1,0 +1,1 @@
+$EXE +units=us-ft +init=${INIT_FILE}:404 -E -f '%.3f' >>${OUT} <<EOF

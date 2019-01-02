@@ -6300,7 +6300,7 @@ TEST(io, projparse_longlat_pm_numeric) {
 
 TEST(io, projparse_longlat_pm_overriding_datum) {
     // It is arguable that we allow the prime meridian of a datum defined by
-    // its name to be overriden, but this is found at least in a regression test
+    // its name to be overridden, but this is found at least in a regression test
     // of GDAL. So let's keep the ellipsoid part of the datum in that case and
     // use the specified prime meridian.
     auto obj = PROJStringParser().createFromPROJString(
@@ -8195,7 +8195,7 @@ TEST(io, projparse_projected_errors) {
     EXPECT_THROW(
         PROJStringParser().createFromPROJString("+proj=tmerc +lat_0=foo"),
         ParsingException);
-    // Inconsitent pm values between geogCRS and projectedCRS
+    // Inconsistent pm values between geogCRS and projectedCRS
     EXPECT_THROW(PROJStringParser().createFromPROJString(
                      "+proj=pipeline +step +proj=longlat +ellps=WGS84 "
                      "+proj=tmerc +ellps=WGS84  +lat_0=foo +pm=paris"),
