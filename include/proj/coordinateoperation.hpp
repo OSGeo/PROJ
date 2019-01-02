@@ -155,6 +155,7 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_FRIEND(crs::DerivedCRS);
     PROJ_FRIEND(io::AuthorityFactory);
     PROJ_FRIEND(CoordinateOperationFactory);
+    PROJ_FRIEND(ConcatenatedOperation);
     PROJ_INTERNAL void
     setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                            std::weak_ptr<crs::CRS> targetCRSIn);
@@ -1585,16 +1586,6 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
-    //! @cond Doxygen_Suppress
-    PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
-        const override; // throw(io::FormattingException)
-
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
-    //! @endcond
-
     PROJ_DLL static ConcatenatedOperationNNPtr
     create(const util::PropertyMap &properties,
            const std::vector<CoordinateOperationNNPtr> &operationsIn,
@@ -1607,6 +1598,24 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
 
     PROJ_DLL std::set<GridDescription>
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL void
+        _exportToWKT(io::WKTFormatter *formatter)
+            const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL bool
+    _isEquivalentTo(const util::IComparable *other,
+                    util::IComparable::Criterion criterion =
+                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_INTERNAL static void
+    fixStepsDirection(const crs::CRSNNPtr &concatOpSourceCRS,
+                      const crs::CRSNNPtr &concatOpTargetCRS,
+                      std::vector<CoordinateOperationNNPtr> &operationsInOut);
+    //! @endcond
 
   protected:
     PROJ_INTERNAL explicit ConcatenatedOperation(

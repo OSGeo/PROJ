@@ -8794,6 +8794,21 @@ ConcatenatedOperation::operations() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+static bool compareStepCRS(const crs::CRS *a, const crs::CRS *b) {
+    const auto &aIds = a->identifiers();
+    const auto &bIds = b->identifiers();
+    if (aIds.size() == 1 && bIds.size() == 1 &&
+        aIds[0]->code() == bIds[0]->code() &&
+        *aIds[0]->codeSpace() == *bIds[0]->codeSpace()) {
+        return true;
+    }
+    return a->_isEquivalentTo(b, util::IComparable::Criterion::EQUIVALENT);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instantiate a ConcatenatedOperation
  *
  * @param properties See \ref general_properties. At minimum the name should
@@ -8823,16 +8838,7 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
                                    "source and/or target CRS");
         }
         if (i >= 1) {
-            const auto &sourceCRSIds = l_sourceCRS->identifiers();
-            const auto &targetCRSIds = lastTargetCRS->identifiers();
-            if (sourceCRSIds.size() == 1 && targetCRSIds.size() == 1 &&
-                sourceCRSIds[0]->code() == targetCRSIds[0]->code() &&
-                *sourceCRSIds[0]->codeSpace() ==
-                    *targetCRSIds[0]->codeSpace()) {
-                // same id --> ok
-            } else if (!l_sourceCRS->_isEquivalentTo(
-                           lastTargetCRS.get(),
-                           util::IComparable::Criterion::EQUIVALENT)) {
+            if (!compareStepCRS(l_sourceCRS.get(), lastTargetCRS.get())) {
                 throw InvalidOperation(
                     "Inconsistent chaining of CRS in operations");
             }
@@ -8848,6 +8854,137 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
     op->setAccuracies(accuracies);
     return op;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void ConcatenatedOperation::fixStepsDirection(
+    const crs::CRSNNPtr &concatOpSourceCRS,
+    const crs::CRSNNPtr &concatOpTargetCRS,
+    std::vector<CoordinateOperationNNPtr> &operationsInOut) {
+
+    // Set of heuristics to assign CRS to steps, and possibly reverse them.
+
+    for (size_t i = 0; i < operationsInOut.size(); ++i) {
+        auto &op = operationsInOut[i];
+        auto l_sourceCRS = op->sourceCRS();
+        auto l_targetCRS = op->targetCRS();
+        auto conv = dynamic_cast<const Conversion *>(op.get());
+        if (conv && i == 0 && !l_sourceCRS && !l_targetCRS) {
+            auto derivedCRS =
+                dynamic_cast<const crs::DerivedCRS *>(concatOpSourceCRS.get());
+            if (derivedCRS) {
+                if (i + 1 < operationsInOut.size()) {
+                    // use the sourceCRS of the next operation as our target CRS
+                    l_targetCRS = operationsInOut[i + 1]->sourceCRS();
+                    // except if it looks like the next operation should
+                    // actually be reversed !!!
+                    if (l_targetCRS &&
+                        !compareStepCRS(l_targetCRS.get(),
+                                        derivedCRS->baseCRS().get()) &&
+                        operationsInOut[i + 1]->targetCRS() &&
+                        compareStepCRS(
+                            operationsInOut[i + 1]->targetCRS().get(),
+                            derivedCRS->baseCRS().get())) {
+                        l_targetCRS = operationsInOut[i + 1]->targetCRS();
+                    }
+                }
+                if (!l_targetCRS) {
+                    l_targetCRS = derivedCRS->baseCRS().as_nullable();
+                }
+                auto invConv =
+                    util::nn_dynamic_pointer_cast<InverseConversion>(op);
+                auto nn_targetCRS = NN_NO_CHECK(l_targetCRS);
+                if (invConv) {
+                    invConv->inverse()->setCRSs(nn_targetCRS, concatOpSourceCRS,
+                                                nullptr);
+                    op->setCRSs(concatOpSourceCRS, nn_targetCRS, nullptr);
+                } else {
+                    op->setCRSs(nn_targetCRS, concatOpSourceCRS, nullptr);
+                    op = op->inverse();
+                }
+            } else if (i + 1 < operationsInOut.size()) {
+                l_targetCRS = operationsInOut[i + 1]->sourceCRS();
+                if (l_targetCRS) {
+                    op->setCRSs(concatOpSourceCRS, NN_NO_CHECK(l_targetCRS),
+                                nullptr);
+                }
+            }
+        } else if (conv && i + 1 == operationsInOut.size() && !l_sourceCRS &&
+                   !l_targetCRS) {
+            auto derivedCRS =
+                dynamic_cast<const crs::DerivedCRS *>(concatOpTargetCRS.get());
+            if (derivedCRS) {
+                if (i >= 1) {
+                    // use the sourceCRS of the previous operation as our source
+                    // CRS
+                    l_sourceCRS = operationsInOut[i - 1]->targetCRS();
+                    // except if it looks like the previous operation should
+                    // actually be reversed !!!
+                    if (l_sourceCRS &&
+                        !compareStepCRS(l_sourceCRS.get(),
+                                        derivedCRS->baseCRS().get()) &&
+                        operationsInOut[i - 1]->sourceCRS() &&
+                        compareStepCRS(
+                            operationsInOut[i - 1]->sourceCRS().get(),
+                            derivedCRS->baseCRS().get())) {
+                        l_targetCRS = operationsInOut[i - 1]->sourceCRS();
+                    }
+                }
+                if (!l_sourceCRS) {
+                    l_sourceCRS = derivedCRS->baseCRS().as_nullable();
+                }
+                op->setCRSs(NN_NO_CHECK(l_sourceCRS), concatOpTargetCRS,
+                            nullptr);
+            } else if (i >= 1) {
+                l_sourceCRS = operationsInOut[i - 1]->targetCRS();
+                if (l_sourceCRS) {
+                    op->setCRSs(NN_NO_CHECK(l_sourceCRS), concatOpTargetCRS,
+                                nullptr);
+                }
+            }
+        } else if (conv && i > 0 && i < operationsInOut.size() - 1) {
+            // For an intermediate conversion, use the target CRS of the
+            // previous step and the source CRS of the next step
+            l_sourceCRS = operationsInOut[i - 1]->targetCRS();
+            l_targetCRS = operationsInOut[i + 1]->sourceCRS();
+            if (l_sourceCRS && l_targetCRS) {
+                op->setCRSs(NN_NO_CHECK(l_sourceCRS), NN_NO_CHECK(l_targetCRS),
+                            nullptr);
+            }
+        } else if (!conv && l_sourceCRS && l_targetCRS) {
+            // Transformations might be mentioned in their foward directions,
+            // whereas we should instead use the reverse path.
+            auto prevOpTarget = (i == 0) ? concatOpSourceCRS.as_nullable()
+                                         : operationsInOut[i - 1]->targetCRS();
+            if (!compareStepCRS(l_sourceCRS.get(), prevOpTarget.get()) &&
+                compareStepCRS(l_targetCRS.get(), prevOpTarget.get())) {
+                op = op->inverse();
+            }
+        }
+    }
+
+    if (!operationsInOut.empty()) {
+        auto l_sourceCRS = operationsInOut.front()->sourceCRS();
+        if (l_sourceCRS &&
+            !compareStepCRS(l_sourceCRS.get(), concatOpSourceCRS.get())) {
+            throw InvalidOperation("The source CRS of the first step of "
+                                   "concatenated operation is not the same "
+                                   "as the source CRS of the concantenated "
+                                   "operation itself");
+        }
+
+        auto l_targetCRS = operationsInOut.back()->targetCRS();
+        if (l_targetCRS &&
+            !compareStepCRS(l_targetCRS.get(), concatOpTargetCRS.get())) {
+            throw InvalidOperation("The target CRS of the last step of "
+                                   "concatenated operation is not the same "
+                                   "as the target CRS of the concantenated "
+                                   "operation itself");
+        }
+    }
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

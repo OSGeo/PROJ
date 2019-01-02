@@ -1153,9 +1153,11 @@ struct WKTParser::Private {
 
     BaseObjectNNPtr build(const WKTNodeNNPtr &node);
 
-    IdentifierPtr buildId(const WKTNodeNNPtr &node, bool tolerant = true);
+    IdentifierPtr buildId(const WKTNodeNNPtr &node, bool tolerant,
+                          bool removeInverseOf);
 
-    PropertyMap &buildProperties(const WKTNodeNNPtr &node);
+    PropertyMap &buildProperties(const WKTNodeNNPtr &node,
+                                 bool removeInverseOf = false);
 
     ObjectDomainPtr buildObjectDomain(const WKTNodeNNPtr &node);
 
@@ -1396,11 +1398,16 @@ double WKTParser::Private::asDouble(const WKTNodeNNPtr &node) {
 // ---------------------------------------------------------------------------
 
 IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
-                                          bool tolerant) {
+                                          bool tolerant, bool removeInverseOf) {
     const auto *nodeP = node->GP();
     const auto &nodeChidren = nodeP->children();
     if (nodeChidren.size() >= 2) {
         auto codeSpace = stripQuotes(nodeChidren[0]);
+        if (removeInverseOf && starts_with(codeSpace, "INVERSE(") &&
+            codeSpace.back() == ')') {
+            codeSpace = codeSpace.substr(strlen("INVERSE("));
+            codeSpace.resize(codeSpace.size() - 1);
+        }
         auto code = stripQuotes(nodeChidren[1]);
         auto &citationNode = nodeP->lookForChild(WKTConstants::CITATION);
         auto &uriNode = nodeP->lookForChild(WKTConstants::URI);
@@ -1444,7 +1451,8 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
 
 // ---------------------------------------------------------------------------
 
-PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
+PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
+                                                 bool removeInverseOf) {
 
     if (propertyCount_ == MAX_PROPERTY_SIZE) {
         throw ParsingException("MAX_PROPERTY_SIZE reached");
@@ -1460,6 +1468,10 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
     if (!nodeChildren.empty()) {
         const auto &nodeName(nodeP->value());
         auto name(stripQuotes(nodeChildren[0]));
+        if (removeInverseOf && starts_with(name, "Inverse of ")) {
+            name = name.substr(strlen("Inverse of "));
+        }
+
         if (ends_with(name, " (deprecated)")) {
             name.resize(name.size() - strlen(" (deprecated)"));
             properties->set(common::IdentifiedObject::DEPRECATED_KEY, true);
@@ -1512,7 +1524,7 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node) {
         const auto &subNodeName(subNode->GP()->value());
         if (ci_equal(subNodeName, WKTConstants::ID) ||
             ci_equal(subNodeName, WKTConstants::AUTHORITY)) {
-            auto id = buildId(subNode);
+            auto id = buildId(subNode, true, removeInverseOf);
             if (id) {
                 identifiers->add(NN_NO_CHECK(id));
             }
@@ -1990,7 +2002,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                 auto &idNode = nodeP->lookForChild(WKTConstants::AUTHORITY);
                 if (!isNull(idNode)) {
                     try {
-                        auto id = buildId(idNode);
+                        auto id = buildId(idNode, true, false);
                         auto authFactory2 = AuthorityFactory::create(
                             NN_NO_CHECK(dbContext_), *id->codeSpace());
                         auto dbDatum =
@@ -2850,8 +2862,22 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
     consumeParameters(node, false, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
-    return Conversion::create(buildProperties(node),
-                              buildProperties(methodNode), parameters, values);
+    auto &convProps = buildProperties(node);
+    auto &methodProps = buildProperties(methodNode);
+    std::string convName;
+    std::string methodName;
+    if (convProps.getStringValue(IdentifiedObject::NAME_KEY, convName) &&
+        methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
+        starts_with(convName, "Inverse of ") &&
+        starts_with(methodName, "Inverse of ")) {
+
+        auto &invConvProps = buildProperties(node, true);
+        auto &invMethodProps = buildProperties(methodNode, true);
+        return NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
+            Conversion::create(invConvProps, invMethodProps, parameters, values)
+                ->inverse()));
+    }
+    return Conversion::create(convProps, methodProps, parameters, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -2918,8 +2944,28 @@ WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
 
 ConcatenatedOperationNNPtr
 WKTParser::Private::buildConcatenatedOperation(const WKTNodeNNPtr &node) {
+
+    const auto *nodeP = node->GP();
+    auto &sourceCRSNode = nodeP->lookForChild(WKTConstants::SOURCECRS);
+    if (/*isNull(sourceCRSNode) ||*/ sourceCRSNode->GP()->childrenSize() != 1) {
+        ThrowMissing(WKTConstants::SOURCECRS);
+    }
+    auto sourceCRS = buildCRS(sourceCRSNode->GP()->children()[0]);
+    if (!sourceCRS) {
+        throw ParsingException("Invalid content in SOURCECRS node");
+    }
+
+    auto &targetCRSNode = nodeP->lookForChild(WKTConstants::TARGETCRS);
+    if (/*isNull(targetCRSNode) ||*/ targetCRSNode->GP()->childrenSize() != 1) {
+        ThrowMissing(WKTConstants::TARGETCRS);
+    }
+    auto targetCRS = buildCRS(targetCRSNode->GP()->children()[0]);
+    if (!targetCRS) {
+        throw ParsingException("Invalid content in TARGETCRS node");
+    }
+
     std::vector<CoordinateOperationNNPtr> operations;
-    for (const auto &childNode : node->GP()->children()) {
+    for (const auto &childNode : nodeP->children()) {
         if (ci_equal(childNode->GP()->value(), WKTConstants::STEP)) {
             if (childNode->GP()->childrenSize() != 1) {
                 throw ParsingException("Invalid content in STEP node");
@@ -2932,6 +2978,10 @@ WKTParser::Private::buildConcatenatedOperation(const WKTNodeNNPtr &node) {
             operations.emplace_back(NN_NO_CHECK(op));
         }
     }
+
+    ConcatenatedOperation::fixStepsDirection(
+        NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), operations);
+
     try {
         return ConcatenatedOperation::create(
             buildProperties(node), operations,
@@ -4213,7 +4263,7 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
     if (ci_equal(name, WKTConstants::ID) ||
         ci_equal(name, WKTConstants::AUTHORITY)) {
         return util::nn_static_pointer_cast<BaseObject>(
-            NN_NO_CHECK(buildId(node, false)));
+            NN_NO_CHECK(buildId(node, false, false)));
     }
 
     throw ParsingException(concat("unhandled keyword: ", name));
@@ -5914,7 +5964,8 @@ PROJStringParser::Private::buildDatum(const Step &step,
     PropertyMap grfMap;
 
     // It is arguable that we allow the prime meridian of a datum defined by
-    // its name to be overridden, but this is found at least in a regression test
+    // its name to be overridden, but this is found at least in a regression
+    // test
     // of GDAL. So let's keep the ellipsoid part of the datum in that case and
     // use the specified prime meridian.
     const auto overridePmIfNeeded =

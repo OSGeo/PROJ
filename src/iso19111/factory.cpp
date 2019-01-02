@@ -3126,117 +3126,12 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                                                     std::string()));
             }
 
-            // In case the operation is a conversion (we hope this is the
-            // forward case!)
-            if (!operations[0]->sourceCRS() || !operations[0]->targetCRS()) {
-                if (!operations[1]->sourceCRS()) {
-                    throw FactoryException(
-                        "chaining of conversion not supported");
-                }
-                operations[0]->setCRSs(
-                    d->createFactory(source_crs_auth_name)
-                        ->createCoordinateReferenceSystem(source_crs_code),
-                    NN_NO_CHECK(operations[1]->sourceCRS()), nullptr);
-            }
-
-            // Some concatenated operations, like 8443, might actually chain
-            // reverse operations rather than forward operations.
-            {
-                const auto &op0SrcId =
-                    operations[0]->sourceCRS()->identifiers()[0];
-                if (op0SrcId->code() != source_crs_code ||
-                    *op0SrcId->codeSpace() != source_crs_auth_name) {
-                    operations[0] = operations[0]->inverse();
-                }
-            }
-
-            {
-                const auto &op0SrcId =
-                    operations[0]->sourceCRS()->identifiers()[0];
-                if (op0SrcId->code() != source_crs_code ||
-                    *op0SrcId->codeSpace() != source_crs_auth_name) {
-                    throw FactoryException(
-                        "Source CRS of first operation in concatenated "
-                        "operation " +
-                        code + " does not match source CRS of "
-                               "concatenated operation");
-                }
-            }
-
-            // In case the operation is a conversion (we hope this is the
-            // forward case!)
-            if (!operations[1]->sourceCRS() || !operations[1]->targetCRS()) {
-                if (step3_auth_name.empty()) {
-                    operations[1]->setCRSs(
-                        NN_NO_CHECK(operations[0]->targetCRS()),
-                        d->createFactory(target_crs_auth_name)
-                            ->createCoordinateReferenceSystem(target_crs_code),
-                        nullptr);
-                } else {
-                    if (!operations[2]->sourceCRS()) {
-                        throw FactoryException(
-                            "chaining of conversion not supported");
-                    }
-                    operations[1]->setCRSs(
-                        NN_NO_CHECK(operations[0]->targetCRS()),
-                        NN_NO_CHECK(operations[2]->sourceCRS()), nullptr);
-                }
-            }
-
-            const auto &op1SrcId = operations[1]->sourceCRS()->identifiers()[0];
-            const auto &op0TargetId =
-                operations[0]->targetCRS()->identifiers()[0];
-            while (true) {
-                if (step3_auth_name.empty()) {
-                    const auto &opLastTargetId =
-                        operations.back()->targetCRS()->identifiers()[0];
-                    if (opLastTargetId->code() == target_crs_code &&
-                        *opLastTargetId->codeSpace() == target_crs_auth_name) {
-                        // in case we have only 2 steps, and
-                        // step2.targetCRS == concatenate.targetCRS do nothing,
-                        // but ConcatenatedOperation::create() will ultimately
-                        // check that step1.targetCRS == step2.sourceCRS
-                        break;
-                    }
-                }
-                if (op1SrcId->code() != op0TargetId->code() ||
-                    *op1SrcId->codeSpace() != *op0TargetId->codeSpace()) {
-                    operations[1] = operations[1]->inverse();
-                }
-                break;
-            }
-
-            if (!step3_auth_name.empty()) {
-
-                const auto &op2Src = operations[2]->sourceCRS();
-                // In case the operation is a conversion (we hope this is the
-                // forward case!)
-                if (!op2Src || !operations[2]->targetCRS()) {
-                    operations[2]->setCRSs(
-                        NN_NO_CHECK(operations[1]->targetCRS()),
-                        d->createFactory(target_crs_auth_name)
-                            ->createCoordinateReferenceSystem(target_crs_code),
-                        nullptr);
-                }
-
-                const auto &op2SrcId = op2Src->identifiers()[0];
-                const auto &op1TargetId =
-                    operations[1]->targetCRS()->identifiers()[0];
-                if (op2SrcId->code() != op1TargetId->code() ||
-                    *op2SrcId->codeSpace() != *op1TargetId->codeSpace()) {
-                    operations[2] = operations[2]->inverse();
-                }
-            }
-
-            const auto &opLastTargetId =
-                operations.back()->targetCRS()->identifiers()[0];
-            if (opLastTargetId->code() != target_crs_code ||
-                *opLastTargetId->codeSpace() != target_crs_auth_name) {
-                throw FactoryException(
-                    "Target CRS of last operation in concatenated operation " +
-                    code +
-                    " doest not match target CRS of concatenated operation");
-            }
+            operation::ConcatenatedOperation::fixStepsDirection(
+                d->createFactory(source_crs_auth_name)
+                    ->createCoordinateReferenceSystem(source_crs_code),
+                d->createFactory(target_crs_auth_name)
+                    ->createCoordinateReferenceSystem(target_crs_code),
+                operations);
 
             auto props =
                 d->createProperties(code, name, deprecated,

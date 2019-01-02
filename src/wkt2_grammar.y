@@ -1458,7 +1458,7 @@ concatenated_operation: concatenated_operation_keyword left_delimiter
                         opt_concatenated_operation_end
                         right_delimiter
 
-step: coordinate_operation | point_motion_keyword | deriving_conversion
+step: coordinate_operation | point_motion_keyword | map_projection | deriving_conversion
 
 opt_concatenated_operation_end:
    | wkt_separator step_keyword left_delimiter step right_delimiter opt_concatenated_operation_end

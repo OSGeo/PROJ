@@ -1102,7 +1102,8 @@ TEST(factory, AuthorityFactory_build_all_concatenated) {
                       // the issue with 7987 is the chaining of two conversions
                       "7987"})) {
             EXPECT_THROW(factory->createCoordinateOperation(code, false),
-                         FactoryException);
+                         FactoryException)
+                << code;
         } else {
             factory->createCoordinateOperation(code, false);
         }
