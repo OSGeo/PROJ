@@ -77,7 +77,14 @@ int pj_ellipsoid (PJ *P) {
     int err = proj_errno_reset (P);
     const char *empty = {""};
 
-    P->def_size = P->def_shape = P->def_spherification = P->def_ellps = nullptr;
+    pj_dealloc(P->def_size);
+    P->def_size = nullptr;
+    pj_dealloc(P->def_shape);
+    P->def_shape = nullptr;
+    pj_dealloc(P->def_spherification);
+    P->def_spherification = nullptr;
+    pj_dealloc(P->def_ellps);
+    P->def_ellps = nullptr;
 
     /* Specifying R overrules everything */
     if (pj_get_param (P->params, "R")) {
@@ -167,7 +174,7 @@ static int ellps_ellps (PJ *P) {
         return proj_errno (P);
 
     /* Finally update P and sail home */
-    P->def_ellps = par->param;
+    P->def_ellps = pj_strdup(par->param);
     par->used = 1;
 
     return proj_errno_restore (P, err);
@@ -180,6 +187,9 @@ static int ellps_size (PJ *P) {
     paralist *par = nullptr;
     int a_was_set = 0;
 
+    pj_dealloc(P->def_size);
+    P->def_size = nullptr;
+
     /* A size parameter *must* be given, but may have been given as ellps prior */
     if (P->a != 0)
         a_was_set = 1;
@@ -191,7 +201,7 @@ static int ellps_size (PJ *P) {
     if (nullptr==par)
         return a_was_set? 0: proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
 
-    P->def_size = par->param;
+    P->def_size = pj_strdup(par->param);
     par->used = 1;
     P->a = pj_atof (pj_param_value (par));
     if (P->a <= 0)
@@ -212,11 +222,13 @@ static int ellps_shape (PJ *P) {
 /***************************************************************************************/
     const char *keys[]  = {"rf", "f", "es", "e", "b"};
     paralist *par = nullptr;
-    char *def = nullptr;
     size_t i, len;
 
     par = nullptr;
     len = sizeof (keys) / sizeof (char *);
+
+    pj_dealloc(P->def_shape);
+    P->def_shape = nullptr;
 
     /* Check which shape key is specified */
     for (i = 0;  i < len;  i++) {
@@ -235,7 +247,7 @@ static int ellps_shape (PJ *P) {
         return 0;
     }
 
-    P->def_shape = def = par->param;
+    P->def_shape = pj_strdup(par->param);
     par->used = 1;
     P->es = P->f = P->b = P->e = P->rf = 0;
 
@@ -319,13 +331,11 @@ static int ellps_spherification (PJ *P) {
     const char *keys[] =  {"R_A", "R_V", "R_a", "R_g", "R_h", "R_lat_a", "R_lat_g"};
     size_t len, i;
     paralist *par = nullptr;
-    char *def = nullptr;
 
     double t;
     char *v, *endp;
 
     len = sizeof (keys) /  sizeof (char *);
-    P->def_spherification = nullptr;
 
     /* Check which spherification key is specified */
     for (i = 0;  i < len;  i++) {
@@ -339,7 +349,7 @@ static int ellps_spherification (PJ *P) {
         return 0;
 
     /* Store definition */
-    P->def_spherification = def = par->param;
+    P->def_spherification = pj_strdup(par->param);
     par->used = 1;
 
     switch (i) {

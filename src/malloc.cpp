@@ -219,6 +219,12 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     if (nullptr==P)
         return nullptr;
 
+
+    pj_dealloc(P->def_size);
+    pj_dealloc(P->def_shape);
+    pj_dealloc(P->def_spherification);
+    pj_dealloc(P->def_ellps);
+
     /* free grid lists */
     pj_dealloc( P->gridlist );
     pj_dealloc( P->vgridlist_geoid );

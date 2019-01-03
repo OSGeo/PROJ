@@ -334,6 +334,8 @@ struct PJconsts {
     const char *descr = nullptr;   /* From pj_list.h or individual PJ_*.c file */
     paralist *params = nullptr;    /* Parameter list */
     char *def_full = nullptr;      /* Full textual definition (usually 0 - set by proj_pj_info) */
+
+    /* For debugging / logging purposes */
     char *def_size = nullptr;      /* Shape and size parameters extracted from params */
     char *def_shape = nullptr;
     char *def_spherification = nullptr;
