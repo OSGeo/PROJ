@@ -329,6 +329,33 @@ static void set_ellipsoid(PJ *P) {
 }
 
 
+static enum pj_io_units get_next_non_whatever_unit(void *pipeline_data, int step, PJ_DIRECTION dir) {
+    PJ **pipeline = static_cast<struct pj_opaque*>(pipeline_data)->pipeline;
+    int nsteps = static_cast<struct pj_opaque*>(pipeline_data)->steps;
+    int i;
+
+    if (dir == PJ_FWD) {
+        for (i = step+1; i<=nsteps; i++) {
+            if (pj_left(pipeline[i]) != pj_right(pipeline[i]))
+                return pj_left(pipeline[i]);
+            if (pj_left(pipeline[i]) != PJ_IO_UNITS_WHATEVER)
+                return pj_left(pipeline[i]);
+            if (pj_right(pipeline[i]) != PJ_IO_UNITS_WHATEVER)
+                return pj_right(pipeline[i]);
+        }
+    } else {
+        for (i=step; i>1; i--) {
+            if (pj_right(pipeline[i]) != pj_left(pipeline[i]))
+                return pj_right(pipeline[i]);
+            if (pj_right(pipeline[i]) != PJ_IO_UNITS_WHATEVER)
+                return pj_right(pipeline[i]);
+            if (pj_left(pipeline[i]) != PJ_IO_UNITS_WHATEVER)
+                return pj_left(pipeline[i]);
+        }
+    }
+    return PJ_IO_UNITS_WHATEVER;
+}
+
 
 
 PJ *OPERATION(pipeline,0) {
@@ -480,14 +507,36 @@ PJ *OPERATION(pipeline,0) {
         }
     }
 
-    /* Check that output units from step i are compatible with expected units in step i+1 */
-    for (i = 1; i < nsteps; i++) {
-        enum pj_io_units unit_returned = pj_right (static_cast<struct pj_opaque*>(P->opaque)->pipeline[i]);
-        enum pj_io_units unit_expected = pj_left  (static_cast<struct pj_opaque*>(P->opaque)->pipeline[i+1]);
 
-        if ( unit_returned == PJ_IO_UNITS_WHATEVER || unit_expected == PJ_IO_UNITS_WHATEVER )
+    /* Replace PJ_IO_UNITS_WHATEVER with input/output units of neighbouring steps where */
+    /* it make sense. It does in most cases but not always, for instance                */
+    /*      proj=pipeline step proj=unitconvert xy_in=deg xy_out=rad step ...           */
+    /* where the left-hand side units of the first step shouldn't be changed to RADIANS */
+    /* as it will result in deg->rad conversions in cs2cs and other applications.       */
+    PJ **pipeline = static_cast<struct pj_opaque*>(P->opaque)->pipeline;
+    for (i=1; i<=nsteps; i++) {
+        if (pj_left(pipeline[i]) == PJ_IO_UNITS_WHATEVER && pj_right(pipeline[i]) == PJ_IO_UNITS_WHATEVER) {
+            pipeline[i]->left = get_next_non_whatever_unit(P->opaque, i, PJ_FWD);
+            pipeline[i]->right = get_next_non_whatever_unit(P->opaque, i, PJ_FWD);
+        }
+    }
+
+    for (i=nsteps; i>0; i--) {
+        if (pj_left(pipeline[i]) == PJ_IO_UNITS_WHATEVER && pj_right(pipeline[i]) == PJ_IO_UNITS_WHATEVER) {
+            pipeline[i]->right = get_next_non_whatever_unit(P->opaque, i, PJ_INV);
+            pipeline[i]->left = get_next_non_whatever_unit(P->opaque, i, PJ_INV);
+        }
+    }
+
+    /* Check that units between each steps match each other, fail if they don't */
+    for (i = 1; i < nsteps; i++) {
+        enum pj_io_units curr_step_output = pj_right (pipeline[i]);
+        enum pj_io_units next_step_input  = pj_left  (pipeline[i+1]);
+
+        if ( curr_step_output == PJ_IO_UNITS_WHATEVER || next_step_input == PJ_IO_UNITS_WHATEVER )
             continue;
-        if ( unit_returned != unit_expected ) {
+
+        if ( curr_step_output != next_step_input ) {
             proj_log_error (P, "Pipeline: Mismatched units between step %d and %d", i, i+1);
             return destructor (P, PJD_ERR_MALFORMED_PIPELINE);
         }
