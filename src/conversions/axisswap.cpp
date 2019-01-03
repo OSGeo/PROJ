@@ -282,8 +282,8 @@ PJ *CONVERSION(axisswap,0) {
     }
 
     if (pj_param(P->ctx, P->params, "tangularunits").i) {
-        P->left  = PJ_IO_UNITS_ANGULAR;
-        P->right = PJ_IO_UNITS_ANGULAR;
+        P->left  = PJ_IO_UNITS_RADIANS;
+        P->right = PJ_IO_UNITS_RADIANS;
     } else {
         P->left  = PJ_IO_UNITS_WHATEVER;
         P->right = PJ_IO_UNITS_WHATEVER;
