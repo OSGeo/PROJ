@@ -48,7 +48,7 @@ static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
     if (HUGE_VAL==coo.v[3] && P->helmert) coo.v[3] = 0.0;
 
     /* Check validity of angular input coordinates */
-    if (INPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
+    if (INPUT_UNITS==PJ_IO_UNITS_RADIANS) {
         double t;
 
         /* check for latitude or longitude over-range */
@@ -135,7 +135,7 @@ static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
     case PJ_IO_UNITS_WHATEVER:
         break;
 
-    case PJ_IO_UNITS_ANGULAR:
+    case PJ_IO_UNITS_RADIANS:
         coo.lpz.z = P->vfr_meter * (coo.lpz.z + P->z0);
 
         if( P->is_long_wrap_set ) {

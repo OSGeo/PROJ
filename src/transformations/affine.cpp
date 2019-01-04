@@ -238,8 +238,8 @@ PJ *TRANSFORMATION(geogoffset,0 /* no need for ellipsoid */) {
     P->fwd    = forward_2d;
     P->inv    = reverse_2d;
 
-    P->left   = PJ_IO_UNITS_ANGULAR;
-    P->right  = PJ_IO_UNITS_ANGULAR;
+    P->left   = PJ_IO_UNITS_RADIANS;
+    P->right  = PJ_IO_UNITS_RADIANS;
 
     /* read args */
     Q->xoff = pj_param(P->ctx, P->params, "ddlon").f * ARCSEC_TO_RAD;

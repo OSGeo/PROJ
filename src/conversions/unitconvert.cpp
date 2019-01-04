@@ -457,6 +457,8 @@ PJ *CONVERSION(unitconvert,0) {
 
     P->left  = PJ_IO_UNITS_WHATEVER;
     P->right = PJ_IO_UNITS_WHATEVER;
+    P->skip_fwd_prepare = 1;
+    P->skip_inv_prepare = 1;
 
     /* if no time input/output unit is specified we can skip them */
     Q->t_in_id = -1;
@@ -476,6 +478,8 @@ PJ *CONVERSION(unitconvert,0) {
         }
         if (f != 0.0)
             Q->xy_factor *= f;
+        if (normalized_name != nullptr && strcmp(normalized_name, "Radian") == 0)
+            P->left = PJ_IO_UNITS_RADIANS;
     }
 
     if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != nullptr) {
@@ -489,6 +493,8 @@ PJ *CONVERSION(unitconvert,0) {
         }
         if (f != 0.0)
             Q->xy_factor /= f;
+        if (normalized_name != nullptr && strcmp(normalized_name, "Radian") == 0)
+            P->right= PJ_IO_UNITS_RADIANS;
     }
 
     if( xy_in_is_linear >= 0 && xy_out_is_linear >= 0 &&

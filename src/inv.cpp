@@ -82,7 +82,7 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
         coo.xyz.y *= P->ra;
         return coo;
 
-    case PJ_IO_UNITS_ANGULAR:
+    case PJ_IO_UNITS_RADIANS:
         coo.lpz.z = P->vto_meter * coo.lpz.z - P->z0;
         break;
     }
@@ -99,7 +99,7 @@ static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
         return proj_coord_error ();
     }
 
-    if (OUTPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
+    if (OUTPUT_UNITS==PJ_IO_UNITS_RADIANS) {
 
         /* Distance from central meridian, taking system zero meridian into account */
         coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;

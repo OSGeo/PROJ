@@ -172,15 +172,12 @@ typedef long pj_int32;
 #define DIR_CHAR '/'
 #endif
 
-
-/* This enum is also conditionally defined in projects.h - but enums cannot */
-/* be forward declared and we need it here for the pj_left/right prototypes */
 enum pj_io_units {
     PJ_IO_UNITS_WHATEVER  = 0,  /* Doesn't matter (or depends on pipeline neighbours) */
     PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
     PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
     PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
-    PJ_IO_UNITS_ANGULAR   = 4   /* Radians */
+    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
 };
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
@@ -245,15 +242,7 @@ struct ARG_list;
 struct PJ_REGION_S;
 typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
-#ifndef PROJ_INTERNAL_H
-enum pj_io_units {
-    PJ_IO_UNITS_WHATEVER  = 0,  /* Doesn't matter (or depends on pipeline neighbours) */
-    PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
-    PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
-    PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
-    PJ_IO_UNITS_ANGULAR   = 4   /* Radians */
-};
-#endif
+
 #ifndef PROJ_H
 typedef struct PJconsts PJ;         /* the PJ object herself */
 typedef union  PJ_COORD PJ_COORD;
@@ -692,7 +681,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
         return nullptr;                                      \
     P->descr = des_##name;                                   \
     P->need_ellps = NEED_ELPJ_LPS;                              \
-    P->left  = PJ_IO_UNITS_ANGULAR;                          \
+    P->left  = PJ_IO_UNITS_RADIANS;                          \
     P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
 }                                                            \

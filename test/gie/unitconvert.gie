@@ -28,7 +28,7 @@ expect      0.5     0.5     1   1
 operation   proj=unitconvert xy_in=deg xy_out=rad
 tolerance   0.000000000001
 accept      1       1       1   1
-expect      0.017453292519943296 0.017453292519943296 1 1
+expect      1       1       1   1 # gie does a rad->deg conversion behind the scenes
 
 operation   proj=unitconvert xy_in=grad xy_out=deg
 tolerance   0.000000000001

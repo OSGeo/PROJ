@@ -137,8 +137,8 @@ PJ *TRANSFORMATION(vgridshift,0) {
     P->fwd    = nullptr;
     P->inv    = nullptr;
 
-    P->left  = PJ_IO_UNITS_ANGULAR;
-    P->right = PJ_IO_UNITS_ANGULAR;
+    P->left  = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
