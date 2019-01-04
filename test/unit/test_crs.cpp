@@ -442,14 +442,16 @@ TEST(crs, EPSG_4979_as_WKT2_2018_SIMPLIFIED) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_4979_as_WKT1_GDAL_with_axis) {
+TEST(crs, EPSG_4979_as_WKT1_GDAL_with_axis_not_strict_mode) {
     auto crs = GeographicCRS::EPSG_4979;
     auto wkt = crs->exportToWKT(
         &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
-              ->setOutputAxis(WKTFormatter::OutputAxisRule::YES)));
+              ->setStrict(false)
+              .setOutputAxis(WKTFormatter::OutputAxisRule::YES)));
     // WKT1 only supports 2 axis for GEOGCS. So this is an extension of
     // WKT1 as it
     // and GDAL doesn't really export such as beast, although it can import it
+    // so allow it only in non-strict more
     EXPECT_EQ(wkt, "GEOGCS[\"WGS 84\",\n"
                    "    DATUM[\"WGS_1984\",\n"
                    "        SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
@@ -469,18 +471,10 @@ TEST(crs, EPSG_4979_as_WKT1_GDAL_with_axis) {
 
 TEST(crs, EPSG_4979_as_WKT1_GDAL) {
     auto crs = GeographicCRS::EPSG_4979;
-    auto wkt = crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
-    EXPECT_EQ(wkt, "GEOGCS[\"WGS 84\",\n"
-                   "    DATUM[\"WGS_1984\",\n"
-                   "        SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
-                   "            AUTHORITY[\"EPSG\",\"7030\"]],\n"
-                   "        AUTHORITY[\"EPSG\",\"6326\"]],\n"
-                   "    PRIMEM[\"Greenwich\",0,\n"
-                   "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
-                   "    UNIT[\"degree\",0.0174532925199433,\n"
-                   "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
-                   "    AUTHORITY[\"EPSG\",\"4979\"]]");
+    EXPECT_THROW(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
 }
 
 // ---------------------------------------------------------------------------
