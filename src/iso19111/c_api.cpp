@@ -1245,6 +1245,8 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
                             ? WKTFormatter::OutputAxisRule::YES
                             : WKTFormatter::OutputAxisRule::NO);
                 }
+            } else if ((value = getOptionValue(*iter, "STRICT="))) {
+                formatter->setStrict(ci_equal(value, "YES"));
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;

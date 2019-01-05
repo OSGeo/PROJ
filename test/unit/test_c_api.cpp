@@ -420,6 +420,25 @@ TEST_F(CApi, proj_as_wkt) {
         EXPECT_TRUE(std::string(wkt).find("AXIS") != std::string::npos) << wkt;
     }
 
+    auto crs4979 = proj_create_from_wkt(
+        m_ctxt,
+        GeographicCRS::EPSG_4979->exportToWKT(WKTFormatter::create().get())
+            .c_str(),
+        nullptr, nullptr, nullptr);
+    ObjectKeeper keeper_crs4979(crs4979);
+    ASSERT_NE(crs4979, nullptr);
+
+    // STRICT=NO
+    {
+        EXPECT_EQ(proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, nullptr), nullptr);
+
+        const char *const options[] = {"STRICT=NO", nullptr};
+        auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, options);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("GEOGCS[\"WGS 84\"") == 0)
+            << wkt;
+    }
+
     // unsupported option
     {
         const char *const options[] = {"unsupported=yes", nullptr};

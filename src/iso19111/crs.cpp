@@ -1046,16 +1046,20 @@ GeodeticCRS::create(const util::PropertyMap &properties,
 //! @cond Doxygen_Suppress
 void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    formatter->startNode(isWKT2 ? ((formatter->use2018Keywords() &&
-                                    dynamic_cast<const GeographicCRS *>(this))
-                                       ? io::WKTConstants::GEOGCRS
-                                       : io::WKTConstants::GEODCRS)
-                                : isGeocentric() ? io::WKTConstants::GEOCCS
-                                                 : io::WKTConstants::GEOGCS,
+    const bool isGeographic =
+        dynamic_cast<const GeographicCRS *>(this) != nullptr;
+    formatter->startNode(isWKT2
+                             ? ((formatter->use2018Keywords() && isGeographic)
+                                    ? io::WKTConstants::GEOGCRS
+                                    : io::WKTConstants::GEODCRS)
+                             : isGeocentric() ? io::WKTConstants::GEOCCS
+                                              : io::WKTConstants::GEOGCS,
                          !identifiers().empty());
     auto l_name = nameStr();
     const auto &cs = coordinateSystem();
     const auto &axisList = cs->axisList();
+
+    const auto oldAxisOutputRule = formatter->outputAxis();
 
     if (formatter->useESRIDialect()) {
         if (axisList.size() != 2) {
@@ -1083,7 +1087,13 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                 }
             }
         }
+    } else if (!isWKT2 && formatter->isStrict() && isGeographic &&
+               axisList.size() != 2 &&
+               oldAxisOutputRule != io::WKTFormatter::OutputAxisRule::NO) {
+        io::FormattingException::Throw(
+            "WKT1 does not support Geographic 3D CRS.");
     }
+
     if (!isWKT2 && !formatter->useESRIDialect() && isDeprecated()) {
         l_name += " (deprecated)";
     }
@@ -1098,7 +1108,6 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         unit._exportToWKT(formatter);
     }
 
-    const auto oldAxisOutputRule = formatter->outputAxis();
     if (oldAxisOutputRule ==
             io::WKTFormatter::OutputAxisRule::WKT1_GDAL_EPSG_STYLE &&
         isGeocentric()) {

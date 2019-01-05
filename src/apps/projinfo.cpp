@@ -70,6 +70,7 @@ struct OutputOptions {
     bool WKT1_ESRI = false;
     bool c_ify = false;
     bool singleLine = false;
+    bool strict = true;
 };
 } // anonymous namespace
 
@@ -321,6 +322,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
+                formatter->setStrict(outputOpt.strict);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
@@ -346,6 +348,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
+                formatter->setStrict(outputOpt.strict);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
@@ -371,6 +374,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
+                formatter->setStrict(outputOpt.strict);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
@@ -396,6 +400,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
+                formatter->setStrict(outputOpt.strict);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
@@ -433,6 +438,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
+                formatter->setStrict(outputOpt.strict);
                 auto wkt = objToExport->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
@@ -455,10 +461,10 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     std::cout << "WKT1_ESRI:" << std::endl;
                 }
 
-                auto wkt = wktExportable->exportToWKT(
-                    WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                         dbContext)
-                        .get());
+                auto formatter = WKTFormatter::create(
+                    WKTFormatter::Convention::WKT1_ESRI, dbContext);
+                formatter->setStrict(outputOpt.strict);
+                auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
                 }
@@ -862,6 +868,8 @@ int main(int argc, char **argv) {
             identify = true;
         } else if (arg == "--show-superseded") {
             showSuperseded = true;
+        } else if (arg == "--lax") {
+            outputOpt.strict = false;
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {

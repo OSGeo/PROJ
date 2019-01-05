@@ -239,7 +239,8 @@ WKTFormatter::setOutputAxis(OutputAxisRule outputAxisIn) noexcept {
 
 /** \brief Set whether the formatter should operate on strict more or not.
  *
- * The default is strit mode, in which case a FormattingException can be thrown.
+ * The default is strict mode, in which case a FormattingException can be
+ * thrown.
  */
 WKTFormatter &WKTFormatter::setStrict(bool strictIn) noexcept {
     d->params_.strict_ = strictIn;
