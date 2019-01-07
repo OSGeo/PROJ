@@ -214,7 +214,7 @@ datum:
 
 crs:
     geodetic_crs | projected_crs | vertical_crs | engineering_crs |
-    parametric_crs | temporal_crs | derived_geodetic_crs | derived_geographic_crs |
+    parametric_crs | temporal_crs | derived_geodetic_crs |
     derived_projected_crs | derived_vertical_crs | derived_engineering_crs |
     derived_parametric_crs | derived_temporal_crs | compound_crs
 
@@ -870,12 +870,23 @@ deformation_model_name: quoted_latin_text
 
 // Geodetic CRS
 
-geodetic_crs: static_geodetic_crs | static_geographic_crs | dynamic_geodetic_crs | dynamic_geographic_crs
+geodetic_crs: static_geodetic_crs | dynamic_geodetic_crs | geographic_crs
+
+geographic_crs: static_geographic_crs | dynamic_geographic_crs
 
 static_geodetic_crs: geodetic_crs_keyword
                      left_delimiter crs_name
                      wkt_separator
                      geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
+                     wkt_separator
+                     opt_prime_meridian_coordinate_system_scope_extent_identifier_remark
+                     right_delimiter
+
+dynamic_geodetic_crs: geodetic_crs_keyword
+                     left_delimiter crs_name
+                     wkt_separator dynamic_crs
+                     wkt_separator
+                     geodetic_reference_frame_without_pm
                      wkt_separator
                      opt_prime_meridian_coordinate_system_scope_extent_identifier_remark
                      right_delimiter
@@ -888,20 +899,11 @@ static_geographic_crs: geographic_crs_keyword
                      opt_prime_meridian_coordinate_system_scope_extent_identifier_remark
                      right_delimiter
 
-dynamic_geodetic_crs: geodetic_crs_keyword
-                     left_delimiter crs_name
-                     wkt_separator dynamic_crs
-                     wkt_separator
-                     geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
-                     wkt_separator
-                     opt_prime_meridian_coordinate_system_scope_extent_identifier_remark
-                     right_delimiter
-
 dynamic_geographic_crs: geographic_crs_keyword
                      left_delimiter crs_name
                      wkt_separator dynamic_crs
                      wkt_separator
-                     geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
+                     geodetic_reference_frame_without_pm
                      wkt_separator
                      opt_prime_meridian_coordinate_system_scope_extent_identifier_remark
                      right_delimiter
@@ -990,10 +992,11 @@ projected_crs_keyword: T_PROJCRS | T_PROJECTEDCRS
 
 // Base CRS
 
-base_geodetic_crs: base_static_geodetic_crs | base_dynamic_geodetic_crs
+base_geodetic_crs: base_static_geodetic_crs | base_dynamic_geodetic_crs |
+                   base_static_geographic_crs | base_dynamic_geographic_crs
 
 base_static_geodetic_crs: base_geodetic_crs_keyword left_delimiter base_crs_name
-                          wkt_separator geodetic_reference_frame_without_pm
+                          wkt_separator geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
                           opt_separator_pm_ellipsoidal_cs_unit
                           right_delimiter
 
@@ -1008,7 +1011,20 @@ base_dynamic_geodetic_crs: base_geodetic_crs_keyword left_delimiter base_crs_nam
                            opt_separator_pm_ellipsoidal_cs_unit
                            right_delimiter
 
-base_geodetic_crs_keyword: T_BASEGEODCRS | T_BASEGEOGCRS
+base_static_geographic_crs: base_geographic_crs_keyword left_delimiter base_crs_name
+                            wkt_separator geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
+                            opt_separator_pm_ellipsoidal_cs_unit
+                            right_delimiter
+
+base_dynamic_geographic_crs: base_geographic_crs_keyword left_delimiter base_crs_name
+                             wkt_separator dynamic_crs
+                             wkt_separator geodetic_reference_frame_without_pm
+                             opt_separator_pm_ellipsoidal_cs_unit
+                             right_delimiter
+
+base_geodetic_crs_keyword: T_BASEGEODCRS
+
+base_geographic_crs_keyword: T_BASEGEOGCRS
 
 base_crs_name: quoted_latin_text
 
@@ -1067,7 +1083,7 @@ static_vertical_crs: vertical_crs_keyword left_delimiter crs_name
 
 dynamic_vertical_crs: vertical_crs_keyword left_delimiter crs_name
                      wkt_separator dynamic_crs
-                     wkt_separator vertical_reference_frame_or_vertical_datum_ensemble
+                     wkt_separator vertical_reference_frame
                      wkt_separator
                      vertical_cs_opt_geoid_model_id_scope_extent_identifier_remark
                      right_delimiter
@@ -1234,22 +1250,44 @@ parameter_file_name: quoted_latin_text
 
 // Derived geodetic CRS and derived geographic CRS
 
-// Note: derived_geodetic_crs and derived_geographic_crs separated to avoid Bison shift/reduce conflicts
-derived_geodetic_crs: geodetic_crs_keyword
+derived_geodetic_crs: derived_static_geodetic_crs | derived_dynamic_geodetic_crs |
+                      derived_geographic_crs
+
+derived_geographic_crs: derived_static_geographic_crs | derived_dynamic_geographic_crs
+
+
+derived_static_geodetic_crs: geodetic_crs_keyword
                       left_delimiter crs_name
-                      wkt_separator base_geodetic_crs
+                      wkt_separator base_static_geodetic_crs_or_base_static_geographic_crs
                       wkt_separator deriving_conversion
                       wkt_separator coordinate_system_scope_extent_identifier_remark
                       right_delimiter
 
-derived_geographic_crs: geographic_crs_keyword
+base_static_geodetic_crs_or_base_static_geographic_crs: base_static_geodetic_crs | base_static_geographic_crs
+
+derived_dynamic_geodetic_crs: geodetic_crs_keyword
                       left_delimiter crs_name
-                      wkt_separator base_geodetic_crs
+                      wkt_separator base_dynamic_geodetic_crs_or_base_dynamic_geographic_crs
                       wkt_separator deriving_conversion
                       wkt_separator coordinate_system_scope_extent_identifier_remark
                       right_delimiter
 
-                      
+base_dynamic_geodetic_crs_or_base_dynamic_geographic_crs: base_dynamic_geodetic_crs | base_dynamic_geographic_crs
+
+derived_static_geographic_crs: geographic_crs_keyword
+                      left_delimiter crs_name
+                      wkt_separator base_static_geodetic_crs_or_base_static_geographic_crs
+                      wkt_separator deriving_conversion
+                      wkt_separator coordinate_system_scope_extent_identifier_remark
+                      right_delimiter
+
+derived_dynamic_geographic_crs: geographic_crs_keyword
+                      left_delimiter crs_name
+                      wkt_separator base_dynamic_geodetic_crs_or_base_dynamic_geographic_crs
+                      wkt_separator deriving_conversion
+                      wkt_separator coordinate_system_scope_extent_identifier_remark
+                      right_delimiter
+
 // Derived projected CRS
 
 derived_projected_crs: derived_projected_crs_keyword left_delimiter
@@ -1335,28 +1373,53 @@ base_temporal_crs_keyword: T_BASETIMECRS
 // Compound CRS
 
 compound_crs: compound_crs_keyword left_delimiter compound_crs_name
-              wkt_separator horizontal_crs wkt_separator
-              compound_crs_other_components
+              wkt_separator compound_crs_choice
               right_delimiter
 
-compound_crs_other_components:
-    vertical_crs opt_separator_scope_extent_identifier_remark
-  | parametric_crs opt_separator_scope_extent_identifier_remark
-  | temporal_crs opt_separator_scope_extent_identifier_remark
-  | vertical_crs wkt_separator temporal_crs opt_separator_scope_extent_identifier_remark
-  | parametric_crs wkt_separator temporal_crs opt_separator_scope_extent_identifier_remark
+compound_crs_choice:
+    horizontal_crs wkt_separator compound_crs_choice_after_horizontal_crs
+  | spatio_temporal_ccrs_no_horizontal_crs
+
+compound_crs_choice_after_horizontal_crs:
+    vertical_crs_or_derived_vertical_crs opt_temporal_crs_or_derived_temporal_crs_list
+  | temporal_crs_or_derived_temporal_crs opt_temporal_crs_or_derived_temporal_crs_list
+  | parametric_crs_or_derived_parametric_crs opt_parametric_crs_or_derived_parametric_crs_list_then_opt_temporal_crs_or_derived_temporal_crs_list
 // PROJ extension: allow bound CRS
   | bound_crs opt_separator_scope_extent_identifier_remark
+
+vertical_crs_or_derived_vertical_crs: vertical_crs | derived_vertical_crs
+
+temporal_crs_or_derived_temporal_crs: temporal_crs | derived_temporal_crs
+
+opt_temporal_crs_or_derived_temporal_crs_list:
+    | wkt_separator temporal_crs_or_derived_temporal_crs opt_temporal_crs_or_derived_temporal_crs_list
+    | wkt_separator no_opt_separator_scope_extent_identifier_remark
+
+parametric_crs_or_derived_parametric_crs: parametric_crs | derived_parametric_crs
+
+opt_parametric_crs_or_derived_parametric_crs_list_then_opt_temporal_crs_or_derived_temporal_crs_list:
+    | wkt_separator parametric_crs_or_derived_parametric_crs opt_parametric_crs_or_derived_parametric_crs_list_then_opt_temporal_crs_or_derived_temporal_crs_list
+    | wkt_separator temporal_crs_or_derived_temporal_crs opt_temporal_crs_or_derived_temporal_crs_list
+    | wkt_separator no_opt_separator_scope_extent_identifier_remark
+
+spatio_temporal_ccrs_no_horizontal_crs: spatio_temporal_ccrs_first wkt_separator temporal_crs_or_derived_temporal_crs opt_temporal_crs_or_derived_temporal_crs_list
+
+spatio_temporal_ccrs_first: vertical_crs
 
 compound_crs_keyword: T_COMPOUNDCRS
 
 compound_crs_name: quoted_latin_text
 
+horizontal_crs: geographic2D_crs | projected_crs | engineering_crs |
+                derived_geographic2D_crs | derived_projected_crs | derived_engineering_crs |
+// PROJ extension: allow geodetic CRS expressions for backward compatibility with WKT2:2015
+                static_geodetic_crs | dynamic_geodetic_crs | derived_static_geodetic_crs | derived_dynamic_geodetic_crs |
 // PROJ extension: allow bound CRS
-horizontal_crs: geographic2D_crs | projected_crs | engineering_crs | bound_crs
+                bound_crs
 
-geographic2D_crs: static_geographic_crs | dynamic_geographic_crs
+geographic2D_crs: geographic_crs
 
+derived_geographic2D_crs: derived_geographic_crs
 
 // coordinate epoch and coordinate metadata
 
@@ -1374,22 +1437,22 @@ coordinate_metadata: coordinate_metadata_keyword left_delimiter
                      coordinate_metadata_crs right_delimiter
 
 coordinate_metadata_crs:
-    static_crs
+    static_crs_coordinate_metadata
   | dynamic_crs_coordinate_metadata wkt_separator metadata_coordinate_epoch
 
 coordinate_metadata_keyword: T_COORDINATEMETADATA
 
-static_crs: static_geodetic_crs | static_geographic_crs |
+static_crs_coordinate_metadata: static_geodetic_crs | static_geographic_crs |
             projected_crs | static_vertical_crs |
             engineering_crs | parametric_crs | temporal_crs |
-            derived_geodetic_crs | derived_geographic_crs |
+            derived_geodetic_crs |
             derived_projected_crs | derived_vertical_crs |
             derived_engineering_crs | derived_parametric_crs |
             derived_temporal_crs | compound_crs
 
 dynamic_crs_coordinate_metadata: dynamic_geodetic_crs | dynamic_geographic_crs |
                                  projected_crs | dynamic_vertical_crs |
-                                 derived_geodetic_crs | derived_geographic_crs |
+                                 derived_geodetic_crs |
                                  derived_projected_crs | derived_vertical_crs
 
 // Coordinate operations
