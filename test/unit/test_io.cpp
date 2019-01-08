@@ -2062,6 +2062,115 @@ TEST(wkt_parse, COMPOUNDCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, COMPOUNDCRS_spatio_parametric_2015) {
+    auto obj = WKTParser().createFromWKT(
+        "COMPOUNDCRS[\"ICAO layer 0\",\n"
+        "    GEODETICCRS[\"WGS 84\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8901]],\n"
+        "        CS[ellipsoidal,2],\n"
+        "            AXIS[\"latitude\",north,\n"
+        "                ORDER[1],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            AXIS[\"longitude\",east,\n"
+        "                ORDER[2],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    PARAMETRICCRS[\"WMO standard atmosphere\",\n"
+        "        PARAMETRICDATUM[\"Mean Sea Level\",\n"
+        "            ANCHOR[\"Mean Sea Level = 1013.25 hPa\"]],\n"
+        "        CS[parametric,1],\n"
+        "            AXIS[\"pressure (P)\",unspecified,\n"
+        "                PARAMETRICUNIT[\"HectoPascal\",100]]]]");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, COMPOUNDCRS_spatio_parametric_2018) {
+    auto obj = WKTParser().createFromWKT(
+        "COMPOUNDCRS[\"ICAO layer 0\",\n"
+        "    GEOGRAPHICCRS[\"WGS 84\",\n"
+        "    DYNAMIC[FRAMEEPOCH[2005]],\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8901]],\n"
+        "        CS[ellipsoidal,2],\n"
+        "            AXIS[\"latitude\",north,\n"
+        "                ORDER[1],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            AXIS[\"longitude\",east,\n"
+        "                ORDER[2],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    PARAMETRICCRS[\"WMO standard atmosphere\",\n"
+        "        PARAMETRICDATUM[\"Mean Sea Level\",\n"
+        "            ANCHOR[\"Mean Sea Level = 1013.25 hPa\"]],\n"
+        "        CS[parametric,1],\n"
+        "            AXIS[\"pressure (P)\",unspecified,\n"
+        "                PARAMETRICUNIT[\"HectoPascal\",100]]]]");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, COMPOUNDCRS_spatio_temporal_2015) {
+    auto obj = WKTParser().createFromWKT(
+        "COMPOUNDCRS[\"GPS position and time\",\n"
+        "    GEODCRS[\"WGS 84 (G1762)\",\n"
+        "        DATUM[\"World Geodetic System 1984 (G1762)\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1,\n"
+        "                    ID[\"EPSG\",9001]]]],\n"
+        "        CS[ellipsoidal,2],\n"
+        "            AXIS[\"latitude\",north,\n"
+        "                ORDER[1],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            AXIS[\"longitude\",east,\n"
+        "                ORDER[2],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    TIMECRS[\"GPS Time\",\n"
+        "        TIMEDATUM[\"Time origin\",TIMEORIGIN[1980-01-01]],\n"
+        "        CS[temporal,1],\n"
+        "            AXIS[\"time (T)\",future]]]");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, COMPOUNDCRS_spatio_temporal_2018) {
+    auto obj = WKTParser().createFromWKT(
+        "COMPOUNDCRS[\"2D GPS position with civil time in ISO 8601 format\",\n"
+        "    GEOGCRS[\"WGS 84 (G1762)\",\n"
+        "        DATUM[\"World Geodetic System 1984 (G1762)\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1,\n"
+        "                    ID[\"EPSG\",9001]]]],\n"
+        "        CS[ellipsoidal,2],\n"
+        "            AXIS[\"latitude\",north,\n"
+        "                ORDER[1],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            AXIS[\"longitude\",east,\n"
+        "                ORDER[2],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    TIMECRS[\"DateTime\",\n"
+        "        TDATUM[\"Gregorian Calendar\"],\n"
+        "        CS[TemporalDateTime,1],\n"
+        "            AXIS[\"time (T)\",future]]]");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, COMPD_CS) {
     auto obj = WKTParser().createFromWKT(
         "COMPD_CS[\"horizontal + vertical\",\n"
