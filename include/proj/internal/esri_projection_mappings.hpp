@@ -880,7 +880,7 @@ static const ESRIMethodMapping esriMappings[] = {
 // ---------------------------------------------------------------------------
 
 // end of anonymous namespace
-}
+} // namespace
 
 //! @endcond
 

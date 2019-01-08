@@ -371,7 +371,9 @@ class PROJ_GCC_DLL PROJStringFormatter {
         //! @cond Doxygen_Suppress
 
         PROJ_DLL void
-        startInversion();
+        setCRSExport(bool b);
+    PROJ_INTERNAL bool getCRSExport() const;
+    PROJ_DLL void startInversion();
     PROJ_DLL void stopInversion();
     PROJ_INTERNAL bool isInverted() const;
     PROJ_INTERNAL bool getUseETMercForTMerc(bool &settingSetOut) const;
@@ -508,24 +510,15 @@ class PROJ_GCC_DLL IPROJStringExportable {
     /** \brief Builds a PROJ string representation.
      *
      * <ul>
-     * <li>For PROJStringFormatter::Convention::PROJ_5 (the default), return
-     * strings that generally express PROJ.5 pipelines.
+     * <li>For PROJStringFormatter::Convention::PROJ_5 (the default),
      * <ul>
-     * <li>For a crs::GeographicCRS, returns a string expressing the
-     * transformation from geographic coordinates expressed in radian with
-     * longitude, latitude order, and with respect to the international
-     * reference meridian, into geographic coordinates expressed in the units
-     * and axis order of the CRS, taking into account its prime meridian.</li>
-     * <li>For a geocentric crs::GeodeticCRS, returns a string expressing the
-     * transformation from geographic coordinates expressed in radian with
-     * longitude, latitude order, and with respect to the international
-     * reference meridian, into geocentric coordinates.</li>
-     * <li>For a
-     * crs::ProjectedCRS / crs::DerivedGeographicCRS / crs::DerivedProjectedCRS,
-     * returns a string expressing the transformation from the base CRS to the
-     * CRS</li>
-     * <li>For a crs::BoundCRS, throws a FormattingException.</li>
-     * <li>For operation::CoordinateTransformations, returns a PROJ
+     * <li>For a crs::CRS, returns the same as
+     * PROJStringFormatter::Convention::PROJ_4. It should be noted that the
+     * export of a CRS as a PROJ string may cause loss of many important aspects
+     * of a CRS definition. Consequently it is discouraged to use it for
+     * interoperability in newer projects. The choice of a WKT representation
+     * will be a better option.</li>
+     * <li>For operation::CoordinateOperation, returns a PROJ
      * pipeline.</li>
      * </ul>
      *

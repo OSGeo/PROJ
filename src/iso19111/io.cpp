@@ -4596,14 +4596,18 @@ IPROJStringExportable::~IPROJStringExportable() = default;
 
 std::string IPROJStringExportable::exportToPROJString(
     PROJStringFormatter *formatter) const {
+    const bool bIsCRS = dynamic_cast<const crs::CRS *>(this) != nullptr;
+    if (bIsCRS) {
+        formatter->setCRSExport(true);
+    }
     _exportToPROJString(formatter);
-    if (formatter->getAddNoDefs() &&
-        formatter->convention() ==
-            io::PROJStringFormatter::Convention::PROJ_4 &&
-        dynamic_cast<const crs::CRS *>(this)) {
+    if (formatter->getAddNoDefs() && bIsCRS) {
         if (!formatter->hasParam("no_defs")) {
             formatter->addParam("no_defs");
         }
+    }
+    if (bIsCRS) {
+        formatter->setCRSExport(false);
     }
     return formatter->toString();
 }
@@ -4673,6 +4677,7 @@ struct PROJStringFormatter::Private {
     bool useETMercForTMercSet_ = false;
     bool addNoDefs_ = true;
     bool coordOperationOptimizations_ = false;
+    bool crsExport_ = false;
 
     std::string result_{};
 
@@ -5308,6 +5313,14 @@ void PROJStringFormatter::ingestPROJString(
                            vto_meter);
     d->steps_.insert(d->steps_.end(), steps.begin(), steps.end());
 }
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setCRSExport(bool b) { d->crsExport_ = b; }
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::getCRSExport() const { return d->crsExport_; }
 
 // ---------------------------------------------------------------------------
 

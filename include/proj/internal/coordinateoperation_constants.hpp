@@ -1240,7 +1240,7 @@ static const MethodMapping otherMethodMappings[] = {
 };
 
 // end of anonymous namespace
-}
+} // namespace
 
 // ---------------------------------------------------------------------------
 

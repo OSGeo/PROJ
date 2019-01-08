@@ -48,7 +48,9 @@ TEST(AngularUnits, Basic) {
 
 TEST(AngularUnits, Pipelines) {
     auto ctx = proj_context_create();
-    auto P = proj_create(ctx, "proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=latlong +step +proj=axisswap +order=2,1");
+    auto P =
+        proj_create(ctx, "proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                         "+proj=latlong +step +proj=axisswap +order=2,1");
 
     EXPECT_TRUE(proj_angular_input(P, PJ_FWD));
     EXPECT_TRUE(proj_angular_output(P, PJ_FWD));
@@ -57,45 +59,43 @@ TEST(AngularUnits, Pipelines) {
 
     proj_destroy(P);
     proj_context_destroy(ctx);
-
 }
 
 TEST(AngularUnits, Pipelines2) {
     auto ctx = proj_context_create();
     auto P = proj_create(
-            ctx,
-            "+proj=pipeline "
-            "+step +proj=axisswap +order=2,1 "
-            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-            "+step +proj=tmerc +lat_0=0 +lon_0=-81 +k=0.9996 +x_0=500000.001016002 +y_0=0 +ellps=WGS84 "
-            "+step +proj=axisswap +order=2,1 "
-            "+step +proj=unitconvert +xy_in=m +z_in=m +xy_out=us-ft +z_out=us-ft");
+        ctx,
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=tmerc +lat_0=0 +lon_0=-81 +k=0.9996 +x_0=500000.001016002 "
+        "+y_0=0 +ellps=WGS84 "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=m +z_in=m +xy_out=us-ft +z_out=us-ft");
 
     EXPECT_FALSE(proj_angular_input(P, PJ_FWD));
     EXPECT_FALSE(proj_angular_output(P, PJ_FWD));
 
     proj_destroy(P);
     proj_context_destroy(ctx);
-
 }
 
 TEST(AngularUnits, Pipelines3) {
     auto ctx = proj_context_create();
     auto P = proj_create(
-            ctx,
-            "+proj=pipeline "
-            "+step +proj=axisswap +order=2,1 "
-            "+step +proj=tmerc +lat_0=0 +lon_0=-81 +k=0.9996 +x_0=500000.001016002 +y_0=0 +ellps=WGS84 "
-            "+step +proj=axisswap +order=2,1 "
-            "+step +proj=unitconvert +xy_in=m +z_in=m +xy_out=us-ft +z_out=us-ft");
+        ctx,
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=tmerc +lat_0=0 +lon_0=-81 +k=0.9996 +x_0=500000.001016002 "
+        "+y_0=0 +ellps=WGS84 "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=m +z_in=m +xy_out=us-ft +z_out=us-ft");
 
     EXPECT_TRUE(proj_angular_input(P, PJ_FWD));
     EXPECT_FALSE(proj_angular_output(P, PJ_FWD));
 
     proj_destroy(P);
     proj_context_destroy(ctx);
-
 }
-
 
 } // namespace

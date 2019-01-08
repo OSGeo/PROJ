@@ -1142,13 +1142,11 @@ void GeodeticCRS::addGeocentricUnitConversionIntoPROJString(
     const auto &unit = axisList[0]->unit();
     if (!unit._isEquivalentTo(common::UnitOfMeasure::METRE,
                               util::IComparable::Criterion::EQUIVALENT)) {
-        if (formatter->convention() ==
-            io::PROJStringFormatter::Convention::PROJ_4) {
-            io::FormattingException::Throw("GeodeticCRS::exportToPROJString(): "
-                                           "non-meter unit not supported for "
-                                           "PROJ.4");
+        if (formatter->getCRSExport()) {
+            io::FormattingException::Throw(
+                "GeodeticCRS::exportToPROJString() only "
+                "supports metre unit");
         }
-
         formatter->addStep("unitconvert");
         formatter->addParam("xy_in", "m");
         formatter->addParam("z_in", "m");
@@ -1164,8 +1162,7 @@ void GeodeticCRS::addGeocentricUnitConversionIntoPROJString(
         const auto &toSI = unit.conversionToSI();
         formatter->addParam("xy_out", toSI);
         formatter->addParam("z_out", toSI);
-    } else if (formatter->convention() ==
-               io::PROJStringFormatter::Convention::PROJ_4) {
+    } else if (formatter->getCRSExport()) {
         formatter->addParam("units", "m");
     }
 }
@@ -1177,14 +1174,11 @@ void GeodeticCRS::addGeocentricUnitConversionIntoPROJString(
 void GeodeticCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_4) {
-        const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
-        if (!extensionProj4.empty()) {
-            formatter->ingestPROJString(extensionProj4);
-            formatter->addNoDefs(false);
-            return;
-        }
+    const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
+    if (!extensionProj4.empty()) {
+        formatter->ingestPROJString(extensionProj4);
+        formatter->addNoDefs(false);
+        return;
     }
 
     if (!isGeocentric()) {
@@ -1193,11 +1187,10 @@ void GeodeticCRS::_exportToPROJString(
             "supports geocentric coordinate systems");
     }
 
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_4) {
-        formatter->addStep("geocent");
-    } else {
+    if (!formatter->getCRSExport()) {
         formatter->addStep("cart");
+    } else {
+        formatter->addStep("geocent");
     }
     addDatumInfoToPROJString(formatter);
     addGeocentricUnitConversionIntoPROJString(formatter);
@@ -1214,9 +1207,8 @@ void GeodeticCRS::addDatumInfoToPROJString(
     bool datumWritten = false;
     const auto &nadgrids = formatter->getHDatumExtension();
     const auto &l_datum = datum();
-    if (formatter->convention() ==
-            io::PROJStringFormatter::Convention::PROJ_4 &&
-        l_datum && TOWGS84Params.empty() && nadgrids.empty()) {
+    if (formatter->getCRSExport() && l_datum && TOWGS84Params.empty() &&
+        nadgrids.empty()) {
         if (l_datum->_isEquivalentTo(
                 datum::GeodeticReferenceFrame::EPSG_6326.get(),
                 util::IComparable::Criterion::EQUIVALENT)) {
@@ -1857,56 +1849,52 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     io::PROJStringFormatter *formatter) const {
     const auto &axisList = coordinateSystem()->axisList();
 
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_5) {
+    formatter->addStep("unitconvert");
+    formatter->addParam("xy_in", "rad");
+    if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
+        formatter->addParam("z_in", "m");
+    }
+    {
+        const auto &unitHoriz = axisList[0]->unit();
+        const auto projUnit = unitHoriz.exportToPROJString();
+        if (projUnit.empty()) {
+            formatter->addParam("xy_out", unitHoriz.conversionToSI());
+        } else {
+            formatter->addParam("xy_out", projUnit);
+        }
+    }
+    if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
+        const auto &unitZ = axisList[2]->unit();
+        auto projVUnit = unitZ.exportToPROJString();
+        if (projVUnit.empty()) {
+            formatter->addParam("z_out", unitZ.conversionToSI());
+        } else {
+            formatter->addParam("z_out", projVUnit);
+        }
+    }
 
-        formatter->addStep("unitconvert");
-        formatter->addParam("xy_in", "rad");
-        if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
-            formatter->addParam("z_in", "m");
+    const char *order[2] = {nullptr, nullptr};
+    const char *one = "1";
+    const char *two = "2";
+    for (int i = 0; i < 2; i++) {
+        const auto &dir = axisList[i]->direction();
+        if (&dir == &cs::AxisDirection::WEST) {
+            order[i] = "-1";
+        } else if (&dir == &cs::AxisDirection::EAST) {
+            order[i] = one;
+        } else if (&dir == &cs::AxisDirection::SOUTH) {
+            order[i] = "-2";
+        } else if (&dir == &cs::AxisDirection::NORTH) {
+            order[i] = two;
         }
-        {
-            const auto &unitHoriz = axisList[0]->unit();
-            const auto projUnit = unitHoriz.exportToPROJString();
-            if (projUnit.empty()) {
-                formatter->addParam("xy_out", unitHoriz.conversionToSI());
-            } else {
-                formatter->addParam("xy_out", projUnit);
-            }
-        }
-        if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
-            const auto &unitZ = axisList[2]->unit();
-            auto projVUnit = unitZ.exportToPROJString();
-            if (projVUnit.empty()) {
-                formatter->addParam("z_out", unitZ.conversionToSI());
-            } else {
-                formatter->addParam("z_out", projVUnit);
-            }
-        }
-
-        const char *order[2] = {nullptr, nullptr};
-        const char *one = "1";
-        const char *two = "2";
-        for (int i = 0; i < 2; i++) {
-            const auto &dir = axisList[i]->direction();
-            if (&dir == &cs::AxisDirection::WEST) {
-                order[i] = "-1";
-            } else if (&dir == &cs::AxisDirection::EAST) {
-                order[i] = one;
-            } else if (&dir == &cs::AxisDirection::SOUTH) {
-                order[i] = "-2";
-            } else if (&dir == &cs::AxisDirection::NORTH) {
-                order[i] = two;
-            }
-        }
-        if (order[0] && order[1] && (order[0] != one || order[1] != two)) {
-            formatter->addStep("axisswap");
-            char orderStr[10];
-            strcpy(orderStr, order[0]);
-            strcat(orderStr, ",");
-            strcat(orderStr, order[1]);
-            formatter->addParam("order", orderStr);
-        }
+    }
+    if (order[0] && order[1] && (order[0] != one || order[1] != two)) {
+        formatter->addStep("axisswap");
+        char orderStr[10];
+        strcpy(orderStr, order[0]);
+        strcat(orderStr, ",");
+        strcat(orderStr, order[1]);
+        formatter->addParam("order", orderStr);
     }
 }
 //! @endcond
@@ -1917,14 +1905,11 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
 void GeographicCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_4) {
-        const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
-        if (!extensionProj4.empty()) {
-            formatter->ingestPROJString(extensionProj4);
-            formatter->addNoDefs(false);
-            return;
-        }
+    const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
+    if (!extensionProj4.empty()) {
+        formatter->ingestPROJString(extensionProj4);
+        formatter->addNoDefs(false);
+        return;
     }
 
     if (!formatter->omitProjLongLatIfPossible() ||
@@ -1934,8 +1919,9 @@ void GeographicCRS::_exportToPROJString(
         formatter->addStep("longlat");
         addDatumInfoToPROJString(formatter);
     }
-
-    addAngularUnitConvertAndAxisSwap(formatter);
+    if (!formatter->getCRSExport()) {
+        addAngularUnitConvertAndAxisSwap(formatter);
+    }
 }
 //! @endcond
 
@@ -2107,20 +2093,17 @@ void VerticalCRS::addLinearUnitConvert(
     io::PROJStringFormatter *formatter) const {
     auto &axisList = coordinateSystem()->axisList();
 
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_5) {
-        if (!axisList.empty()) {
-            auto projUnit = axisList[0]->unit().exportToPROJString();
-            if (axisList[0]->unit().conversionToSI() != 1.0) {
-                formatter->addStep("unitconvert");
-                formatter->addParam("z_in", "m");
-                auto projVUnit = axisList[0]->unit().exportToPROJString();
-                if (projVUnit.empty()) {
-                    formatter->addParam("z_out",
-                                        axisList[0]->unit().conversionToSI());
-                } else {
-                    formatter->addParam("z_out", projVUnit);
-                }
+    if (!axisList.empty()) {
+        auto projUnit = axisList[0]->unit().exportToPROJString();
+        if (axisList[0]->unit().conversionToSI() != 1.0) {
+            formatter->addStep("unitconvert");
+            formatter->addParam("z_in", "m");
+            auto projVUnit = axisList[0]->unit().exportToPROJString();
+            if (projVUnit.empty()) {
+                formatter->addParam("z_out",
+                                    axisList[0]->unit().conversionToSI());
+            } else {
+                formatter->addParam("z_out", projVUnit);
             }
         }
     }
@@ -2437,14 +2420,6 @@ void DerivedCRS::setDerivingConversionCRS() {
 
 // ---------------------------------------------------------------------------
 
-void DerivedCRS::baseExportToPROJString(
-    io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
-{
-    d->derivingConversion_->_exportToPROJString(formatter);
-}
-
-// ---------------------------------------------------------------------------
-
 void DerivedCRS::baseExportToWKT(io::WKTFormatter *&formatter,
                                  const std::string &keyword,
                                  const std::string &baseKeyword) const {
@@ -2742,17 +2717,14 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 void ProjectedCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_4) {
-        const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
-        if (!extensionProj4.empty()) {
-            formatter->ingestPROJString(extensionProj4);
-            formatter->addNoDefs(false);
-            return;
-        }
+    const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
+    if (!extensionProj4.empty()) {
+        formatter->ingestPROJString(extensionProj4);
+        formatter->addNoDefs(false);
+        return;
     }
 
-    baseExportToPROJString(formatter);
+    derivingConversionRef()->_exportToPROJString(formatter);
 }
 
 // ---------------------------------------------------------------------------
@@ -2821,8 +2793,7 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                               util::IComparable::Criterion::EQUIVALENT)) {
         auto projUnit = unit.exportToPROJString();
         const double toSI = unit.conversionToSI();
-        if (formatter->convention() ==
-            io::PROJStringFormatter::Convention::PROJ_5) {
+        if (!formatter->getCRSExport()) {
             formatter->addStep("unitconvert");
             formatter->addParam("xy_in", "m");
             formatter->addParam("z_in", "m");
@@ -2840,17 +2811,11 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                 formatter->addParam("units", projUnit);
             }
         }
-    } else if (formatter->convention() ==
-               io::PROJStringFormatter::Convention::PROJ_4) {
-        // could come from the hardcoded def of webmerc
-        if (!formatter->hasParam("units")) {
-            formatter->addParam("units", "m");
-        }
+    } else if (formatter->getCRSExport()) {
+        formatter->addParam("units", "m");
     }
 
-    if (formatter->convention() ==
-            io::PROJStringFormatter::Convention::PROJ_5 &&
-        !axisSpecFound) {
+    if (!axisSpecFound && !formatter->getCRSExport()) {
         const auto &dir0 = axisList[0]->direction();
         const auto &dir1 = axisList[1]->direction();
         if (!(&dir0 == &cs::AxisDirection::EAST &&
@@ -4086,9 +4051,10 @@ void DerivedGeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 void DerivedGeodeticCRS::_exportToPROJString(
-    io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
+    io::PROJStringFormatter *) const // throw(io::FormattingException)
 {
-    baseExportToPROJString(formatter);
+    throw io::FormattingException(
+        "DerivedGeodeticCRS cannot be exported to PROJ string");
 }
 
 // ---------------------------------------------------------------------------
@@ -4223,9 +4189,10 @@ void DerivedGeographicCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 void DerivedGeographicCRS::_exportToPROJString(
-    io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
+    io::PROJStringFormatter *) const // throw(io::FormattingException)
 {
-    baseExportToPROJString(formatter);
+    throw io::FormattingException(
+        "DerivedGeographicCRS cannot be exported to PROJ string");
 }
 
 // ---------------------------------------------------------------------------
@@ -4374,14 +4341,6 @@ void DerivedProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->endNode();
 }
 //! @endcond
-
-// ---------------------------------------------------------------------------
-
-void DerivedProjectedCRS::_exportToPROJString(
-    io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
-{
-    baseExportToPROJString(formatter);
-}
 
 // ---------------------------------------------------------------------------
 
@@ -4792,9 +4751,10 @@ void DerivedVerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 void DerivedVerticalCRS::_exportToPROJString(
-    io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
+    io::PROJStringFormatter *) const // throw(io::FormattingException)
 {
-    baseExportToPROJString(formatter);
+    throw io::FormattingException(
+        "DerivedVerticalCRS cannot be exported to PROJ string");
 }
 
 // ---------------------------------------------------------------------------

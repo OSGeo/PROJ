@@ -61,7 +61,6 @@ namespace { // anonymous namespace
 struct OutputOptions {
     bool quiet = false;
     bool PROJ5 = false;
-    bool PROJ4 = false;
     bool WKT2_2018 = false;
     bool WKT2_2018_SIMPLIFIED = false;
     bool WKT2_2015 = false;
@@ -100,7 +99,7 @@ static void usage() {
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
-                 "all,default,PROJ4,PROJ,WKT_ALL,WKT2_2015,WKT2_2018,WKT1_GDAL,"
+                 "all,default,PROJ,WKT_ALL,WKT2_2015,WKT2_2018,WKT1_GDAL,"
                  "WKT1_ESRI"
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
@@ -256,29 +255,11 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
     if (projStringExportable) {
         if (outputOpt.PROJ5) {
             try {
-                if (!outputOpt.quiet) {
-                    std::cout << "PROJ string:" << std::endl;
-                }
-                std::cout << projStringExportable->exportToPROJString(
-                                 PROJStringFormatter::create(
-                                     PROJStringFormatter::Convention::PROJ_5,
-                                     dbContext)
-                                     .get())
-                          << std::endl;
-            } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to PROJ string: " << e.what()
-                          << std::endl;
-            }
-            alreadyOutputed = true;
-        }
-
-        if (outputOpt.PROJ4) {
-            try {
                 if (alreadyOutputed) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "PROJ.4 string:" << std::endl;
+                    std::cout << "PROJ string:" << std::endl;
                 }
 
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
@@ -295,7 +276,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
 
                 std::cout << objToExport->exportToPROJString(
                                  PROJStringFormatter::create(
-                                     PROJStringFormatter::Convention::PROJ_4,
+                                     PROJStringFormatter::Convention::PROJ_5,
                                      dbContext)
                                      .get())
                           << std::endl;
@@ -651,23 +632,15 @@ int main(int argc, char **argv) {
             for (auto format : formats) {
                 if (ci_equal(format, "all")) {
                     outputOpt.PROJ5 = true;
-                    outputOpt.PROJ4 = true;
                     outputOpt.WKT2_2018 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                     outputOpt.WKT1_ESRI = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
-                    outputOpt.PROJ4 = false;
                     outputOpt.WKT2_2018 = false;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = false;
-                } else if (ci_equal(format, "PROJ4") ||
-                           ci_equal(format, "PROJ.4")) {
-                    outputOpt.PROJ4 = true;
-                } else if (ci_equal(format, "-PROJ4") ||
-                           ci_equal(format, "-PROJ.4")) {
-                    outputOpt.PROJ4 = false;
                 } else if (ci_equal(format, "PROJ")) {
                     outputOpt.PROJ5 = true;
                 } else if (ci_equal(format, "-PROJ")) {
@@ -929,7 +902,7 @@ int main(int argc, char **argv) {
     }
 
     if (outputOpt.quiet &&
-        (outputOpt.PROJ5 + outputOpt.PROJ4 + outputOpt.WKT2_2018 +
+        (outputOpt.PROJ5 + outputOpt.WKT2_2018 +
          outputOpt.WKT2_2015 + outputOpt.WKT1_GDAL) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;

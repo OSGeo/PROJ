@@ -502,9 +502,6 @@ class PROJ_GCC_DLL DerivedCRS : virtual public SingleCRS {
 
     PROJ_INTERNAL void setDerivingConversionCRS();
 
-    PROJ_INTERNAL void baseExportToPROJString(
-        io::PROJStringFormatter *formatter) const; // throw(FormattingException)
-
     PROJ_INTERNAL void baseExportToWKT(
         io::WKTFormatter *&formatter, const std::string &keyword,
         const std::string &baseKeyword) const; // throw(FormattingException)
@@ -977,9 +974,6 @@ class PROJ_GCC_DLL DerivedGeodeticCRS final : public GeodeticCRS,
                        const cs::SphericalCSNNPtr &csIn);
     PROJ_INTERNAL DerivedGeodeticCRS(const DerivedGeodeticCRS &other);
 
-    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
-        const override; // throw(FormattingException)
-
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
 
     PROJ_INTERNAL bool
@@ -989,6 +983,10 @@ class PROJ_GCC_DLL DerivedGeodeticCRS final : public GeodeticCRS,
 
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
+
+    // cppcheck-suppress functionStatic
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
 
@@ -1041,9 +1039,6 @@ class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS,
                          const cs::EllipsoidalCSNNPtr &csIn);
     PROJ_INTERNAL DerivedGeographicCRS(const DerivedGeographicCRS &other);
 
-    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
-        const override; // throw(FormattingException)
-
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
 
     PROJ_INTERNAL bool
@@ -1053,6 +1048,10 @@ class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS,
 
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
+
+    // cppcheck-suppress functionStatic
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
 
@@ -1078,9 +1077,7 @@ using DerivedProjectedCRSNNPtr = util::nn<DerivedProjectedCRSPtr>;
  *
  * \remark Implements DerivedProjectedCRS from \ref ISO_19111_2018
  */
-class PROJ_GCC_DLL DerivedProjectedCRS final
-    : public DerivedCRS,
-      public io::IPROJStringExportable {
+class PROJ_GCC_DLL DerivedProjectedCRS final : public DerivedCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedProjectedCRS() override;
@@ -1105,9 +1102,6 @@ class PROJ_GCC_DLL DerivedProjectedCRS final
                         const operation::ConversionNNPtr &derivingConversionIn,
                         const cs::CoordinateSystemNNPtr &csIn);
     PROJ_INTERNAL DerivedProjectedCRS(const DerivedProjectedCRS &other);
-
-    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
-        const override; // throw(FormattingException)
 
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
 
@@ -1164,9 +1158,6 @@ class PROJ_GCC_DLL DerivedVerticalCRS final : public VerticalCRS,
                        const cs::VerticalCSNNPtr &csIn);
     PROJ_INTERNAL DerivedVerticalCRS(const DerivedVerticalCRS &other);
 
-    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
-        const override; // throw(FormattingException)
-
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
 
     PROJ_INTERNAL bool
@@ -1176,6 +1167,10 @@ class PROJ_GCC_DLL DerivedVerticalCRS final : public VerticalCRS,
 
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
+
+    // cppcheck-suppress functionStatic
+    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
 
     INLINED_MAKE_SHARED
 
