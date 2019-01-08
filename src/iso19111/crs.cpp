@@ -3757,13 +3757,6 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 void BoundCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_5) {
-        io::FormattingException::Throw(
-            "BoundCRS cannot be exported as a PROJ.5 string, but its baseCRS "
-            "might");
-    }
-
     auto crs_exportable =
         dynamic_cast<const io::IPROJStringExportable *>(d->baseCRS_.get());
     if (!crs_exportable) {

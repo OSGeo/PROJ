@@ -3539,13 +3539,8 @@ TEST(crs, boundCRS_geographicCRS_to_PROJ_string) {
     auto crs = BoundCRS::createFromTOWGS84(
         basecrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
 
-    EXPECT_THROW(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                 FormattingException);
-    EXPECT_EQ(
-        crs->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
-                .get()),
-        "+proj=longlat +ellps=WGS84 +towgs84=1,2,3,4,5,6,7 +no_defs");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=longlat +ellps=WGS84 +towgs84=1,2,3,4,5,6,7 +no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -3564,12 +3559,9 @@ TEST(crs, boundCRS_projectedCRS_to_PROJ_string) {
     auto crs = BoundCRS::createFromTOWGS84(
         projcrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
 
-    EXPECT_EQ(
-        crs->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
-                .get()),
-        "+proj=utm +zone=31 +ellps=WGS84 +towgs84=1,2,3,4,5,6,7 +units=m "
-        "+no_defs");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=utm +zone=31 +ellps=WGS84 +towgs84=1,2,3,4,5,6,7 +units=m "
+              "+no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -3695,12 +3687,9 @@ TEST(crs, WKT1_DATUM_EXTENSION_to_WKT1_and_PROJ_string) {
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         wkt);
 
-    EXPECT_EQ(
-        crs->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
-                .get()),
-        "+proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 "
-        "+ellps=intl +nadgrids=nzgd2kgrid0005.gsb +units=m +no_defs");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 "
+              "+ellps=intl +nadgrids=nzgd2kgrid0005.gsb +units=m +no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -3796,11 +3785,8 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_PROJ_string) {
     auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_EQ(
-        crs->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
-                .get()),
-        "+geoidgrids=egm08_25.gtx +vunits=m +no_defs");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+geoidgrids=egm08_25.gtx +vunits=m +no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -4756,14 +4742,12 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                   bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(boundCRS->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_4)
-                          .get()),
-                  "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
-                  "+y_0=500000 +ellps=krass "
-                  "+towgs84=2.329,-147.042,-92.08,-0.309,0.325,0.497,5.69 "
-                  "+units=m +no_defs");
+        EXPECT_EQ(
+            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
+            "+y_0=500000 +ellps=krass "
+            "+towgs84=2.329,-147.042,-92.08,-0.309,0.325,0.497,5.69 "
+            "+units=m +no_defs");
     }
     {
         // Pulkovo 42 Poland
@@ -4775,14 +4759,12 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                   bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(boundCRS->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_4)
-                          .get()),
-                  "+proj=sterea +lat_0=50.625 +lon_0=21.0833333333333 "
-                  "+k=0.9998 +x_0=4637000 +y_0=5647000 +ellps=krass "
-                  "+towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 "
-                  "+units=m +no_defs");
+        EXPECT_EQ(
+            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=sterea +lat_0=50.625 +lon_0=21.0833333333333 "
+            "+k=0.9998 +x_0=4637000 +y_0=5647000 +ellps=krass "
+            "+towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 "
+            "+units=m +no_defs");
     }
     {
         // NTF (Paris)
@@ -4794,12 +4776,10 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                   bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(boundCRS->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_4)
-                          .get()),
-                  "+proj=longlat +ellps=clrk80ign +pm=paris "
-                  "+towgs84=-168,-60,320,0,0,0,0 +no_defs");
+        EXPECT_EQ(
+            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=longlat +ellps=clrk80ign +pm=paris "
+            "+towgs84=-168,-60,320,0,0,0,0 +no_defs");
     }
     {
         // NTF (Paris) / Lambert zone II + NGF-IGN69 height
@@ -4811,14 +4791,12 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                   bound);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(boundCRS->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_4)
-                          .get()),
-                  "+proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 "
-                  "+x_0=600000 +y_0=2200000 +ellps=clrk80ign +pm=paris "
-                  "+towgs84=-168,-60,320,0,0,0,0 +units=m "
-                  "+vunits=m +no_defs");
+        EXPECT_EQ(
+            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 "
+            "+x_0=600000 +y_0=2200000 +ellps=clrk80ign +pm=paris "
+            "+towgs84=-168,-60,320,0,0,0,0 +units=m "
+            "+vunits=m +no_defs");
     }
     {
         auto crs = createVerticalCRS();
@@ -4832,13 +4810,11 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(boundCRS->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_4)
-                          .get()),
-                  "+proj=stere +lat_0=-90 +lon_0=140 +k=0.960272946 "
-                  "+x_0=300000 +y_0=-2299363.482 +ellps=intl "
-                  "+towgs84=324.8,153.6,172.1,0,0,0,0 +units=m +no_defs");
+        EXPECT_EQ(
+            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=stere +lat_0=-90 +lon_0=140 +k=0.960272946 "
+            "+x_0=300000 +y_0=-2299363.482 +ellps=intl "
+            "+towgs84=324.8,153.6,172.1,0,0,0,0 +units=m +no_defs");
     }
     {
         auto factoryIGNF =
@@ -4848,12 +4824,10 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         EXPECT_NE(bound, crs);
         auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
         ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(boundCRS->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_4)
-                          .get()),
-                  "+proj=geocent +ellps=intl "
-                  "+towgs84=324.8,153.6,172.1,0,0,0,0 +units=m +no_defs");
+        EXPECT_EQ(
+            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=geocent +ellps=intl "
+            "+towgs84=324.8,153.6,172.1,0,0,0,0 +units=m +no_defs");
     }
     {
         auto crs = factory->createCoordinateReferenceSystem("4269"); // NAD83
