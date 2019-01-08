@@ -1,5 +1,5 @@
 Testing projinfo EPSG:4326
-PROJ string:
+PROJ.4 string:
 +proj=longlat +datum=WGS84 +no_defs
 
 WKT2_2015 string:
@@ -21,7 +21,7 @@ GEODCRS["WGS 84",
     ID["EPSG",4326]]
 
 Testing projinfo -o ALL EPSG:4326
-PROJ string:
+PROJ.4 string:
 +proj=longlat +datum=WGS84 +no_defs
 
 WKT2_2015 string:
@@ -480,7 +480,7 @@ Warning: object is deprecated
 Alternative non-deprecated CRS:
   EPSG:3003
 
-PROJ string:
+PROJ.4 string:
 +proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=1500000 +y_0=0 +ellps=intl +pm=rome +units=m +no_defs
 
 WKT2_2015 string:
@@ -525,7 +525,7 @@ Warning: GEOGCS should have a PRIMEM node
 Warning: Parsing error : syntax error, unexpected UNIT, expecting PRIMEM. Error occurred around:
 HEROID["WGS 84",6378137,298.257223563]],UNIT["degree",0.0174532925199433]]
                                         ^
-PROJ string:
+PROJ.4 string:
 +proj=longlat +datum=WGS84 +no_defs
 
 WKT2_2015 string:
@@ -544,4 +544,8 @@ GEODCRS["WGS 84",
         AXIS["latitude",north,
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]]]
+
+Testing CRS with towgs84: projinfo -o PROJ EPSG:25832
+PROJ.4 string:
++proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
 

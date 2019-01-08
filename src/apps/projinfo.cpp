@@ -258,11 +258,15 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (alreadyOutputed) {
                     std::cout << std::endl;
                 }
+                auto crs = nn_dynamic_pointer_cast<CRS>(obj);
                 if (!outputOpt.quiet) {
-                    std::cout << "PROJ string:" << std::endl;
+                    if( crs ) {
+                        std::cout << "PROJ.4 string:" << std::endl;
+                    } else {
+                        std::cout << "PROJ string:" << std::endl;
+                    }
                 }
 
-                auto crs = nn_dynamic_pointer_cast<CRS>(obj);
                 std::shared_ptr<IPROJStringExportable> objToExport;
                 if (crs) {
                     objToExport =
