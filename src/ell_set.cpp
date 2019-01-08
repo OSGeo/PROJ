@@ -576,7 +576,6 @@ int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
     PJ B;
     int ret;
 
-    memset (&B, 0, sizeof (B));
     B.ctx = ctx;
     B.params = pl;
 
