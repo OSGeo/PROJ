@@ -16,7 +16,7 @@ https://proj4.org/
 
 The PROJ.4 mailing list can be found at:
 
-http://lists.maptools.org/mailman/listinfo/proj
+https://lists.osgeo.org/mailman/listinfo/proj/
 
 See the NEWS file for changes between versions.
 
