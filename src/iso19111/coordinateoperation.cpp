@@ -5377,8 +5377,8 @@ bool Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
         bool north = true;
         if (l_method->getPrivate()->projMethodOverride_ == "etmerc" &&
             !isUTM(zone, north)) {
-            auto projFormatter = io::PROJStringFormatter::create(
-                io::PROJStringFormatter::Convention::PROJ_4);
+            auto projFormatter = io::PROJStringFormatter::create();
+            projFormatter->setCRSExport(true);
             projFormatter->setUseETMercForTMerc(true);
             formatter->startNode(io::WKTConstants::EXTENSION, false);
             formatter->addQuotedString("PROJ4");
@@ -5391,8 +5391,8 @@ bool Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
                        EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR ||
                    nameStr() == "Popular Visualisation Mercator") {
 
-            auto projFormatter = io::PROJStringFormatter::create(
-                io::PROJStringFormatter::Convention::PROJ_4);
+            auto projFormatter = io::PROJStringFormatter::create();
+            projFormatter->setCRSExport(true);
             if (createPROJ4WebMercator(this, projFormatter.get())) {
                 formatter->startNode(io::WKTConstants::EXTENSION, false);
                 formatter->addQuotedString("PROJ4");
@@ -5401,8 +5401,8 @@ bool Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
                 return true;
             }
         } else if (starts_with(methodName, "PROJ ")) {
-            auto projFormatter = io::PROJStringFormatter::create(
-                io::PROJStringFormatter::Convention::PROJ_4);
+            auto projFormatter = io::PROJStringFormatter::create();
+            projFormatter->setCRSExport(true);
             if (createPROJExtensionFromCustomProj(this, projFormatter.get(),
                                                   true)) {
                 formatter->startNode(io::WKTConstants::EXTENSION, false);
@@ -5413,8 +5413,8 @@ bool Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
             }
         } else if (methodName ==
                    PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X) {
-            auto projFormatter = io::PROJStringFormatter::create(
-                io::PROJStringFormatter::Convention::PROJ_4);
+            auto projFormatter = io::PROJStringFormatter::create();
+            projFormatter->setCRSExport(true);
             formatter->startNode(io::WKTConstants::EXTENSION, false);
             formatter->addQuotedString("PROJ4");
             _exportToPROJString(projFormatter.get());
@@ -5445,12 +5445,10 @@ void Conversion::_exportToPROJString(
     const bool applySourceCRSModifiers =
         !isZUnitConversion && !isAffineParametric &&
         !isAxisOrderReversal(methodEPSGCode) && !isGeographicGeocentric;
-    const bool applyTargetCRSModifiers = applySourceCRSModifiers;
+    bool applyTargetCRSModifiers = applySourceCRSModifiers;
 
     auto l_sourceCRS = sourceCRS();
-    if (l_sourceCRS && applySourceCRSModifiers &&
-        formatter->convention() ==
-            io::PROJStringFormatter::Convention::PROJ_5) {
+    if (!formatter->getCRSExport() && l_sourceCRS && applySourceCRSModifiers) {
         auto geogCRS =
             dynamic_cast<const crs::GeographicCRS *>(l_sourceCRS.get());
         if (geogCRS) {
@@ -5593,8 +5591,7 @@ void Conversion::_exportToPROJString(
                 EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
         }
         // PROJ.4 specific hack for webmercator
-    } else if (formatter->convention() ==
-                   io::PROJStringFormatter::Convention::PROJ_4 &&
+    } else if (formatter->getCRSExport() &&
                methodEPSGCode ==
                    EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) {
         if (!createPROJ4WebMercator(this, formatter)) {
@@ -5605,14 +5602,15 @@ void Conversion::_exportToPROJString(
         }
         bConversionDone = true;
         bEllipsoidParametersDone = true;
+        applyTargetCRSModifiers = false;
     } else if (ci_equal(convName, "Popular Visualisation Mercator")) {
-        if (formatter->convention() ==
-            io::PROJStringFormatter::Convention::PROJ_4) {
+        if (formatter->getCRSExport()) {
             if (!createPROJ4WebMercator(this, formatter)) {
                 throw io::FormattingException(concat(
                     "Cannot export ", convName,
                     " as PROJ.4 string outside of a ProjectedCRS context"));
             }
+            applyTargetCRSModifiers = false;
         } else {
             formatter->addStep("webmerc");
             if (l_sourceCRS) {
@@ -5717,8 +5715,7 @@ void Conversion::_exportToPROJString(
         if (!bEllipsoidParametersDone) {
             auto targetGeogCRS = l_targetCRS->extractGeographicCRS();
             if (targetGeogCRS) {
-                if (formatter->convention() ==
-                    io::PROJStringFormatter::Convention::PROJ_4) {
+                if (formatter->getCRSExport()) {
                     targetGeogCRS->addDatumInfoToPROJString(formatter);
                 } else {
                     targetGeogCRS->ellipsoid()->_exportToPROJString(formatter);
@@ -5737,13 +5734,10 @@ void Conversion::_exportToPROJString(
         auto derivedGeographicCRS =
             dynamic_cast<const crs::DerivedGeographicCRS *>(l_targetCRS.get());
         if (derivedGeographicCRS) {
-            if (formatter->convention() ==
-                io::PROJStringFormatter::Convention::PROJ_5) {
-                auto geogCRS = derivedGeographicCRS->baseCRS();
-                formatter->setOmitProjLongLatIfPossible(true);
-                geogCRS->_exportToPROJString(formatter);
-                formatter->setOmitProjLongLatIfPossible(false);
-            }
+            auto baseGeodCRS = derivedGeographicCRS->baseCRS();
+            formatter->setOmitProjLongLatIfPossible(true);
+            baseGeodCRS->_exportToPROJString(formatter);
+            formatter->setOmitProjLongLatIfPossible(false);
         }
     }
 }
@@ -11104,31 +11098,27 @@ CoordinateOperationFactory::Private::createOperations(
         if (!targetProjExportable) {
             throw InvalidOperation("Target CRS is not PROJ exportable");
         }
-        auto projFormatter = io::PROJStringFormatter::create(
-            io::PROJStringFormatter::Convention::PROJ_4);
+        auto projFormatter = io::PROJStringFormatter::create();
+        projFormatter->setCRSExport(true);
         projFormatter->startInversion();
         sourceProjExportable->_exportToPROJString(projFormatter.get());
-
         auto geogSrc =
             dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
         if (geogSrc) {
-            auto proj5Formatter = io::PROJStringFormatter::create(
-                io::PROJStringFormatter::Convention::PROJ_5);
-            geogSrc->addAngularUnitConvertAndAxisSwap(proj5Formatter.get());
-            projFormatter->ingestPROJString(proj5Formatter->toString());
+            auto tmpFormatter = io::PROJStringFormatter::create();
+            geogSrc->addAngularUnitConvertAndAxisSwap(tmpFormatter.get());
+            projFormatter->ingestPROJString(tmpFormatter->toString());
         }
 
         projFormatter->stopInversion();
 
         targetProjExportable->_exportToPROJString(projFormatter.get());
-
         auto geogDst =
             dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
         if (geogDst) {
-            auto proj5Formatter = io::PROJStringFormatter::create(
-                io::PROJStringFormatter::Convention::PROJ_5);
-            geogDst->addAngularUnitConvertAndAxisSwap(proj5Formatter.get());
-            projFormatter->ingestPROJString(proj5Formatter->toString());
+            auto tmpFormatter = io::PROJStringFormatter::create();
+            geogDst->addAngularUnitConvertAndAxisSwap(tmpFormatter.get());
+            projFormatter->ingestPROJString(tmpFormatter->toString());
         }
 
         const auto PROJString = projFormatter->toString();

@@ -409,9 +409,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=longlat +ellps=WGS84 +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
-              "+order=2,1");
+              "+proj=longlat +datum=WGS84 +no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -972,11 +970,9 @@ TEST(factory, AuthorityFactory_test_uom_9110) {
     // This tests conversion from unit of measure EPSG:9110 DDD.MMSSsss
     auto crs = factory->createProjectedCRS("2172");
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=sterea "
-              "+lat_0=53.0019444444444 +lon_0=21.5027777777778 +k=0.9998 "
-              "+x_0=4603000 +y_0=5806000 +ellps=krass +step +proj=axisswap "
-              "+order=2,1");
+              "+proj=sterea +lat_0=53.0019444444444 +lon_0=21.5027777777778 "
+              "+k=0.9998 +x_0=4603000 +y_0=5806000 +ellps=krass +units=m "
+              "+no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -2327,10 +2323,8 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         EXPECT_EQ(*(crs->name()->description()), "my name");
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
-        EXPECT_EQ(
-            crs->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-            "+step +proj=mbt_s +unused_flag +ellps=WGS84");
+        EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=mbt_s +unused_flag +datum=WGS84 +units=m +no_defs");
         EXPECT_TRUE(crs->canonicalBoundCRS() == nullptr);
     }
     {
@@ -2338,10 +2332,8 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         EXPECT_EQ(*(crs->name()->description()), "my name");
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
-        EXPECT_EQ(
-            crs->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-            "+step +proj=mbt_s +unused_flag +ellps=WGS84");
+        EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=mbt_s +unused_flag +datum=WGS84 +units=m +no_defs");
         EXPECT_TRUE(crs->canonicalBoundCRS() != nullptr);
     }
 

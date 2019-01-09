@@ -1377,9 +1377,8 @@ TEST(operation, tmerc_south_oriented_export) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=tmerc "
-              "+axis=wsu +lat_0=0 +lon_0=29 +k=1 +x_0=0 +y_0=0 +ellps=WGS84");
+              "+proj=tmerc +axis=wsu +lat_0=0 +lon_0=29 +k=1 +x_0=0 +y_0=0 "
+              "+ellps=WGS84 +units=m +no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -1630,8 +1629,8 @@ TEST(operation, bonne_export) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=bonne +lat_1=1 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
+              "+proj=bonne +lat_1=1 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84 "
+              "+units=m +no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -3016,12 +3015,6 @@ TEST(operation, webmerc_export) {
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=webmerc +lat_0=0 +lon_0=2 +x_0=3 +y_0=4");
 
-    EXPECT_THROW(
-        conv->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
-                .get()),
-        FormattingException);
-
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Popular Visualisation Pseudo Mercator\",\n"
               "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
@@ -3072,20 +3065,17 @@ TEST(operation, webmerc_export) {
         "+x_0=3 +y_0=4 +k=1 +units=m "
         "+nadgrids=@null +wktext +no_defs\"]]");
 
-    EXPECT_EQ(
-        projCRS->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5)
-                .get()),
-        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
-        "+lat_0=0 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4326, projCRS);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
+              "+lat_0=0 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
 
-    EXPECT_EQ(
-        projCRS->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
-                .get()),
-        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 +x_0=3 "
-        "+y_0=4 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+    EXPECT_EQ(projCRS->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 +x_0=3 "
+              "+y_0=4 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
 }
 
 // ---------------------------------------------------------------------------
@@ -3183,17 +3173,8 @@ TEST(operation, webmerc_import_from_GDAL_wkt1_EPSG_3785_deprecated) {
     ASSERT_TRUE(crs != nullptr);
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
-              "+lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
-              "+ellps=WGS84");
-
-    EXPECT_EQ(
-        crs->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
-                .get()),
-        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
-        "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+              "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
 
     auto convGot = crs->derivingConversion();
 
@@ -3257,16 +3238,8 @@ TEST(operation, webmerc_import_from_WKT2_EPSG_3785_deprecated) {
     ASSERT_TRUE(crs != nullptr);
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
-              "+ellps=WGS84");
-
-    EXPECT_EQ(
-        crs->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
-                .get()),
-        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
-        "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+              "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
 
     EXPECT_EQ(
         crs->exportToWKT(
@@ -4105,12 +4078,9 @@ TEST(operation, eqearth_export) {
 TEST(operation, laborde_oblique_mercator) {
 
     // Content of EPSG:29701 "Tananarive (Paris) / Laborde Grid"
-    auto projString = "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-                      "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
-                      "+proj=longlat +ellps=intl +pm=paris +step +proj=labrd "
-                      "+lat_0=-18.9 +lon_0=44.1 +azi=18.9 +k=0.9995 "
-                      "+x_0=400000 +y_0=800000 +ellps=intl +pm=paris +step "
-                      "+proj=axisswap +order=2,1";
+    auto projString = "+proj=labrd +lat_0=-18.9 +lon_0=44.1 +azi=18.9 "
+                      "+k=0.9995 +x_0=400000 +y_0=800000 +ellps=intl +pm=paris "
+                      "+units=m +no_defs";
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);

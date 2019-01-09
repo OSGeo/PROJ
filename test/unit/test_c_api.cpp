@@ -492,10 +492,7 @@ TEST_F(CApi, proj_as_proj_string) {
     {
         auto proj_5 = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_5, nullptr);
         ASSERT_NE(proj_5, nullptr);
-        EXPECT_EQ(std::string(proj_5), "+proj=pipeline +step +proj=longlat "
-                                       "+ellps=WGS84 +step +proj=unitconvert "
-                                       "+xy_in=rad +xy_out=deg +step "
-                                       "+proj=axisswap +order=2,1");
+        EXPECT_EQ(std::string(proj_5), "+proj=longlat +datum=WGS84 +no_defs");
     }
     {
         auto proj_4 = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, nullptr);
