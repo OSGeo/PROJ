@@ -74,7 +74,7 @@ static void PROJ_NO_INLINE proj_log_error(PJ_CONTEXT *ctx, const char *function,
     std::string msg(function);
     msg += ": ";
     msg += text;
-    ctx->logger(ctx->app_data, PJ_LOG_ERROR, msg.c_str());
+    ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
 }
 
 // ---------------------------------------------------------------------------
@@ -84,7 +84,7 @@ static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
     std::string msg(function);
     msg += ": ";
     msg += text;
-    ctx->logger(ctx->app_data, PJ_LOG_DEBUG, msg.c_str());
+    ctx->logger(ctx->logger_app_data, PJ_LOG_DEBUG, msg.c_str());
 }
 
 // ---------------------------------------------------------------------------

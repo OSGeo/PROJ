@@ -74,7 +74,7 @@ void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args )
     /* we should use vsnprintf where available once we add configure detect.*/
     vsprintf( msg_buf, fmt, args );
 
-    ctx->logger( ctx->app_data, level, msg_buf );
+    ctx->logger( ctx->logger_app_data, level, msg_buf );
 
     free( msg_buf );
 }

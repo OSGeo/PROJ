@@ -449,7 +449,7 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
         pj_get_default_ctx ();
     if (nullptr==ctx)
         return;
-    ctx->app_data = app_data;
+    ctx->logger_app_data = app_data;
     if (nullptr!=logf)
         ctx->logger = logf;
 }

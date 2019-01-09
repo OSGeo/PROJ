@@ -644,14 +644,22 @@ struct projCppContext;
 
 /* proj thread context */
 struct projCtx_t {
-    int     last_errno;
-    int     debug_level;
-    void    (*logger)(void *, int, const char *);
-    void    *app_data;
-    struct projFileAPI_t *fileapi;
-    struct projCppContext* cpp_context; /* internal context for C++ code */
-    int     use_proj4_init_rules; /* -1 = unknown, 0 = no, 1 = yes */
-    int     epsg_file_exists; /* -1 = unknown, 0 = no, 1 = yes */
+    int     last_errno = 0;
+    int     debug_level = 0;
+    void    (*logger)(void *, int, const char *) = nullptr;
+    void    *logger_app_data = nullptr;
+    struct projFileAPI_t *fileapi = nullptr;
+    struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
+    int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
+    int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
+
+    projCtx_t() = default;
+    projCtx_t(const projCtx_t&);
+    ~projCtx_t();
+
+    projCtx_t& operator= (const projCtx_t&) = delete;
+
+    static projCtx_t createDefault();
 };
 
 /* Generate pj_list external or make list from include file */
