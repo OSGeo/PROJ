@@ -29,12 +29,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <new>
+
 #include "proj_experimental.h"
 #include "proj_internal.h"
-#include "proj_internal.h"
-
-static projCtx_t default_context;
-static volatile int       default_context_initialized = 0;
 
 /************************************************************************/
 /*                             pj_get_ctx()                             */
@@ -81,43 +79,80 @@ void proj_assign_context( PJ* pj, PJ_CONTEXT* ctx )
 }
 
 /************************************************************************/
+/*                          createDefault()                             */
+/************************************************************************/
+
+projCtx_t projCtx_t::createDefault()
+{
+    projCtx_t ctx;
+    ctx.debug_level = PJ_LOG_NONE;
+    ctx.logger = pj_stderr_logger;
+    ctx.fileapi = pj_get_default_fileapi();
+
+    if( getenv("PROJ_DEBUG") != nullptr )
+    {
+        if( atoi(getenv("PROJ_DEBUG")) >= -PJ_LOG_DEBUG_MINOR )
+            ctx.debug_level = atoi(getenv("PROJ_DEBUG"));
+        else
+            ctx.debug_level = PJ_LOG_DEBUG_MINOR;
+    }
+    return ctx;
+}
+
+/************************************************************************/
+/*                           set_search_paths()                         */
+/************************************************************************/
+
+void projCtx_t::set_search_paths(const std::vector<std::string>& search_paths_in )
+{
+    search_paths = search_paths_in;
+    delete[] c_compat_paths;
+    c_compat_paths = nullptr;
+    if( !search_paths.empty() ) {
+        c_compat_paths = new const char*[search_paths.size()];
+        for( size_t i = 0; i < search_paths.size(); ++i ) {
+            c_compat_paths[i] = search_paths[i].c_str();
+        }
+    }
+}
+
+/************************************************************************/
+/*                  projCtx_t(const projCtx_t& other)                   */
+/************************************************************************/
+
+projCtx_t::projCtx_t(const projCtx_t& other)
+{
+    debug_level = other.debug_level;
+    logger = other.logger;
+    logger_app_data = other.logger_app_data;
+    fileapi = other.fileapi;
+    epsg_file_exists = other.epsg_file_exists;
+    set_search_paths(other.search_paths);
+    file_finder = other.file_finder;
+    file_finder_legacy = other.file_finder_legacy;
+    file_finder_user_data = other.file_finder_user_data;
+}
+
+/************************************************************************/
 /*                         pj_get_default_ctx()                         */
 /************************************************************************/
 
 projCtx pj_get_default_ctx()
 
 {
-    /* If already initialized, don't bother locking */
-    if( default_context_initialized )
-        return &default_context;
-
-    pj_acquire_lock();
-
-    /* Ask again, since it may have been initialized in another thread */
-    if( !default_context_initialized )
-    {
-        default_context.last_errno = 0;
-        default_context.debug_level = PJ_LOG_NONE;
-        default_context.logger = pj_stderr_logger;
-        default_context.app_data = nullptr;
-        default_context.fileapi = pj_get_default_fileapi();
-        default_context.cpp_context = nullptr;
-        default_context.use_proj4_init_rules = -1;
-        default_context.epsg_file_exists = -1;
-
-        if( getenv("PROJ_DEBUG") != nullptr )
-        {
-            if( atoi(getenv("PROJ_DEBUG")) >= -PJ_LOG_DEBUG_MINOR )
-                default_context.debug_level = atoi(getenv("PROJ_DEBUG"));
-            else
-                default_context.debug_level = PJ_LOG_DEBUG_MINOR;
-        }
-        default_context_initialized = 1;
-    }
-
-    pj_release_lock();
-
+    // C++11 rules guarantee a thread-safe instanciation.
+    static projCtx_t default_context(projCtx_t::createDefault());
     return &default_context;
+}
+
+/************************************************************************/
+/*                            ~projCtx_t()                              */
+/************************************************************************/
+
+projCtx_t::~projCtx_t()
+{
+    delete[] c_compat_paths;
+    proj_context_delete_cpp_context(cpp_context);
 }
 
 /************************************************************************/
@@ -127,15 +162,7 @@ projCtx pj_get_default_ctx()
 projCtx pj_ctx_alloc()
 
 {
-    projCtx ctx = (projCtx_t *) malloc(sizeof(projCtx_t));
-    if (nullptr==ctx)
-        return nullptr;
-    memcpy( ctx, pj_get_default_ctx(), sizeof(projCtx_t) );
-    ctx->last_errno = 0;
-    ctx->cpp_context = nullptr;
-    ctx->use_proj4_init_rules = -1;
-
-    return ctx;
+    return new (std::nothrow) projCtx_t(*pj_get_default_ctx());
 }
 
 /************************************************************************/
@@ -145,8 +172,7 @@ projCtx pj_ctx_alloc()
 void pj_ctx_free( projCtx ctx )
 
 {
-    proj_context_delete_cpp_context( ctx->cpp_context );
-    pj_dealloc( ctx );
+    delete ctx;
 }
 
 /************************************************************************/
@@ -210,7 +236,7 @@ void pj_ctx_set_app_data( projCtx ctx, void *new_app_data )
 {
     if (nullptr==ctx)
         return;
-    ctx->app_data = new_app_data;
+    ctx->logger_app_data = new_app_data;
 }
 
 /************************************************************************/
@@ -222,7 +248,7 @@ void *pj_ctx_get_app_data( projCtx ctx )
 {
     if (nullptr==ctx)
         return nullptr;
-    return ctx->app_data;
+    return ctx->logger_app_data;
 }
 
 /************************************************************************/
@@ -248,3 +274,4 @@ projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
         return nullptr;
     return ctx->fileapi;
 }
+
