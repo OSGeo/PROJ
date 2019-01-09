@@ -581,4 +581,36 @@ TEST(pj_transform_test, init_epsg) {
     pj_free(dst);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(proj_api_h, pj_set_searchpath ) {
+
+    const char* path = "/i_do/not/exit";
+    pj_set_searchpath(1, &path);
+    {
+        auto info = proj_info();
+        EXPECT_EQ(info.path_count, 1);
+        ASSERT_NE(info.paths, nullptr);
+        ASSERT_NE(info.paths[0], nullptr);
+        EXPECT_EQ(std::string(info.paths[0]), path);
+    }
+
+    pj_set_searchpath(0, nullptr);
+    {
+        auto info = proj_info();
+        EXPECT_EQ(info.path_count, 0);
+        EXPECT_EQ(info.paths, nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(proj_api_h, pj_set_finder ) {
+
+    const auto myfinder = [](const char*) -> const char* { return nullptr; };
+    pj_set_finder(myfinder);
+
+    pj_set_finder(nullptr);
+}
+
 } // namespace

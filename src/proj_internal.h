@@ -228,9 +228,6 @@ char  *pj_make_args (size_t argc, char **argv);
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);
 
-const char * const *proj_get_searchpath(void);
-int    proj_get_path_count(void);
-
 typedef struct { double r, i; } COMPLEX;
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
@@ -653,11 +650,20 @@ struct projCtx_t {
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
 
+    std::vector<std::string> search_paths{};
+    const char **c_compat_paths = nullptr; // same, but for projinfo usage
+
+    const char* (*file_finder_legacy) (const char*) = nullptr; // Only for proj_api compat. To remove once it is removed
+    const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
+    void* file_finder_user_data = nullptr;
+
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);
     ~projCtx_t();
 
     projCtx_t& operator= (const projCtx_t&) = delete;
+
+    void set_search_paths(const std::vector<std::string>& search_paths_in);
 
     static projCtx_t createDefault();
 };

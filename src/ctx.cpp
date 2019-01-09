@@ -100,6 +100,23 @@ projCtx_t projCtx_t::createDefault()
 }
 
 /************************************************************************/
+/*                           set_search_paths()                         */
+/************************************************************************/
+
+void projCtx_t::set_search_paths(const std::vector<std::string>& search_paths_in )
+{
+    search_paths = search_paths_in;
+    delete[] c_compat_paths;
+    c_compat_paths = nullptr;
+    if( !search_paths.empty() ) {
+        c_compat_paths = new const char*[search_paths.size()];
+        for( size_t i = 0; i < search_paths.size(); ++i ) {
+            c_compat_paths[i] = search_paths[i].c_str();
+        }
+    }
+}
+
+/************************************************************************/
 /*                  projCtx_t(const projCtx_t& other)                   */
 /************************************************************************/
 
@@ -110,6 +127,10 @@ projCtx_t::projCtx_t(const projCtx_t& other)
     logger_app_data = other.logger_app_data;
     fileapi = other.fileapi;
     epsg_file_exists = other.epsg_file_exists;
+    set_search_paths(other.search_paths);
+    file_finder = other.file_finder;
+    file_finder_legacy = other.file_finder_legacy;
+    file_finder_user_data = other.file_finder_user_data;
 }
 
 /************************************************************************/
@@ -130,6 +151,7 @@ projCtx pj_get_default_ctx()
 
 projCtx_t::~projCtx_t()
 {
+    delete[] c_compat_paths;
     proj_context_delete_cpp_context(cpp_context);
 }
 
@@ -252,3 +274,4 @@ projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
         return nullptr;
     return ctx->fileapi;
 }
+

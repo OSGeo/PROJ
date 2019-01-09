@@ -37,11 +37,7 @@
 #include <string.h>
 
 #include "proj_internal.h"
-#include "proj_internal.h"
 
-static const char *(*pj_finder)(const char *) = nullptr;
-static int path_count = 0;
-static char **search_path = nullptr;
 static const char * proj_lib_name =
 #ifdef PROJ_LIB
 PROJ_LIB;
@@ -56,7 +52,83 @@ nullptr;
 void pj_set_finder( const char *(*new_finder)(const char *) )
 
 {
-    pj_finder = new_finder;
+    auto ctx = pj_get_default_ctx();
+    if( ctx ) {
+        ctx->file_finder_legacy = new_finder;
+    }
+}
+
+/************************************************************************/
+/*                   proj_context_set_file_finder()                     */
+/************************************************************************/
+
+/** \brief Assign a file finder callback to a context.
+ * 
+ * This callback will be used whenever PROJ must open one of its resource files
+ * (proj.db database, grids, etc...)
+ * 
+ * The callback will be called with the context currently in use at the moment
+ * where it is used (not necessarily the one provided during this call), and
+ * with the provided user_data (which may be NULL).
+ * The user_data must remain valid during the whole lifetime of the context.
+ * 
+ * A finder set on the default context will be inherited by contexts created
+ * later.
+ * 
+ * @param ctx PROJ context, or NULL for the default context.
+ * @param finder Finder callback. May be NULL
+ * @param user_data User data provided to the finder callback. May be NULL.
+ * 
+ * @since PROJ 6.0
+ */
+void proj_context_set_file_finder(PJ_CONTEXT *ctx, proj_file_finder finder,
+                                  void* user_data)
+{
+    if( !ctx )
+        ctx = pj_get_default_ctx();
+    if( !ctx )
+        return;
+    ctx->file_finder = finder;
+    ctx->file_finder_user_data = user_data;
+}
+
+/************************************************************************/
+/*                  proj_context_set_search_paths()                     */
+/************************************************************************/
+
+
+/** \brief Sets search paths.
+ * 
+ * Those search paths will be used whenever PROJ must open one of its resource files
+ * (proj.db database, grids, etc...)
+ *
+ * If set on the default context, they will be inherited by contexts created
+ * later.
+ * 
+ * @param ctx PROJ context, or NULL for the default context.
+ * @param count_paths Number of paths. 0 if paths == NULL.
+ * @param paths Paths. May be NULL.
+ * 
+ * @since PROJ 6.0
+ */
+void proj_context_set_search_paths(PJ_CONTEXT *ctx,
+                                   int count_paths,
+                                   const char* const* paths)
+{
+    if( !ctx )
+        ctx = pj_get_default_ctx();
+    if( !ctx )
+        return;
+    try {
+        std::vector<std::string> vector_of_paths;
+        for (int i = 0; i < count_paths; i++)
+        {
+            vector_of_paths.emplace_back(paths[i]);
+        }
+        ctx->set_search_paths(vector_of_paths);
+    } catch( const std::exception& )
+    {
+    }
 }
 
 /************************************************************************/
@@ -69,41 +141,9 @@ void pj_set_finder( const char *(*new_finder)(const char *) )
 
 void pj_set_searchpath ( int count, const char **path )
 {
-    int i;
-
-    if (path_count > 0 && search_path != nullptr)
-    {
-        for (i = 0; i < path_count; i++)
-        {
-            pj_dalloc(search_path[i]);
-        }
-        pj_dalloc(search_path);
-        path_count = 0;
-        search_path = nullptr;
-    }
-
-    if( count > 0 )
-    {
-        search_path = static_cast<char**>(pj_malloc(sizeof *search_path * count));
-        for (i = 0; i < count; i++)
-        {
-            search_path[i] = static_cast<char*>(pj_malloc(strlen(path[i]) + 1));
-            strcpy(search_path[i], path[i]);
-        }
-    }
-
-    path_count = count;
+    proj_context_set_search_paths( nullptr, count, const_cast<const char* const*>(path) );
 }
 
-/* just a couple of helper functions that lets other functions
-   access the otherwise private search path */
-const char * const *proj_get_searchpath(void) {
-    return (const char * const *)search_path;
-}
-
-int proj_get_path_count(void) {
-    return path_count;
-}
 /************************************************************************/
 /*                          pj_open_lib_ex()                            */
 /************************************************************************/
@@ -112,15 +152,18 @@ static PAFile
 pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                char* out_full_filename, size_t out_full_filename_size) {
     char fname[MAX_PATH_FILENAME+1];
-    const char *sysname;
+    const char *sysname = nullptr;
     PAFile fid;
     int n = 0;
-    int i;
 #ifdef WIN32
     static const char dir_chars[] = "/\\";
 #else
     static const char dir_chars[] = "/";
 #endif
+
+    if( ctx == nullptr ) {
+        ctx = pj_get_default_ctx();
+    }
 
     if( out_full_filename != nullptr && out_full_filename_size > 0 )
         out_full_filename[0] = '\0';
@@ -148,8 +191,11 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         sysname = name;
 
     /* or try to use application provided file finder */
-    else if( pj_finder != nullptr && pj_finder( name ) != nullptr )
-        sysname = pj_finder( name );
+    else if( ctx && ctx->file_finder != nullptr && (sysname = ctx->file_finder( ctx, name, ctx->file_finder_user_data )) != nullptr )
+        ;
+
+    else if( ctx && ctx->file_finder_legacy != nullptr && (sysname = ctx->file_finder_legacy( name )) != nullptr )
+        ;
 
     /* or is environment PROJ_LIB defined */
     else if ((sysname = getenv("PROJ_LIB")) || (sysname = proj_lib_name)) {
@@ -176,16 +222,19 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     }
 
     /* If none of those work and we have a search path, try it */
-    if (!fid && path_count > 0)
+    std::string tmp;
+    if (!fid && ctx && !ctx->search_paths.empty() )
     {
-        for (i = 0; fid == nullptr && i < path_count; i++)
-        {
-            if( strlen(search_path[i]) + 1 + strlen(name) + 1 <= sizeof(fname) )
-            {
-                sprintf(fname, "%s%c%s", search_path[i], DIR_CHAR, name);
-                sysname = fname;
+        for( const auto& path: ctx->search_paths ) {
+            try {
+                tmp = path + DIR_CHAR + name;
+                sysname = tmp.c_str();
                 fid = pj_ctx_fopen(ctx, sysname, mode);
+            } catch( const std::exception& )
+            {
             }
+            if( fid )
+                break;
         }
         if (fid)
         {

@@ -82,6 +82,14 @@ target_link_libraries(proj_angular_io_test
     ${PROJ_LIBRARIES})
 add_test(NAME proj_angular_io_test COMMAND proj_angular_io_test)
 
+add_executable(proj_context_test
+    main.cpp
+    proj_context_test.cpp)
+target_link_libraries(proj_context_test
+    gtest
+    ${PROJ_LIBRARIES})
+add_test(NAME proj_context_test COMMAND proj_context_test)
+
 if (MSVC AND BUILD_LIBPROJ_SHARED)
 # ph_phi2_test not compatible of a .dll build
 else()

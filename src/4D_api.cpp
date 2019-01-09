@@ -1006,7 +1006,6 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
 static const char *empty = {""};
 static char version[64]  = {""};
 static PJ_INFO info = {0, 0, 0, nullptr, nullptr, nullptr, nullptr, 0};
-static volatile int info_initialized = 0;
 
 /*****************************************************************************/
 PJ_INFO proj_info (void) {
@@ -1015,18 +1014,10 @@ PJ_INFO proj_info (void) {
 
     Returns PJ_INFO struct.
 ******************************************************************************/
-    const char * const *paths;
-    size_t i, n;
-
     size_t  buf_size = 0;
     char   *buf = nullptr;
 
     pj_acquire_lock ();
-
-    if (0!=info_initialized) {
-        pj_release_lock ();
-        return info;
-    }
 
     info.major = PROJ_VERSION_MAJOR;
     info.minor = PROJ_VERSION_MINOR;
@@ -1037,7 +1028,6 @@ PJ_INFO proj_info (void) {
     long and there is room for 64 bytes in the version string. */
     sprintf (version, "%d.%d.%d", info.major, info.minor, info.patch);
 
-    info.searchpath = empty;
     info.version    = version;
     info.release    = pj_get_release ();
 
@@ -1045,17 +1035,19 @@ PJ_INFO proj_info (void) {
     buf = path_append (buf, getenv ("HOME"), &buf_size);
     buf = path_append (buf, getenv ("PROJ_LIB"), &buf_size);
 
-    paths = proj_get_searchpath ();
-    n = (size_t) proj_get_path_count ();
+    auto ctx = pj_get_default_ctx();
+    if( ctx ) {
+        for( const auto& path: ctx->search_paths ) {
+            buf = path_append(buf, path.c_str(), &buf_size);
+        }
+    }
 
-    for (i = 0;  i < n;  i++)
-        buf = path_append (buf, paths[i], &buf_size);
+    pj_dalloc(const_cast<char*>(info.searchpath));
     info.searchpath = buf ? buf : empty;
 
-    info.paths = paths;
-    info.path_count = n;
+    info.paths = ctx ? ctx->c_compat_paths : nullptr;
+    info.path_count = ctx ? static_cast<int>(ctx->search_paths.size()) : 0;
 
-    info_initialized = 1;
     pj_release_lock ();
     return info;
 }
