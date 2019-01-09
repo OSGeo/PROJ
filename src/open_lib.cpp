@@ -30,11 +30,17 @@
 
 #define PJ_LIB__
 
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
+
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "proj/internal/internal.hpp"
 
 #include "proj_internal.h"
 
@@ -151,92 +157,73 @@ void pj_set_searchpath ( int count, const char **path )
 static PAFile
 pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                char* out_full_filename, size_t out_full_filename_size) {
-    char fname[MAX_PATH_FILENAME+1];
-    const char *sysname = nullptr;
-    PAFile fid;
-    int n = 0;
+    try {
+        std::string fname;
+        const char *sysname = nullptr;
+        PAFile fid = nullptr;
 #ifdef WIN32
-    static const char dir_chars[] = "/\\";
+        static const char dir_chars[] = "/\\";
+        const char dirSeparator = ';';
 #else
-    static const char dir_chars[] = "/";
+        static const char dir_chars[] = "/";
+        const char dirSeparator = ':';
 #endif
 
-    if( ctx == nullptr ) {
-        ctx = pj_get_default_ctx();
-    }
-
-    if( out_full_filename != nullptr && out_full_filename_size > 0 )
-        out_full_filename[0] = '\0';
-
-    /* check if ~/name */
-    if (*name == '~' && strchr(dir_chars,name[1]) )
-        if ((sysname = getenv("HOME")) != nullptr) {
-            if( strlen(sysname) + 1 + strlen(name) + 1 > sizeof(fname) )
-            {
-                return nullptr;
-            }
-            (void)strcpy(fname, sysname);
-            fname[n = (int)strlen(fname)] = DIR_CHAR;
-            fname[++n] = '\0';
-            (void)strcpy(fname+n, name + 1);
-            sysname = fname;
-        } else
-            return nullptr;
-
-    /* or fixed path: /name, ./name or ../name */
-    else if (strchr(dir_chars,*name)
-             || (*name == '.' && strchr(dir_chars,name[1])) 
-             || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
-             || (name[1] == ':' && strchr(dir_chars,name[2])) )
-        sysname = name;
-
-    /* or try to use application provided file finder */
-    else if( ctx && ctx->file_finder != nullptr && (sysname = ctx->file_finder( ctx, name, ctx->file_finder_user_data )) != nullptr )
-        ;
-
-    else if( ctx && ctx->file_finder_legacy != nullptr && (sysname = ctx->file_finder_legacy( name )) != nullptr )
-        ;
-
-    /* or is environment PROJ_LIB defined */
-    else if ((sysname = getenv("PROJ_LIB")) || (sysname = proj_lib_name)) {
-        if( strlen(sysname) + 1 + strlen(name) + 1 > sizeof(fname) )
-        {
-            return nullptr;
+        if( ctx == nullptr ) {
+            ctx = pj_get_default_ctx();
         }
-        (void)strcpy(fname, sysname);
-        fname[n = (int)strlen(fname)] = DIR_CHAR;
-        fname[++n] = '\0';
-        (void)strcpy(fname+n, name);
-        sysname = fname;
-    } else /* just try it bare bones */
-        sysname = name;
 
-    if ((fid = pj_ctx_fopen(ctx, sysname, mode)) != nullptr)
-    {
         if( out_full_filename != nullptr && out_full_filename_size > 0 )
-        {
-            strncpy(out_full_filename, sysname, out_full_filename_size);
-            out_full_filename[out_full_filename_size-1] = '\0';
-        }
-        errno = 0;
-    }
+            out_full_filename[0] = '\0';
 
-    /* If none of those work and we have a search path, try it */
-    std::string tmp;
-    if (!fid && ctx && !ctx->search_paths.empty() )
-    {
-        for( const auto& path: ctx->search_paths ) {
-            try {
-                tmp = path + DIR_CHAR + name;
-                sysname = tmp.c_str();
+        /* check if ~/name */
+        if (*name == '~' && strchr(dir_chars,name[1]) )
+            if ((sysname = getenv("HOME")) != nullptr) {
+                fname = sysname;
+                fname += DIR_CHAR;
+                fname += name;
+                sysname = fname.c_str();
+            } else
+                return nullptr;
+
+        /* or fixed path: /name, ./name or ../name */
+        else if (strchr(dir_chars,*name)
+                || (*name == '.' && strchr(dir_chars,name[1])) 
+                || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
+                || (name[1] == ':' && strchr(dir_chars,name[2])) )
+            sysname = name;
+
+        /* or try to use application provided file finder */
+        else if( ctx && ctx->file_finder != nullptr && (sysname = ctx->file_finder( ctx, name, ctx->file_finder_user_data )) != nullptr )
+            ;
+
+        else if( ctx && ctx->file_finder_legacy != nullptr && (sysname = ctx->file_finder_legacy( name )) != nullptr )
+            ;
+
+        /* or is environment PROJ_LIB defined */
+        else if ((sysname = getenv("PROJ_LIB")) != nullptr) {
+
+            auto paths = NS_PROJ::internal::split(std::string(sysname), dirSeparator);
+            for( const auto& path: paths ) {
+                fname = path;
+                fname += DIR_CHAR;
+                fname += name;
+                sysname = fname.c_str();
                 fid = pj_ctx_fopen(ctx, sysname, mode);
-            } catch( const std::exception& )
-            {
+                if( fid )
+                    break;
             }
-            if( fid )
-                break;
-        }
-        if (fid)
+
+        /* or hardcoded path */
+        } else if ((sysname = proj_lib_name) != nullptr) {
+            fname = sysname;
+            fname += DIR_CHAR;
+            fname += name;
+            sysname = fname.c_str();
+        } else /* just try it bare bones */
+            sysname = name;
+
+        if ( fid != nullptr || (fid = pj_ctx_fopen(ctx, sysname, mode)) != nullptr)
         {
             if( out_full_filename != nullptr && out_full_filename_size > 0 )
             {
@@ -245,17 +232,52 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             }
             errno = 0;
         }
+
+        /* If none of those work and we have a search path, try it */
+        if (!fid && ctx && !ctx->search_paths.empty() )
+        {
+            for( const auto& path: ctx->search_paths ) {
+                try {
+                    fname = path;
+                    fname += DIR_CHAR;
+                    fname += name;
+                    sysname = fname.c_str();
+                    fid = pj_ctx_fopen(ctx, sysname, mode);
+                } catch( const std::exception& )
+                {
+                }
+                if( fid )
+                    break;
+            }
+            if (fid)
+            {
+                if( out_full_filename != nullptr && out_full_filename_size > 0 )
+                {
+                    strncpy(out_full_filename, sysname, out_full_filename_size);
+                    out_full_filename[out_full_filename_size-1] = '\0';
+                }
+                errno = 0;
+            }
+        }
+
+        if( ctx->last_errno == 0 && errno != 0 )
+            pj_ctx_set_errno( ctx, errno );
+
+        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
+                "pj_open_lib(%s): call fopen(%s) - %s",
+                name, sysname,
+                fid == nullptr ? "failed" : "succeeded" );
+
+        return(fid);
     }
+    catch( const std::exception& ) {
 
-    if( ctx->last_errno == 0 && errno != 0 )
-        pj_ctx_set_errno( ctx, errno );
+        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
+                "pj_open_lib(%s): out of memory",
+                name );
 
-    pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
-            "pj_open_lib(%s): call fopen(%s) - %s",
-            name, sysname,
-            fid == nullptr ? "failed" : "succeeded" );
-
-    return(fid);
+        return nullptr;
+    }
 }
 
 /************************************************************************/
