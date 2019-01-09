@@ -99,9 +99,7 @@ struct projCppContext {
     explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
                             const char *const *auxDbPaths = nullptr)
         : databaseContext(DatabaseContext::create(
-              dbPath ? dbPath : std::string(), toVector(auxDbPaths))) {
-        databaseContext->attachPJContext(ctx);
-    }
+              dbPath ? dbPath : std::string(), toVector(auxDbPaths), ctx)) {}
 
     static std::vector<std::string> toVector(const char *const *auxDbPaths) {
         std::vector<std::string> res;

@@ -118,7 +118,7 @@ struct DatabaseContext::Private {
     Private();
     ~Private();
 
-    void open(const std::string &databasePath = std::string());
+    void open(const std::string &databasePath, PJ_CONTEXT *ctx);
     void setHandle(sqlite3 *sqlite_handle);
 
     sqlite3 *handle() const { return sqlite_handle_; }
@@ -554,20 +554,18 @@ bool DatabaseContext::Private::createCustomVFS() {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::open(const std::string &databasePath) {
+void DatabaseContext::Private::open(const std::string &databasePath,
+                                    PJ_CONTEXT *ctx) {
+    setPjCtxt(ctx ? ctx : pj_get_default_ctx());
     std::string path(databasePath);
     if (path.empty()) {
-        const char *proj_lib = std::getenv("PROJ_LIB");
-#ifdef PROJ_LIB
-        if (!proj_lib) {
-            proj_lib = PROJ_LIB;
+        path.resize(2048);
+        const bool found =
+            pj_find_file(pjCtxt(), "proj.db", &path[0], path.size() - 1) != 0;
+        path.resize(strlen(path.c_str()));
+        if (!found) {
+            throw FactoryException("Cannot find proj.db");
         }
-#endif
-        if (!proj_lib) {
-            throw FactoryException(
-                "Cannot find proj.db due to missing PROJ_LIB");
-        }
-        path = std::string(proj_lib) + DIR_CHAR + "proj.db";
     }
 
     if (
@@ -854,52 +852,27 @@ DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instantiate a database context, using the default proj.db file
- *
- * It will be searched in the directory pointed by the PROJ_LIB environment
- * variable. If not found, on Unix builds, it will be then searched first in
- * the pkgdatadir directory of the installation prefix.
+/** \brief Instantiate a database context.
  *
  * This database context should be used only by one thread at a time.
- * @throw FactoryException
- */
-DatabaseContextNNPtr DatabaseContext::create() {
-    return create(std::string(), {});
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate a database context from a full filename.
  *
- * This database context should be used only by one thread at a time.
  * @param databasePath Path and filename of the database. Might be empty
  * string for the default rules to locate the default proj.db
+ * @param auxiliaryDatabasePaths Path and filename of auxiliary databases.
+ * Might be empty.
+ * @param ctx Context used for file search.
  * @throw FactoryException
  */
-DatabaseContextNNPtr DatabaseContext::create(const std::string &databasePath) {
-    return create(databasePath, {});
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate a database context from a full filename, and attach
- * auxiliary databases to it.
- *
- * This database context should be used only by one thread at a time.
- * @param databasePath Path and filename of the database. Might be empty
- * string for the default rules to locate the default proj.db
- * @param auxiliaryDatabasePaths Path and filename of auxiliary databases;
- * @throw FactoryException
- */
-DatabaseContextNNPtr DatabaseContext::create(
-    const std::string &databasePath,
-    const std::vector<std::string> &auxiliaryDatabasePaths) {
-    auto ctxt = DatabaseContext::nn_make_shared<DatabaseContext>();
-    ctxt->getPrivate()->open(databasePath);
+DatabaseContextNNPtr
+DatabaseContext::create(const std::string &databasePath,
+                        const std::vector<std::string> &auxiliaryDatabasePaths,
+                        PJ_CONTEXT *ctx) {
+    auto dbCtx = DatabaseContext::nn_make_shared<DatabaseContext>();
+    dbCtx->getPrivate()->open(databasePath, ctx);
     if (!auxiliaryDatabasePaths.empty()) {
-        ctxt->getPrivate()->attachExtraDatabases(auxiliaryDatabasePaths);
+        dbCtx->getPrivate()->attachExtraDatabases(auxiliaryDatabasePaths);
     }
-    return ctxt;
+    return dbCtx;
 }
 
 // ---------------------------------------------------------------------------
@@ -960,12 +933,6 @@ DatabaseContextNNPtr DatabaseContext::create(void *sqlite_handle) {
 
 void *DatabaseContext::getSqliteHandle() const {
     return getPrivate()->handle();
-}
-
-// ---------------------------------------------------------------------------
-
-void DatabaseContext::attachPJContext(void *pjCtxt) {
-    d->setPjCtxt(static_cast<PJ_CONTEXT *>(pjCtxt));
 }
 
 // ---------------------------------------------------------------------------

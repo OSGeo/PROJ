@@ -36,6 +36,8 @@
 #include <utility>
 #include <vector>
 
+#include "proj.h"
+
 #include "util.hpp"
 
 NS_PROJ_START
@@ -683,14 +685,11 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_DLL ~DatabaseContext();
     //! @endcond
 
-    PROJ_DLL static DatabaseContextNNPtr create();
-
     PROJ_DLL static DatabaseContextNNPtr
-    create(const std::string &databasePath);
-
-    PROJ_DLL static DatabaseContextNNPtr
-    create(const std::string &databasePath,
-           const std::vector<std::string> &auxiliaryDatabasePaths);
+    create(const std::string &databasePath = std::string(),
+           const std::vector<std::string> &auxiliaryDatabasePaths =
+               std::vector<std::string>(),
+           PJ_CONTEXT *ctx = nullptr);
 
     PROJ_DLL const std::string &getPath() const;
 
@@ -706,8 +705,6 @@ class PROJ_GCC_DLL DatabaseContext {
         getSqliteHandle() const;
 
     PROJ_DLL static DatabaseContextNNPtr create(void *sqlite_handle);
-
-    PROJ_INTERNAL void attachPJContext(void *pjCtxt);
 
     PROJ_INTERNAL bool lookForGridAlternative(const std::string &officialName,
                                               std::string &projFilename,
