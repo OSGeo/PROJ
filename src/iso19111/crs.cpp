@@ -3673,8 +3673,8 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
         operation::Transformation::createNTv2(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                     transformationName),
-            baseCRSIn, GeographicCRS::EPSG_4326, filename,
-            std::vector<metadata::PositionalAccuracyNNPtr>()));
+            NN_NO_CHECK(transformationSourceCRS), GeographicCRS::EPSG_4326,
+            filename, std::vector<metadata::PositionalAccuracyNNPtr>()));
 }
 
 // ---------------------------------------------------------------------------

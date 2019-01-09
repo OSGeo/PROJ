@@ -3094,7 +3094,7 @@ TEST(wkt_parse, WKT1_DATUM_EXTENSION) {
 
     ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
     EXPECT_EQ(crs->transformation()->sourceCRS()->nameStr(),
-              crs->baseCRS()->nameStr());
+              "International 1909 (Hayford)");
 
     ASSERT_TRUE(crs->transformation()->targetCRS() != nullptr);
     EXPECT_EQ(crs->transformation()->targetCRS()->nameStr(),

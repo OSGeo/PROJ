@@ -5552,6 +5552,29 @@ TEST(operation, boundCRS_to_boundCRS_unralated_hub) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, boundCRS_of_projCRS_towgs84_to_boundCRS_of_projCRS_nadgrids) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=15 +datum=NAD83 +units=m +no_defs +ellps=GRS80 "
+        "+towgs84=0,0,0");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=15 +datum=NAD27 +units=m +no_defs +ellps=clrk66 "
+        "+nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=utm +zone=15 +ellps=GRS80 +step "
+              "+inv +proj=hgridshift "
+              "+grids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat +step +proj=utm "
+              "+zone=15 +ellps=clrk66");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_with_basecrs_with_extent_to_geogCRS) {
 
     auto wkt =
