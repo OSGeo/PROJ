@@ -3,8 +3,8 @@
  * Purpose:  Revised, experimental API for PROJ.4, intended as the foundation
  *           for added geodetic functionality.
  *
- *           The original proj API (defined in projects.h) has grown organically
- *           over the years, but it has also grown somewhat messy.
+ *           The original proj API (defined previously in projects.h) has grown
+ *           organically over the years, but it has also grown somewhat messy.
  *
  *           The same has happened with the newer high level API (defined in
  *           proj_api.h): To support various historical objectives, proj_api.h
@@ -93,6 +93,7 @@
  *
  ******************************************************************************
  * Copyright (c) 2016, 2017, Thomas Knudsen / SDFE
+ * Copyright (c) 2018, Even Rouault
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -326,6 +327,12 @@ typedef struct projCtx_t PJ_CONTEXT;
 
 /* A P I */
 
+/**
+ * The objects returned by the functions defined in this section have minimal
+ * interaction with the functions of the
+ * \ref iso19111_functions section, and vice versa. See its introduction
+ * paragraph for more details.
+ */
 
 /* Functionality for handling thread contexts */
 #ifdef __cplusplus
@@ -645,6 +652,17 @@ typedef enum
 /**
  * \defgroup iso19111_functions Binding in C of basic methods from the C++ API
  *  Functions for ISO19111 C API
+ *
+ * The PJ* objects returned by proj_create_from_user_input(), proj_create_from_wkt(),
+ * proj_create_from_proj_string(), proj_create_from_database() and other functions
+ * will have generally minimal interaction with the functions declared in the
+ * upper section of this header file (calling those functions on those objects
+ * will either return an error or default/non-sensical values). The exception is
+ * for ISO19111 objects of type CoordinateOperation that can be exported as a
+ * valid PROJ pipeline. In this case, the PJ objects will work for example with
+ * proj_trans_generic().
+ * Conversely, objects returned by proj_create() and proj_create_argv() will
+ * return an error when used with functions of this section.
  * @{
  */
 

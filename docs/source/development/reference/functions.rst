@@ -22,6 +22,11 @@ Threading contexts
 Transformation setup
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+The objects returned by the functions defined in this section have minimal
+interaction with the the functions of the
+`C API for ISO-19111 functionality`_, and vice versa. See its introduction
+paragraph for more details.
+
 .. c:function:: PJ* proj_create(PJ_CONTEXT *ctx, const char *definition)
 
     Create a transformation object from a proj-string.
@@ -573,6 +578,18 @@ Various
 
 C API for ISO-19111 functionality
 +++++++++++++++++++++++++++++++++
+
+The PJ* objects returned by :c:func:`proj_create_from_user_input`,
+:c:func:`proj_create_from_wkt`, :c:func:`proj_create_from_proj_string`,
+:c:func:`proj_create_from_database` and other functions
+will have generally minimal interaction with the functions declared in the
+previous sections (calling those functions on those objects
+will either return an error or default/non-sensical values). The exception is
+for ISO19111 objects of type CoordinateOperation that can be exported as a
+valid PROJ pipeline. In this case,  objects will work for example with
+:c:func:`proj_trans_generic`.
+Conversely, objects returned by :c:func:`proj_create` and :c:func:`proj_create_argv` will
+return an error when used with functions of this section.
 
 .. doxygengroup:: iso19111_functions
    :project: cpp_stuff
