@@ -1032,9 +1032,13 @@ PJ_INFO proj_info (void) {
     info.release    = pj_get_release ();
 
     /* build search path string */
-    buf = path_append (buf, getenv ("HOME"), &buf_size);
-    buf = path_append (buf, getenv ("PROJ_LIB"), &buf_size);
-
+    const char* envPROJ_LIB = getenv ("PROJ_LIB");
+    buf = path_append (buf, envPROJ_LIB, &buf_size);
+#ifdef PROJ_LIB
+    if( envPROJ_LIB == nullptr ) {
+        buf = path_append (buf, PROJ_LIB, &buf_size);
+    }
+#endif
     auto ctx = pj_get_default_ctx();
     if( ctx ) {
         for( const auto& path: ctx->search_paths ) {
