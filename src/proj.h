@@ -329,7 +329,7 @@ typedef struct projCtx_t PJ_CONTEXT;
 
 /**
  * The objects returned by the functions defined in this section have minimal
- * interaction with the the functions of the
+ * interaction with the functions of the
  * \ref iso19111_functions section, and vice versa. See its introduction
  * paragraph for more details.
  */
