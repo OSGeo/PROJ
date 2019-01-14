@@ -6,8 +6,8 @@ PROJ RFC 3: Dependency management
 
 :Author: Kristian Evers
 :Contact: kreve@sdfe.dk
-:Status: Draft
-:Last Updated: 2018-11-10
+:Status: Proposed to the PSC
+:Last Updated: 2019-01-14
 
 Summary
 -------------------------------------------------------------------------------
@@ -70,8 +70,10 @@ C and C++
 
 Following :ref:`RFC2 <rfc2>` PROJ is written in both C and C++. At the time of
 writing the core library is C based and the code described in RFC2 is written
-in C++.  For the foreseeable future this will be upheld but it is likely that a
-shift towards C++ will happen some time in the not-so-distant future.
+in C++. While the core library is mostly written in C it is compiled as C++.
+Minor sections of PROJ, like the geodesic algorithms are still compiled as C
+since there is no apparent benefit of compiling with a C++ compiler. This may
+change in the future.
 
 Both the C and C++ standards are updated with regular intervals. After an
 update of a standard it takes time for compiler manufacturers to implement the
@@ -141,4 +143,5 @@ acception of this RFC PROJ will have the following external requirements:
 Adoption status
 -------------------------------------------------------------------------------
 
-The RFC is still in draft mode and hasn't been put forward to the PSC yet.
+The RFC has been through review by the PROJ community and is currently up for a
+vote by the PSC.
