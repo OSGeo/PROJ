@@ -642,8 +642,8 @@ int main(int argc, char **argv) {
                     outputOpt.WKT1_ESRI = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
-                    outputOpt.WKT2_2018 = false;
-                    outputOpt.WKT2_2015 = true;
+                    outputOpt.WKT2_2018 = true;
+                    outputOpt.WKT2_2015 = false;
                     outputOpt.WKT1_GDAL = false;
                 } else if (ci_equal(format, "PROJ")) {
                     outputOpt.PROJ5 = true;
@@ -902,7 +902,7 @@ int main(int argc, char **argv) {
 
     if (!outputSwithSpecified) {
         outputOpt.PROJ5 = true;
-        outputOpt.WKT2_2015 = true;
+        outputOpt.WKT2_2018 = true;
     }
 
     if (outputOpt.quiet &&
