@@ -1,6 +1,4 @@
-set(PROJ_SRC apps/proj.cpp 
-             apps/gen_cheb.cpp 
-             apps/p_series.cpp
+set(PROJ_SRC apps/proj.cpp
              apps/emess.cpp
 )
 

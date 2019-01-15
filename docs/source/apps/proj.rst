@@ -148,25 +148,12 @@ The following control parameters can appear in any order
 .. option:: -v
 
     Causes a listing of cartographic control parameters tested for and used by
-    the program to be printed prior to input data. Should not be used with the
-    :option:`-T` option.
+    the program to be printed prior to input data.
 
 .. option:: -V
 
     This option causes an expanded annotated listing of the characteristics of
     the projected point. :option:`-v` is implied with this option.
-
-.. option:: -T <ulow,uhi,vlow,vhi,res[,umax,vmax]>
-
-    This option creates a set of bivariate Chebyshev polynomial coefficients
-    that approximate the selected cartographic projection on stdout. The values
-    *low* and *hi* denote the range of the input where the *u* or *v* prefixes apply to
-    respective longitude-x or latitude-y depending upon whether a forward or
-    inverse projection is selected. The integer *res* is a number specifying the
-    power of 10 precision of the approximation. For example, a *res* of -3
-    specifies an approximation with an accuracy better than 0.001. Optional *umax*, and *vmax*
-    specify maximum degree of the polynomials (default: 15).
-
 
 
 The *+args* run-line arguments are associated with cartographic parameters.
