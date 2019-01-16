@@ -1035,13 +1035,12 @@ ellipsoidal_cs_unit: angle_unit
 map_projection: map_projection_keyword left_delimiter
                 map_projection_name
                 wkt_separator map_projection_method
-                wkt_separator
-                parameter_list_identifier_list
+                opt_separator_parameter_list_identifier_list
                 right_delimiter
 
-parameter_list_identifier_list:
-    map_projection_parameter opt_separator_identifier_list
-  | map_projection_parameter wkt_separator parameter_list_identifier_list
+opt_separator_parameter_list_identifier_list:
+  | wkt_separator identifier opt_separator_identifier_list
+  | wkt_separator map_projection_parameter opt_separator_parameter_list_identifier_list
 
 map_projection_keyword: T_CONVERSION
 
@@ -1192,16 +1191,15 @@ calendar_identifier: quoted_latin_text
 deriving_conversion: deriving_conversion_keyword left_delimiter
                      deriving_conversion_name wkt_separator
                      operation_method
-                     wkt_separator parameter_or_parameter_file
-                     opt_separator_deriving_conversion_end
+                     opt_separator_parameter_or_parameter_file_identifier_list
                      right_delimiter
 
 parameter_or_parameter_file: operation_parameter | operation_parameter_file
 
-opt_separator_deriving_conversion_end:
-   | wkt_separator operation_parameter opt_separator_deriving_conversion_end
-   | wkt_separator operation_parameter_file opt_separator_deriving_conversion_end
-   | wkt_separator identifier opt_separator_identifier
+opt_separator_parameter_or_parameter_file_identifier_list:
+   | wkt_separator operation_parameter opt_separator_parameter_or_parameter_file_identifier_list
+   | wkt_separator operation_parameter_file opt_separator_parameter_or_parameter_file_identifier_list
+   | wkt_separator identifier opt_separator_identifier_list
 
 deriving_conversion_keyword: T_DERIVINGCONVERSION
 
