@@ -4252,8 +4252,20 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
     }
 
     if (ci_equal(name, WKTConstants::CONVERSION)) {
-        return util::nn_static_pointer_cast<BaseObject>(
-            buildConversion(node, UnitOfMeasure::METRE, UnitOfMeasure::DEGREE));
+        auto conv =
+            buildConversion(node, UnitOfMeasure::METRE, UnitOfMeasure::DEGREE);
+
+        if (conv->nameStr() == "PROJ-based coordinate operation" &&
+            starts_with(conv->method()->nameStr(),
+                        "PROJ-based operation method: ")) {
+            auto projString = conv->method()->nameStr().substr(
+                strlen("PROJ-based operation method: "));
+            return util::nn_static_pointer_cast<BaseObject>(
+                PROJBasedOperation::create(PropertyMap(), projString, nullptr,
+                                           nullptr, {}));
+        }
+
+        return util::nn_static_pointer_cast<BaseObject>(conv);
     }
 
     if (ci_equal(name, WKTConstants::CONCATENATEDOPERATION)) {

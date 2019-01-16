@@ -11788,33 +11788,22 @@ PROJBasedOperation::~PROJBasedOperation() = default;
 
 // ---------------------------------------------------------------------------
 
-PROJBasedOperation::PROJBasedOperation(
-    const OperationMethodNNPtr &methodIn,
-    const std::vector<GeneralParameterValueNNPtr> &values)
-    : SingleOperation(methodIn) {
-    setParameterValues(values);
-}
+PROJBasedOperation::PROJBasedOperation(const OperationMethodNNPtr &methodIn)
+    : SingleOperation(methodIn) {}
 
 // ---------------------------------------------------------------------------
-
-static const std::string PROJSTRING_PARAMETER_NAME("PROJ string");
 
 PROJBasedOperationNNPtr PROJBasedOperation::create(
     const util::PropertyMap &properties, const std::string &PROJString,
     const crs::CRSPtr &sourceCRS, const crs::CRSPtr &targetCRS,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
-    auto parameter = OperationParameter::create(util::PropertyMap().set(
-        common::IdentifiedObject::NAME_KEY, PROJSTRING_PARAMETER_NAME));
     auto method = OperationMethod::create(
         util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                "PROJ-based operation method"),
-        std::vector<OperationParameterNNPtr>{parameter});
-    std::vector<GeneralParameterValueNNPtr> values;
-    values.push_back(OperationParameterValue::create(
-        parameter, ParameterValue::create(PROJString)));
-    auto op =
-        PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method, values);
+                                "PROJ-based operation method: " + PROJString),
+        std::vector<GeneralOperationParameterNNPtr>{});
+    auto op = PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method);
     op->assignSelf(op);
+    op->projString_ = PROJString;
     if (sourceCRS && targetCRS) {
         op->setCRSs(NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), nullptr);
     }
@@ -11826,21 +11815,11 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
 
 // ---------------------------------------------------------------------------
 
-static const std::string
-    APPROX_PROJSTRING_PARAMETER_NAME("(Approximte) PROJ string");
-
 PROJBasedOperationNNPtr PROJBasedOperation::create(
     const util::PropertyMap &properties,
     const io::IPROJStringExportableNNPtr &projExportable, bool inverse,
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
-    auto parameter = OperationParameter::create(util::PropertyMap().set(
-        common::IdentifiedObject::NAME_KEY, APPROX_PROJSTRING_PARAMETER_NAME));
-    auto method = OperationMethod::create(
-        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                "PROJ-based operation method"),
-        std::vector<OperationParameterNNPtr>{parameter});
-    std::vector<GeneralParameterValueNNPtr> values;
 
     auto formatter = io::PROJStringFormatter::create();
     if (inverse) {
@@ -11852,11 +11831,14 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     }
     auto projString = formatter->toString();
 
-    values.push_back(OperationParameterValue::create(
-        parameter, ParameterValue::create(projString)));
-    auto op =
-        PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method, values);
+    auto method = OperationMethod::create(
+        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                "PROJ-based operation method (approximate) : " +
+                                    projString),
+        std::vector<GeneralOperationParameterNNPtr>{});
+    auto op = PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method);
     op->assignSelf(op);
+    op->projString_ = projString;
     op->setCRSs(sourceCRS, targetCRS, nullptr);
     op->setProperties(
         addDefaultNameIfNeeded(properties, "PROJ-based coordinate operation"));
@@ -11882,8 +11864,7 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
     auto formatter = io::PROJStringFormatter::create();
     formatter->startInversion();
     try {
-        formatter->ingestPROJString(
-            parameterValue(PROJSTRING_PARAMETER_NAME)->stringValue());
+        formatter->ingestPROJString(projString_);
     } catch (const io::ParsingException &e) {
         throw util::UnsupportedOperationException(
             std::string("PROJBasedOperation::inverse() failed: ") + e.what());
@@ -11938,8 +11919,7 @@ void PROJBasedOperation::_exportToPROJString(
     }
 
     try {
-        formatter->ingestPROJString(
-            parameterValue(PROJSTRING_PARAMETER_NAME)->stringValue());
+        formatter->ingestPROJString(projString_);
     } catch (const io::ParsingException &e) {
         throw io::FormattingException(
             std::string("PROJBasedOperation::exportToPROJString() failed: ") +

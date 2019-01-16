@@ -252,8 +252,7 @@ class PROJBasedOperation : public SingleOperation {
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
   protected:
-    PROJBasedOperation(const OperationMethodNNPtr &methodIn,
-                       const std::vector<GeneralParameterValueNNPtr> &values);
+    PROJBasedOperation(const OperationMethodNNPtr &methodIn);
 
     void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
@@ -261,6 +260,7 @@ class PROJBasedOperation : public SingleOperation {
     INLINED_MAKE_SHARED
 
   private:
+    std::string projString_{};
     io::IPROJStringExportablePtr projStringExportable_{};
     bool inverse_ = false;
 };

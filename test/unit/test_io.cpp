@@ -2280,6 +2280,20 @@ TEST(wkt_parse, COORDINATEOPERATION) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, conversion_proj_based) {
+
+    auto wkt = "CONVERSION[\"PROJ-based coordinate operation\",\n"
+               "    METHOD[\"PROJ-based operation method: +proj=merc\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<SingleOperation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=merc");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, CONCATENATEDOPERATION) {
 
     auto transf_1 = Transformation::create(

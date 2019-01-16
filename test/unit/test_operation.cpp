@@ -4099,8 +4099,7 @@ TEST(operation, PROJ_based) {
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"PROJ-based coordinate operation\",\n"
-              "    METHOD[\"PROJ-based operation method\"],\n"
-              "    PARAMETER[\"PROJ string\",\"+proj=merc\"]]");
+              "    METHOD[\"PROJ-based operation method: +proj=merc\"]]");
 
     EXPECT_EQ(conv->inverse()->exportToPROJString(
                   PROJStringFormatter::create().get()),
@@ -4135,8 +4134,7 @@ TEST(operation, PROJ_based_empty) {
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"PROJ-based coordinate operation\",\n"
-              "    METHOD[\"PROJ-based operation method\"],\n"
-              "    PARAMETER[\"PROJ string\",\"\"]]");
+              "    METHOD[\"PROJ-based operation method: \"]]");
 
     EXPECT_THROW(
         conv->exportToWKT(
