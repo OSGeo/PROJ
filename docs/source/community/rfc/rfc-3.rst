@@ -143,5 +143,9 @@ acception of this RFC PROJ will have the following external requirements:
 Adoption status
 -------------------------------------------------------------------------------
 
-The RFC has been through review by the PROJ community and is currently up for a
-vote by the PSC.
+The RFC was adopted on 2018-01-19 with +1's from the following PSC members
+
+* Kristian Evers
+* Even Rouault
+* Thomas Knudsen
+* Howard Butler
