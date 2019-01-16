@@ -6,8 +6,8 @@ PROJ RFC 3: Dependency management
 
 :Author: Kristian Evers
 :Contact: kreve@sdfe.dk
-:Status: Proposed to the PSC
-:Last Updated: 2019-01-14
+:Status: Adopted
+:Last Updated: 2019-01-16
 
 Summary
 -------------------------------------------------------------------------------
