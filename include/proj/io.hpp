@@ -602,6 +602,9 @@ createFromUserInput(const std::string &text,
                     const DatabaseContextPtr &dbContext,
                     bool usePROJ4InitRules = false);
 
+PROJ_DLL util::BaseObjectNNPtr createFromUserInput(const std::string &text,
+                                                   PJ_CONTEXT *ctx);
+
 // ---------------------------------------------------------------------------
 
 /** \brief Parse a WKT string into the appropriate suclass of util::BaseObject.
@@ -664,6 +667,11 @@ class PROJ_GCC_DLL PROJStringParser {
     PROJ_DLL util::BaseObjectNNPtr createFromPROJString(
         const std::string &projString); // throw(ParsingException)
 
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJStringParser &
+        attachContext(PJ_CONTEXT *ctx);
+    //! @endcond
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };

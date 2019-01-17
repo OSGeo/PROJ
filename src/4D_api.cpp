@@ -462,7 +462,7 @@ Returns 1 on success, 0 on failure
         if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=axisswap  axis=%s", P->axis);
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
             return 0;
@@ -477,7 +477,7 @@ Returns 1 on success, 0 on failure
         if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=vgridshift  grids=%s", gridnames);
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
             return 0;
@@ -492,7 +492,7 @@ Returns 1 on success, 0 on failure
         if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=hgridshift  grids=%s", gridnames);
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
             return 0;
@@ -524,7 +524,7 @@ Returns 1 on success, 0 on failure
         if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=helmert exact %s convention=position_vector", s);
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         free(def);
         if (nullptr==Q)
             return 0;
@@ -550,14 +550,14 @@ Returns 1 on success, 0 on failure
                 *next_pos = '.';
             }
         }
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         if (nullptr==Q)
             return 0;
         P->cart = skip_prep_fin (Q);
 
         if (!P->is_geocent) {
             sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
-            Q = proj_create (P->ctx, def);
+            Q = pj_create_internal (P->ctx, def);
             if (nullptr==Q)
                 return 0;
             P->cart_wgs84 = skip_prep_fin (Q);
@@ -568,9 +568,10 @@ Returns 1 on success, 0 on failure
 }
 
 
-
 /*************************************************************************************/
-PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
+PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
+/*************************************************************************************/
+
 /**************************************************************************************
     Create a new PJ object in the context ctx, using the given definition. If ctx==0,
     the default context is used, if definition==0, or invalid, a null-pointer is
@@ -623,8 +624,6 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     return P;
 }
 
-
-
 /*************************************************************************************/
 PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
 /**************************************************************************************
@@ -652,6 +651,34 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
     }
 
     P = proj_create (ctx, c);
+
+    pj_dealloc ((char *) c);
+    return P;
+}
+
+/*************************************************************************************/
+PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv) {
+/**************************************************************************************
+Same as proj_create_argv() but calls pj_create_internal() instead of proj_create() internally
+**************************************************************************************/
+    PJ *P;
+    const char *c;
+
+    if (nullptr==ctx)
+        ctx = pj_get_default_ctx ();
+    if (nullptr==argv) {
+        proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
+        return nullptr;
+    }
+
+    /* We assume that free format is used, and build a full proj_create compatible string */
+    c = pj_make_args (argc, argv);
+    if (nullptr==c) {
+        proj_context_errno_set(ctx, ENOMEM);
+        return nullptr;
+    }
+
+    P = pj_create_internal (ctx, c);
 
     pj_dealloc ((char *) c);
     return P;
@@ -761,7 +788,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     - a PROJ string, like "+proj=longlat +datum=WGS84".
       When using that syntax, the axis order and unit for geographic CRS will
       be longitude, latitude, and the unit degrees.
-    - more generally any string accepted by proj_create_from_user_input()
+    - more generally any string accepted by proj_create()
 
     An "area of use" can be specified in area. When it is supplied, the more
     accurate transformation between two given systems can be chosen.
@@ -772,27 +799,23 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
 ******************************************************************************/
     const char* proj_string;
-    const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", nullptr };
 
     if( !ctx ) {
         ctx = pj_get_default_ctx();
     }
-
-    const char* const* optionsImportCRS =
-        proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : nullptr;
 
     try
     {
         std::string source_crs_modified(pj_add_type_crs_if_needed(source_crs));
         std::string target_crs_modified(pj_add_type_crs_if_needed(target_crs));
 
-        auto src = proj_create_from_user_input(ctx, source_crs_modified.c_str(), optionsImportCRS);
+        auto src = proj_create(ctx, source_crs_modified.c_str());
         if( !src ) {
             proj_context_log_debug(ctx, "Cannot instantiate source_crs");
             return nullptr;
         }
 
-        auto dst = proj_create_from_user_input(ctx, target_crs_modified.c_str(), optionsImportCRS);
+        auto dst = proj_create(ctx, target_crs_modified.c_str());
         if( !dst ) {
             proj_context_log_debug(ctx, "Cannot instantiate target_crs");
             proj_destroy(src);

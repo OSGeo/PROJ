@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 
+#include "proj/io.hpp"
 #include "proj/util.hpp"
 
 //! @cond Doxygen_Suppress
@@ -158,6 +159,27 @@ class WKTConstants {
 } // namespace io
 
 NS_PROJ_END
+
+// ---------------------------------------------------------------------------
+
+/** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
+struct projCppContext {
+    NS_PROJ::io::DatabaseContextNNPtr databaseContext;
+    std::string lastUOMName_{};
+
+    explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
+                            const char *const *auxDbPaths = nullptr)
+        : databaseContext(NS_PROJ::io::DatabaseContext::create(
+              dbPath ? dbPath : std::string(), toVector(auxDbPaths), ctx)) {}
+
+    static std::vector<std::string> toVector(const char *const *auxDbPaths) {
+        std::vector<std::string> res;
+        for (auto iter = auxDbPaths; iter && *iter; ++iter) {
+            res.emplace_back(std::string(*iter));
+        }
+        return res;
+    }
+};
 
 //! @endcond
 

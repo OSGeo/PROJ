@@ -4116,14 +4116,11 @@ TEST(operation, PROJ_based) {
             ->exportToPROJString(PROJStringFormatter::create().get()),
         str);
 
-    EXPECT_THROW(SingleOperation::createPROJBased(PropertyMap(), "+inv",
-                                                  nullptr, nullptr)
+    EXPECT_THROW(SingleOperation::createPROJBased(
+                     PropertyMap(), "+proj=pipeline +step +proj=pipeline",
+                     nullptr, nullptr)
                      ->exportToPROJString(PROJStringFormatter::create().get()),
                  FormattingException);
-    EXPECT_THROW(
-        SingleOperation::createPROJBased(PropertyMap(), "foo", nullptr, nullptr)
-            ->exportToPROJString(PROJStringFormatter::create().get()),
-        FormattingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -4690,7 +4687,9 @@ TEST(operation, geogCRS_to_geogCRS_init_IGNF_to_init_IGNF_context) {
     EXPECT_EQ(list[0]->nameStr(),
               "NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=hgridshift +grids=ntf_r93.gsb");
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=hgridshift +grids=ntf_r93.gsb +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------

@@ -238,6 +238,10 @@ Expand key from buffer or (if not in buffer) from init file
     char *definition = nullptr;
     paralist *init_items = nullptr;
 
+    if( !ctx ) {
+        ctx = pj_get_default_ctx();
+    }
+
     /* support "init=file:section", "+init=file:section", and "file:section" format */
     xkey = strstr (key, "init=");
     if (nullptr==xkey)
@@ -270,7 +274,6 @@ Expand key from buffer or (if not in buffer) from init file
         }
 
         if( !exists ) {
-            const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", nullptr };
             char szInitStr[7 + 64];
             PJ* src;
             const char* proj_string;
@@ -287,7 +290,10 @@ Expand key from buffer or (if not in buffer) from init file
             strcpy(szInitStr, "+init=");
             strcat(szInitStr, xkey);
 
-            src = proj_create_from_user_input(ctx, szInitStr, optionsProj4Mode);
+            auto old_proj4_init_rules = ctx->use_proj4_init_rules;
+            ctx->use_proj4_init_rules = true;
+            src = proj_create(ctx, szInitStr);
+            ctx->use_proj4_init_rules = old_proj4_init_rules;
             if( !src ) {
                 return nullptr;
             }

@@ -901,6 +901,9 @@ PJ* pj_init_ctx_with_allow_init_epsg( projCtx_t *ctx, int argc, char **argv, int
 
 std::string PROJ_DLL pj_add_type_crs_if_needed(const std::string& str);
 
+PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition);
+PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);
+
 /* classic public API */
 #include "proj_api.h"
 

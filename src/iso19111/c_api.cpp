@@ -47,6 +47,7 @@
 #include "proj/util.hpp"
 
 #include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
 
 // PROJ include order is sensitive
 // clang-format off
@@ -91,25 +92,6 @@ static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
 
 //! @cond Doxygen_Suppress
 
-/** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
-struct projCppContext {
-    DatabaseContextNNPtr databaseContext;
-    std::string lastUOMName_{};
-
-    explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
-                            const char *const *auxDbPaths = nullptr)
-        : databaseContext(DatabaseContext::create(
-              dbPath ? dbPath : std::string(), toVector(auxDbPaths), ctx)) {}
-
-    static std::vector<std::string> toVector(const char *const *auxDbPaths) {
-        std::vector<std::string> res;
-        for (auto iter = auxDbPaths; iter && *iter; ++iter) {
-            res.emplace_back(std::string(*iter));
-        }
-        return res;
-    }
-};
-
 // ---------------------------------------------------------------------------
 
 void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
@@ -150,8 +132,9 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
         try {
             auto formatter = PROJStringFormatter::create(
                 PROJStringFormatter::Convention::PROJ_5, dbContext);
-            auto pj = proj_create(
-                ctx, coordop->exportToPROJString(formatter.get()).c_str());
+            auto projString = coordop->exportToPROJString(formatter.get());
+            auto pj = pj_create_internal(
+                ctx, projString.empty() ? "+proj=affine" : projString.c_str());
             if (pj) {
                 pj->iso_obj = objIn;
                 return pj;
@@ -346,41 +329,20 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
  *
  * @param ctx PROJ context, or NULL for default context
  * @param text String (must not be NULL)
- * @param options null-terminated list of options, or NULL. Currently
- * supported options are:
- * <ul>
- * <li>USE_PROJ4_INIT_RULES=YES/NO. Defaults to NO. When set to YES,
- * init=epsg:XXXX syntax will be allowed and will be interpreted according to
- * PROJ.4 and PROJ.5 rules, that is geodeticCRS will have longitude, latitude
- * order and will expect/output coordinates in radians. ProjectedCRS will have
- * easting, northing axis order (except the ones with Transverse Mercator South
- * Orientated projection). In that mode, the epsg:XXXX syntax will be also
- * interprated the same way.</li>
- * </ul>
  * @return Object that must be unreferenced with proj_destroy(), or NULL in
  * case of error.
  */
-PJ *proj_create_from_user_input(PJ_CONTEXT *ctx, const char *text,
-                                const char *const *options) {
+PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
     SANITIZE_CTX(ctx);
     assert(text);
-    (void)options;
-    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+
+    // Only connect to proj.db if needed
+    if( strstr(text, "proj=") == nullptr || strstr(text, "init=") != nullptr ) {
+        getDBcontextNoException(ctx, __FUNCTION__);
+    }
     try {
-        bool usePROJ4InitRules = false;
-        for (auto iter = options; iter && iter[0]; ++iter) {
-            const char *value;
-            if ((value = getOptionValue(*iter, "USE_PROJ4_INIT_RULES="))) {
-                usePROJ4InitRules = ci_equal(value, "YES");
-            } else {
-                std::string msg("Unknown option :");
-                msg += *iter;
-                proj_log_error(ctx, __FUNCTION__, msg.c_str());
-                return nullptr;
-            }
-        }
         auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
-            createFromUserInput(text, dbContext, usePROJ4InitRules));
+            createFromUserInput(text, ctx));
         if (identifiedObject) {
             return pj_obj_create(ctx, NN_NO_CHECK(identifiedObject));
         }
@@ -514,43 +476,6 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
         } else {
             proj_log_error(ctx, __FUNCTION__, e.what());
         }
-    }
-    return nullptr;
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Instantiate an object from a PROJ string.
- *
- * This function calls osgeo::proj::io::PROJStringParser::createFromPROJString()
- *
- * The returned object must be unreferenced with proj_destroy() after use.
- * It should be used by at most one thread at a time.
- *
- * @param ctx PROJ context, or NULL for default context
- * @param proj_string PROJ string (must not be NULL)
- * @param options should be set to NULL for now
- * @return Object that must be unreferenced with proj_destroy(), or NULL in
- * case of error.
- */
-PJ *proj_create_from_proj_string(PJ_CONTEXT *ctx, const char *proj_string,
-                                 const char *const *options) {
-    SANITIZE_CTX(ctx);
-    (void)options;
-    assert(proj_string);
-    try {
-        PROJStringParser parser;
-        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
-        if (dbContext) {
-            parser.attachDatabaseContext(NN_NO_CHECK(dbContext));
-        }
-        auto identifiedObject = nn_dynamic_pointer_cast<IdentifiedObject>(
-            parser.createFromPROJString(proj_string));
-        if (identifiedObject) {
-            return pj_obj_create(ctx, NN_NO_CHECK(identifiedObject));
-        }
-    } catch (const std::exception &e) {
-        proj_log_error(ctx, __FUNCTION__, e.what());
     }
     return nullptr;
 }

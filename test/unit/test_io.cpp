@@ -1276,7 +1276,8 @@ TEST(wkt_parse, wkt1_krovak_south_west) {
               expectedPROJString);
 
     obj = PROJStringParser().createFromPROJString(
-        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+type=crs +proj=pipeline +step +proj=unitconvert +xy_in=deg "
+        "+xy_out=rad "
         "+step +proj=krovak +lat_0=49.5 "
         "+lon_0=24.8333333333333 +alpha=30.2881397222222 "
         "+k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
@@ -6915,8 +6916,8 @@ TEST(io, projparse_longlat_complex) {
         "+step +proj=longlat +ellps=clrk80ign "
         "+pm=paris +step +proj=unitconvert +xy_in=rad +xy_out=grad +step "
         "+proj=axisswap +order=2,1";
-    auto obj =
-        PROJStringParser().createFromPROJString("+proj=pipeline " + input);
+    auto obj = PROJStringParser().createFromPROJString(
+        "+type=crs +proj=pipeline " + input);
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -7194,7 +7195,7 @@ TEST(io, projparse_longlat_axis_swu) {
 
 TEST(io, projparse_longlat_unitconvert_deg) {
     auto obj = PROJStringParser().createFromPROJString(
-        "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+        "+type=crs +proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
         "+proj=unitconvert +xy_in=rad +xy_out=deg");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -7210,7 +7211,7 @@ TEST(io, projparse_longlat_unitconvert_deg) {
 
 TEST(io, projparse_longlat_unitconvert_grad) {
     auto obj = PROJStringParser().createFromPROJString(
-        "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+        "+type=crs +proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
         "+proj=unitconvert +xy_in=rad +xy_out=grad");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -7228,7 +7229,7 @@ TEST(io, projparse_longlat_unitconvert_grad) {
 
 TEST(io, projparse_longlat_unitconvert_rad) {
     auto obj = PROJStringParser().createFromPROJString(
-        "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+        "+type=crs +proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
         "+proj=unitconvert +xy_in=rad +xy_out=rad");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -7248,9 +7249,10 @@ TEST(io, projparse_longlat_axisswap) {
         for (auto order2 : {"1", "-1", "2", "-2"}) {
             if (std::abs(atoi(order1) * atoi(order2)) == 2 &&
                 !(atoi(order1) == 1 && atoi(order2) == 2)) {
-                auto str = "+proj=pipeline +step +proj=longlat +ellps=GRS80 "
-                           "+step +proj=axisswap +order=" +
-                           std::string(order1) + "," + order2;
+                auto str =
+                    "+type=crs +proj=pipeline +step +proj=longlat +ellps=GRS80 "
+                    "+step +proj=axisswap +order=" +
+                    std::string(order1) + "," + order2;
                 auto obj = PROJStringParser().createFromPROJString(str);
                 auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
                 ASSERT_TRUE(crs != nullptr);
@@ -7363,9 +7365,11 @@ TEST(io, projparse_tmerc_south_oriented) {
     EXPECT_EQ(f->toString(), expected);
 
     obj = PROJStringParser().createFromPROJString(
-        "+proj=pipeline +step +proj=tmerc +x_0=1 +lat_0=1 +k_0=2 +step "
+        "+type=crs +proj=pipeline +step +proj=tmerc +x_0=1 +lat_0=1 +k_0=2 "
+        "+step "
         "+proj=axisswap +order=-1,-2");
     crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
               "Transverse Mercator (South Orientated)");
 }
@@ -7917,7 +7921,7 @@ TEST(io, projparse_non_earth_ellipsoid) {
 
 TEST(io, projparse_axisswap_unitconvert_longlat_proj) {
     std::string input =
-        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv +proj=longlat "
         "+ellps=clrk80ign +pm=paris +step +proj=lcc +lat_1=49.5 "
         "+lat_0=49.5 +lon_0=0 +k_0=0.999877341 +x_0=600000 +y_0=200000 "
@@ -7939,7 +7943,7 @@ TEST(io, projparse_axisswap_unitconvert_longlat_proj) {
 
 TEST(io, projparse_axisswap_unitconvert_proj_axisswap) {
     std::string input =
-        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
         "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=axisswap +order=2,1";
     auto obj = PROJStringParser().createFromPROJString(input);
@@ -7959,7 +7963,7 @@ TEST(io, projparse_axisswap_unitconvert_proj_axisswap) {
 
 TEST(io, projparse_axisswap_unitconvert_proj_unitconvert) {
     std::string input =
-        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
         "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=unitconvert +xy_in=m "
         "+z_in=m +xy_out=ft +z_out=ft";
@@ -7980,7 +7984,7 @@ TEST(io, projparse_axisswap_unitconvert_proj_unitconvert) {
 
 TEST(io, projparse_axisswap_unitconvert_proj_unitconvert_numeric_axisswap) {
     std::string input =
-        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
         "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=unitconvert +xy_in=m "
         "+z_in=m +xy_out=2.5 +z_out=2.5 +step +proj=axisswap +order=-2,-1";
@@ -8294,7 +8298,7 @@ TEST(io, projparse_projected_wktext) {
 
 TEST(io, projparse_ob_tran_longlat) {
     std::string input(
-        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran "
         "+o_proj=longlat +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 +ellps=WGS84 "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
@@ -8316,7 +8320,11 @@ TEST(io, projparse_ob_tran_longlat) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_helmert_translation) {
-    std::string projString("+proj=helmert +x=1 +y=2 +z=3");
+    std::string projString("+proj=pipeline +step +proj=unitconvert +xy_in=deg "
+                           "+xy_out=rad +step +proj=cart +ellps=GRS80 +step "
+                           "+proj=helmert +x=1 +y=2 +z=3 +step +inv +proj=cart "
+                           "+ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+                           "+xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8330,8 +8338,11 @@ TEST(io, projparse_helmert_translation) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_helmert_translation_inv) {
-    std::string projString(
-        "+proj=pipeline +step +inv +proj=helmert +x=1 +y=2 +z=3");
+    std::string projString("+proj=pipeline +step +proj=unitconvert +xy_in=deg "
+                           "+xy_out=rad +step +proj=cart +ellps=GRS80 +step "
+                           "+inv +proj=helmert +x=1 +y=2 +z=3 +step +inv "
+                           "+proj=cart +ellps=GRS80 +step +proj=unitconvert "
+                           "+xy_in=rad +xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8339,14 +8350,20 @@ TEST(io, projparse_helmert_translation_inv) {
         transf->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5)
                 .get()),
-        "+proj=helmert +x=-1 +y=-2 +z=-3");
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+        "+proj=cart +ellps=GRS80 +step +proj=helmert +x=-1 +y=-2 +z=-3 +step "
+        "+inv +proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+        "+xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_helmert_position_vector) {
-    std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
-                           "+s=7 +convention=position_vector");
+    std::string projString(
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+        "+proj=cart +ellps=GRS80 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
+        "+ry=5 +rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
+        "+ellps=GRS80 +step +proj=unitconvert +xy_in=rad +xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8360,9 +8377,11 @@ TEST(io, projparse_helmert_position_vector) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_helmert_position_vector_inv) {
-    std::string projString("+proj=pipeline +step +inv +proj=helmert +x=1 +y=2 "
-                           "+z=3 +rx=4 +ry=5 +rz=6 "
-                           "+s=7 +convention=position_vector");
+    std::string projString(
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+        "+proj=cart +ellps=GRS80 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
+        "+ry=5 +rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
+        "+ellps=GRS80 +step +proj=unitconvert +xy_in=rad +xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8376,10 +8395,14 @@ TEST(io, projparse_helmert_position_vector_inv) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_helmert_time_dependent_position_vector) {
-    std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
+    std::string projString("+proj=pipeline +step +proj=unitconvert +xy_in=deg "
+                           "+xy_out=rad +step +proj=cart +ellps=GRS80 +step "
+                           "+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
                            "+s=7 +dx=0.1 +dy=0.2 +dz=0.3 +drx=0.4 +dry=0.5 "
                            "+drz=0.6 +ds=0.7 +t_epoch=2018.5 "
-                           "+convention=position_vector");
+                           "+convention=position_vector +step +inv +proj=cart "
+                           "+ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+                           "+xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8393,8 +8416,11 @@ TEST(io, projparse_helmert_time_dependent_position_vector) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_helmert_coordinate_frame) {
-    std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
-                           "+s=7 +convention=coordinate_frame");
+    std::string projString(
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+        "+proj=cart +ellps=GRS80 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
+        "+ry=5 +rz=6 +s=7 +convention=coordinate_frame +step +inv +proj=cart "
+        "+ellps=GRS80 +step +proj=unitconvert +xy_in=rad +xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8408,10 +8434,14 @@ TEST(io, projparse_helmert_coordinate_frame) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_helmert_time_dependent_coordinate_frame) {
-    std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
+    std::string projString("+proj=pipeline +step +proj=unitconvert +xy_in=deg "
+                           "+xy_out=rad +step +proj=cart +ellps=GRS80 +step "
+                           "+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
                            "+s=7 +dx=0.1 +dy=0.2 +dz=0.3 +drx=0.4 +dry=0.5 "
                            "+drz=0.6 +ds=0.7 +t_epoch=2018.5 "
-                           "+convention=coordinate_frame");
+                           "+convention=coordinate_frame +step +inv +proj=cart "
+                           "+ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+                           "+xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8425,28 +8455,6 @@ TEST(io, projparse_helmert_time_dependent_coordinate_frame) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_helmert_complex_pipeline) {
-    std::string projString(
-        "+proj=pipeline +step +proj=cart "
-        "+ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 "
-        "+ry=-5 +rz=-6 +s=-7 +convention=position_vector +step +inv "
-        "+proj=cart +ellps=clrk80ign");
-    auto obj = PROJStringParser().createFromPROJString(projString);
-    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
-    ASSERT_TRUE(transf != nullptr);
-    EXPECT_EQ(
-        transf->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5)
-                .get()),
-        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=cart +ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 "
-        "+z=-3 +rx=-4 +ry=-5 +rz=-6 +s=-7 +convention=position_vector "
-        "+step +inv +proj=cart +ellps=clrk80ign +step +proj=unitconvert "
-        "+xy_in=rad +xy_out=deg");
-}
-
-// ---------------------------------------------------------------------------
-
-TEST(io, projparse_helmert_complex_pipeline_2) {
     std::string projString(
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
@@ -8472,21 +8480,18 @@ TEST(io, projparse_helmert_errors) {
     // Missing convention
     EXPECT_THROW(PROJStringParser().createFromPROJString("+proj=helmert +rx=4"),
                  ParsingException);
-
-    EXPECT_THROW(PROJStringParser().createFromPROJString(
-                     "+proj=helmert +convention=unhandled"),
-                 ParsingException);
-
-    EXPECT_THROW(PROJStringParser().createFromPROJString(
-                     "+proj=helmert +unhandled_keyword"),
-                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_molodensky) {
-    std::string projString("+proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
-                           "+dz=116.95 +da=251 +df=1.41927e-05");
+    std::string projString(
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+proj=longlat +ellps=WGS84 +step +proj=molodensky +ellps=WGS84 "
+        "+dx=84.87 +dy=96.49 "
+        "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=longlat "
+        "+ellps=GRS80 +step +proj=unitconvert "
+        "+xy_in=rad +xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8505,12 +8510,13 @@ TEST(io, projparse_molodensky) {
         "ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\","
         "0.0174532925199433]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT["
         "\"degree\",0.0174532925199433]]]],TARGETCRS[GEODCRS[\"unknown\",DATUM["
-        "\"unknown\",ELLIPSOID[\"unknown\",6378388,297.000000198989,LENGTHUNIT["
-        "\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0."
-        "0174532925199433]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],"
-        "ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"latitude\",north,"
-        "ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]]]],METHOD["
-        "\"Molodensky\",ID[\"EPSG\",9604]],PARAMETER[\"X-axis "
+        "\"Unknown based on GRS80 ellipsoid\",ELLIPSOID[\"GRS "
+        "1980\",6378137,298.257222101,LENGTHUNIT[\"metre\",1]]],PRIMEM["
+        "\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS["
+        "ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\","
+        "0.0174532925199433]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT["
+        "\"degree\",0.0174532925199433]]]],METHOD[\"Molodensky\",ID[\"EPSG\","
+        "9604]],PARAMETER[\"X-axis "
         "translation\",84.87,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8605]],"
         "PARAMETER[\"Y-axis "
         "translation\",96.49,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8606]],"
@@ -8524,19 +8530,21 @@ TEST(io, projparse_molodensky) {
         transf->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5)
                 .get()),
-        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
-        "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=longlat "
-        "+a=6378388 +rf=297.000000198989 +step +proj=unitconvert "
-        "+xy_in=rad +xy_out=deg");
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+        "+proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 +dz=116.95 +da=251 "
+        "+df=1.41927e-05 +step +proj=unitconvert +xy_in=rad +xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_molodensky_inv) {
-    std::string projString("+proj=pipeline +step +inv +proj=molodensky "
-                           "+ellps=WGS84 +dx=84.87 +dy=96.49 "
-                           "+dz=116.95 +da=251 +df=1.41927e-05");
+    std::string projString(
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+proj=longlat +ellps=WGS84 +step +inv +proj=molodensky "
+        "+ellps=WGS84 +dx=84.87 +dy=96.49 "
+        "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=longlat "
+        "+ellps=GRS80 +step +proj=unitconvert "
+        "+xy_in=rad +xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
     ASSERT_TRUE(transf != nullptr);
@@ -8544,66 +8552,33 @@ TEST(io, projparse_molodensky_inv) {
         transf->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5)
                 .get()),
-        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +inv +proj=longlat +a=6378388 +rf=297.000000198989 +step "
-        "+proj=molodensky +a=6378388 +rf=297.000000198989 +dx=-84.87 "
-        "+dy=-96.49 +dz=-116.95 +da=-251 +df=-1.41927e-05 +step "
-        "+proj=unitconvert +xy_in=rad +xy_out=deg");
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+        "+proj=molodensky +ellps=GRS80 +dx=-84.87 +dy=-96.49 +dz=-116.95 "
+        "+da=-251 +df=-1.41927e-05 +step +proj=unitconvert +xy_in=rad "
+        "+xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_molodensky_abridged) {
-    std::string projString("+proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
-                           "+dz=116.95 +da=251 +df=1.41927e-05 +abridged");
-    auto obj = PROJStringParser().createFromPROJString(projString);
-    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
-    ASSERT_TRUE(transf != nullptr);
-    EXPECT_EQ(
-        transf->exportToPROJString(
-            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5)
-                .get()),
-        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
-        "+dz=116.95 +da=251 +df=1.41927e-05 +abridged +step +proj=longlat "
-        "+a=6378388 +rf=297.000000198989 +step "
-        "+proj=unitconvert +xy_in=rad +xy_out=deg");
-}
-
-// ---------------------------------------------------------------------------
-
-TEST(io, projparse_molodensky_complex_pipeline) {
     std::string projString(
         "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
         "+proj=longlat +ellps=WGS84 +step +proj=molodensky +ellps=WGS84 "
         "+dx=84.87 +dy=96.49 "
-        "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=longlat "
+        "+dz=116.95 +da=251 +df=1.41927e-05 +abridged +step +proj=longlat "
         "+ellps=GRS80 +step +proj=unitconvert "
         "+xy_in=rad +xy_out=deg");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
-
-    WKTFormatterNNPtr f(WKTFormatter::create());
-    f->simulCurNodeHasId();
-    f->setMultiLine(false);
-    transf->exportToWKT(f.get());
-    auto wkt = f->toString();
-    EXPECT_TRUE(wkt.find("SOURCECRS[GEODCRS[\"unknown\",DATUM[\"Unknown based "
-                         "on WGS84 ellipsoid\"") != std::string::npos)
-        << wkt;
-    EXPECT_TRUE(wkt.find("TARGETCRS[GEODCRS[\"unknown\",DATUM[\"Unknown based "
-                         "on GRS80 ellipsoid\"") != std::string::npos)
-        << wkt;
-
     EXPECT_EQ(
         transf->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5)
                 .get()),
-        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
-        "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=unitconvert "
-        "+xy_in=rad +xy_out=deg");
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+        "+proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 +dz=116.95 +da=251 "
+        "+df=1.41927e-05 +abridged +step +proj=unitconvert +xy_in=rad "
+        "+xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------
@@ -8665,12 +8640,12 @@ TEST(io, projparse_init) {
 
     {
         // EPSG:4326 is normally latitude-longitude order with degree,
-        // but in compatibillity mode it will be long-lat radian
+        // but in compatibillity mode it will be long-lat
         auto obj = createFromUserInput("init=epsg:4326", dbContext, true);
         auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
-            EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::RADIAN)
+            EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE)
                 .get()));
     }
 
@@ -8691,20 +8666,19 @@ TEST(io, projparse_init) {
         auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
         ASSERT_TRUE(co != nullptr);
         EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=helmert +x=-0.0001 +y=0.0008 +z=0.0058 +rx=0 +ry=0 "
-                  "+rz=0 +s=-0.0004 +dx=0.0002 +dy=-0.0001 +dz=0.0018 +drx=0 "
-                  "+dry=0 +drz=0 +ds=-8e-06 +t_epoch=2000 "
-                  "+convention=position_vector");
+                  "+proj=helmert +x=-0.0001 +y=0.0008 +z=0.0058 +s=-0.0004 "
+                  "+dx=0.0002 +dy=-0.0001 +dz=0.0018 +ds=-0.000008 "
+                  "+t_epoch=2000.0 +convention=position_vector");
     }
 
     {
-        auto obj = createFromUserInput(
-            "title=mytitle init=epsg:4326 ellps=WGS84", dbContext, true);
-        auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
-        ASSERT_TRUE(co != nullptr);
-        EXPECT_EQ(co->nameStr(), "mytitle");
-        EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+init=epsg:4326 +ellps=WGS84");
+        auto obj = createFromUserInput("+title=mytitle +geoc +init=epsg:4326",
+                                       dbContext, true);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "mytitle");
+        EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=longlat +geoc +datum=WGS84 +no_defs +type=crs");
     }
 
     {
@@ -8716,16 +8690,6 @@ TEST(io, projparse_init) {
         EXPECT_EQ(co->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=pipeline +step +init=epsg:4326 +step +proj=longlat "
                   "+ellps=WGS84");
-    }
-
-    {
-        auto obj = createFromUserInput(
-            "init=epsg:4326 proj=longlat ellps=GRS80 +type=crs", dbContext,
-            true);
-        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
-        ASSERT_TRUE(crs != nullptr);
-        EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=longlat +ellps=GRS80 +no_defs +type=crs");
     }
 }
 
@@ -8850,10 +8814,11 @@ TEST(io, projparse_projected_errors) {
                      "+proj=tmerc +lat_0=foo +type=crs"),
                  ParsingException);
     // Inconsistent pm values between geogCRS and projectedCRS
-    EXPECT_THROW(PROJStringParser().createFromPROJString(
-                     "+proj=pipeline +step +proj=longlat +ellps=WGS84 "
-                     "+proj=tmerc +ellps=WGS84  +lat_0=foo +pm=paris"),
-                 ParsingException);
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString(
+            "+type=crs +proj=pipeline +step +proj=longlat +ellps=WGS84 "
+            "+step +proj=tmerc +ellps=WGS84 +lat_0=0 +pm=paris"),
+        ParsingException);
 }
 
 // ---------------------------------------------------------------------------
