@@ -1176,7 +1176,8 @@ void GeodeticCRS::_exportToPROJString(
 {
     const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
     if (!extensionProj4.empty()) {
-        formatter->ingestPROJString(extensionProj4);
+        formatter->ingestPROJString(
+            replaceAll(extensionProj4, " +type=crs", ""));
         formatter->addNoDefs(false);
         return;
     }
@@ -1907,7 +1908,8 @@ void GeographicCRS::_exportToPROJString(
 {
     const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
     if (!extensionProj4.empty()) {
-        formatter->ingestPROJString(extensionProj4);
+        formatter->ingestPROJString(
+            replaceAll(extensionProj4, " +type=crs", ""));
         formatter->addNoDefs(false);
         return;
     }
@@ -2719,7 +2721,8 @@ void ProjectedCRS::_exportToPROJString(
 {
     const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
     if (!extensionProj4.empty()) {
-        formatter->ingestPROJString(extensionProj4);
+        formatter->ingestPROJString(
+            replaceAll(extensionProj4, " +type=crs", ""));
         formatter->addNoDefs(false);
         return;
     }

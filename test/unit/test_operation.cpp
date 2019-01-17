@@ -1378,7 +1378,7 @@ TEST(operation, tmerc_south_oriented_export) {
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=tmerc +axis=wsu +lat_0=0 +lon_0=29 +k=1 +x_0=0 +y_0=0 "
-              "+ellps=WGS84 +units=m +no_defs");
+              "+ellps=WGS84 +units=m +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -1630,7 +1630,7 @@ TEST(operation, bonne_export) {
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=bonne +lat_1=1 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84 "
-              "+units=m +no_defs");
+              "+units=m +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -2127,7 +2127,7 @@ TEST(operation, createEquidistantCylindricalSpherical) {
 TEST(operation, equidistant_cylindrical_lat_0) {
 
     auto obj = PROJStringParser().createFromPROJString(
-        "+proj=eqc +ellps=sphere +lat_0=-2 +lat_ts=1 +lon_0=-10");
+        "+proj=eqc +ellps=sphere +lat_0=-2 +lat_ts=1 +lon_0=-10 +type=crs");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
@@ -2141,7 +2141,7 @@ TEST(operation, equidistant_cylindrical_lat_0) {
             .get());
     EXPECT_EQ(projString,
               "+proj=eqc +lat_ts=1 +lat_0=-2 +lon_0=-10 +x_0=0 +y_0=0 "
-              "+ellps=sphere +units=m +no_defs");
+              "+ellps=sphere +units=m +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -3073,9 +3073,10 @@ TEST(operation, webmerc_export) {
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
               "+lat_0=0 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
 
-    EXPECT_EQ(projCRS->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 +x_0=3 "
-              "+y_0=4 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+    EXPECT_EQ(
+        projCRS->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 +x_0=3 "
+        "+y_0=4 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -3172,9 +3173,10 @@ TEST(operation, webmerc_import_from_GDAL_wkt1_EPSG_3785_deprecated) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
-              "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+    EXPECT_EQ(
+        crs->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+        "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs");
 
     auto convGot = crs->derivingConversion();
 
@@ -3237,9 +3239,10 @@ TEST(operation, webmerc_import_from_WKT2_EPSG_3785_deprecated) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
-              "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+    EXPECT_EQ(
+        crs->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+        "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs");
 
     EXPECT_EQ(
         crs->exportToWKT(
@@ -4080,7 +4083,7 @@ TEST(operation, laborde_oblique_mercator) {
     // Content of EPSG:29701 "Tananarive (Paris) / Laborde Grid"
     auto projString = "+proj=labrd +lat_0=-18.9 +lon_0=44.1 +azi=18.9 "
                       "+k=0.9995 +x_0=400000 +y_0=800000 +ellps=intl +pm=paris "
-                      "+units=m +no_defs";
+                      "+units=m +no_defs +type=crs";
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -4694,13 +4697,13 @@ TEST(operation, geogCRS_to_geogCRS_init_IGNF_to_init_IGNF_context) {
 
 TEST(operation, geogCRS_to_geogCRS_3D) {
 
-    auto geogcrs_m_obj =
-        PROJStringParser().createFromPROJString("+proj=longlat +vunits=m");
+    auto geogcrs_m_obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +vunits=m +type=crs");
     auto geogcrs_m = nn_dynamic_pointer_cast<CRS>(geogcrs_m_obj);
     ASSERT_TRUE(geogcrs_m != nullptr);
 
-    auto geogcrs_ft_obj =
-        PROJStringParser().createFromPROJString("+proj=longlat +vunits=ft");
+    auto geogcrs_ft_obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +vunits=ft +type=crs");
     auto geogcrs_ft = nn_dynamic_pointer_cast<CRS>(geogcrs_ft_obj);
     ASSERT_TRUE(geogcrs_ft != nullptr);
 
@@ -4721,7 +4724,7 @@ TEST(operation, geogCRS_to_geogCRS_3D) {
     }
 
     auto geogcrs_m_with_pm_obj = PROJStringParser().createFromPROJString(
-        "+proj=longlat +pm=paris +vunits=m");
+        "+proj=longlat +pm=paris +vunits=m +type=crs");
     auto geogcrs_m_with_pm =
         nn_dynamic_pointer_cast<CRS>(geogcrs_m_with_pm_obj);
     ASSERT_TRUE(geogcrs_m_with_pm != nullptr);
@@ -5345,14 +5348,14 @@ TEST(operation, boundCRS_of_geogCRS_to_unrelated_geogCRS) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, createOperation_boundCRS_identified_by_datum) {
-    auto objSrc =
-        PROJStringParser().createFromPROJString("+proj=longlat +datum=WGS84");
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +datum=WGS84 +type=crs");
     auto src = nn_dynamic_pointer_cast<GeographicCRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
 
     auto objDest = PROJStringParser().createFromPROJString(
         "+proj=utm +zone=32 +a=6378249.2 +b=6356515 "
-        "+towgs84=-263.0,6.0,431.0 +no_defs");
+        "+towgs84=-263.0,6.0,431.0 +no_defs +type=crs");
     auto dest = nn_dynamic_pointer_cast<BoundCRS>(objDest);
     ASSERT_TRUE(dest != nullptr);
 
@@ -5379,12 +5382,12 @@ TEST(operation, createOperation_boundCRS_identified_by_datum) {
 
 TEST(operation, boundCRS_of_clrk_66_geogCRS_to_nad83_geogCRS) {
     auto objSrc = PROJStringParser().createFromPROJString(
-        "+proj=latlong +ellps=clrk66 +nadgrids=ntv1_can.dat,conus");
+        "+proj=latlong +ellps=clrk66 +nadgrids=ntv1_can.dat,conus +type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
 
-    auto objDest =
-        PROJStringParser().createFromPROJString("+proj=latlong +datum=NAD83");
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=latlong +datum=NAD83 +type=crs");
     auto dest = nn_dynamic_pointer_cast<CRS>(objDest);
     ASSERT_TRUE(dest != nullptr);
 
@@ -5401,12 +5404,13 @@ TEST(operation, boundCRS_of_clrk_66_geogCRS_to_nad83_geogCRS) {
 
 TEST(operation, boundCRS_of_clrk_66_projCRS_to_nad83_geogCRS) {
     auto objSrc = PROJStringParser().createFromPROJString(
-        "+proj=utm +zone=17 +ellps=clrk66 +nadgrids=ntv1_can.dat,conus");
+        "+proj=utm +zone=17 +ellps=clrk66 +nadgrids=ntv1_can.dat,conus "
+        "+type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
 
-    auto objDest =
-        PROJStringParser().createFromPROJString("+proj=latlong +datum=NAD83");
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=latlong +datum=NAD83 +type=crs");
     auto dest = nn_dynamic_pointer_cast<CRS>(objDest);
     ASSERT_TRUE(dest != nullptr);
 
@@ -5553,12 +5557,12 @@ TEST(operation, boundCRS_to_boundCRS_unralated_hub) {
 TEST(operation, boundCRS_of_projCRS_towgs84_to_boundCRS_of_projCRS_nadgrids) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=utm +zone=15 +datum=NAD83 +units=m +no_defs +ellps=GRS80 "
-        "+towgs84=0,0,0");
+        "+towgs84=0,0,0 +type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=utm +zone=15 +datum=NAD27 +units=m +no_defs +ellps=clrk66 "
-        "+nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat");
+        "+nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat +type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -6140,13 +6144,13 @@ TEST(operation, vertCRS_to_vertCRS) {
 
 TEST(operation, compoundCRS_to_geogCRS_3D) {
 
-    auto compoundcrs_ft_obj =
-        PROJStringParser().createFromPROJString("+proj=merc +vunits=ft");
+    auto compoundcrs_ft_obj = PROJStringParser().createFromPROJString(
+        "+proj=merc +vunits=ft +type=crs");
     auto compoundcrs_ft = nn_dynamic_pointer_cast<CRS>(compoundcrs_ft_obj);
     ASSERT_TRUE(compoundcrs_ft != nullptr);
 
-    auto geogcrs_m_obj =
-        PROJStringParser().createFromPROJString("+proj=longlat +vunits=m");
+    auto geogcrs_m_obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +vunits=m +type=crs");
     auto geogcrs_m = nn_dynamic_pointer_cast<CRS>(geogcrs_m_obj);
     ASSERT_TRUE(geogcrs_m != nullptr);
 
@@ -6300,7 +6304,7 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
 
 TEST(operation, createOperation_fallback_to_proj4_strings) {
     auto objDest = PROJStringParser().createFromPROJString(
-        "+proj=longlat +geoc +ellps=WGS84");
+        "+proj=longlat +geoc +ellps=WGS84 +type=crs");
     auto dest = nn_dynamic_pointer_cast<GeographicCRS>(objDest);
     ASSERT_TRUE(dest != nullptr);
 

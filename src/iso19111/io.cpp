@@ -3344,6 +3344,9 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                ci_equal(stripQuotes(extensionChildren[0]), "PROJ4")) {
         std::string projString = stripQuotes(extensionChildren[1]);
         if (starts_with(projString, "+proj=")) {
+            if (projString.find(" +type=crs") == std::string::npos) {
+                projString += " +type=crs";
+            }
             try {
                 auto projObj =
                     PROJStringParser().createFromPROJString(projString);
@@ -4619,6 +4622,9 @@ std::string IPROJStringExportable::exportToPROJString(
         }
     }
     if (bIsCRS) {
+        if (!formatter->hasParam("type")) {
+            formatter->addParam("type", "crs");
+        }
         formatter->setCRSExport(false);
     }
     return formatter->toString();
@@ -5303,6 +5309,9 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             vunits = word.substr(strlen("vunits="));
         } else if (starts_with(word, "vto_meter=")) {
             vto_meter = word.substr(strlen("vto_meter="));
+        } else if (word == "type=crs" &&
+                   (!vunits.empty() || !vto_meter.empty())) {
+            // ok
         } else if (starts_with(word, "title=")) {
             title = word.substr(strlen("title="));
             prevWasTitle = true;
@@ -6902,7 +6911,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 param.key == "towgs84" || param.key == "nadgrids" ||
                 param.key == "geoidgrids" || param.key == "units" ||
                 param.key == "to_meter" || param.key == "vunits" ||
-                param.key == "vto_meter") {
+                param.key == "vto_meter" || param.key == "type") {
                 continue;
             }
             if (param.value.empty()) {
@@ -7252,6 +7261,10 @@ static const metadata::ExtentPtr &getExtent(const crs::CRS *crs) {
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a sub-class of BaseObject from a PROJ string.
+ *
+ * The projString must contain +type=crs for the object to be detected as a
+ * CRS instead of a CoordinateOperation.
+ *
  * @throw ParsingException
  */
 BaseObjectNNPtr
@@ -7300,7 +7313,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
 
     // +init=xxxx:yyyy syntax
     if (d->steps_.size() == 1 && d->steps_[0].isInit &&
-        d->steps_[0].paramValues.size() == 0) {
+        (d->steps_[0].paramValues.size() == 0 ||
+         d->getParamValue(d->steps_[0], "type") == "crs")) {
 
         // Those used to come from a text init file
         // We only support them in compatibility mode
@@ -7481,6 +7495,11 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             unexpectedStructure = true;
             break;
         }
+    }
+
+    if (d->steps_.size() == 1 && iHelmert < 0 && iMolodensky < 0 &&
+        d->getParamValue(d->steps_[0], "type") != "crs") {
+        unexpectedStructure = true;
     }
 
     if (!unexpectedStructure) {

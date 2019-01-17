@@ -213,8 +213,9 @@ static PJ *instanciate_crs(const std::string &definition,
                                const char *const *optionsImportCRS,
                                bool &isGeog, double &toRadians,
                                bool &isLatFirst) {
-    PJ *crs = proj_create_from_user_input(nullptr, definition.c_str(),
-                                                  optionsImportCRS);
+    PJ *crs = proj_create_from_user_input(nullptr,
+                                          pj_add_type_crs_if_needed(definition).c_str(),
+                                          optionsImportCRS);
     if (!crs) {
         return nullptr;
     }

@@ -492,12 +492,14 @@ TEST_F(CApi, proj_as_proj_string) {
     {
         auto proj_5 = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_5, nullptr);
         ASSERT_NE(proj_5, nullptr);
-        EXPECT_EQ(std::string(proj_5), "+proj=longlat +datum=WGS84 +no_defs");
+        EXPECT_EQ(std::string(proj_5),
+                  "+proj=longlat +datum=WGS84 +no_defs +type=crs");
     }
     {
         auto proj_4 = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, nullptr);
         ASSERT_NE(proj_4, nullptr);
-        EXPECT_EQ(std::string(proj_4), "+proj=longlat +datum=WGS84 +no_defs");
+        EXPECT_EQ(std::string(proj_4),
+                  "+proj=longlat +datum=WGS84 +no_defs +type=crs");
     }
 }
 
@@ -518,22 +520,24 @@ TEST_F(CApi, proj_as_proj_string_incompatible_WKT1) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_as_proj_string_etmerc_option_yes) {
-    auto obj = proj_create_from_proj_string(m_ctxt, "+proj=tmerc", nullptr);
+    auto obj =
+        proj_create_from_proj_string(m_ctxt, "+proj=tmerc +type=crs", nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
     const char *options[] = {"USE_ETMERC=YES", nullptr};
     auto str = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, options);
     ASSERT_NE(str, nullptr);
-    EXPECT_EQ(str, std::string("+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 "
-                               "+y_0=0 +datum=WGS84 +units=m +no_defs"));
+    EXPECT_EQ(str,
+              std::string("+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 "
+                          "+y_0=0 +datum=WGS84 +units=m +no_defs +type=crs"));
 }
 
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_as_proj_string_etmerc_option_no) {
-    auto obj =
-        proj_create_from_proj_string(m_ctxt, "+proj=utm +zone=31", nullptr);
+    auto obj = proj_create_from_proj_string(
+        m_ctxt, "+proj=utm +zone=31 +type=crs", nullptr);
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -542,7 +546,7 @@ TEST_F(CApi, proj_as_proj_string_etmerc_option_no) {
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str, std::string("+proj=tmerc +lat_0=0 +lon_0=3 +k=0.9996 "
                                "+x_0=500000 +y_0=0 +datum=WGS84 +units=m "
-                               "+no_defs"));
+                               "+no_defs +type=crs"));
 }
 
 // ---------------------------------------------------------------------------
@@ -563,7 +567,7 @@ TEST_F(CApi, proj_crs_create_bound_crs_to_WGS84) {
               "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
               "+y_0=500000 +ellps=krass "
               "+towgs84=2.329,-147.042,-92.08,-0.309,0.325,0.497,5.69 "
-              "+units=m +no_defs");
+              "+units=m +no_defs +type=crs");
 
     auto base_crs = proj_get_source_crs(m_ctxt, res);
     ObjectKeeper keeper_base_crs(base_crs);
@@ -2432,8 +2436,8 @@ TEST_F(CApi, proj_crs_alter_geodetic_crs) {
     ObjectKeeper keeper(projCRS);
     ASSERT_NE(projCRS, nullptr);
 
-    auto newGeodCRS =
-        proj_create_from_proj_string(m_ctxt, "+proj=longlat", nullptr);
+    auto newGeodCRS = proj_create_from_proj_string(
+        m_ctxt, "+proj=longlat +type=crs", nullptr);
     ObjectKeeper keeper_newGeodCRS(newGeodCRS);
     ASSERT_NE(newGeodCRS, nullptr);
 
