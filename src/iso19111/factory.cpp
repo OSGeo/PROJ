@@ -1170,9 +1170,9 @@ struct AuthorityFactory::Private {
             const std::string &authorityName)
         : context_(contextIn), authority_(authorityName) {}
 
-    inline const std::string &authority() PROJ_CONST_DEFN { return authority_; }
+    inline const std::string &authority() PROJ_PURE_DEFN { return authority_; }
 
-    inline const DatabaseContextNNPtr &context() PROJ_CONST_DEFN {
+    inline const DatabaseContextNNPtr &context() PROJ_PURE_DEFN {
         return context_;
     }
 
@@ -3732,7 +3732,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 /** \brief Returns the authority name associated to this factory.
  * @return name.
  */
-const std::string &AuthorityFactory::getAuthority() PROJ_CONST_DEFN {
+const std::string &AuthorityFactory::getAuthority() PROJ_PURE_DEFN {
     return d->authority();
 }
 

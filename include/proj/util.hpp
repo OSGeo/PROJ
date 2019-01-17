@@ -153,30 +153,14 @@ namespace proj {}
 #if defined(__GNUC__)
 #define PROJ_NO_INLINE __attribute__((noinline))
 #define PROJ_NO_RETURN __attribute__((noreturn))
-// Applies to a function that has no side effect, and its return will not
-// change if the arguments are the same. But is return may change
-// if the object state changes. So this is for getters of mutable objects.
+// Applies to a function that has no side effect.
 #define PROJ_PURE_DECL const noexcept __attribute__((pure))
-// Applies to a function that has no side effect, and its return will not
-// change if the arguments are the same, and their pointed value must not
-// be modified. So this is for getters of immutable objets. This is stronger
-// than PROJ_PURE_DECL.
-#if defined(__INTEL_COMPILER)
-// If using __attribute__((const)), ICC on an expression like
-// Angle(x).getSIValue() will create the object, destroy it and then call
-// getSIValue(). Fallback to ((pure)), which is weaker
-#define PROJ_CONST_DECL const noexcept __attribute__((pure))
-#else
-#define PROJ_CONST_DECL const noexcept __attribute__((const))
-#endif
 #else
 #define PROJ_NO_RETURN
 #define PROJ_NO_INLINE
 #define PROJ_PURE_DECL const noexcept
-#define PROJ_CONST_DECL const noexcept
 #endif
 #define PROJ_PURE_DEFN const noexcept
-#define PROJ_CONST_DEFN const noexcept
 
 //! @endcond
 
@@ -673,16 +657,16 @@ class CodeList {
 
     /** Return the CodeList item as a string. */
     // cppcheck-suppress functionStatic
-    inline const std::string &toString() PROJ_CONST_DECL { return name_; }
+    inline const std::string &toString() PROJ_PURE_DECL { return name_; }
 
     /** Return the CodeList item as a string. */
-    inline operator std::string() PROJ_CONST_DECL { return toString(); }
+    inline operator std::string() PROJ_PURE_DECL { return toString(); }
 
     //! @cond Doxygen_Suppress
-    inline bool operator==(const CodeList &other) PROJ_CONST_DECL {
+    inline bool operator==(const CodeList &other) PROJ_PURE_DECL {
         return name_ == other.name_;
     }
-    inline bool operator!=(const CodeList &other) PROJ_CONST_DECL {
+    inline bool operator!=(const CodeList &other) PROJ_PURE_DECL {
         return name_ != other.name_;
     }
     //! @endcond

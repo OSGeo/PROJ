@@ -108,7 +108,7 @@ Citation &Citation::operator=(const Citation &other) {
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the name by which the cited resource is known. */
-const optional<std::string> &Citation::title() PROJ_CONST_DEFN {
+const optional<std::string> &Citation::title() PROJ_PURE_DEFN {
     return d->title;
 }
 
@@ -169,7 +169,7 @@ GeographicBoundingBox::~GeographicBoundingBox() = default;
  * If eastBoundLongitude < westBoundLongitude(), then the bounding box crosses
  * the anti-meridian.
  */
-double GeographicBoundingBox::westBoundLongitude() PROJ_CONST_DEFN {
+double GeographicBoundingBox::westBoundLongitude() PROJ_PURE_DEFN {
     return d->west_;
 }
 
@@ -180,7 +180,7 @@ double GeographicBoundingBox::westBoundLongitude() PROJ_CONST_DEFN {
  *
  * The unit is degrees.
  */
-double GeographicBoundingBox::southBoundLatitude() PROJ_CONST_DEFN {
+double GeographicBoundingBox::southBoundLatitude() PROJ_PURE_DEFN {
     return d->south_;
 }
 
@@ -194,7 +194,7 @@ double GeographicBoundingBox::southBoundLatitude() PROJ_CONST_DEFN {
  * If eastBoundLongitude < westBoundLongitude(), then the bounding box crosses
  * the anti-meridian.
  */
-double GeographicBoundingBox::eastBoundLongitude() PROJ_CONST_DEFN {
+double GeographicBoundingBox::eastBoundLongitude() PROJ_PURE_DEFN {
     return d->east_;
 }
 
@@ -205,7 +205,7 @@ double GeographicBoundingBox::eastBoundLongitude() PROJ_CONST_DEFN {
  *
  * The unit is degrees.
  */
-double GeographicBoundingBox::northBoundLatitude() PROJ_CONST_DEFN {
+double GeographicBoundingBox::northBoundLatitude() PROJ_PURE_DEFN {
     return d->north_;
 }
 
@@ -466,19 +466,19 @@ VerticalExtent::~VerticalExtent() = default;
 
 /** \brief Returns the minimum of the vertical extent.
  */
-double VerticalExtent::minimumValue() PROJ_CONST_DEFN { return d->minimum_; }
+double VerticalExtent::minimumValue() PROJ_PURE_DEFN { return d->minimum_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the maximum of the vertical extent.
  */
-double VerticalExtent::maximumValue() PROJ_CONST_DEFN { return d->maximum_; }
+double VerticalExtent::maximumValue() PROJ_PURE_DEFN { return d->maximum_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the unit of the vertical extent.
  */
-common::UnitOfMeasureNNPtr &VerticalExtent::unit() PROJ_CONST_DEFN {
+common::UnitOfMeasureNNPtr &VerticalExtent::unit() PROJ_PURE_DEFN {
     return d->unit_;
 }
 
@@ -562,13 +562,13 @@ TemporalExtent::~TemporalExtent() = default;
 
 /** \brief Returns the start of the temporal extent.
  */
-const std::string &TemporalExtent::start() PROJ_CONST_DEFN { return d->start_; }
+const std::string &TemporalExtent::start() PROJ_PURE_DEFN { return d->start_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the end of the temporal extent.
  */
-const std::string &TemporalExtent::stop() PROJ_CONST_DEFN { return d->stop_; }
+const std::string &TemporalExtent::stop() PROJ_PURE_DEFN { return d->stop_; }
 
 // ---------------------------------------------------------------------------
 
@@ -643,7 +643,7 @@ Extent::~Extent() = default;
  *
  * @return the description, or empty.
  */
-const optional<std::string> &Extent::description() PROJ_CONST_DEFN {
+const optional<std::string> &Extent::description() PROJ_PURE_DEFN {
     return d->description_;
 }
 
@@ -654,7 +654,7 @@ const optional<std::string> &Extent::description() PROJ_CONST_DEFN {
  * @return the geographic element(s), or empty.
  */
 const std::vector<GeographicExtentNNPtr> &
-Extent::geographicElements() PROJ_CONST_DEFN {
+Extent::geographicElements() PROJ_PURE_DEFN {
     return d->geographicElements_;
 }
 
@@ -665,7 +665,7 @@ Extent::geographicElements() PROJ_CONST_DEFN {
  * @return the vertical element(s), or empty.
  */
 const std::vector<VerticalExtentNNPtr> &
-Extent::verticalElements() PROJ_CONST_DEFN {
+Extent::verticalElements() PROJ_PURE_DEFN {
     return d->verticalElements_;
 }
 
@@ -676,7 +676,7 @@ Extent::verticalElements() PROJ_CONST_DEFN {
  * @return the temporal element(s), or empty.
  */
 const std::vector<TemporalExtentNNPtr> &
-Extent::temporalElements() PROJ_CONST_DEFN {
+Extent::temporalElements() PROJ_PURE_DEFN {
     return d->temporalElements_;
 }
 
@@ -980,7 +980,7 @@ Identifier::createFromDescription(const std::string &descriptionIn) {
  *
  * @return the citation for the authority, or empty.
  */
-const optional<Citation> &Identifier::authority() PROJ_CONST_DEFN {
+const optional<Citation> &Identifier::authority() PROJ_PURE_DEFN {
     return d->authority_;
 }
 
@@ -993,7 +993,7 @@ const optional<Citation> &Identifier::authority() PROJ_CONST_DEFN {
  *
  * @return the code.
  */
-const std::string &Identifier::code() PROJ_CONST_DEFN { return d->code_; }
+const std::string &Identifier::code() PROJ_PURE_DEFN { return d->code_; }
 
 // ---------------------------------------------------------------------------
 
@@ -1004,7 +1004,7 @@ const std::string &Identifier::code() PROJ_CONST_DEFN { return d->code_; }
  *
  * @return the authority codespace, or empty.
  */
-const optional<std::string> &Identifier::codeSpace() PROJ_CONST_DEFN {
+const optional<std::string> &Identifier::codeSpace() PROJ_PURE_DEFN {
     return d->codeSpace_;
 }
 
@@ -1017,7 +1017,7 @@ const optional<std::string> &Identifier::codeSpace() PROJ_CONST_DEFN {
  *
  * @return the version or empty.
  */
-const optional<std::string> &Identifier::version() PROJ_CONST_DEFN {
+const optional<std::string> &Identifier::version() PROJ_PURE_DEFN {
     return d->version_;
 }
 
@@ -1028,7 +1028,7 @@ const optional<std::string> &Identifier::version() PROJ_CONST_DEFN {
  *
  * @return the description or empty.
  */
-const optional<std::string> &Identifier::description() PROJ_CONST_DEFN {
+const optional<std::string> &Identifier::description() PROJ_PURE_DEFN {
     return d->description_;
 }
 
@@ -1038,7 +1038,7 @@ const optional<std::string> &Identifier::description() PROJ_CONST_DEFN {
  *
  * @return the URI or empty.
  */
-const optional<std::string> &Identifier::uri() PROJ_CONST_DEFN {
+const optional<std::string> &Identifier::uri() PROJ_PURE_DEFN {
     return d->uri_;
 }
 
@@ -1266,7 +1266,7 @@ PositionalAccuracy::~PositionalAccuracy() = default;
 
 /** \brief Return the value of the positional accuracy.
  */
-const std::string &PositionalAccuracy::value() PROJ_CONST_DEFN {
+const std::string &PositionalAccuracy::value() PROJ_PURE_DEFN {
     return d->value_;
 }
 

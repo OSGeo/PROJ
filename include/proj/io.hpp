@@ -822,7 +822,7 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::string &sourceCRSCode,
         const std::string &targetCRSCode) const;
 
-    PROJ_DLL const std::string &getAuthority() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &getAuthority() PROJ_PURE_DECL;
 
     /** Object type. */
     enum class ObjectType {

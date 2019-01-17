@@ -267,7 +267,7 @@ PrimeMeridian::~PrimeMeridian() = default;
  *
  * @return the longitude of the prime meridian.
  */
-const common::Angle &PrimeMeridian::longitude() PROJ_CONST_DEFN {
+const common::Angle &PrimeMeridian::longitude() PROJ_PURE_DEFN {
     return d->longitude_;
 }
 
@@ -477,7 +477,7 @@ Ellipsoid::Ellipsoid(const Ellipsoid &other)
  *
  * @return the semi-major axis.
  */
-const common::Length &Ellipsoid::semiMajorAxis() PROJ_CONST_DEFN {
+const common::Length &Ellipsoid::semiMajorAxis() PROJ_PURE_DEFN {
     return d->semiMajorAxis_;
 }
 
@@ -494,7 +494,7 @@ const common::Length &Ellipsoid::semiMajorAxis() PROJ_CONST_DEFN {
  * @return the inverse flattening value of the ellipsoid, or empty.
  */
 const util::optional<common::Scale> &
-Ellipsoid::inverseFlattening() PROJ_CONST_DEFN {
+Ellipsoid::inverseFlattening() PROJ_PURE_DEFN {
     return d->inverseFlattening_;
 }
 
@@ -511,7 +511,7 @@ Ellipsoid::inverseFlattening() PROJ_CONST_DEFN {
  * @return the semi-minor axis of the ellipsoid, or empty.
  */
 const util::optional<common::Length> &
-Ellipsoid::semiMinorAxis() PROJ_CONST_DEFN {
+Ellipsoid::semiMinorAxis() PROJ_PURE_DEFN {
     return d->semiMinorAxis_;
 }
 
@@ -526,7 +526,7 @@ Ellipsoid::semiMinorAxis() PROJ_CONST_DEFN {
  *
  * @return true if the ellipsoid is spherical.
  */
-bool Ellipsoid::isSphere() PROJ_CONST_DEFN {
+bool Ellipsoid::isSphere() PROJ_PURE_DEFN {
     if (d->inverseFlattening_.has_value()) {
         return d->inverseFlattening_->value() == 0;
     }
@@ -547,7 +547,7 @@ bool Ellipsoid::isSphere() PROJ_CONST_DEFN {
  * @return the semi-median axis of the ellipsoid, or empty.
  */
 const util::optional<common::Length> &
-Ellipsoid::semiMedianAxis() PROJ_CONST_DEFN {
+Ellipsoid::semiMedianAxis() PROJ_PURE_DEFN {
     return d->semiMedianAxis_;
 }
 
@@ -560,7 +560,7 @@ Ellipsoid::semiMedianAxis() PROJ_CONST_DEFN {
  *
  * @return the inverse flattening value of the ellipsoid, or 0 for a sphere.
  */
-double Ellipsoid::computedInverseFlattening() PROJ_CONST_DEFN {
+double Ellipsoid::computedInverseFlattening() PROJ_PURE_DEFN {
     if (d->inverseFlattening_.has_value()) {
         return d->inverseFlattening_->getSIValue();
     }
@@ -580,7 +580,7 @@ double Ellipsoid::computedInverseFlattening() PROJ_CONST_DEFN {
  *
  * @return the squared eccentricity, or a negative value if invalid.
  */
-double Ellipsoid::squaredEccentricity() PROJ_CONST_DEFN {
+double Ellipsoid::squaredEccentricity() PROJ_PURE_DEFN {
     const double rf = computedInverseFlattening();
     const double f = rf != 0.0 ? 1. / rf : 0.0;
     const double e2 = f * (2 - f);
@@ -616,7 +616,7 @@ common::Length Ellipsoid::computeSemiMinorAxis() const {
 /** \brief Return the name of the celestial body on which the ellipsoid refers
  * to.
  */
-const std::string &Ellipsoid::celestialBody() PROJ_CONST_DEFN {
+const std::string &Ellipsoid::celestialBody() PROJ_PURE_DEFN {
     return d->celestialBody_;
 }
 
@@ -998,7 +998,7 @@ GeodeticReferenceFrame::~GeodeticReferenceFrame() = default;
  * @return the PrimeMeridian.
  */
 const PrimeMeridianNNPtr &
-GeodeticReferenceFrame::primeMeridian() PROJ_CONST_DEFN {
+GeodeticReferenceFrame::primeMeridian() PROJ_PURE_DEFN {
     return d->primeMeridian_;
 }
 
@@ -1014,7 +1014,7 @@ GeodeticReferenceFrame::primeMeridian() PROJ_CONST_DEFN {
  *
  * @return the Ellipsoid.
  */
-const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() PROJ_CONST_DEFN {
+const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() PROJ_PURE_DEFN {
     return d->ellipsoid_;
 }
 // ---------------------------------------------------------------------------

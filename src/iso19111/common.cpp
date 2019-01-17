@@ -329,7 +329,7 @@ Measure::~Measure() = default;
 
 /** \brief Return the unit of the Measure.
  */
-const UnitOfMeasure &Measure::unit() PROJ_CONST_DEFN { return d->unit_; }
+const UnitOfMeasure &Measure::unit() PROJ_PURE_DEFN { return d->unit_; }
 
 // ---------------------------------------------------------------------------
 
@@ -337,7 +337,7 @@ const UnitOfMeasure &Measure::unit() PROJ_CONST_DEFN { return d->unit_; }
  * corresponding
  * unit of the International System.
  */
-double Measure::getSIValue() PROJ_CONST_DEFN {
+double Measure::getSIValue() PROJ_PURE_DEFN {
     return d->value_ * d->unit_.conversionToSI();
 }
 
@@ -345,13 +345,13 @@ double Measure::getSIValue() PROJ_CONST_DEFN {
 
 /** \brief Return the value of the measure, expressed in the unit()
  */
-double Measure::value() PROJ_CONST_DEFN { return d->value_; }
+double Measure::value() PROJ_PURE_DEFN { return d->value_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Return the value of this measure expressed into the provided unit.
  */
-double Measure::convertToUnit(const UnitOfMeasure &otherUnit) PROJ_CONST_DEFN {
+double Measure::convertToUnit(const UnitOfMeasure &otherUnit) PROJ_PURE_DEFN {
     return getSIValue() / otherUnit.conversionToSI();
 }
 
@@ -361,7 +361,7 @@ double Measure::convertToUnit(const UnitOfMeasure &otherUnit) PROJ_CONST_DEFN {
  *
  * The comparison is done both on the value and the unit.
  */
-bool Measure::operator==(const Measure &other) PROJ_CONST_DEFN {
+bool Measure::operator==(const Measure &other) PROJ_PURE_DEFN {
     return d->value_ == other.d->value_ && d->unit_ == other.d->unit_;
 }
 
@@ -567,7 +567,7 @@ IdentifiedObject::~IdentifiedObject() = default;
  * Generally, the only interesting field of the name will be
  * name()->description().
  */
-const IdentifierNNPtr &IdentifiedObject::name() PROJ_CONST_DEFN {
+const IdentifierNNPtr &IdentifiedObject::name() PROJ_PURE_DEFN {
     return d->name;
 }
 
@@ -577,7 +577,7 @@ const IdentifierNNPtr &IdentifiedObject::name() PROJ_CONST_DEFN {
  *
  * Return *(name()->description())
  */
-const std::string &IdentifiedObject::nameStr() PROJ_CONST_DEFN {
+const std::string &IdentifiedObject::nameStr() PROJ_PURE_DEFN {
     return *(d->name->description());
 }
 
@@ -589,7 +589,7 @@ const std::string &IdentifiedObject::nameStr() PROJ_CONST_DEFN {
  * filled.
  */
 const std::vector<IdentifierNNPtr> &
-IdentifiedObject::identifiers() PROJ_CONST_DEFN {
+IdentifiedObject::identifiers() PROJ_PURE_DEFN {
     return d->identifiers;
 }
 
@@ -598,7 +598,7 @@ IdentifiedObject::identifiers() PROJ_CONST_DEFN {
 /** \brief Return the alias(es) of the object.
  */
 const std::vector<GenericNameNNPtr> &
-IdentifiedObject::aliases() PROJ_CONST_DEFN {
+IdentifiedObject::aliases() PROJ_PURE_DEFN {
     return d->aliases;
 }
 
@@ -608,7 +608,7 @@ IdentifiedObject::aliases() PROJ_CONST_DEFN {
  *
  * Shortcut for aliases()[0]->toFullyQualifiedName()->toString()
  */
-std::string IdentifiedObject::alias() PROJ_CONST_DEFN {
+std::string IdentifiedObject::alias() PROJ_PURE_DEFN {
     if (d->aliases.empty())
         return std::string();
     return d->aliases[0]->toFullyQualifiedName()->toString();
@@ -619,7 +619,7 @@ std::string IdentifiedObject::alias() PROJ_CONST_DEFN {
 /** \brief Return the EPSG code.
  * @return code, or 0 if not found
  */
-int IdentifiedObject::getEPSGCode() PROJ_CONST_DEFN {
+int IdentifiedObject::getEPSGCode() PROJ_PURE_DEFN {
     for (const auto &id : identifiers()) {
         if (ci_equal(*(id->codeSpace()), metadata::Identifier::EPSG)) {
             return ::atoi(id->code().c_str());
@@ -632,7 +632,7 @@ int IdentifiedObject::getEPSGCode() PROJ_CONST_DEFN {
 
 /** \brief Return the remarks.
  */
-const std::string &IdentifiedObject::remarks() PROJ_CONST_DEFN {
+const std::string &IdentifiedObject::remarks() PROJ_PURE_DEFN {
     return d->remarks;
 }
 
@@ -642,7 +642,7 @@ const std::string &IdentifiedObject::remarks() PROJ_CONST_DEFN {
  *
  * \remark Extension of \ref ISO_19111_2018
  */
-bool IdentifiedObject::isDeprecated() PROJ_CONST_DEFN {
+bool IdentifiedObject::isDeprecated() PROJ_PURE_DEFN {
     return d->isDeprecated;
 }
 
@@ -829,7 +829,7 @@ bool IdentifiedObject::_isEquivalentTo(
 
 bool IdentifiedObject::_isEquivalentTo(const IdentifiedObject *otherIdObj,
                                        util::IComparable::Criterion criterion)
-    PROJ_CONST_DEFN {
+    PROJ_PURE_DEFN {
     if (criterion == util::IComparable::Criterion::STRICT) {
         if (!ci_equal(nameStr(), otherIdObj->nameStr())) {
             return false;
@@ -883,7 +883,7 @@ ObjectDomain::~ObjectDomain() = default;
  *
  * @return the scope, or empty.
  */
-const optional<std::string> &ObjectDomain::scope() PROJ_CONST_DEFN {
+const optional<std::string> &ObjectDomain::scope() PROJ_PURE_DEFN {
     return d->scope_;
 }
 
@@ -893,7 +893,7 @@ const optional<std::string> &ObjectDomain::scope() PROJ_CONST_DEFN {
  *
  * @return the domain of validity, or nullptr.
  */
-const ExtentPtr &ObjectDomain::domainOfValidity() PROJ_CONST_DEFN {
+const ExtentPtr &ObjectDomain::domainOfValidity() PROJ_PURE_DEFN {
     return d->domainOfValidity_;
 }
 
@@ -1013,7 +1013,7 @@ ObjectUsage::~ObjectUsage() = default;
 
 /** \brief Return the domains of the object.
  */
-const std::vector<ObjectDomainNNPtr> &ObjectUsage::domains() PROJ_CONST_DEFN {
+const std::vector<ObjectDomainNNPtr> &ObjectUsage::domains() PROJ_PURE_DEFN {
     return d->domains_;
 }
 

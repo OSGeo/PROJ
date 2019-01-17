@@ -149,14 +149,14 @@ class Measure : public util::BaseObject {
     PROJ_DLL ~Measure();
     //! @endcond
 
-    PROJ_DLL const UnitOfMeasure &unit() PROJ_CONST_DECL;
-    PROJ_DLL double getSIValue() PROJ_CONST_DECL;
-    PROJ_DLL double value() PROJ_CONST_DECL;
+    PROJ_DLL const UnitOfMeasure &unit() PROJ_PURE_DECL;
+    PROJ_DLL double getSIValue() PROJ_PURE_DECL;
+    PROJ_DLL double value() PROJ_PURE_DECL;
 
     PROJ_DLL double
-    convertToUnit(const UnitOfMeasure &otherUnit) PROJ_CONST_DECL;
+    convertToUnit(const UnitOfMeasure &otherUnit) PROJ_PURE_DECL;
 
-    PROJ_DLL bool operator==(const Measure &other) PROJ_CONST_DECL;
+    PROJ_DLL bool operator==(const Measure &other) PROJ_PURE_DECL;
 
     /** Default maximum resulative error. */
     static constexpr double DEFAULT_MAX_REL_ERROR = 1e-10;
@@ -296,20 +296,20 @@ class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
     PROJ_DLL static const std::string DEPRECATED_KEY;
 
     // in practice only name().description() is used
-    PROJ_DLL const metadata::IdentifierNNPtr &name() PROJ_CONST_DECL;
-    PROJ_DLL const std::string &nameStr() PROJ_CONST_DECL;
+    PROJ_DLL const metadata::IdentifierNNPtr &name() PROJ_PURE_DECL;
+    PROJ_DLL const std::string &nameStr() PROJ_PURE_DECL;
     PROJ_DLL const std::vector<metadata::IdentifierNNPtr> &
-    identifiers() PROJ_CONST_DECL;
+    identifiers() PROJ_PURE_DECL;
     PROJ_DLL const std::vector<util::GenericNameNNPtr> &
-    aliases() PROJ_CONST_DECL;
-    PROJ_DLL const std::string &remarks() PROJ_CONST_DECL;
+    aliases() PROJ_PURE_DECL;
+    PROJ_DLL const std::string &remarks() PROJ_PURE_DECL;
 
     // from Apache SIS AbstractIdentifiedObject
-    PROJ_DLL bool isDeprecated() PROJ_CONST_DECL;
+    PROJ_DLL bool isDeprecated() PROJ_PURE_DECL;
 
     // Non-standard
-    PROJ_DLL std::string alias() PROJ_CONST_DECL;
-    PROJ_DLL int getEPSGCode() PROJ_CONST_DECL;
+    PROJ_DLL std::string alias() PROJ_PURE_DECL;
+    PROJ_DLL int getEPSGCode() PROJ_PURE_DECL;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
@@ -325,7 +325,7 @@ class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
     PROJ_INTERNAL bool
     _isEquivalentTo(const IdentifiedObject *other,
                     util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) PROJ_CONST_DECL;
+                        util::IComparable::Criterion::STRICT) PROJ_PURE_DECL;
     //! @endcond
 
   protected:
@@ -363,8 +363,8 @@ class ObjectDomain : public util::BaseObject, public util::IComparable {
     // In ISO_19111:2018, scope and domain are compulsory, but in WKT2:2015,
     // they
     // are not necessarily both specified
-    PROJ_DLL const util::optional<std::string> &scope() PROJ_CONST_DECL;
-    PROJ_DLL const metadata::ExtentPtr &domainOfValidity() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<std::string> &scope() PROJ_PURE_DECL;
+    PROJ_DLL const metadata::ExtentPtr &domainOfValidity() PROJ_PURE_DECL;
 
     PROJ_DLL static ObjectDomainNNPtr
     create(const util::optional<std::string> &scopeIn,
@@ -414,7 +414,7 @@ class ObjectUsage : public IdentifiedObject {
     PROJ_DLL ~ObjectUsage() override;
     //! @endcond
 
-    PROJ_DLL const std::vector<ObjectDomainNNPtr> &domains() PROJ_CONST_DECL;
+    PROJ_DLL const std::vector<ObjectDomainNNPtr> &domains() PROJ_PURE_DECL;
 
     PROJ_DLL static const std::string SCOPE_KEY;
     PROJ_DLL static const std::string DOMAIN_OF_VALIDITY_KEY;

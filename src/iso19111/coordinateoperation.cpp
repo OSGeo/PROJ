@@ -760,7 +760,7 @@ OperationMethod::~OperationMethod() = default;
  *
  * @return the formula, or empty.
  */
-const util::optional<std::string> &OperationMethod::formula() PROJ_CONST_DEFN {
+const util::optional<std::string> &OperationMethod::formula() PROJ_PURE_DEFN {
     return d->formula_;
 }
 
@@ -773,7 +773,7 @@ const util::optional<std::string> &OperationMethod::formula() PROJ_CONST_DEFN {
  * @return the formula citation, or empty.
  */
 const util::optional<metadata::Citation> &
-OperationMethod::formulaCitation() PROJ_CONST_DEFN {
+OperationMethod::formulaCitation() PROJ_PURE_DEFN {
     return d->formulaCitation_;
 }
 
@@ -784,7 +784,7 @@ OperationMethod::formulaCitation() PROJ_CONST_DEFN {
  * @return the parameters.
  */
 const std::vector<GeneralOperationParameterNNPtr> &
-OperationMethod::parameters() PROJ_CONST_DEFN {
+OperationMethod::parameters() PROJ_PURE_DEFN {
     return d->parameters_;
 }
 
@@ -835,7 +835,7 @@ OperationMethodNNPtr OperationMethod::create(
 /** \brief Return the EPSG code, either directly, or through the name
  * @return code, or 0 if not found
  */
-int OperationMethod::getEPSGCode() PROJ_CONST_DEFN {
+int OperationMethod::getEPSGCode() PROJ_PURE_DEFN {
     int epsg_code = IdentifiedObject::getEPSGCode();
     if (epsg_code == 0) {
         auto l_name = nameStr();
@@ -1012,7 +1012,7 @@ OperationParameterValue::~OperationParameterValue() = default;
  * @return the parameter (definition).
  */
 const OperationParameterNNPtr &
-OperationParameterValue::parameter() PROJ_CONST_DEFN {
+OperationParameterValue::parameter() PROJ_PURE_DEFN {
     return d->parameter;
 }
 
@@ -1023,7 +1023,7 @@ OperationParameterValue::parameter() PROJ_CONST_DEFN {
  * @return the parameter value.
  */
 const ParameterValueNNPtr &
-OperationParameterValue::parameterValue() PROJ_CONST_DEFN {
+OperationParameterValue::parameterValue() PROJ_PURE_DEFN {
     return d->parameterValue;
 }
 
@@ -1273,7 +1273,7 @@ const char *OperationParameter::getNameForEPSGCode(int epsg_code) noexcept {
 /** \brief Return the EPSG code, either directly, or through the name
  * @return code, or 0 if not found
  */
-int OperationParameter::getEPSGCode() PROJ_CONST_DEFN {
+int OperationParameter::getEPSGCode() PROJ_PURE_DEFN {
     int epsg_code = IdentifiedObject::getEPSGCode();
     if (epsg_code == 0) {
         const auto &l_name = nameStr();
@@ -1335,7 +1335,7 @@ SingleOperation::~SingleOperation() = default;
  * @return the parameter values.
  */
 const std::vector<GeneralParameterValueNNPtr> &
-SingleOperation::parameterValues() PROJ_CONST_DEFN {
+SingleOperation::parameterValues() PROJ_PURE_DEFN {
     return d->parameterValues_;
 }
 
@@ -1345,7 +1345,7 @@ SingleOperation::parameterValues() PROJ_CONST_DEFN {
  *
  * @return the operation method.
  */
-const OperationMethodNNPtr &SingleOperation::method() PROJ_CONST_DEFN {
+const OperationMethodNNPtr &SingleOperation::method() PROJ_PURE_DEFN {
     return d->method_;
 }
 
@@ -2072,7 +2072,7 @@ ParameterValueNNPtr ParameterValue::create(bool booleanValueIn) {
  *
  * @return the type.
  */
-const ParameterValue::Type &ParameterValue::type() PROJ_CONST_DEFN {
+const ParameterValue::Type &ParameterValue::type() PROJ_PURE_DEFN {
     return d->type_;
 }
 
@@ -2081,7 +2081,7 @@ const ParameterValue::Type &ParameterValue::type() PROJ_CONST_DEFN {
 /** \brief Returns the value as a Measure (assumes type() == Type::MEASURE)
  * @return the value as a Measure.
  */
-const common::Measure &ParameterValue::value() PROJ_CONST_DEFN {
+const common::Measure &ParameterValue::value() PROJ_PURE_DEFN {
     return *d->measure_;
 }
 
@@ -2090,7 +2090,7 @@ const common::Measure &ParameterValue::value() PROJ_CONST_DEFN {
 /** \brief Returns the value as a string (assumes type() == Type::STRING)
  * @return the value as a string.
  */
-const std::string &ParameterValue::stringValue() PROJ_CONST_DEFN {
+const std::string &ParameterValue::stringValue() PROJ_PURE_DEFN {
     return *d->stringValue_;
 }
 
@@ -2099,7 +2099,7 @@ const std::string &ParameterValue::stringValue() PROJ_CONST_DEFN {
 /** \brief Returns the value as a filename (assumes type() == Type::FILENAME)
  * @return the value as a filename.
  */
-const std::string &ParameterValue::valueFile() PROJ_CONST_DEFN {
+const std::string &ParameterValue::valueFile() PROJ_PURE_DEFN {
     return *d->stringValue_;
 }
 
@@ -2108,14 +2108,14 @@ const std::string &ParameterValue::valueFile() PROJ_CONST_DEFN {
 /** \brief Returns the value as a integer (assumes type() == Type::INTEGER)
  * @return the value as a integer.
  */
-int ParameterValue::integerValue() PROJ_CONST_DEFN { return d->integerValue_; }
+int ParameterValue::integerValue() PROJ_PURE_DEFN { return d->integerValue_; }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the value as a boolean (assumes type() == Type::BOOLEAN)
  * @return the value as a boolean.
  */
-bool ParameterValue::booleanValue() PROJ_CONST_DEFN { return d->booleanValue_; }
+bool ParameterValue::booleanValue() PROJ_PURE_DEFN { return d->booleanValue_; }
 
 // ---------------------------------------------------------------------------
 
@@ -5917,7 +5917,7 @@ Transformation::Transformation(const Transformation &other)
  *
  * @return the source CRS.
  */
-const crs::CRSNNPtr &Transformation::sourceCRS() PROJ_CONST_DEFN {
+const crs::CRSNNPtr &Transformation::sourceCRS() PROJ_PURE_DEFN {
     return CoordinateOperation::getPrivate()->strongRef_->sourceCRS_;
 }
 
@@ -5927,7 +5927,7 @@ const crs::CRSNNPtr &Transformation::sourceCRS() PROJ_CONST_DEFN {
  *
  * @return the target CRS.
  */
-const crs::CRSNNPtr &Transformation::targetCRS() PROJ_CONST_DEFN {
+const crs::CRSNNPtr &Transformation::targetCRS() PROJ_PURE_DEFN {
     return CoordinateOperation::getPrivate()->strongRef_->targetCRS_;
 }
 

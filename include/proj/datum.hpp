@@ -177,7 +177,7 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
     PROJ_DLL ~PrimeMeridian() override;
     //! @endcond
 
-    PROJ_DLL const common::Angle &longitude() PROJ_CONST_DECL;
+    PROJ_DLL const common::Angle &longitude() PROJ_PURE_DECL;
 
     // non-standard
     PROJ_DLL static PrimeMeridianNNPtr
@@ -249,25 +249,25 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
     PROJ_DLL ~Ellipsoid() override;
     //! @endcond
 
-    PROJ_DLL const common::Length &semiMajorAxis() PROJ_CONST_DECL;
+    PROJ_DLL const common::Length &semiMajorAxis() PROJ_PURE_DECL;
 
     // Inlined from SecondDefiningParameter union
     PROJ_DLL const util::optional<common::Scale> &
-    inverseFlattening() PROJ_CONST_DECL;
+    inverseFlattening() PROJ_PURE_DECL;
     PROJ_DLL const util::optional<common::Length> &
-    semiMinorAxis() PROJ_CONST_DECL;
-    PROJ_DLL bool isSphere() PROJ_CONST_DECL;
+    semiMinorAxis() PROJ_PURE_DECL;
+    PROJ_DLL bool isSphere() PROJ_PURE_DECL;
 
     PROJ_DLL const util::optional<common::Length> &
-    semiMedianAxis() PROJ_CONST_DECL;
+    semiMedianAxis() PROJ_PURE_DECL;
 
     // non-standard
 
-    PROJ_DLL double computedInverseFlattening() PROJ_CONST_DECL;
-    PROJ_DLL double squaredEccentricity() PROJ_CONST_DECL;
+    PROJ_DLL double computedInverseFlattening() PROJ_PURE_DECL;
+    PROJ_DLL double squaredEccentricity() PROJ_PURE_DECL;
     PROJ_DLL common::Length computeSemiMinorAxis() const;
 
-    PROJ_DLL const std::string &celestialBody() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &celestialBody() PROJ_PURE_DECL;
 
     PROJ_DLL static const std::string EARTH;
 
@@ -377,11 +377,11 @@ class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
     PROJ_DLL ~GeodeticReferenceFrame() override;
     //! @endcond
 
-    PROJ_DLL const PrimeMeridianNNPtr &primeMeridian() PROJ_CONST_DECL;
+    PROJ_DLL const PrimeMeridianNNPtr &primeMeridian() PROJ_PURE_DECL;
 
     // We constraint more than the standard into which the ellipsoid might
     // be omitted for a CRS with a non-ellipsoidal CS
-    PROJ_DLL const EllipsoidNNPtr &ellipsoid() PROJ_CONST_DECL;
+    PROJ_DLL const EllipsoidNNPtr &ellipsoid() PROJ_PURE_DECL;
 
     // non-standard
     PROJ_DLL static GeodeticReferenceFrameNNPtr

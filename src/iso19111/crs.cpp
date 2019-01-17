@@ -131,7 +131,7 @@ CRS::~CRS() = default;
  *
  * @return a BoundCRSPtr, that might be null.
  */
-const BoundCRSPtr &CRS::canonicalBoundCRS() PROJ_CONST_DEFN {
+const BoundCRSPtr &CRS::canonicalBoundCRS() PROJ_PURE_DEFN {
     return d->canonicalBoundCRS_;
 }
 
@@ -712,7 +712,7 @@ SingleCRS::~SingleCRS() = default;
  *
  * @return a Datum that might be null.
  */
-const datum::DatumPtr &SingleCRS::datum() PROJ_CONST_DEFN { return d->datum; }
+const datum::DatumPtr &SingleCRS::datum() PROJ_PURE_DEFN { return d->datum; }
 
 // ---------------------------------------------------------------------------
 
@@ -722,7 +722,7 @@ const datum::DatumPtr &SingleCRS::datum() PROJ_CONST_DEFN { return d->datum; }
  *
  * @return a DatumEnsemble that might be null.
  */
-const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() PROJ_CONST_DEFN {
+const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() PROJ_PURE_DEFN {
     return d->datumEnsemble;
 }
 
@@ -734,7 +734,7 @@ const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() PROJ_CONST_DEFN {
  *
  * @return a CoordinateSystem that might be null.
  */
-const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() PROJ_CONST_DEFN {
+const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() PROJ_PURE_DEFN {
     return d->coordinateSystem;
 }
 
@@ -873,7 +873,7 @@ CRSNNPtr GeodeticCRS::_shallowClone() const {
  * @return a GeodeticReferenceFrame or null (in which case datumEnsemble()
  * should return a non-null pointer.)
  */
-const datum::GeodeticReferenceFramePtr &GeodeticCRS::datum() PROJ_CONST_DEFN {
+const datum::GeodeticReferenceFramePtr &GeodeticCRS::datum() PROJ_PURE_DEFN {
     return d->datum_;
 }
 
@@ -895,7 +895,7 @@ static datum::GeodeticReferenceFrame *oneDatum(const GeodeticCRS *crs) {
  *
  * @return the PrimeMeridian.
  */
-const datum::PrimeMeridianNNPtr &GeodeticCRS::primeMeridian() PROJ_CONST_DEFN {
+const datum::PrimeMeridianNNPtr &GeodeticCRS::primeMeridian() PROJ_PURE_DEFN {
     if (d->datum_) {
         return d->datum_->primeMeridian();
     }
@@ -909,7 +909,7 @@ const datum::PrimeMeridianNNPtr &GeodeticCRS::primeMeridian() PROJ_CONST_DEFN {
  *
  * @return the PrimeMeridian.
  */
-const datum::EllipsoidNNPtr &GeodeticCRS::ellipsoid() PROJ_CONST_DEFN {
+const datum::EllipsoidNNPtr &GeodeticCRS::ellipsoid() PROJ_PURE_DEFN {
     if (d->datum_) {
         return d->datum_->ellipsoid();
     }
@@ -923,7 +923,7 @@ const datum::EllipsoidNNPtr &GeodeticCRS::ellipsoid() PROJ_CONST_DEFN {
  * @return a velocity model. might be null.
  */
 const std::vector<operation::PointMotionOperationNNPtr> &
-GeodeticCRS::velocityModel() PROJ_CONST_DEFN {
+GeodeticCRS::velocityModel() PROJ_PURE_DEFN {
     return d->velocityModel;
 }
 
@@ -938,7 +938,7 @@ GeodeticCRS::velocityModel() PROJ_CONST_DEFN {
  *
  * @return true if the CRS is a geocentric CRS.
  */
-bool GeodeticCRS::isGeocentric() PROJ_CONST_DEFN {
+bool GeodeticCRS::isGeocentric() PROJ_PURE_DEFN {
     const auto &cs = coordinateSystem();
     const auto &axisList = cs->axisList();
     return axisList.size() == 3 &&
@@ -1653,7 +1653,7 @@ CRSNNPtr GeographicCRS::_shallowClone() const {
  * @return a EllipsoidalCS.
  */
 const cs::EllipsoidalCSNNPtr &
-GeographicCRS::coordinateSystem() PROJ_CONST_DEFN {
+GeographicCRS::coordinateSystem() PROJ_PURE_DEFN {
     return d->coordinateSystem_;
 }
 
@@ -1715,7 +1715,7 @@ GeographicCRS::create(const util::PropertyMap &properties,
  * other 3D GeographicCRS.
  */
 bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
-    PROJ_CONST_DEFN {
+    PROJ_PURE_DEFN {
     const auto &axis = d->coordinateSystem_->axisList();
     const auto &otherAxis = other->d->coordinateSystem_->axisList();
     if (!(axis.size() == 2 && otherAxis.size() == 3)) {
@@ -2009,7 +2009,7 @@ const datum::VerticalReferenceFramePtr VerticalCRS::datum() const {
  * @return a geoid model. might be null
  */
 const std::vector<operation::TransformationNNPtr> &
-VerticalCRS::geoidModel() PROJ_CONST_DEFN {
+VerticalCRS::geoidModel() PROJ_PURE_DEFN {
     return d->geoidModel;
 }
 
@@ -2020,7 +2020,7 @@ VerticalCRS::geoidModel() PROJ_CONST_DEFN {
  * @return a velocity model. might be null.
  */
 const std::vector<operation::PointMotionOperationNNPtr> &
-VerticalCRS::velocityModel() PROJ_CONST_DEFN {
+VerticalCRS::velocityModel() PROJ_PURE_DEFN {
     return d->velocityModel;
 }
 
@@ -2370,7 +2370,7 @@ DerivedCRS::~DerivedCRS() = default;
  *
  * @return the base CRS.
  */
-const SingleCRSNNPtr &DerivedCRS::baseCRS() PROJ_CONST_DEFN {
+const SingleCRSNNPtr &DerivedCRS::baseCRS() PROJ_PURE_DEFN {
     return d->baseCRS_;
 }
 
@@ -2388,7 +2388,7 @@ const operation::ConversionNNPtr DerivedCRS::derivingConversion() const {
 
 //! @cond Doxygen_Suppress
 const operation::ConversionNNPtr &
-DerivedCRS::derivingConversionRef() PROJ_CONST_DEFN {
+DerivedCRS::derivingConversionRef() PROJ_PURE_DEFN {
     return d->derivingConversion_;
 }
 //! @endcond
@@ -2495,7 +2495,7 @@ CRSNNPtr ProjectedCRS::_shallowClone() const {
  *
  * @return the base CRS.
  */
-const GeodeticCRSNNPtr &ProjectedCRS::baseCRS() PROJ_CONST_DEFN {
+const GeodeticCRSNNPtr &ProjectedCRS::baseCRS() PROJ_PURE_DEFN {
     return d->baseCRS();
 }
 
@@ -2505,7 +2505,7 @@ const GeodeticCRSNNPtr &ProjectedCRS::baseCRS() PROJ_CONST_DEFN {
  *
  * @return a CartesianCS
  */
-const cs::CartesianCSNNPtr &ProjectedCRS::coordinateSystem() PROJ_CONST_DEFN {
+const cs::CartesianCSNNPtr &ProjectedCRS::coordinateSystem() PROJ_PURE_DEFN {
     return d->coordinateSystem();
 }
 
@@ -3209,7 +3209,7 @@ CRSNNPtr CompoundCRS::_shallowClone() const {
  * @return the components.
  */
 const std::vector<CRSNNPtr> &
-CompoundCRS::componentReferenceSystems() PROJ_CONST_DEFN {
+CompoundCRS::componentReferenceSystems() PROJ_PURE_DEFN {
     return d->components_;
 }
 
@@ -3552,7 +3552,7 @@ CRSNNPtr BoundCRS::_shallowClone() const { return shallowCloneAsBoundCRS(); }
  *
  * @return the base CRS.
  */
-const CRSNNPtr &BoundCRS::baseCRS() PROJ_CONST_DEFN { return d->baseCRS_; }
+const CRSNNPtr &BoundCRS::baseCRS() PROJ_PURE_DEFN { return d->baseCRS_; }
 
 // ---------------------------------------------------------------------------
 
@@ -3589,7 +3589,7 @@ CRSNNPtr BoundCRS::baseCRSWithCanonicalBoundCRS() const {
  *
  * @return the hub CRS.
  */
-const CRSNNPtr &BoundCRS::hubCRS() PROJ_CONST_DEFN { return d->hubCRS_; }
+const CRSNNPtr &BoundCRS::hubCRS() PROJ_PURE_DEFN { return d->hubCRS_; }
 
 // ---------------------------------------------------------------------------
 
@@ -3598,7 +3598,7 @@ const CRSNNPtr &BoundCRS::hubCRS() PROJ_CONST_DEFN { return d->hubCRS_; }
  * @return transformation.
  */
 const operation::TransformationNNPtr &
-BoundCRS::transformation() PROJ_CONST_DEFN {
+BoundCRS::transformation() PROJ_PURE_DEFN {
     return d->transformation_;
 }
 

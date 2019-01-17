@@ -129,7 +129,7 @@ class PROJ_GCC_DLL Meridian : public common::IdentifiedObject {
     PROJ_DLL ~Meridian() override;
     //! @endcond
 
-    PROJ_DLL const common::Angle &longitude() PROJ_CONST_DECL;
+    PROJ_DLL const common::Angle &longitude() PROJ_PURE_DECL;
 
     // non-standard
     PROJ_DLL static MeridianNNPtr create(const common::Angle &longitudeIn);
@@ -172,12 +172,12 @@ class PROJ_GCC_DLL CoordinateSystemAxis final
     PROJ_DLL ~CoordinateSystemAxis() override;
     //! @endcond
 
-    PROJ_DLL const std::string &abbreviation() PROJ_CONST_DECL;
-    PROJ_DLL const AxisDirection &direction() PROJ_CONST_DECL;
-    PROJ_DLL const common::UnitOfMeasure &unit() PROJ_CONST_DECL;
-    PROJ_DLL const util::optional<double> &minimumValue() PROJ_CONST_DECL;
-    PROJ_DLL const util::optional<double> &maximumValue() PROJ_CONST_DECL;
-    PROJ_DLL const MeridianPtr &meridian() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &abbreviation() PROJ_PURE_DECL;
+    PROJ_DLL const AxisDirection &direction() PROJ_PURE_DECL;
+    PROJ_DLL const common::UnitOfMeasure &unit() PROJ_PURE_DECL;
+    PROJ_DLL const util::optional<double> &minimumValue() PROJ_PURE_DECL;
+    PROJ_DLL const util::optional<double> &maximumValue() PROJ_PURE_DECL;
+    PROJ_DLL const MeridianPtr &meridian() PROJ_PURE_DECL;
 
     // Non-standard
     PROJ_DLL static CoordinateSystemAxisNNPtr
@@ -242,7 +242,7 @@ class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject {
     //! @endcond
 
     PROJ_DLL const std::vector<CoordinateSystemAxisNNPtr> &
-    axisList() PROJ_CONST_DECL;
+    axisList() PROJ_PURE_DECL;
 
     PROJ_PRIVATE :
 

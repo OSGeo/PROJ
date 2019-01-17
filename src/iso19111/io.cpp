@@ -782,15 +782,15 @@ struct WKTNode::Private {
     explicit Private(const std::string &valueIn) : value_(valueIn) {}
 
     // cppcheck-suppress functionStatic
-    inline const std::string &value() PROJ_CONST_DEFN { return value_; }
+    inline const std::string &value() PROJ_PURE_DEFN { return value_; }
 
     // cppcheck-suppress functionStatic
-    inline const std::vector<WKTNodeNNPtr> &children() PROJ_CONST_DEFN {
+    inline const std::vector<WKTNodeNNPtr> &children() PROJ_PURE_DEFN {
         return children_;
     }
 
     // cppcheck-suppress functionStatic
-    inline size_t childrenSize() PROJ_CONST_DEFN { return children_.size(); }
+    inline size_t childrenSize() PROJ_PURE_DEFN { return children_.size(); }
 
     // cppcheck-suppress functionStatic
     const WKTNodeNNPtr &lookForChild(const std::string &childName,

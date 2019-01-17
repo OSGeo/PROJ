@@ -71,7 +71,7 @@ class PROJ_GCC_DLL Citation : public util::BaseObject {
     PROJ_DLL ~Citation();
     //! @endcond
 
-    PROJ_DLL const util::optional<std::string> &title() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<std::string> &title() PROJ_PURE_DECL;
 
   protected:
     PROJ_FRIEND_OPTIONAL(Citation);
@@ -154,10 +154,10 @@ class PROJ_GCC_DLL GeographicBoundingBox : public GeographicExtent {
     PROJ_DLL ~GeographicBoundingBox() override;
     //! @endcond
 
-    PROJ_DLL double westBoundLongitude() PROJ_CONST_DECL;
-    PROJ_DLL double southBoundLatitude() PROJ_CONST_DECL;
-    PROJ_DLL double eastBoundLongitude() PROJ_CONST_DECL;
-    PROJ_DLL double northBoundLatitude() PROJ_CONST_DECL;
+    PROJ_DLL double westBoundLongitude() PROJ_PURE_DECL;
+    PROJ_DLL double southBoundLatitude() PROJ_PURE_DECL;
+    PROJ_DLL double eastBoundLongitude() PROJ_PURE_DECL;
+    PROJ_DLL double northBoundLatitude() PROJ_PURE_DECL;
 
     PROJ_DLL static GeographicBoundingBoxNNPtr
     create(double west, double south, double east, double north);
@@ -208,8 +208,8 @@ class PROJ_GCC_DLL TemporalExtent : public util::BaseObject,
     PROJ_DLL ~TemporalExtent() override;
     //! @endcond
 
-    PROJ_DLL const std::string &start() PROJ_CONST_DECL;
-    PROJ_DLL const std::string &stop() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &start() PROJ_PURE_DECL;
+    PROJ_DLL const std::string &stop() PROJ_PURE_DECL;
 
     PROJ_DLL static TemporalExtentNNPtr create(const std::string &start,
                                                const std::string &stop);
@@ -255,9 +255,9 @@ class PROJ_GCC_DLL VerticalExtent : public util::BaseObject,
     PROJ_DLL ~VerticalExtent() override;
     //! @endcond
 
-    PROJ_DLL double minimumValue() PROJ_CONST_DECL;
-    PROJ_DLL double maximumValue() PROJ_CONST_DECL;
-    PROJ_DLL common::UnitOfMeasureNNPtr &unit() PROJ_CONST_DECL;
+    PROJ_DLL double minimumValue() PROJ_PURE_DECL;
+    PROJ_DLL double maximumValue() PROJ_PURE_DECL;
+    PROJ_DLL common::UnitOfMeasureNNPtr &unit() PROJ_PURE_DECL;
 
     PROJ_DLL static VerticalExtentNNPtr
     create(double minimumValue, double maximumValue,
@@ -304,13 +304,13 @@ class PROJ_GCC_DLL Extent : public util::BaseObject, public util::IComparable {
     PROJ_DLL ~Extent() override;
     //! @endcond
 
-    PROJ_DLL const util::optional<std::string> &description() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<std::string> &description() PROJ_PURE_DECL;
     PROJ_DLL const std::vector<GeographicExtentNNPtr> &
-    geographicElements() PROJ_CONST_DECL;
+    geographicElements() PROJ_PURE_DECL;
     PROJ_DLL const std::vector<TemporalExtentNNPtr> &
-    temporalElements() PROJ_CONST_DECL;
+    temporalElements() PROJ_PURE_DECL;
     PROJ_DLL const std::vector<VerticalExtentNNPtr> &
-    verticalElements() PROJ_CONST_DECL;
+    verticalElements() PROJ_PURE_DECL;
 
     PROJ_DLL static ExtentNNPtr
     create(const util::optional<std::string> &descriptionIn,
@@ -383,12 +383,12 @@ class PROJ_GCC_DLL Identifier : public util::BaseObject,
     PROJ_DLL static const std::string EPSG;
     PROJ_DLL static const std::string OGC;
 
-    PROJ_DLL const util::optional<Citation> &authority() PROJ_CONST_DECL;
-    PROJ_DLL const std::string &code() PROJ_CONST_DECL;
-    PROJ_DLL const util::optional<std::string> &codeSpace() PROJ_CONST_DECL;
-    PROJ_DLL const util::optional<std::string> &version() PROJ_CONST_DECL;
-    PROJ_DLL const util::optional<std::string> &description() PROJ_CONST_DECL;
-    PROJ_DLL const util::optional<std::string> &uri() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<Citation> &authority() PROJ_PURE_DECL;
+    PROJ_DLL const std::string &code() PROJ_PURE_DECL;
+    PROJ_DLL const util::optional<std::string> &codeSpace() PROJ_PURE_DECL;
+    PROJ_DLL const util::optional<std::string> &version() PROJ_PURE_DECL;
+    PROJ_DLL const util::optional<std::string> &description() PROJ_PURE_DECL;
+    PROJ_DLL const util::optional<std::string> &uri() PROJ_PURE_DECL;
 
     PROJ_DLL static bool isEquivalentName(const char *a,
                                           const char *b) noexcept;
@@ -441,7 +441,7 @@ class PROJ_GCC_DLL PositionalAccuracy : public util::BaseObject {
     PROJ_DLL ~PositionalAccuracy() override;
     //! @endcond
 
-    PROJ_DLL const std::string &value() PROJ_CONST_DECL;
+    PROJ_DLL const std::string &value() PROJ_PURE_DECL;
 
     PROJ_DLL static PositionalAccuracyNNPtr create(const std::string &valueIn);
 

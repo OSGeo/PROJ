@@ -241,7 +241,7 @@ class PROJ_GCC_DLL OperationParameter final : public GeneralOperationParameter {
     PROJ_DLL static OperationParameterNNPtr
     create(const util::PropertyMap &properties);
 
-    PROJ_DLL int getEPSGCode() PROJ_CONST_DECL;
+    PROJ_DLL int getEPSGCode() PROJ_PURE_DECL;
 
     PROJ_DLL static const char *getNameForEPSGCode(int epsg_code) noexcept;
 
@@ -358,12 +358,12 @@ class PROJ_GCC_DLL ParameterValue final : public util::BaseObject,
     PROJ_DLL static ParameterValueNNPtr
     createFilename(const std::string &stringValueIn);
 
-    PROJ_DLL const Type &type() PROJ_CONST_DECL;
-    PROJ_DLL const common::Measure &value() PROJ_CONST_DECL;
-    PROJ_DLL const std::string &stringValue() PROJ_CONST_DECL;
-    PROJ_DLL const std::string &valueFile() PROJ_CONST_DECL;
-    PROJ_DLL int integerValue() PROJ_CONST_DECL;
-    PROJ_DLL bool booleanValue() PROJ_CONST_DECL;
+    PROJ_DLL const Type &type() PROJ_PURE_DECL;
+    PROJ_DLL const common::Measure &value() PROJ_PURE_DECL;
+    PROJ_DLL const std::string &stringValue() PROJ_PURE_DECL;
+    PROJ_DLL const std::string &valueFile() PROJ_PURE_DECL;
+    PROJ_DLL int integerValue() PROJ_PURE_DECL;
+    PROJ_DLL bool booleanValue() PROJ_PURE_DECL;
 
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL bool
@@ -406,8 +406,8 @@ class PROJ_GCC_DLL OperationParameterValue final
     PROJ_DLL ~OperationParameterValue() override;
     //! @endcond
 
-    PROJ_DLL const OperationParameterNNPtr &parameter() PROJ_CONST_DECL;
-    PROJ_DLL const ParameterValueNNPtr &parameterValue() PROJ_CONST_DECL;
+    PROJ_DLL const OperationParameterNNPtr &parameter() PROJ_PURE_DECL;
+    PROJ_DLL const ParameterValueNNPtr &parameterValue() PROJ_PURE_DECL;
 
     PROJ_DLL static OperationParameterValueNNPtr
     create(const OperationParameterNNPtr &parameterIn,
@@ -468,11 +468,11 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
     PROJ_DLL ~OperationMethod() override;
     //! @endcond
 
-    PROJ_DLL const util::optional<std::string> &formula() PROJ_CONST_DECL;
+    PROJ_DLL const util::optional<std::string> &formula() PROJ_PURE_DECL;
     PROJ_DLL const util::optional<metadata::Citation> &
-    formulaCitation() PROJ_CONST_DECL;
+    formulaCitation() PROJ_PURE_DECL;
     PROJ_DLL const std::vector<GeneralOperationParameterNNPtr> &
-    parameters() PROJ_CONST_DECL;
+    parameters() PROJ_PURE_DECL;
 
     PROJ_DLL static OperationMethodNNPtr
     create(const util::PropertyMap &properties,
@@ -482,7 +482,7 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
     create(const util::PropertyMap &properties,
            const std::vector<OperationParameterNNPtr> &parameters);
 
-    PROJ_DLL int getEPSGCode() PROJ_CONST_DECL;
+    PROJ_DLL int getEPSGCode() PROJ_PURE_DECL;
 
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
@@ -540,8 +540,8 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
     //! @endcond
 
     PROJ_DLL const std::vector<GeneralParameterValueNNPtr> &
-    parameterValues() PROJ_CONST_DECL;
-    PROJ_DLL const OperationMethodNNPtr &method() PROJ_CONST_DECL;
+    parameterValues() PROJ_PURE_DECL;
+    PROJ_DLL const OperationMethodNNPtr &method() PROJ_PURE_DECL;
 
     PROJ_DLL const ParameterValuePtr &
     parameterValue(const std::string &paramName, int epsg_code = 0) const
@@ -1358,8 +1358,8 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_DLL ~Transformation() override;
     //! @endcond
 
-    PROJ_DLL const crs::CRSNNPtr &sourceCRS() PROJ_CONST_DECL;
-    PROJ_DLL const crs::CRSNNPtr &targetCRS() PROJ_CONST_DECL;
+    PROJ_DLL const crs::CRSNNPtr &sourceCRS() PROJ_PURE_DECL;
+    PROJ_DLL const crs::CRSNNPtr &targetCRS() PROJ_PURE_DECL;
 
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
