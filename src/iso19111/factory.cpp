@@ -2086,7 +2086,8 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
 
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(d->context());
-            auto obj = createFromUserInput(text_definition, d->context());
+            auto obj = createFromUserInput(
+                pj_add_type_crs_if_needed(text_definition), d->context());
             auto geodCRS = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(obj);
             if (geodCRS) {
                 return cloneWithProps(NN_NO_CHECK(geodCRS), props);
@@ -2333,7 +2334,8 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
 
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(d->context());
-            auto obj = createFromUserInput(text_definition, d->context());
+            auto obj = createFromUserInput(
+                pj_add_type_crs_if_needed(text_definition), d->context());
             auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(obj.get());
             if (projCRS) {
                 const auto &conv = projCRS->derivingConversionRef();

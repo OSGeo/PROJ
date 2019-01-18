@@ -653,16 +653,16 @@ typedef enum
  * \defgroup iso19111_functions Binding in C of basic methods from the C++ API
  *  Functions for ISO19111 C API
  *
- * The PJ* objects returned by proj_create_from_user_input(), proj_create_from_wkt(),
- * proj_create_from_proj_string(), proj_create_from_database() and other functions
+ * The PJ* objects returned by proj_create_from_wkt(),
+ * proj_create_from_database() and other functions in that section
  * will have generally minimal interaction with the functions declared in the
  * upper section of this header file (calling those functions on those objects
  * will either return an error or default/non-sensical values). The exception is
  * for ISO19111 objects of type CoordinateOperation that can be exported as a
  * valid PROJ pipeline. In this case, the PJ objects will work for example with
  * proj_trans_generic().
- * Conversely, objects returned by proj_create() and proj_create_argv() will
- * return an error when used with functions of this section.
+ * Conversely, objects returned by proj_create() and proj_create_argv(), which
+ * are not of type CRS, will return an error when used with functions of this section.
  * @{
  */
 
@@ -686,18 +686,10 @@ const char PROJ_DLL *proj_context_get_database_metadata(PJ_CONTEXT* ctx,
 PJ_GUESSED_WKT_DIALECT PROJ_DLL proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
                                                                const char *wkt);
 
-PJ PROJ_DLL *proj_create_from_user_input(PJ_CONTEXT *ctx,
-                                                 const char *text,
-                                                 const char* const *options);
-
 PJ PROJ_DLL *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
                                           const char* const *options,
                                           PROJ_STRING_LIST *out_warnings,
                                           PROJ_STRING_LIST *out_grammar_errors);
-
-PJ PROJ_DLL *proj_create_from_proj_string(PJ_CONTEXT *ctx,
-                                                  const char *proj_string,
-                                                  const char* const *options);
 
 PJ PROJ_DLL *proj_create_from_database(PJ_CONTEXT *ctx,
                                                const char *auth_name,

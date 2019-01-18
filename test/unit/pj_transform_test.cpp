@@ -572,6 +572,7 @@ TEST(pj_transform_test, init_epsg) {
     auto src = pj_init_plus("+init=epsg:4326");
     ASSERT_TRUE(src != nullptr);
     auto dst = pj_init_plus("+init=epsg:32631");
+    ASSERT_TRUE(dst != nullptr);
     double x = 3 * DEG_TO_RAD;
     double y = 0 * DEG_TO_RAD;
     EXPECT_EQ(pj_transform(src, dst, 1, 0, &x, &y, nullptr), 0);

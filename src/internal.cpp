@@ -207,6 +207,8 @@ consuming their surrounding whitespace.
 
     pj_chomp (c);
     n = strlen (c);
+    if (n==0)
+        return c;
 
     /* First collapse repeated whitespace (including +/;) */
     i = 0;

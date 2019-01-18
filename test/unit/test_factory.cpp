@@ -409,7 +409,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=longlat +datum=WGS84 +no_defs");
+              "+proj=longlat +datum=WGS84 +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -972,7 +972,7 @@ TEST(factory, AuthorityFactory_test_uom_9110) {
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=sterea +lat_0=53.0019444444444 +lon_0=21.5027777777778 "
               "+k=0.9998 +x_0=4603000 +y_0=5806000 +ellps=krass +units=m "
-              "+no_defs");
+              "+no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -2324,7 +2324,8 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=mbt_s +unused_flag +datum=WGS84 +units=m +no_defs");
+                  "+proj=mbt_s +unused_flag +datum=WGS84 +units=m +no_defs "
+                  "+type=crs");
         EXPECT_TRUE(crs->canonicalBoundCRS() == nullptr);
     }
     {
@@ -2333,15 +2334,16 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=mbt_s +unused_flag +datum=WGS84 +units=m +no_defs");
+                  "+proj=mbt_s +unused_flag +datum=WGS84 +units=m +no_defs "
+                  "+type=crs");
         EXPECT_TRUE(crs->canonicalBoundCRS() != nullptr);
     }
 
     EXPECT_THROW(factory->createProjectedCRS("TEST_WRONG"), FactoryException);
 
     {
-        auto obj =
-            PROJStringParser().createFromPROJString("+proj=merc +a=1 +b=1");
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=merc +a=1 +b=1 +type=crs");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factory);
@@ -2352,8 +2354,8 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     }
 
     {
-        auto obj =
-            PROJStringParser().createFromPROJString("+proj=merc +ellps=GRS80");
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=merc +ellps=GRS80 +type=crs");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factory);
@@ -2365,7 +2367,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
 
     {
         auto obj = PROJStringParser().createFromPROJString(
-            "+proj=merc +a=6378137 +rf=298.257222101");
+            "+proj=merc +a=6378137 +rf=298.257222101 +type=crs");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factory);
@@ -2376,8 +2378,8 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     }
 
     {
-        auto obj =
-            PROJStringParser().createFromPROJString("+proj=merc +ellps=WGS84");
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=merc +ellps=WGS84 +type=crs");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factory);

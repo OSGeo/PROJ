@@ -29,13 +29,25 @@ paragraph for more details.
 
 .. c:function:: PJ* proj_create(PJ_CONTEXT *ctx, const char *definition)
 
-    Create a transformation object from a proj-string.
+    Create a transformation object, or a CRS object, from a proj-string,
+    a WKT string, or object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+    "urn:ogc:def:coordinateOperation:EPSG::1671").
 
     Example call:
 
     .. code-block:: C
 
         PJ *P = proj_create(0, "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel");
+
+    If a proj-string contains a +type=crs option, then it is interpreted as
+    a CRS definition. In particular geographic CRS are assumed to have axis
+    in the longitude, latitude order and with degree angular unit. The use
+    of proj-string to describe a CRS is discouraged. It is a legacy means of
+    conveying CRS descriptions: use of object codes (EPSG:XXXX typically) or
+    WKT description is recommended for better expressivity.
+
+    If a proj-string does not contain +type=crs, then it is interpreted as a
+    coordination operation / transformation.
 
     If creation of the transformation object fails, the function returns `0` and
     the PROJ error number is updated. The error number can be read with
@@ -50,7 +62,7 @@ paragraph for more details.
 
 .. c:function:: PJ* proj_create_argv(PJ_CONTEXT *ctx, int argc, char **argv)
 
-    Create transformation object with argc/argv-style initialization. For this
+    Create a transformation object, or a CRS object, with argc/argv-style initialization. For this
     application each parameter in the defining proj-string is an entry in :c:data:`argv`.
 
     Example call:
@@ -59,6 +71,13 @@ paragraph for more details.
 
         char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
         PJ* P = proj_create_argv(0, 3, args);
+
+    If there is a type=crs argument, then the arguments are interpreted as
+    a CRS definition. In particular geographic CRS are assumed to have axis
+    in the longitude, latitude order and with degree angular unit.
+
+    If there is no type=crs argument, then it is interpreted as a
+    coordination operation / transformation.
 
     If creation of the transformation object fails, the function returns `0` and
     the PROJ error number is updated. The error number can be read with
@@ -71,28 +90,34 @@ paragraph for more details.
     :param char** argv: Vector of strings with proj-string parameters, e.g. ``+proj=merc``
     :returns: :c:type:`PJ*`
 
-.. c:function:: PJ* proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area)
+.. c:function:: PJ* proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area)
 
     Create a transformation object that is a pipeline between two known
     coordinate reference systems.
 
-    :c:data:`srid_from` and :c:data:`srid_to` should be the value part of a ``+init=...`` parameter
-    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that
-    can be found in a init-file in :envvar:`PROJ_LIB` is a valid input to this function.
+    source_crs and target_crs can be :
 
-    For now the function mimics the cs2cs app: An input and an output CRS is
-    given and coordinates are transformed via a hub datum (WGS84). This
-    transformation strategy is referred to as "early-binding" by the EPSG. The
-    function can be extended to support "late-binding" transformations in the
-    future without affecting users of the function. When the function is extended
-    to the late-binding approach the :c:data:`area` argument will be used. For
-    now it is just a place-holder for a future improved implementation.
+        - a "AUTHORITY:CODE", like EPSG:25832. When using that syntax for a source
+          CRS, the created pipeline will expect that the values passed to :c:func:`proj_trans`
+          respect the axis order and axis unit of the official definition (
+          so for example, for EPSG:4326, with latitude first and longitude next,
+          in degrees). Similarly, when using that syntax for a target CRS, output
+          values will be emitted according to the official definition of this CRS.
+
+        - a PROJ string, like "+proj=longlat +datum=WGS84".
+          When using that syntax, the axis order and unit for geographic CRS will
+          be longitude, latitude, and the unit degrees.
+
+        - more generally any string accepted by :c:func:`proj_create`
+
+    An "area of use" can be specified in area. When it is supplied, the more
+    accurate transformation between two given systems can be chosen.
 
     Example call:
 
     .. code-block:: C
 
-        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833", 0);
+        PJ *P = proj_create_crs_to_crs(0, "EPSG:25832", "EPSG:25833", 0);
 
     If creation of the transformation object fails, the function returns `0` and
     the PROJ error number is updated. The error number can be read with
@@ -579,17 +604,17 @@ Various
 C API for ISO-19111 functionality
 +++++++++++++++++++++++++++++++++
 
-The PJ* objects returned by :c:func:`proj_create_from_user_input`,
-:c:func:`proj_create_from_wkt`, :c:func:`proj_create_from_proj_string`,
-:c:func:`proj_create_from_database` and other functions
+The PJ* objects returned by :c:func:`proj_create_from_wkt`,
+:c:func:`proj_create_from_database` and other functions in that section
 will have generally minimal interaction with the functions declared in the
 previous sections (calling those functions on those objects
 will either return an error or default/non-sensical values). The exception is
 for ISO19111 objects of type CoordinateOperation that can be exported as a
 valid PROJ pipeline. In this case,  objects will work for example with
 :c:func:`proj_trans_generic`.
-Conversely, objects returned by :c:func:`proj_create` and :c:func:`proj_create_argv` will
-return an error when used with functions of this section.
+Conversely, objects returned by :c:func:`proj_create` and :c:func:`proj_create_argv`,
+which are not of type CRS (can be tested with :c:func:`proj_is_crs`),
+will return an error when used with functions of this section.
 
 .. doxygengroup:: iso19111_functions
    :project: cpp_stuff

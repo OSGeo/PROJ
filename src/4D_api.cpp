@@ -27,6 +27,8 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#define FROM_PROJ_CPP
+
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -44,7 +46,9 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+#include "proj/internal/internal.hpp"
 
+using namespace NS_PROJ::internal;
 
 /* Initialize PJ_COORD struct */
 PJ_COORD proj_coord (double x, double y, double z, double t) {
@@ -458,7 +462,7 @@ Returns 1 on success, 0 on failure
         if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=axisswap  axis=%s", P->axis);
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
             return 0;
@@ -473,7 +477,7 @@ Returns 1 on success, 0 on failure
         if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=vgridshift  grids=%s", gridnames);
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
             return 0;
@@ -488,7 +492,7 @@ Returns 1 on success, 0 on failure
         if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=hgridshift  grids=%s", gridnames);
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
             return 0;
@@ -520,7 +524,7 @@ Returns 1 on success, 0 on failure
         if (nullptr==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=helmert exact %s convention=position_vector", s);
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         free(def);
         if (nullptr==Q)
             return 0;
@@ -546,14 +550,14 @@ Returns 1 on success, 0 on failure
                 *next_pos = '.';
             }
         }
-        Q = proj_create (P->ctx, def);
+        Q = pj_create_internal (P->ctx, def);
         if (nullptr==Q)
             return 0;
         P->cart = skip_prep_fin (Q);
 
         if (!P->is_geocent) {
             sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
-            Q = proj_create (P->ctx, def);
+            Q = pj_create_internal (P->ctx, def);
             if (nullptr==Q)
                 return 0;
             P->cart_wgs84 = skip_prep_fin (Q);
@@ -564,9 +568,10 @@ Returns 1 on success, 0 on failure
 }
 
 
-
 /*************************************************************************************/
-PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
+PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
+/*************************************************************************************/
+
 /**************************************************************************************
     Create a new PJ object in the context ctx, using the given definition. If ctx==0,
     the default context is used, if definition==0, or invalid, a null-pointer is
@@ -619,8 +624,6 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     return P;
 }
 
-
-
 /*************************************************************************************/
 PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
 /**************************************************************************************
@@ -648,6 +651,34 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
     }
 
     P = proj_create (ctx, c);
+
+    pj_dealloc ((char *) c);
+    return P;
+}
+
+/*************************************************************************************/
+PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv) {
+/**************************************************************************************
+Same as proj_create_argv() but calls pj_create_internal() instead of proj_create() internally
+**************************************************************************************/
+    PJ *P;
+    const char *c;
+
+    if (nullptr==ctx)
+        ctx = pj_get_default_ctx ();
+    if (nullptr==argv) {
+        proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
+        return nullptr;
+    }
+
+    /* We assume that free format is used, and build a full proj_create compatible string */
+    c = pj_make_args (argc, argv);
+    if (nullptr==c) {
+        proj_context_errno_set(ctx, ENOMEM);
+        return nullptr;
+    }
+
+    P = pj_create_internal (ctx, c);
 
     pj_dealloc ((char *) c);
     return P;
@@ -726,6 +757,20 @@ int proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_
     return from_legacy_code_path;
 }
 
+/** Adds a " +type=crs" suffix to a PROJ string (if it is a PROJ string) */
+std::string pj_add_type_crs_if_needed(const std::string& str)
+{
+    std::string ret(str);
+    if( (starts_with(str, "proj=") ||
+            starts_with(str, "+proj=") ||
+            starts_with(str, "+init=") ||
+            starts_with(str, "+title=")) &&
+        str.find("type=crs") == std::string::npos )
+    {
+        ret += " +type=crs";
+    }
+    return ret;
+}
 
 /*****************************************************************************/
 PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area) {
@@ -743,7 +788,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     - a PROJ string, like "+proj=longlat +datum=WGS84".
       When using that syntax, the axis order and unit for geographic CRS will
       be longitude, latitude, and the unit degrees.
-    - more generally any string accepted by proj_create_from_user_input()
+    - more generally any string accepted by proj_create()
 
     An "area of use" can be specified in area. When it is supplied, the more
     accurate transformation between two given systems can be chosen.
@@ -754,88 +799,94 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
 ******************************************************************************/
     const char* proj_string;
-    const char* const optionsProj4Mode[] = { "USE_PROJ4_INIT_RULES=YES", nullptr };
 
     if( !ctx ) {
         ctx = pj_get_default_ctx();
     }
 
-    const char* const* optionsImportCRS =
-        proj_context_get_use_proj4_init_rules(ctx, FALSE) ? optionsProj4Mode : nullptr;
+    try
+    {
+        std::string source_crs_modified(pj_add_type_crs_if_needed(source_crs));
+        std::string target_crs_modified(pj_add_type_crs_if_needed(target_crs));
 
-    auto src = proj_create_from_user_input(ctx, source_crs, optionsImportCRS);
-    if( !src ) {
-        proj_context_log_debug(ctx, "Cannot instantiate source_crs");
-        return nullptr;
-    }
+        auto src = proj_create(ctx, source_crs_modified.c_str());
+        if( !src ) {
+            proj_context_log_debug(ctx, "Cannot instantiate source_crs");
+            return nullptr;
+        }
 
-    auto dst = proj_create_from_user_input(ctx, target_crs, optionsImportCRS);
-    if( !dst ) {
-        proj_context_log_debug(ctx, "Cannot instantiate target_crs");
-        proj_destroy(src);
-        return nullptr;
-    }
+        auto dst = proj_create(ctx, target_crs_modified.c_str());
+        if( !dst ) {
+            proj_context_log_debug(ctx, "Cannot instantiate target_crs");
+            proj_destroy(src);
+            return nullptr;
+        }
 
-    auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
-    if( !operation_ctx ) {
+        auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
+        if( !operation_ctx ) {
+            proj_destroy(src);
+            proj_destroy(dst);
+            return nullptr;
+        }
+
+        if( area && area->bbox_set ) {
+            proj_operation_factory_context_set_area_of_interest(
+                                                ctx,
+                                                operation_ctx,
+                                                area->west_lon_degree,
+                                                area->south_lat_degree,
+                                                area->east_lon_degree,
+                                                area->north_lat_degree);
+        }
+
+        proj_operation_factory_context_set_grid_availability_use(
+            ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+
+        auto op_list = proj_create_operations(ctx, src, dst, operation_ctx);
+
+        proj_operation_factory_context_destroy(operation_ctx);
         proj_destroy(src);
         proj_destroy(dst);
-        return nullptr;
-    }
 
-    if( area && area->bbox_set ) {
-        proj_operation_factory_context_set_area_of_interest(
-                                            ctx,
-                                            operation_ctx,
-                                            area->west_lon_degree,
-                                            area->south_lat_degree,
-                                            area->east_lon_degree,
-                                            area->north_lat_degree);
-    }
+        if( !op_list ) {
+            return nullptr;
+        }
 
-    proj_operation_factory_context_set_grid_availability_use(
-        ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+        if( proj_list_get_count(op_list) == 0 ) {
+            proj_list_destroy(op_list);
+            proj_context_log_debug(ctx, "No operation found matching criteria");
+            return nullptr;
+        }
 
-    auto op_list = proj_create_operations(ctx, src, dst, operation_ctx);
-
-    proj_operation_factory_context_destroy(operation_ctx);
-    proj_destroy(src);
-    proj_destroy(dst);
-
-    if( !op_list ) {
-        return nullptr;
-    }
-
-    if( proj_list_get_count(op_list) == 0 ) {
+        auto op = proj_list_get(ctx, op_list, 0);
         proj_list_destroy(op_list);
-        proj_context_log_debug(ctx, "No operation found matching criteria");
-        return nullptr;
-    }
+        if( !op ) {
+            return nullptr;
+        }
 
-    auto op = proj_list_get(ctx, op_list, 0);
-    proj_list_destroy(op_list);
-    if( !op ) {
-        return nullptr;
-    }
+        proj_string = proj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
+        if( !proj_string) {
+            proj_destroy(op);
+            proj_context_log_debug(ctx, "Cannot export operation as a PROJ string");
+            return nullptr;
+        }
 
-    proj_string = proj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
-    if( !proj_string) {
+        PJ* P;
+        if( proj_string[0] == '\0' ) {
+            /* Null transform ? */
+            P = proj_create(ctx, "proj=affine");
+        } else {
+            P = proj_create(ctx, proj_string);
+        }
+
         proj_destroy(op);
-        proj_context_log_debug(ctx, "Cannot export operation as a PROJ string");
+
+        return P;
+    }
+    catch( const std::exception& )
+    {
         return nullptr;
     }
-
-    PJ* P;
-    if( proj_string[0] == '\0' ) {
-        /* Null transform ? */
-        P = proj_create(ctx, "proj=affine");
-    } else {
-        P = proj_create(ctx, proj_string);
-    }
-
-    proj_destroy(op);
-
-    return P;
 }
 
 PJ *proj_destroy (PJ *P) {

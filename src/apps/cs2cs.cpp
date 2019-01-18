@@ -210,11 +210,10 @@ static void process(FILE *fid)
 /************************************************************************/
 
 static PJ *instanciate_crs(const std::string &definition,
-                               const char *const *optionsImportCRS,
                                bool &isGeog, double &toRadians,
                                bool &isLatFirst) {
-    PJ *crs = proj_create_from_user_input(nullptr, definition.c_str(),
-                                                  optionsImportCRS);
+    PJ *crs = proj_create(nullptr,
+                          pj_add_type_crs_if_needed(definition).c_str());
     if (!crs) {
         return nullptr;
     }
@@ -535,16 +534,13 @@ int main(int argc, char **argv) {
         emess(3, "missing source and target coordinate systems");
     }
 
-    const char *const optionsProj4Mode[] = {"USE_PROJ4_INIT_RULES=YES",
-                                            nullptr};
-    const char *const *optionsImportCRS =
-        proj_context_get_use_proj4_init_rules(nullptr, TRUE) ? optionsProj4Mode
-                                                             : nullptr;
+    proj_context_use_proj4_init_rules(nullptr,
+        proj_context_get_use_proj4_init_rules(nullptr, TRUE));
 
     PJ *src = nullptr;
     if (!fromStr.empty()) {
         bool ignored;
-        src = instanciate_crs(fromStr, optionsImportCRS, srcIsGeog,
+        src = instanciate_crs(fromStr, srcIsGeog,
                               srcToRadians, ignored);
         if (!src) {
             emess(3, "cannot instantiate source coordinate system");
@@ -553,7 +549,7 @@ int main(int argc, char **argv) {
 
     PJ *dst = nullptr;
     if (!toStr.empty()) {
-        dst = instanciate_crs(toStr, optionsImportCRS, destIsGeog,
+        dst = instanciate_crs(toStr, destIsGeog,
                               destToRadians, destIsLatLong);
         if (!dst) {
             emess(3, "cannot instantiate target coordinate system");

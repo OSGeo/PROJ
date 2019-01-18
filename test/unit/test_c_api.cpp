@@ -148,15 +148,14 @@ class CApi : public ::testing::Test {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_create_from_user_input) {
+TEST_F(CApi, proj_create) {
     proj_destroy(nullptr);
-    EXPECT_EQ(proj_create_from_user_input(m_ctxt, "invalid", nullptr), nullptr);
+    EXPECT_EQ(proj_create(m_ctxt, "invalid"), nullptr);
     {
-        auto obj = proj_create_from_user_input(
-            m_ctxt,
-            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
-                .c_str(),
-            nullptr);
+        auto obj =
+            proj_create(m_ctxt, GeographicCRS::EPSG_4326
+                                    ->exportToWKT(WKTFormatter::create().get())
+                                    .c_str());
         ObjectKeeper keeper(obj);
         EXPECT_NE(obj, nullptr);
 
@@ -182,7 +181,7 @@ TEST_F(CApi, proj_create_from_user_input) {
         EXPECT_EQ(info.definition, std::string(""));
     }
     {
-        auto obj = proj_create_from_user_input(m_ctxt, "EPSG:4326", nullptr);
+        auto obj = proj_create(m_ctxt, "EPSG:4326");
         ObjectKeeper keeper(obj);
         EXPECT_NE(obj, nullptr);
     }
@@ -314,17 +313,6 @@ TEST_F(CApi, proj_create_from_wkt) {
         ObjectKeeper keeper(obj);
         EXPECT_NE(obj, nullptr);
     }
-}
-
-// ---------------------------------------------------------------------------
-
-TEST_F(CApi, proj_create_from_proj_string) {
-
-    EXPECT_EQ(proj_create_from_proj_string(m_ctxt, "invalid", nullptr),
-              nullptr);
-    auto obj = proj_create_from_proj_string(m_ctxt, "+proj=longlat", nullptr);
-    ObjectKeeper keeper(obj);
-    EXPECT_NE(obj, nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -492,12 +480,14 @@ TEST_F(CApi, proj_as_proj_string) {
     {
         auto proj_5 = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_5, nullptr);
         ASSERT_NE(proj_5, nullptr);
-        EXPECT_EQ(std::string(proj_5), "+proj=longlat +datum=WGS84 +no_defs");
+        EXPECT_EQ(std::string(proj_5),
+                  "+proj=longlat +datum=WGS84 +no_defs +type=crs");
     }
     {
         auto proj_4 = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, nullptr);
         ASSERT_NE(proj_4, nullptr);
-        EXPECT_EQ(std::string(proj_4), "+proj=longlat +datum=WGS84 +no_defs");
+        EXPECT_EQ(std::string(proj_4),
+                  "+proj=longlat +datum=WGS84 +no_defs +type=crs");
     }
 }
 
@@ -518,22 +508,22 @@ TEST_F(CApi, proj_as_proj_string_incompatible_WKT1) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_as_proj_string_etmerc_option_yes) {
-    auto obj = proj_create_from_proj_string(m_ctxt, "+proj=tmerc", nullptr);
+    auto obj = proj_create(m_ctxt, "+proj=tmerc +type=crs");
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
     const char *options[] = {"USE_ETMERC=YES", nullptr};
     auto str = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, options);
     ASSERT_NE(str, nullptr);
-    EXPECT_EQ(str, std::string("+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 "
-                               "+y_0=0 +datum=WGS84 +units=m +no_defs"));
+    EXPECT_EQ(str,
+              std::string("+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 "
+                          "+y_0=0 +datum=WGS84 +units=m +no_defs +type=crs"));
 }
 
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_as_proj_string_etmerc_option_no) {
-    auto obj =
-        proj_create_from_proj_string(m_ctxt, "+proj=utm +zone=31", nullptr);
+    auto obj = proj_create(m_ctxt, "+proj=utm +zone=31 +type=crs");
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -542,7 +532,7 @@ TEST_F(CApi, proj_as_proj_string_etmerc_option_no) {
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str, std::string("+proj=tmerc +lat_0=0 +lon_0=3 +k=0.9996 "
                                "+x_0=500000 +y_0=0 +datum=WGS84 +units=m "
-                               "+no_defs"));
+                               "+no_defs +type=crs"));
 }
 
 // ---------------------------------------------------------------------------
@@ -563,7 +553,7 @@ TEST_F(CApi, proj_crs_create_bound_crs_to_WGS84) {
               "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
               "+y_0=500000 +ellps=krass "
               "+towgs84=2.329,-147.042,-92.08,-0.309,0.325,0.497,5.69 "
-              "+units=m +no_defs");
+              "+units=m +no_defs +type=crs");
 
     auto base_crs = proj_get_source_crs(m_ctxt, res);
     ObjectKeeper keeper_base_crs(base_crs);
@@ -1694,8 +1684,7 @@ TEST_F(CApi, proj_get_area_of_use) {
         EXPECT_EQ(std::string(name), "World");
     }
     {
-        auto obj =
-            proj_create_from_user_input(m_ctxt, "+proj=longlat", nullptr);
+        auto obj = proj_create(m_ctxt, "+proj=longlat +type=crs");
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_FALSE(proj_get_area_of_use(m_ctxt, obj, nullptr, nullptr,
@@ -1722,8 +1711,7 @@ TEST_F(CApi, proj_coordoperation_get_accuracy) {
         EXPECT_EQ(proj_coordoperation_get_accuracy(m_ctxt, obj), 16.0);
     }
     {
-        auto obj =
-            proj_create_from_user_input(m_ctxt, "+proj=helmert", nullptr);
+        auto obj = proj_create(m_ctxt, "+proj=helmert");
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
         EXPECT_EQ(proj_coordoperation_get_accuracy(m_ctxt, obj), -1.0);
@@ -1746,11 +1734,10 @@ TEST_F(CApi, proj_create_geographic_crs) {
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
 
-        auto objRef = proj_create_from_user_input(
-            m_ctxt,
-            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
-                .c_str(),
-            nullptr);
+        auto objRef =
+            proj_create(m_ctxt, GeographicCRS::EPSG_4326
+                                    ->exportToWKT(WKTFormatter::create().get())
+                                    .c_str());
         ObjectKeeper keeperobjRef(objRef);
         EXPECT_NE(objRef, nullptr);
 
@@ -1783,11 +1770,10 @@ TEST_F(CApi, proj_create_geographic_crs) {
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
 
-        auto objRef = proj_create_from_user_input(
-            m_ctxt,
-            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
-                .c_str(),
-            nullptr);
+        auto objRef =
+            proj_create(m_ctxt, GeographicCRS::EPSG_4326
+                                    ->exportToWKT(WKTFormatter::create().get())
+                                    .c_str());
         ObjectKeeper keeperobjRef(objRef);
         EXPECT_NE(objRef, nullptr);
 
@@ -1802,11 +1788,10 @@ TEST_F(CApi, proj_create_geographic_crs) {
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
 
-        auto objRef = proj_create_from_user_input(
-            m_ctxt,
-            GeographicCRS::EPSG_4269->exportToWKT(WKTFormatter::create().get())
-                .c_str(),
-            nullptr);
+        auto objRef =
+            proj_create(m_ctxt, GeographicCRS::EPSG_4269
+                                    ->exportToWKT(WKTFormatter::create().get())
+                                    .c_str());
         ObjectKeeper keeperobjRef(objRef);
         EXPECT_NE(objRef, nullptr);
 
@@ -1861,11 +1846,10 @@ TEST_F(CApi, proj_create_geocentric_crs) {
         ObjectKeeper keeper(obj);
         ASSERT_NE(obj, nullptr);
 
-        auto objRef = proj_create_from_user_input(
-            m_ctxt,
-            GeographicCRS::EPSG_4978->exportToWKT(WKTFormatter::create().get())
-                .c_str(),
-            nullptr);
+        auto objRef =
+            proj_create(m_ctxt, GeographicCRS::EPSG_4978
+                                    ->exportToWKT(WKTFormatter::create().get())
+                                    .c_str());
         ObjectKeeper keeperobjRef(objRef);
         EXPECT_NE(objRef, nullptr);
 
@@ -2411,7 +2395,7 @@ TEST_F(CApi, proj_context_get_database_metadata) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_clone) {
-    auto obj = proj_create_from_proj_string(m_ctxt, "+proj=longlat", nullptr);
+    auto obj = proj_create(m_ctxt, "+proj=longlat");
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
@@ -2432,8 +2416,7 @@ TEST_F(CApi, proj_crs_alter_geodetic_crs) {
     ObjectKeeper keeper(projCRS);
     ASSERT_NE(projCRS, nullptr);
 
-    auto newGeodCRS =
-        proj_create_from_proj_string(m_ctxt, "+proj=longlat", nullptr);
+    auto newGeodCRS = proj_create(m_ctxt, "+proj=longlat +type=crs");
     ObjectKeeper keeper_newGeodCRS(newGeodCRS);
     ASSERT_NE(newGeodCRS, nullptr);
 

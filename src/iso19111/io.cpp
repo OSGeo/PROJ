@@ -3344,6 +3344,9 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                ci_equal(stripQuotes(extensionChildren[0]), "PROJ4")) {
         std::string projString = stripQuotes(extensionChildren[1]);
         if (starts_with(projString, "+proj=")) {
+            if (projString.find(" +type=crs") == std::string::npos) {
+                projString += " +type=crs";
+            }
             try {
                 auto projObj =
                     PROJStringParser().createFromPROJString(projString);
@@ -4281,58 +4284,44 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
     throw ParsingException(concat("unhandled keyword: ", name));
 }
-//! @endcond
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instantiate a sub-class of BaseObject from a user specified text.
- *
- * The text can be a:
- * <ul>
- * <li>WKT string</li>
- * <li>PROJ string</li>
- * <li>database code, prefixed by its authoriy. e.g. "EPSG:4326"</li>
- * <li>URN. e.g. "urn:ogc:def:crs:EPSG::4326",
- *     "urn:ogc:def:coordinateOperation:EPSG::1671"</li>
- * <li>an objet name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
- *     uniqueness is not guaranteed, the function may apply heuristics to
- *     determine the appropriate best match.</li>
- * </ul>
- *
- * @param text One of the above mentioned text format
- * @param dbContext Database context, or nullptr (in which case database
- * lookups will not work)
- * @param usePROJ4InitRules When set to true,
- * init=epsg:XXXX syntax will be allowed and will be interpreted according to
- * PROJ.4 and PROJ.5 rules, that is geodeticCRS will have longitude, latitude
- * order and will expect/output coordinates in radians. ProjectedCRS will have
- * easting, northing axis order (except the ones with Transverse Mercator South
- * Orientated projection). In that mode, the epsg:XXXX syntax will be also
- * interprated the same way.
- * @throw ParsingException
- */
-BaseObjectNNPtr createFromUserInput(const std::string &text,
-                                    const DatabaseContextPtr &dbContext,
-                                    bool usePROJ4InitRules) {
+static BaseObjectNNPtr createFromUserInput(const std::string &text,
+                                           const DatabaseContextPtr &dbContext,
+                                           bool usePROJ4InitRules,
+                                           PJ_CONTEXT *ctx) {
 
-    for (const auto &wktConstants : WKTConstants::constants()) {
-        if (ci_starts_with(text, wktConstants)) {
-            return WKTParser()
-                .attachDatabaseContext(dbContext)
-                .setStrict(false)
-                .createFromWKT(text);
+    if (!ci_starts_with(text, "step proj=") &&
+        !ci_starts_with(text, "step +proj=")) {
+        for (const auto &wktConstants : WKTConstants::constants()) {
+            if (ci_starts_with(text, wktConstants)) {
+                return WKTParser()
+                    .attachDatabaseContext(dbContext)
+                    .setStrict(false)
+                    .createFromWKT(text);
+            }
         }
     }
+
     const char *textWithoutPlusPrefix = text.c_str();
     if (textWithoutPlusPrefix[0] == '+')
         textWithoutPlusPrefix++;
 
     if (strncmp(textWithoutPlusPrefix, "proj=", strlen("proj=")) == 0 ||
+        text.find(" +proj=") != std::string::npos ||
+        text.find(" proj=") != std::string::npos ||
         strncmp(textWithoutPlusPrefix, "init=", strlen("init=")) == 0 ||
+        text.find(" +init=") != std::string::npos ||
+        text.find(" init=") != std::string::npos ||
         strncmp(textWithoutPlusPrefix, "title=", strlen("title=")) == 0) {
         return PROJStringParser()
             .attachDatabaseContext(dbContext)
-            .setUsePROJ4InitRules(usePROJ4InitRules)
+            .attachContext(ctx)
+            .setUsePROJ4InitRules(ctx != nullptr
+                                      ? (proj_context_get_use_proj4_init_rules(
+                                             ctx, false) == TRUE)
+                                      : usePROJ4InitRules)
             .createFromPROJString(text);
     }
 
@@ -4448,6 +4437,69 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
     }
 
     throw ParsingException("unrecognized format / unknown name");
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a sub-class of BaseObject from a user specified text.
+ *
+ * The text can be a:
+ * <ul>
+ * <li>WKT string</li>
+ * <li>PROJ string</li>
+ * <li>database code, prefixed by its authoriy. e.g. "EPSG:4326"</li>
+ * <li>URN. e.g. "urn:ogc:def:crs:EPSG::4326",
+ *     "urn:ogc:def:coordinateOperation:EPSG::1671"</li>
+ * <li>an objet name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
+ *     uniqueness is not guaranteed, the function may apply heuristics to
+ *     determine the appropriate best match.</li>
+ * </ul>
+ *
+ * @param text One of the above mentioned text format
+ * @param dbContext Database context, or nullptr (in which case database
+ * lookups will not work)
+ * @param usePROJ4InitRules When set to true,
+ * init=epsg:XXXX syntax will be allowed and will be interpreted according to
+ * PROJ.4 and PROJ.5 rules, that is geodeticCRS will have longitude, latitude
+ * order and will expect/output coordinates in radians. ProjectedCRS will have
+ * easting, northing axis order (except the ones with Transverse Mercator South
+ * Orientated projection). In that mode, the epsg:XXXX syntax will be also
+ * interprated the same way.
+ * @throw ParsingException
+ */
+BaseObjectNNPtr createFromUserInput(const std::string &text,
+                                    const DatabaseContextPtr &dbContext,
+                                    bool usePROJ4InitRules) {
+    return createFromUserInput(text, dbContext, usePROJ4InitRules, nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a sub-class of BaseObject from a user specified text.
+ *
+ * The text can be a:
+ * <ul>
+ * <li>WKT string</li>
+ * <li>PROJ string</li>
+ * <li>database code, prefixed by its authoriy. e.g. "EPSG:4326"</li>
+ * <li>URN. e.g. "urn:ogc:def:crs:EPSG::4326",
+ *     "urn:ogc:def:coordinateOperation:EPSG::1671"</li>
+ * <li>an objet name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
+ *     uniqueness is not guaranteed, the function may apply heuristics to
+ *     determine the appropriate best match.</li>
+ * </ul>
+ *
+ * @param text One of the above mentioned text format
+ * @param ctx PROJ context
+ * @throw ParsingException
+ */
+BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
+    return createFromUserInput(
+        text, ctx != nullptr && ctx->cpp_context
+                  ? ctx->cpp_context->databaseContext.as_nullable()
+                  : nullptr,
+        false, ctx);
 }
 
 // ---------------------------------------------------------------------------
@@ -4619,6 +4671,9 @@ std::string IPROJStringExportable::exportToPROJString(
         }
     }
     if (bIsCRS) {
+        if (!formatter->hasParam("type")) {
+            formatter->addParam("type", "crs");
+        }
         formatter->setCRSExport(false);
     }
     return formatter->toString();
@@ -5217,17 +5272,68 @@ void PROJStringFormatter::Private::appendToResult(const char *str) {
 static void
 PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                        std::vector<Step::KeyValue> &globalParamValues,
-                       std::string &title, std::string &vunits,
-                       std::string &vto_meter) {
+                       std::string &title) {
     std::string word;
     std::istringstream iss(projString, std::istringstream::in);
-    bool inverted = false;
-    bool prevWasStep = false;
-    bool inProj = false;
-    bool inPipeline = false;
     bool prevWasTitle = false;
-    bool prevWasInit = false;
 
+    if (projString.find("proj=pipeline") == std::string::npos) {
+        const bool hasProj = projString.find("proj=") == 0 ||
+                             projString.find("+proj=") == 0 ||
+                             projString.find(" proj=") != std::string::npos ||
+                             projString.find(" +proj=") != std::string::npos;
+        const bool hasInit = projString.find("init=") == 0 ||
+                             projString.find("+init=") == 0 ||
+                             projString.find(" init=") != std::string::npos ||
+                             projString.find(" +init=") != std::string::npos;
+        if (hasProj || hasInit) {
+            steps.push_back(Step());
+        }
+
+        while (iss >> word) {
+            if (word[0] == '+') {
+                word = word.substr(1);
+            } else if (prevWasTitle && word.find('=') == std::string::npos) {
+                title += " ";
+                title += word;
+                continue;
+            }
+
+            prevWasTitle = false;
+            if (starts_with(word, "proj=") && !hasInit) {
+                assert(hasProj);
+                auto stepName = word.substr(strlen("proj="));
+                steps.back().name = stepName;
+            } else if (starts_with(word, "init=")) {
+                assert(hasInit);
+                auto initName = word.substr(strlen("init="));
+                steps.back().name = initName;
+                steps.back().isInit = true;
+            } else if (word == "inv") {
+                if (!steps.empty()) {
+                    steps.back().inverted = true;
+                }
+            } else if (starts_with(word, "title=")) {
+                title = word.substr(strlen("title="));
+                prevWasTitle = true;
+            } else if (word != "step") {
+                const auto pos = word.find('=');
+                auto key = word.substr(0, pos);
+                auto pair = (pos != std::string::npos)
+                                ? Step::KeyValue(key, word.substr(pos + 1))
+                                : Step::KeyValue(key);
+                if (steps.empty()) {
+                    globalParamValues.push_back(pair);
+                } else {
+                    steps.back().paramValues.push_back(pair);
+                }
+            }
+        }
+        return;
+    }
+
+    bool inPipeline = false;
+    bool invGlobal = false;
     while (iss >> word) {
         if (word[0] == '+') {
             word = word.substr(1);
@@ -5242,52 +5348,31 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             if (inPipeline) {
                 throw ParsingException("nested pipeline not supported");
             }
-            inverted = false;
-            prevWasStep = false;
-            inProj = true;
             inPipeline = true;
         } else if (word == "step") {
             if (!inPipeline) {
                 throw ParsingException("+step found outside pipeline");
             }
-            inverted = false;
-            prevWasStep = true;
-            prevWasInit = false;
+            steps.push_back(Step());
         } else if (word == "inv") {
-            if (prevWasStep) {
-                inverted = true;
+            if (steps.empty()) {
+                invGlobal = true;
             } else {
-                if (steps.empty()) {
-                    throw ParsingException("+inv found at unexpected place");
-                }
                 steps.back().inverted = true;
             }
-            prevWasStep = false;
-        } else if (starts_with(word, "proj=")) {
+        } else if (inPipeline && !steps.empty() && starts_with(word, "proj=") &&
+                   steps.back().name.empty()) {
             auto stepName = word.substr(strlen("proj="));
-            if (prevWasInit) {
-                steps.back() = Step();
-                prevWasInit = false;
-            } else {
-                steps.push_back(Step());
-            }
             steps.back().name = stepName;
-            steps.back().inverted = inverted;
-            prevWasStep = false;
-            inProj = true;
-        } else if (starts_with(word, "init=")) {
-            if (prevWasInit) {
-                throw ParsingException("+init= found at unexpected place");
-            }
+        } else if (inPipeline && !steps.empty() && starts_with(word, "init=") &&
+                   steps.back().name.empty()) {
             auto initName = word.substr(strlen("init="));
-            steps.push_back(Step());
             steps.back().name = initName;
             steps.back().isInit = true;
-            steps.back().inverted = inverted;
-            prevWasStep = false;
-            prevWasInit = true;
-            inProj = true;
-        } else if (inProj) {
+        } else if (!inPipeline && starts_with(word, "title=")) {
+            title = word.substr(strlen("title="));
+            prevWasTitle = true;
+        } else {
             const auto pos = word.find('=');
             auto key = word.substr(0, pos);
             auto pair = (pos != std::string::npos)
@@ -5298,17 +5383,13 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             } else {
                 steps.back().paramValues.push_back(pair);
             }
-            prevWasStep = false;
-        } else if (starts_with(word, "vunits=")) {
-            vunits = word.substr(strlen("vunits="));
-        } else if (starts_with(word, "vto_meter=")) {
-            vto_meter = word.substr(strlen("vto_meter="));
-        } else if (starts_with(word, "title=")) {
-            title = word.substr(strlen("title="));
-            prevWasTitle = true;
-        } else {
-            throw ParsingException("Unexpected token: " + word);
         }
+    }
+    if (invGlobal) {
+        for (auto &step : steps) {
+            step.inverted = !step.inverted;
+        }
+        std::reverse(steps.begin(), steps.end());
     }
 }
 
@@ -5319,10 +5400,7 @@ void PROJStringFormatter::ingestPROJString(
 {
     std::vector<Step> steps;
     std::string title;
-    std::string vunits;
-    std::string vto_meter;
-    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title, vunits,
-                           vto_meter);
+    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title);
     d->steps_.insert(d->steps_.end(), steps.begin(), steps.end());
 }
 
@@ -5596,6 +5674,7 @@ const DatabaseContextPtr &PROJStringFormatter::databaseContext() const {
 
 struct PROJStringParser::Private {
     DatabaseContextPtr dbContext_{};
+    PJ_CONTEXT *ctx_{};
     bool usePROJ4InitRules_ = false;
     std::vector<std::string> warningList_{};
 
@@ -5619,6 +5698,17 @@ struct PROJStringParser::Private {
             }
         }
         return false;
+    }
+
+    template <class T>
+    // cppcheck-suppress functionStatic
+    const std::string &getGlobalParamValue(const T key) {
+        for (const auto &pair : globalParamValues_) {
+            if (ci_equal(pair.key, key)) {
+                return pair.value;
+            }
+        }
+        return emptyString;
     }
 
     template <class T>
@@ -5701,6 +5791,15 @@ PROJStringParser::attachDatabaseContext(const DatabaseContextPtr &dbContext) {
     d->dbContext_ = dbContext;
     return *this;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+PROJStringParser &PROJStringParser::attachContext(PJ_CONTEXT *ctx) {
+    d->ctx_ = ctx;
+    return *this;
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -6902,7 +7001,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 param.key == "towgs84" || param.key == "nadgrids" ||
                 param.key == "geoidgrids" || param.key == "units" ||
                 param.key == "to_meter" || param.key == "vunits" ||
-                param.key == "vto_meter") {
+                param.key == "vto_meter" || param.key == "type") {
                 continue;
             }
             if (param.value.empty()) {
@@ -7252,22 +7351,24 @@ static const metadata::ExtentPtr &getExtent(const crs::CRS *crs) {
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a sub-class of BaseObject from a PROJ string.
+ *
+ * The projString must contain +type=crs for the object to be detected as a
+ * CRS instead of a CoordinateOperation.
+ *
  * @throw ParsingException
  */
 BaseObjectNNPtr
 PROJStringParser::createFromPROJString(const std::string &projString) {
-    std::string vunits;
-    std::string vto_meter;
-
     d->steps_.clear();
     d->title_.clear();
     d->globalParamValues_.clear();
     d->projString_ = projString;
     PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_,
-                           d->title_, vunits, vto_meter);
+                           d->title_);
 
     if (d->steps_.empty()) {
-
+        const auto &vunits = d->getGlobalParamValue("vunits");
+        const auto &vto_meter = d->getGlobalParamValue("vto_meter");
         if (!vunits.empty() || !vto_meter.empty()) {
             Step fakeStep;
             if (!vunits.empty()) {
@@ -7288,9 +7389,10 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
     }
 
-    if ((d->steps_.size() == 1 ||
+    if (((d->steps_.size() == 1 &&
+          d->getParamValue(d->steps_[0], "type") == "crs") ||
          (d->steps_.size() == 2 && d->steps_[1].name == "unitconvert")) &&
-        isGeocentricStep(d->steps_[0].name)) {
+        !d->steps_[0].inverted && isGeocentricStep(d->steps_[0].name)) {
         return d->buildBoundOrCompoundCRSIfNeeded(
             0, d->buildGeocentricCRS(0, (d->steps_.size() == 2 &&
                                          d->steps_[1].name == "unitconvert")
@@ -7300,7 +7402,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
 
     // +init=xxxx:yyyy syntax
     if (d->steps_.size() == 1 && d->steps_[0].isInit &&
-        d->steps_[0].paramValues.size() == 0) {
+        !d->steps_[0].inverted) {
 
         // Those used to come from a text init file
         // We only support them in compatibility mode
@@ -7331,9 +7433,14 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             if (!file_found) {
                 auto obj = createFromUserInput(stepName, d->dbContext_, true);
                 auto crs = dynamic_cast<CRS *>(obj.get());
-                if (crs) {
+                if (crs &&
+                    (d->steps_[0].paramValues.empty() ||
+                     (d->steps_[0].paramValues.size() == 1 &&
+                      d->getParamValue(d->steps_[0], "type") == "crs"))) {
                     PropertyMap properties;
-                    properties.set(IdentifiedObject::NAME_KEY, crs->nameStr());
+                    properties.set(IdentifiedObject::NAME_KEY,
+                                   d->title_.empty() ? crs->nameStr()
+                                                     : d->title_);
                     const auto &extent = getExtent(crs);
                     if (extent) {
                         properties.set(
@@ -7342,12 +7449,12 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     }
                     auto geogCRS = dynamic_cast<GeographicCRS *>(crs);
                     if (geogCRS) {
-                        // Override with longitude latitude in radian
+                        // Override with longitude latitude in degrees
                         return GeographicCRS::create(
                             properties, geogCRS->datum(),
                             geogCRS->datumEnsemble(),
                             EllipsoidalCS::createLongitudeLatitude(
-                                UnitOfMeasure::RADIAN));
+                                UnitOfMeasure::DEGREE));
                     }
                     auto projCRS = dynamic_cast<ProjectedCRS *>(crs);
                     if (projCRS) {
@@ -7363,8 +7470,31 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                                         ->unit()));
                         }
                     }
+                    return obj;
                 }
-                return obj;
+                auto projStringExportable =
+                    dynamic_cast<IPROJStringExportable *>(crs);
+                if (projStringExportable) {
+                    std::string expanded;
+                    if (!d->title_.empty()) {
+                        expanded = "title=";
+                        expanded += d->title_;
+                    }
+                    for (const auto &pair : d->steps_[0].paramValues) {
+                        if (!expanded.empty())
+                            expanded += ' ';
+                        expanded += '+';
+                        expanded += pair.key;
+                        if (!pair.value.empty()) {
+                            expanded += '=';
+                            expanded += pair.value;
+                        }
+                    }
+                    expanded += ' ';
+                    expanded += projStringExportable->exportToPROJString(
+                        PROJStringFormatter::create().get());
+                    return createFromPROJString(expanded);
+                }
             }
         }
 
@@ -7372,18 +7502,23 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         if (!init) {
             throw ParsingException("out of memory");
         }
-        PJ_CONTEXT *ctx = proj_context_create();
+        PJ_CONTEXT *ctx = d->ctx_ ? d->ctx_ : proj_context_create();
         if (!ctx) {
             pj_dealloc(init);
             throw ParsingException("out of memory");
         }
         paralist *list = pj_expand_init(ctx, init);
-        proj_context_destroy(ctx);
+        if (ctx != d->ctx_) {
+            proj_context_destroy(ctx);
+        }
         if (!list) {
             pj_dealloc(init);
             throw ParsingException("cannot expand " + projString);
         }
         std::string expanded;
+        if (!d->title_.empty()) {
+            expanded = "title=" + d->title_;
+        }
         bool first = true;
         bool has_init_term = false;
         for (auto t = list; t;) {
@@ -7403,6 +7538,14 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             pj_dealloc(t);
             t = n;
         }
+        for (const auto &pair : d->steps_[0].paramValues) {
+            expanded += " +";
+            expanded += pair.key;
+            if (!pair.value.empty()) {
+                expanded += '=';
+                expanded += pair.value;
+            }
+        }
 
         if (!has_init_term) {
             return createFromPROJString(expanded);
@@ -7420,7 +7563,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     int iFirstCart = -1;
     int iSecondCart = -1;
     int iMolodensky = -1;
-    bool unexpectedStructure = false;
+    bool unexpectedStructure = d->steps_.empty();
     for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
         const auto &stepName = d->steps_[i].name;
         if (isGeographicStep(stepName)) {
@@ -7483,9 +7626,82 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
     }
 
+    if (iHelmert < 0 && iMolodensky < 0 && !d->steps_.empty()) {
+        // CRS candidate
+        if ((d->steps_.size() == 1 &&
+             d->getParamValue(d->steps_[0], "type") != "crs") ||
+            (d->steps_.size() > 1 && d->getGlobalParamValue("type") != "crs")) {
+            unexpectedStructure = true;
+        }
+    } else if (iHelmert >= 0 &&
+               (d->hasParamValue(d->steps_[iHelmert], "theta") ||
+                d->hasParamValue(d->steps_[iHelmert], "exact") ||
+                d->hasParamValue(d->steps_[iHelmert], "transpose") ||
+                d->hasParamValue(d->steps_[iHelmert], "towgs84"))) {
+        unexpectedStructure = true;
+    }
+
+    if (unexpectedStructure || iHelmert >= 0 || iMolodensky >= 0) {
+        struct Logger {
+            std::string msg{};
+
+            // cppcheck-suppress functionStatic
+            void setMessage(const char *msgIn) noexcept {
+                try {
+                    msg = msgIn;
+                } catch (const std::exception &) {
+                }
+            }
+
+            static void log(void *user_data, int level, const char *msg) {
+                if (level == PJ_LOG_ERROR) {
+                    static_cast<Logger *>(user_data)->setMessage(msg);
+                }
+            }
+        };
+
+        // If the structure is not recognized, then try to instantiate the
+        // pipeline, and if successful, wrap it in a PROJBasedOperation
+        Logger logger;
+        bool valid;
+
+        auto pj_context = d->ctx_ ? d->ctx_ : proj_context_create();
+        if (!pj_context) {
+            throw ParsingException("out of memory");
+        }
+        if (pj_context != d->ctx_) {
+            proj_log_func(pj_context, &logger, Logger::log);
+            proj_context_use_proj4_init_rules(pj_context,
+                                              d->usePROJ4InitRules_);
+        }
+        auto pj = pj_create_internal(pj_context, projString.c_str());
+        valid = pj != nullptr;
+        proj_destroy(pj);
+
+        if (!valid) {
+            std::string prefix("Error " +
+                               toString(proj_context_errno(pj_context)) + ": ");
+            if (logger.msg.empty()) {
+                logger.msg =
+                    prefix + proj_errno_string(proj_context_errno(pj_context));
+            } else {
+                logger.msg = prefix + logger.msg;
+            }
+        }
+
+        if (pj_context != d->ctx_) {
+            proj_context_destroy(pj_context);
+        }
+
+        if (!valid) {
+            throw ParsingException(logger.msg);
+        }
+    }
+
     if (!unexpectedStructure) {
-        if (iFirstGeogStep == 0 && iSecondGeogStep < 0 && iProjStep < 0 &&
-            iHelmert < 0 && iFirstCart < 0 && iMolodensky < 0 &&
+        if (iFirstGeogStep == 0 && !d->steps_[iFirstGeogStep].inverted &&
+            iSecondGeogStep < 0 && iProjStep < 0 && iHelmert < 0 &&
+            iFirstCart < 0 && iMolodensky < 0 &&
             (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
             (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
             const bool ignoreVUnits = false;
@@ -7515,9 +7731,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
                                                     : iFirstAxisSwap));
         }
-        if (d->steps_.size() == 1 && iHelmert == 0) {
-            return d->buildHelmertTransformation(iHelmert);
-        }
 
         if (iProjStep < 0 && iHelmert > 0 && iMolodensky < 0 &&
             (iFirstGeogStep < 0 || iFirstGeogStep == iFirstCart - 1 ||
@@ -7541,10 +7754,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 iSecondAxisSwap, iSecondUnitConvert);
         }
 
-        if (d->steps_.size() == 1 && iMolodensky == 0) {
-            return d->buildMolodenskyTransformation(iMolodensky);
-        }
-
         if (iProjStep < 0 && iHelmert < 0 && iMolodensky > 0 &&
             (iFirstGeogStep < 0 || iFirstGeogStep == iMolodensky - 1 ||
              (iFirstGeogStep == iMolodensky + 1 && iSecondGeogStep < 0)) &&
@@ -7563,47 +7772,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                                                          : iMolodensky,
                 iSecondAxisSwap, iSecondUnitConvert);
         }
-    }
-
-    struct Logger {
-        std::string msg{};
-
-        // cppcheck-suppress functionStatic
-        void setMessage(const char *msgIn) noexcept {
-            try {
-                msg = msgIn;
-            } catch (const std::exception &) {
-            }
-        }
-
-        static void log(void *user_data, int level, const char *msg) {
-            if (level == PJ_LOG_ERROR) {
-                static_cast<Logger *>(user_data)->setMessage(msg);
-            }
-        }
-    };
-
-    // If the structure is not recognized, then try to instantiate the
-    // pipeline, and if successful, wrap it in a PROJBasedOperation
-    Logger logger;
-    auto pj_context = proj_context_create();
-    if (!pj_context) {
-        throw ParsingException("out of memory");
-    }
-    proj_log_func(pj_context, &logger, Logger::log);
-    proj_context_use_proj4_init_rules(pj_context, d->usePROJ4InitRules_);
-    auto pj = proj_create(pj_context, projString.c_str());
-    bool valid = pj != nullptr;
-    proj_destroy(pj);
-
-    if (!valid && logger.msg.empty()) {
-        logger.setMessage(proj_errno_string(proj_context_errno(pj_context)));
-    }
-
-    proj_context_destroy(pj_context);
-
-    if (!valid) {
-        throw ParsingException(logger.msg);
     }
 
     auto props = PropertyMap();
