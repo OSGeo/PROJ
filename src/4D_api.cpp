@@ -607,6 +607,11 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
     }
 
     argv = pj_trim_argv (argc, args);
+    if (!argv) {
+        pj_dealloc(args);
+        proj_context_errno_set(ctx, ENOMEM);
+        return nullptr;
+    }
 
     /* ...and let pj_init_ctx do the hard work */
     /* New interface: forbid init=epsg:XXXX syntax by default */
