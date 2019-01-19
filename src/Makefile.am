@@ -18,9 +18,9 @@ EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake tests/geodtest.cpp \
 	wkt1_grammar.y wkt2_grammar.y apps/emess.h
 
-proj_SOURCES = apps/proj.cpp apps/gen_cheb.cpp apps/p_series.cpp apps/emess.cpp
+proj_SOURCES = apps/proj.cpp apps/emess.cpp
 projinfo_SOURCES = apps/projinfo.cpp
-cs2cs_SOURCES = apps/cs2cs.cpp apps/gen_cheb.cpp apps/p_series.cpp apps/emess.cpp
+cs2cs_SOURCES = apps/cs2cs.cpp apps/emess.cpp
 cct_SOURCES = apps/cct.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
 nad2bin_SOURCES = apps/nad2bin.cpp
 geod_SOURCES = apps/geod.cpp apps/geod_set.cpp apps/geod_interface.cpp apps/geod_interface.h apps/emess.cpp

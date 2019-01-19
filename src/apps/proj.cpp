@@ -20,8 +20,6 @@
 #define MAX_PARGS 100
 #define PJ_INVERS(P) (P->inv ? 1 : 0)
 
-extern void gen_cheb(int, PJ_UV(*)(PJ_UV), const char *, PJ *, int, char **);
-
 static PJ *Proj;
 static union {
     PJ_UV (*generic)(PJ_UV, PJ *);
@@ -43,7 +41,6 @@ static int
     postscale = 0;
 
 static const char
-    *cheby_str,         /* string controlling Chebychev evaluation */
     *oform = nullptr; /* output format for x-y or decimal degrees */
 static char oform_buffer[16];   /* Buffer for oform when using -d */
 
@@ -55,22 +52,6 @@ static PJ_FACTORS facs;
 
 static double (*informat)(const char *, char **), /* input data deformatter function */
               fscale = 0.;                        /* cartesian scale factor */
-
-static PJ_UV int_proj(PJ_UV data) {
-    if (prescale) {
-        data.u *= fscale;
-        data.v *= fscale;
-    }
-
-    data = (*proj.generic)(data, Proj);
-
-    if (postscale && data.u != HUGE_VAL) {
-        data.u *= fscale;
-        data.v *= fscale;
-    }
-
-    return data;
-}
 
 /* file processing function */
 static void process(FILE *fid) {
@@ -309,10 +290,10 @@ static void vprocess(FILE *fid) {
 }
 
 int main(int argc, char **argv) {
-    char *arg, *pargv[MAX_PARGS], **iargv = argv;
+    char *arg, *pargv[MAX_PARGS];
     char **eargv = argv;
     FILE *fid;
-    int pargc = 0, iargc = argc, eargc = 0, mon = 0;
+    int pargc = 0, eargc = 0, mon = 0;
 
     if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != nullptr)
         ++emess_dat.Prog_name;
@@ -425,10 +406,6 @@ int main(int argc, char **argv) {
                 emess(1,"missing argument for -%c",*arg);
                 oterr = *++argv;
                 continue;
-              case 'T': /* generate Chebyshev coefficients */
-                if (--argc <= 0) goto noargument;
-                cheby_str = *++argv;
-                continue;
               case 'm': /* cartesian multiplier */
                 if (--argc <= 0) goto noargument;
                 postscale = 1;
@@ -482,10 +459,9 @@ int main(int argc, char **argv) {
         } else /* assumed to be input file name(s) */
             eargv[eargc++] = *argv;
     }
-    if (eargc == 0 && !cheby_str) /* if no specific files force sysin */
+    if (eargc == 0) /* if no specific files force sysin */
         eargv[eargc++] = const_cast<char*>("-");
-    else if (eargc > 0 && cheby_str) /* warning */
-        emess(4, "data files when generating Chebychev prohibited");
+
     /* done with parameter and control input */
     if (inverse && postscale) {
         prescale = 1;
@@ -512,10 +488,6 @@ int main(int argc, char **argv) {
         proj.inv = pj_inv;
     } else
         proj.fwd = pj_fwd;
-    if (cheby_str) {
-        gen_cheb(inverse, int_proj, cheby_str, Proj, iargc, iargv);
-        exit(0);
-    }
 
     /* set input formatting control */
     if (mon) {

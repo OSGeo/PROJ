@@ -1,6 +1,4 @@
 set(CS2CS_SRC apps/cs2cs.cpp
-              apps/gen_cheb.cpp 
-              apps/p_series.cpp
               apps/emess.cpp
 )
 
