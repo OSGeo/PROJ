@@ -127,10 +127,10 @@ paragraph for more details.
     The returned :c:type:`PJ`-pointer should be deallocated with :c:func:`proj_destroy`.
 
     :param PJ_CONTEXT* ctx: Threading context.
-    :param `srid_from`: Source SRID.
-    :type `srid_from`: const char*
-    :param `srid_to`: Destination SRID.
-    :type `srid_to`: const char*
+    :param `source_crs`: Source CRS.
+    :type `source_crs`: const char*
+    :param `target_crs`: Destination SRS.
+    :type `target_crs`: const char*
     :param `area`: Descriptor of the desired area for the transformation.
     :type `area`: PJ_AREA
     :returns: :c:type:`PJ*`
@@ -141,6 +141,45 @@ paragraph for more details.
 
     :param PJ* P:
     :returns: :c:type:`PJ*`
+
+Area of interest
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 6.0.0
+
+
+.. c:function:: PJ_AREA* proj_area_create(void)
+
+    Create an area of use.
+
+    Such an area of use is to be passed to :c:func:`proj_create_crs_to_crs` to
+    specify the area of use for the choice of relevant coordinate operations.
+
+    :returns: :c:type:`PJ_AREA*` to be deallocated with :c:func:`proj_area_destroy`
+
+
+.. c:function:: void proj_area_set_bbox(PJ_AREA *area, double west_lon_degree, double south_lat_degree, double east_lon_degree, double north_lat_degree)
+
+    Set the bounding box of the area of use
+
+    Such an area of use is to be passed to :c:func:`proj_create_crs_to_crs` to
+    specify the area of use for the choice of relevant coordinate operations.
+
+    In the case of an area of use crossing the antimeridian (longitude +/- 180 degrees),
+    `west_lon_degree` will be greater than `east_lon_degree`.
+
+    :param `area`: Pointer to an object returned by :c:func:`proj_area_create`.
+    :param `west_lon_degree`: West longitude, in degrees. In [-180,180] range.
+    :param `south_lat_degree`: South latitude, in degrees. In [-90,90] range.
+    :param `east_lon_degree`: East longitude, in degrees. In [-180,180] range.
+    :param `north_lat_degree`: North latitude, in degrees. In [-90,90] range.
+
+.. c:function:: void proj_area_destroy(PJ_AREA* area)
+
+    Deallocate a :c:type:`PJ_AREA` object.
+
+    :param PJ_AREA* area
+
 
 .. _coord_trans_functions:
 
@@ -603,6 +642,8 @@ Various
 
 C API for ISO-19111 functionality
 +++++++++++++++++++++++++++++++++
+
+.. versionadded:: 6.0.0
 
 The PJ* objects returned by :c:func:`proj_create_from_wkt`,
 :c:func:`proj_create_from_database` and other functions in that section

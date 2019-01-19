@@ -60,11 +60,12 @@ Transformation objects
 
 .. c:type:: PJ_AREA
 
+    .. versionadded:: 6.0.0
+
     Opaque object describing an area in which a transformation is performed.
 
-    .. note:: This object is not fully implemented yet. It is to be used with
-              :c:func:`proj_create_crs_to_crs` to select the best transformation
-              between the two input coordinate reference systems.
+    It is used with :c:func:`proj_create_crs_to_crs` to select the best transformation
+    between the two input coordinate reference systems.
 
 2 dimensional coordinates
 --------------------------------------------------------------------------------
