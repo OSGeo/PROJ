@@ -319,6 +319,13 @@ man_pages = [
         ['Thomas Knudsen'],
         1
     ),
+    (
+        'apps/projinfo',
+        'projinfo',
+        u'Geodetic object and coordinate operation queries',
+        ['Even Rouault'],
+        1
+    ),
 ]
 
 # If true, show URL addresses after external links.

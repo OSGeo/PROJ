@@ -220,7 +220,7 @@ outputs
     See also
     ********
 
-    **proj(1)**, **cct(1)**, **geod(1)**, **gie(1)**
+    **proj(1)**, **cct(1)**, **geod(1)**, **gie(1)**, **projinfo(1)**
 
     Bugs
     ****
