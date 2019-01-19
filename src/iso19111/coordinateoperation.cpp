@@ -8947,7 +8947,7 @@ void ConcatenatedOperation::fixStepsDirection(
                             nullptr);
             }
         } else if (!conv && l_sourceCRS && l_targetCRS) {
-            // Transformations might be mentioned in their foward directions,
+            // Transformations might be mentioned in their forward directions,
             // whereas we should instead use the reverse path.
             auto prevOpTarget = (i == 0) ? concatOpSourceCRS.as_nullable()
                                          : operationsInOut[i - 1]->targetCRS();

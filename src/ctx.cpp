@@ -140,7 +140,7 @@ projCtx_t::projCtx_t(const projCtx_t& other)
 projCtx pj_get_default_ctx()
 
 {
-    // C++11 rules guarantee a thread-safe instanciation.
+    // C++11 rules guarantee a thread-safe instantiation.
     static projCtx_t default_context(projCtx_t::createDefault());
     return &default_context;
 }
