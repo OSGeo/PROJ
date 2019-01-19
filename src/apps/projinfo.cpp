@@ -80,7 +80,7 @@ static void usage() {
         << "usage: projinfo [-o formats] [-k crs|operation] [--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
-           "[--bbox min_long,min_lat,max_long,max_lat]) "
+           "[--bbox west_long,south_lat,east_long,north_lat]) "
         << std::endl
         << "                [--spatial-test contains|intersects]" << std::endl
         << "                [--crs-extent-use none|both|intersection|smallest]"

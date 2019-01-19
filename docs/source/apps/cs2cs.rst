@@ -6,19 +6,35 @@ cs2cs
 
 .. only:: html
 
-    Cartographic coordinate system filter.
+    Filter for transformations between two coordinate reference systems.
 
 Synopsis
 ********
 
     **cs2cs** [ **-eEfIlrstvwW** [ args ] ] [ *+opts[=arg]* ] [ +to [*+opts[=arg]*] ] file[s]
 
+or
+
+    **cs2cs** [ **-eEfIlrstvwW** [ args ] ] {source_crs} +to {target_crs} file[s]
+
+    where {source_crs} or {target_crs} is a PROJ string, a WKT string or a AUTHORITY:CODE
+    (where AUTHORITY is the name of a CRS authority and CODE the code of a CRS
+    found in the proj.db database), expressing a coordinate reference system.
+
+.. versionadded:: 6.0.0
+
+or
+
+    **cs2cs** [ **-eEfIlrstvwW** [ args ] ] {source_crs} {target_crs}
+
+.. versionadded:: 6.0.0
+
 Description
 ***********
 
 :program:`cs2cs` performs transformation between the source and destination
-cartographic coordinate system on a set of input points. The coordinate
-system transformation can include translation between projected and
+cartographic coordinate reference system on a set of input points. The coordinate
+reference system transformation can include translation between projected and
 geographic coordinates as well as the application of datum shifts.
 
 The following control parameters can appear in any order:
@@ -125,22 +141,21 @@ The following control parameters can appear in any order:
     parameters. Usage varies with projection and for a complete description
     consult the :ref:`projection pages <projections>`.
 
-The :program:`cs2cs` program requires two coordinate system definitions. The first (or
+The :program:`cs2cs` program requires two coordinate reference system (CRS) definitions. The first (or
 primary is defined based on all projection parameters not appearing after the
 *+to* argument. All projection parameters appearing after the *+to* argument
-are considered the definition of the second coordinate system. If there is no
-second coordinate system defined, a geographic coordinate system based on the
-datum and ellipsoid of the source coordinate system is assumed. Note that the
-source and destination coordinate system can both be projections, both be
-geographic, or one of each and may have the same or different datums.
+are considered the definition of the second CRS. If there is no
+second CRS defined, a geographic CRS based on the
+datum and ellipsoid of the source CRS is assumed. Note that the
+source and destination CRS can both of same or different nature (geographic,
+projected, compound CRS), or one of each and may have the same or different datums.
 
-Additional projection control parameters may be contained in two auxiliary
-control files: the first is optionally referenced with the
-*+init=file:id* and the second is always processed after the name of the
-projection has been established from either the run-line or the contents of
-*+init* file. The environment parameter :envvar:`PROJ_LIB` establishes the default
-directory for a file reference without an absolute path. This is also used
-for supporting files like datum shift files.
+When using a WKT definition or a AUTHORITY:CODE, the axis order of the CRS will
+be enforced. So for example if using EPSG:4326, the first value expected (or
+returned) will be a latitude.
+
+The environment parameter :envvar:`PROJ_LIB` establishes the
+directory for resource files (database, datum shift grids, etc.)
 
 One or more files (processed in left to right order) specify the source of
 data to be transformed. A ``-`` will specify the location of processing standard
@@ -157,8 +172,11 @@ places), while projected (cartesian) coordinates will be in linear
 (meter, feet) units.
 
 
-Example
-*******
+Examples
+********
+
+Using PROJ strings
+------------------
 
 The following script
 
@@ -179,12 +197,30 @@ The x-y output data will appear as three lines of:
 
     1402285.98  5076292.42 -0.00
 
+
+Using EPSG codes
+----------------
+
+Transforming from WGS 84 latitude/longitude (in that order) to UTM Zone 31N/WGS 84
+
+::
+
+    cs2cs EPSG:4326 EPSG:32631 <<EOF
+    45N 2E
+    EOF
+
+outputs
+
+::
+
+    421184.70   4983436.77 0.00
+
 .. only:: man
 
     See also
     ********
 
-    **proj(1)**, **cct(1)**, **geod(1)**, **gie(1)**
+    **proj(1)**, **cct(1)**, **geod(1)**, **gie(1)**, **projinfo(1)**
 
     Bugs
     ****
