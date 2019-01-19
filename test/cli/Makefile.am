@@ -36,7 +36,7 @@ testvarious-check:
 	PROJ_LIB=$(DATAPATH) $(TESTVARIOUS) $(CS2CSEXE)
 
 testdatumfile-check:
-	@if [ -f $(DATAPATH)/conus -a -f $(DATAPATH)/ntv1_can.dat -a -f $(DATAPATH)/MD -a -f $(DATAPATH)/ntf_r93.dat ]; then \
+	@if [ -f $(DATAPATH)/conus -a -f $(DATAPATH)/ntv1_can.dat -a -f $(DATAPATH)/MD -a -f $(DATAPATH)/ntf_r93.gsb ]; then \
 	  PROJ_LIB=$(DATAPATH) $(TESTDATUMFILE) $(CS2CSEXE) ; \
 	fi
 
