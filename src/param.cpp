@@ -9,6 +9,31 @@
 #include "proj.h"
 #include "proj_internal.h"
 
+static void unquote_string(char* param_str) {
+
+    size_t len = strlen(param_str);
+    // Remove leading and terminating spaces after equal sign
+    const char* equal = strstr(param_str, "=\"");
+    if( equal && equal - param_str + 1 > 2 && param_str[len-1] == '"' ) {
+        size_t dst = equal + 1 - param_str;
+        size_t src = dst + 1;
+        for( ; param_str[src]; dst++, src++)
+        {
+            if( param_str[src] == '"' ) {
+                if( param_str[src+1] == '"' ) {
+                    src++;
+                } else {
+                    break;
+                }
+            }
+            param_str[dst] = param_str[src];
+        }
+        param_str[dst] = '\0';
+    }
+
+}
+
+
 /* create parameter list entry */
 paralist *pj_mkparam(const char *str) {
     paralist *newitem;
@@ -19,13 +44,14 @@ paralist *pj_mkparam(const char *str) {
         if (*str == '+')
             ++str;
         (void)strcpy(newitem->param, str);
+        unquote_string(newitem->param);
     }
     return newitem;
 }
 
 
 /* As pj_mkparam, but payload ends at first whitespace, rather than at end of <str> */
-paralist *pj_mkparam_ws (const char *str) {
+paralist *pj_mkparam_ws (const char *str, const char **next_str) {
     paralist *newitem;
     size_t len = 0;
 
@@ -35,18 +61,32 @@ paralist *pj_mkparam_ws (const char *str) {
     /* Find start and length of string */
     while (isspace (*str))
         str++;
-    while ((!isspace(str[len])) && 0!=str[len])
-        len++;
-    if (*str == '+') {
+    if (*str == '+')
         str++;
-        len--;
+    bool in_string = false;
+    for( ; str[len] != '\0'; len++ ) {
+        if( in_string ) {
+            if( str[len] == '"' && str[len+1] == '"' ) {
+                len++;
+            } else if( str[len] == '"' ) {
+                in_string = false;
+            }
+        } else if( str[len] == '=' && str[len+1] == '"' ) {
+            in_string = true;
+        } else if( isspace(str[len]) ) {
+            break;
+        }
     }
+
+    if( next_str )
+        *next_str = str + len;
 
     /* Use calloc to automagically 0-terminate the copy */
     newitem = (paralist *) pj_calloc (1, sizeof(paralist) + len + 1);
     if (nullptr==newitem)
         return nullptr;
     memmove(newitem->param, str, len);
+    unquote_string(newitem->param);
 
     newitem->used = 0;
     newitem->next = nullptr;

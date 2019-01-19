@@ -775,7 +775,7 @@ double aatan2(double, double);
 PROJVALUE PROJ_DLL pj_param(projCtx_t *ctx, paralist *, const char *);
 paralist PROJ_DLL *pj_param_exists (paralist *list, const char *parameter);
 paralist PROJ_DLL *pj_mkparam(const char *);
-paralist *pj_mkparam_ws (const char *str);
+paralist *pj_mkparam_ws (const char *str, const char **next_str);
 
 
 int PROJ_DLL pj_ell_set(projCtx_t *ctx, paralist *, double *, double *);
@@ -900,6 +900,7 @@ void   pj_freeup_plain (PJ *P);
 PJ* pj_init_ctx_with_allow_init_epsg( projCtx_t *ctx, int argc, char **argv, int allow_init_epsg );
 
 std::string PROJ_DLL pj_add_type_crs_if_needed(const std::string& str);
+std::string pj_double_quote_string_param_if_needed(const std::string& str);
 
 PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition);
 PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);

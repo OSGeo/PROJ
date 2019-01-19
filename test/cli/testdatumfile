@@ -27,6 +27,9 @@ echo "============================================"
 echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
+mkdir "dir with \" space"
+cp ${PROJ_LIB}/conus "dir with \" space/myconus"
+
 OUT=td_out
 #EXE=../src/cs2cs
 #
@@ -46,7 +49,7 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo As above, but without ntv1 everything goes through conus file. >> ${OUT}
 #
-$EXE +proj=latlong +ellps=clrk66 +nadgrids=conus \
+$EXE +proj=latlong +ellps=clrk66 '+nadgrids="./dir with "" space/myconus"' \
  +to +proj=latlong +datum=NAD83 \
  -E >>${OUT} <<EOF
 111d00'00.000"W 44d00'00.000"N 0.0
@@ -94,6 +97,9 @@ $EXE +proj=latlong +datum=WGS84 \
 -5.4999 51.9999
 -5.5001 52.0
 EOF
+
+rm -rf "dir with \" space"
+
 #
 ##############################################################################
 # Done!     
