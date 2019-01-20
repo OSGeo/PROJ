@@ -29,6 +29,8 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#define FROM_PROJ_CPP
+
 #include <ctype.h>
 #include <errno.h>
 #include <math.h>
@@ -39,8 +41,10 @@
 
 #include "geodesic.h"
 #include "proj_internal.h"
-#include "proj_internal.h"
 
+#include "proj/internal/internal.hpp"
+
+using namespace NS_PROJ::internal;
 
 enum pj_io_units pj_left (PJ *P) {
     enum pj_io_units u = P->inverted? P->right: P->left;
@@ -200,7 +204,7 @@ consuming their surrounding whitespace.
     size_t i, j, n;
 
     /* Flag showing that a whitespace (ws) has been written after last non-ws */
-    size_t ws;
+    bool ws = false;
 
     if (nullptr==c)
        return nullptr;
@@ -212,8 +216,19 @@ consuming their surrounding whitespace.
 
     /* First collapse repeated whitespace (including +/;) */
     i = 0;
-    ws = 0;
+    bool in_string = false;
     for (j = 0;  j < n;  j++) {
+
+        if( in_string ) {
+            if( c[j] == '"' && c[j+1] == '"' ) {
+                c[i++] = c[j];
+                j++;
+            } else if( c[j] == '"' ) {
+                in_string = false;
+            }
+            c[i++] = c[j];
+            continue;
+        }
 
         /* Eliminate prefix '+', only if preceded by whitespace */
         /* (i.e. keep it in 1.23e+08) */
@@ -222,14 +237,22 @@ consuming their surrounding whitespace.
         if ((i==0) && ('+'==c[j]))
             c[j] = ' ';
 
+        // Detect a string beginning after '='
+        if( c[j] == '"' && i > 0 && c[i-1] == '=' ) {
+            in_string = true;
+            ws = false;
+            c[i++] = c[j];
+            continue;
+        }
+
         if (isspace (c[j]) || ';'==c[j]) {
-            if (0==ws && (i > 0))
+            if (false==ws && (i > 0))
                 c[i++] = ' ';
-            ws = 1;
+            ws = true;
             continue;
         }
         else {
-            ws = 0;
+            ws = false;
             c[i++] = c[j];
         }
     }
@@ -275,8 +298,20 @@ argument string, args, and count its number of elements.
     n = strlen (args);
     if (n==0)
         return 0;
+    bool in_string = false;
     for (i = m = 0;  i < n;  i++) {
-        if (' '==args[i]) {
+        if (in_string ) {
+            if( args[i] == '"' && args[i+1] == '"' ) {
+                i++;
+            } else if( args[i] == '"' ) {
+                in_string = false;
+            }
+        }
+        else if (args[i] == '=' && args[i+1] == '"' ) {
+            i++;
+            in_string = true;
+        }
+        else if (' '==args[i]) {
             args[i] = 0;
             m++;
         }
@@ -302,8 +337,6 @@ is allocated and returned.
 
 It is the duty of the caller to free this array.
 ******************************************************************************/
-    size_t i, j;
-    char **argv;
 
     if (nullptr==args)
         return nullptr;
@@ -312,22 +345,27 @@ It is the duty of the caller to free this array.
 
 
     /* turn the input string into an array of strings */
-    argv = (char **) calloc (argc, sizeof (char *));
+    char** argv = (char **) calloc (argc, sizeof (char *));
     if (nullptr==argv)
         return nullptr;
-    argv[0] = args;
-    j = 1;
-    for (i = 0;  ;  i++) {
-        if (0==args[i]) {
-            argv[j++] = args + (i + 1);
-        }
-        if (j==argc)
-            break;
+    for(size_t i = 0, j = 0; j < argc; j++) {
+        argv[j] = args + i;
+        char* str = argv[j];
+        size_t nLen = strlen(str);
+        i += nLen + 1;
     }
     return argv;
 }
 
 
+/*****************************************************************************/
+std::string pj_double_quote_string_param_if_needed(const std::string& str) {
+/*****************************************************************************/
+    if( str.find(' ') == std::string::npos ) {
+        return str;
+    }
+    return '"' + replaceAll(str, "\"", "\"\"") + '"';
+}
 
 /*****************************************************************************/
 char *pj_make_args (size_t argc, char **argv) {
@@ -339,23 +377,28 @@ Allocates, and returns, an array of char, large enough to hold a whitespace
 separated copy of the args in argv. It is the duty of the caller to free this
 array.
 ******************************************************************************/
-    size_t i, n;
-    char *p;
 
-    for (i = n = 0;  i < argc;  i++)
-        n += strlen (argv[i]);
+    try
+    {
+        std::string s;
+        for( size_t i = 0; i < argc; i++ )
+        {
+            const char* equal = strchr(argv[i], '=');
+            if( equal ) {
+                s += std::string(argv[i], equal - argv[i] + 1);
+                s += pj_double_quote_string_param_if_needed(equal + 1);
+            } else {
+                s += argv[i];
+            }
+            s += ' ';
+        }
 
-    p = static_cast<char*>(pj_calloc (n + argc + 1, sizeof (char)));
-    if (nullptr==p)
-        return nullptr;
-    if (0==argc)
-        return p;
-
-    for (i = 0;  i < argc;  i++) {
-        strcat (p, argv[i]);
-        strcat (p, " ");
+        char* p = pj_strdup(s.c_str());
+        return pj_shrink (p);
     }
-    return pj_shrink (p);
+    catch( const std::exception& ) {
+        return nullptr;
+    }
 }
 
 

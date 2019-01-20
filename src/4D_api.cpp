@@ -473,10 +473,11 @@ Returns 1 on success, 0 on failure
     p = pj_param_exists (P->params, "geoidgrids");
     if (p  &&  strlen (p->param) > strlen ("geoidgrids=")) {
         char *gridnames = p->param + strlen ("geoidgrids=");
-        char *def = static_cast<char*>(malloc (100+strlen(gridnames)));
+        char *def = static_cast<char*>(malloc (100+2*strlen(gridnames)));
         if (nullptr==def)
             return 0;
-        sprintf (def, "break_cs2cs_recursion     proj=vgridshift  grids=%s", gridnames);
+        sprintf (def, "break_cs2cs_recursion     proj=vgridshift  grids=%s",
+                 pj_double_quote_string_param_if_needed(gridnames).c_str());
         Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
@@ -488,10 +489,11 @@ Returns 1 on success, 0 on failure
     p = pj_param_exists (P->params, "nadgrids");
     if (p  &&  strlen (p->param) > strlen ("nadgrids=")) {
         char *gridnames = p->param + strlen ("nadgrids=");
-        char *def = static_cast<char*>(malloc (100+strlen(gridnames)));
+        char *def = static_cast<char*>(malloc (100+2*strlen(gridnames)));
         if (nullptr==def)
             return 0;
-        sprintf (def, "break_cs2cs_recursion     proj=hgridshift  grids=%s", gridnames);
+        sprintf (def, "break_cs2cs_recursion     proj=hgridshift  grids=%s",
+                 pj_double_quote_string_param_if_needed(gridnames).c_str());
         Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)

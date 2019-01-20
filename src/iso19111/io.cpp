@@ -5208,8 +5208,9 @@ const std::string &PROJStringFormatter::toString() const {
             d->appendToResult("+");
             d->result_ += paramValue.key;
             if (!paramValue.value.empty()) {
-                d->result_ += "=";
-                d->result_ += paramValue.value;
+                d->result_ += '=';
+                d->result_ +=
+                    pj_double_quote_string_param_if_needed(paramValue.value);
             }
         }
     }
@@ -5229,8 +5230,9 @@ const std::string &PROJStringFormatter::toString() const {
             d->appendToResult("+");
             d->result_ += paramValue.key;
             if (!paramValue.value.empty()) {
-                d->result_ += "=";
-                d->result_ += paramValue.value;
+                d->result_ += '=';
+                d->result_ +=
+                    pj_double_quote_string_param_if_needed(paramValue.value);
             }
         }
     }
@@ -5273,8 +5275,39 @@ static void
 PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                        std::vector<Step::KeyValue> &globalParamValues,
                        std::string &title) {
-    std::string word;
-    std::istringstream iss(projString, std::istringstream::in);
+    const char *c_str = projString.c_str();
+    std::vector<std::string> tokens;
+
+    size_t i = 0;
+    while (true) {
+        for (; isspace(c_str[i]); i++) {
+        }
+        std::string token;
+        bool in_string = false;
+        for (; c_str[i]; i++) {
+            if (in_string) {
+                if (c_str[i] == '"' && c_str[i + 1] == '"') {
+                    i++;
+                } else if (c_str[i] == '"') {
+                    in_string = false;
+                    continue;
+                }
+            } else if (c_str[i] == '=' && c_str[i + 1] == '"') {
+                in_string = true;
+                token += c_str[i];
+                i++;
+                continue;
+            } else if (isspace(c_str[i])) {
+                break;
+            }
+            token += c_str[i];
+        }
+        if (token.empty()) {
+            break;
+        }
+        tokens.emplace_back(token);
+    }
+
     bool prevWasTitle = false;
 
     if (projString.find("proj=pipeline") == std::string::npos) {
@@ -5290,7 +5323,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             steps.push_back(Step());
         }
 
-        while (iss >> word) {
+        for (auto &word : tokens) {
             if (word[0] == '+') {
                 word = word.substr(1);
             } else if (prevWasTitle && word.find('=') == std::string::npos) {
@@ -5334,7 +5367,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
 
     bool inPipeline = false;
     bool invGlobal = false;
-    while (iss >> word) {
+    for (auto &word : tokens) {
         if (word[0] == '+') {
             word = word.substr(1);
         } else if (prevWasTitle && word.find('=') == std::string::npos) {
