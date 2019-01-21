@@ -189,3 +189,12 @@ TEST(common, identifiedobject_alias_array_of_invalid_type) {
     ASSERT_THROW(OperationParameter::create(properties),
                  InvalidValueTypeException);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(common, DataEpoch) {
+    DataEpoch epochSrc(Measure(2010.5, UnitOfMeasure::YEAR));
+    DataEpoch epoch(epochSrc);
+    EXPECT_EQ(epoch.coordinateEpoch().value(), 2010.5);
+    EXPECT_EQ(epoch.coordinateEpoch().unit(), UnitOfMeasure::YEAR);
+}

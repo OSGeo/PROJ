@@ -262,10 +262,22 @@ class DateTime {
 
 /** \brief Data epoch */
 class DataEpoch {
-    // FIXME
   public:
-    /** FIXME */
-    Measure coordinateEpoch{};
+    //! @cond Doxygen_Suppress
+    PROJ_DLL explicit DataEpoch(const Measure &coordinateEpochIn);
+    PROJ_DLL DataEpoch(const DataEpoch &other);
+    PROJ_DLL ~DataEpoch();
+    //! @endcond
+
+    PROJ_DLL const Measure &coordinateEpoch() const;
+
+  protected:
+    DataEpoch();
+    PROJ_FRIEND_OPTIONAL(DataEpoch);
+
+  private:
+    DataEpoch &operator=(const DataEpoch &other) = delete;
+    PROJ_OPAQUE_PRIVATE_DATA
 };
 
 // ---------------------------------------------------------------------------

@@ -642,9 +642,7 @@ const std::string &IdentifiedObject::remarks() PROJ_PURE_DEFN {
  *
  * \remark Extension of \ref ISO_19111_2018
  */
-bool IdentifiedObject::isDeprecated() PROJ_PURE_DEFN {
-    return d->isDeprecated;
-}
+bool IdentifiedObject::isDeprecated() PROJ_PURE_DEFN { return d->isDeprecated; }
 
 // ---------------------------------------------------------------------------
 //! @cond Doxygen_Suppress
@@ -1110,6 +1108,46 @@ bool ObjectUsage::_isEquivalentTo(
     return IdentifiedObject::_isEquivalentTo(other, criterion);
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct DataEpoch::Private {
+    Measure coordinateEpoch_{};
+
+    explicit Private(const Measure &coordinateEpochIn)
+        : coordinateEpoch_(coordinateEpochIn) {}
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+DataEpoch::DataEpoch()
+    : d(internal::make_unique<Private>(Measure())) {}
+
+// ---------------------------------------------------------------------------
+
+DataEpoch::DataEpoch(const Measure &coordinateEpochIn)
+    : d(internal::make_unique<Private>(coordinateEpochIn)) {}
+
+// ---------------------------------------------------------------------------
+
+DataEpoch::DataEpoch(const DataEpoch &other)
+    : d(internal::make_unique<Private>(*(other.d))) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+DataEpoch::~DataEpoch() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the coordinate epoch, as a measure in decimal year.
+ */
+const Measure &DataEpoch::coordinateEpoch() const {
+    return d->coordinateEpoch_;
+}
 
 } // namespace common
 NS_PROJ_END
