@@ -199,7 +199,7 @@ The x-y output data will appear as three lines of:
 
 ::
 
-    1402285.98  5076292.42 -0.00
+    1402293.44  5076292.68 0.00
 
 
 Using EPSG codes
