@@ -108,10 +108,19 @@ paragraph for more details.
           When using that syntax, the axis order and unit for geographic CRS will
           be longitude, latitude, and the unit degrees.
 
+        - the name of a CRS as found in the PROJ database, e.g "WGS84", "NAD27", etc.
+
         - more generally any string accepted by :c:func:`proj_create`
 
     An "area of use" can be specified in area. When it is supplied, the more
     accurate transformation between two given systems can be chosen.
+
+    When no area of use is specific and several coordinate operations are possible
+    depending on the area of use, this function will internally store those
+    candidate coordinate operations in the return PJ object. Each subsequent
+    coordinate transformation done with :c:func:`proj_trans` will then select
+    the appropriate coordinate operation by comparing the input coordinates with
+    the area of use of the candidate coordinate operations.
 
     Example call:
 

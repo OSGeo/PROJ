@@ -60,6 +60,7 @@
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
+
 #include <string>
 #include <vector>
 
@@ -517,6 +518,50 @@ struct PJconsts {
     mutable std::string lastPROJString{};
     mutable bool gridsNeededAsked = false;
     mutable std::vector<NS_PROJ::operation::GridDescription> gridsNeeded{};
+
+    /*************************************************************************************
+     proj_create_crs_to_crs() alternative coordinate operations
+    **************************************************************************************/
+
+    struct CoordOperation
+    {
+        double minxSrc = 0.0;
+        double minySrc = 0.0;
+        double maxxSrc = 0.0;
+        double maxySrc = 0.0;
+        double minxDst = 0.0;
+        double minyDst = 0.0;
+        double maxxDst = 0.0;
+        double maxyDst = 0.0;
+        PJ* pj = nullptr;
+        std::string name{};
+
+        CoordOperation(double minxSrcIn, double minySrcIn, double maxxSrcIn, double maxySrcIn,
+                       double minxDstIn, double minyDstIn, double maxxDstIn, double maxyDstIn,
+                       PJ* pjIn, const std::string& nameIn):
+            minxSrc(minxSrcIn), minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
+            minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn), maxyDst(maxyDstIn),
+            pj(pjIn), name(nameIn) {}
+
+        CoordOperation(const CoordOperation&) = delete;
+
+        CoordOperation(CoordOperation&& other):
+            minxSrc(other.minxSrc), minySrc(other.minySrc), maxxSrc(other.maxxSrc), maxySrc(other.maxySrc),
+            minxDst(other.minxDst), minyDst(other.minyDst), maxxDst(other.maxxDst), maxyDst(other.maxyDst),
+            name(std::move(other.name)) {
+                pj = other.pj;
+                other.pj = nullptr;
+            }
+
+        CoordOperation& operator=(const CoordOperation&) = delete;
+
+        ~CoordOperation()
+        {
+            proj_destroy(pj);
+        }
+    };
+    std::vector<CoordOperation> alternativeCoordinateOperations{};
+    int iCurCoordOp = -1;
 
     /*************************************************************************************
 

@@ -642,9 +642,7 @@ const std::string &IdentifiedObject::remarks() PROJ_PURE_DEFN {
  *
  * \remark Extension of \ref ISO_19111_2018
  */
-bool IdentifiedObject::isDeprecated() PROJ_PURE_DEFN {
-    return d->isDeprecated;
-}
+bool IdentifiedObject::isDeprecated() PROJ_PURE_DEFN { return d->isDeprecated; }
 
 // ---------------------------------------------------------------------------
 //! @cond Doxygen_Suppress

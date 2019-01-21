@@ -1653,8 +1653,7 @@ CRSNNPtr GeographicCRS::_shallowClone() const {
  *
  * @return a EllipsoidalCS.
  */
-const cs::EllipsoidalCSNNPtr &
-GeographicCRS::coordinateSystem() PROJ_PURE_DEFN {
+const cs::EllipsoidalCSNNPtr &GeographicCRS::coordinateSystem() PROJ_PURE_DEFN {
     return d->coordinateSystem_;
 }
 

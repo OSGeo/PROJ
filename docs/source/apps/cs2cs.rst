@@ -154,6 +154,10 @@ When using a WKT definition or a AUTHORITY:CODE, the axis order of the CRS will
 be enforced. So for example if using EPSG:4326, the first value expected (or
 returned) will be a latitude.
 
+Internally, :program:`cs2cs` uses the :c:func:`proj_create_crs_to_crs` function
+to compute the appropriate coordinate operation, so implementation details of
+this function directly impact the results returned by the program.
+
 The environment parameter :envvar:`PROJ_LIB` establishes the
 directory for resource files (database, datum shift grids, etc.)
 
