@@ -187,7 +187,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','6144','Kalianpur 1937',NULL,NULL,'EP
 INSERT INTO "geodetic_datum" VALUES('EPSG','6145','Kalianpur 1962',NULL,NULL,'EPSG','7044','EPSG','8901','EPSG','1184',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6146','Kalianpur 1975',NULL,NULL,'EPSG','7045','EPSG','8901','EPSG','3341',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6147','Hanoi 1972',NULL,NULL,'EPSG','7024','EPSG','8901','EPSG','3328',0);
-INSERT INTO "geodetic_datum" VALUES('EPSG','6148','Hartebeesthoek94',NULL,NULL,'EPSG','7030','EPSG','8901','EPSG','1215',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','6148','Hartebeesthoek94',NULL,NULL,'EPSG','7030','EPSG','8901','EPSG','4540',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6149','CH1903',NULL,NULL,'EPSG','7004','EPSG','8901','EPSG','1286',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6150','CH1903+',NULL,NULL,'EPSG','7004','EPSG','8901','EPSG','1286',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6151','Swiss Terrestrial Reference Frame 1995',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1286',0);

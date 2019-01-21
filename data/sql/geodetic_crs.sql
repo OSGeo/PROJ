@@ -92,7 +92,7 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','4144','Kalianpur 1937',NULL,NULL,'geog
 INSERT INTO "geodetic_crs" VALUES('EPSG','4145','Kalianpur 1962',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6145','EPSG','1184',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4146','Kalianpur 1975',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6146','EPSG','3341',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4147','Hanoi 1972',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6147','EPSG','3328',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('EPSG','4148','Hartebeesthoek94',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6148','EPSG','1215',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','4148','Hartebeesthoek94',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6148','EPSG','4540',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4149','CH1903',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6149','EPSG','1286',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4150','CH1903+',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6150','EPSG','1286',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4151','CHTRF95',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6151','EPSG','1286',NULL,0);
@@ -578,8 +578,8 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','4936','ETRS89',NULL,NULL,'geocentric',
 INSERT INTO "geodetic_crs" VALUES('EPSG','4937','ETRS89',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','6258','EPSG','1298',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4938','GDA94',NULL,NULL,'geocentric','EPSG','6500','EPSG','6283','EPSG','4177',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4939','GDA94',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','6283','EPSG','4177',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('EPSG','4940','Hartebeesthoek94',NULL,NULL,'geocentric','EPSG','6500','EPSG','6148','EPSG','1215',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('EPSG','4941','Hartebeesthoek94',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','6148','EPSG','1215',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','4940','Hartebeesthoek94',NULL,NULL,'geocentric','EPSG','6500','EPSG','6148','EPSG','4540',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','4941','Hartebeesthoek94',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','6148','EPSG','4540',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4942','IRENET95',NULL,NULL,'geocentric','EPSG','6500','EPSG','6173','EPSG','1305',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4943','IRENET95',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','6173','EPSG','1305',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4944','ISN93',NULL,NULL,'geocentric','EPSG','6500','EPSG','6659','EPSG','1120',NULL,0);
