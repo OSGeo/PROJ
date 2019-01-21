@@ -180,7 +180,7 @@ Parameters
 
 .. option:: +t_obs=<value>
 
-    Observation time of coordinate(s) given in decicalyear. Mostly useful
+    Observation time of coordinate(s) given in decimalyear. Mostly useful
     in 2D and 3D transformations where the observation time is not passed
     as part of the input coordinate. Can be used to override the observation
     time from the input coordinate.
