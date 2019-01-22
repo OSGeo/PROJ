@@ -7024,6 +7024,17 @@ TEST(io, projparse_longlat_nadgrids) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_longlat_nadgrids_towgs84_ignored) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +towgs84=1,2,3 +nadgrids=foo.gsb "
+        "+type=crs");
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(dynamic_cast<GeographicCRS *>(crs->baseCRS().get()) != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat_geoidgrids) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx +type=crs");

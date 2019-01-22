@@ -1653,8 +1653,7 @@ CRSNNPtr GeographicCRS::_shallowClone() const {
  *
  * @return a EllipsoidalCS.
  */
-const cs::EllipsoidalCSNNPtr &
-GeographicCRS::coordinateSystem() PROJ_PURE_DEFN {
+const cs::EllipsoidalCSNNPtr &GeographicCRS::coordinateSystem() PROJ_PURE_DEFN {
     return d->coordinateSystem_;
 }
 
@@ -3765,6 +3764,11 @@ void BoundCRS::_exportToPROJString(
     if (!crs_exportable) {
         io::FormattingException::Throw(
             "baseCRS of BoundCRS cannot be exported as a PROJ string");
+    }
+
+    if (formatter->getDropEarlyBindingsTerms()) {
+        crs_exportable->_exportToPROJString(formatter);
+        return;
     }
 
     auto vdatumProj4GridName = getVDatumPROJ4GRIDS();

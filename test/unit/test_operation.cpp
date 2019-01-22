@@ -6320,6 +6320,32 @@ TEST(operation, createOperation_fallback_to_proj4_strings) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createOperation_on_crs_with_bound_crs_and_wktext) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 "
+        "+units=m +no_defs +nadgrids=GDA94_GDA2020_conformal.gsb "
+        "+type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 "
+        "+units=m +no_defs +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=utm +zone=55 +south "
+              "+ellps=GRS80 +step +proj=hgridshift "
+              "+grids=GDA94_GDA2020_conformal.gsb +step +proj=utm +zone=55 "
+              "+south +ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, mercator_variant_A_to_variant_B) {
     auto projCRS = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,

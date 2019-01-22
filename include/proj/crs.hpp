@@ -158,8 +158,7 @@ class PROJ_GCC_DLL SingleCRS : public CRS {
 
     PROJ_DLL const datum::DatumPtr &datum() PROJ_PURE_DECL;
     PROJ_DLL const datum::DatumEnsemblePtr &datumEnsemble() PROJ_PURE_DECL;
-    PROJ_DLL const cs::CoordinateSystemNNPtr &
-    coordinateSystem() PROJ_PURE_DECL;
+    PROJ_DLL const cs::CoordinateSystemNNPtr &coordinateSystem() PROJ_PURE_DECL;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

@@ -4745,6 +4745,7 @@ struct PROJStringFormatter::Private {
     bool addNoDefs_ = true;
     bool coordOperationOptimizations_ = false;
     bool crsExport_ = false;
+    bool dropEarlyBindingsTerms_ = false;
 
     std::string result_{};
 
@@ -5274,7 +5275,7 @@ void PROJStringFormatter::Private::appendToResult(const char *str) {
 static void
 PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                        std::vector<Step::KeyValue> &globalParamValues,
-                       std::string &title) {
+                       std::string &title, bool dropEarlyBindingsTerms) {
     const char *c_str = projString.c_str();
     std::vector<std::string> tokens;
 
@@ -5352,13 +5353,17 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             } else if (word != "step") {
                 const auto pos = word.find('=');
                 auto key = word.substr(0, pos);
-                auto pair = (pos != std::string::npos)
-                                ? Step::KeyValue(key, word.substr(pos + 1))
-                                : Step::KeyValue(key);
-                if (steps.empty()) {
-                    globalParamValues.push_back(pair);
-                } else {
-                    steps.back().paramValues.push_back(pair);
+                if (!(dropEarlyBindingsTerms &&
+                      (key == "towgs84" || key == "nadgrids" ||
+                       key == "geoidgrids" || key == "wktext"))) {
+                    auto pair = (pos != std::string::npos)
+                                    ? Step::KeyValue(key, word.substr(pos + 1))
+                                    : Step::KeyValue(key);
+                    if (steps.empty()) {
+                        globalParamValues.push_back(pair);
+                    } else {
+                        steps.back().paramValues.push_back(pair);
+                    }
                 }
             }
         }
@@ -5433,7 +5438,8 @@ void PROJStringFormatter::ingestPROJString(
 {
     std::vector<Step> steps;
     std::string title;
-    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title);
+    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title,
+                           d->dropEarlyBindingsTerms_);
     d->steps_.insert(d->steps_.end(), steps.begin(), steps.end());
 }
 
@@ -5691,6 +5697,18 @@ void PROJStringFormatter::setOmitZUnitConversion(bool omit) {
 
 bool PROJStringFormatter::omitZUnitConversion() const {
     return d->omitZUnitConversion_;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setDropEarlyBindingsTerms(bool drop) {
+    d->dropEarlyBindingsTerms_ = drop;
+}
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::getDropEarlyBindingsTerms() const {
+    return d->dropEarlyBindingsTerms_;
 }
 
 // ---------------------------------------------------------------------------
@@ -6673,8 +6691,12 @@ CRSNNPtr
 PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
                                                            CRSNNPtr crs) {
     const auto &step = steps_[iStep];
+    const auto &nadgrids = getParamValue(step, "nadgrids");
     const auto &towgs84 = getParamValue(step, "towgs84");
-    if (!towgs84.empty()) {
+    // nadgrids has the priority over towgs84
+    if (!nadgrids.empty()) {
+        crs = BoundCRS::createFromNadgrids(crs, nadgrids);
+    } else if (!towgs84.empty()) {
         std::vector<double> towgs84Values;
         const auto tokens = split(towgs84, ',');
         for (const auto &str : tokens) {
@@ -6685,11 +6707,6 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
             }
         }
         crs = BoundCRS::createFromTOWGS84(crs, towgs84Values);
-    }
-
-    const auto &nadgrids = getParamValue(step, "nadgrids");
-    if (!nadgrids.empty()) {
-        crs = BoundCRS::createFromNadgrids(crs, nadgrids);
     }
 
     const auto &geoidgrids = getParamValue(step, "geoidgrids");
@@ -7397,7 +7414,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     d->globalParamValues_.clear();
     d->projString_ = projString;
     PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_,
-                           d->title_);
+                           d->title_, false);
 
     if (d->steps_.empty()) {
         const auto &vunits = d->getGlobalParamValue("vunits");
