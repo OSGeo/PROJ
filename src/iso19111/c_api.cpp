@@ -337,7 +337,7 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
     assert(text);
 
     // Only connect to proj.db if needed
-    if( strstr(text, "proj=") == nullptr || strstr(text, "init=") != nullptr ) {
+    if (strstr(text, "proj=") == nullptr || strstr(text, "init=") != nullptr) {
         getDBcontextNoException(ctx, __FUNCTION__);
     }
     try {

@@ -29,6 +29,7 @@
 
 #define FROM_PROJ_CPP
 
+#include <assert.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -38,10 +39,13 @@
 #include <strings.h>
 #endif
 
+#include <algorithm>
+#include <limits>
+
 #include "proj.h"
+#include "proj_experimental.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "proj_internal.h"
 #include "geodesic.h"
 
 #include "proj/common.hpp"
@@ -182,18 +186,52 @@ available.
 See also pj_approx_2D_trans and pj_approx_3D_trans in pj_internal.c, which work
 similarly, but prefers the 2D resp. 3D interfaces if available.
 ***************************************************************************************/
-    if (nullptr==P)
+    if (nullptr==P || direction == PJ_IDENT)
         return coord;
     if (P->inverted)
         direction = opposite_direction(direction);
+
+    if( !P->alternativeCoordinateOperations.empty() ) {
+        int i = 0;
+        for( const auto &alt: P->alternativeCoordinateOperations ) {
+            if( direction == PJ_FWD ) {
+                if( coord.xyzt.x >= alt.minxSrc &&
+                    coord.xyzt.y >= alt.minySrc &&
+                    coord.xyzt.x <= alt.maxxSrc &&
+                    coord.xyzt.y <= alt.maxySrc ) {
+                    if( P->iCurCoordOp != i ) {
+                        std::string msg("Using coordinate operation ");
+                        msg += alt.name;
+                        pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                        P->iCurCoordOp = i;
+                    }
+                    return pj_fwd4d( coord, alt.pj );
+                }
+            } else {
+                if( coord.xyzt.x >= alt.minxDst &&
+                    coord.xyzt.y >= alt.minyDst &&
+                    coord.xyzt.x <= alt.maxxDst &&
+                    coord.xyzt.y <= alt.maxyDst ) {
+                    if( P->iCurCoordOp != i ) {
+                        std::string msg("Using coordinate operation ");
+                        msg += alt.name;
+                        pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                        P->iCurCoordOp = i;
+                    }
+                    return pj_inv4d( coord, alt.pj );
+                }
+            }
+            i ++;
+        }
+        proj_errno_set (P, EINVAL);
+        return proj_coord_error ();
+    }
 
     switch (direction) {
         case PJ_FWD:
             return pj_fwd4d (coord, P);
         case PJ_INV:
             return  pj_inv4d (coord, P);
-        case PJ_IDENT:
-            return coord;
         default:
             break;
     }
@@ -780,118 +818,389 @@ std::string pj_add_type_crs_if_needed(const std::string& str)
 }
 
 /*****************************************************************************/
+static PJ* op_to_pj(PJ_CONTEXT* ctx, PJ* op)
+/*****************************************************************************/
+{
+    auto proj_string = proj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
+    if( !proj_string) {
+        return nullptr;
+    }
+
+    if( proj_string[0] == '\0' ) {
+        /* Null transform ? */
+        return proj_create(ctx, "proj=affine");
+    } else {
+        return proj_create(ctx, proj_string);
+    }
+}
+
+/*****************************************************************************/
+static void reproject_bbox(PJ* pjGeogToCrs,
+                          double west_lon, double south_lat,
+                          double east_lon, double north_lat,
+                          double& minx,
+                          double& miny,
+                          double& maxx,
+                          double& maxy) {
+/*****************************************************************************/
+
+    minx = -std::numeric_limits<double>::max();
+    miny = -std::numeric_limits<double>::max();
+    maxx = std::numeric_limits<double>::max();
+    maxy = std::numeric_limits<double>::max();
+
+    if( !(west_lon == -180.0 && east_lon == 180.0 &&
+          south_lat == -90.0 && north_lat == 90.0) )
+    {
+        minx = -minx;
+        miny = -miny;
+        maxx = -maxx;
+        maxy = -maxy;
+
+        double x[21 * 4], y[21 * 4];
+        for( int j = 0; j <= 20; j++ )
+        {
+            x[j] = west_lon + j * (east_lon - west_lon) / 20;
+            y[j] = south_lat;
+            x[21+j] = west_lon + j * (east_lon - west_lon) / 20;
+            y[21+j] = north_lat;
+            x[21*2+j] = west_lon;
+            y[21*2+j] = south_lat + j * (north_lat - south_lat) / 20;
+            x[21*3+j] = east_lon;
+            y[21*3+j] = south_lat + j * (north_lat - south_lat) / 20;
+        }
+        proj_trans_generic (
+            pjGeogToCrs, PJ_FWD,
+                x, sizeof(double), 21 * 4,
+                y, sizeof(double), 21 * 4,
+                nullptr, 0, 0,
+                nullptr, 0, 0);
+        for( int j = 0; j < 21 * 4; j++ )
+        {
+            if( x[j] != HUGE_VAL && y[j] != HUGE_VAL )
+            {
+                minx = std::min(minx, x[j]);
+                miny = std::min(miny, y[j]);
+                maxx = std::max(maxx, x[j]);
+                maxy = std::max(maxy, y[j]);
+            }
+        }
+    }
+}
+
+
+/*****************************************************************************/
+static PJ* add_coord_op_to_list(PJ_CONTEXT* ctx, PJ* op,
+                            double west_lon, double south_lat,
+                            double east_lon, double north_lat,
+                            PJ* pjGeogToSrc,
+                            PJ* pjGeogToDst,
+                            std::vector<PJconsts::CoordOperation>& altCoordOps) {
+/*****************************************************************************/
+
+    double minxSrc;
+    double minySrc;
+    double maxxSrc;
+    double maxySrc;
+    double minxDst;
+    double minyDst;
+    double maxxDst;
+    double maxyDst;
+
+    reproject_bbox(pjGeogToSrc, west_lon, south_lat, east_lon, north_lat,
+                  minxSrc, minySrc, maxxSrc, maxySrc);
+    reproject_bbox(pjGeogToDst, west_lon, south_lat, east_lon, north_lat,
+                  minxDst, minyDst, maxxDst, maxyDst);
+
+    if( minxSrc <= maxxSrc && minxDst <= maxxDst )
+    {
+        const char* c_name = proj_get_name(op);
+        std::string name(c_name ? c_name : "");
+        auto pj = op_to_pj(ctx, op);
+        proj_destroy(op);
+        op = nullptr;
+        if( pj )
+        {
+            altCoordOps.emplace_back(minxSrc, minySrc, maxxSrc, maxySrc,
+                                     minxDst, minyDst, maxxDst, maxyDst,
+                                     pj, name);
+        }
+    }
+    return op;
+};
+
+/*****************************************************************************/
+static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, PJ* crs) {
+/*****************************************************************************/
+    // Create a geographic 2D long-lat degrees CRS that is related to the
+    // CRS
+    auto geodetic_crs = proj_crs_get_geodetic_crs(ctx, crs);
+    if( !geodetic_crs ) {
+        proj_context_log_debug(ctx, "Cannot find geodetic CRS matching CRS");
+        return nullptr;
+    }
+
+    auto geodetic_crs_type = proj_get_type(geodetic_crs);
+    if( geodetic_crs_type == PJ_TYPE_GEOCENTRIC_CRS ||
+        geodetic_crs_type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
+        geodetic_crs_type == PJ_TYPE_GEOGRAPHIC_3D_CRS )
+    {
+        auto datum = proj_crs_get_datum(ctx, geodetic_crs);
+        if( datum )
+        {
+            auto cs = proj_create_ellipsoidal_2D_cs(
+                ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
+            auto temp = proj_create_geographic_crs_from_datum(
+                ctx,"unnamed", datum, cs);
+            proj_destroy(datum);
+            proj_destroy(cs);
+            proj_destroy(geodetic_crs);
+            geodetic_crs = temp;
+            geodetic_crs_type = proj_get_type(geodetic_crs);
+        }
+    }
+    if( geodetic_crs_type != PJ_TYPE_GEOGRAPHIC_2D_CRS )
+    {
+        // Shouldn't happen
+        proj_context_log_debug(ctx, "Cannot find geographic CRS matching CRS");
+        proj_destroy(geodetic_crs);
+        return nullptr;
+    }
+
+    // Create the transformation from this geographic 2D CRS to the source CRS
+    auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
+    proj_operation_factory_context_set_spatial_criterion(
+        ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    proj_operation_factory_context_set_grid_availability_use(
+        ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+    auto op_list_to_geodetic = proj_create_operations(
+        ctx, geodetic_crs, crs, operation_ctx);
+    proj_operation_factory_context_destroy(operation_ctx);
+    proj_destroy(geodetic_crs);
+
+    if( op_list_to_geodetic == nullptr ||
+        proj_list_get_count(op_list_to_geodetic) == 0 )
+    {
+        proj_context_log_debug(ctx, "Cannot compute transformation from geographic CRS to CRS");
+        proj_list_destroy(op_list_to_geodetic);
+        return nullptr;
+    }
+    auto opGeogToCrs = proj_list_get(ctx, op_list_to_geodetic, 0);
+    assert(opGeogToCrs);
+    proj_list_destroy(op_list_to_geodetic);
+    auto P = op_to_pj(ctx, opGeogToCrs);
+    proj_destroy(opGeogToCrs);
+    return P;
+}
+
+/*****************************************************************************/
 PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area) {
 /******************************************************************************
     Create a transformation pipeline between two known coordinate reference
     systems.
 
-    source_crs and target_crs can be :
-    - a "AUTHORITY:CODE", like EPSG:25832. When using that syntax for a source
-      CRS, the created pipeline will expect that the values passed to proj_trans()
-      respect the axis order and axis unit of the official definition (
-      so for example, for EPSG:4326, with latitude first and longitude next,
-      in degrees). Similarly, when using that syntax for a target CRS, output
-      values will be emitted according to the official definition of this CRS.
-    - a PROJ string, like "+proj=longlat +datum=WGS84".
-      When using that syntax, the axis order and unit for geographic CRS will
-      be longitude, latitude, and the unit degrees.
-    - more generally any string accepted by proj_create()
-
-    An "area of use" can be specified in area. When it is supplied, the more
-    accurate transformation between two given systems can be chosen.
-
-    Example call:
-
-        PJ *P = proj_create_crs_to_crs(0, "EPSG:25832", "EPSG:25833", NULL);
+    See docs/source/development/reference/functions.rst
 
 ******************************************************************************/
-    const char* proj_string;
-
     if( !ctx ) {
         ctx = pj_get_default_ctx();
     }
 
+    PJ* src;
+    PJ* dst;
     try
     {
         std::string source_crs_modified(pj_add_type_crs_if_needed(source_crs));
         std::string target_crs_modified(pj_add_type_crs_if_needed(target_crs));
 
-        auto src = proj_create(ctx, source_crs_modified.c_str());
+        src = proj_create(ctx, source_crs_modified.c_str());
         if( !src ) {
             proj_context_log_debug(ctx, "Cannot instantiate source_crs");
             return nullptr;
         }
 
-        auto dst = proj_create(ctx, target_crs_modified.c_str());
+        dst = proj_create(ctx, target_crs_modified.c_str());
         if( !dst ) {
             proj_context_log_debug(ctx, "Cannot instantiate target_crs");
             proj_destroy(src);
             return nullptr;
         }
+    }
+    catch( const std::exception& )
+    {
+        return nullptr;
+    }
 
-        auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
-        if( !operation_ctx ) {
-            proj_destroy(src);
-            proj_destroy(dst);
-            return nullptr;
+    auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
+    if( !operation_ctx ) {
+        proj_destroy(src);
+        proj_destroy(dst);
+        return nullptr;
+    }
+
+    if( area && area->bbox_set ) {
+        proj_operation_factory_context_set_area_of_interest(
+                                            ctx,
+                                            operation_ctx,
+                                            area->west_lon_degree,
+                                            area->south_lat_degree,
+                                            area->east_lon_degree,
+                                            area->north_lat_degree);
+    }
+
+    proj_operation_factory_context_set_spatial_criterion(
+        ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    proj_operation_factory_context_set_grid_availability_use(
+        ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+
+    auto op_list = proj_create_operations(ctx, src, dst, operation_ctx);
+
+    if( !op_list ) {
+        proj_operation_factory_context_destroy(operation_ctx);
+        proj_destroy(src);
+        proj_destroy(dst);
+        return nullptr;
+    }
+
+    auto op_count = proj_list_get_count(op_list);
+    if( op_count == 0 ) {
+        proj_list_destroy(op_list);
+        proj_operation_factory_context_destroy(operation_ctx);
+        proj_destroy(src);
+        proj_destroy(dst);
+        proj_context_log_debug(ctx, "No operation found matching criteria");
+        return nullptr;
+    }
+
+    PJ* P;
+    {
+        auto op = proj_list_get(ctx, op_list, 0);
+        assert(op);
+        P = op_to_pj(ctx, op);
+        proj_destroy(op);
+    }
+
+    if( P == nullptr || op_count == 1 || (area && area->bbox_set) ||
+        proj_get_type(src) == PJ_TYPE_GEOCENTRIC_CRS ||
+        proj_get_type(dst) == PJ_TYPE_GEOCENTRIC_CRS ) {
+        proj_list_destroy(op_list);
+        proj_operation_factory_context_destroy(operation_ctx);
+        proj_destroy(src);
+        proj_destroy(dst);
+        return P;
+    }
+
+    auto pjGeogToSrc = create_operation_to_base_geog_crs(ctx, src);
+    if( !pjGeogToSrc )
+    {
+        proj_list_destroy(op_list);
+        proj_operation_factory_context_destroy(operation_ctx);
+        proj_destroy(src);
+        proj_destroy(dst);
+        proj_context_log_debug(ctx,
+            "Cannot create transformation from geographic CRS of source CRS to source CRS");
+        proj_destroy(P);
+        return nullptr;
+    }
+
+    auto pjGeogToDst = create_operation_to_base_geog_crs(ctx, dst);
+    if( !pjGeogToDst )
+    {
+        proj_list_destroy(op_list);
+        proj_operation_factory_context_destroy(operation_ctx);
+        proj_destroy(src);
+        proj_destroy(dst);
+        proj_context_log_debug(ctx,
+            "Cannot create transformation from geographic CRS of target CRS to target CRS");
+        proj_destroy(P);
+        proj_destroy(pjGeogToSrc);
+        return nullptr;
+    }
+
+    try
+    {
+        // Iterate over source->target candidate transformations and reproject
+        // their long-lat bounding box into the source CRS.
+        for( int i = 0; i < op_count; i++ )
+        {
+            auto op = proj_list_get(ctx, op_list, i);
+            assert(op);
+            double west_lon = 0.0;
+            double south_lat = 0.0;
+            double east_lon = 0.0;
+            double north_lat = 0.0;
+
+            const char* name = proj_get_name(op);
+            if( name && (strstr(name, "Null geographic offset") ||
+                         strstr(name, "Null geocentric translation")) )
+            {
+                // Skip default transformations
+            }
+            else if( proj_get_area_of_use(ctx, op,
+                        &west_lon, &south_lat, &east_lon, &north_lat, nullptr) )
+            {
+                if( west_lon <= east_lon )
+                {
+                    op = add_coord_op_to_list(ctx, op,
+                        west_lon, south_lat, east_lon, north_lat,
+                        pjGeogToSrc, pjGeogToDst,
+                        P->alternativeCoordinateOperations);
+                }
+                else
+                {
+                    auto op_clone = proj_clone(ctx, op);
+
+                    op = add_coord_op_to_list(ctx, op,
+                        west_lon, south_lat, 180, north_lat,
+                        pjGeogToSrc, pjGeogToDst,
+                        P->alternativeCoordinateOperations);
+                    op_clone = add_coord_op_to_list(ctx, op_clone,
+                        -180, south_lat, east_lon, north_lat,
+                        pjGeogToSrc, pjGeogToDst,
+                        P->alternativeCoordinateOperations);
+                    proj_destroy(op_clone);
+                }
+            }
+
+            proj_destroy(op);
         }
 
-        if( area && area->bbox_set ) {
-            proj_operation_factory_context_set_area_of_interest(
-                                                ctx,
-                                                operation_ctx,
-                                                area->west_lon_degree,
-                                                area->south_lat_degree,
-                                                area->east_lon_degree,
-                                                area->north_lat_degree);
-        }
-
-        proj_operation_factory_context_set_grid_availability_use(
-            ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
-
-        auto op_list = proj_create_operations(ctx, src, dst, operation_ctx);
+        proj_list_destroy(op_list);
 
         proj_operation_factory_context_destroy(operation_ctx);
         proj_destroy(src);
         proj_destroy(dst);
+        proj_destroy(pjGeogToSrc);
+        proj_destroy(pjGeogToDst);
 
-        if( !op_list ) {
-            return nullptr;
-        }
-
-        if( proj_list_get_count(op_list) == 0 ) {
-            proj_list_destroy(op_list);
-            proj_context_log_debug(ctx, "No operation found matching criteria");
-            return nullptr;
-        }
-
-        auto op = proj_list_get(ctx, op_list, 0);
-        proj_list_destroy(op_list);
-        if( !op ) {
-            return nullptr;
-        }
-
-        proj_string = proj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
-        if( !proj_string) {
-            proj_destroy(op);
-            proj_context_log_debug(ctx, "Cannot export operation as a PROJ string");
-            return nullptr;
-        }
-
-        PJ* P;
-        if( proj_string[0] == '\0' ) {
-            /* Null transform ? */
-            P = proj_create(ctx, "proj=affine");
+        // If there's finally juste a single result, return it directly
+        if( P->alternativeCoordinateOperations.size() == 1 ) {
+            auto retP = P->alternativeCoordinateOperations[0].pj;
+            P->alternativeCoordinateOperations[0].pj = nullptr;
+            proj_destroy(P);
+            P = retP;
         } else {
-            P = proj_create(ctx, proj_string);
+            // The returned P is rather dummy
+            P->iso_obj = nullptr;
+            P->fwd = nullptr;
+            P->inv = nullptr;
+            P->fwd3d = nullptr;
+            P->inv3d = nullptr;
+            P->fwd4d = nullptr;
+            P->inv4d = nullptr;
         }
-
-        proj_destroy(op);
 
         return P;
     }
     catch( const std::exception& )
     {
+        proj_list_destroy(op_list);
+        proj_operation_factory_context_destroy(operation_ctx);
+        proj_destroy(src);
+        proj_destroy(dst);
+        proj_destroy(pjGeogToSrc);
+        proj_destroy(pjGeogToDst);
+        proj_destroy(P);
         return nullptr;
     }
 }
@@ -1132,11 +1441,20 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
     if (nullptr==P)
         return pjinfo;
 
+    /* coordinate operation description */
+    if( P->iCurCoordOp >= 0 ) {
+        P = P->alternativeCoordinateOperations[P->iCurCoordOp].pj;
+    } else if( !P->alternativeCoordinateOperations.empty() ) {
+        pjinfo.id = "unknown";
+        pjinfo.description = "unavailable until proj_trans is called";
+        pjinfo.definition = "unavailable until proj_trans is called";
+        return pjinfo;
+    }
+
     /* projection id */
     if (pj_param(P->ctx, P->params, "tproj").i)
         pjinfo.id = pj_param(P->ctx, P->params, "sproj").s;
 
-    /* coordinate operation description */
     if( P->iso_obj ) {
         pjinfo.description = P->iso_obj->nameStr().c_str();
     } else {
