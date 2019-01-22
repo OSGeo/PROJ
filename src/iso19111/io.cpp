@@ -4692,6 +4692,7 @@ struct Step {
     struct KeyValue {
         std::string key{};
         std::string value{};
+        bool usedByParser = false; // only for PROJStringParser used
 
         explicit KeyValue(const std::string &keyIn) : key(keyIn) {}
 
@@ -4745,6 +4746,7 @@ struct PROJStringFormatter::Private {
     bool addNoDefs_ = true;
     bool coordOperationOptimizations_ = false;
     bool crsExport_ = false;
+    bool dropEarlyBindingsTerms_ = false;
 
     std::string result_{};
 
@@ -5264,7 +5266,7 @@ void PROJStringFormatter::setCoordinateOperationOptimizations(bool enable) {
 
 void PROJStringFormatter::Private::appendToResult(const char *str) {
     if (!result_.empty()) {
-        result_ += " ";
+        result_ += ' ';
     }
     result_ += str;
 }
@@ -5274,38 +5276,40 @@ void PROJStringFormatter::Private::appendToResult(const char *str) {
 static void
 PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                        std::vector<Step::KeyValue> &globalParamValues,
-                       std::string &title) {
+                       std::string &title, bool dropEarlyBindingsTerms) {
     const char *c_str = projString.c_str();
     std::vector<std::string> tokens;
 
-    size_t i = 0;
-    while (true) {
-        for (; isspace(c_str[i]); i++) {
-        }
-        std::string token;
-        bool in_string = false;
-        for (; c_str[i]; i++) {
-            if (in_string) {
-                if (c_str[i] == '"' && c_str[i + 1] == '"') {
+    {
+        size_t i = 0;
+        while (true) {
+            for (; isspace(c_str[i]); i++) {
+            }
+            std::string token;
+            bool in_string = false;
+            for (; c_str[i]; i++) {
+                if (in_string) {
+                    if (c_str[i] == '"' && c_str[i + 1] == '"') {
+                        i++;
+                    } else if (c_str[i] == '"') {
+                        in_string = false;
+                        continue;
+                    }
+                } else if (c_str[i] == '=' && c_str[i + 1] == '"') {
+                    in_string = true;
+                    token += c_str[i];
                     i++;
-                } else if (c_str[i] == '"') {
-                    in_string = false;
                     continue;
+                } else if (isspace(c_str[i])) {
+                    break;
                 }
-            } else if (c_str[i] == '=' && c_str[i + 1] == '"') {
-                in_string = true;
                 token += c_str[i];
-                i++;
-                continue;
-            } else if (isspace(c_str[i])) {
+            }
+            if (token.empty()) {
                 break;
             }
-            token += c_str[i];
+            tokens.emplace_back(token);
         }
-        if (token.empty()) {
-            break;
-        }
-        tokens.emplace_back(token);
     }
 
     bool prevWasTitle = false;
@@ -5352,13 +5356,27 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             } else if (word != "step") {
                 const auto pos = word.find('=');
                 auto key = word.substr(0, pos);
-                auto pair = (pos != std::string::npos)
-                                ? Step::KeyValue(key, word.substr(pos + 1))
-                                : Step::KeyValue(key);
-                if (steps.empty()) {
-                    globalParamValues.push_back(pair);
-                } else {
-                    steps.back().paramValues.push_back(pair);
+                if (!(dropEarlyBindingsTerms &&
+                      (key == "towgs84" || key == "nadgrids" ||
+                       key == "geoidgrids"))) {
+                    auto pair = (pos != std::string::npos)
+                                    ? Step::KeyValue(key, word.substr(pos + 1))
+                                    : Step::KeyValue(key);
+                    if (dropEarlyBindingsTerms && key == "datum") {
+                        const auto datums = pj_get_datums_ref();
+                        for (int i = 0; datums[i].id != nullptr; i++) {
+                            if (pair.value == datums[i].id) {
+                                pair.key = "ellps";
+                                pair.value = datums[i].ellipse_id;
+                                break;
+                            }
+                        }
+                    }
+                    if (steps.empty()) {
+                        globalParamValues.push_back(pair);
+                    } else {
+                        steps.back().paramValues.push_back(pair);
+                    }
                 }
             }
         }
@@ -5433,7 +5451,8 @@ void PROJStringFormatter::ingestPROJString(
 {
     std::vector<Step> steps;
     std::string title;
-    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title);
+    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title,
+                           d->dropEarlyBindingsTerms_);
     d->steps_.insert(d->steps_.end(), steps.begin(), steps.end());
 }
 
@@ -5695,6 +5714,18 @@ bool PROJStringFormatter::omitZUnitConversion() const {
 
 // ---------------------------------------------------------------------------
 
+void PROJStringFormatter::setDropEarlyBindingsTerms(bool drop) {
+    d->dropEarlyBindingsTerms_ = drop;
+}
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::getDropEarlyBindingsTerms() const {
+    return d->dropEarlyBindingsTerms_;
+}
+
+// ---------------------------------------------------------------------------
+
 const DatabaseContextPtr &PROJStringFormatter::databaseContext() const {
     return d->dbContext_;
 }
@@ -5717,16 +5748,20 @@ struct PROJStringParser::Private {
     std::vector<Step::KeyValue> globalParamValues_{};
     std::string title_{};
 
+    bool ignoreNadgrids_ = false;
+
     template <class T>
     // cppcheck-suppress functionStatic
-    bool hasParamValue(const Step &step, const T key) {
-        for (const auto &pair : globalParamValues_) {
+    bool hasParamValue(Step &step, const T key) {
+        for (auto &pair : globalParamValues_) {
             if (ci_equal(pair.key, key)) {
+                pair.usedByParser = true;
                 return true;
             }
         }
-        for (const auto &pair : step.paramValues) {
+        for (auto &pair : step.paramValues) {
             if (ci_equal(pair.key, key)) {
+                pair.usedByParser = true;
                 return true;
             }
         }
@@ -5735,9 +5770,10 @@ struct PROJStringParser::Private {
 
     template <class T>
     // cppcheck-suppress functionStatic
-    const std::string &getGlobalParamValue(const T key) {
-        for (const auto &pair : globalParamValues_) {
+    const std::string &getGlobalParamValue(T key) {
+        for (auto &pair : globalParamValues_) {
             if (ci_equal(pair.key, key)) {
+                pair.usedByParser = true;
                 return pair.value;
             }
         }
@@ -5746,14 +5782,26 @@ struct PROJStringParser::Private {
 
     template <class T>
     // cppcheck-suppress functionStatic
-    const std::string &getParamValue(const Step &step, const T key) {
-        for (const auto &pair : globalParamValues_) {
+    const std::string &getParamValue(Step &step, const T key) {
+        for (auto &pair : globalParamValues_) {
             if (ci_equal(pair.key, key)) {
+                pair.usedByParser = true;
                 return pair.value;
             }
         }
-        for (const auto &pair : step.paramValues) {
+        for (auto &pair : step.paramValues) {
             if (ci_equal(pair.key, key)) {
+                pair.usedByParser = true;
+                return pair.value;
+            }
+        }
+        return emptyString;
+    }
+
+    static const std::string &getParamValueK(Step &step) {
+        for (auto &pair : step.paramValues) {
+            if (ci_equal(pair.key, "k") || ci_equal(pair.key, "k_0")) {
+                pair.usedByParser = true;
                 return pair.value;
             }
         }
@@ -5761,20 +5809,22 @@ struct PROJStringParser::Private {
     }
 
     // cppcheck-suppress functionStatic
-    const std::string &getParamValueK(const Step &step) {
-        for (const auto &pair : step.paramValues) {
-            if (ci_equal(pair.key, "k") || ci_equal(pair.key, "k_0")) {
-                return pair.value;
+    bool hasUnusedParameters(const Step &step) const {
+        if (steps_.size() == 1) {
+            for (const auto &pair : step.paramValues) {
+                if (pair.key != "no_defs" && !pair.usedByParser) {
+                    return true;
+                }
             }
         }
-        return emptyString;
+        return false;
     }
 
     // cppcheck-suppress functionStatic
     std::string guessBodyName(double a);
 
-    PrimeMeridianNNPtr buildPrimeMeridian(const Step &step);
-    GeodeticReferenceFrameNNPtr buildDatum(const Step &step,
+    PrimeMeridianNNPtr buildPrimeMeridian(Step &step);
+    GeodeticReferenceFrameNNPtr buildDatum(Step &step,
                                            const std::string &title);
     GeographicCRSNNPtr buildGeographicCRS(int iStep, int iUnitConvert,
                                           int iAxisSwap, bool ignoreVUnits,
@@ -5783,7 +5833,7 @@ struct PROJStringParser::Private {
     CRSNNPtr buildProjectedCRS(int iStep, GeographicCRSNNPtr geogCRS,
                                int iUnitConvert, int iAxisSwap);
     CRSNNPtr buildBoundOrCompoundCRSIfNeeded(int iStep, CRSNNPtr crs);
-    UnitOfMeasure buildUnit(const Step &step, const std::string &unitsParamName,
+    UnitOfMeasure buildUnit(Step &step, const std::string &unitsParamName,
                             const std::string &toMeterParamName);
     CoordinateOperationNNPtr buildHelmertTransformation(
         int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
@@ -5797,7 +5847,7 @@ struct PROJStringParser::Private {
     enum class AxisType { REGULAR, NORTH_POLE, SOUTH_POLE };
 
     std::vector<CoordinateSystemAxisNNPtr>
-    processAxisSwap(const Step &step, const UnitOfMeasure &unit, int iAxisSwap,
+    processAxisSwap(Step &step, const UnitOfMeasure &unit, int iAxisSwap,
                     AxisType axisType, bool ignorePROJAxis);
 
     EllipsoidalCSNNPtr buildEllipsoidalCS(int iStep, int iUnitConvert,
@@ -5940,7 +5990,7 @@ static UnitOfMeasure _buildUnit(double to_meter_value) {
 // ---------------------------------------------------------------------------
 
 UnitOfMeasure
-PROJStringParser::Private::buildUnit(const Step &step,
+PROJStringParser::Private::buildUnit(Step &step,
                                      const std::string &unitsParamName,
                                      const std::string &toMeterParamName) {
     UnitOfMeasure unit = UnitOfMeasure::METRE;
@@ -6049,8 +6099,7 @@ static PropertyMap createMapWithUnknownName() {
 
 // ---------------------------------------------------------------------------
 
-PrimeMeridianNNPtr
-PROJStringParser::Private::buildPrimeMeridian(const Step &step) {
+PrimeMeridianNNPtr PROJStringParser::Private::buildPrimeMeridian(Step &step) {
 
     PrimeMeridianNNPtr pm = PrimeMeridian::GREENWICH;
     const auto &pmStr = getParamValue(step, "pm");
@@ -6098,8 +6147,7 @@ std::string PROJStringParser::Private::guessBodyName(double a) {
 // ---------------------------------------------------------------------------
 
 GeodeticReferenceFrameNNPtr
-PROJStringParser::Private::buildDatum(const Step &step,
-                                      const std::string &title) {
+PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
 
     const auto &ellpsStr = getParamValue(step, "ellps");
     const auto &datumStr = getParamValue(step, "datum");
@@ -6416,7 +6464,7 @@ createAxis(const std::string &name, const std::string &abbreviation,
 }
 
 std::vector<CoordinateSystemAxisNNPtr>
-PROJStringParser::Private::processAxisSwap(const Step &step,
+PROJStringParser::Private::processAxisSwap(Step &step,
                                            const UnitOfMeasure &unit,
                                            int iAxisSwap, AxisType axisType,
                                            bool ignorePROJAxis) {
@@ -6493,7 +6541,7 @@ PROJStringParser::Private::processAxisSwap(const Step &step,
             throw ParsingException("Unhandled axis=" + axisStr);
         }
     } else if (iAxisSwap >= 0) {
-        const auto &stepAxisSwap = steps_[iAxisSwap];
+        auto &stepAxisSwap = steps_[iAxisSwap];
         const auto &orderStr = getParamValue(stepAxisSwap, "order");
         auto orderTab = split(orderStr, ',');
         if (orderTab.size() != 2) {
@@ -6526,13 +6574,13 @@ EllipsoidalCSNNPtr
 PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
                                               int iAxisSwap, bool ignoreVUnits,
                                               bool ignorePROJAxis) {
-    const auto &step = steps_[iStep];
+    auto &step = steps_[iStep];
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
 
     UnitOfMeasure angularUnit = UnitOfMeasure::DEGREE;
     if (iUnitConvert >= 0) {
-        const auto &stepUnitConvert = steps_[iUnitConvert];
+        auto &stepUnitConvert = steps_[iUnitConvert];
         const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
         const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
         if (stepUnitConvert.inverted) {
@@ -6588,32 +6636,36 @@ GeographicCRSNNPtr
 PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
                                               int iAxisSwap, bool ignoreVUnits,
                                               bool ignorePROJAxis) {
-    const auto &step = steps_[iStep];
+    auto &step = steps_[iStep];
 
     const bool l_isGeographicStep = isGeographicStep(step.name);
     const auto &title = l_isGeographicStep ? title_ : emptyString;
+
+    // units=m is often found in the wild.
+    // No need to create a extension string for this
+    hasParamValue(step, "units");
 
     auto datum = buildDatum(step, title);
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
+    auto cs = buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignoreVUnits,
+                                 ignorePROJAxis);
+
     if (l_isGeographicStep &&
-        (hasParamValue(step, "wktext") ||
-         hasParamValue(step, "lon_wrap") | hasParamValue(step, "geoc") ||
+        (hasUnusedParameters(step) ||
          getNumericValue(getParamValue(step, "lon_0")) != 0.0)) {
         props.set("EXTENSION_PROJ4", projString_);
     }
 
-    return GeographicCRS::create(
-        props, datum, buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap,
-                                         ignoreVUnits, ignorePROJAxis));
+    return GeographicCRS::create(props, datum, cs);
 }
 
 // ---------------------------------------------------------------------------
 
 GeodeticCRSNNPtr
 PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
-    const auto &step = steps_[iStep];
+    auto &step = steps_[iStep];
 
     assert(isGeocentricStep(step.name));
     assert(iUnitConvert < 0 ||
@@ -6625,7 +6677,7 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
 
     UnitOfMeasure unit = UnitOfMeasure::METRE;
     if (iUnitConvert >= 0) {
-        const auto &stepUnitConvert = steps_[iUnitConvert];
+        auto &stepUnitConvert = steps_[iUnitConvert];
         const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
         const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
         const std::string *z_in = &getParamValue(stepUnitConvert, "z_in");
@@ -6659,11 +6711,12 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
-    if (hasParamValue(step, "wktext")) {
+    auto cs = CartesianCS::createGeocentric(unit);
+
+    if (hasUnusedParameters(step)) {
         props.set("EXTENSION_PROJ4", projString_);
     }
 
-    auto cs = CartesianCS::createGeocentric(unit);
     return GeodeticCRS::create(props, datum, cs);
 }
 
@@ -6672,9 +6725,13 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
 CRSNNPtr
 PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
                                                            CRSNNPtr crs) {
-    const auto &step = steps_[iStep];
+    auto &step = steps_[iStep];
+    const auto &nadgrids = getParamValue(step, "nadgrids");
     const auto &towgs84 = getParamValue(step, "towgs84");
-    if (!towgs84.empty()) {
+    // nadgrids has the priority over towgs84
+    if (!ignoreNadgrids_ && !nadgrids.empty()) {
+        crs = BoundCRS::createFromNadgrids(crs, nadgrids);
+    } else if (!towgs84.empty()) {
         std::vector<double> towgs84Values;
         const auto tokens = split(towgs84, ',');
         for (const auto &str : tokens) {
@@ -6685,11 +6742,6 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
             }
         }
         crs = BoundCRS::createFromTOWGS84(crs, towgs84Values);
-    }
-
-    const auto &nadgrids = getParamValue(step, "nadgrids");
-    if (!nadgrids.empty()) {
-        crs = BoundCRS::createFromNadgrids(crs, nadgrids);
     }
 
     const auto &geoidgrids = getParamValue(step, "geoidgrids");
@@ -6830,7 +6882,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR);
             for (size_t i = 0; i < step.paramValues.size(); ++i) {
                 if (ci_equal(step.paramValues[i].key, "nadgrids")) {
-                    step.paramValues.erase(step.paramValues.begin() + i);
+                    ignoreNadgrids_ = true;
                     break;
                 }
             }
@@ -6892,7 +6944,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     UnitOfMeasure unit = buildUnit(step, "units", "to_meter");
     if (iUnitConvert >= 0) {
-        const auto &stepUnitConvert = steps_[iUnitConvert];
+        auto &stepUnitConvert = steps_[iUnitConvert];
         const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
         const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
         if (stepUnitConvert.inverted) {
@@ -7085,8 +7137,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
-
-    if (hasParamValue(step, "wktext")) {
+    if (hasUnusedParameters(step)) {
         props.set("EXTENSION_PROJ4", projString_);
     }
 
@@ -7105,7 +7156,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         crs = CompoundCRS::create(mapWithUnknownName,
                                   std::vector<CRSNNPtr>{crs, vcrs});
     }
-
     return crs;
 }
 
@@ -7397,7 +7447,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     d->globalParamValues_.clear();
     d->projString_ = projString;
     PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_,
-                           d->title_);
+                           d->title_, false);
 
     if (d->steps_.empty()) {
         const auto &vunits = d->getGlobalParamValue("vunits");
@@ -7422,16 +7472,11 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
     }
 
-    if (((d->steps_.size() == 1 &&
+    const bool isGeocentricCRS =
+        ((d->steps_.size() == 1 &&
           d->getParamValue(d->steps_[0], "type") == "crs") ||
          (d->steps_.size() == 2 && d->steps_[1].name == "unitconvert")) &&
-        !d->steps_[0].inverted && isGeocentricStep(d->steps_[0].name)) {
-        return d->buildBoundOrCompoundCRSIfNeeded(
-            0, d->buildGeocentricCRS(0, (d->steps_.size() == 2 &&
-                                         d->steps_[1].name == "unitconvert")
-                                            ? 1
-                                            : -1));
-    }
+        !d->steps_[0].inverted && isGeocentricStep(d->steps_[0].name);
 
     // +init=xxxx:yyyy syntax
     if (d->steps_.size() == 1 && d->steps_[0].isInit &&
@@ -7674,60 +7719,133 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         unexpectedStructure = true;
     }
 
-    if (unexpectedStructure || iHelmert >= 0 || iMolodensky >= 0) {
-        struct Logger {
-            std::string msg{};
+    struct Logger {
+        std::string msg{};
 
-            // cppcheck-suppress functionStatic
-            void setMessage(const char *msgIn) noexcept {
-                try {
-                    msg = msgIn;
-                } catch (const std::exception &) {
-                }
+        // cppcheck-suppress functionStatic
+        void setMessage(const char *msgIn) noexcept {
+            try {
+                msg = msgIn;
+            } catch (const std::exception &) {
             }
+        }
 
-            static void log(void *user_data, int level, const char *msg) {
-                if (level == PJ_LOG_ERROR) {
-                    static_cast<Logger *>(user_data)->setMessage(msg);
-                }
+        static void log(void *user_data, int level, const char *msg) {
+            if (level == PJ_LOG_ERROR) {
+                static_cast<Logger *>(user_data)->setMessage(msg);
             }
-        };
-
-        // If the structure is not recognized, then try to instantiate the
-        // pipeline, and if successful, wrap it in a PROJBasedOperation
-        Logger logger;
-        bool valid;
-
-        auto pj_context = d->ctx_ ? d->ctx_ : proj_context_create();
-        if (!pj_context) {
-            throw ParsingException("out of memory");
         }
-        if (pj_context != d->ctx_) {
-            proj_log_func(pj_context, &logger, Logger::log);
-            proj_context_use_proj4_init_rules(pj_context,
-                                              d->usePROJ4InitRules_);
-        }
-        auto pj = pj_create_internal(pj_context, projString.c_str());
-        valid = pj != nullptr;
-        proj_destroy(pj);
+    };
 
-        if (!valid) {
-            std::string prefix("Error " +
-                               toString(proj_context_errno(pj_context)) + ": ");
-            if (logger.msg.empty()) {
-                logger.msg =
-                    prefix + proj_errno_string(proj_context_errno(pj_context));
+    // If the structure is not recognized, then try to instantiate the
+    // pipeline, and if successful, wrap it in a PROJBasedOperation
+    Logger logger;
+    bool valid;
+
+    auto pj_context = d->ctx_ ? d->ctx_ : proj_context_create();
+    if (!pj_context) {
+        throw ParsingException("out of memory");
+    }
+    if (pj_context != d->ctx_) {
+        proj_log_func(pj_context, &logger, Logger::log);
+        proj_context_use_proj4_init_rules(pj_context, d->usePROJ4InitRules_);
+    }
+    auto pj = pj_create_internal(
+        pj_context, (projString.find("type=crs") != std::string::npos
+                         ? projString + " +disable_grid_presence_check"
+                         : projString)
+                        .c_str());
+    valid = pj != nullptr;
+
+    // Remove parameters not understood by PROJ.
+    if (valid && d->steps_.size() == 1) {
+        std::vector<Step::KeyValue> newParamValues{};
+        std::set<std::string> foundKeys;
+        auto &step = d->steps_[0];
+
+        for (auto &kv : step.paramValues) {
+            bool recognizedByPROJ = false;
+            if (foundKeys.find(kv.key) != foundKeys.end()) {
+                continue;
+            }
+            foundKeys.insert(kv.key);
+            if (step.name == "krovak" && kv.key == "alpha") {
+                // We recognize it in our CRS parsing code
+                recognizedByPROJ = true;
             } else {
-                logger.msg = prefix + logger.msg;
+                for (auto cur = pj->params; cur; cur = cur->next) {
+                    const char *equal = strchr(cur->param, '=');
+                    if (equal &&
+                        static_cast<size_t>(equal - cur->param) ==
+                            kv.key.size()) {
+                        if (memcmp(cur->param, kv.key.c_str(), kv.key.size()) ==
+                            0) {
+                            recognizedByPROJ = (cur->used == 1);
+                            break;
+                        }
+                    } else if (strcmp(cur->param, kv.key.c_str()) == 0) {
+                        recognizedByPROJ = (cur->used == 1);
+                        break;
+                    }
+                }
+            }
+            if (recognizedByPROJ) {
+                newParamValues.emplace_back(kv);
             }
         }
+        step.paramValues = newParamValues;
 
-        if (pj_context != d->ctx_) {
-            proj_context_destroy(pj_context);
+        d->projString_.clear();
+        if (!step.name.empty()) {
+            d->projString_ += step.isInit ? "+init=" : "+proj=";
+            d->projString_ += step.name;
         }
+        for (const auto &paramValue : step.paramValues) {
+            if (!d->projString_.empty()) {
+                d->projString_ += ' ';
+            }
+            d->projString_ += '+';
+            d->projString_ += paramValue.key;
+            if (!paramValue.value.empty()) {
+                d->projString_ += '=';
+                d->projString_ +=
+                    pj_double_quote_string_param_if_needed(paramValue.value);
+            }
+        }
+    }
 
-        if (!valid) {
-            throw ParsingException(logger.msg);
+    proj_destroy(pj);
+
+    if (!valid) {
+        std::string prefix("Error " + toString(proj_context_errno(pj_context)) +
+                           ": ");
+        if (logger.msg.empty()) {
+            logger.msg =
+                prefix + proj_errno_string(proj_context_errno(pj_context));
+        } else {
+            logger.msg = prefix + logger.msg;
+        }
+    }
+
+    if (pj_context != d->ctx_) {
+        proj_context_destroy(pj_context);
+    }
+
+    if (!valid) {
+        throw ParsingException(logger.msg);
+    }
+
+    if (isGeocentricCRS) {
+        // First run is dry run to mark all recognized/unrecognized tokens
+        for (int iter = 0; iter < 2; iter++) {
+            auto obj = d->buildBoundOrCompoundCRSIfNeeded(
+                0, d->buildGeocentricCRS(0, (d->steps_.size() == 2 &&
+                                             d->steps_[1].name == "unitconvert")
+                                                ? 1
+                                                : -1));
+            if (iter == 1) {
+                return nn_static_pointer_cast<BaseObject>(obj);
+            }
         }
     }
 
@@ -7738,9 +7856,16 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
             (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
             const bool ignoreVUnits = false;
-            return d->buildBoundOrCompoundCRSIfNeeded(
-                0, d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                         iFirstAxisSwap, ignoreVUnits, false));
+            // First run is dry run to mark all recognized/unrecognized tokens
+            for (int iter = 0; iter < 2; iter++) {
+                auto obj = d->buildBoundOrCompoundCRSIfNeeded(
+                    0,
+                    d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
+                                          iFirstAxisSwap, ignoreVUnits, false));
+                if (iter == 1) {
+                    return nn_static_pointer_cast<BaseObject>(obj);
+                }
+            }
         }
         if (iProjStep >= 0 && !d->steps_[iProjStep].inverted &&
             (iFirstGeogStep < 0 || iFirstGeogStep + 1 == iProjStep) &&
@@ -7749,20 +7874,27 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             if (iFirstGeogStep < 0)
                 iFirstGeogStep = iProjStep;
             const bool ignoreVUnits = true;
-            return d->buildBoundOrCompoundCRSIfNeeded(
-                iProjStep,
-                d->buildProjectedCRS(
+            // First run is dry run to mark all recognized/unrecognized tokens
+            for (int iter = 0; iter < 2; iter++) {
+                auto obj = d->buildBoundOrCompoundCRSIfNeeded(
                     iProjStep,
-                    d->buildGeographicCRS(
-                        iFirstGeogStep,
-                        iFirstUnitConvert < iFirstGeogStep ? iFirstUnitConvert
-                                                           : -1,
-                        iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap : -1,
-                        ignoreVUnits, true),
-                    iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
-                                                       : iFirstUnitConvert,
-                    iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
-                                                    : iFirstAxisSwap));
+                    d->buildProjectedCRS(
+                        iProjStep,
+                        d->buildGeographicCRS(
+                            iFirstGeogStep, iFirstUnitConvert < iFirstGeogStep
+                                                ? iFirstUnitConvert
+                                                : -1,
+                            iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap
+                                                            : -1,
+                            ignoreVUnits, true),
+                        iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
+                                                           : iFirstUnitConvert,
+                        iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
+                                                        : iFirstAxisSwap));
+                if (iter == 1) {
+                    return nn_static_pointer_cast<BaseObject>(obj);
+                }
+            }
         }
 
         if (iProjStep < 0 && iHelmert > 0 && iMolodensky < 0 &&

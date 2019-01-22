@@ -1122,8 +1122,7 @@ struct DataEpoch::Private {
 
 // ---------------------------------------------------------------------------
 
-DataEpoch::DataEpoch()
-    : d(internal::make_unique<Private>(Measure())) {}
+DataEpoch::DataEpoch() : d(internal::make_unique<Private>(Measure())) {}
 
 // ---------------------------------------------------------------------------
 

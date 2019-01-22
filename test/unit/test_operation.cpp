@@ -6303,7 +6303,7 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
 
 TEST(operation, createOperation_fallback_to_proj4_strings) {
     auto objDest = PROJStringParser().createFromPROJString(
-        "+proj=longlat +geoc +ellps=WGS84 +type=crs");
+        "+proj=longlat +geoc +datum=WGS84 +type=crs");
     auto dest = nn_dynamic_pointer_cast<GeographicCRS>(objDest);
     ASSERT_TRUE(dest != nullptr);
 
@@ -6313,9 +6313,34 @@ TEST(operation, createOperation_fallback_to_proj4_strings) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +inv +proj=longlat +datum=WGS84 "
               "+step +proj=longlat +geoc +ellps=WGS84 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_on_crs_with_bound_crs_and_wktext) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 "
+        "+units=m +no_defs +nadgrids=@GDA94_GDA2020_conformal.gsb +ignored1 "
+        "+ignored2=val +wktext +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 "
+        "+units=m +no_defs +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=utm +zone=55 +south "
+              "+ellps=GRS80 +step +proj=hgridshift "
+              "+grids=@GDA94_GDA2020_conformal.gsb +step +proj=utm +zone=55 "
+              "+south +ellps=GRS80");
 }
 
 // ---------------------------------------------------------------------------

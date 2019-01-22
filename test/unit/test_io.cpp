@@ -7024,6 +7024,17 @@ TEST(io, projparse_longlat_nadgrids) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_longlat_nadgrids_towgs84_ignored) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +towgs84=1,2,3 +nadgrids=foo.gsb "
+        "+type=crs");
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(dynamic_cast<GeographicCRS *>(crs->baseCRS().get()) != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat_geoidgrids) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx +type=crs");
@@ -7461,7 +7472,7 @@ TEST(io, projparse_cea_ellipsoidal) {
 
 TEST(io, projparse_geos_sweep_x) {
     auto obj = PROJStringParser().createFromPROJString(
-        "+proj=geos +sweep=x +type=crs");
+        "+proj=geos +sweep=x +h=1 +type=crs");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     WKTFormatterNNPtr f(WKTFormatter::create());
@@ -7477,7 +7488,8 @@ TEST(io, projparse_geos_sweep_x) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_geos_sweep_y) {
-    auto obj = PROJStringParser().createFromPROJString("+proj=geos +type=crs");
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=geos +h=1 +type=crs");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     WKTFormatterNNPtr f(WKTFormatter::create());
@@ -8089,7 +8101,7 @@ TEST(io, projparse_projected_vunits) {
 TEST(io, projparse_projected_unknown) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=mbt_s +unused_flag +lat_0=45 +lon_0=0 +k=1 +x_0=10 +y_0=0 "
-        "+type=crs");
+        "+datum=WGS84 +type=crs");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
@@ -8100,8 +8112,8 @@ TEST(io, projparse_projected_unknown) {
         crs->exportToWKT(f.get());
         auto wkt = f->toString();
         EXPECT_TRUE(
-            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ mbt_s "
-                     "unused_flag\"],PARAMETER[\"lat_0\",45,ANGLEUNIT["
+            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ mbt_s\"],"
+                     "PARAMETER[\"lat_0\",45,ANGLEUNIT["
                      "\"degree\",0.0174532925199433]],PARAMETER[\"lon_0\","
                      "0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
                      "PARAMETER[\"k\",1,SCALEUNIT[\"unity\",1]],PARAMETER["
@@ -8119,8 +8131,8 @@ TEST(io, projparse_projected_unknown) {
         "\"9122\"]]],"
         "PROJECTION[\"custom_proj4\"],UNIT[\"metre\",1,AUTHORITY[\"EPSG\","
         "\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],EXTENSION["
-        "\"PROJ4\",\"+proj=mbt_s +datum=WGS84 +unused_flag +lat_0=45 "
-        "+lon_0=0 +k=1 +x_0=10 +y_0=0 +wktext +no_defs\"]]";
+        "\"PROJ4\",\"+proj=mbt_s +lat_0=45 "
+        "+lon_0=0 +k=1 +x_0=10 +y_0=0 +datum=WGS84\"]]";
 
     {
         WKTFormatterNNPtr f(
@@ -8133,8 +8145,8 @@ TEST(io, projparse_projected_unknown) {
     }
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=mbt_s +unused_flag +lat_0=45 +lon_0=0 +k=1 +x_0=10 "
-              "+y_0=0 +datum=WGS84 +units=m +no_defs +type=crs");
+              "+proj=mbt_s +lat_0=45 +lon_0=0 +k=1 +x_0=10 "
+              "+y_0=0 +datum=WGS84 +type=crs");
 
     {
         auto obj2 = WKTParser().createFromWKT(expected_wkt1);
@@ -8147,8 +8159,8 @@ TEST(io, projparse_projected_unknown) {
         crs2->exportToWKT(f.get());
         auto wkt = f->toString();
         EXPECT_TRUE(
-            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ mbt_s "
-                     "unused_flag\"],PARAMETER[\"lat_0\",45,ANGLEUNIT["
+            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ mbt_s\"],"
+                     "PARAMETER[\"lat_0\",45,ANGLEUNIT["
                      "\"degree\",0.0174532925199433]],PARAMETER[\"lon_0\","
                      "0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
                      "PARAMETER[\"k\",1,SCALEUNIT[\"unity\",1]],PARAMETER["
@@ -8263,7 +8275,7 @@ TEST(io, projparse_longlat_wktext) {
         crs->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
-        input);
+        "+proj=longlat +datum=WGS84 +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -8277,7 +8289,7 @@ TEST(io, projparse_geocent_wktext) {
         crs->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
-        input);
+        "+proj=geocent +datum=WGS84 +units=m +no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -8291,7 +8303,8 @@ TEST(io, projparse_projected_wktext) {
         crs->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
-        input);
+        "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs "
+        "+type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -8301,8 +8314,7 @@ TEST(io, projparse_ob_tran_longlat) {
         "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran "
         "+o_proj=longlat +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 +ellps=WGS84 "
-        "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
-        "+proj=axisswap +order=2,1");
+        "+step +proj=axisswap +order=2,1");
     auto obj = PROJStringParser().createFromPROJString(input);
     auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
