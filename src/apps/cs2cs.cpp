@@ -345,8 +345,9 @@ int main(int argc, char **argv) {
     int countNonOptionArg = 0;
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
-            if (argv[i][1] == '\0') {
-                countNonOptionArg++;
+            if (argv[i][1] == 'f' || argv[i][1] == 'e' || argv[i][1] == 'd' ||
+                argv[i][1] == 'D' ) {
+                i++;
             }
         } else {
             if (strcmp(argv[i], "+to") == 0) {
