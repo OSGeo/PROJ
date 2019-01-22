@@ -8524,7 +8524,7 @@ TEST(io, projparse_molodensky) {
         "translation\",116.95,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8607]],"
         "PARAMETER[\"Semi-major axis length "
         "difference\",251,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8654]],PARAMETER["
-        "\"Flattening difference\",1.41927e-05,ID[\"EPSG\",8655]]]");
+        "\"Flattening difference\",1.41927E-05,ID[\"EPSG\",8655]]]");
 
     EXPECT_EQ(
         transf->exportToPROJString(

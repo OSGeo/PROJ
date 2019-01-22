@@ -512,7 +512,7 @@ void WKTFormatter::add(double number, int precision) {
     } else {
         std::string val(
             normalizeSerializedString(internal::toString(number, precision)));
-        d->result_ += val;
+        d->result_ += replaceAll(val, "e", "E");
         if (d->params_.useESRIDialect_ && val.find('.') == std::string::npos) {
             d->result_ += ".0";
         }
