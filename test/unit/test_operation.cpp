@@ -6323,8 +6323,8 @@ TEST(operation, createOperation_fallback_to_proj4_strings) {
 TEST(operation, createOperation_on_crs_with_bound_crs_and_wktext) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 "
-        "+units=m +no_defs +nadgrids=GDA94_GDA2020_conformal.gsb "
-        "+type=crs");
+        "+units=m +no_defs +nadgrids=@GDA94_GDA2020_conformal.gsb +ignored1 "
+        "+ignored2=val +wktext +type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
 
@@ -6340,7 +6340,7 @@ TEST(operation, createOperation_on_crs_with_bound_crs_and_wktext) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=utm +zone=55 +south "
               "+ellps=GRS80 +step +proj=hgridshift "
-              "+grids=GDA94_GDA2020_conformal.gsb +step +proj=utm +zone=55 "
+              "+grids=@GDA94_GDA2020_conformal.gsb +step +proj=utm +zone=55 "
               "+south +ellps=GRS80");
 }
 

@@ -456,6 +456,9 @@ Returns 1 on success, 0 on failure
     /* Swap axes? */
     p = pj_param_exists (P->params, "axis");
 
+    const bool disable_grid_presence_check = pj_param_exists (
+        P->params, "disable_grid_presence_check") != nullptr;
+
     /* Don't axisswap if data are already in "enu" order */
     if (p && (0!=strcmp ("enu", p->param))) {
         char *def = static_cast<char*>(malloc (100+strlen(P->axis)));
@@ -471,7 +474,7 @@ Returns 1 on success, 0 on failure
 
     /* Geoid grid(s) given? */
     p = pj_param_exists (P->params, "geoidgrids");
-    if (p  &&  strlen (p->param) > strlen ("geoidgrids=")) {
+    if (!disable_grid_presence_check && p  &&  strlen (p->param) > strlen ("geoidgrids=")) {
         char *gridnames = p->param + strlen ("geoidgrids=");
         char *def = static_cast<char*>(malloc (100+2*strlen(gridnames)));
         if (nullptr==def)
@@ -487,7 +490,7 @@ Returns 1 on success, 0 on failure
 
     /* Datum shift grid(s) given? */
     p = pj_param_exists (P->params, "nadgrids");
-    if (p  &&  strlen (p->param) > strlen ("nadgrids=")) {
+    if (!disable_grid_presence_check && p  &&  strlen (p->param) > strlen ("nadgrids=")) {
         char *gridnames = p->param + strlen ("nadgrids=");
         char *def = static_cast<char*>(malloc (100+2*strlen(gridnames)));
         if (nullptr==def)

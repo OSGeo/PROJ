@@ -2324,8 +2324,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=mbt_s +unused_flag +datum=WGS84 +units=m +no_defs "
-                  "+type=crs");
+                  "+proj=mbt_s +datum=WGS84 +units=m +no_defs +type=crs");
         EXPECT_TRUE(crs->canonicalBoundCRS() == nullptr);
     }
     {
@@ -2334,8 +2333,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         EXPECT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=mbt_s +unused_flag +datum=WGS84 +units=m +no_defs "
-                  "+type=crs");
+                  "+proj=mbt_s +datum=WGS84 +units=m +no_defs +type=crs");
         EXPECT_TRUE(crs->canonicalBoundCRS() != nullptr);
     }
 
