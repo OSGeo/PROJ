@@ -5280,34 +5280,36 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
     const char *c_str = projString.c_str();
     std::vector<std::string> tokens;
 
-    size_t i = 0;
-    while (true) {
-        for (; isspace(c_str[i]); i++) {
-        }
-        std::string token;
-        bool in_string = false;
-        for (; c_str[i]; i++) {
-            if (in_string) {
-                if (c_str[i] == '"' && c_str[i + 1] == '"') {
+    {
+        size_t i = 0;
+        while (true) {
+            for (; isspace(c_str[i]); i++) {
+            }
+            std::string token;
+            bool in_string = false;
+            for (; c_str[i]; i++) {
+                if (in_string) {
+                    if (c_str[i] == '"' && c_str[i + 1] == '"') {
+                        i++;
+                    } else if (c_str[i] == '"') {
+                        in_string = false;
+                        continue;
+                    }
+                } else if (c_str[i] == '=' && c_str[i + 1] == '"') {
+                    in_string = true;
+                    token += c_str[i];
                     i++;
-                } else if (c_str[i] == '"') {
-                    in_string = false;
                     continue;
+                } else if (isspace(c_str[i])) {
+                    break;
                 }
-            } else if (c_str[i] == '=' && c_str[i + 1] == '"') {
-                in_string = true;
                 token += c_str[i];
-                i++;
-                continue;
-            } else if (isspace(c_str[i])) {
+            }
+            if (token.empty()) {
                 break;
             }
-            token += c_str[i];
+            tokens.emplace_back(token);
         }
-        if (token.empty()) {
-            break;
-        }
-        tokens.emplace_back(token);
     }
 
     bool prevWasTitle = false;
@@ -5356,10 +5358,20 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                 auto key = word.substr(0, pos);
                 if (!(dropEarlyBindingsTerms &&
                       (key == "towgs84" || key == "nadgrids" ||
-                       key == "geoidgrids" || key == "wktext"))) {
+                       key == "geoidgrids"))) {
                     auto pair = (pos != std::string::npos)
                                     ? Step::KeyValue(key, word.substr(pos + 1))
                                     : Step::KeyValue(key);
+                    if (dropEarlyBindingsTerms && key == "datum") {
+                        const auto datums = pj_get_datums_ref();
+                        for (int i = 0; datums[i].id != nullptr; i++) {
+                            if (pair.value == datums[i].id) {
+                                pair.key = "ellps";
+                                pair.value = datums[i].ellipse_id;
+                                break;
+                            }
+                        }
+                    }
                     if (steps.empty()) {
                         globalParamValues.push_back(pair);
                     } else {

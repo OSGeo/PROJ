@@ -1209,7 +1209,7 @@ void GeodeticCRS::addDatumInfoToPROJString(
     const auto &nadgrids = formatter->getHDatumExtension();
     const auto &l_datum = datum();
     if (formatter->getCRSExport() && l_datum && TOWGS84Params.empty() &&
-        nadgrids.empty()) {
+        nadgrids.empty() && !formatter->getDropEarlyBindingsTerms()) {
         if (l_datum->_isEquivalentTo(
                 datum::GeodeticReferenceFrame::EPSG_6326.get(),
                 util::IComparable::Criterion::EQUIVALENT)) {
