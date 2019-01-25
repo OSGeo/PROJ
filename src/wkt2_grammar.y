@@ -212,11 +212,7 @@ datum:
     vertical_reference_frame | engineering_datum | parametric_datum |
     temporal_datum
 
-crs:
-    geodetic_crs | projected_crs | vertical_crs | engineering_crs |
-    parametric_crs | temporal_crs | derived_geodetic_crs |
-    derived_projected_crs | derived_vertical_crs | derived_engineering_crs |
-    derived_parametric_crs | derived_temporal_crs | compound_crs
+crs: single_crs | compound_crs
 
 // Basic characters
 
@@ -1194,8 +1190,6 @@ deriving_conversion: deriving_conversion_keyword left_delimiter
                      opt_separator_parameter_or_parameter_file_identifier_list
                      right_delimiter
 
-parameter_or_parameter_file: operation_parameter | operation_parameter_file
-
 opt_separator_parameter_or_parameter_file_identifier_list:
    | wkt_separator operation_parameter opt_separator_parameter_or_parameter_file_identifier_list
    | wkt_separator operation_parameter_file opt_separator_parameter_or_parameter_file_identifier_list
@@ -1397,53 +1391,28 @@ base_temporal_crs_keyword: T_BASETIMECRS
 // Compound CRS
 
 compound_crs: compound_crs_keyword left_delimiter compound_crs_name
-              wkt_separator compound_crs_choice
+              wkt_separator single_crs_or_bound_crs
+              wkt_separator single_crs_or_bound_crs
+              opt_wkt_separator_single_crs_list_opt_separator_scope_extent_identifier_remark
               right_delimiter
 
-compound_crs_choice:
-    horizontal_crs wkt_separator compound_crs_choice_after_horizontal_crs
-  | spatio_temporal_ccrs_no_horizontal_crs
+single_crs: geodetic_crs | derived_geodetic_crs |
+            projected_crs | derived_projected_crs |
+            vertical_crs | derived_vertical_crs |
+            engineering_crs | derived_engineering_crs |
+            parametric_crs | derived_parametric_crs |
+            temporal_crs | derived_temporal_crs
 
-compound_crs_choice_after_horizontal_crs:
-    vertical_crs_or_derived_vertical_crs opt_temporal_crs_or_derived_temporal_crs_list
-  | temporal_crs_or_derived_temporal_crs opt_temporal_crs_or_derived_temporal_crs_list
-  | parametric_crs_or_derived_parametric_crs opt_parametric_crs_or_derived_parametric_crs_list_then_opt_temporal_crs_or_derived_temporal_crs_list
-// PROJ extension: allow bound CRS
-  | bound_crs opt_separator_scope_extent_identifier_remark
+// PROJ extension
+single_crs_or_bound_crs: single_crs | bound_crs
 
-vertical_crs_or_derived_vertical_crs: vertical_crs | derived_vertical_crs
-
-temporal_crs_or_derived_temporal_crs: temporal_crs | derived_temporal_crs
-
-opt_temporal_crs_or_derived_temporal_crs_list:
-    | wkt_separator temporal_crs_or_derived_temporal_crs opt_temporal_crs_or_derived_temporal_crs_list
+opt_wkt_separator_single_crs_list_opt_separator_scope_extent_identifier_remark:
+    | wkt_separator single_crs_or_bound_crs opt_wkt_separator_single_crs_list_opt_separator_scope_extent_identifier_remark
     | wkt_separator no_opt_separator_scope_extent_identifier_remark
-
-parametric_crs_or_derived_parametric_crs: parametric_crs | derived_parametric_crs
-
-opt_parametric_crs_or_derived_parametric_crs_list_then_opt_temporal_crs_or_derived_temporal_crs_list:
-    | wkt_separator parametric_crs_or_derived_parametric_crs opt_parametric_crs_or_derived_parametric_crs_list_then_opt_temporal_crs_or_derived_temporal_crs_list
-    | wkt_separator temporal_crs_or_derived_temporal_crs opt_temporal_crs_or_derived_temporal_crs_list
-    | wkt_separator no_opt_separator_scope_extent_identifier_remark
-
-spatio_temporal_ccrs_no_horizontal_crs: spatio_temporal_ccrs_first wkt_separator temporal_crs_or_derived_temporal_crs opt_temporal_crs_or_derived_temporal_crs_list
-
-spatio_temporal_ccrs_first: vertical_crs
 
 compound_crs_keyword: T_COMPOUNDCRS
 
 compound_crs_name: quoted_latin_text
-
-horizontal_crs: geographic2D_crs | projected_crs | engineering_crs |
-                derived_geographic2D_crs | derived_projected_crs | derived_engineering_crs |
-// PROJ extension: allow geodetic CRS expressions for backward compatibility with WKT2:2015
-                static_geodetic_crs | dynamic_geodetic_crs | derived_static_geod_crs | derived_dynamic_geod_crs |
-// PROJ extension: allow bound CRS
-                bound_crs
-
-geographic2D_crs: geographic_crs
-
-derived_geographic2D_crs: derived_geographic_crs
 
 // coordinate epoch and coordinate metadata
 
@@ -1484,13 +1453,12 @@ dynamic_crs_coordinate_metadata: dynamic_geodetic_crs | dynamic_geographic_crs |
 coordinate_operation: operation_keyword left_delimiter operation_name
                       wkt_separator source_crs wkt_separator target_crs
                       wkt_separator operation_method
-                      wkt_separator parameter_or_parameter_file
-                      opt_coordinate_operation_end
+                      opt_parameter_or_parameter_file_list_opt_interpolation_crs_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark
                       right_delimiter
 
-opt_coordinate_operation_end:
-   | wkt_separator operation_parameter opt_coordinate_operation_end
-   | wkt_separator operation_parameter_file opt_coordinate_operation_end
+opt_parameter_or_parameter_file_list_opt_interpolation_crs_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark:
+   | wkt_separator operation_parameter opt_parameter_or_parameter_file_list_opt_interpolation_crs_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark
+   | wkt_separator operation_parameter_file opt_parameter_or_parameter_file_list_opt_interpolation_crs_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark
    | wkt_separator interpolation_crs opt_separator_scope_extent_identifier_remark
    | wkt_separator interpolation_crs wkt_separator operation_accuracy opt_separator_scope_extent_identifier_remark
    | wkt_separator operation_accuracy opt_separator_scope_extent_identifier_remark
@@ -1522,13 +1490,12 @@ operation_accuracy_keyword: T_OPERATIONACCURACY
 point_motion_operation: point_motion_keyword left_delimiter operation_name
                         wkt_separator source_crs
                         wkt_separator operation_method
-                        wkt_separator parameter_or_parameter_file
-                        opt_point_motion_operation_end
+                        opt_parameter_or_parameter_file_list_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark
                         right_delimiter
 
-opt_point_motion_operation_end:
-   | wkt_separator operation_parameter opt_point_motion_operation_end
-   | wkt_separator operation_parameter_file opt_point_motion_operation_end
+opt_parameter_or_parameter_file_list_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark:
+   | wkt_separator operation_parameter opt_parameter_or_parameter_file_list_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark
+   | wkt_separator operation_parameter_file opt_parameter_or_parameter_file_list_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark
    | wkt_separator operation_accuracy opt_separator_scope_extent_identifier_remark
    | wkt_separator no_opt_separator_scope_extent_identifier_remark
 
