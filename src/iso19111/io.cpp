@@ -482,7 +482,7 @@ void WKTFormatter::add(int number) {
 // ---------------------------------------------------------------------------
 
 #ifdef __MINGW32__
-static std::string normalizeSerializedString(const std::string &in) {
+static std::string normalizeExponent(const std::string &in) {
     // mingw will output 1e-0xy instead of 1e-xy. Fix that
     auto pos = in.find("e-0");
     if (pos == std::string::npos) {
@@ -494,10 +494,27 @@ static std::string normalizeSerializedString(const std::string &in) {
     return in;
 }
 #else
-static inline std::string normalizeSerializedString(const std::string &in) {
+static inline std::string normalizeExponent(const std::string &in) {
     return in;
 }
 #endif
+
+static inline std::string normalizeSerializedString(const std::string &in) {
+    auto ret(normalizeExponent(in));
+    auto dotPos = ret.find('.');
+    // Detect sequences like x.yz000000foo
+    if( dotPos != std::string::npos &&
+        ret.find('e', dotPos) == std::string::npos &&
+        ret.find('E', dotPos) == std::string::npos )
+    {
+        auto zeroesPos = ret.find("000000", dotPos);
+        if( zeroesPos != std::string::npos )
+        {
+            ret.resize(zeroesPos);
+        }
+    }
+    return ret;
+}
 
 // ---------------------------------------------------------------------------
 
