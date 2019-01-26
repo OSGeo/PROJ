@@ -379,10 +379,7 @@ size_t proj_trans_generic (
         coord.xyzt.z = *z;
         coord.xyzt.t = *t;
 
-        if (PJ_FWD==direction)
-            coord = pj_fwd4d (coord, P);
-        else
-            coord = pj_inv4d (coord, P);
+        coord = proj_trans(P, direction, coord);
 
         /* in all full length cases, we overwrite the input with the output,  */
         /* and step on to the next element.                                   */
