@@ -18,29 +18,27 @@ shallow_clone: true
 build_script:
   - echo build_script
   - vcpkg install sqlite3:"%platform%"-windows
+  - set SQLITE3_BIN=%APPVEYOR_BUILD_FOLDER%\sqlite3\bin
+  - mkdir %SQLITE3_BIN%
+  - copy c:\tools\vcpkg\installed\"%platform%"-windows\bin\sqlite3.dll %SQLITE3_BIN%
   - ps: |
         appveyor DownloadFile https://sqlite.org/2018/sqlite-tools-win32-x86-3250100.zip
         7z x sqlite-tools-win32-x86-3250100.zip
-        copy sqlite-tools-win32-x86-3250100/sqlite3.exe .
+  - copy "%APPVEYOR_BUILD_FOLDER%"\sqlite-tools-win32-x86-3250100\sqlite3.exe %SQLITE3_BIN%
+  - set PATH=%PATH%;%SQLITE3_BIN%
   - if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
+  - if "%platform%" == "x64" SET BUILD_LIBPROJ_SHARED=ON
   - if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
+  - if "%platform%" == "x86" SET BUILD_LIBPROJ_SHARED=OFF
   - echo "%VS_FULL%"
 #
   - if "%platform%" == "x64" mkdir build_dll
   - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x64" copy ..\sqlite3.exe .
-  - if "%platform%" == "x64" copy c:\tools\vcpkg\installed\x64-windows\bin\sqlite3.dll .
-  - if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%CD%/install"
-  - if "%platform%" == "x64" cmake --build . --config Release --target install
-  - if "%platform%" == "x64" cd ..
-#
   - if "%platform%" == "x86" mkdir build_static
   - if "%platform%" == "x86" cd build_static
-  - if "%platform%" == "x86" copy ..\sqlite3.exe .
-  - if "%platform%" == "x86" copy c:\tools\vcpkg\installed\x86-windows\bin\sqlite3.dll .
-  - if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%CD%/install"
-  - if "%platform%" == "x86" cmake --build . --config Release --target install
-  - if "%platform%" == "x86" cd ..
+  - cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED="%BUILD_LIBPROJ_SHARED%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%CD%/install"
+  - cmake --build . --config Release --target install
+  - cd ..
 
 test_script:
   - echo test_script
@@ -54,11 +52,8 @@ test_script:
   - cd %CURDIR%
 #
   - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x64" ctest -V -C Release
-  - if "%platform%" == "x64" cd ..
-#
   - if "%platform%" == "x86" cd build_static
-  - if "%platform%" == "x86" ctest -V -C Release
-  - if "%platform%" == "x86" cd ..
+  - ctest -V -C Release
+  - cd ..
 
 deploy: off
