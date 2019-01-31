@@ -1126,7 +1126,7 @@ void GeodeticReferenceFrame::_exportToWKT(
         if (TOWGS84Params.size() == 7) {
             formatter->startNode(io::WKTConstants::TOWGS84, false);
             for (const auto &val : TOWGS84Params) {
-                formatter->add(val);
+                formatter->add(val, 12);
             }
             formatter->endNode();
         }

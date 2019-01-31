@@ -697,11 +697,9 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     c.xyz.x = 45; // Lat
     c.xyz.y = 25; // Long
     c.xyz.z = 0;
-    proj_trans_generic (P, PJ_FWD,
-                        &(c.xyz.x), sizeof(double), 1,
-                        &(c.xyz.y), sizeof(double), 1,
-                        &(c.xyz.z), sizeof(double), 1,
-                        nullptr, 0, 0);
+    proj_trans_generic(P, PJ_FWD, &(c.xyz.x), sizeof(double), 1, &(c.xyz.y),
+                       sizeof(double), 1, &(c.xyz.z), sizeof(double), 1,
+                       nullptr, 0, 0);
     EXPECT_NEAR(c.xy.x, 44.999701238, 1e-9);
     EXPECT_NEAR(c.xy.y, 24.998474948, 1e-9);
 

@@ -501,18 +501,6 @@ static inline std::string normalizeExponent(const std::string &in) {
 
 static inline std::string normalizeSerializedString(const std::string &in) {
     auto ret(normalizeExponent(in));
-    auto dotPos = ret.find('.');
-    // Detect sequences like x.yz000000foo
-    if( dotPos != std::string::npos &&
-        ret.find('e', dotPos) == std::string::npos &&
-        ret.find('E', dotPos) == std::string::npos )
-    {
-        auto zeroesPos = ret.find("000000", dotPos);
-        if( zeroesPos != std::string::npos )
-        {
-            ret.resize(zeroesPos);
-        }
-    }
     return ret;
 }
 

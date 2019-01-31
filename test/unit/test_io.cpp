@@ -8927,3 +8927,37 @@ TEST(io, guessDialect) {
     EXPECT_EQ(WKTParser().guessDialect("foo"),
               WKTParser::WKTGuessedDialect::NOT_WKT);
 }
+
+// ---------------------------------------------------------------------------
+
+// GDAL MITAB driver requires on rather excessive precision on parameter
+// values to implement a nasty trick...
+
+TEST(wkt_export, precision) {
+    auto wkt = "PROJCS[\"RGF93 / Lambert-93\",\n"
+               "    GEOGCS[\"RGF93\",\n"
+               "        DATUM[\"Reseau_Geodesique_Francais_1993\",\n"
+               "            SPHEROID[\"GRS 80\",6378137,298.257222101],\n"
+               "            AUTHORITY[\"EPSG\",\"6171\"]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
+               "    PROJECTION[\"Lambert_Conformal_Conic_2SP\"],\n"
+               "    PARAMETER[\"standard_parallel_1\",49.00000000001],\n"
+               "    PARAMETER[\"standard_parallel_2\",44],\n"
+               "    PARAMETER[\"latitude_of_origin\",46.5],\n"
+               "    PARAMETER[\"central_meridian\",3],\n"
+               "    PARAMETER[\"false_easting\",700000],\n"
+               "    PARAMETER[\"false_northing\",6600000],\n"
+               "    UNIT[\"Meter\",1],\n"
+               "    AXIS[\"Easting\",EAST],\n"
+               "    AXIS[\"Northing\",NORTH]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        wkt);
+}
