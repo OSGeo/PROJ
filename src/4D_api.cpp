@@ -927,7 +927,7 @@ static PJ* add_coord_op_to_list(PJ_CONTEXT* ctx, PJ* op,
         }
     }
     return op;
-};
+}
 
 /*****************************************************************************/
 static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, PJ* crs) {
