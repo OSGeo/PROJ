@@ -41,10 +41,7 @@ The kinematic transformations require an observation time of the coordinate, as 
 as a central epoch for the transformation. The latter is usually documented
 alongside the rest of the transformation parameters for a given transformation.
 The central epoch is controlled with the parameter `t_epoch`. The observation
-time can either by stated as part of the coordinate when using PROJ's
-4D-functionality or it can be controlled in the transformation setup by the
-parameter `t_obs`. When `t_obs` is specified, all transformed coordinates are
-treated as if they have the same observation time.
+time is given as part of the coordinate when using PROJ's 4D-functionality.
 
 Examples
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -62,16 +59,16 @@ Simplified transformations from ITRF2008/IGS08 to ETRS89 using 7 parameters:
     proj=helmert convention=coordinate_frame x=0.67678    y=0.65495   z=-0.52827
                 rx=-0.022742 ry=0.012667 rz=0.022704  s=-0.01070
 
-Transformation from `ITRF2000@2017.0`  to `ITRF93@2017.0` using 15 parameters:
+Transformation from `ITRF2000`  to `ITRF93` using 15 parameters:
 
 ::
 
-    proj=helmert convention=position_vector 
+    proj=helmert convention=position_vector
          x=0.0127     y=0.0065     z=-0.0209  s=0.00195
          dx=-0.0029   dy=-0.0002   dz=-0.0006 ds=0.00001
          rx=-0.00039  ry=0.00080   rz=-0.00114
          drx=-0.00011 dry=-0.00019 drz=0.00007
-         t_epoch=1988.0 t_obs=2017.0
+         t_epoch=1988.0
 
 Parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -177,13 +174,6 @@ Parameters
 
     Central epoch of transformation given in decimalyear. Only used
     spatiotemporal transformations.
-
-.. option:: +t_obs=<value>
-
-    Observation time of coordinate(s) given in decimalyear. Mostly useful
-    in 2D and 3D transformations where the observation time is not passed
-    as part of the input coordinate. Can be used to override the observation
-    time from the input coordinate.
 
 .. option:: +exact
 
