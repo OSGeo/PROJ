@@ -34,11 +34,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "projects.h" // For pj_gc_unloadall()
+#include "proj_internal.h" // For pj_gc_unloadall()
 #include "proj_api.h"
 
 /* Standalone build:
-g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -DSTANDALONE ../../src/.libs/libproj.a -lpthread -I../../src
+g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -fvisibility=hidden -DSTANDALONE ../../src/.libs/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
 */
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv);

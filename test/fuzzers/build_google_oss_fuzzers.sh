@@ -26,7 +26,7 @@ build_fuzzer()
     shift
     shift
     echo "Building fuzzer $fuzzerName"
-    $CXX $CXXFLAGS -std=c++11 -I$SRC_DIR/src \
+    $CXX $CXXFLAGS -std=c++11 -fvisibility=hidden -I$SRC_DIR/src -I$SRC_DIR/include \
         $sourceFilename $* -o $OUT/$fuzzerName \
         -lFuzzingEngine $SRC_DIR/src/.libs/libproj.a -lpthread /usr/lib/x86_64-linux-gnu/libsqlite3.a $EXTRA_LIBS
 }
