@@ -5287,6 +5287,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
 
     bool hasProj = false;
     bool hasInit = false;
+    bool hasPipeline = false;
     {
         size_t i = 0;
         while (true) {
@@ -5315,8 +5316,11 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             if (token.empty()) {
                 break;
             }
-            if (!hasProj &&
-                (starts_with(token, "proj=") || starts_with(token, "+proj="))) {
+            if (!hasPipeline &&
+                (token == "proj=pipeline" || token == "+proj=pipeline")) {
+                hasPipeline = true;
+            } else if (!hasProj && (starts_with(token, "proj=") ||
+                                    starts_with(token, "+proj="))) {
                 hasProj = true;
             } else if (!hasInit && (starts_with(token, "init=") ||
                                     starts_with(token, "+init="))) {
@@ -5328,7 +5332,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
 
     bool prevWasTitle = false;
 
-    if (projString.find("proj=pipeline") == std::string::npos) {
+    if (!hasPipeline) {
         if (hasProj || hasInit) {
             steps.push_back(Step());
         }
