@@ -366,7 +366,8 @@ using ObjectDomainNNPtr = util::nn<ObjectDomainPtr>;
  *
  * \remark Implements ObjectDomain from \ref ISO_19111_2018
  */
-class ObjectDomain : public util::BaseObject, public util::IComparable {
+class PROJ_GCC_DLL ObjectDomain : public util::BaseObject,
+                                  public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ObjectDomain() override;
@@ -420,7 +421,7 @@ using ObjectUsageNNPtr = util::nn<ObjectUsagePtr>;
  *
  * \remark Implements ObjectUsage from \ref ISO_19111_2018
  */
-class ObjectUsage : public IdentifiedObject {
+class PROJ_GCC_DLL ObjectUsage : public IdentifiedObject {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ObjectUsage() override;
