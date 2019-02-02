@@ -8735,6 +8735,10 @@ TEST(io, projparse_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString(
                      "proj=pipeline step init=epsg:4326 init=epsg:4326"),
                  ParsingException);
+
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString("proj=\tinit= +type=crs"),
+        ParsingException);
 }
 
 // ---------------------------------------------------------------------------
