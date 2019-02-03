@@ -108,6 +108,10 @@ PJ *PROJECTION(labrd) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
+    if (P->phi0 == 0.) {
+        return pj_default_destructor(P, PJD_ERR_LAT_0_IS_ZERO);
+    }
+
     Az = pj_param(P->ctx, P->params, "razi").f;
     sinp = sin(P->phi0);
     t = 1. - P->es * sinp * sinp;
