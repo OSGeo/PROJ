@@ -8965,3 +8965,61 @@ TEST(wkt_export, precision) {
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         wkt);
 }
+
+// ---------------------------------------------------------------------------
+
+// Avoid division by zero
+
+TEST(wkt_export, invalid_linear_unit) {
+    auto wkt = "PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
+               "    PROJECTION[\"Transverse_Mercator\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",0],\n"
+               "    PARAMETER[\"central_meridian\",3],\n"
+               "    PARAMETER[\"scale_factor\",0.9996],\n"
+               "    PARAMETER[\"false_easting\",500000],\n"
+               "    PARAMETER[\"false_northing\",0],\n"
+               "    UNIT[\"foo\",0]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_THROW(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+// Avoid division by zero
+
+TEST(wkt_export, invalid_angular_unit) {
+    auto wkt = "PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"foo\",0]],\n"
+               "    PROJECTION[\"Transverse_Mercator\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",0],\n"
+               "    PARAMETER[\"central_meridian\",3],\n"
+               "    PARAMETER[\"scale_factor\",0.9996],\n"
+               "    PARAMETER[\"false_easting\",500000],\n"
+               "    PARAMETER[\"false_northing\",0],\n"
+               "    UNIT[\"meter\",1]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_THROW(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
+}

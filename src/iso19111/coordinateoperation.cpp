@@ -2147,11 +2147,19 @@ void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
             // registered linear / angular unit.
             const auto &unitType = unit.type();
             if (unitType == common::UnitOfMeasure::Type::LINEAR) {
-                formatter->add(
-                    l_value.convertToUnit(*(formatter->axisLinearUnit())));
+                const auto &targetUnit = *(formatter->axisLinearUnit());
+                if (targetUnit.conversionToSI() == 0.0) {
+                    throw io::FormattingException(
+                        "cannot convert value to target linear unit");
+                }
+                formatter->add(l_value.convertToUnit(targetUnit));
             } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
-                formatter->add(
-                    l_value.convertToUnit(*(formatter->axisAngularUnit())));
+                const auto &targetUnit = *(formatter->axisAngularUnit());
+                if (targetUnit.conversionToSI() == 0.0) {
+                    throw io::FormattingException(
+                        "cannot convert value to target angular unit");
+                }
+                formatter->add(l_value.convertToUnit(targetUnit));
             } else {
                 formatter->add(l_value.getSIValue());
             }
