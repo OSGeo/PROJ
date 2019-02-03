@@ -764,20 +764,18 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
         s = units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "sto_meter").s)) {
-        double factor;
-        int ratio = 0;
-
-        /* ratio number? */
-        if (strlen (s) > 1 && s[0] == '1' && s[1]=='/') {
-            ratio = 1;
-            s += 2;
+        char* end_ptr = const_cast<char*>(s);
+        PIN->to_meter = pj_strtod(s, &end_ptr);
+        s = end_ptr;
+        if (*s == '/') { /* ratio number */
+            ++s;
+            double denom = pj_strtod(s, nullptr);
+            if (denom == 0.0)
+                return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
+            PIN->to_meter /= denom;
         }
-
-        factor = pj_strtod(s, nullptr);
-        if ((factor <= 0.0) || (1/factor==0))
+        if (PIN->to_meter <= 0.0)
             return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
-
-        PIN->to_meter = ratio?  1 / factor: factor;
         PIN->fr_meter = 1 / PIN->to_meter;
 
     } else
@@ -792,9 +790,16 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
         s = units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "svto_meter").s)) {
-        PIN->vto_meter = pj_strtod(s, nullptr);
-        if (*s == '/') /* ratio number */
-            PIN->vto_meter /= pj_strtod(++s, nullptr);
+        char* end_ptr = const_cast<char*>(s);
+        PIN->vto_meter = pj_strtod(s, &end_ptr);
+        s = end_ptr;
+        if (*s == '/') { /* ratio number */
+            ++s;
+            double denom = pj_strtod(s, nullptr);
+            if (denom == 0.0)
+                return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
+            PIN->vto_meter /= denom;
+        }
         if (PIN->vto_meter <= 0.0)
             return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
         PIN->vfr_meter = 1. / PIN->vto_meter;

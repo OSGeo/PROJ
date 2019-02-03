@@ -348,6 +348,14 @@ accept      0 0 1000
 expect      0 0 1
 roundtrip   1
 
+operation   +proj=longlat +a=1 +b=1 +vto_meter=2000/2
+accept      0 0 1000
+expect      0 0 1
+roundtrip   1
+
+operation  +proj=longlat +a=1 +b=1 +vto_meter=1/0
+expect     failure   errno unit_factor_less_than_0
+
 operation   +proj=longlat +a=1 +b=1 +vto_meter=1000 +geoc
 accept      0 0 1000
 expect      0 0 1
