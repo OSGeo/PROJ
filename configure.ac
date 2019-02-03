@@ -319,18 +319,40 @@ if test x"$SQLITE3_CHECK" != x"yes" ; then
 fi
 
 dnl ---------------------------------------------------------------------------
+dnl Check for external Google Test
+dnl ---------------------------------------------------------------------------
+
+AC_ARG_WITH(external-gtest,
+            AS_HELP_STRING([--with-external-gtest],
+               [Whether to use external Google Test]),,)
+
+if test "x$with_external_gtest" == "xyes" ; then
+    AC_MSG_RESULT([using external GTest.])
+    PKG_CHECK_MODULES([GTEST], [gtest >= 1.8.0])
+else
+    AC_MSG_RESULT([using internal GTest.])
+    GTEST_CFLAGS="-I\$(top_srcdir)/test/googletest/include"
+    GTEST_LIBS="\$(top_builddir)/test/googletest/libgtest.la"
+fi
+AM_CONDITIONAL(USE_EXTERNAL_GTEST, [test "x$with_external_gtest" == "xyes"])
+AC_SUBST(GTEST_CFLAGS,$GTEST_CFLAGS)
+AC_SUBST(GTEST_LIBS,$GTEST_LIBS)
+
+dnl ---------------------------------------------------------------------------
 dnl Generate files
 dnl ---------------------------------------------------------------------------
 
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
                  test/Makefile test/cli/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
-                 test/googletest/Makefile test/googletest/include/Makefile
-                 test/googletest/include/gtest/Makefile
-                 test/googletest/include/gtest/internal/Makefile
-                 test/googletest/include/gtest/internal/custom/Makefile
-                 test/googletest/src/Makefile
                  man/Makefile man/man1/Makefile man/man3/Makefile data/Makefile
                  jniwrap/Makefile jniwrap/org.osgeo.proj/Makefile jniwrap/org.osgeo.proj/org/Makefile jniwrap/org.osgeo.proj/org/proj4/Makefile])
+if ! test "x$with_external_gtest" = "xyes" ; then
+    AC_CONFIG_FILES([test/googletest/Makefile test/googletest/include/Makefile
+                     test/googletest/include/gtest/Makefile
+                     test/googletest/include/gtest/internal/Makefile
+                     test/googletest/include/gtest/internal/custom/Makefile
+                     test/googletest/src/Makefile])
+fi
 AC_CONFIG_FILES([data/install], [chmod +x data/install])
 
 AC_CONFIG_FILES([proj.pc])
