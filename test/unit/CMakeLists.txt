@@ -1,5 +1,16 @@
 # CMake configuration for PROJ unit tests
 
+option(USE_EXTERNAL_GTEST "Compile against external GTest" OFF)
+
+if (USE_EXTERNAL_GTEST)
+
+message(STATUS "Using external GTest")
+find_package(GTest 1.8.0)
+
+else (USE_EXTERNAL_GTEST)
+
+message(STATUS "Using internal GTest")
+
 # FIXME: Deal with our old-school CMakeLists.txt behaving badly
 set(_save_c_flags "${CMAKE_C_FLAGS}")
 set(_save_cxx_flags "${CMAKE_CXX_FLAGS}")
@@ -46,6 +57,8 @@ set(CMAKE_C_FLAGS "${_save_c_flags}")
 set(CMAKE_CXX_FLAGS "${_save_cxx_flags}")
 unset(_save_c_flags)
 unset(_save_cxx_flags)
+
+endif(USE_EXTERNAL_GTEST)
 
 #
 # Build PROJ unit tests
