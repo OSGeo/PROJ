@@ -646,7 +646,8 @@ EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
  * @param semiMajorAxisIn the semi-major axis.
- * @param invFlattening the inverse/reverse flattening.
+ * @param invFlattening the inverse/reverse flattening. If set to 0, this will
+ * be considered as a sphere.
  * @param celestialBody Name of the celestial body on which the ellipsoid refers
  * to.
  * @return new Ellipsoid.
@@ -654,8 +655,11 @@ EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
 EllipsoidNNPtr Ellipsoid::createFlattenedSphere(
     const util::PropertyMap &properties, const common::Length &semiMajorAxisIn,
     const common::Scale &invFlattening, const std::string &celestialBody) {
-    auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(
-        semiMajorAxisIn, invFlattening, celestialBody));
+    auto ellipsoid(invFlattening.value() == 0
+                       ? Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn,
+                                                              celestialBody)
+                       : Ellipsoid::nn_make_shared<Ellipsoid>(
+                             semiMajorAxisIn, invFlattening, celestialBody));
     ellipsoid->setProperties(properties);
     return ellipsoid;
 }

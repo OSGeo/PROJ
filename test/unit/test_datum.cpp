@@ -127,6 +127,18 @@ TEST(datum, ellipsoid_from_inverse_flattening) {
 
 // ---------------------------------------------------------------------------
 
+TEST(datum, ellipsoid_from_null_inverse_flattening) {
+
+    auto ellipsoid = Ellipsoid::createFlattenedSphere(
+        PropertyMap(), Length(6378137), Scale(0));
+    EXPECT_FALSE(ellipsoid->inverseFlattening().has_value());
+    EXPECT_FALSE(ellipsoid->semiMinorAxis().has_value());
+    EXPECT_FALSE(ellipsoid->semiMedianAxis().has_value());
+    EXPECT_TRUE(ellipsoid->isSphere());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(datum, ellipsoid_from_semi_minor_axis) {
 
     auto ellipsoid = Ellipsoid::createTwoAxis(PropertyMap(), Length(6378137),
