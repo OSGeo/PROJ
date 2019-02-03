@@ -1733,7 +1733,7 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
                 common::Length(c_locale_stod(semi_minor_axis_str), uom), body);
         }
     } catch (const std::exception &ex) {
-        throw buildFactoryException("elllipsoid", code, ex);
+        throw buildFactoryException("ellipsoid", code, ex);
     }
 }
 
