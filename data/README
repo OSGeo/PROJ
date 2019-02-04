@@ -1,5 +1,4 @@
-The files in this directory are support data for PROJ programs
-as well as test scripts for testing proj installation.
+The files in this directory are support data for PROJ programs.
 
 File Contents:
 
@@ -28,7 +27,7 @@ nad.lst --- Reference list of SPCS States and NGS datum identifiers
 
 IGNF    --- Translation of French Mapping Agency codes into PROJ via init= mechanism.
 
-install     --- Unix shell (sh) script to install nad2nad file and proj
-				init files.  Read beginning for usage instructions.
+install     --- Unix shell (sh) script to install proj init files.
+				Read beginning for usage instructions.
 
 Additional data files are available in https://github.com/OSGeo/proj-datumgrid/

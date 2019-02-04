@@ -1,7 +1,7 @@
 DATAPATH = $(top_srcdir)/data
 
 pkgdata_DATA = GL27 nad.lst nad27 nad83 world other.extra \
-		CH \
+		CH null \
 		ITRF2000 ITRF2008 ITRF2014 proj.db
 
 SQL_ORDERED_LIST = sql/begin.sql \
@@ -40,34 +40,12 @@ EXTRA_DIST = GL27 nad.lst nad27 nad83 \
 		world other.extra \
 		CH \
 		ITRF2000 ITRF2008 ITRF2014 \
-		CMakeLists.txt tests/test_nodata.gtx null.lla \
+		CMakeLists.txt tests/test_nodata.gtx null \
 		generate_all_sql_in.cmake sql_filelist.cmake \
 		$(SQL_ORDERED_LIST)
 
-process-nad2bin:
-	@if [ -f $(DATAPATH)/null.lla -a ! -f null ] || [ -f $(DATAPATH)/conus.lla -a ! -f conus ] ; then \
-	  for x in $(DATAPATH)/*.lla ; do \
-	    DEST=`basename $$x .lla`; \
-	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
-	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
-	  done; \
-	fi
-
-install-data-local: process-nad2bin
+install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	@if [ -f $(DATAPATH)/null.lla -a ! -f $(DATAPATH)/null ] || [ -f $(DATAPATH)/conus.lla -a ! -f $(DATAPATH)/conus ] ; then \
-	  for x in $(DATAPATH)/*.lla ; do \
-	    DEST=$(DESTDIR)$(pkgdatadir)/`basename $$x .lla`; \
-	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
-	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
-	    if [ $$? -ne 0 ] ; then \
-		echo "nad2bin$(EXEEXT) failed to install $$DEST"; \
-		exit 1; \
-	    fi; \
-	  done; \
-	else \
-	  echo "nad2nad NADCON source files not present"; \
-	fi
 	@for gridfile in $(DATAPATH)/*.gsb $(DATAPATH)/*.gtx $(DATAPATH)/ntv1_can.dat dummy \
 	                 $(DATAPATH)/alaska $(DATAPATH)/conus $(DATAPATH)/hawaii $(DATAPATH)/null \
 	                 $(DATAPATH)/prvi $(DATAPATH)/stgeorge $(DATAPATH)/stlrnc $(DATAPATH)/stpaul \
@@ -97,9 +75,9 @@ proj.db: $(DATAPATH)/sql/*.sql
 		exit 1; \
 	 fi
 
-	
+
 # For out-of-tree builds, link all file of the source data dir to the generated data
-check-local: process-nad2bin
+check-local:
 	@if [ ! -f GL27 ]; then \
 		for x in $(DATAPATH)/*; do \
 			ln -sf $$x .; \
