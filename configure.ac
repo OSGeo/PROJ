@@ -309,37 +309,9 @@ dnl ---------------------------------------------------------------------------
 dnl Check for sqlite3 library and binary
 dnl ---------------------------------------------------------------------------
 
-AC_ARG_WITH(sqlite3-include,
-    [  --with-sqlite3-include=ARG sqlite3 include directory],,,)
-
-if test "x$with_sqlite3_include" = "x" ; then
-SQLITE3_FLAGS=""
-if test -z "`uname | grep Darwin`" ; then
-    AC_CHECK_HEADERS([sqlite3.h])
-    if test "$ac_cv_header_sqlite3_h" = "no" ; then
-        AC_MSG_ERROR([Please install sqlite3 development package.])
-    fi
-fi
-else
-    SQLITE3_FLAGS="-I$with_sqlite3_include"
-fi
-AC_SUBST(SQLITE3_FLAGS,$SQLITE3_FLAGS)
-
-AC_ARG_WITH(sqlite3-ldflags,
-      [  --with-sqlite3-ldflags=ARG   sqlite3 link flags (i.e. -L/xxx -lsqlite3)],,,)
-
-SQLITE3_LDFLAGS=""
-if test "x$with_sqlite3_ldflags" = "x" ; then
-    AC_CHECK_LIB(sqlite3,sqlite3_open,SQLITE3_LIB_FOUND=yes,SQLITE3_LIB_FOUND=no,)
-    if test x"$SQLITE3_LIB_FOUND" != x"yes"; then
-        AC_MSG_ERROR([Please install sqlite3 development package.])
-    fi
-    SQLITE3_LDFLAGS="-lsqlite3"
-else
-    SQLITE3_LDFLAGS="$with_sqlite3_ldflags"
-fi
-AC_SUBST(SQLITE3_LDFLAGS,$SQLITE3_LDFLAGS)
-
+PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.7])
+AC_SUBST(SQLITE3_CFLAGS,$SQLITE3_CFLAGS)
+AC_SUBST(SQLITE3_LIBS,$SQLITE3_LIBS)
 
 AC_CHECK_PROG(SQLITE3_CHECK,sqlite3,yes)
 if test x"$SQLITE3_CHECK" != x"yes" ; then
@@ -347,18 +319,40 @@ if test x"$SQLITE3_CHECK" != x"yes" ; then
 fi
 
 dnl ---------------------------------------------------------------------------
+dnl Check for external Google Test
+dnl ---------------------------------------------------------------------------
+
+AC_ARG_WITH(external-gtest,
+            AS_HELP_STRING([--with-external-gtest],
+               [Whether to use external Google Test]),,)
+
+if test "x$with_external_gtest" == "xyes" ; then
+    AC_MSG_RESULT([using external GTest.])
+    PKG_CHECK_MODULES([GTEST], [gtest >= 1.8.0])
+else
+    AC_MSG_RESULT([using internal GTest.])
+    GTEST_CFLAGS="-I\$(top_srcdir)/test/googletest/include"
+    GTEST_LIBS="\$(top_builddir)/test/googletest/libgtest.la"
+fi
+AM_CONDITIONAL(USE_EXTERNAL_GTEST, [test "x$with_external_gtest" == "xyes"])
+AC_SUBST(GTEST_CFLAGS,$GTEST_CFLAGS)
+AC_SUBST(GTEST_LIBS,$GTEST_LIBS)
+
+dnl ---------------------------------------------------------------------------
 dnl Generate files
 dnl ---------------------------------------------------------------------------
 
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
                  test/Makefile test/cli/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
-                 test/googletest/Makefile test/googletest/include/Makefile
-                 test/googletest/include/gtest/Makefile
-                 test/googletest/include/gtest/internal/Makefile
-                 test/googletest/include/gtest/internal/custom/Makefile
-                 test/googletest/src/Makefile
                  man/Makefile man/man1/Makefile man/man3/Makefile data/Makefile
                  jniwrap/Makefile jniwrap/org.osgeo.proj/Makefile jniwrap/org.osgeo.proj/org/Makefile jniwrap/org.osgeo.proj/org/proj4/Makefile])
+if ! test "x$with_external_gtest" = "xyes" ; then
+    AC_CONFIG_FILES([test/googletest/Makefile test/googletest/include/Makefile
+                     test/googletest/include/gtest/Makefile
+                     test/googletest/include/gtest/internal/Makefile
+                     test/googletest/include/gtest/internal/custom/Makefile
+                     test/googletest/src/Makefile])
+fi
 AC_CONFIG_FILES([data/install], [chmod +x data/install])
 
 AC_CONFIG_FILES([proj.pc])

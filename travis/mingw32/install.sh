@@ -13,15 +13,15 @@ ln -s /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll  $HOME/.wine/drive_c/windo
 # build sqlite3
 wget https://sqlite.org/2018/sqlite-autoconf-3250100.tar.gz
 tar xzf sqlite-autoconf-3250100.tar.gz
-(cd sqlite-autoconf-3250100 &&  CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ./configure --host=x86_64-w64-mingw32 --prefix=/tmp/proj_autoconf_install && make -j3 && make install)
-ln -s /tmp/proj_autoconf_install/bin/libsqlite3-0.dll  $HOME/.wine/drive_c/windows
+(cd sqlite-autoconf-3250100 &&  CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ./configure --host=x86_64-w64-mingw32 --prefix=/usr/x86_64-w64-mingw32 && make -j3 && sudo make install)
+ln -s /usr/x86_64-w64-mingw32/bin/libsqlite3-0.dll  $HOME/.wine/drive_c/windows
 
 # prepare build files
 ./autogen.sh
 # autoconf build
 mkdir build_autoconf
 cd build_autoconf
-CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ../configure --host=x86_64-w64-mingw32 --with-sqlite3_include=/tmp/proj_autoconf_install/include --with-sqlite3_ldflags="-L/tmp/proj_autoconf_install/lib -lsqlite3" --prefix=/tmp/proj_autoconf_install
+CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ../configure --host=x86_64-w64-mingw32 --prefix=/tmp/proj_autoconf_install
 make -j3
 make install
 make dist-all
@@ -37,7 +37,7 @@ cd ..
 # autoconf build with grids
 mkdir build_autoconf_grids
 cd build_autoconf_grids
-CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ../configure --host=x86_64-w64-mingw32 --with-sqlite3_include=/tmp/proj_autoconf_install/include --with-sqlite3_ldflags="-L/tmp/proj_autoconf_install/lib -lsqlite3" --prefix=/tmp/proj_autoconf_install_nad
+CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ../configure --host=x86_64-w64-mingw32 --prefix=/tmp/proj_autoconf_install_nad
 make -j3
 make install
 find /tmp/proj_autoconf_install_nad
