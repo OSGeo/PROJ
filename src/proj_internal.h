@@ -702,6 +702,8 @@ struct projCtx_t {
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
 
+    std::string curStringInCreateFromPROJString{};
+
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);
     ~projCtx_t();

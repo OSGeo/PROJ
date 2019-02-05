@@ -5313,6 +5313,9 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                 }
                 token += c_str[i];
             }
+            if (in_string) {
+                throw ParsingException("Unbalanced double quote");
+            }
             if (token.empty()) {
                 break;
             }
@@ -7452,6 +7455,13 @@ static const metadata::ExtentPtr &getExtent(const crs::CRS *crs) {
  */
 BaseObjectNNPtr
 PROJStringParser::createFromPROJString(const std::string &projString) {
+
+    // In some abnormal situations involving init=epsg:XXXX syntax, we could
+    // have infinite loop
+    if (d->ctx_ && d->ctx_->curStringInCreateFromPROJString == projString) {
+        throw ParsingException("invalid PROJ string");
+    }
+
     d->steps_.clear();
     d->title_.clear();
     d->globalParamValues_.clear();
@@ -7760,11 +7770,17 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         proj_log_func(pj_context, &logger, Logger::log);
         proj_context_use_proj4_init_rules(pj_context, d->usePROJ4InitRules_);
     }
+    if (d->ctx_) {
+        d->ctx_->curStringInCreateFromPROJString = projString;
+    }
     auto pj = pj_create_internal(
         pj_context, (projString.find("type=crs") != std::string::npos
                          ? projString + " +disable_grid_presence_check"
                          : projString)
                         .c_str());
+    if (d->ctx_) {
+        d->ctx_->curStringInCreateFromPROJString.clear();
+    }
     valid = pj != nullptr;
 
     // Remove parameters not understood by PROJ.
