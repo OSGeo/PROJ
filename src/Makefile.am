@@ -1,6 +1,6 @@
 AM_CFLAGS = @C_WFLAGS@
 
-bin_PROGRAMS =	proj nad2bin geod cs2cs gie cct projinfo
+bin_PROGRAMS =	proj geod cs2cs gie cct projinfo
 EXTRA_PROGRAMS = multistresstest test228
 
 TESTS = geodtest
@@ -14,7 +14,7 @@ include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesi
 	org_proj4_PJ.h proj_symbol_rename.h
 
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
-	bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake bin_projinfo.cmake \
+	bin_geod.cmake bin_proj.cmake bin_projinfo.cmake \
 	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake tests/geodtest.cpp \
 	wkt1_grammar.y wkt2_grammar.y apps/emess.h
 
@@ -22,7 +22,6 @@ proj_SOURCES = apps/proj.cpp apps/emess.cpp
 projinfo_SOURCES = apps/projinfo.cpp
 cs2cs_SOURCES = apps/cs2cs.cpp apps/emess.cpp
 cct_SOURCES = apps/cct.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
-nad2bin_SOURCES = apps/nad2bin.cpp
 geod_SOURCES = apps/geod.cpp apps/geod_set.cpp apps/geod_interface.cpp apps/geod_interface.h apps/emess.cpp
 
 gie_SOURCES = apps/gie.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
@@ -35,7 +34,6 @@ cs2cs_LDADD = libproj.la
 geod_LDADD = libproj.la
 proj_LDADD = libproj.la
 projinfo_LDADD = libproj.la
-nad2bin_LDADD = libproj.la
 
 gie_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@
