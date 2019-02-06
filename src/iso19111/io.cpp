@@ -7773,6 +7773,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     if (d->ctx_) {
         d->ctx_->curStringInCreateFromPROJString = projString;
     }
+    auto log_level = proj_log_level(pj_context, PJ_LOG_NONE);
     auto pj = pj_create_internal(
         pj_context, (projString.find("type=crs") != std::string::npos
                          ? projString + " +disable_grid_presence_check"
@@ -7782,6 +7783,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         d->ctx_->curStringInCreateFromPROJString.clear();
     }
     valid = pj != nullptr;
+    proj_log_level(pj_context, log_level);
 
     // Remove parameters not understood by PROJ.
     if (valid && d->steps_.size() == 1) {
