@@ -888,6 +888,38 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_DLL std::string getDescriptionText(const std::string &code) const;
 
+    /** CRS information */
+    struct CRSInfo {
+        /** Authority name */
+        std::string authName{};
+        /** Code */
+        std::string code{};
+        /** Name */
+        std::string name{};
+        /** Type */
+        ObjectType type{ObjectType::CRS};
+        /** Whether the object is deprecated */
+        bool deprecated{};
+        /** Whereas the west_lon_degree, south_lat_degree, east_lon_degree and
+        * north_lat_degree fields are valid. */
+        bool bbox_valid{};
+        /** Western-most longitude of the area of use, in degrees. */
+        double west_lon_degree{};
+        /** Southern-most latitude of the area of use, in degrees. */
+        double south_lat_degree{};
+        /** Eastern-most longitude of the area of use, in degrees. */
+        double east_lon_degree{};
+        /** Northern-most latitude of the area of use, in degrees. */
+        double north_lat_degree{};
+        /** Name of the area of use. */
+        std::string areaName{};
+        /** Name of the projection method for a projected CRS. Might be empty
+         * even for projected CRS in some cases. */
+        std::string projectionMethodName{};
+    };
+
+    PROJ_DLL std::list<CRSInfo> getCRSInfoList() const;
+
     // non-standard
     PROJ_DLL static AuthorityFactoryNNPtr
     create(const DatabaseContextNNPtr &context,

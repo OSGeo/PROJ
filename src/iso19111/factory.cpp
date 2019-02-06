@@ -77,9 +77,17 @@ namespace io {
 
 //! @cond Doxygen_Suppress
 
-#define GEOG_2D "'geographic 2D'"
-#define GEOG_3D "'geographic 3D'"
-#define GEOCENTRIC "'geocentric'"
+// CRS subtypes
+#define GEOG_2D "geographic 2D"
+#define GEOG_3D "geographic 3D"
+#define GEOCENTRIC "geocentric"
+#define PROJECTED "projected"
+#define VERTICAL "vertical"
+#define COMPOUND "compound"
+
+#define GEOG_2D_SINGLE_QUOTED "'geographic 2D'"
+#define GEOG_3D_SINGLE_QUOTED "'geographic 3D'"
+#define GEOCENTRIC_SINGLE_QUOTED "'geocentric'"
 
 // ---------------------------------------------------------------------------
 
@@ -1051,7 +1059,7 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
     sql += replaceAll(tableName, "\"", "\"\"");
     sql += "\" WHERE name = ?";
     if (tableName == "geodetic_crs") {
-        sql += " AND type = " GEOG_2D;
+        sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
     }
     auto res = d->run(sql, {officialName});
     if (res.empty()) {
@@ -2067,7 +2075,8 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
                     "deprecated FROM "
                     "geodetic_crs WHERE auth_name = ? AND code = ?");
     if (geographicOnly) {
-        sql += " AND type in (" GEOG_2D "," GEOG_3D ")";
+        sql += " AND type in (" GEOG_2D_SINGLE_QUOTED "," GEOG_3D_SINGLE_QUOTED
+               ")";
     }
     auto res = d->runWithCodeParam(sql, code);
     if (res.empty()) {
@@ -2124,15 +2133,14 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
 
         auto ellipsoidalCS =
             util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
-        if ((type == "geographic 2D" || type == "geographic 3D") &&
-            ellipsoidalCS) {
+        if ((type == GEOG_2D || type == GEOG_3D) && ellipsoidalCS) {
             auto crsRet = crs::GeographicCRS::create(
                 props, datum, NN_NO_CHECK(ellipsoidalCS));
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
-        if (type == "geocentric" && geocentricCS) {
+        if (type == GEOCENTRIC && geocentricCS) {
             auto crsRet = crs::GeodeticCRS::create(props, datum,
                                                    NN_NO_CHECK(geocentricCS));
             d->context()->d->cache(cacheKey, crsRet);
@@ -2477,17 +2485,16 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                            code);
     }
     const auto &type = res.front()[0];
-    if (type == "geographic 2D" || type == "geographic 3D" ||
-        type == "geocentric") {
+    if (type == GEOG_2D || type == GEOG_3D || type == GEOCENTRIC) {
         return createGeodeticCRS(code);
     }
-    if (type == "vertical") {
+    if (type == VERTICAL) {
         return createVerticalCRS(code);
     }
-    if (type == "projected") {
+    if (type == PROJECTED) {
         return createProjectedCRS(code);
     }
-    if (allowCompound && type == "compound") {
+    if (allowCompound && type == COMPOUND) {
         return createCompoundCRS(code);
     }
     throw FactoryException("unhandled CRS type: " + type);
@@ -3782,17 +3789,22 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
         sql = "SELECT code FROM geodetic_crs WHERE ";
         break;
     case ObjectType::GEOCENTRIC_CRS:
-        sql = "SELECT code FROM geodetic_crs WHERE type = " GEOCENTRIC " AND ";
+        sql = "SELECT code FROM geodetic_crs WHERE type "
+              "= " GEOCENTRIC_SINGLE_QUOTED " AND ";
         break;
     case ObjectType::GEOGRAPHIC_CRS:
-        sql = "SELECT code FROM geodetic_crs WHERE type IN (" GEOG_2D
-              "," GEOG_3D ") AND ";
+        sql = "SELECT code FROM geodetic_crs WHERE type IN "
+              "(" GEOG_2D_SINGLE_QUOTED "," GEOG_3D_SINGLE_QUOTED ") AND ";
         break;
     case ObjectType::GEOGRAPHIC_2D_CRS:
-        sql = "SELECT code FROM geodetic_crs WHERE type = " GEOG_2D " AND ";
+        sql =
+            "SELECT code FROM geodetic_crs WHERE type = " GEOG_2D_SINGLE_QUOTED
+            " AND ";
         break;
     case ObjectType::GEOGRAPHIC_3D_CRS:
-        sql = "SELECT code FROM geodetic_crs WHERE type = " GEOG_3D " AND ";
+        sql =
+            "SELECT code FROM geodetic_crs WHERE type = " GEOG_3D_SINGLE_QUOTED
+            " AND ";
         break;
     case ObjectType::VERTICAL_CRS:
         sql = "SELECT code FROM vertical_crs WHERE ";
@@ -3854,6 +3866,107 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
                                            code);
     }
     return res.front()[0];
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a list of information on CRS objects
+ *
+ * This is functionnaly equivalent of listing the codes from an authority,
+ * instanciating
+ * a CRS object for each of them and getting the information from this CRS
+ * object, but this implementation has much less overhead.
+ *
+ * @throw FactoryException
+ */
+std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
+    std::string sql = "SELECT c.auth_name, c.code, c.name, c.type, "
+                      "c.deprecated, "
+                      "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
+                      "a.name, NULL FROM geodetic_crs c "
+                      "JOIN area a ON "
+                      "c.area_of_use_auth_name = a.auth_name AND "
+                      "c.area_of_use_code = a.code";
+    ListOfParams params;
+    if (d->hasAuthorityRestriction()) {
+        sql += " WHERE c.auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    sql += " UNION ALL ";
+    sql += "SELECT c.auth_name, c.code, c.name, 'projected', "
+           "c.deprecated, "
+           "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
+           "a.name, conv.method_name FROM projected_crs c "
+           "JOIN area a ON "
+           "c.area_of_use_auth_name = a.auth_name AND "
+           "c.area_of_use_code = a.code "
+           "LEFT JOIN conversion conv ON "
+           "c.conversion_auth_name = conv.auth_name AND "
+           "c.conversion_code = conv.code";
+    if (d->hasAuthorityRestriction()) {
+        sql += " WHERE c.auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    sql += " UNION ALL ";
+    sql += "SELECT c.auth_name, c.code, c.name, 'vertical', "
+           "c.deprecated, "
+           "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
+           "a.name, NULL FROM vertical_crs c "
+           "JOIN area a ON "
+           "c.area_of_use_auth_name = a.auth_name AND "
+           "c.area_of_use_code = a.code";
+    if (d->hasAuthorityRestriction()) {
+        sql += " WHERE c.auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    sql += " UNION ALL ";
+    sql += "SELECT c.auth_name, c.code, c.name, 'compound', "
+           "c.deprecated, "
+           "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
+           "a.name, NULL FROM compound_crs c "
+           "JOIN area a ON "
+           "c.area_of_use_auth_name = a.auth_name AND "
+           "c.area_of_use_code = a.code";
+    if (d->hasAuthorityRestriction()) {
+        sql += " WHERE c.auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    auto sqlRes = d->run(sql, params);
+    std::list<AuthorityFactory::CRSInfo> res;
+    for (const auto &row : sqlRes) {
+        AuthorityFactory::CRSInfo info;
+        info.authName = row[0];
+        info.code = row[1];
+        info.name = row[2];
+        const auto &type = row[3];
+        if (type == GEOG_2D) {
+            info.type = AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS;
+        } else if (type == GEOG_3D) {
+            info.type = AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS;
+        } else if (type == GEOCENTRIC) {
+            info.type = AuthorityFactory::ObjectType::GEOCENTRIC_CRS;
+        } else if (type == PROJECTED) {
+            info.type = AuthorityFactory::ObjectType::PROJECTED_CRS;
+        } else if (type == VERTICAL) {
+            info.type = AuthorityFactory::ObjectType::VERTICAL_CRS;
+        } else if (type == COMPOUND) {
+            info.type = AuthorityFactory::ObjectType::COMPOUND_CRS;
+        }
+        info.deprecated = row[4] == "1";
+        if (row[5].empty()) {
+            info.bbox_valid = false;
+        } else {
+            info.bbox_valid = true;
+            info.west_lon_degree = c_locale_stod(row[5]);
+            info.south_lat_degree = c_locale_stod(row[6]);
+            info.east_lon_degree = c_locale_stod(row[7]);
+            info.north_lat_degree = c_locale_stod(row[8]);
+        }
+        info.areaName = row[9];
+        info.projectionMethodName = row[10];
+        res.emplace_back(info);
+    }
+    return res;
 }
 
 // ---------------------------------------------------------------------------
@@ -4056,23 +4169,25 @@ AuthorityFactory::createObjectsFromName(
                 break;
             case ObjectType::GEOCENTRIC_CRS:
                 addToListStringWithOR(otherConditions,
-                                      "(table_name = " GEOCENTRIC " AND "
-                                      "type = " GEOCENTRIC ")");
+                                      "(table_name = " GEOCENTRIC_SINGLE_QUOTED
+                                      " AND "
+                                      "type = " GEOCENTRIC_SINGLE_QUOTED ")");
                 break;
             case ObjectType::GEOGRAPHIC_CRS:
                 addToListStringWithOR(otherConditions,
                                       "(table_name = 'geodetic_crs' AND "
-                                      "type IN (" GEOG_2D "," GEOG_3D "))");
+                                      "type IN (" GEOG_2D_SINGLE_QUOTED
+                                      "," GEOG_3D_SINGLE_QUOTED "))");
                 break;
             case ObjectType::GEOGRAPHIC_2D_CRS:
                 addToListStringWithOR(otherConditions,
                                       "(table_name = 'geodetic_crs' AND "
-                                      "type = " GEOG_2D ")");
+                                      "type = " GEOG_2D_SINGLE_QUOTED ")");
                 break;
             case ObjectType::GEOGRAPHIC_3D_CRS:
                 addToListStringWithOR(otherConditions,
                                       "(table_name = 'geodetic_crs' AND "
-                                      "type = " GEOG_3D ")");
+                                      "type = " GEOG_3D_SINGLE_QUOTED ")");
                 break;
             case ObjectType::PROJECTED_CRS:
                 addToListString(tableNameList, "'projected_crs'");

@@ -34,6 +34,7 @@
 #include <cstdarg>
 #include <cstring>
 #include <map>
+#include <new>
 #include <utility>
 #include <vector>
 
@@ -1895,6 +1896,8 @@ PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
  *
  * @return a NULL terminated list of NUL-terminated strings that must be
  * freed with proj_string_list_destroy(), or NULL in case of error.
+ *
+ * @see proj_get_crs_info_list_from_database()
  */
 PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                               const char *auth_name,
@@ -1925,6 +1928,215 @@ void proj_string_list_destroy(PROJ_STRING_LIST list) {
     if (list) {
         for (size_t i = 0; list[i] != nullptr; i++) {
             delete[] list[i];
+        }
+        delete[] list;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a default set of parameters to be used by
+ * proj_get_crs_list().
+ *
+ * @return a new object to free with proj_get_crs_list_parameters_destroy() */
+PROJ_CRS_LIST_PARAMETERS *proj_get_crs_list_parameters_create() {
+    auto ret = new (std::nothrow) PROJ_CRS_LIST_PARAMETERS();
+    if (ret) {
+        ret->types = nullptr;
+        ret->typesCount = 0;
+        ret->crs_area_of_use_contains_bbox = TRUE;
+        ret->bbox_valid = FALSE;
+        ret->west_lon_degree = 0.0;
+        ret->south_lat_degree = 0.0;
+        ret->east_lon_degree = 0.0;
+        ret->north_lat_degree = 0.0;
+        ret->allow_deprecated = FALSE;
+    }
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Destroy an object returned by proj_get_crs_list_parameters_create()
+ */
+void proj_get_crs_list_parameters_destroy(PROJ_CRS_LIST_PARAMETERS *params) {
+    delete params;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Enumerate CRS objects from the database, taking into account various
+ * criteria.
+ *
+ * The returned object is an array of PROJ_CRS_INFO* pointers, whose last
+ * entry is NULL. This array should be freed with proj_crs_list_destroy()
+ *
+ * When no filter parameters are set, this is functionnaly equivalent to
+ * proj_get_crs_info_list_from_database(), instanciating a PJ* object for each
+ * of the proj_create_from_database() and retrieving information with the
+ * various getters. However this function will be much faster.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param auth_name Authority name, used to restrict the search.
+ * Or NULL for all authorities.
+ * @param params Additional criteria, or NULL. If not-NULL, params SHOULD
+ * have been allocated by proj_get_crs_list_parameters_create(), as the
+ * PROJ_CRS_LIST_PARAMETERS structure might grow over time.
+ * @param out_result_count Output parameter pointing to an integer to receive
+ * the size of the result list. Might be NULL
+ * @return an array of PROJ_CRS_INFO* pointers to be freed with
+ * proj_crs_list_destroy(), or NULL in case of error.
+ */
+PROJ_CRS_INFO **
+proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
+                                     const PROJ_CRS_LIST_PARAMETERS *params,
+                                     int *out_result_count) {
+    SANITIZE_CTX(ctx);
+    PROJ_CRS_INFO **ret = nullptr;
+    int i = 0;
+    try {
+        auto factory = AuthorityFactory::create(getDBcontext(ctx),
+                                                auth_name ? auth_name : "");
+        auto list = factory->getCRSInfoList();
+        ret = new PROJ_CRS_INFO *[list.size() + 1];
+        GeographicBoundingBoxPtr bbox;
+        if (params && params->bbox_valid) {
+            bbox = GeographicBoundingBox::create(
+                       params->west_lon_degree, params->south_lat_degree,
+                       params->east_lon_degree, params->north_lat_degree)
+                       .as_nullable();
+        }
+        for (const auto &info : list) {
+            auto type = PJ_TYPE_CRS;
+            if (info.type == AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS) {
+                type = PJ_TYPE_GEOGRAPHIC_2D_CRS;
+            } else if (info.type ==
+                       AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS) {
+                type = PJ_TYPE_GEOGRAPHIC_3D_CRS;
+            } else if (info.type ==
+                       AuthorityFactory::ObjectType::GEOCENTRIC_CRS) {
+                type = PJ_TYPE_GEOCENTRIC_CRS;
+            } else if (info.type ==
+                       AuthorityFactory::ObjectType::PROJECTED_CRS) {
+                type = PJ_TYPE_PROJECTED_CRS;
+            } else if (info.type ==
+                       AuthorityFactory::ObjectType::VERTICAL_CRS) {
+                type = PJ_TYPE_VERTICAL_CRS;
+            } else if (info.type ==
+                       AuthorityFactory::ObjectType::COMPOUND_CRS) {
+                type = PJ_TYPE_COMPOUND_CRS;
+            }
+            if (params && params->typesCount) {
+                bool typeValid = false;
+                for (size_t j = 0; j < params->typesCount; j++) {
+                    if (params->types[j] == type) {
+                        typeValid = true;
+                        break;
+                    } else if (params->types[j] == PJ_TYPE_GEOGRAPHIC_CRS &&
+                               (type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
+                                type == PJ_TYPE_GEOGRAPHIC_3D_CRS)) {
+                        typeValid = true;
+                        break;
+                    } else if (params->types[j] == PJ_TYPE_GEODETIC_CRS &&
+                               (type == PJ_TYPE_GEOCENTRIC_CRS ||
+                                type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
+                                type == PJ_TYPE_GEOGRAPHIC_3D_CRS)) {
+                        typeValid = true;
+                        break;
+                    }
+                }
+                if (!typeValid) {
+                    continue;
+                }
+            }
+            if (params && !params->allow_deprecated && info.deprecated) {
+                continue;
+            }
+            if (params && params->bbox_valid) {
+                if (!info.bbox_valid) {
+                    continue;
+                }
+                if (info.west_lon_degree <= info.east_lon_degree &&
+                    params->west_lon_degree <= params->east_lon_degree) {
+                    if (params->crs_area_of_use_contains_bbox) {
+                        if (params->west_lon_degree < info.west_lon_degree ||
+                            params->east_lon_degree > info.east_lon_degree ||
+                            params->south_lat_degree < info.south_lat_degree ||
+                            params->north_lat_degree > info.north_lat_degree) {
+                            continue;
+                        }
+                    } else {
+                        if (info.east_lon_degree < params->west_lon_degree ||
+                            info.west_lon_degree > params->east_lon_degree ||
+                            info.north_lat_degree < params->south_lat_degree ||
+                            info.south_lat_degree > params->north_lat_degree) {
+                            continue;
+                        }
+                    }
+                } else {
+                    auto crsExtent = GeographicBoundingBox::create(
+                        info.west_lon_degree, info.south_lat_degree,
+                        info.east_lon_degree, info.north_lat_degree);
+                    if (params->crs_area_of_use_contains_bbox) {
+                        if (!crsExtent->contains(NN_NO_CHECK(bbox))) {
+                            continue;
+                        }
+                    } else {
+                        if (!bbox->intersects(crsExtent)) {
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            ret[i] = new PROJ_CRS_INFO;
+            ret[i]->auth_name = pj_strdup(info.authName.c_str());
+            ret[i]->code = pj_strdup(info.code.c_str());
+            ret[i]->name = pj_strdup(info.name.c_str());
+            ret[i]->type = type;
+            ret[i]->deprecated = info.deprecated;
+            ret[i]->bbox_valid = info.bbox_valid;
+            ret[i]->west_lon_degree = info.west_lon_degree;
+            ret[i]->south_lat_degree = info.south_lat_degree;
+            ret[i]->east_lon_degree = info.east_lon_degree;
+            ret[i]->north_lat_degree = info.north_lat_degree;
+            ret[i]->area_name = pj_strdup(info.areaName.c_str());
+            ret[i]->projection_method_name =
+                info.projectionMethodName.empty()
+                    ? nullptr
+                    : pj_strdup(info.projectionMethodName.c_str());
+            i++;
+        }
+        ret[i] = nullptr;
+        if (out_result_count)
+            *out_result_count = i;
+        return ret;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ret) {
+            ret[i + 1] = nullptr;
+            proj_crs_list_destroy(ret);
+        }
+        if (out_result_count)
+            *out_result_count = 0;
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Destroy the result returned by
+ * proj_get_crs_info_list_from_database().
+ */
+void proj_crs_list_destroy(PROJ_CRS_INFO **list) {
+    if (list) {
+        for (int i = 0; list[i] != nullptr; i++) {
+            pj_dalloc(list[i]->auth_name);
+            pj_dalloc(list[i]->code);
+            pj_dalloc(list[i]->name);
+            pj_dalloc(list[i]->area_name);
+            pj_dalloc(list[i]->projection_method_name);
+            delete list[i];
         }
         delete[] list;
     }
