@@ -1485,6 +1485,12 @@ AuthorityFactory::createExtent(const std::string &code) const {
     try {
         const auto &row = res.front();
         const auto &name = row[0];
+        if (row[1].empty()) {
+            auto extent = metadata::Extent::create(
+                util::optional<std::string>(name), {}, {}, {});
+            d->context()->d->cache(code, extent);
+            return extent;
+        }
         double south_lat = c_locale_stod(row[1]);
         double north_lat = c_locale_stod(row[2]);
         double west_lon = c_locale_stod(row[3]);

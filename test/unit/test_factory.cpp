@@ -222,6 +222,16 @@ TEST(factory, AuthorityFactory_createExtent) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createExtent_no_bbox) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto extent = factory->createExtent("1361"); // Sudan - south. Deprecated
+    EXPECT_EQ(*(extent->description()), "Sudan - south");
+    const auto &geogElts = extent->geographicElements();
+    EXPECT_TRUE(geogElts.empty());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createGeodeticDatum) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createGeodeticDatum("-1"),
@@ -410,6 +420,17 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=longlat +datum=WGS84 +no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D_area_no_bbox) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createGeodeticCRS("4296"); // Sudan - deprecated
+    auto domain = crs->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1361").get()));
 }
 
 // ---------------------------------------------------------------------------
