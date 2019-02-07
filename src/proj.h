@@ -645,6 +645,74 @@ typedef enum
     PJ_CS_TYPE_TEMPORALMEASURE
 } PJ_COORDINATE_SYSTEM_TYPE;
 
+/** \brief Structure given overall description of a CRS.
+ *
+ * This structure may grow over time, and should not be directly allocated by
+ * client code.
+ */
+typedef struct
+{
+    /** Authority name. */
+    char* auth_name;
+    /** Object code. */
+    char* code;
+    /** Object name. */
+    char* name;
+    /** Object type. */
+    PJ_TYPE type;
+    /** Whether the object is deprecated */
+    int deprecated;
+    /** Whereas the west_lon_degree, south_lat_degree, east_lon_degree and
+     * north_lat_degree fields are valid. */
+    int bbox_valid;
+    /** Western-most longitude of the area of use, in degrees. */
+    double west_lon_degree;
+    /** Southern-most latitude of the area of use, in degrees. */
+    double south_lat_degree;
+    /** Eastern-most longitude of the area of use, in degrees. */
+    double east_lon_degree;
+    /** Northern-most latitude of the area of use, in degrees. */
+    double north_lat_degree;
+    /** Name of the area of use. */
+    char* area_name;
+    /** Name of the projection method for a projected CRS. Might be NULL even
+     *for projected CRS in some cases. */
+    char* projection_method_name;
+} PROJ_CRS_INFO;
+
+/** \brief Structure describing optional parameters for proj_get_crs_list();
+ *
+ * This structure may grow over time, and should not be directly allocated by
+ * client code.
+ */
+typedef struct
+{
+    /** Array of allowed object types. Should be NULL if all types are allowed*/
+    const PJ_TYPE* types;
+    /** Size of types. Should be 0 if all types are allowed*/
+    size_t typesCount;
+
+    /** If TRUE and bbox_valid == TRUE, then only CRS whose area of use
+     * entirely contains the specified bounding box will be returned.
+     * If FALSE and bbox_valid == TRUE, then only CRS whose area of use
+     * intersects the specified bounding box will be returned.
+     */
+    int crs_area_of_use_contains_bbox;
+    /** To set to TRUE so that west_lon_degree, south_lat_degree,
+     * east_lon_degree and north_lat_degree fields are taken into account. */
+    int bbox_valid;
+    /** Western-most longitude of the area of use, in degrees. */
+    double west_lon_degree;
+    /** Southern-most latitude of the area of use, in degrees. */
+    double south_lat_degree;
+    /** Eastern-most longitude of the area of use, in degrees. */
+    double east_lon_degree;
+    /** Northern-most latitude of the area of use, in degrees. */
+    double north_lat_degree;
+
+    /** Whether deprecated objects are allowed. Default to FALSE. */
+    int allow_deprecated;
+} PROJ_CRS_LIST_PARAMETERS;
 
 
 /**@}*/
@@ -773,6 +841,19 @@ PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                              const char *auth_name,
                                              PJ_TYPE type,
                                              int allow_deprecated);
+
+PROJ_CRS_LIST_PARAMETERS PROJ_DLL *proj_get_crs_list_parameters_create(void);
+
+void PROJ_DLL proj_get_crs_list_parameters_destroy(
+                                        PROJ_CRS_LIST_PARAMETERS* params);
+
+PROJ_CRS_INFO PROJ_DLL **proj_get_crs_info_list_from_database(
+                                      PJ_CONTEXT *ctx,
+                                      const char *auth_name,
+                                      const PROJ_CRS_LIST_PARAMETERS* params,
+                                      int *out_result_count);
+
+void PROJ_DLL proj_crs_list_destroy(PROJ_CRS_INFO** list);
 
 /* ------------------------------------------------------------------------- */
 
