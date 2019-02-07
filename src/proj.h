@@ -853,7 +853,7 @@ PROJ_CRS_INFO PROJ_DLL **proj_get_crs_info_list_from_database(
                                       const PROJ_CRS_LIST_PARAMETERS* params,
                                       int *out_result_count);
 
-void PROJ_DLL proj_crs_list_destroy(PROJ_CRS_INFO** list);
+void PROJ_DLL proj_crs_info_list_destroy(PROJ_CRS_INFO** list);
 
 /* ------------------------------------------------------------------------- */
 

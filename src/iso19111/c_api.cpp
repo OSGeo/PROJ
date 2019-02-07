@@ -1969,7 +1969,7 @@ void proj_get_crs_list_parameters_destroy(PROJ_CRS_LIST_PARAMETERS *params) {
  * criteria.
  *
  * The returned object is an array of PROJ_CRS_INFO* pointers, whose last
- * entry is NULL. This array should be freed with proj_crs_list_destroy()
+ * entry is NULL. This array should be freed with proj_crs_info_list_destroy()
  *
  * When no filter parameters are set, this is functionnaly equivalent to
  * proj_get_crs_info_list_from_database(), instanciating a PJ* object for each
@@ -1985,7 +1985,7 @@ void proj_get_crs_list_parameters_destroy(PROJ_CRS_LIST_PARAMETERS *params) {
  * @param out_result_count Output parameter pointing to an integer to receive
  * the size of the result list. Might be NULL
  * @return an array of PROJ_CRS_INFO* pointers to be freed with
- * proj_crs_list_destroy(), or NULL in case of error.
+ * proj_crs_info_list_destroy(), or NULL in case of error.
  */
 PROJ_CRS_INFO **
 proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
@@ -2115,7 +2115,7 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
         proj_log_error(ctx, __FUNCTION__, e.what());
         if (ret) {
             ret[i + 1] = nullptr;
-            proj_crs_list_destroy(ret);
+            proj_crs_info_list_destroy(ret);
         }
         if (out_result_count)
             *out_result_count = 0;
@@ -2128,7 +2128,7 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 /** \brief Destroy the result returned by
  * proj_get_crs_info_list_from_database().
  */
-void proj_crs_list_destroy(PROJ_CRS_INFO **list) {
+void proj_crs_info_list_destroy(PROJ_CRS_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
             pj_dalloc(list[i]->auth_name);

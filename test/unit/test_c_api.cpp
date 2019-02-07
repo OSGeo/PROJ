@@ -3025,7 +3025,7 @@ TEST_F(CApi, proj_create_cartesian_2D_cs) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_get_crs_info_list_from_database) {
-    { proj_crs_list_destroy(nullptr); }
+    { proj_crs_info_list_destroy(nullptr); }
 
     { proj_get_crs_list_parameters_destroy(nullptr); }
 
@@ -3038,7 +3038,7 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         EXPECT_NE(list[0]->auth_name, nullptr);
         EXPECT_NE(list[0]->code, nullptr);
         EXPECT_NE(list[0]->name, nullptr);
-        proj_crs_list_destroy(list);
+        proj_crs_info_list_destroy(list);
     }
 
     // Default parameters
@@ -3098,7 +3098,7 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         EXPECT_TRUE(found32631);
         EXPECT_TRUE(found3855);
         EXPECT_TRUE(found3901);
-        proj_crs_list_destroy(list);
+        proj_crs_info_list_destroy(list);
     }
 
     // Filter on only geodetic crs
@@ -3125,7 +3125,7 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         EXPECT_TRUE(foundGeog3D);
         EXPECT_TRUE(foundGeocentric);
         proj_get_crs_list_parameters_destroy(params);
-        proj_crs_list_destroy(list);
+        proj_crs_info_list_destroy(list);
     }
 
     // Filter on only geographic crs
@@ -3148,7 +3148,7 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         EXPECT_TRUE(foundGeog2D);
         EXPECT_TRUE(foundGeog3D);
         proj_get_crs_list_parameters_destroy(params);
-        proj_crs_list_destroy(list);
+        proj_crs_info_list_destroy(list);
     }
 
     // Filter on only geographic 2D crs and projected CRS
@@ -3172,7 +3172,7 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         EXPECT_TRUE(foundGeog2D);
         EXPECT_TRUE(foundProjected);
         proj_get_crs_list_parameters_destroy(params);
-        proj_crs_list_destroy(list);
+        proj_crs_info_list_destroy(list);
     }
 
     // Filter on bbox (inclusion)
@@ -3198,7 +3198,7 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
             EXPECT_GE(list[i]->north_lat_degree, params->north_lat_degree);
         }
         proj_get_crs_list_parameters_destroy(params);
-        proj_crs_list_destroy(list);
+        proj_crs_info_list_destroy(list);
     }
 
     // Filter on bbox (intersection)
@@ -3225,7 +3225,7 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
             EXPECT_GE(list[i]->north_lat_degree, params->south_lat_degree);
         }
         proj_get_crs_list_parameters_destroy(params);
-        proj_crs_list_destroy(list);
+        proj_crs_info_list_destroy(list);
     }
 }
 } // namespace
