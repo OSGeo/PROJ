@@ -201,15 +201,15 @@ SET(SRC_LIBPROJ_ISO19111
 
 SET(SRC_LIBPROJ_CORE
         pj_list.h proj_internal.h proj_math.h
-        aasincos.cpp adjlon.cpp bch2bps.cpp bchgen.cpp
-        biveval.cpp dmstor.cpp mk_cheby.cpp auth.cpp
+        aasincos.cpp adjlon.cpp
+        dmstor.cpp auth.cpp
         deriv.cpp ell_set.cpp ellps.cpp errno.cpp
         factors.cpp fwd.cpp init.cpp inv.cpp
         list.cpp malloc.cpp mlfn.cpp msfn.cpp proj_mdist.cpp
         open_lib.cpp param.cpp phi2.cpp pr_list.cpp
         qsfn.cpp strerrno.cpp
         tsfn.cpp units.cpp ctx.cpp log.cpp zpoly1.cpp rtodms.cpp
-        vector1.cpp release.cpp gauss.cpp
+        release.cpp gauss.cpp
         fileapi.cpp
         gc_reader.cpp gridcatalog.cpp
         nad_cvt.cpp nad_init.cpp nad_intr.cpp

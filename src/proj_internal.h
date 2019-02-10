@@ -653,7 +653,7 @@ struct FACTORS {
 #define PJD_ERR_LAT_0_OR_ALPHA_EQ_90    -33
 #define PJD_ERR_ELLIPSOID_USE_REQUIRED  -34
 #define PJD_ERR_INVALID_UTM_ZONE        -35
-#define PJD_ERR_TCHEBY_VAL_OUT_OF_RANGE -36
+/* -36 no longer used */
 #define PJD_ERR_FAILED_TO_FIND_PROJ     -37
 #define PJD_ERR_FAILED_TO_LOAD_GRID     -38
 #define PJD_ERR_INVALID_M_OR_N          -39
@@ -677,8 +677,8 @@ struct FACTORS {
 #define PJD_ERR_TOO_MANY_INITS          -57
 #define PJD_ERR_INVALID_ARG             -58
 #define PJD_ERR_INCONSISTENT_UNIT       -59
-/* NOTE: Remember to update pj_strerrno.c and transient_error in */
-/* pj_transform.c when adding new value */
+/* NOTE: Remember to update src/strerrno.cpp, src/apps/gie.cpp and transient_error in */
+/* src/transform.cpp when adding new value */
 
 struct projFileAPI_t;
 
@@ -853,30 +853,6 @@ COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 
 int pj_deriv(PJ_LP, double, const PJ *, struct DERIVS *);
 int pj_factors(PJ_LP, const PJ *, double, struct FACTORS *);
-
-struct PW_COEF {    /* row coefficient structure */
-    int m;          /* number of c coefficients (=0 for none) */
-    double *c;      /* power coefficients */
-};
-
-/* Approximation structures and procedures */
-typedef struct {    /* Chebyshev or Power series structure */
-    PJ_UV a, b;    /* power series range for evaluation */
-                    /* or Chebyshev argument shift/scaling */
-    struct PW_COEF *cu, *cv;
-    int mu, mv;     /* maximum cu and cv index (+1 for count) */
-    int power;      /* != 0 if power series, else Chebyshev */
-} Tseries;
-
-Tseries PROJ_DLL *mk_cheby(PJ_UV, PJ_UV, double, PJ_UV *, PJ_UV (*)(PJ_UV), int, int, int);
-PJ_UV   bpseval(PJ_UV, Tseries *);
-PJ_UV   bcheval(PJ_UV, Tseries *);
-PJ_UV   biveval(PJ_UV, Tseries *);
-void    *vector1(int, int);
-void   **vector2(int, int, int);
-void     freev2(void **v, int nrows);
-int      bchgen(PJ_UV, PJ_UV, int, int, PJ_UV **, PJ_UV(*)(PJ_UV));
-int      bch2bps(PJ_UV, PJ_UV, PJ_UV **, int, int);
 
 /* nadcon related protos */
 PJ_LP             nad_intr(PJ_LP, struct CTABLE *);

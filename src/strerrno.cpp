@@ -44,7 +44,7 @@ pj_err_list[] = {
     "lat_1=lat_2 or lat_1=0 or lat_2=90",                              /* -33 */
     "elliptical usage required",                                       /* -34 */
     "invalid UTM zone number",                                         /* -35 */
-    "arg(s) out of range for Tcheby eval",                             /* -36 */
+    "", /* no longer used */                                           /* -36 */
     "failed to find projection to be rotated",                         /* -37 */
     "failed to load datum shift file",                                 /* -38 */
     "both n & m must be spec'd and > 0",                               /* -39 */
