@@ -318,6 +318,36 @@ TEST_F(gieTest, proj_create_crs_to_crs_proj_longlat) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(gieTest, proj_create_crs_to_crs_issue_1255)
+{
+
+    auto P = proj_create_crs_to_crs(
+        PJ_DEFAULT_CTX,
+        "proj=utm zone=15 datum=NAD83 units=m no_defs ellps=GRS80 towgs84=0,0,0",
+        "proj=utm zone=15 datum=NAD27 units=m no_defs ellps=clrk66 nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat",
+        NULL);
+    ASSERT_TRUE(P != nullptr);
+    double ax, ay;
+
+    // meters
+    ax = 569704.5660295591;
+    ay = 4269024.671083651;
+
+    proj_trans_generic(
+        P,
+        PJ_FWD,
+        &ax, sizeof(double), 1,
+        &ay, sizeof(double), 1,
+        nullptr, 0, 0,
+        nullptr, 0, 0);
+
+    EXPECT_NEAR(ax, 569722.3417412076, 1e-9);
+    EXPECT_NEAR(ay, 4268814.027642512, 1e-9);
+    proj_destroy(P);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(gie, info_functions) {
     PJ_INFO info;
     PJ_PROJ_INFO pj_info;
