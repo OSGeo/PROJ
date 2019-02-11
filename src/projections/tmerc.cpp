@@ -534,11 +534,6 @@ PJ *PROJECTION(etmerc) {
 /* UNLESS +approx is set in which case the Evenden/Snyder implemenation is used. */
 PJ *PROJECTION(utm) {
     long zone;
-    struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(pj_calloc (1, sizeof (struct pj_opaque_exact)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
-    P->opaque = Q;
-
     if (P->es == 0.0) {
         proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
         return pj_default_destructor(P, ENOMEM);
@@ -571,8 +566,18 @@ PJ *PROJECTION(utm) {
     P->phi0 = 0.;
 
     if (pj_param(P->ctx, P->params, "bapprox").i) {
+        struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(pj_calloc (1, sizeof (struct pj_opaque_approx)));
+        if (nullptr==Q)
+            return pj_default_destructor (P, ENOMEM);
+        P->opaque = Q;
+
         return setup_approx(P);
     } else {
-        return setup_exact (P);
+        struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(pj_calloc (1, sizeof (struct pj_opaque_exact)));
+        if (nullptr==Q)
+            return pj_default_destructor (P, ENOMEM);
+        P->opaque = Q;
+
+        return setup_exact(P);
     }
 }
