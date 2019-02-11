@@ -214,6 +214,9 @@ static PJ *destructor_approx(PJ *P, int errlev) {
 
 static PJ *setup_approx(PJ *P) {
     struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
+
+    P->destructor = destructor_approx;
+
     if (P->es != 0.0) {
         if (!(Q->en = pj_enfn(P->es)))
             return pj_default_destructor(P, ENOMEM);
@@ -508,7 +511,6 @@ PJ *PROJECTION(tmerc) {
             return pj_default_destructor (P, ENOMEM);
 
         P->opaque = Q;
-        P->destructor = destructor_approx;
 
         return setup_approx(P);
     } else {
