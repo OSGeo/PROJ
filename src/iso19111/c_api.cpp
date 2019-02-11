@@ -145,9 +145,11 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
             // PROJ string.
         }
     }
-    auto pj = new PJ();
-    pj->descr = "ISO-19111 object";
-    pj->iso_obj = objIn;
+    auto pj = pj_new();
+    if (pj) {
+        pj->descr = "ISO-19111 object";
+        pj->iso_obj = objIn;
+    }
     return pj;
 }
 //! @endcond
