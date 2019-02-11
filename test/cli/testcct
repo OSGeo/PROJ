@@ -1,0 +1,51 @@
+:
+# Test cct
+
+TEST_CLI_DIR=`dirname $0`
+DATA_DIR=`dirname $0`/../../data
+EXE=$1
+
+usage()
+{
+    echo "Usage: ${0} <path to 'cct' program>" 
+    echo
+    exit 1
+}
+
+if test -z "${EXE}"; then
+    EXE=../../src/cct
+fi
+
+if test ! -x ${EXE}; then
+    echo "*** ERROR: Can not find '${EXE}' program!"
+    exit 1
+fi
+
+echo "============================================"
+echo "Running ${0} using ${EXE}:"
+echo "============================================"
+
+OUT=testcct_out
+
+rm -f ${OUT}
+
+echo "Testing cct -d 8 +proj=merc +R=1" >> ${OUT}
+echo "90 45" 0 | $EXE -d 8 +proj=merc +R=1 >>${OUT}
+echo "" >>${OUT}
+
+# do 'diff' with distribution results
+echo "diff ${OUT} with testcct_out.dist"
+diff -u ${OUT} ${TEST_CLI_DIR}/testcct_out.dist
+if [ $? -ne 0 ] ; then
+	echo  ""
+	echo "PROBLEMS HAVE OCCURRED"
+	echo "test file ${OUT} saved"
+    echo
+	exit 100
+else
+	echo "TEST OK"
+	echo "test file ${OUT} removed"
+    echo
+	/bin/rm -f ${OUT}
+	exit 0
+fi
