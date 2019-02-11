@@ -57,9 +57,9 @@ struct pj_opaque_exact {
 #define PROJ_ETMERC_ORDER 6
 
 /*****************************************************************************/
-/*
-/*                  Approximate Transverse Mercator functions
-/*
+//
+//                  Approximate Transverse Mercator functions
+//
 /*****************************************************************************/
 
 static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P) {
@@ -234,21 +234,21 @@ static PJ *setup_approx(PJ *P) {
 
 
 /*****************************************************************************/
-/**
-/*                  Exact Transverse Mercator functions
-/*
-/*
-/* The code in this file is largly based upon procedures:
-/ *
-/* Written by: Knud Poder and Karsten Engsager
-/*
-/* Based on math from: R.Koenig and K.H. Weise, "Mathematische
-/* Grundlagen der hoeheren Geodaesie und Kartographie,
-/* Springer-Verlag, Berlin/Goettingen" Heidelberg, 1951.
-/*
-/* Modified and used here by permission of Reference Networks
-/* Division, Kort og Matrikelstyrelsen (KMS), Copenhagen, Denmark
-/*
+//
+//                  Exact Transverse Mercator functions
+//
+//
+// The code in this file is largly based upon procedures:
+//
+// Written by: Knud Poder and Karsten Engsager
+//
+// Based on math from: R.Koenig and K.H. Weise, "Mathematische
+// Grundlagen der hoeheren Geodaesie und Kartographie,
+// Springer-Verlag, Berlin/Goettingen" Heidelberg, 1951.
+//
+// Modified and used here by permission of Reference Networks
+// Division, Kort og Matrikelstyrelsen (KMS), Copenhagen, Denmark
+//
 /*****************************************************************************/
 
 /* Helper functios for "exact" transverse mercator */
@@ -494,9 +494,9 @@ static PJ *setup_exact(PJ *P) {
 
 
 /*****************************************************************************/
-/*
-/*                                Operation Setups
-/*
+//
+//                                Operation Setups
+//
 /*****************************************************************************/
 
 PJ *PROJECTION(tmerc) {
