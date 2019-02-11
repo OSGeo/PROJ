@@ -43,7 +43,6 @@ Projections map the spherical 3D space to a flat 2D space.
    eqdc
    eqearth
    euler
-   etmerc
    fahey
    fouc
    fouc_s

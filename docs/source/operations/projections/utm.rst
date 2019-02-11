@@ -66,6 +66,12 @@ Required
 
     Add this flag when using the UTM on the southern hemisphere.
 
+.. option:: +approx
+
+    .. versionadded:: 6.0.0
+
+    Use faster, less accurate algorithm for the Transverse Mercator.
+
 Optional
 -------------------------------------------------------------------------------
 

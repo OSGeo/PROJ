@@ -122,7 +122,6 @@ libproj_la_SOURCES = \
 	projections/wag7.cpp \
 	projections/lcca.cpp \
 	projections/geos.cpp \
-	projections/etmerc.cpp \
 	projections/boggs.cpp \
 	projections/collg.cpp \
 	projections/comill.cpp \
