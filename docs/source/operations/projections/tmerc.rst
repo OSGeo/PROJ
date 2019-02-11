@@ -14,7 +14,7 @@ The transverse Mercator projection in its various forms is the most widely used 
 | **Defined area**    | Global, but reasonably accurate only within 15 degrees   |
 |                     | of the central meridian                                  |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | tmerc, etmerc                                            |
+| **Alias**           | tmerc                                                    |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
