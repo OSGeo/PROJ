@@ -5218,6 +5218,16 @@ accept  -200 -100
 expect  -7.490535682 -0.000901935
 
 
+operation +proj=utm +zone=32
+tolerance 0.001 mm
+accept	12 56 0 2000
+expect  687071.43910944  6210141.32674801    0.00000000     2000.0000
+
+operation +proj=utm +zone=32 +approx
+tolerance 0.001 mm
+accept	12 56 0 2000
+expect  687071.43911000  6210141.32675053    0.00000000     2000.0000
+
 ===============================================================================
 van der Grinten (I)
 	Misc Sph

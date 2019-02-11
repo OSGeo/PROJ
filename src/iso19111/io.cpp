@@ -4746,8 +4746,7 @@ struct PROJStringFormatter::Private {
     bool omitProjLongLatIfPossible_ = false;
     bool omitZUnitConversion_ = false;
     DatabaseContextPtr dbContext_{};
-    bool useETMercForTMerc_ = false;
-    bool useETMercForTMercSet_ = false;
+    bool useApproxTMerc_ = false;
     bool addNoDefs_ = true;
     bool coordOperationOptimizations_ = false;
     bool crsExport_ = false;
@@ -4803,11 +4802,9 @@ PROJStringFormatter::create(Convention conventionIn,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Set whether Extended Transverse Mercator (etmerc) should be used
- * instead of tmerc */
-void PROJStringFormatter::setUseETMercForTMerc(bool flag) {
-    d->useETMercForTMerc_ = flag;
-    d->useETMercForTMercSet_ = true;
+/** \brief Set whether approximate Transverse Mercator or UTM should be used */
+void PROJStringFormatter::setUseApproxTMerc(bool flag) {
+    d->useApproxTMerc_ = flag;
 }
 
 // ---------------------------------------------------------------------------
@@ -5256,9 +5253,8 @@ PROJStringFormatter::Convention PROJStringFormatter::convention() const {
 
 // ---------------------------------------------------------------------------
 
-bool PROJStringFormatter::getUseETMercForTMerc(bool &settingSetOut) const {
-    settingSetOut = d->useETMercForTMercSet_;
-    return d->useETMercForTMerc_;
+bool PROJStringFormatter::getUseApproxTMerc() const {
+    return d->useApproxTMerc_;
 }
 
 // ---------------------------------------------------------------------------
@@ -7081,8 +7077,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                                 : UnitOfMeasure::NONE)));
         }
 
-        if (step.name == "etmerc") {
-            methodMap.set("proj_method", "etmerc");
+        if (step.name == "tmerc" && hasParamValue(step, "approx")) {
+            methodMap.set("proj_method", "tmerc approx");
+        } else if (step.name == "utm" && hasParamValue(step, "approx")) {
+            methodMap.set("proj_method", "utm approx");
         }
 
         conv = Conversion::create(mapWithUnknownName, methodMap, parameters,

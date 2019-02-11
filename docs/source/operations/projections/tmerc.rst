@@ -68,12 +68,18 @@ Example using Gauss-Kruger on Germany area (aka EPSG:31467) ::
 Example using Gauss Boaga on Italy area (EPSG:3004) ::
 
     $ echo 15 42 | proj +proj=tmerc +lat_0=0 +lon_0=15 +k_0=0.9996 +x_0=2520000 +y_0=0 +ellps=intl +units=m +no_defs
-    2520000.00	4649858.60 
+    2520000.00	4649858.60
 
 Parameters
 ################################################################################
 
 .. note:: All parameters for the projection are optional.
+
+.. option:: +approx
+
+    .. versionadded:: 6.0.0
+
+    Use faster, less accurate algorithm for the Transverse Mercator.
 
 .. include:: ../options/lon_0.rst
 

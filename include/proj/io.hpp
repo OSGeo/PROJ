@@ -365,7 +365,7 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_DLL ~PROJStringFormatter();
     //! @endcond
 
-    PROJ_DLL void setUseETMercForTMerc(bool flag);
+    PROJ_DLL void setUseApproxTMerc(bool flag);
 
     PROJ_DLL const std::string &toString() const;
 
@@ -378,7 +378,7 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_DLL void startInversion();
     PROJ_DLL void stopInversion();
     PROJ_INTERNAL bool isInverted() const;
-    PROJ_INTERNAL bool getUseETMercForTMerc(bool &settingSetOut) const;
+    PROJ_INTERNAL bool getUseApproxTMerc() const;
     PROJ_INTERNAL void setCoordinateOperationOptimizations(bool enable);
 
     PROJ_DLL void
