@@ -1205,9 +1205,8 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
  * @param type PROJ String version.
  * @param options NULL-terminated list of strings with "KEY=VALUE" format. or
  * NULL.
- * The currently recognized option is USE_ETMERC=YES to use
- * +proj=etmerc instead of +proj=tmerc (or USE_ETMERC=NO to disable implicit
- * use of etmerc by utm conversions)
+ * The currently recognized option is USE_APPROX_TMERC=YES to add the +approx
+ * flag to +proj=tmerc or +proj=utm
  * @return a string, or NULL in case of error.
  */
 const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
@@ -1241,10 +1240,8 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
     try {
         auto formatter = PROJStringFormatter::create(convention, dbContext);
         if (options != nullptr && options[0] != nullptr) {
-            if (ci_equal(options[0], "USE_ETMERC=YES")) {
-                formatter->setUseETMercForTMerc(true);
-            } else if (ci_equal(options[0], "USE_ETMERC=NO")) {
-                formatter->setUseETMercForTMerc(false);
+            if (ci_equal(options[0], "USE_APPROX_TMERC=YES")) {
+                formatter->setUseApproxTMerc(true);
             }
         }
         obj->lastPROJString = exportable->exportToPROJString(formatter.get());
