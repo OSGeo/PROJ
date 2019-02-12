@@ -54,6 +54,6 @@ testntv2-check:
 	fi
 
 testcct-check:
-	PROJ_LIB=$(DATAPATH) $(TESTCCT) $(CCTEXT)
+	PROJ_LIB=$(DATAPATH) $(TESTCCT) $(CCTEXE)
 
 check-local: testprojinfo-check test27-check test83-check testvarious-check testdatumfile-check testign-check testntv2-check testcct-check
