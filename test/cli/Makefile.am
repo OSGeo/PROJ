@@ -22,7 +22,8 @@ EXTRA_DIST = pj_out27.dist pj_out83.dist td_out.dist \
 		test27 test83 tv_out.dist tf_out.dist \
 		testflaky testvarious testdatumfile testntv2 ntv2_out.dist \
 		testIGNF proj_outIGNF.dist \
-		testprojinfo testprojinfo_out.dist testcct_out.dist \
+		testprojinfo testprojinfo_out.dist \
+		testcct testcct_out.dist \
 		CMakeLists.txt
 
 testprojinfo-check:
