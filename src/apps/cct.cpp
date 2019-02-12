@@ -410,6 +410,8 @@ int main(int argc, char **argv) {
             );
     }
 
+    proj_destroy(P);
+
     if (stdout != fout)
         fclose (fout);
     free (o);

@@ -1,0 +1,3 @@
+Testing cct -d 8 +proj=merc +R=1
+   1.57079633     0.88137359    0.00000000           inf
+

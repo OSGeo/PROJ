@@ -1058,7 +1058,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_lat_0_or_alpha_eq_90"     ,  -33},
     {"pjd_err_ellipsoid_use_required"   ,  -34},
     {"pjd_err_invalid_utm_zone"         ,  -35},
-    {"pjd_err_tcheby_val_out_of_range"  ,  -36},
+    {""                                 ,  -36}, /* no longer used */
     {"pjd_err_failed_to_find_proj"      ,  -37},
     {"pjd_err_failed_to_load_grid"      ,  -38},
     {"pjd_err_invalid_m_or_n"           ,  -39},
@@ -1081,6 +1081,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_ellipsoidal_unsupported"  ,  -56},
     {"pjd_err_too_many_inits"           ,  -57},
     {"pjd_err_invalid_arg"              ,  -58},
+    {"pjd_err_inconsistent_unit"        ,  -59},
     {"pjd_err_dont_skip"                ,  5555},
     {"pjd_err_unknown"                  ,  9999},
     {"pjd_err_enomem"                   ,  ENOMEM},
@@ -1140,7 +1141,8 @@ static int errno_from_err_const (const char *err_const) {
 
     /* First try to find a match excluding the PJD_ERR_ prefix */
     for (i = 0;  i < n;  i++) {
-        if (0==strncmp (lookup[i].the_err_const + 8, err_const, len))
+        if (strlen(lookup[i].the_err_const) > 8 &&
+            0==strncmp (lookup[i].the_err_const + 8, err_const, len))
             return lookup[i].the_errno;
     }
 

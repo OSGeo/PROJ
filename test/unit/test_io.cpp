@@ -7654,12 +7654,39 @@ TEST(io, projparse_etmerc) {
         crs->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
-        "+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 "
+        "+proj=tmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 "
         "+datum=WGS84 +units=m +no_defs +type=crs");
 
     auto wkt1 = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
-    EXPECT_TRUE(wkt1.find("EXTENSION[\"PROJ4\",\"+proj=etmerc +lat_0=0 "
+    EXPECT_TRUE(wkt1.find("EXTENSION[\"PROJ4\"") == std::string::npos)
+        << wkt1;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_tmerc_approx) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=tmerc +approx +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto wkt2 = crs->exportToWKT(
+        &WKTFormatter::create()->simulCurNodeHasId().setMultiLine(false));
+    EXPECT_TRUE(
+        wkt2.find("METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]]") !=
+        std::string::npos)
+        << wkt2;
+
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=tmerc +approx +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 "
+        "+datum=WGS84 +units=m +no_defs +type=crs");
+
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(wkt1.find("EXTENSION[\"PROJ4\",\"+proj=tmerc +approx +lat_0=0 "
                           "+lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m "
                           "+no_defs\"]") != std::string::npos)
         << wkt1;

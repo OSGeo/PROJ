@@ -353,7 +353,6 @@ if ! test "x$with_external_gtest" = "xyes" ; then
                      test/googletest/include/gtest/internal/custom/Makefile
                      test/googletest/src/Makefile])
 fi
-AC_CONFIG_FILES([data/install], [chmod +x data/install])
 
 AC_CONFIG_FILES([proj.pc])
 
