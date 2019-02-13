@@ -5489,7 +5489,7 @@ void Conversion::_exportToPROJString(
         if (isUTM(zone, north)) {
             bConversionDone = true;
             formatter->addStep("utm");
-            if( useApprox ) {
+            if (useApprox) {
                 formatter->addParam("approx");
             }
             formatter->addParam("zone", zone);

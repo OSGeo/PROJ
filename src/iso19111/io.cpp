@@ -5844,14 +5844,6 @@ struct PROJStringParser::Private {
     CRSNNPtr buildBoundOrCompoundCRSIfNeeded(int iStep, CRSNNPtr crs);
     UnitOfMeasure buildUnit(Step &step, const std::string &unitsParamName,
                             const std::string &toMeterParamName);
-    CoordinateOperationNNPtr buildHelmertTransformation(
-        int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
-        int iFirstGeogStep = -1, int iSecondGeogStep = -1,
-        int iSecondAxisSwap = -1, int iSecondUnitConvert = -1);
-    CoordinateOperationNNPtr buildMolodenskyTransformation(
-        int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
-        int iFirstGeogStep = -1, int iSecondGeogStep = -1,
-        int iSecondAxisSwap = -1, int iSecondUnitConvert = -1);
 
     enum class AxisType { REGULAR, NORTH_POLE, SOUTH_POLE };
 
@@ -7170,261 +7162,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     return crs;
 }
 
-// ---------------------------------------------------------------------------
-
-static bool isDatumDefiningParam(const std::string &param) {
-    return (param == "datum" || param == "ellps" || param == "a" ||
-            param == "b" || param == "rf" || param == "f" || param == "R");
-}
-
-// ---------------------------------------------------------------------------
-
-CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
-    int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
-    int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
-    auto &step = steps_[iStep];
-    auto datum = buildDatum(step, std::string());
-    auto cs = CartesianCS::createGeocentric(UnitOfMeasure::METRE);
-
-    auto mapWithUnknownName = createMapWithUnknownName();
-
-    auto sourceCRS =
-        iFirstGeogStep >= 0
-            ? util::nn_static_pointer_cast<crs::CRS>(
-                  buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                     iFirstAxisSwap, true, false))
-            : util::nn_static_pointer_cast<crs::CRS>(
-                  GeodeticCRS::create(mapWithUnknownName, datum, cs));
-    auto targetCRS =
-        iSecondGeogStep >= 0
-            ? util::nn_static_pointer_cast<crs::CRS>(
-                  buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
-                                     iSecondAxisSwap, true, false))
-            : util::nn_static_pointer_cast<crs::CRS>(
-                  GeodeticCRS::create(mapWithUnknownName, datum, cs));
-
-    double x = 0;
-    double y = 0;
-    double z = 0;
-    double rx = 0;
-    double ry = 0;
-    double rz = 0;
-    double s = 0;
-    double dx = 0;
-    double dy = 0;
-    double dz = 0;
-    double drx = 0;
-    double dry = 0;
-    double drz = 0;
-    double ds = 0;
-    double t_epoch = 0;
-    bool rotationTerms = false;
-    bool timeDependent = false;
-    bool conventionFound = false;
-    bool positionVectorConvention = false;
-
-    struct Params {
-        double *pValue;
-        const char *name;
-        bool *pPresent;
-    };
-    const Params knownParams[] = {
-        {&x, "x", nullptr},
-        {&y, "y", nullptr},
-        {&z, "z", nullptr},
-        {&rx, "rx", &rotationTerms},
-        {&ry, "ry", &rotationTerms},
-        {&rz, "rz", &rotationTerms},
-        {&s, "s", &rotationTerms},
-        {&dx, "dx", &timeDependent},
-        {&dy, "dy", &timeDependent},
-        {&dz, "dz", &timeDependent},
-        {&drx, "drx", &timeDependent},
-        {&dry, "dry", &timeDependent},
-        {&drz, "drz", &timeDependent},
-        {&ds, "ds", &timeDependent},
-        {&t_epoch, "t_epoch", &timeDependent},
-        {nullptr, "exact", nullptr},
-    };
-
-    for (const auto &param : step.paramValues) {
-        if (isDatumDefiningParam(param.key)) {
-            continue;
-        }
-        if (param.key == "convention") {
-            if (param.value == "position_vector") {
-                positionVectorConvention = true;
-                conventionFound = true;
-            } else if (param.value == "coordinate_frame") {
-                positionVectorConvention = false;
-                conventionFound = true;
-            } else {
-                throw ParsingException("unsupported convention");
-            }
-        } else {
-            bool found = false;
-            for (auto &&knownParam : knownParams) {
-                if (param.key == knownParam.name) {
-                    found = true;
-                    if (knownParam.pValue)
-                        *(knownParam.pValue) = getNumericValue(param.value);
-                    if (knownParam.pPresent)
-                        *(knownParam.pPresent) = true;
-                    break;
-                }
-            }
-            if (!found) {
-                throw ParsingException("unsupported keyword for Helmert: " +
-                                       param.key);
-            }
-        }
-    }
-
-    rotationTerms |= timeDependent;
-    if (rotationTerms && !conventionFound) {
-        throw ParsingException("missing convention");
-    }
-
-    std::vector<metadata::PositionalAccuracyNNPtr> emptyAccuracies;
-
-    auto transf = ([&]() {
-        if (!rotationTerms) {
-            return Transformation::createGeocentricTranslations(
-                mapWithUnknownName, sourceCRS, targetCRS, x, y, z,
-                emptyAccuracies);
-        } else if (positionVectorConvention) {
-            if (timeDependent) {
-                return Transformation::createTimeDependentPositionVector(
-                    mapWithUnknownName, sourceCRS, targetCRS, x, y, z, rx, ry,
-                    rz, s, dx, dy, dz, drx, dry, drz, ds, t_epoch,
-                    emptyAccuracies);
-            } else {
-                return Transformation::createPositionVector(
-                    mapWithUnknownName, sourceCRS, targetCRS, x, y, z, rx, ry,
-                    rz, s, emptyAccuracies);
-            }
-        } else {
-            if (timeDependent) {
-                return Transformation::
-                    createTimeDependentCoordinateFrameRotation(
-                        mapWithUnknownName, sourceCRS, targetCRS, x, y, z, rx,
-                        ry, rz, s, dx, dy, dz, drx, dry, drz, ds, t_epoch,
-                        emptyAccuracies);
-            } else {
-                return Transformation::createCoordinateFrameRotation(
-                    mapWithUnknownName, sourceCRS, targetCRS, x, y, z, rx, ry,
-                    rz, s, emptyAccuracies);
-            }
-        }
-    })();
-
-    if (step.inverted) {
-        return util::nn_static_pointer_cast<CoordinateOperation>(
-            transf->inverse());
-    } else {
-        return util::nn_static_pointer_cast<CoordinateOperation>(transf);
-    }
-}
-
-// ---------------------------------------------------------------------------
-
-CoordinateOperationNNPtr
-PROJStringParser::Private::buildMolodenskyTransformation(
-    int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
-    int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
-    auto &step = steps_[iStep];
-
-    double dx = 0;
-    double dy = 0;
-    double dz = 0;
-    double da = 0;
-    double df = 0;
-
-    struct Params {
-        double *pValue;
-        const char *name;
-    };
-    const Params knownParams[] = {
-        {&dx, "dx"}, {&dy, "dy"}, {&dz, "dz"}, {&da, "da"}, {&df, "df"},
-    };
-    bool abridged = false;
-
-    for (const auto &param : step.paramValues) {
-        if (isDatumDefiningParam(param.key)) {
-            continue;
-        } else if (param.key == "abridged") {
-            abridged = true;
-        } else {
-            bool found = false;
-            for (auto &&knownParam : knownParams) {
-                if (param.key == knownParam.name) {
-                    found = true;
-                    if (knownParam.pValue)
-                        *(knownParam.pValue) = getNumericValue(param.value);
-                    break;
-                }
-            }
-            if (!found) {
-                throw ParsingException("unsupported keyword for Molodensky: " +
-                                       param.key);
-            }
-        }
-    }
-
-    auto datum = buildDatum(step, std::string());
-    auto sourceCRS = iFirstGeogStep >= 0
-                         ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                              iFirstAxisSwap, true, false)
-                         : buildGeographicCRS(iStep, -1, -1, true, false);
-
-    const auto &ellps = sourceCRS->ellipsoid();
-    const double a = ellps->semiMajorAxis().getSIValue();
-    const double rf = ellps->computedInverseFlattening();
-    const double target_a = a + da;
-    const double target_rf = 1.0 / (1.0 / rf + df);
-
-    auto mapWithUnknownName = createMapWithUnknownName();
-
-    auto target_ellipsoid =
-        Ellipsoid::createFlattenedSphere(mapWithUnknownName, Length(target_a),
-                                         Scale(target_rf))
-            ->identify();
-    auto target_datum = GeodeticReferenceFrame::create(
-        mapWithUnknownName, target_ellipsoid, util::optional<std::string>(),
-        PrimeMeridian::GREENWICH);
-
-    auto targetCRS = util::nn_static_pointer_cast<crs::CRS>(
-        iSecondGeogStep >= 0
-            ? buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
-                                 iSecondAxisSwap, true, false)
-            : GeographicCRS::create(mapWithUnknownName, target_datum,
-                                    EllipsoidalCS::createLongitudeLatitude(
-                                        UnitOfMeasure::DEGREE)));
-
-    auto sourceCRS_as_CRS = util::nn_static_pointer_cast<crs::CRS>(sourceCRS);
-
-    std::vector<metadata::PositionalAccuracyNNPtr> emptyAccuracies;
-
-    auto transf = ([&]() {
-        if (abridged) {
-            return Transformation::createAbridgedMolodensky(
-                mapWithUnknownName, sourceCRS_as_CRS, targetCRS, dx, dy, dz, da,
-                df, emptyAccuracies);
-        } else {
-            return Transformation::createMolodensky(
-                mapWithUnknownName, sourceCRS_as_CRS, targetCRS, dx, dy, dz, da,
-                df, emptyAccuracies);
-        }
-    })();
-
-    if (step.inverted) {
-        return util::nn_static_pointer_cast<CoordinateOperation>(
-            transf->inverse());
-    } else {
-        return util::nn_static_pointer_cast<CoordinateOperation>(transf);
-    }
-}
-
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -7655,10 +7392,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     int iSecondUnitConvert = -1;
     int iFirstAxisSwap = -1;
     int iSecondAxisSwap = -1;
-    int iHelmert = -1;
-    int iFirstCart = -1;
-    int iSecondCart = -1;
-    int iMolodensky = -1;
     bool unexpectedStructure = d->steps_.empty();
     for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
         const auto &stepName = d->steps_[i].name;
@@ -7689,27 +7422,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 unexpectedStructure = true;
                 break;
             }
-        } else if (stepName == "helmert") {
-            if (iHelmert >= 0) {
-                unexpectedStructure = true;
-                break;
-            }
-            iHelmert = i;
-        } else if (stepName == "cart") {
-            if (iFirstCart < 0) {
-                iFirstCart = i;
-            } else if (iSecondCart < 0) {
-                iSecondCart = i;
-            } else {
-                unexpectedStructure = true;
-                break;
-            }
-        } else if (stepName == "molodensky") {
-            if (iMolodensky >= 0) {
-                unexpectedStructure = true;
-                break;
-            }
-            iMolodensky = i;
         } else if (isProjectedStep(stepName)) {
             if (iProjStep >= 0) {
                 unexpectedStructure = true;
@@ -7722,19 +7434,13 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
     }
 
-    if (iHelmert < 0 && iMolodensky < 0 && !d->steps_.empty()) {
+    if (!d->steps_.empty()) {
         // CRS candidate
         if ((d->steps_.size() == 1 &&
              d->getParamValue(d->steps_[0], "type") != "crs") ||
             (d->steps_.size() > 1 && d->getGlobalParamValue("type") != "crs")) {
             unexpectedStructure = true;
         }
-    } else if (iHelmert >= 0 &&
-               (d->hasParamValue(d->steps_[iHelmert], "theta") ||
-                d->hasParamValue(d->steps_[iHelmert], "exact") ||
-                d->hasParamValue(d->steps_[iHelmert], "transpose") ||
-                d->hasParamValue(d->steps_[iHelmert], "towgs84"))) {
-        unexpectedStructure = true;
     }
 
     struct Logger {
@@ -7877,8 +7583,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
 
     if (!unexpectedStructure) {
         if (iFirstGeogStep == 0 && !d->steps_[iFirstGeogStep].inverted &&
-            iSecondGeogStep < 0 && iProjStep < 0 && iHelmert < 0 &&
-            iFirstCart < 0 && iMolodensky < 0 &&
+            iSecondGeogStep < 0 && iProjStep < 0 &&
             (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
             (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
             const bool ignoreVUnits = false;
@@ -7895,8 +7600,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
         if (iProjStep >= 0 && !d->steps_[iProjStep].inverted &&
             (iFirstGeogStep < 0 || iFirstGeogStep + 1 == iProjStep) &&
-            iMolodensky < 0 && iSecondGeogStep < 0 && iFirstCart < 0 &&
-            iHelmert < 0) {
+            iSecondGeogStep < 0) {
             if (iFirstGeogStep < 0)
                 iFirstGeogStep = iProjStep;
             const bool ignoreVUnits = true;
@@ -7921,47 +7625,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     return nn_static_pointer_cast<BaseObject>(obj);
                 }
             }
-        }
-
-        if (iProjStep < 0 && iHelmert > 0 && iMolodensky < 0 &&
-            (iFirstGeogStep < 0 || iFirstGeogStep == iFirstCart - 1 ||
-             (iFirstGeogStep == iSecondCart + 1 && iSecondGeogStep < 0)) &&
-            iFirstCart == iHelmert - 1 && iSecondCart == iHelmert + 1 &&
-            (iSecondGeogStep < 0 || iSecondGeogStep == iSecondCart + 1) &&
-            !d->steps_[iFirstCart].inverted &&
-            d->steps_[iSecondCart].inverted && iFirstAxisSwap < iHelmert &&
-            iFirstUnitConvert < iHelmert &&
-            (iSecondAxisSwap < 0 || iSecondAxisSwap > iHelmert) &&
-            (iSecondUnitConvert < 0 || iSecondUnitConvert > iHelmert)) {
-            return d->buildHelmertTransformation(
-                iHelmert, iFirstAxisSwap, iFirstUnitConvert,
-                iFirstGeogStep >= 0 && iFirstGeogStep == iFirstCart - 1
-                    ? iFirstGeogStep
-                    : iFirstCart,
-                iFirstGeogStep == iSecondCart + 1
-                    ? iFirstGeogStep
-                    : iSecondGeogStep == iSecondCart + 1 ? iSecondGeogStep
-                                                         : iSecondCart,
-                iSecondAxisSwap, iSecondUnitConvert);
-        }
-
-        if (iProjStep < 0 && iHelmert < 0 && iMolodensky > 0 &&
-            (iFirstGeogStep < 0 || iFirstGeogStep == iMolodensky - 1 ||
-             (iFirstGeogStep == iMolodensky + 1 && iSecondGeogStep < 0)) &&
-            (iSecondGeogStep < 0 || iSecondGeogStep == iMolodensky + 1) &&
-            iFirstAxisSwap < iMolodensky && iFirstUnitConvert < iMolodensky &&
-            (iSecondAxisSwap < 0 || iSecondAxisSwap > iMolodensky) &&
-            (iSecondUnitConvert < 0 || iSecondUnitConvert > iMolodensky)) {
-            return d->buildMolodenskyTransformation(
-                iMolodensky, iFirstAxisSwap, iFirstUnitConvert,
-                iFirstGeogStep >= 0 && iFirstGeogStep == iMolodensky - 1
-                    ? iFirstGeogStep
-                    : iMolodensky,
-                iFirstGeogStep == iMolodensky + 1
-                    ? iFirstGeogStep
-                    : iSecondGeogStep == iMolodensky + 1 ? iSecondGeogStep
-                                                         : iMolodensky,
-                iSecondAxisSwap, iSecondUnitConvert);
         }
     }
 

@@ -6062,21 +6062,23 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
     {
         auto formatter = PROJStringFormatter::create();
         formatter->setUseApproxTMerc(true);
-        EXPECT_EQ(op->exportToPROJString(formatter.get()),
-                  "+proj=pipeline +step +inv +proj=tmerc +approx +lat_0=1 +lon_0=2 "
-                  "+k=3 +x_0=4 +y_0=5 +ellps=WGS84 +step "
-                  "+proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step "
-                  "+proj=utm +approx +zone=32 "
-                  "+ellps=WGS84");
+        EXPECT_EQ(
+            op->exportToPROJString(formatter.get()),
+            "+proj=pipeline +step +inv +proj=tmerc +approx +lat_0=1 +lon_0=2 "
+            "+k=3 +x_0=4 +y_0=5 +ellps=WGS84 +step "
+            "+proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step "
+            "+proj=utm +approx +zone=32 "
+            "+ellps=WGS84");
     }
     {
         auto formatter = PROJStringFormatter::create();
         formatter->setUseApproxTMerc(true);
-        EXPECT_EQ(op->inverse()->exportToPROJString(formatter.get()),
-                  "+proj=pipeline +step +inv +proj=utm +approx +zone=32 +ellps=WGS84 "
-                  "+step +inv +proj=vgridshift +grids=bla.gtx "
-                  "+multiplier=0.001 +step +proj=tmerc +approx +lat_0=1 +lon_0=2 "
-                  "+k=3 +x_0=4 +y_0=5 +ellps=WGS84");
+        EXPECT_EQ(
+            op->inverse()->exportToPROJString(formatter.get()),
+            "+proj=pipeline +step +inv +proj=utm +approx +zone=32 +ellps=WGS84 "
+            "+step +inv +proj=vgridshift +grids=bla.gtx "
+            "+multiplier=0.001 +step +proj=tmerc +approx +lat_0=1 +lon_0=2 "
+            "+k=3 +x_0=4 +y_0=5 +ellps=WGS84");
     }
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
