@@ -4837,6 +4837,12 @@ const std::string &PROJStringFormatter::toString() const {
                    step.paramValues[1].keyEquals("xy_out") &&
                    step.paramValues[0].value == step.paramValues[1].value) {
             iter = d->steps_.erase(iter);
+        } else if (step.name == "push" && step.inverted) {
+            step.name = "pop";
+            step.inverted = false;
+        } else if (step.name == "pop" && step.inverted) {
+            step.name = "push";
+            step.inverted = false;
         } else {
             ++iter;
         }
@@ -4908,6 +4914,30 @@ const std::string &PROJStringFormatter::toString() const {
                 curStepParamCount == 1 &&
                 curStep.paramValues[0].keyEquals("ellps")) {
                 d->steps_.erase(iterCur);
+                changeDone = true;
+                break;
+            }
+
+            // push v_x followed by pop v_x is a no-op.
+            if (curStep.name == "pop" && prevStep.name == "push" &&
+                !curStep.inverted && !prevStep.inverted &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
+                curStep.paramValues[0].key == prevStep.paramValues[0].key) {
+                ++iterCur;
+                d->steps_.erase(iterPrev, iterCur);
+                changeDone = true;
+                break;
+            }
+
+            // pop v_x followed by push v_x is, almost, a no-op. For our
+            // purposes,
+            // we consider it as a no-op for better pipeline optimizations.
+            if (curStep.name == "push" && prevStep.name == "pop" &&
+                !curStep.inverted && !prevStep.inverted &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
+                curStep.paramValues[0].key == prevStep.paramValues[0].key) {
+                ++iterCur;
+                d->steps_.erase(iterPrev, iterCur);
                 changeDone = true;
                 break;
             }
@@ -5065,6 +5095,71 @@ const std::string &PROJStringFormatter::toString() const {
                 if (nextStep.name == "axisswap" &&
                     nextStep.paramValues.size() == 1 &&
                     nextStep.paramValues[0].equals("order", "2,1")) {
+                    d->steps_.erase(iterPrev);
+                    d->steps_.erase(iterNext);
+                    changeDone = true;
+                    break;
+                }
+            }
+
+            // axisswap order=2,1, pop/push v_3, axisswap order=2,1 -> can
+            // suppress axisswap
+            if (i + 1 < d->steps_.size() && prevStep.name == "axisswap" &&
+                (curStep.name == "push" || curStep.name == "pop") &&
+                prevStepParamCount == 1 &&
+                prevStep.paramValues[0].equals("order", "2,1") &&
+                curStepParamCount == 1 && curStep.paramValues[0].key == "v_3") {
+                auto iterNext = iterCur;
+                ++iterNext;
+                auto &nextStep = *iterNext;
+                if (nextStep.name == "axisswap" &&
+                    nextStep.paramValues.size() == 1 &&
+                    nextStep.paramValues[0].equals("order", "2,1")) {
+                    d->steps_.erase(iterPrev);
+                    d->steps_.erase(iterNext);
+                    changeDone = true;
+                    break;
+                }
+            }
+
+            // push v_3, axisswap order=2,1, pop v_3 -> can suppress push/pop
+            if (i + 1 < d->steps_.size() && prevStep.name == "push" &&
+                prevStepParamCount == 1 &&
+                prevStep.paramValues[0].key == "v_3" &&
+                curStep.name == "axisswap" && curStepParamCount == 1 &&
+                curStep.paramValues[0].equals("order", "2,1")) {
+                auto iterNext = iterCur;
+                ++iterNext;
+                auto &nextStep = *iterNext;
+                if (nextStep.name == "pop" &&
+                    nextStep.paramValues.size() == 1 &&
+                    nextStep.paramValues[0].key == "v_3") {
+                    d->steps_.erase(iterPrev);
+                    d->steps_.erase(iterNext);
+                    changeDone = true;
+                    break;
+                }
+            }
+
+            // unitconvert xy_in=A xy_out=B, pop/push v_3, unitconvert xy_in=B
+            // xy_out=A -> can suppress unitconvert
+            if (i + 1 < d->steps_.size() && prevStep.name == "unitconvert" &&
+                (curStep.name == "push" || curStep.name == "pop") &&
+                prevStepParamCount == 2 &&
+                prevStep.paramValues[0].key == "xy_in" &&
+                prevStep.paramValues[1].key == "xy_out" &&
+                curStepParamCount == 1 && curStep.paramValues[0].key == "v_3") {
+                auto iterNext = iterCur;
+                ++iterNext;
+                auto &nextStep = *iterNext;
+                if (nextStep.name == "unitconvert" &&
+                    nextStep.paramValues.size() == 2 &&
+                    nextStep.paramValues[0].key == "xy_in" &&
+                    nextStep.paramValues[1].key == "xy_out" &&
+                    nextStep.paramValues[0].value ==
+                        prevStep.paramValues[1].value &&
+                    nextStep.paramValues[1].value ==
+                        prevStep.paramValues[0].value) {
                     d->steps_.erase(iterPrev);
                     d->steps_.erase(iterNext);
                     changeDone = true;

@@ -838,13 +838,14 @@ TEST_F(CApi, proj_create_from_database) {
         ASSERT_NE(info.definition, nullptr);
         EXPECT_EQ(
             info.definition,
-            std::string("proj=pipeline step proj=axisswap order=2,1 step "
-                        "proj=unitconvert xy_in=deg xy_out=rad step proj=cart "
-                        "ellps=bessel step proj=helmert x=601.705 y=84.263 "
-                        "z=485.227 rx=-4.7354 ry=-1.3145 rz=-5.393 s=-2.3887 "
-                        "convention=coordinate_frame step inv proj=cart "
-                        "ellps=GRS80 step proj=unitconvert xy_in=rad "
-                        "xy_out=deg step proj=axisswap order=2,1"));
+            std::string("proj=pipeline step proj=push v_3 step proj=axisswap "
+                        "order=2,1 step proj=unitconvert xy_in=deg xy_out=rad "
+                        "step proj=cart ellps=bessel step proj=helmert "
+                        "x=601.705 y=84.263 z=485.227 rx=-4.7354 ry=-1.3145 "
+                        "rz=-5.393 s=-2.3887 convention=coordinate_frame step "
+                        "inv proj=cart ellps=GRS80 step proj=unitconvert "
+                        "xy_in=rad xy_out=deg step proj=axisswap order=2,1 "
+                        "step proj=pop v_3"));
         EXPECT_EQ(info.accuracy, 1);
     }
 }
