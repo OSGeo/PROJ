@@ -20,7 +20,7 @@ set (@PROJECT_NAME@_INCLUDE_DIRS "${_ROOT}/@INCLUDEDIR@")
 set (@PROJECT_NAME@_LIBRARY_DIRS "${_ROOT}/@LIBDIR@")
 set (@PROJECT_NAME@_BINARY_DIRS "${_ROOT}/@BINDIR@")
 
-set (@PROJECT_NAME@_LIBRARIES proj)
+set (@PROJECT_NAME@_LIBRARIES @PROJECT_NAME@::proj)
 # Read in the exported definition of the library
 include ("${_DIR}/@PROJECT_NAME_LOWER@-targets.cmake")
 include ("${_DIR}/@PROJECT_NAME_LOWER@-namespace-targets.cmake")
