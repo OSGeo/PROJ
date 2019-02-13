@@ -15,4 +15,6 @@ conversions.
    cart
    geoc
    latlon
+   pop
+   push
    unitconvert

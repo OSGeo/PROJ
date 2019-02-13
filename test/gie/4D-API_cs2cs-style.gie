@@ -294,6 +294,95 @@ accept      12          56
 expect      1335.8339   7522.963
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Test Pipeline Coordinate Stack
+-------------------------------------------------------------------------------
+operation  +proj=pipeline
+            +step +proj=push +v_1
+            +step +proj=utm +zone=32
+            +step +proj=utm +zone=33 +inv
+            +step +proj=pop +v_1
+
+accept      12  56  0   2020
+expect      12  56  0   2020
+roundtrip   10
+
+#operation   +proj=pipeline
+            +step +proj=latlon # dummy step
+            +step +proj=push +v_1
+            +step +proj=utm +zone=32
+            +step +proj=utm +zone=33 +inv
+            +step +proj=pop +v_1
+            +step +proj=affine # dummy step
+
+accept      12  56  0   2020
+expect      12  56  0   2020
+roundtrip   10
+
+# push value to stack without popping it again
+operation  +proj=pipeline
+            +step +proj=push +v_1
+            +step +proj=utm +zone=32
+            +step +proj=utm +zone=33 +inv
+
+accept      12  56  0   2020
+expect      18  56  0   2020
+
+# test that multiple pushes and pops works
+operation  +proj=pipeline
+            +step +proj=push +v_1
+            +step +proj=utm +zone=32
+            +step +proj=push +v_1
+            +step +proj=utm +zone=33 +inv
+            +step +proj=utm +zone=34
+            +step +proj=pop +v_1
+            +step +proj=utm +zone=32 +inv
+            +step +proj=pop +v_1
+
+accept      12  56  0   2020
+expect      12  56  0   2020
+
+# pop from empty stack
+operation  +proj=pipeline
+            +step +proj=utm +zone=32
+            +step +proj=utm +zone=33 +inv
+            +step +proj=pop +v_1
+
+accept      12  56  0   2020
+expect      18  56  0   2020
+
+operation   +proj=pipeline
+            +step +proj=push +v_2
+            +step +inv +proj=eqearth
+            +step +proj=laea
+            +step +proj=pop +v_2
+
+accept      900000      6000000 0   2020
+expect      896633.0226 6000000 0   2020
+
+# Datum shift in cartesian space but keeping the height
+# (simulates a datum-shift with affin since ISO19111 code
+# currrently obfuscates proj-strings using cart/helmert/invcart)
+operation   +proj=pipeline +ellps=GRS80
+            +step +proj=push +v_3
+            +step +proj=cart
+            +step +proj=affine +xoff=1000 +yoff=2000 +xoff=3000
+            +step +proj=cart +inv
+            +step +proj=pop +v_3
+tolerance   50 cm
+
+accept      12              56              0
+expect      12.0280112877   55.9896187413   0
+roundtrip   1
+
+operation   +proj=push +v_3
+accept      12 56 0 0
+expect      12 56 0 0
+
+operation   +proj=pop +v_3
+accept      12 56 0 0
+expect      12 56 0 0
+
 
 -------------------------------------------------------------------------------
 Test bugfix of https://github.com/OSGeo/proj.4/issues/1002
