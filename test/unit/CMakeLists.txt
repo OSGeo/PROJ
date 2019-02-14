@@ -5,7 +5,7 @@ option(USE_EXTERNAL_GTEST "Compile against external GTest" OFF)
 if (USE_EXTERNAL_GTEST)
 
 message(STATUS "Using external GTest")
-find_package(GTest 1.8.0)
+find_package(GTest 1.8.1)
 
 else (USE_EXTERNAL_GTEST)
 
@@ -42,6 +42,7 @@ endif()
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # Add googletest directly to our build. This defines
 # the gtest and gtest_main targets.
+option(INSTALL_GTEST "Enable installation of googletest" OFF)
 add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  ${CMAKE_BINARY_DIR}/googletest-build
                  EXCLUDE_FROM_ALL)
