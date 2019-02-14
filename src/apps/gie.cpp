@@ -1082,6 +1082,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_too_many_inits"           ,  -57},
     {"pjd_err_invalid_arg"              ,  -58},
     {"pjd_err_inconsistent_unit"        ,  -59},
+    {"pjd_err_mutually_exclusive_args"  ,  -60},
     {"pjd_err_dont_skip"                ,  5555},
     {"pjd_err_unknown"                  ,  9999},
     {"pjd_err_enomem"                   ,  ENOMEM},

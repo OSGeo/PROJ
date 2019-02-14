@@ -677,6 +677,7 @@ struct FACTORS {
 #define PJD_ERR_TOO_MANY_INITS          -57
 #define PJD_ERR_INVALID_ARG             -58
 #define PJD_ERR_INCONSISTENT_UNIT       -59
+#define PJD_ERR_MUTUALLY_EXCLUSIVE_ARGS -60
 /* NOTE: Remember to update src/strerrno.cpp, src/apps/gie.cpp and transient_error in */
 /* src/transform.cpp when adding new value */
 

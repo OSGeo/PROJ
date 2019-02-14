@@ -65,7 +65,7 @@ PROJ_HEAD(deformation, "Kinematic grid shift");
 
 namespace { // anonymous namespace
 struct pj_opaque {
-    double t_obs;
+    double dt;
     double t_epoch;
     PJ *cart;
 };
@@ -167,23 +167,20 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     PJ_COORD out, in;
     PJ_XYZ shift;
-    double dt = 0.0;
     in.lpz = lpz;
     out = in;
 
-    if (Q->t_obs != HUGE_VAL) {
-        dt = Q->t_obs - Q->t_epoch;
-    } else {
+    if (Q->dt == HUGE_VAL) {
         out = proj_coord_error(); /* in the 3D case +t_obs must be specified */
-        proj_log_debug(P, "deformation: +t_obs must be specified");
+        proj_log_debug(P, "deformation: +dt must be specified");
         return out.xyz;
     }
 
     shift = get_grid_shift(P, in.xyz);
 
-    out.xyz.x += dt * shift.x;
-    out.xyz.y += dt * shift.y;
-    out.xyz.z += dt * shift.z;
+    out.xyz.x += Q->dt * shift.x;
+    out.xyz.y += Q->dt * shift.y;
+    out.xyz.z += Q->dt * shift.z;
 
     return out.xyz;
 }
@@ -195,10 +192,10 @@ static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
     PJ_XYZ shift;
     PJ_COORD out = in;
 
-    if (Q->t_obs != HUGE_VAL) {
-            dt = Q->t_obs - Q->t_epoch;
-        } else {
-            dt = in.xyzt.t - Q->t_epoch ;
+    if (Q->dt != HUGE_VAL) {
+        dt = Q->dt;
+    } else {
+        dt = in.xyzt.t - Q->t_epoch ;
     }
 
     shift = get_grid_shift(P, in.xyz);
@@ -215,18 +212,15 @@ static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
 static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     PJ_COORD out;
-    double dt = 0.0;
     out.xyz = in;
 
-    if (Q->t_obs != HUGE_VAL) {
-        dt = Q->t_obs - Q->t_epoch;
-    } else {
+    if (Q->dt == HUGE_VAL) {
         out = proj_coord_error(); /* in the 3D case +t_obs must be specified */
-        proj_log_debug(P, "deformation: +t_obs must be specified");
+        proj_log_debug(P, "deformation: +dt must be specified");
         return out.lpz;
     }
 
-    out.xyz = reverse_shift(P, in, dt);
+    out.xyz = reverse_shift(P, in, Q->dt);
 
     return out.lpz;
 }
@@ -237,8 +231,8 @@ static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
     double dt;
 
 
-    if (Q->t_obs != HUGE_VAL) {
-            dt = Q->t_obs - Q->t_epoch;
+    if (Q->dt != HUGE_VAL) {
+            dt = Q->dt;
         } else {
             dt = in.xyzt.t - Q->t_epoch;
     }
@@ -298,16 +292,29 @@ PJ *TRANSFORMATION(deformation,1) {
         return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
     }
 
-    Q->t_obs = HUGE_VAL;
-    if (pj_param(P->ctx, P->params, "tt_obs").i) {
-       Q->t_obs = pj_param(P->ctx, P->params, "dt_obs").f;
+    Q->dt = HUGE_VAL;
+    if (pj_param(P->ctx, P->params, "tdt").i) {
+       Q->dt = pj_param(P->ctx, P->params, "ddt").f;
     }
 
+    if (pj_param_exists(P->params, "t_obs")) {
+        proj_log_error(P, "deformation: +t_obs parameter is deprecated. Use +dt instead.");
+        return destructor(P, PJD_ERR_MISSING_ARGS);
+    }
+
+    Q->t_epoch = HUGE_VAL;
     if (pj_param(P->ctx, P->params, "tt_epoch").i) {
         Q->t_epoch = pj_param(P->ctx, P->params, "dt_epoch").f;
-    } else {
-       proj_log_error(P, "deformation: +t_epoch parameter missing.");
-       return destructor(P, PJD_ERR_MISSING_ARGS);
+    }
+
+    if (Q->dt == HUGE_VAL && Q->t_epoch == HUGE_VAL) {
+        proj_log_error(P, "deformation: either +dt or +t_epoch needs to be set.");
+        return destructor(P, PJD_ERR_MISSING_ARGS);
+    }
+
+    if (Q->dt != HUGE_VALL && Q->t_epoch != HUGE_VALL) {
+        proj_log_error(P, "deformation: +dt or +t_epoch are mutually exclusive.");
+        return destructor(P, PJD_ERR_MUTUALLY_EXCLUSIVE_ARGS);
     }
 
     P->fwd4d = forward_4d;
