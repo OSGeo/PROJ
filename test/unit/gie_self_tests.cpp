@@ -682,17 +682,17 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     EXPECT_NEAR(c.xy.x, 44.999701238, 1e-9);
     EXPECT_NEAR(c.xy.y, 24.998474948, 1e-9);
     EXPECT_EQ(std::string(proj_pj_info(P).definition),
-              "proj=pipeline step proj=axisswap order=2,1 step "
-              "proj=unitconvert xy_in=deg xy_out=rad step proj=cart "
+              "proj=pipeline step proj=push v_3 step proj=axisswap order=2,1 "
+              "step proj=unitconvert xy_in=deg xy_out=rad step proj=cart "
               "ellps=krass step proj=helmert x=2.3287 y=-147.0425 z=-92.0802 "
               "rx=0.3092483 ry=-0.32482185 rz=-0.49729934 s=5.68906266 "
               "convention=coordinate_frame step inv proj=cart ellps=GRS80 step "
               "proj=unitconvert xy_in=rad xy_out=deg step proj=axisswap "
-              "order=2,1");
+              "order=2,1 step proj=pop v_3");
 
     c = proj_trans(P, PJ_INV, c);
-    EXPECT_NEAR(c.xy.x, 45, 1e-9);
-    EXPECT_NEAR(c.xy.y, 25, 1e-9);
+    EXPECT_NEAR(c.xy.x, 45, 1e-8);
+    EXPECT_NEAR(c.xy.y, 25, 1e-8);
 
     c.xyz.x = 45; // Lat
     c.xyz.y = 25; // Long
@@ -711,12 +711,12 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     EXPECT_NEAR(c.xy.x, 51.999714150, 1e-9);
     EXPECT_NEAR(c.xy.y, 19.998187811, 1e-9);
     EXPECT_EQ(std::string(proj_pj_info(P).definition),
-              "proj=pipeline step proj=axisswap order=2,1 step "
-              "proj=unitconvert xy_in=deg xy_out=rad step proj=cart "
+              "proj=pipeline step proj=push v_3 step proj=axisswap order=2,1 "
+              "step proj=unitconvert xy_in=deg xy_out=rad step proj=cart "
               "ellps=krass step proj=helmert x=33.4 y=-146.6 z=-76.3 rx=-0.359 "
               "ry=-0.053 rz=0.844 s=-0.84 convention=position_vector step inv "
               "proj=cart ellps=GRS80 step proj=unitconvert xy_in=rad "
-              "xy_out=deg step proj=axisswap order=2,1");
+              "xy_out=deg step proj=axisswap order=2,1 step proj=pop v_3");
 
     proj_destroy(P);
 }

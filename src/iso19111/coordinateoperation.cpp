@@ -5489,7 +5489,7 @@ void Conversion::_exportToPROJString(
         if (isUTM(zone, north)) {
             bConversionDone = true;
             formatter->addStep("utm");
-            if( useApprox ) {
+            if (useApprox) {
                 formatter->addParam("approx");
             }
             formatter->addParam("zone", zone);
@@ -8138,6 +8138,18 @@ void Transformation::_exportToPROJString(
         double z =
             parameterValueNumericAsSI(EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION);
 
+        if (methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+            methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) {
+            formatter->addStep("push");
+            formatter->addParam("v_3");
+        }
+
         setupPROJGeodeticSourceCRS(formatter, sourceCRS(), "Helmert");
 
         formatter->addStep("helmert");
@@ -8204,6 +8216,18 @@ void Transformation::_exportToPROJString(
 
         setupPROJGeodeticTargetCRS(formatter, targetCRS(), "Helmert");
 
+        if (methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+            methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) {
+            formatter->addStep("pop");
+            formatter->addParam("v_3");
+        }
+
         return;
     }
 
@@ -8250,6 +8274,14 @@ void Transformation::_exportToPROJString(
         double pz = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_ORDINATE_3_EVAL_POINT);
 
+        if (methodEPSGCode ==
+                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D) {
+            formatter->addStep("push");
+            formatter->addParam("v_3");
+        }
+
         setupPROJGeodeticSourceCRS(formatter, sourceCRS(),
                                    "Molodensky-Badekas");
 
@@ -8272,6 +8304,14 @@ void Transformation::_exportToPROJString(
 
         setupPROJGeodeticTargetCRS(formatter, targetCRS(),
                                    "Molodensky-Badekas");
+
+        if (methodEPSGCode ==
+                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D) {
+            formatter->addStep("pop");
+            formatter->addParam("v_3");
+        }
 
         return;
     }
