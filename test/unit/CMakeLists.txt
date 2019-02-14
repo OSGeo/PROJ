@@ -53,6 +53,9 @@ set(CMAKE_CXX_FLAGS "${_save_cxx_flags}")
 unset(_save_c_flags)
 unset(_save_cxx_flags)
 
+# Provide the same target name as find_package(GTest)
+add_library(GTest::gtest ALIAS gtest)
+
 endif(USE_EXTERNAL_GTEST)
 
 #
@@ -70,7 +73,7 @@ add_executable(proj_pj_transform_test
   main.cpp
   pj_transform_test.cpp)
 target_link_libraries(proj_pj_transform_test
-  gtest
+  GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME proj_pj_transform_test COMMAND proj_pj_transform_test)
 
@@ -78,7 +81,7 @@ add_executable(proj_errno_string_test
   main.cpp
   proj_errno_string_test.cpp)
 target_link_libraries(proj_errno_string_test
-  gtest
+  GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME proj_errno_string_test COMMAND proj_errno_string_test)
 
@@ -86,7 +89,7 @@ add_executable(proj_angular_io_test
     main.cpp
     proj_angular_io_test.cpp)
 target_link_libraries(proj_angular_io_test
-    gtest
+    GTest::gtest
     ${PROJ_LIBRARIES})
 add_test(NAME proj_angular_io_test COMMAND proj_angular_io_test)
 
@@ -94,7 +97,7 @@ add_executable(proj_context_test
     main.cpp
     proj_context_test.cpp)
 target_link_libraries(proj_context_test
-    gtest
+    GTest::gtest
     ${PROJ_LIBRARIES})
 add_test(NAME proj_context_test COMMAND proj_context_test)
 
@@ -105,7 +108,7 @@ add_executable(pj_phi2_test
         main.cpp
         pj_phi2_test.cpp)
 target_link_libraries(pj_phi2_test
-        gtest
+        GTest::gtest
         ${PROJ_LIBRARIES})
 add_test(NAME pj_phi2_test COMMAND pj_phi2_test)
 endif()
@@ -122,7 +125,7 @@ add_executable(proj_test_cpp_api
   test_factory.cpp
   test_c_api.cpp)
 target_link_libraries(proj_test_cpp_api
-  gtest
+  GTest::gtest
   ${PROJ_LIBRARIES}
   ${SQLITE3_LIBRARY})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
@@ -131,6 +134,6 @@ add_executable(gie_self_tests
   main.cpp
   gie_self_tests.cpp)
 target_link_libraries(gie_self_tests
-  gtest
+  GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME gie_self_tests COMMAND gie_self_tests)
