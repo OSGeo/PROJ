@@ -10018,7 +10018,7 @@ struct FilterResults {
                         !gridDesc.available) {
                         gridsAvailable = false;
                     }
-                    if (gridDesc.packageName.empty()) {
+                    if (gridDesc.packageName.empty() && !gridDesc.available) {
                         gridsKnown = false;
                     }
                 }
