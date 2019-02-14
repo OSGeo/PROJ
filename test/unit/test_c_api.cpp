@@ -507,32 +507,17 @@ TEST_F(CApi, proj_as_proj_string_incompatible_WKT1) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_as_proj_string_etmerc_option_yes) {
+TEST_F(CApi, proj_as_proj_string_approx_tmerc_option_yes) {
     auto obj = proj_create(m_ctxt, "+proj=tmerc +type=crs");
     ObjectKeeper keeper(obj);
     ASSERT_NE(obj, nullptr);
 
-    const char *options[] = {"USE_ETMERC=YES", nullptr};
+    const char *options[] = {"USE_APPROX_TMERC=YES", nullptr};
     auto str = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, options);
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str,
-              std::string("+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 "
+              std::string("+proj=tmerc +approx +lat_0=0 +lon_0=0 +k=1 +x_0=0 "
                           "+y_0=0 +datum=WGS84 +units=m +no_defs +type=crs"));
-}
-
-// ---------------------------------------------------------------------------
-
-TEST_F(CApi, proj_as_proj_string_etmerc_option_no) {
-    auto obj = proj_create(m_ctxt, "+proj=utm +zone=31 +type=crs");
-    ObjectKeeper keeper(obj);
-    ASSERT_NE(obj, nullptr);
-
-    const char *options[] = {"USE_ETMERC=NO", nullptr};
-    auto str = proj_as_proj_string(m_ctxt, obj, PJ_PROJ_4, options);
-    ASSERT_NE(str, nullptr);
-    EXPECT_EQ(str, std::string("+proj=tmerc +lat_0=0 +lon_0=3 +k=0.9996 "
-                               "+x_0=500000 +y_0=0 +datum=WGS84 +units=m "
-                               "+no_defs +type=crs"));
 }
 
 // ---------------------------------------------------------------------------
@@ -3022,4 +3007,210 @@ TEST_F(CApi, proj_create_cartesian_2D_cs) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_crs_info_list_from_database) {
+    { proj_crs_info_list_destroy(nullptr); }
+
+    { proj_get_crs_list_parameters_destroy(nullptr); }
+
+    // All null parameters
+    {
+        auto list = proj_get_crs_info_list_from_database(nullptr, nullptr,
+                                                         nullptr, nullptr);
+        ASSERT_NE(list, nullptr);
+        ASSERT_NE(list[0], nullptr);
+        EXPECT_NE(list[0]->auth_name, nullptr);
+        EXPECT_NE(list[0]->code, nullptr);
+        EXPECT_NE(list[0]->name, nullptr);
+        proj_crs_info_list_destroy(list);
+    }
+
+    // Default parameters
+    {
+        int result_count = 0;
+        auto params = proj_get_crs_list_parameters_create();
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, "EPSG", params,
+                                                         &result_count);
+        proj_get_crs_list_parameters_destroy(params);
+        ASSERT_NE(list, nullptr);
+        EXPECT_GT(result_count, 1);
+        EXPECT_EQ(list[result_count], nullptr);
+        bool found4326 = false;
+        bool found4978 = false;
+        bool found4979 = false;
+        bool found32631 = false;
+        bool found3855 = false;
+        bool found3901 = false;
+        for (int i = 0; i < result_count; i++) {
+            auto code = std::string(list[i]->code);
+            if (code == "4326") {
+                found4326 = true;
+                EXPECT_EQ(std::string(list[i]->auth_name), "EPSG");
+                EXPECT_EQ(std::string(list[i]->name), "WGS 84");
+                EXPECT_EQ(list[i]->type, PJ_TYPE_GEOGRAPHIC_2D_CRS);
+                EXPECT_EQ(list[i]->deprecated, 0);
+                EXPECT_EQ(list[i]->bbox_valid, 1);
+                EXPECT_EQ(list[i]->west_lon_degree, -180.0);
+                EXPECT_EQ(list[i]->south_lat_degree, -90.0);
+                EXPECT_EQ(list[i]->east_lon_degree, 180.0);
+                EXPECT_EQ(list[i]->north_lat_degree, 90.0);
+                EXPECT_EQ(std::string(list[i]->area_name), "World");
+                EXPECT_EQ(list[i]->projection_method_name, nullptr);
+            } else if (code == "4978") {
+                found4978 = true;
+                EXPECT_EQ(list[i]->type, PJ_TYPE_GEOCENTRIC_CRS);
+            } else if (code == "4979") {
+                found4979 = true;
+                EXPECT_EQ(list[i]->type, PJ_TYPE_GEOGRAPHIC_3D_CRS);
+            } else if (code == "32631") {
+                found32631 = true;
+                EXPECT_EQ(list[i]->type, PJ_TYPE_PROJECTED_CRS);
+                EXPECT_EQ(std::string(list[i]->projection_method_name),
+                          "Transverse Mercator");
+            } else if (code == "3855") {
+                found3855 = true;
+                EXPECT_EQ(list[i]->type, PJ_TYPE_VERTICAL_CRS);
+            } else if (code == "3901") {
+                found3901 = true;
+                EXPECT_EQ(list[i]->type, PJ_TYPE_COMPOUND_CRS);
+            }
+            EXPECT_EQ(list[i]->deprecated, 0);
+        }
+        EXPECT_TRUE(found4326);
+        EXPECT_TRUE(found4978);
+        EXPECT_TRUE(found4979);
+        EXPECT_TRUE(found32631);
+        EXPECT_TRUE(found3855);
+        EXPECT_TRUE(found3901);
+        proj_crs_info_list_destroy(list);
+    }
+
+    // Filter on only geodetic crs
+    {
+        int result_count = 0;
+        auto params = proj_get_crs_list_parameters_create();
+        params->typesCount = 1;
+        auto type = PJ_TYPE_GEODETIC_CRS;
+        params->types = &type;
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, "EPSG", params,
+                                                         &result_count);
+        bool foundGeog2D = false;
+        bool foundGeog3D = false;
+        bool foundGeocentric = false;
+        for (int i = 0; i < result_count; i++) {
+            foundGeog2D |= list[i]->type == PJ_TYPE_GEOGRAPHIC_2D_CRS;
+            foundGeog3D |= list[i]->type == PJ_TYPE_GEOGRAPHIC_3D_CRS;
+            foundGeocentric |= list[i]->type == PJ_TYPE_GEOCENTRIC_CRS;
+            EXPECT_TRUE(list[i]->type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
+                        list[i]->type == PJ_TYPE_GEOGRAPHIC_3D_CRS ||
+                        list[i]->type == PJ_TYPE_GEOCENTRIC_CRS);
+        }
+        EXPECT_TRUE(foundGeog2D);
+        EXPECT_TRUE(foundGeog3D);
+        EXPECT_TRUE(foundGeocentric);
+        proj_get_crs_list_parameters_destroy(params);
+        proj_crs_info_list_destroy(list);
+    }
+
+    // Filter on only geographic crs
+    {
+        int result_count = 0;
+        auto params = proj_get_crs_list_parameters_create();
+        params->typesCount = 1;
+        auto type = PJ_TYPE_GEOGRAPHIC_CRS;
+        params->types = &type;
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, "EPSG", params,
+                                                         &result_count);
+        bool foundGeog2D = false;
+        bool foundGeog3D = false;
+        for (int i = 0; i < result_count; i++) {
+            foundGeog2D |= list[i]->type == PJ_TYPE_GEOGRAPHIC_2D_CRS;
+            foundGeog3D |= list[i]->type == PJ_TYPE_GEOGRAPHIC_3D_CRS;
+            EXPECT_TRUE(list[i]->type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
+                        list[i]->type == PJ_TYPE_GEOGRAPHIC_3D_CRS);
+        }
+        EXPECT_TRUE(foundGeog2D);
+        EXPECT_TRUE(foundGeog3D);
+        proj_get_crs_list_parameters_destroy(params);
+        proj_crs_info_list_destroy(list);
+    }
+
+    // Filter on only geographic 2D crs and projected CRS
+    {
+        int result_count = 0;
+        auto params = proj_get_crs_list_parameters_create();
+        params->typesCount = 2;
+        const PJ_TYPE types[] = {PJ_TYPE_GEOGRAPHIC_2D_CRS,
+                                 PJ_TYPE_PROJECTED_CRS};
+        params->types = types;
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, "EPSG", params,
+                                                         &result_count);
+        bool foundGeog2D = false;
+        bool foundProjected = false;
+        for (int i = 0; i < result_count; i++) {
+            foundGeog2D |= list[i]->type == PJ_TYPE_GEOGRAPHIC_2D_CRS;
+            foundProjected |= list[i]->type == PJ_TYPE_PROJECTED_CRS;
+            EXPECT_TRUE(list[i]->type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
+                        list[i]->type == PJ_TYPE_PROJECTED_CRS);
+        }
+        EXPECT_TRUE(foundGeog2D);
+        EXPECT_TRUE(foundProjected);
+        proj_get_crs_list_parameters_destroy(params);
+        proj_crs_info_list_destroy(list);
+    }
+
+    // Filter on bbox (inclusion)
+    {
+        int result_count = 0;
+        auto params = proj_get_crs_list_parameters_create();
+        params->bbox_valid = 1;
+        params->west_lon_degree = 2;
+        params->south_lat_degree = 49;
+        params->east_lon_degree = 2.1;
+        params->north_lat_degree = 49.1;
+        params->typesCount = 1;
+        auto type = PJ_TYPE_PROJECTED_CRS;
+        params->types = &type;
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, "EPSG", params,
+                                                         &result_count);
+        ASSERT_NE(list, nullptr);
+        EXPECT_GT(result_count, 1);
+        for (int i = 0; i < result_count; i++) {
+            EXPECT_LE(list[i]->west_lon_degree, params->west_lon_degree);
+            EXPECT_LE(list[i]->south_lat_degree, params->south_lat_degree);
+            EXPECT_GE(list[i]->east_lon_degree, params->east_lon_degree);
+            EXPECT_GE(list[i]->north_lat_degree, params->north_lat_degree);
+        }
+        proj_get_crs_list_parameters_destroy(params);
+        proj_crs_info_list_destroy(list);
+    }
+
+    // Filter on bbox (intersection)
+    {
+        int result_count = 0;
+        auto params = proj_get_crs_list_parameters_create();
+        params->bbox_valid = 1;
+        params->west_lon_degree = 2;
+        params->south_lat_degree = 49;
+        params->east_lon_degree = 2.1;
+        params->north_lat_degree = 49.1;
+        params->crs_area_of_use_contains_bbox = 0;
+        params->typesCount = 1;
+        auto type = PJ_TYPE_PROJECTED_CRS;
+        params->types = &type;
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, "EPSG", params,
+                                                         &result_count);
+        ASSERT_NE(list, nullptr);
+        EXPECT_GT(result_count, 1);
+        for (int i = 0; i < result_count; i++) {
+            EXPECT_LE(list[i]->west_lon_degree, params->east_lon_degree);
+            EXPECT_LE(list[i]->south_lat_degree, params->north_lat_degree);
+            EXPECT_GE(list[i]->east_lon_degree, params->west_lon_degree);
+            EXPECT_GE(list[i]->north_lat_degree, params->south_lat_degree);
+        }
+        proj_get_crs_list_parameters_destroy(params);
+        proj_crs_info_list_destroy(list);
+    }
+}
 } // namespace

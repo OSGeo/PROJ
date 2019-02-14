@@ -88,7 +88,8 @@ int pj_ellipsoid (PJ *P) {
 
     /* Specifying R overrules everything */
     if (pj_get_param (P->params, "R")) {
-        ellps_size (P);
+        if (0 != ellps_size (P))
+            return 1;
         pj_calc_ellipsoid_params (P, P->a, 0);
         if (proj_errno (P))
             return 1;

@@ -239,7 +239,7 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Test transverse mercator (#97)" >> ${OUT}
 #
-$EXE +proj=tmerc +k=0.998 +lon_0=-20 +datum=WGS84 +x_0=10000 +y_0=20000 \
+$EXE +proj=tmerc +approx +k=0.998 +lon_0=-20 +datum=WGS84 +x_0=10000 +y_0=20000 \
  +to +proj=latlong +datum=WGS84 \
  -E >>${OUT} <<EOF
 10000 20000
@@ -253,7 +253,7 @@ echo "##############################################################" >> ${OUT}
 echo "Test transverse mercator inverse (#97)" >> ${OUT}
 #
 $EXE +proj=latlong +datum=WGS84 \
- +to +proj=tmerc +k=0.998 +lon_0=-20 +datum=WGS84 +x_0=10000 +y_0=20000 \
+ +to +proj=tmerc +approx +k=0.998 +lon_0=-20 +datum=WGS84 +x_0=10000 +y_0=20000 \
  -E >>${OUT} <<EOF
 0dN 0.000
 15d22'16.108"W	17d52'53.478"N 0.000

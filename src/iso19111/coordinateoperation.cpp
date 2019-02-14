@@ -2147,11 +2147,19 @@ void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
             // registered linear / angular unit.
             const auto &unitType = unit.type();
             if (unitType == common::UnitOfMeasure::Type::LINEAR) {
-                formatter->add(
-                    l_value.convertToUnit(*(formatter->axisLinearUnit())));
+                const auto &targetUnit = *(formatter->axisLinearUnit());
+                if (targetUnit.conversionToSI() == 0.0) {
+                    throw io::FormattingException(
+                        "cannot convert value to target linear unit");
+                }
+                formatter->add(l_value.convertToUnit(targetUnit));
             } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
-                formatter->add(
-                    l_value.convertToUnit(*(formatter->axisAngularUnit())));
+                const auto &targetUnit = *(formatter->axisAngularUnit());
+                if (targetUnit.conversionToSI() == 0.0) {
+                    throw io::FormattingException(
+                        "cannot convert value to target angular unit");
+                }
+                formatter->add(l_value.convertToUnit(targetUnit));
             } else {
                 formatter->add(l_value.getSIValue());
             }
@@ -5373,13 +5381,11 @@ bool Conversion::addWKTExtensionNode(io::WKTFormatter *formatter) const {
         const auto &l_method = method();
         const auto &methodName = l_method->nameStr();
         const int methodEPSGCode = l_method->getEPSGCode();
-        int zone = 0;
-        bool north = true;
-        if (l_method->getPrivate()->projMethodOverride_ == "etmerc" &&
-            !isUTM(zone, north)) {
+        if (l_method->getPrivate()->projMethodOverride_ == "tmerc approx" ||
+            l_method->getPrivate()->projMethodOverride_ == "utm approx") {
             auto projFormatter = io::PROJStringFormatter::create();
             projFormatter->setCRSExport(true);
-            projFormatter->setUseETMercForTMerc(true);
+            projFormatter->setUseApproxTMerc(true);
             formatter->startNode(io::WKTConstants::EXTENSION, false);
             formatter->addQuotedString("PROJ4");
             _exportToPROJString(projFormatter.get());
@@ -5471,17 +5477,21 @@ void Conversion::_exportToPROJString(
     const auto &convName = nameStr();
     bool bConversionDone = false;
     bool bEllipsoidParametersDone = false;
-    bool useETMerc = false;
+    bool useApprox = false;
     if (methodEPSGCode == EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
         // Check for UTM
         int zone = 0;
         bool north = true;
-        bool etMercSettingSet = false;
-        useETMerc = formatter->getUseETMercForTMerc(etMercSettingSet) ||
-                    l_method->getPrivate()->projMethodOverride_ == "etmerc";
-        if (isUTM(zone, north) && !(etMercSettingSet && !useETMerc)) {
+        useApprox =
+            formatter->getUseApproxTMerc() ||
+            l_method->getPrivate()->projMethodOverride_ == "tmerc approx" ||
+            l_method->getPrivate()->projMethodOverride_ == "utm approx";
+        if (isUTM(zone, north)) {
             bConversionDone = true;
             formatter->addStep("utm");
+            if( useApprox ) {
+                formatter->addParam("approx");
+            }
             formatter->addParam("zone", zone);
             if (!north) {
                 formatter->addParam("south");
@@ -5654,7 +5664,10 @@ void Conversion::_exportToPROJString(
     if (!bConversionDone) {
         const MethodMapping *mapping = getMapping(l_method.get());
         if (mapping && mapping->proj_name_main) {
-            formatter->addStep(useETMerc ? "etmerc" : mapping->proj_name_main);
+            formatter->addStep(mapping->proj_name_main);
+            if (useApprox) {
+                formatter->addParam("approx");
+            }
             if (mapping->proj_name_aux) {
                 if (internal::starts_with(mapping->proj_name_aux, "axis=")) {
                     bAxisSpecFound = true;

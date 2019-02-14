@@ -496,6 +496,14 @@ expect     failure   errno unit_factor_less_than_0
 operation  proj=utm  ellps=GRS80  zone=32  to_meter=10
 accept     12   55
 expect        69187.5632    609890.7825
+
+operation  proj=utm  ellps=GRS80  zone=32  to_meter=1/0
+expect     failure   errno unit_factor_less_than_0
+
+operation  proj=utm  ellps=GRS80  zone=32  to_meter=2.0/0.2
+accept     12   55
+expect        69187.5632    609890.7825
+
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------

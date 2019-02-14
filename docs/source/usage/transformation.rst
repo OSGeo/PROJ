@@ -210,8 +210,7 @@ at each grid location. Actually grid shifts are normally computed based on an
 interpolation between the containing four grid points.
 
 PROJ supports use of grid files for shifting between various reference frames.
-The grid shift table formats are ctable (the binary format produced by the PROJ
-``nad2bin`` program), NTv1 (the old Canadian format), and NTv2 (``.gsb`` - the new
+The grid shift table formats are ctable, NTv1 (the old Canadian format), and NTv2 (``.gsb`` - the new
 Canadian and Australian format).
 
 The text in this section is based on the *cs2cs* framework. Gridshifting is off

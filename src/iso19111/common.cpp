@@ -172,21 +172,22 @@ void UnitOfMeasure::_exportToWKT(
 {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
 
-    if (formatter->forceUNITKeyword() && type() != Type::PARAMETRIC) {
+    const auto l_type = type();
+    if (formatter->forceUNITKeyword() && l_type != Type::PARAMETRIC) {
         formatter->startNode(WKTConstants::UNIT, !codeSpace().empty());
     } else if (!unitType.empty()) {
         formatter->startNode(unitType, !codeSpace().empty());
     } else {
-        if (isWKT2 && type() == Type::LINEAR) {
+        if (isWKT2 && l_type == Type::LINEAR) {
             formatter->startNode(WKTConstants::LENGTHUNIT,
                                  !codeSpace().empty());
-        } else if (isWKT2 && type() == Type::ANGULAR) {
+        } else if (isWKT2 && l_type == Type::ANGULAR) {
             formatter->startNode(WKTConstants::ANGLEUNIT, !codeSpace().empty());
-        } else if (isWKT2 && type() == Type::SCALE) {
+        } else if (isWKT2 && l_type == Type::SCALE) {
             formatter->startNode(WKTConstants::SCALEUNIT, !codeSpace().empty());
-        } else if (isWKT2 && type() == Type::TIME) {
+        } else if (isWKT2 && l_type == Type::TIME) {
             formatter->startNode(WKTConstants::TIMEUNIT, !codeSpace().empty());
-        } else if (isWKT2 && type() == Type::PARAMETRIC) {
+        } else if (isWKT2 && l_type == Type::PARAMETRIC) {
             formatter->startNode(WKTConstants::PARAMETRICUNIT,
                                  !codeSpace().empty());
         } else {
@@ -211,7 +212,7 @@ void UnitOfMeasure::_exportToWKT(
             formatter->addQuotedString(l_name);
         }
         const auto &factor = conversionToSI();
-        if (!isWKT2 || factor != 0.0) {
+        if (!isWKT2 || l_type != Type::TIME || factor != 0.0) {
             // Some TIMEUNIT do not have a conversion factor
             formatter->add(factor);
         }

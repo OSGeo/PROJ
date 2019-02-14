@@ -4746,8 +4746,7 @@ struct PROJStringFormatter::Private {
     bool omitProjLongLatIfPossible_ = false;
     bool omitZUnitConversion_ = false;
     DatabaseContextPtr dbContext_{};
-    bool useETMercForTMerc_ = false;
-    bool useETMercForTMercSet_ = false;
+    bool useApproxTMerc_ = false;
     bool addNoDefs_ = true;
     bool coordOperationOptimizations_ = false;
     bool crsExport_ = false;
@@ -4803,11 +4802,9 @@ PROJStringFormatter::create(Convention conventionIn,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Set whether Extended Transverse Mercator (etmerc) should be used
- * instead of tmerc */
-void PROJStringFormatter::setUseETMercForTMerc(bool flag) {
-    d->useETMercForTMerc_ = flag;
-    d->useETMercForTMercSet_ = true;
+/** \brief Set whether approximate Transverse Mercator or UTM should be used */
+void PROJStringFormatter::setUseApproxTMerc(bool flag) {
+    d->useApproxTMerc_ = flag;
 }
 
 // ---------------------------------------------------------------------------
@@ -5256,9 +5253,8 @@ PROJStringFormatter::Convention PROJStringFormatter::convention() const {
 
 // ---------------------------------------------------------------------------
 
-bool PROJStringFormatter::getUseETMercForTMerc(bool &settingSetOut) const {
-    settingSetOut = d->useETMercForTMercSet_;
-    return d->useETMercForTMerc_;
+bool PROJStringFormatter::getUseApproxTMerc() const {
+    return d->useApproxTMerc_;
 }
 
 // ---------------------------------------------------------------------------
@@ -5285,6 +5281,9 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
     const char *c_str = projString.c_str();
     std::vector<std::string> tokens;
 
+    bool hasProj = false;
+    bool hasInit = false;
+    bool hasPipeline = false;
     {
         size_t i = 0;
         while (true) {
@@ -5310,8 +5309,21 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                 }
                 token += c_str[i];
             }
+            if (in_string) {
+                throw ParsingException("Unbalanced double quote");
+            }
             if (token.empty()) {
                 break;
+            }
+            if (!hasPipeline &&
+                (token == "proj=pipeline" || token == "+proj=pipeline")) {
+                hasPipeline = true;
+            } else if (!hasProj && (starts_with(token, "proj=") ||
+                                    starts_with(token, "+proj="))) {
+                hasProj = true;
+            } else if (!hasInit && (starts_with(token, "init=") ||
+                                    starts_with(token, "+init="))) {
+                hasInit = true;
             }
             tokens.emplace_back(token);
         }
@@ -5319,15 +5331,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
 
     bool prevWasTitle = false;
 
-    if (projString.find("proj=pipeline") == std::string::npos) {
-        const bool hasProj = projString.find("proj=") == 0 ||
-                             projString.find("+proj=") == 0 ||
-                             projString.find(" proj=") != std::string::npos ||
-                             projString.find(" +proj=") != std::string::npos;
-        const bool hasInit = projString.find("init=") == 0 ||
-                             projString.find("+init=") == 0 ||
-                             projString.find(" init=") != std::string::npos ||
-                             projString.find(" +init=") != std::string::npos;
+    if (!hasPipeline) {
         if (hasProj || hasInit) {
             steps.push_back(Step());
         }
@@ -7073,8 +7077,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                                 : UnitOfMeasure::NONE)));
         }
 
-        if (step.name == "etmerc") {
-            methodMap.set("proj_method", "etmerc");
+        if (step.name == "tmerc" && hasParamValue(step, "approx")) {
+            methodMap.set("proj_method", "tmerc approx");
+        } else if (step.name == "utm" && hasParamValue(step, "approx")) {
+            methodMap.set("proj_method", "utm approx");
         }
 
         conv = Conversion::create(mapWithUnknownName, methodMap, parameters,
@@ -7447,6 +7453,13 @@ static const metadata::ExtentPtr &getExtent(const crs::CRS *crs) {
  */
 BaseObjectNNPtr
 PROJStringParser::createFromPROJString(const std::string &projString) {
+
+    // In some abnormal situations involving init=epsg:XXXX syntax, we could
+    // have infinite loop
+    if (d->ctx_ && d->ctx_->curStringInCreateFromPROJString == projString) {
+        throw ParsingException("invalid PROJ string");
+    }
+
     d->steps_.clear();
     d->title_.clear();
     d->globalParamValues_.clear();
@@ -7755,11 +7768,17 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         proj_log_func(pj_context, &logger, Logger::log);
         proj_context_use_proj4_init_rules(pj_context, d->usePROJ4InitRules_);
     }
+    if (d->ctx_) {
+        d->ctx_->curStringInCreateFromPROJString = projString;
+    }
     auto pj = pj_create_internal(
         pj_context, (projString.find("type=crs") != std::string::npos
                          ? projString + " +disable_grid_presence_check"
                          : projString)
                         .c_str());
+    if (d->ctx_) {
+        d->ctx_->curStringInCreateFromPROJString.clear();
+    }
     valid = pj != nullptr;
 
     // Remove parameters not understood by PROJ.

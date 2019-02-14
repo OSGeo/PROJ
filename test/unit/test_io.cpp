@@ -7654,12 +7654,39 @@ TEST(io, projparse_etmerc) {
         crs->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
-        "+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 "
+        "+proj=tmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 "
         "+datum=WGS84 +units=m +no_defs +type=crs");
 
     auto wkt1 = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
-    EXPECT_TRUE(wkt1.find("EXTENSION[\"PROJ4\",\"+proj=etmerc +lat_0=0 "
+    EXPECT_TRUE(wkt1.find("EXTENSION[\"PROJ4\"") == std::string::npos)
+        << wkt1;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_tmerc_approx) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=tmerc +approx +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto wkt2 = crs->exportToWKT(
+        &WKTFormatter::create()->simulCurNodeHasId().setMultiLine(false));
+    EXPECT_TRUE(
+        wkt2.find("METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]]") !=
+        std::string::npos)
+        << wkt2;
+
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=tmerc +approx +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 "
+        "+datum=WGS84 +units=m +no_defs +type=crs");
+
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(wkt1.find("EXTENSION[\"PROJ4\",\"+proj=tmerc +approx +lat_0=0 "
                           "+lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m "
                           "+no_defs\"]") != std::string::npos)
         << wkt1;
@@ -8735,6 +8762,10 @@ TEST(io, projparse_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString(
                      "proj=pipeline step init=epsg:4326 init=epsg:4326"),
                  ParsingException);
+
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString("proj=\tinit= +type=crs"),
+        ParsingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -8960,4 +8991,62 @@ TEST(wkt_export, precision) {
         crs->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+// Avoid division by zero
+
+TEST(wkt_export, invalid_linear_unit) {
+    auto wkt = "PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
+               "    PROJECTION[\"Transverse_Mercator\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",0],\n"
+               "    PARAMETER[\"central_meridian\",3],\n"
+               "    PARAMETER[\"scale_factor\",0.9996],\n"
+               "    PARAMETER[\"false_easting\",500000],\n"
+               "    PARAMETER[\"false_northing\",0],\n"
+               "    UNIT[\"foo\",0]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_THROW(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+// Avoid division by zero
+
+TEST(wkt_export, invalid_angular_unit) {
+    auto wkt = "PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"foo\",0]],\n"
+               "    PROJECTION[\"Transverse_Mercator\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",0],\n"
+               "    PARAMETER[\"central_meridian\",3],\n"
+               "    PARAMETER[\"scale_factor\",0.9996],\n"
+               "    PARAMETER[\"false_easting\",500000],\n"
+               "    PARAMETER[\"false_northing\",0],\n"
+               "    UNIT[\"meter\",1]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_THROW(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        FormattingException);
 }

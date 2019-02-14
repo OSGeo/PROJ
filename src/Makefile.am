@@ -1,20 +1,20 @@
 AM_CFLAGS = @C_WFLAGS@
 
-bin_PROGRAMS =	proj nad2bin geod cs2cs gie cct projinfo
+bin_PROGRAMS =	proj geod cs2cs gie cct projinfo
 EXTRA_PROGRAMS = multistresstest test228
 
 TESTS = geodtest
 check_PROGRAMS = geodtest
 
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
-		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@ -I$(top_srcdir)/include @SQLITE3_FLAGS@
+		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@ -I$(top_srcdir)/include @SQLITE3_CFLAGS@
 AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@ -DPROJ_COMPILATION
 
 include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesic.h \
 	org_proj4_PJ.h proj_symbol_rename.h
 
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
-	bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake bin_projinfo.cmake \
+	bin_geod.cmake bin_proj.cmake bin_projinfo.cmake \
 	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake tests/geodtest.cpp \
 	wkt1_grammar.y wkt2_grammar.y apps/emess.h
 
@@ -22,7 +22,6 @@ proj_SOURCES = apps/proj.cpp apps/emess.cpp
 projinfo_SOURCES = apps/projinfo.cpp
 cs2cs_SOURCES = apps/cs2cs.cpp apps/emess.cpp
 cct_SOURCES = apps/cct.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
-nad2bin_SOURCES = apps/nad2bin.cpp
 geod_SOURCES = apps/geod.cpp apps/geod_set.cpp apps/geod_interface.cpp apps/geod_interface.h apps/emess.cpp
 
 gie_SOURCES = apps/gie.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
@@ -35,7 +34,6 @@ cs2cs_LDADD = libproj.la
 geod_LDADD = libproj.la
 proj_LDADD = libproj.la
 projinfo_LDADD = libproj.la
-nad2bin_LDADD = libproj.la
 
 gie_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@
@@ -45,7 +43,7 @@ geodtest_LDADD = libproj.la
 lib_LTLIBRARIES = libproj.la
 
 libproj_la_LDFLAGS = -no-undefined -version-info 14:1:1
-libproj_la_LIBADD = @SQLITE3_LDFLAGS@
+libproj_la_LIBADD = @SQLITE3_LIBS@
 
 libproj_la_SOURCES = \
 	pj_list.h proj_internal.h proj_math.h \
@@ -124,7 +122,6 @@ libproj_la_SOURCES = \
 	projections/wag7.cpp \
 	projections/lcca.cpp \
 	projections/geos.cpp \
-	projections/etmerc.cpp \
 	projections/boggs.cpp \
 	projections/collg.cpp \
 	projections/comill.cpp \
@@ -186,15 +183,15 @@ libproj_la_SOURCES = \
 	transformations/molodensky.cpp \
 	transformations/vgridshift.cpp \
 	\
-	aasincos.cpp adjlon.cpp bch2bps.cpp bchgen.cpp \
-	biveval.cpp dmstor.cpp mk_cheby.cpp auth.cpp \
+	aasincos.cpp adjlon.cpp \
+	dmstor.cpp auth.cpp \
 	deriv.cpp ell_set.cpp ellps.cpp errno.cpp \
 	factors.cpp fwd.cpp init.cpp inv.cpp \
 	list.cpp malloc.cpp mlfn.cpp msfn.cpp proj_mdist.cpp \
 	open_lib.cpp param.cpp phi2.cpp pr_list.cpp \
 	qsfn.cpp strerrno.cpp \
 	tsfn.cpp units.cpp ctx.cpp log.cpp zpoly1.cpp rtodms.cpp \
-	vector1.cpp release.cpp gauss.cpp \
+	release.cpp gauss.cpp \
 	fileapi.cpp \
 	\
 	gc_reader.cpp gridcatalog.cpp \

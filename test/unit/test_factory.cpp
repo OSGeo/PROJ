@@ -222,6 +222,16 @@ TEST(factory, AuthorityFactory_createExtent) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createExtent_no_bbox) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto extent = factory->createExtent("1361"); // Sudan - south. Deprecated
+    EXPECT_EQ(*(extent->description()), "Sudan - south");
+    const auto &geogElts = extent->geographicElements();
+    EXPECT_TRUE(geogElts.empty());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createGeodeticDatum) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createGeodeticDatum("-1"),
@@ -410,6 +420,17 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=longlat +datum=WGS84 +no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D_area_no_bbox) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createGeodeticCRS("4296"); // Sudan - deprecated
+    auto domain = crs->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1361").get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -2789,4 +2810,103 @@ TEST(factory, listAreaOfUseFromName) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(factory, getCRSInfoList) {
+    auto ctxt = DatabaseContext::create();
+    {
+        auto factory = AuthorityFactory::create(ctxt, std::string());
+        auto list = factory->getCRSInfoList();
+        EXPECT_GT(list.size(), 1U);
+        bool foundEPSG = false;
+        bool foundIGNF = true;
+        bool found4326 = false;
+        for (const auto &info : list) {
+            foundEPSG |= info.authName == "EPSG";
+            foundIGNF |= info.authName == "IGNF";
+            if (info.authName == "EPSG" && info.code == "4326") {
+                found4326 = true;
+            }
+        }
+        EXPECT_TRUE(foundEPSG);
+        EXPECT_TRUE(foundIGNF);
+        EXPECT_TRUE(found4326);
+    }
+    {
+        auto factory = AuthorityFactory::create(ctxt, "EPSG");
+        auto list = factory->getCRSInfoList();
+        EXPECT_GT(list.size(), 1U);
+        bool found4326 = false;
+        bool found4978 = false;
+        bool found4979 = false;
+        bool found32631 = false;
+        bool found3855 = false;
+        bool found6871 = false;
+        for (const auto &info : list) {
+            EXPECT_EQ(info.authName, "EPSG");
+            if (info.code == "4326") {
+                EXPECT_EQ(info.name, "WGS 84");
+                EXPECT_EQ(info.type,
+                          AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS);
+                EXPECT_EQ(info.deprecated, false);
+                EXPECT_EQ(info.bbox_valid, true);
+                EXPECT_EQ(info.west_lon_degree, -180.0);
+                EXPECT_EQ(info.south_lat_degree, -90.0);
+                EXPECT_EQ(info.east_lon_degree, 180.0);
+                EXPECT_EQ(info.north_lat_degree, 90.0);
+                EXPECT_EQ(info.areaName, "World");
+                EXPECT_TRUE(info.projectionMethodName.empty());
+                found4326 = true;
+            } else if (info.code == "4296") { // Soudan - deprecated
+                EXPECT_EQ(info.bbox_valid, false);
+                EXPECT_EQ(info.west_lon_degree, 0.0);
+                EXPECT_EQ(info.south_lat_degree, 0.0);
+                EXPECT_EQ(info.east_lon_degree, 0.0);
+                EXPECT_EQ(info.north_lat_degree, 0.0);
+            } else if (info.code == "4978") {
+                EXPECT_EQ(info.name, "WGS 84");
+                EXPECT_EQ(info.type,
+                          AuthorityFactory::ObjectType::GEOCENTRIC_CRS);
+                found4978 = true;
+            } else if (info.code == "4979") {
+                EXPECT_EQ(info.name, "WGS 84");
+                EXPECT_EQ(info.type,
+                          AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+                found4979 = true;
+            } else if (info.code == "32631") {
+                EXPECT_EQ(info.name, "WGS 84 / UTM zone 31N");
+                EXPECT_EQ(info.type,
+                          AuthorityFactory::ObjectType::PROJECTED_CRS);
+                EXPECT_EQ(info.deprecated, false);
+                EXPECT_EQ(info.bbox_valid, true);
+                EXPECT_EQ(info.west_lon_degree, 0.0);
+                EXPECT_EQ(info.south_lat_degree, 0.0);
+                EXPECT_EQ(info.east_lon_degree, 6.0);
+                EXPECT_EQ(info.north_lat_degree, 84.0);
+                EXPECT_EQ(info.areaName, "World - N hemisphere - 0\xC2\xB0"
+                                         "E to 6\xC2\xB0"
+                                         "E - by country");
+                EXPECT_EQ(info.projectionMethodName, "Transverse Mercator");
+                found32631 = true;
+            } else if (info.code == "3855") {
+                EXPECT_EQ(info.name, "EGM2008 height");
+                EXPECT_EQ(info.type,
+                          AuthorityFactory::ObjectType::VERTICAL_CRS);
+                found3855 = true;
+            } else if (info.code == "6871") {
+                EXPECT_EQ(info.name,
+                          "WGS 84 / Pseudo-Mercator +  EGM2008 geoid height");
+                EXPECT_EQ(info.type,
+                          AuthorityFactory::ObjectType::COMPOUND_CRS);
+                found6871 = true;
+            }
+        }
+        EXPECT_TRUE(found4326);
+        EXPECT_TRUE(found4978);
+        EXPECT_TRUE(found4979);
+        EXPECT_TRUE(found32631);
+        EXPECT_TRUE(found3855);
+        EXPECT_TRUE(found6871);
+    }
+}
 } // namespace
