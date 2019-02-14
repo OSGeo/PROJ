@@ -5,7 +5,7 @@ option(USE_EXTERNAL_GTEST "Compile against external GTest" OFF)
 if (USE_EXTERNAL_GTEST)
 
 message(STATUS "Using external GTest")
-find_package(GTest 1.8.1)
+find_package(GTest 1.8.1 CONFIG REQUIRED)
 
 else (USE_EXTERNAL_GTEST)
 
