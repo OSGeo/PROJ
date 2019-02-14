@@ -1,3 +1,148 @@
+6.0.0 Release Notes
+-------------------
+
+PROJ 6 has undergone extensive changes to increase its functional scope from a
+cartographic projection engine with so-called "early-binding" geodetic datum
+transformation capabilities to a more complete library supporting coordinate
+transformations and coordinate reference systems.
+
+As a foundation for other enhancements, PROJ now includes a C++ implementation
+of the modelisation propopsed by the ISO-19111:2019 standard / OGC Abstract
+Specification Topic 2: "Referencing By Coordinates", for geodetic reference
+frames (datums), coordinate reference systems and coordinate operations.
+Construction and query of those geodetic objects is available through a new C++
+API, and also accessible for the most part from bindings in the C API.
+
+Those geodetic objects can be imported and exported from and into the OGC
+Well-Known Text format (WKT) in its different variants: ESRI WKT, GDAL WKT 1,
+WKT2:2015 (ISO 19162:2015) and WKT2:2018 (ISO 19162:2018). Import and export of
+CRS objects from and into PROJ strings is also supported. This functionality
+was previously available in the GDAL software library (except WKT2 support
+which is a new feature), and is now an integral part of PROJ.
+
+A unified database of geodetic objects, coordinate reference systems and their
+metadata, and coordinate operations between those CRS is now available in a
+SQLite3 database file, proj.db. This includes definitions imported from the
+IOGP EPSG dataset (v9.5.5 release), the IGNF (French national mapping agency)
+geodetic registry and the ESRI projection engine database. PROJ is now the
+reference software in the "OSGeo C stack" for this CRS and coordinate operation
+database, whereas previously this functionality was spread over PROJ, GDAL and
+libgeotiff, and used CSV or other adhoc text-based formats.
+
+Late-binding coordinate operation capabilities, that takes  metadata such as
+area of use and accuracy into account, has been added. This can avoid in a
+number of situations the past requirement of using WGS84 as a pivot system,
+which could cause unneeded accuracy loss, or was not doable at all sometimes
+when transformation to WGS84 was not available. Those late-binding capabilities
+are now used by the proj_create_crs_to_crs() function and the cs2cs utility.
+
+A new command line utility, projinfo, has been added to query information about
+a geodetic object of the database, import and export geodetic objects from/into
+WKT and PROJ strings, and display coordinate operations available between two
+CRSs.
+
+ UPDATES
+ -------
+
+ o Removed projects.h as a public interface (#835)
+
+ o Deprecated the proj_api.h interface. The header file is still available
+   but will be removed with the next major version release of PROJ. It is
+   now required to define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H before the
+   interface can be used (#836)
+
+ o Removed support for the nmake build system (#838)
+
+ o Removed support for the proj_def.dat defaults file (#201)
+
+ o C++11 required for building PROJ (#1203)
+
+ o Added build dependency on SQLite 3.7 (#1175)
+
+ o Added projinfo command line application (#1189)
+
+ o Added many functions to proj.h for handling ISO19111 functionality (#1175)
+
+ o Added C++ API exposing ISO19111 functionality (#1175)
+
+ o Updated cs2cs to use late-binding features (#1182)
+
+ o Removed the nad2bin application. Now available in the proj-datumgrid
+   git repository (#1236)
+
+ o Removed support for Chebyshev polynomials in proj (#1226)
+
+ o Removed proj_geocentric_latitude from proj.h API (#1170)
+
+ o Changed behaviour of proj: Now only allow initialization of
+   projections (#1162)
+
+ o Changed behaviour of tmerc: Now default to the Extended Transverse
+   Mercator algorithm (etmerc). Old implementation available by adding
+   +approx (#404)
+
+ o Chaged behaviour: Default ellipsoid now set to GRS80 (was WGS84) (#1210)
+
+ o Allow multiple directories in PROJ_LIB environment variable (#1281)
+
+ o Added Lambert Conic Conformal (2SP Michigan) projection (#1142)
+
+ o Added Bertin1953 projection (#1133)
+
+ o Added Tobler-Mercator projection (#1153)
+
+ o Added Molodensky-Badekas transform (#1160)
+
+ o Added push and pop coordinate operations (#1250)
+
+ o Removed +t_obs parameter from helmert and deformation (#1264)
+
+ o Added +dt parameter to deformation as replacement for
+   removed +t_obs (#1264)
+
+ BUG FIXES
+ ---------
+
+ o Read +towgs84 values correctly on locales not using dot as comma separator (#1136)
+
+ o Fixed file offset for reading of shift values in NTv1 files (#1144)
+
+ o Avoid problems with PTHREAD_MUTEX_RECURSIVE when using CMake (#1158)
+
+ o Avoid raising errors when setting ellipsoid flattening to zero (#1191)
+
+ o Fixed lower square calculations in rHealpix projection (#1206)
+
+ o Allow Molodensky transform parameters to be zero (#1194)
+
+ o Fixed wrong parameter in ITRF2000 init file (#1240)
+
+ o Fixed use of grid paths including spaces (#1152)
+
+ THANKS TO
+ ------------
+
+ Version 6.0.0 is made possible by the following contributors:
+
+ Aaron Puchert
+ Phil Elson
+ Mateusz Łoskot
+ Markus Neteler
+ Jürgen Fischer
+ Howard Butler
+ Charles Karney
+ Alan D. Snow
+ Marco Bernasocchi
+ Karoline Skaar
+ Ben Boeckel
+ Ivan Veselov
+ Mike Taves
+ Philippe Rivière
+ Elliott Sales de Andrade
+ Kai Pastor
+ Kristian Evers
+ Even Rouault
+
 5.2.0 Release Notes
 -------------------
 
