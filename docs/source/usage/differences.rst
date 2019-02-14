@@ -65,7 +65,52 @@ Version 6.0.0
 Removal of proj_def.dat
 -----------------------
 
-Before PROJ 6, the proj_def.dat was used to provide general and per-projection
-parameters, when +no_defs was not specified. It has now been removed. In case,
+Before PROJ 6, the ``proj_def.dat`` was used to provide general and per-projection
+parameters, when ``+no_defs`` was not specified. It has now been removed. In case,
 no ellipsoid or datum specification is provided in the PROJ string, the
 default ellipsoid is GRS80 (was WGS84 in previous PROJ versions).
+
+Changes to :ref:`deformation<deformation>`
+------------------------------------------------------------------
+.. _differences_deformation:
+
+
+Reversed order of operation
+...........................
+
+In the initial version of the of :ref:`deformation<deformation>` operation
+the time span between :math:`t_{obs}` and :math:`t_c` was determined by the
+expression
+
+.. math::
+
+    dt = t_c - t_{obs}
+
+With version 6.0.0 this has been reversed in order to behave similarly to
+the :ref:`Helmert operation<helmert>`, which determines time differences as
+
+.. math::
+
+    dt = t_{obs} - t_c
+
+Effectively this means that the direction of the operation has been reversed,
+so that what in PROJ 5 was a forward operation is now an inverse operation and
+vice versa.
+
+Pipelines written for PROJ 5 can be migrated to PROJ 6 by adding :option:`
++inv` to forward steps involving the deformation operation. Similarly
+:option:`+inv` should be removed from inverse steps to be compatible with
+PROJ 6.
+
+Removed ``+t_obs``  parameter
+.............................
+
+The ``+t_obs`` parameter was confusing for users since it effectively
+overwrote the observation time in input coordinates. To make it more clear
+what is the operation is doing, users are now required to directly specify
+the time span for which they wish to apply a given deformation. The parameter
+:option:`+dt` has been added for that purpose. The new parameter is mutually
+exclusive with :option:`+t_epoch`. :option:`+dt` is used when deformation
+for a set amount of time is needed and :option:`+t_epoch` is used (in
+conjunction with the observation time of the input coordinate) when
+deformation from a specific epoch to the observation time is needed.

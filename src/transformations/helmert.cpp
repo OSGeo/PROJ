@@ -649,9 +649,6 @@ PJ *TRANSFORMATION(helmert, 0) {
     if (pj_param(P->ctx, P->params, "tt_epoch").i)
         Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
 
-    if (pj_param(P->ctx, P->params, "tt_obs").i)
-        Q->t_obs = pj_param (P->ctx, P->params, "dt_obs").f;
-
     Q->xyz    =  Q->xyz_0;
     Q->opk    =  Q->opk_0;
     Q->scale  =  Q->scale_0;
@@ -678,7 +675,7 @@ PJ *TRANSFORMATION(helmert, 0) {
                        "  convention=coordinate_frame");
         proj_log_debug(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f",   Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
         proj_log_debug(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f",   Q->dopk.o, Q->dopk.p, Q->dopk.k);
-        proj_log_debug(P, "ds= %8.5f  t_epoch=%8.5f  t_obs=%8.5f", Q->dscale, Q->t_epoch, Q->t_obs);
+        proj_log_debug(P, "ds= %8.5f  t_epoch=%8.5f", Q->dscale, Q->t_epoch);
     }
 
     if (Q->no_rotation) {

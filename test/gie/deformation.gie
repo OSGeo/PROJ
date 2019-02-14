@@ -12,10 +12,10 @@ The input coordinate is located at lon=60, lam=-160 - somewhere in Alaska.
 <gie>
 
 -------------------------------------------------------------------------------
-Test using both horizontal and vertical grids as well as the +tobs parameter
+Test the +dt parameter
 -------------------------------------------------------------------------------
 operation   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx
-            +t_epoch=2016.0 +t_obs=2000.0 +ellps=GRS80
+            +ellps=GRS80 +dt=16.0 # 2016.0 - 2000.0
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
 ignore      pjd_err_failed_to_load_grid
@@ -27,7 +27,7 @@ roundtrip   5
 # Here we test 120W 40N which is well outside the alaska grid.
 accept      -2446353.8001  -4237209.0750  4077985.572
 expect      failure errno grid_area
-accept      -2446353.8001  -4237209.0750  4077985.572   2000
+accept      -2446353.8001  -4237209.0750  4077985.572
 expect      failure errno grid_area
 
 
@@ -38,26 +38,27 @@ operation   +proj=deformation
             +xy_grids=alaska +z_grids=egm96_15.gtx +t_epoch=2016.0 +ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
+direction   inverse
 ignore      pjd_err_failed_to_load_grid
 accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
 expect      -3004295.7025       -1093474.2106       5500477.3444       2000.0
 roundtrip   5
 
 -------------------------------------------------------------------------------
-operation   proj=deformation xy_grids=alaska t_epoch=2016.0 t_obs=2017.0
+operation   proj=deformation xy_grids=alaska +dt=1.0
             ellps=GRS80
 expect      failure pjd_err_no_args
 
-operation   proj=deformation z_grids=egm96_15.gtx t_epoch=2016.0 t_obs=2017.0
+operation   proj=deformation z_grids=egm96_15.gtx +dt=1.0
             ellps=GRS80
 expect      failure pjd_err_no_args
 
 operation   proj=deformation xy_grids=nonexisting z_grids=egm96_15.gtx
-            t_epoch=2016.0 t_obs=2017.0 ellps=GRS80
+            +dt=1.0 ellps=GRS80
 expect      failure pjd_err_failed_to_load_grid
 
 operation   proj=deformation xy_grids=alaska z_grids=nonexisting
-            t_epoch=2016.0 t_obs=2017.0 ellps=GRS80
+            +dt=1.0 ellps=GRS80
 expect      failure pjd_err_failed_to_load_grid
 
 operation   proj=deformation xy_grids=alaska z_grids=nonexisting ellps=GRS80

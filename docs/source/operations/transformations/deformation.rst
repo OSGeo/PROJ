@@ -31,9 +31,9 @@ they represent the physical world better. In PROJ this is done with the deformat
 operation.
 
 The horizontal grid is stored in CTable2 format and the vertical grid is stored in the
-GTX format. Both grids are expected to contain grid-values in units of mm/year.
-Details about the formats can be found in the GDAL documentation. GDAL both reads and
-writes both file formats. Using GDAL for construction of new grids is recommended.
+GTX format. Both grids are expected to contain grid-values in units of
+mm/year. GDAL both reads and writes both file formats. Using GDAL for
+construction of new grids is recommended.
 
 Example
 -------------------------------------------------------------------------------
@@ -59,13 +59,14 @@ to the Danish realisation of ETRS89 is in PROJ described as::
     step    proj = deformation t_epoch = 2000.0
             xy_grids = ./nkgrf03vel_realigned_xy.ct2
             z_grids  = ./nkgrf03vel_realigned_z.gtx
+            inv
             # NKG_ETRF@2000.0 -> ETRF92@2000.0
     step    proj=helmert convention=position_vector s = -0.009420e
             x = 0.03863 rx = 0.00617753
             y = 0.147   ry = 5.064e-05
             z = 0.02776 rz = 4.729e-05
             # ETRF92@2000.0 -> ETRF92@1994.704
-    step    proj = deformation t_epoch = 1994.704 t_obs = 2000.0
+    step    proj = deformation dt = -5.296
             xy_grids = ./nkgrf03vel_realigned_xy.ct2
             z_grids  = ./nkgrf03vel_realigned_z.gtx
 
@@ -85,10 +86,6 @@ component.
 
 Parameters
 -------------------------------------------------------------------------------
-
-Required
-################################################################################
-
 
 .. option:: +xy_grids=<list>
 
@@ -110,15 +107,22 @@ Required
 
 .. option:: +t_epoch=<value>
 
-    Central epoch of transformation given in decimalyears.
+    Central epoch of transformation given in decimalyears. Will be used in
+    conjunction with the observation time from the input coordinate to
+    determine :math:`dt` as used in eq. :eq:`apply_velocity` below.
 
-Optional
-################################################################################
+    .. note:: :option:`+t_epoch` is mutually exclusive with :option:`+dt`
 
-.. option:: +t_obs=<value>
+.. option:: +dt=<value>
 
-    Observation time of coordinate(s) given in decimalyears. If not specified,
-    the observation time from the temporal component of 4D input points is used.
+    .. versionadded:: 6.0.0
+
+    :math:`dt` as used in eq. :eq:`apply_velocity` below. Is useful when
+    no observation time is available in the input coordinate or when
+    a deformation for a specific timespan needs to be applied in a
+    transformation. :math:`dt` is given in units of decimalyears.
+
+    .. note:: :option:`+dt` is mutually exclusive with :option:`+t_epoch`
 
 Mathematical description
 -------------------------------------------------------------------------------
@@ -127,7 +131,7 @@ Mathematically speaking, application of a deformation model is simple. The defor
 represented as a grid of velocities in three dimensions. Coordinate corrections are
 applied in cartesian space. For a given coordinate, :math:`(X, Y, Z)`, velocities
 :math:`(V_X, V_Y, V_Z)` can be interpolated from the gridded model. The time span
-between :math:`t_c` and :math:`t_{obs}` determine the magnitude of the coordinate
+between :math:`t_{obs}` and :math:`t_c` determine the magnitude of the coordinate
 correcton as seen in eq. :eq:`apply_velocity` below.
 
 .. math::
@@ -144,7 +148,7 @@ correcton as seen in eq. :eq:`apply_velocity` below.
             Y \\
             Z \\
         \end{pmatrix}_A +
-        (t_c - t_{obs})
+        (t_{obs} - t_c)
         \begin{pmatrix}
             V_X \\
             V_Y \\
@@ -154,14 +158,14 @@ correcton as seen in eq. :eq:`apply_velocity` below.
 
 Corrections are done in cartesian space.
 
-Coordinates of the gridded model are in ENU (east, north, up) space because it would
-otherwise require an enormous 3 dimensional grid to handle the corrections in cartesian
-space. Keeping the correction in lat/long space reduces the complexity of the grid
-significantly. Consequently though, the input coordinates needs to be converted to
-lat/long space when searching for corrections in the grid. This is done with the *cart*
-operation. The converted grid corrections can then be applied to the input coordinates
-in cartesian space. The conversion from ENU space to cartesian space is done in the
-following way:
+Coordinates of the gridded model are in ENU (east, north, up) space because it
+would otherwise require an enormous 3 dimensional grid to handle the corrections
+in cartesian space. Keeping the correction in lat/long space reduces the
+complexity of the grid significantly. Consequently though, the input coordinates
+needs to be converted to lat/long space when searching for corrections in the
+grid. This is done with the :ref:`cart<cart>` operation. The converted grid
+corrections can then be applied to the input coordinates in cartesian space. The
+conversion from ENU space to cartesian space is done in the following way:
 
 .. math::
     :label: enu2xyz
@@ -182,3 +186,9 @@ following way:
 where :math:`\phi` and :math:`\lambda` are the latitude and longitude of the coordinate
 that is searched for in the grid. :math:`(E, N, U)` are the grid values in ENU-space and
 :math:`(X, Y, Z)` are the corrections converted to cartesian space.
+
+
+See also
+-----------------------------------------------------------------------------
+
+#. :ref:`Behavioural changes from version 5 to 6<differences_deformation>`
