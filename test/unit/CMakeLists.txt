@@ -46,12 +46,6 @@ option(INSTALL_GTEST "Enable installation of googletest" OFF)
 add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  ${CMAKE_BINARY_DIR}/googletest-build
                  EXCLUDE_FROM_ALL)
-# The gtest/gtest_main targets carry header search path
-# dependencies automatically when using CMake 2.8.11 or
-# later. Otherwise we have to add them here ourselves.
-if (CMAKE_VERSION VERSION_LESS 2.8.11)
-  include_directories("${gtest_SOURCE_DIR}/include")
-endif()
 
 # FIXME: Deal with our old-school CMakeLists.txt behaving badly
 set(CMAKE_C_FLAGS "${_save_c_flags}")
