@@ -172,7 +172,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     out = in;
 
     if (Q->t_obs != HUGE_VAL) {
-        dt = Q->t_epoch - Q->t_obs;
+        dt = Q->t_obs - Q->t_epoch;
     } else {
         out = proj_coord_error(); /* in the 3D case +t_obs must be specified */
         proj_log_debug(P, "deformation: +t_obs must be specified");
@@ -196,9 +196,9 @@ static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
     PJ_COORD out = in;
 
     if (Q->t_obs != HUGE_VAL) {
-            dt = Q->t_epoch - Q->t_obs;
+            dt = Q->t_obs - Q->t_epoch;
         } else {
-            dt = Q->t_epoch - in.xyzt.t;
+            dt = in.xyzt.t - Q->t_epoch ;
     }
 
     shift = get_grid_shift(P, in.xyz);
@@ -219,7 +219,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
     out.xyz = in;
 
     if (Q->t_obs != HUGE_VAL) {
-        dt = Q->t_epoch - Q->t_obs;
+        dt = Q->t_obs - Q->t_epoch;
     } else {
         out = proj_coord_error(); /* in the 3D case +t_obs must be specified */
         proj_log_debug(P, "deformation: +t_obs must be specified");
@@ -238,9 +238,9 @@ static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
 
 
     if (Q->t_obs != HUGE_VAL) {
-            dt = Q->t_epoch - Q->t_obs;
+            dt = Q->t_obs - Q->t_epoch;
         } else {
-            dt = Q->t_epoch - in.xyzt.t;
+            dt = in.xyzt.t - Q->t_epoch;
     }
 
     out.xyz = reverse_shift(P, in.xyz, dt);

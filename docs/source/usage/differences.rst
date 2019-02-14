@@ -69,3 +69,25 @@ Before PROJ 6, the proj_def.dat was used to provide general and per-projection
 parameters, when +no_defs was not specified. It has now been removed. In case,
 no ellipsoid or datum specification is provided in the PROJ string, the
 default ellipsoid is GRS80 (was WGS84 in previous PROJ versions).
+
+Changes to :ref:`deformation<deformation>`
+------------------------------------------------------------------
+
+In the initial version of the of :ref:`deformation<deformation>` operation the time span between :math:`t_{obs}` and :math:`t_c` was determine by the expression
+
+.. math::
+
+    dt = t_c - t_{obs}
+
+With version 6.0.0 this has been reversed in order to behave similarly to
+the :ref:`Helmert operation<helmert>`, which determines time differences as
+
+.. math::
+
+    dt = t_{obs} - t_c
+
+Effectively this means that the direction of the operation has been reversed,
+so that what in PROJ 5 was a forward operation is now an inverse operation and
+vice versa.
+
+Pipelines written for PROJ 5 can be migrated to PROJ 6 by adding :option:`+inv` to forward steps involving the deformation operation. Similarly :option:`+inv` should be removed from inverse steps to be compatible with PROJ 6.

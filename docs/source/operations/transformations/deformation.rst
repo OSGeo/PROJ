@@ -127,7 +127,7 @@ Mathematically speaking, application of a deformation model is simple. The defor
 represented as a grid of velocities in three dimensions. Coordinate corrections are
 applied in cartesian space. For a given coordinate, :math:`(X, Y, Z)`, velocities
 :math:`(V_X, V_Y, V_Z)` can be interpolated from the gridded model. The time span
-between :math:`t_c` and :math:`t_{obs}` determine the magnitude of the coordinate
+between :math:`t_{obs}` and :math:`t_c` determine the magnitude of the coordinate
 correcton as seen in eq. :eq:`apply_velocity` below.
 
 .. math::
@@ -144,7 +144,7 @@ correcton as seen in eq. :eq:`apply_velocity` below.
             Y \\
             Z \\
         \end{pmatrix}_A +
-        (t_c - t_{obs})
+        (t_{obs} - t_c)
         \begin{pmatrix}
             V_X \\
             V_Y \\
@@ -154,14 +154,14 @@ correcton as seen in eq. :eq:`apply_velocity` below.
 
 Corrections are done in cartesian space.
 
-Coordinates of the gridded model are in ENU (east, north, up) space because it would
-otherwise require an enormous 3 dimensional grid to handle the corrections in cartesian
-space. Keeping the correction in lat/long space reduces the complexity of the grid
-significantly. Consequently though, the input coordinates needs to be converted to
-lat/long space when searching for corrections in the grid. This is done with the *cart*
-operation. The converted grid corrections can then be applied to the input coordinates
-in cartesian space. The conversion from ENU space to cartesian space is done in the
-following way:
+Coordinates of the gridded model are in ENU (east, north, up) space because it
+would otherwise require an enormous 3 dimensional grid to handle the corrections
+in cartesian space. Keeping the correction in lat/long space reduces the
+complexity of the grid significantly. Consequently though, the input coordinates
+needs to be converted to lat/long space when searching for corrections in the
+grid. This is done with the :ref:`cart<cart>` operation. The converted grid
+corrections can then be applied to the input coordinates in cartesian space. The
+conversion from ENU space to cartesian space is done in the following way:
 
 .. math::
     :label: enu2xyz
