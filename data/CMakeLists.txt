@@ -47,6 +47,15 @@ add_custom_command(OUTPUT ${PROJ_DB}
 
 add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
 
+if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+    foreach(FILE ${PROJ_DICTIONARY}
+                 null
+                 ${GRIDSHIFT_FILES}
+                 ${GEOID_FILES})
+        configure_file(${FILE} ${FILE} COPYONLY)
+    endforeach()
+endif()
+
 #
 #install
 #
