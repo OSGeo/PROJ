@@ -50,8 +50,7 @@ add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
 
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     foreach(FILE ${PROJ_DICTIONARY}
-                 ${GRIDSHIFT_FILES}
-                 ${GEOID_FILES})
+                 ${GRIDSHIFT_FILES})
         configure_file(${FILE} ${FILE} COPYONLY)
     endforeach()
 endif()
@@ -61,7 +60,6 @@ endif()
 #
 set(ALL_DATA_FILE ${PROJ_DICTIONARY}
                   ${GRIDSHIFT_FILES}
-                  ${GEOID_FILES}
                   ${PROJ_DB})
 install(FILES ${ALL_DATA_FILE}
         DESTINATION ${DATADIR})
