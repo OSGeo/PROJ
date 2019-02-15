@@ -2,7 +2,8 @@
 # files containing dictionary of useful projection
 #
 
-set(PROJ_DICTIONARY  world
+set(PROJ_DICTIONARY  null
+                     world
                      other.extra
                      nad27
                      GL27
@@ -49,7 +50,6 @@ add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
 
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     foreach(FILE ${PROJ_DICTIONARY}
-                 null
                  ${GRIDSHIFT_FILES}
                  ${GEOID_FILES})
         configure_file(${FILE} ${FILE} COPYONLY)
