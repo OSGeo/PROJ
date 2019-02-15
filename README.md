@@ -30,6 +30,11 @@ The following command line utilities are included in the PROJ package:
 
 
 ## Installation
+### Build dependencies
+
+PROJ requires C and C++11 compilers.
+It also requires SQLite3 (headers, library and executable).
+
 ### Building with CMake
 
     cd proj
@@ -41,6 +46,11 @@ The following command line utilities are included in the PROJ package:
 On Windows, one may need to specify generator:
 
     cmake -G "Visual Studio 15 2017" ..
+
+If the SQLite3 dependency is installed in a custom location, specify the
+paths to the include directory and the library::
+
+    cmake -DSQLITE3_INCLUDE_DIR=/opt/SQLite/include -DSQLITE3_LIBRARY=/opt/SQLite/lib/libsqlite3.so ..
 
 Tests are run with
 
