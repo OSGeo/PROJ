@@ -82,7 +82,7 @@ End the section by thanking the authors that contributed to the release. Get a
 sorted list of contributors in descending order of activity:
 
 ```
-git shortlog -sn x.y.z..HEAD | tac | awk '{print $2 " " $3}'
+git shortlog -sn x.y.z..HEAD | tac | awk '{$1=""; print $0}'
 ```
 
 where `x.y.z` is the tag of the previous release. You may need to edit the list
