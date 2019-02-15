@@ -79,7 +79,7 @@ TEST(io, wkt_parsing) {
     {
         auto n = WKTNode::createFrom("MYNODE[\"x\"]");
         EXPECT_EQ(n->value(), "MYNODE");
-        ASSERT_EQ(n->children().size(), 1);
+        ASSERT_EQ(n->children().size(), 1U);
         EXPECT_EQ(n->children()[0]->value(), "\"x\"");
         EXPECT_EQ(n->toString(), "MYNODE[\"x\"]");
     }
@@ -89,14 +89,14 @@ TEST(io, wkt_parsing) {
     {
         auto n = WKTNode::createFrom("MYNODE[  \"x\"   ]");
         EXPECT_EQ(n->value(), "MYNODE");
-        ASSERT_EQ(n->children().size(), 1);
+        ASSERT_EQ(n->children().size(), 1U);
         EXPECT_EQ(n->children()[0]->value(), "\"x\"");
     }
 
     {
         auto n = WKTNode::createFrom("MYNODE[\"x[\",1]");
         EXPECT_EQ(n->value(), "MYNODE");
-        ASSERT_EQ(n->children().size(), 2);
+        ASSERT_EQ(n->children().size(), 2U);
         EXPECT_EQ(n->children()[0]->value(), "\"x[\"");
         EXPECT_EQ(n->children()[1]->value(), "1");
         EXPECT_EQ(n->toString(), "MYNODE[\"x[\",1]");
@@ -107,9 +107,9 @@ TEST(io, wkt_parsing) {
     {
         auto n = WKTNode::createFrom("A[B[y]]");
         EXPECT_EQ(n->value(), "A");
-        ASSERT_EQ(n->children().size(), 1);
+        ASSERT_EQ(n->children().size(), 1U);
         EXPECT_EQ(n->children()[0]->value(), "B");
-        ASSERT_EQ(n->children()[0]->children().size(), 1);
+        ASSERT_EQ(n->children()[0]->children().size(), 1U);
         EXPECT_EQ(n->children()[0]->children()[0]->value(), "y");
         EXPECT_EQ(n->toString(), "A[B[y]]");
     }
@@ -311,7 +311,7 @@ TEST(wkt_parse, geogcrs_with_ensemble) {
     ASSERT_TRUE(crs != nullptr);
     ASSERT_TRUE(crs->datum() == nullptr);
     ASSERT_TRUE(crs->datumEnsemble() != nullptr);
-    EXPECT_EQ(crs->datumEnsemble()->datums().size(), 6);
+    EXPECT_EQ(crs->datumEnsemble()->datums().size(), 6U);
 }
 
 // ---------------------------------------------------------------------------
@@ -341,14 +341,14 @@ TEST(wkt_parse, invalid_geogcrs_with_ensemble) {
 static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
                            bool checkEPSGCodes = true) {
     if (checkEPSGCodes) {
-        ASSERT_EQ(crs->identifiers().size(), 1);
+        ASSERT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->identifiers()[0]->code(), "4326");
         EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     }
     EXPECT_EQ(crs->nameStr(), "WGS 84");
 
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 2);
+    ASSERT_EQ(cs->axisList().size(), 2U);
     if (latLong) {
         EXPECT_TRUE(cs->axisList()[0]->nameStr() == "Latitude" ||
                     cs->axisList()[0]->nameStr() == "Geodetic latitude")
@@ -373,7 +373,7 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
 
     auto datum = crs->datum();
     if (checkEPSGCodes) {
-        ASSERT_EQ(datum->identifiers().size(), 1);
+        ASSERT_EQ(datum->identifiers().size(), 1U);
         EXPECT_EQ(datum->identifiers()[0]->code(), "6326");
         EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
     }
@@ -384,7 +384,7 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
     EXPECT_EQ(ellipsoid->semiMajorAxis().unit(), UnitOfMeasure::METRE);
     EXPECT_EQ(ellipsoid->inverseFlattening()->value(), 298.257223563);
     if (checkEPSGCodes) {
-        ASSERT_EQ(ellipsoid->identifiers().size(), 1);
+        ASSERT_EQ(ellipsoid->identifiers().size(), 1U);
         EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");
         EXPECT_EQ(*(ellipsoid->identifiers()[0]->codeSpace()), "EPSG");
     }
@@ -431,7 +431,7 @@ TEST(wkt_parse, wkt1_EPSG_4267) {
     ASSERT_TRUE(crs != nullptr);
 
     auto datum = crs->datum();
-    ASSERT_EQ(datum->identifiers().size(), 1);
+    ASSERT_EQ(datum->identifiers().size(), 1U);
     EXPECT_EQ(datum->identifiers()[0]->code(), "6267");
     EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(datum->nameStr(), "North American Datum 1927");
@@ -723,13 +723,13 @@ TEST(wkt_parse, wkt2_TRF) {
 // ---------------------------------------------------------------------------
 
 static void checkEPSG_4979(GeographicCRSPtr crs) {
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "4979");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(crs->nameStr(), "WGS 84");
 
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 3);
+    ASSERT_EQ(cs->axisList().size(), 3U);
     EXPECT_EQ(cs->axisList()[0]->nameStr(), "Latitude");
     EXPECT_EQ(cs->axisList()[0]->abbreviation(), "lat");
     EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::NORTH);
@@ -782,7 +782,7 @@ static void checkGeocentric(GeodeticCRSPtr crs) {
 
     EXPECT_TRUE(crs->isGeocentric());
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 3);
+    ASSERT_EQ(cs->axisList().size(), 3U);
 
     EXPECT_EQ(cs->axisList()[0]->nameStr(), "Geocentric X");
     EXPECT_EQ(cs->axisList()[0]->abbreviation(), "X");
@@ -909,7 +909,7 @@ TEST(wkt_parse, wkt1_geocentric_with_z_OTHER) {
 
 static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N");
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "32631");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
 
@@ -922,7 +922,7 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     auto method = conversion->method();
     EXPECT_EQ(method->nameStr(), "Transverse Mercator");
     auto values = conversion->parameterValues();
-    ASSERT_EQ(values.size(), 5);
+    ASSERT_EQ(values.size(), 5U);
     {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[0]);
@@ -985,7 +985,7 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     }
 
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 2);
+    ASSERT_EQ(cs->axisList().size(), 2U);
 
     EXPECT_EQ(cs->axisList()[0]->nameStr(), "Easting");
     EXPECT_EQ(cs->axisList()[0]->abbreviation(), "E");
@@ -1097,7 +1097,7 @@ TEST(wkt_parse, wkt1_projected_wrong_axis_geogcs) {
     EXPECT_TRUE(crs->baseCRS()->identifiers().empty());
 
     auto cs = crs->baseCRS()->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 2);
+    ASSERT_EQ(cs->axisList().size(), 2U);
     EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::EAST);
     EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::NORTH);
 }
@@ -1806,7 +1806,7 @@ TEST(wkt_parse, cs_with_MERIDIAN) {
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 2);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 2U);
     auto axis = crs->coordinateSystem()->axisList()[0];
     auto meridian = axis->meridian();
     ASSERT_TRUE(meridian != nullptr);
@@ -1833,7 +1833,7 @@ TEST(wkt_parse, cs_with_multiple_ID) {
     auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->nameStr(), "WGS 84");
-    ASSERT_EQ(crs->identifiers().size(), 2);
+    ASSERT_EQ(crs->identifiers().size(), 2U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "codeA");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "authorityA");
     EXPECT_EQ(crs->identifiers()[1]->code(), "codeB");
@@ -1854,18 +1854,18 @@ TEST(wkt_parse, vertcrs_WKT2) {
     auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->nameStr(), "ODN height");
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "5701");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
 
     auto datum = crs->datum();
     EXPECT_EQ(datum->nameStr(), "Ordnance Datum Newlyn");
-    // ASSERT_EQ(datum->identifiers().size(), 1);
+    // ASSERT_EQ(datum->identifiers().size(), 1U);
     // EXPECT_EQ(datum->identifiers()[0]->code(), "5101");
     // EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
 
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 1);
+    ASSERT_EQ(cs->axisList().size(), 1U);
     EXPECT_EQ(cs->axisList()[0]->nameStr(), "Gravity-related height");
     EXPECT_EQ(cs->axisList()[0]->abbreviation(), "H");
     EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
@@ -1916,18 +1916,18 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL) {
     auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->nameStr(), "ODN height");
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "5701");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
 
     auto datum = crs->datum();
     EXPECT_EQ(datum->nameStr(), "Ordnance Datum Newlyn");
-    ASSERT_EQ(datum->identifiers().size(), 1);
+    ASSERT_EQ(datum->identifiers().size(), 1U);
     EXPECT_EQ(datum->identifiers()[0]->code(), "5101");
     EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
 
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 1);
+    ASSERT_EQ(cs->axisList().size(), 1U);
     EXPECT_EQ(cs->axisList()[0]->nameStr(), "Gravity-related height");
     EXPECT_EQ(cs->axisList()[0]->abbreviation(), ""); // "H" in WKT2
     EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
@@ -1948,7 +1948,7 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL_minimum) {
     EXPECT_EQ(datum->nameStr(), "Ordnance Datum Newlyn");
 
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 1);
+    ASSERT_EQ(cs->axisList().size(), 1U);
     EXPECT_EQ(cs->axisList()[0]->nameStr(), "Gravity-related height");
     EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
 }
@@ -1995,7 +1995,7 @@ TEST(wkt_parse, vertcrs_with_ensemble) {
     ASSERT_TRUE(crs != nullptr);
     ASSERT_TRUE(crs->datum() == nullptr);
     ASSERT_TRUE(crs->datumEnsemble() != nullptr);
-    EXPECT_EQ(crs->datumEnsemble()->datums().size(), 2);
+    EXPECT_EQ(crs->datumEnsemble()->datums().size(), 2U);
 }
 
 // ---------------------------------------------------------------------------
@@ -2057,8 +2057,8 @@ TEST(wkt_parse, COMPOUNDCRS) {
     auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->nameStr(), "horizontal + vertical");
-    EXPECT_EQ(crs->componentReferenceSystems().size(), 2);
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->componentReferenceSystems().size(), 2U);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "code");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "codespace");
 }
@@ -2212,8 +2212,8 @@ TEST(wkt_parse, COMPD_CS) {
     auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->nameStr(), "horizontal + vertical");
-    EXPECT_EQ(crs->componentReferenceSystems().size(), 2);
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->componentReferenceSystems().size(), 2U);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "code");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "codespace");
 }
@@ -2265,11 +2265,11 @@ TEST(wkt_parse, COORDINATEOPERATION) {
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
     EXPECT_EQ(transf->nameStr(), "transformationName");
-    ASSERT_EQ(transf->identifiers().size(), 1);
+    ASSERT_EQ(transf->identifiers().size(), 1U);
     EXPECT_EQ(transf->identifiers()[0]->code(), "codeTransformation");
     EXPECT_EQ(*(transf->identifiers()[0]->codeSpace()),
               "codeSpaceTransformation");
-    ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1);
+    ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1U);
     EXPECT_EQ(transf->coordinateOperationAccuracies()[0]->value(), "0.1");
     EXPECT_EQ(transf->sourceCRS()->nameStr(),
               GeographicCRS::EPSG_4326->nameStr());
@@ -2279,7 +2279,7 @@ TEST(wkt_parse, COORDINATEOPERATION) {
     EXPECT_EQ(transf->interpolationCRS()->nameStr(),
               GeographicCRS::EPSG_4979->nameStr());
     EXPECT_EQ(transf->method()->nameStr(), "operationMethodName");
-    EXPECT_EQ(transf->parameterValues().size(), 1);
+    EXPECT_EQ(transf->parameterValues().size(), 1U);
 }
 
 // ---------------------------------------------------------------------------
@@ -2339,10 +2339,10 @@ TEST(wkt_parse, CONCATENATEDOPERATION) {
     auto concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(obj);
     ASSERT_TRUE(concat != nullptr);
     EXPECT_EQ(concat->nameStr(), "name");
-    ASSERT_EQ(concat->identifiers().size(), 1);
+    ASSERT_EQ(concat->identifiers().size(), 1U);
     EXPECT_EQ(concat->identifiers()[0]->code(), "code");
     EXPECT_EQ(*(concat->identifiers()[0]->codeSpace()), "codeSpace");
-    ASSERT_EQ(concat->operations().size(), 2);
+    ASSERT_EQ(concat->operations().size(), 2U);
     ASSERT_EQ(concat->operations()[0]->nameStr(), transf_1->nameStr());
     ASSERT_EQ(concat->operations()[1]->nameStr(), transf_2->nameStr());
     ASSERT_TRUE(concat->sourceCRS() != nullptr);
@@ -3069,7 +3069,7 @@ TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION) {
               "EGM2008 geoid height to WGS84 ellipsoidal height");
     EXPECT_EQ(crs->transformation()->method()->nameStr(),
               "GravityRelatedHeight to Geographic3D");
-    ASSERT_EQ(crs->transformation()->parameterValues().size(), 1);
+    ASSERT_EQ(crs->transformation()->parameterValues().size(), 1U);
     {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(
@@ -3121,7 +3121,7 @@ TEST(wkt_parse, WKT1_DATUM_EXTENSION) {
     EXPECT_EQ(crs->transformation()->nameStr(),
               "International 1909 (Hayford) to WGS84");
     EXPECT_EQ(crs->transformation()->method()->nameStr(), "NTv2");
-    ASSERT_EQ(crs->transformation()->parameterValues().size(), 1);
+    ASSERT_EQ(crs->transformation()->parameterValues().size(), 1U);
     {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(
@@ -3424,7 +3424,7 @@ TEST(wkt_parse, dateTimeTemporalCRS_WKT2) {
     EXPECT_EQ(tdatum->calendar(), "proleptic Gregorian");
     EXPECT_TRUE(nn_dynamic_pointer_cast<DateTimeTemporalCS>(
                     crs->coordinateSystem()) != nullptr);
-    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1U);
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().type(),
               UnitOfMeasure::Type::NONE);
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(), "");
@@ -3451,7 +3451,7 @@ TEST(wkt_parse, dateTimeTemporalCRS_WKT2_2018) {
     EXPECT_EQ(tdatum->calendar(), "proleptic Gregorian");
     EXPECT_TRUE(nn_dynamic_pointer_cast<DateTimeTemporalCS>(
                     crs->coordinateSystem()) != nullptr);
-    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1U);
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().type(),
               UnitOfMeasure::Type::NONE);
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(), "");
@@ -3478,7 +3478,7 @@ TEST(wkt_parse, temporalCountCRSWithConvFactor_WKT2_2018) {
     EXPECT_EQ(tdatum->calendar(), "proleptic Gregorian");
     EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalCountCS>(
                     crs->coordinateSystem()) != nullptr);
-    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1U);
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(),
               "milliseconds (ms)");
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().conversionToSI(),
@@ -3506,7 +3506,7 @@ TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2018) {
     EXPECT_EQ(tdatum->temporalOrigin().toString(), "1979-12-29T00Z");
     EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalCountCS>(
                     crs->coordinateSystem()) != nullptr);
-    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1U);
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(), "hour");
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().conversionToSI(),
               0.0);
@@ -3533,7 +3533,7 @@ TEST(wkt_parse, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalMeasureCS>(
                     crs->coordinateSystem()) != nullptr);
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 1);
+    ASSERT_EQ(cs->axisList().size(), 1U);
     auto axis = cs->axisList()[0];
     EXPECT_EQ(axis->nameStr(), "Decimal years");
     EXPECT_EQ(axis->unit().name(), "year");
@@ -3592,7 +3592,7 @@ TEST(wkt_parse, ENGCRS) {
     EXPECT_EQ(crs->nameStr(), "Engineering CRS");
     EXPECT_EQ(crs->datum()->nameStr(), "Engineering datum");
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 2);
+    ASSERT_EQ(cs->axisList().size(), 2U);
 }
 
 // ---------------------------------------------------------------------------
@@ -3617,7 +3617,7 @@ TEST(wkt_parse, ENGINEERINGCRS) {
     EXPECT_EQ(crs->nameStr(), "Engineering CRS");
     EXPECT_EQ(crs->datum()->nameStr(), "Engineering datum");
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 2);
+    ASSERT_EQ(cs->axisList().size(), 2U);
 }
 
 // ---------------------------------------------------------------------------
@@ -3632,7 +3632,7 @@ TEST(wkt_parse, LOCAL_CS_short) {
     EXPECT_EQ(crs->nameStr(), "Engineering CRS");
     EXPECT_FALSE(!crs->datum()->nameStr().empty());
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 2);
+    ASSERT_EQ(cs->axisList().size(), 2U);
 
     EXPECT_EQ(
         crs->exportToWKT(
@@ -3655,7 +3655,7 @@ TEST(wkt_parse, LOCAL_CS_long_one_axis) {
     EXPECT_EQ(crs->nameStr(), "Engineering CRS");
     EXPECT_EQ(crs->datum()->nameStr(), "Engineering datum");
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 1);
+    ASSERT_EQ(cs->axisList().size(), 1U);
 }
 
 // ---------------------------------------------------------------------------
@@ -3674,7 +3674,7 @@ TEST(wkt_parse, LOCAL_CS_long_two_axis) {
     EXPECT_EQ(crs->nameStr(), "Engineering CRS");
     EXPECT_EQ(crs->datum()->nameStr(), "Engineering datum");
     auto cs = crs->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 2);
+    ASSERT_EQ(cs->axisList().size(), 2U);
 }
 
 // ---------------------------------------------------------------------------
@@ -3728,7 +3728,7 @@ TEST(wkt_parse, PARAMETRICCRS) {
     EXPECT_EQ(crs->datum()->nameStr(), "Mean Sea Level");
     auto cs = crs->coordinateSystem();
     EXPECT_TRUE(nn_dynamic_pointer_cast<ParametricCS>(cs) != nullptr);
-    ASSERT_EQ(cs->axisList().size(), 1);
+    ASSERT_EQ(cs->axisList().size(), 1U);
     auto axis = cs->axisList()[0];
     EXPECT_EQ(axis->nameStr(), "Pressure");
     EXPECT_EQ(axis->unit().name(), "HectoPascal");
@@ -3858,12 +3858,12 @@ TEST(wkt_parse, ensemble) {
     auto ensemble = nn_dynamic_pointer_cast<DatumEnsemble>(obj);
     ASSERT_TRUE(ensemble != nullptr);
 
-    ASSERT_EQ(ensemble->datums().size(), 2);
+    ASSERT_EQ(ensemble->datums().size(), 2U);
     auto firstDatum =
         nn_dynamic_pointer_cast<GeodeticReferenceFrame>(ensemble->datums()[0]);
     ASSERT_TRUE(firstDatum != nullptr);
     EXPECT_EQ(firstDatum->nameStr(), "World Geodetic System 1984");
-    ASSERT_EQ(firstDatum->identifiers().size(), 1);
+    ASSERT_EQ(firstDatum->identifiers().size(), 1U);
     EXPECT_EQ(firstDatum->identifiers()[0]->code(), "6326");
     EXPECT_EQ(*(firstDatum->identifiers()[0]->codeSpace()), "EPSG");
 
@@ -3884,7 +3884,7 @@ TEST(wkt_parse, ensemble_vdatum) {
     auto ensemble = nn_dynamic_pointer_cast<DatumEnsemble>(obj);
     ASSERT_TRUE(ensemble != nullptr);
 
-    ASSERT_EQ(ensemble->datums().size(), 2);
+    ASSERT_EQ(ensemble->datums().size(), 2U);
     auto firstDatum =
         nn_dynamic_pointer_cast<VerticalReferenceFrame>(ensemble->datums()[0]);
     ASSERT_TRUE(firstDatum != nullptr);

@@ -150,7 +150,7 @@ TEST(factory, AuthorityFactory_createPrimeMeridian) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<PrimeMeridian>(
                     factory->createObject("8903")) != nullptr);
     auto pm = factory->createPrimeMeridian("8903");
-    ASSERT_EQ(pm->identifiers().size(), 1);
+    ASSERT_EQ(pm->identifiers().size(), 1U);
     EXPECT_EQ(pm->identifiers()[0]->code(), "8903");
     EXPECT_EQ(*(pm->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(pm->name()->description()), "Paris");
@@ -174,7 +174,7 @@ TEST(factory, AuthorityFactory_createEllipsoid) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<Ellipsoid>(
                     factory->createObject("7030")) != nullptr);
     auto ellipsoid = factory->createEllipsoid("7030");
-    ASSERT_EQ(ellipsoid->identifiers().size(), 1);
+    ASSERT_EQ(ellipsoid->identifiers().size(), 1U);
     EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");
     EXPECT_EQ(*(ellipsoid->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(ellipsoid->name()->description()), "WGS 84");
@@ -211,7 +211,7 @@ TEST(factory, AuthorityFactory_createExtent) {
     auto extent = factory->createExtent("1262");
     EXPECT_EQ(*(extent->description()), "World");
     const auto &geogElts = extent->geographicElements();
-    ASSERT_EQ(geogElts.size(), 1);
+    ASSERT_EQ(geogElts.size(), 1U);
     auto bbox = nn_dynamic_pointer_cast<GeographicBoundingBox>(geogElts[0]);
     ASSERT_TRUE(bbox != nullptr);
     EXPECT_EQ(bbox->westBoundLongitude(), -180);
@@ -237,7 +237,7 @@ TEST(factory, AuthorityFactory_createGeodeticDatum) {
     EXPECT_THROW(factory->createGeodeticDatum("-1"),
                  NoSuchAuthorityCodeException);
     auto grf = factory->createGeodeticDatum("6326");
-    ASSERT_EQ(grf->identifiers().size(), 1);
+    ASSERT_EQ(grf->identifiers().size(), 1U);
     EXPECT_EQ(grf->identifiers()[0]->code(), "6326");
     EXPECT_EQ(*(grf->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(grf->name()->description()), "World Geodetic System 1984");
@@ -245,7 +245,7 @@ TEST(factory, AuthorityFactory_createGeodeticDatum) {
         factory->createEllipsoid("7030").get()));
     EXPECT_TRUE(grf->primeMeridian()->isEquivalentTo(
         factory->createPrimeMeridian("8901").get()));
-    ASSERT_EQ(grf->domains().size(), 1);
+    ASSERT_EQ(grf->domains().size(), 1U);
     auto domain = grf->domains()[0];
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
@@ -259,7 +259,7 @@ TEST(factory, AuthorityFactory_createVerticalDatum) {
     EXPECT_THROW(factory->createVerticalDatum("-1"),
                  NoSuchAuthorityCodeException);
     auto vrf = factory->createVerticalDatum("1027");
-    ASSERT_EQ(vrf->identifiers().size(), 1);
+    ASSERT_EQ(vrf->identifiers().size(), 1U);
     EXPECT_EQ(vrf->identifiers()[0]->code(), "1027");
     EXPECT_EQ(*(vrf->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(vrf->name()->description()), "EGM2008 geoid");
@@ -290,12 +290,12 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_ellipsoidal_2_axis) {
     auto ellipsoidal_cs = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     ASSERT_TRUE(ellipsoidal_cs != nullptr);
 
-    ASSERT_EQ(ellipsoidal_cs->identifiers().size(), 1);
+    ASSERT_EQ(ellipsoidal_cs->identifiers().size(), 1U);
     EXPECT_EQ(ellipsoidal_cs->identifiers()[0]->code(), "6422");
     EXPECT_EQ(*(ellipsoidal_cs->identifiers()[0]->codeSpace()), "EPSG");
 
     const auto &axisList = ellipsoidal_cs->axisList();
-    EXPECT_EQ(axisList.size(), 2);
+    EXPECT_EQ(axisList.size(), 2U);
 
     EXPECT_EQ(*(axisList[0]->name()->description()), "Geodetic latitude");
     EXPECT_EQ(axisList[0]->abbreviation(), "Lat");
@@ -317,12 +317,12 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_ellipsoidal_3_axis) {
     auto ellipsoidal_cs = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     ASSERT_TRUE(ellipsoidal_cs != nullptr);
 
-    ASSERT_EQ(ellipsoidal_cs->identifiers().size(), 1);
+    ASSERT_EQ(ellipsoidal_cs->identifiers().size(), 1U);
     EXPECT_EQ(ellipsoidal_cs->identifiers()[0]->code(), "6423");
     EXPECT_EQ(*(ellipsoidal_cs->identifiers()[0]->codeSpace()), "EPSG");
 
     const auto &axisList = ellipsoidal_cs->axisList();
-    EXPECT_EQ(axisList.size(), 3);
+    EXPECT_EQ(axisList.size(), 3U);
 
     EXPECT_EQ(*(axisList[0]->name()->description()), "Geodetic latitude");
     EXPECT_EQ(axisList[0]->abbreviation(), "Lat");
@@ -349,12 +349,12 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_geocentric) {
     auto cartesian_cs = nn_dynamic_pointer_cast<CartesianCS>(cs);
     ASSERT_TRUE(cartesian_cs != nullptr);
 
-    ASSERT_EQ(cartesian_cs->identifiers().size(), 1);
+    ASSERT_EQ(cartesian_cs->identifiers().size(), 1U);
     EXPECT_EQ(cartesian_cs->identifiers()[0]->code(), "6500");
     EXPECT_EQ(*(cartesian_cs->identifiers()[0]->codeSpace()), "EPSG");
 
     const auto &axisList = cartesian_cs->axisList();
-    EXPECT_EQ(axisList.size(), 3);
+    EXPECT_EQ(axisList.size(), 3U);
 
     EXPECT_EQ(*(axisList[0]->name()->description()), "Geocentric X");
     EXPECT_EQ(axisList[0]->abbreviation(), "X");
@@ -383,12 +383,12 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_vertical) {
     auto vertical_cs = nn_dynamic_pointer_cast<VerticalCS>(cs);
     ASSERT_TRUE(vertical_cs != nullptr);
 
-    ASSERT_EQ(vertical_cs->identifiers().size(), 1);
+    ASSERT_EQ(vertical_cs->identifiers().size(), 1U);
     EXPECT_EQ(vertical_cs->identifiers()[0]->code(), "6499");
     EXPECT_EQ(*(vertical_cs->identifiers()[0]->codeSpace()), "EPSG");
 
     const auto &axisList = vertical_cs->axisList();
-    EXPECT_EQ(axisList.size(), 1);
+    EXPECT_EQ(axisList.size(), 1U);
 
     EXPECT_EQ(*(axisList[0]->name()->description()), "Gravity-related height");
     EXPECT_EQ(axisList[0]->abbreviation(), "H");
@@ -405,7 +405,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
     auto crs = factory->createGeodeticCRS("4326");
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
     ASSERT_TRUE(gcrs != nullptr);
-    ASSERT_EQ(gcrs->identifiers().size(), 1);
+    ASSERT_EQ(gcrs->identifiers().size(), 1U);
     EXPECT_EQ(gcrs->identifiers()[0]->code(), "4326");
     EXPECT_EQ(*(gcrs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(gcrs->name()->description()), "WGS 84");
@@ -440,7 +440,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic3D) {
     auto crs = factory->createGeodeticCRS("4979");
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
     ASSERT_TRUE(gcrs != nullptr);
-    ASSERT_EQ(gcrs->identifiers().size(), 1);
+    ASSERT_EQ(gcrs->identifiers().size(), 1U);
     EXPECT_EQ(gcrs->identifiers()[0]->code(), "4979");
     EXPECT_EQ(*(gcrs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(gcrs->name()->description()), "WGS 84");
@@ -456,7 +456,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geocentric) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto crs = factory->createGeodeticCRS("4978");
     ASSERT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) == nullptr);
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "4978");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
@@ -474,7 +474,7 @@ TEST(factory, AuthorityFactory_createVerticalCRS) {
                  NoSuchAuthorityCodeException);
 
     auto crs = factory->createVerticalCRS("3855");
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "3855");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "EGM2008 height");
@@ -496,19 +496,19 @@ TEST(factory, AuthorityFactory_createConversion) {
     EXPECT_THROW(factory->createConversion("-1"), NoSuchAuthorityCodeException);
 
     auto conv = factory->createConversion("16031");
-    ASSERT_EQ(conv->identifiers().size(), 1);
+    ASSERT_EQ(conv->identifiers().size(), 1U);
     EXPECT_EQ(conv->identifiers()[0]->code(), "16031");
     EXPECT_EQ(*(conv->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(conv->name()->description()), "UTM zone 31N");
 
     auto method = conv->method();
-    ASSERT_EQ(method->identifiers().size(), 1);
+    ASSERT_EQ(method->identifiers().size(), 1U);
     EXPECT_EQ(method->identifiers()[0]->code(), "9807");
     EXPECT_EQ(*(method->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(method->name()->description()), "Transverse Mercator");
 
     const auto &values = conv->parameterValues();
-    ASSERT_EQ(values.size(), 5);
+    ASSERT_EQ(values.size(), 5U);
     {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[0]);
@@ -547,7 +547,7 @@ TEST(factory, AuthorityFactory_createProjectedCRS) {
                  NoSuchAuthorityCodeException);
 
     auto crs = factory->createProjectedCRS("32631");
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "32631");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84 / UTM zone 31N");
@@ -573,7 +573,7 @@ TEST(factory, AuthorityFactory_createProjectedCRS_south_pole) {
 
     auto crs = factory->createProjectedCRS("32761");
     auto csList = crs->coordinateSystem()->axisList();
-    ASSERT_EQ(csList.size(), 2);
+    ASSERT_EQ(csList.size(), 2U);
     EXPECT_TRUE(csList[0]->meridian() != nullptr);
     EXPECT_EQ(csList[0]->direction(), AxisDirection::NORTH);
     EXPECT_EQ(
@@ -592,7 +592,7 @@ TEST(factory, AuthorityFactory_createProjectedCRS_north_pole) {
 
     auto crs = factory->createProjectedCRS("32661");
     auto csList = crs->coordinateSystem()->axisList();
-    ASSERT_EQ(csList.size(), 2);
+    ASSERT_EQ(csList.size(), 2U);
     EXPECT_TRUE(csList[0]->meridian() != nullptr);
     EXPECT_EQ(csList[0]->direction(), AxisDirection::SOUTH);
     EXPECT_EQ(
@@ -612,14 +612,14 @@ TEST(factory, AuthorityFactory_createCompoundCRS) {
                  NoSuchAuthorityCodeException);
 
     auto crs = factory->createCompoundCRS("6871");
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "6871");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()),
               "WGS 84 / Pseudo-Mercator +  EGM2008 geoid height");
 
     auto components = crs->componentReferenceSystems();
-    ASSERT_EQ(components.size(), 2);
+    ASSERT_EQ(components.size(), 2U);
     EXPECT_TRUE(components[0]->isEquivalentTo(
         factory->createProjectedCRS("3857").get()));
     EXPECT_TRUE(components[1]->isEquivalentTo(
@@ -1018,7 +1018,7 @@ TEST(factory,
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
     auto operations = concatenated->operations();
-    ASSERT_EQ(operations.size(), 2);
+    ASSERT_EQ(operations.size(), 2U);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
         factory->createCoordinateOperation("3895", false).get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
@@ -1035,7 +1035,7 @@ TEST(
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
     auto operations = concatenated->operations();
-    ASSERT_EQ(operations.size(), 3);
+    ASSERT_EQ(operations.size(), 3U);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
         factory->createCoordinateOperation("1313", false).get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
@@ -1054,7 +1054,7 @@ TEST(
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
     auto operations = concatenated->operations();
-    ASSERT_EQ(operations.size(), 2);
+    ASSERT_EQ(operations.size(), 2U);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
         factory->createCoordinateOperation("8364", false)->inverse().get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
@@ -1071,7 +1071,7 @@ TEST(
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
     auto operations = concatenated->operations();
-    ASSERT_EQ(operations.size(), 2);
+    ASSERT_EQ(operations.size(), 2U);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
         factory->createCoordinateOperation("1763", false).get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
@@ -1088,7 +1088,7 @@ TEST(
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
     auto operations = concatenated->operations();
-    ASSERT_EQ(operations.size(), 2);
+    ASSERT_EQ(operations.size(), 2U);
     EXPECT_TRUE(operations[0]->isEquivalentTo(
         factory->createCoordinateOperation("7972", false).get()));
     EXPECT_TRUE(operations[1]->isEquivalentTo(
@@ -1537,7 +1537,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             auto res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
                 false, {});
-            EXPECT_EQ(res.size(), 1);
+            EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
 
@@ -1545,7 +1545,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
                 false, {std::make_pair(std::string("NS_PIVOT"),
                                        std::string("PIVOT"))});
-            EXPECT_EQ(res.size(), 1);
+            EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
 
@@ -1553,18 +1553,18 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
                 false, {std::make_pair(std::string("NS_PIVOT"),
                                        std::string("NOT_EXISTING"))});
-            EXPECT_EQ(res.size(), 0);
+            EXPECT_EQ(res.size(), 0U);
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
                 false,
                 {std::make_pair(std::string("BAD_NS"), std::string("PIVOT"))});
-            EXPECT_EQ(res.size(), 0);
+            EXPECT_EQ(res.size(), 0U);
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_TARGET", "TARGET", "NS_SOURCE", "SOURCE", false, false,
                 false, {});
-            EXPECT_EQ(res.size(), 1);
+            EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
         }
@@ -1574,7 +1574,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             auto res = factory->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
                 false, {});
-            EXPECT_EQ(res.size(), 1);
+            EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
 
@@ -1590,7 +1590,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                     CoordinateOperationContext::create(factory, nullptr, 0);
                 res = CoordinateOperationFactory::create()->createOperations(
                     srcCRS, targetCRS, ctxt);
-                EXPECT_EQ(res.size(), 1);
+                EXPECT_EQ(res.size(), 1U);
                 EXPECT_TRUE(
                     res.empty() ||
                     nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
@@ -1603,7 +1603,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                     std::string("NS_PIVOT"), std::string("PIVOT"))});
                 res = CoordinateOperationFactory::create()->createOperations(
                     srcCRS, targetCRS, ctxt);
-                EXPECT_EQ(res.size(), 1);
+                EXPECT_EQ(res.size(), 1U);
                 EXPECT_TRUE(
                     res.empty() ||
                     nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
@@ -1615,7 +1615,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                 ctxt->setAllowUseIntermediateCRS(false);
                 res = CoordinateOperationFactory::create()->createOperations(
                     srcCRS, targetCRS, ctxt);
-                EXPECT_EQ(res.size(), 1);
+                EXPECT_EQ(res.size(), 1U);
                 EXPECT_TRUE(res.empty() ||
                             nn_dynamic_pointer_cast<Transformation>(res[0]));
             }
@@ -1627,7 +1627,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                     std::string("NS_PIVOT"), std::string("NOT_EXISTING"))});
                 res = CoordinateOperationFactory::create()->createOperations(
                     srcCRS, targetCRS, ctxt);
-                EXPECT_EQ(res.size(), 1);
+                EXPECT_EQ(res.size(), 1U);
                 EXPECT_TRUE(res.empty() ||
                             nn_dynamic_pointer_cast<Transformation>(res[0]));
             }
@@ -1723,7 +1723,7 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
     {
         auto res =
             factory->createFromCoordinateReferenceSystemCodes("4326", "32631");
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_TRUE(res[0]->sourceCRS() != nullptr);
         EXPECT_TRUE(res[0]->targetCRS() != nullptr);
         EXPECT_TRUE(
@@ -1742,7 +1742,7 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
     {
         auto list =
             factory->createFromCoordinateReferenceSystemCodes("4179", "4258");
-        ASSERT_EQ(list.size(), 3);
+        ASSERT_EQ(list.size(), 3U);
         // Romania has a larger area than Poland (given our approx formula)
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
         EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
@@ -1752,7 +1752,7 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
         // Test removal of superseded transform
         auto list = factory->createFromCoordinateReferenceSystemCodes(
             "EPSG", "4179", "EPSG", "4258", false, false, true);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 2U);
         // Romania has a larger area than Poland (given our approx formula)
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
         EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
@@ -1770,7 +1770,7 @@ TEST(
     {
         auto res = factory->createFromCoordinateReferenceSystemCodes(
             "EPSG", "4326", "EPSG", "32631", false, false, false);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
     }
     {
         auto res = factory->createFromCoordinateReferenceSystemCodes(
@@ -1808,7 +1808,7 @@ TEST_F(FactoryWithTmpDatabase,
     {
         auto res = factoryGeneral->createFromCoordinateReferenceSystemCodes(
             "OTHER", "OTHER_4326", "OTHER", "OTHER_32631", false, false, false);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
     }
 
     auto factoryEPSG =
@@ -1816,7 +1816,7 @@ TEST_F(FactoryWithTmpDatabase,
     {
         auto res = factoryEPSG->createFromCoordinateReferenceSystemCodes(
             "OTHER", "OTHER_4326", "OTHER", "OTHER_32631", false, false, false);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
     }
 
     auto factoryOTHER =
@@ -1824,7 +1824,7 @@ TEST_F(FactoryWithTmpDatabase,
     {
         auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
             "OTHER_4326", "OTHER_32631");
-        ASSERT_EQ(res.size(), 0); // the conversion is in the EPSG space
+        ASSERT_EQ(res.size(), 0U); // the conversion is in the EPSG space
     }
 
     ASSERT_TRUE(execute(
@@ -1838,17 +1838,17 @@ TEST_F(FactoryWithTmpDatabase,
     {
         auto res = factoryGeneral->createFromCoordinateReferenceSystemCodes(
             "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
     }
     {
         auto res = factoryEPSG->createFromCoordinateReferenceSystemCodes(
             "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false);
-        ASSERT_EQ(res.size(), 0);
+        ASSERT_EQ(res.size(), 0U);
     }
     {
         auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
             "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
     }
 }
 
@@ -1899,7 +1899,7 @@ TEST_F(FactoryWithTmpDatabase,
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
         "EPSG", "4326", "EPSG", "4326", false, false, false);
-    ASSERT_EQ(res.size(), 3);
+    ASSERT_EQ(res.size(), 3U);
     EXPECT_EQ(*(res[0]->name()->description()), "TRANSFORMATION_1M");
     EXPECT_EQ(*(res[1]->name()->description()), "TRANSFORMATION_10M");
     EXPECT_EQ(*(res[2]->name()->description()),
@@ -1918,7 +1918,7 @@ TEST_F(
                                             std::string());
     auto res = factory->createFromCRSCodesWithIntermediates(
         "EPSG", "4326", "EPSG", "4326", false, false, false, {});
-    EXPECT_EQ(res.size(), 0);
+    EXPECT_EQ(res.size(), 0U);
 }
 
 // ---------------------------------------------------------------------------
@@ -2002,7 +2002,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
         "EPSG", "4326", "EPSG", "4326", false, false, false);
-    ASSERT_EQ(res.size(), 1);
+    ASSERT_EQ(res.size(), 1U);
     EXPECT_EQ(res[0]->nameStr(), "My PROJ string based op");
     EXPECT_EQ(res[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +ellps=WGS84 +step +proj=longlat");
@@ -2063,7 +2063,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
         "EPSG", "4326", "EPSG", "4326", false, false, false);
-    ASSERT_EQ(res.size(), 1);
+    ASSERT_EQ(res.size(), 1U);
     EXPECT_EQ(res[0]->nameStr(), "My WKT string based op");
     EXPECT_EQ(res[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=push +v_3 +step +proj=axisswap "
@@ -2145,7 +2145,7 @@ TEST_F(FactoryWithTmpDatabase, getAuthorities) {
     populateWithFakeEPSG();
 
     auto res = DatabaseContext::create(m_ctxt)->getAuthorities();
-    EXPECT_EQ(res.size(), 2);
+    EXPECT_EQ(res.size(), 2U);
     EXPECT_TRUE(res.find("EPSG") != res.end());
     EXPECT_TRUE(res.find("PROJ") != res.end());
 }
@@ -2237,7 +2237,7 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
         auto crs = factory->createGeodeticCRS("TEST");
         EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
         EXPECT_EQ(*(crs->name()->description()), "my name TEST");
-        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
         EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
         EXPECT_TRUE(crs->canonicalBoundCRS() == nullptr);
@@ -2246,7 +2246,7 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
         auto crs = factory->createGeodeticCRS("TEST_BOUND");
         EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
         EXPECT_EQ(*(crs->name()->description()), "my name TEST");
-        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
         EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
         EXPECT_TRUE(crs->canonicalBoundCRS() != nullptr);
@@ -2255,7 +2255,7 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
         auto crs = factory->createGeodeticCRS("TEST_GC");
         EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) == nullptr);
         EXPECT_EQ(*(crs->name()->description()), "my name");
-        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
         EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
     }
@@ -2263,7 +2263,7 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
         auto crs = factory->createGeodeticCRS("TEST_REF_ANOTHER");
         EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
         EXPECT_EQ(*(crs->name()->description()), "my name TEST_REF_ANOTHER");
-        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->ellipsoid()->semiMajorAxis(), Length(2));
         EXPECT_EQ(*(crs->ellipsoid()->inverseFlattening()), Scale(300));
     }
@@ -2344,7 +2344,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     {
         auto crs = factory->createProjectedCRS("TEST");
         EXPECT_EQ(*(crs->name()->description()), "my name");
-        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=mbt_s +datum=WGS84 +units=m +no_defs +type=crs");
@@ -2353,7 +2353,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
     {
         auto crs = factory->createProjectedCRS("TEST_BOUND");
         EXPECT_EQ(*(crs->name()->description()), "my name");
-        EXPECT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->identifiers().size(), 1U);
         EXPECT_EQ(crs->derivingConversion()->targetCRS().get(), crs.get());
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=mbt_s +datum=WGS84 +units=m +no_defs +type=crs");
@@ -2368,7 +2368,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factory);
-        EXPECT_EQ(res.size(), 1);
+        EXPECT_EQ(res.size(), 1U);
         if (!res.empty()) {
             EXPECT_EQ(res.front().first->nameStr(), "merc");
         }
@@ -2380,7 +2380,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factory);
-        EXPECT_EQ(res.size(), 1);
+        EXPECT_EQ(res.size(), 1U);
         if (!res.empty()) {
             EXPECT_EQ(res.front().first->nameStr(), "merc2");
         }
@@ -2392,7 +2392,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factory);
-        EXPECT_EQ(res.size(), 1);
+        EXPECT_EQ(res.size(), 1U);
         if (!res.empty()) {
             EXPECT_EQ(res.front().first->nameStr(), "merc2");
         }
@@ -2404,7 +2404,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factory);
-        EXPECT_EQ(res.size(), 1);
+        EXPECT_EQ(res.size(), 1U);
         if (!res.empty()) {
             EXPECT_EQ(res.front().first->nameStr(), "WKT1_GDAL");
         }
@@ -2635,7 +2635,7 @@ TEST_F(FactoryWithTmpDatabase,
         AuthorityFactory::create(dbContext, "EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
-    ASSERT_EQ(list.size(), 2);
+    ASSERT_EQ(list.size(), 2U);
     EXPECT_EQ(list[0]->nameStr(), "WHOLE_AREA_APPROX_ACCURACY");
     EXPECT_EQ(list[1]->nameStr(), "PARTIAL_AREA_PERFECT_ACCURACY");
 }
@@ -2647,24 +2647,24 @@ TEST(factory, createObjectsFromName) {
     auto factory = AuthorityFactory::create(ctxt, std::string());
     auto factoryEPSG = AuthorityFactory::create(ctxt, "EPSG");
 
-    EXPECT_EQ(factory->createObjectsFromName("").size(), 0);
+    EXPECT_EQ(factory->createObjectsFromName("").size(), 0U);
 
     // ellipsoid + 3 geodeticCRS
-    EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, false).size(), 4);
+    EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, false).size(), 4U);
 
     EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, true, 10).size(),
-              10);
+              10U);
 
     EXPECT_EQ(factory
                   ->createObjectsFromName(
                       "WGS 84", {AuthorityFactory::ObjectType::CRS}, false)
                   .size(),
-              3);
+              3U);
 
     {
         auto res = factoryEPSG->createObjectsFromName(
             "WGS84", {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS}, true);
-        EXPECT_EQ(res.size(), 2); // EPSG:4326 and EPSG:4030
+        EXPECT_EQ(res.size(), 2U); // EPSG:4326 and EPSG:4030
         if (!res.empty()) {
             EXPECT_EQ(res.front()->getEPSGCode(), 4326);
         }
@@ -2672,87 +2672,87 @@ TEST(factory, createObjectsFromName) {
 
     // Prime meridian
     EXPECT_EQ(factoryEPSG->createObjectsFromName("Paris", {}, false, 2).size(),
-              1);
+              1U);
     // Ellipsoid
     EXPECT_EQ(
         factoryEPSG->createObjectsFromName("Clarke 1880 (IGN)", {}, false, 2)
             .size(),
-        1);
+        1U);
     // Geodetic datum
     EXPECT_EQ(
         factoryEPSG->createObjectsFromName("Hungarian Datum 1909", {}, false, 2)
             .size(),
-        1);
+        1U);
     // Vertical datum
     EXPECT_EQ(factoryEPSG->createObjectsFromName("EGM2008 geoid", {}, false, 2)
                   .size(),
-              1);
+              1U);
     // Geodetic CRS
     EXPECT_EQ(factoryEPSG
                   ->createObjectsFromName(
                       "Unknown datum based upon the Airy 1830 ellipsoid", {},
                       false, 2)
                   .size(),
-              1);
+              1U);
     // Projected CRS
     EXPECT_EQ(factoryEPSG
                   ->createObjectsFromName(
                       "Anguilla 1957 / British West Indies Grid", {}, false, 2)
                   .size(),
-              1);
+              1U);
     // Vertical CRS
     EXPECT_EQ(factoryEPSG->createObjectsFromName("EGM2008 height", {}, false, 2)
                   .size(),
-              1);
+              1U);
     // Compound CRS
     EXPECT_EQ(factoryEPSG
                   ->createObjectsFromName(
                       "KKJ / Finland Uniform Coordinate System + N60 height",
                       {}, false, 2)
                   .size(),
-              1);
+              1U);
     // Conversion
     EXPECT_EQ(
         factoryEPSG->createObjectsFromName("Belgian Lambert 2008", {}, false, 2)
             .size(),
-        1);
+        1U);
     // Helmert transform
     EXPECT_EQ(
         factoryEPSG->createObjectsFromName("MGI to ETRS89 (4)", {}, false, 2)
             .size(),
-        1);
+        1U);
     // Grid transform
     EXPECT_EQ(factoryEPSG
                   ->createObjectsFromName("Guam 1963 to NAD83(HARN) (1)", {},
                                           false, 2)
                   .size(),
-              1);
+              1U);
     // Other transform
     EXPECT_EQ(factoryEPSG
                   ->createObjectsFromName(
                       "Monte Mario (Rome) to Monte Mario (1)", {}, false, 2)
                   .size(),
-              1);
+              1U);
     // Concatenated operation
     EXPECT_EQ(
         factoryEPSG
             ->createObjectsFromName("MGI (Ferro) to WGS 84 (2)", {}, false, 2)
             .size(),
-        1);
+        1U);
 
     // Deprecated object
     EXPECT_EQ(factoryEPSG
                   ->createObjectsFromName(
                       "NAD27(CGQ77) / SCoPQ zone 2 (deprecated)", {}, false, 2)
                   .size(),
-              1);
+              1U);
 
     // Deprecated object (but without explicit deprecated)
     EXPECT_EQ(
         factoryEPSG
             ->createObjectsFromName("NAD27(CGQ77) / SCoPQ zone 2", {}, false, 2)
             .size(),
-        1);
+        1U);
 
     const auto types = std::vector<AuthorityFactory::ObjectType>{
         AuthorityFactory::ObjectType::PRIME_MERIDIAN,
@@ -2798,7 +2798,7 @@ TEST(factory, listAreaOfUseFromName) {
     auto factoryEPSG = AuthorityFactory::create(ctxt, "EPSG");
     {
         auto res = factory->listAreaOfUseFromName("Denmark - onshore", false);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first, "EPSG");
         EXPECT_EQ(res.front().second, "3237");
     }
@@ -2808,7 +2808,7 @@ TEST(factory, listAreaOfUseFromName) {
     }
     {
         auto res = factory->listAreaOfUseFromName("no where land", false);
-        ASSERT_EQ(res.size(), 0);
+        ASSERT_EQ(res.size(), 0U);
     }
 }
 
