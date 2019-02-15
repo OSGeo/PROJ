@@ -502,7 +502,7 @@ TEST(operation, concatenated_operation) {
     auto inv_as_concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(inv);
     ASSERT_TRUE(inv_as_concat != nullptr);
 
-    ASSERT_EQ(inv_as_concat->operations().size(), 2);
+    ASSERT_EQ(inv_as_concat->operations().size(), 2U);
     EXPECT_EQ(inv_as_concat->operations()[0]->nameStr(),
               "Inverse of transformationName");
     EXPECT_EQ(inv_as_concat->operations()[1]->nameStr(),
@@ -663,7 +663,7 @@ TEST(operation, transformation_createPositionVector) {
                                           PositionalAccuracy::create("100")});
     EXPECT_TRUE(transf->validateParameters().empty());
 
-    ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1);
+    ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1U);
 
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     EXPECT_EQ(transf->getTOWGS84Parameters(), expected);
@@ -678,7 +678,7 @@ TEST(operation, transformation_createPositionVector) {
               "+v_3");
 
     auto inv_transf = transf->inverse();
-    ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 1);
+    ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 1U);
 
     EXPECT_EQ(transf->sourceCRS()->nameStr(),
               inv_transf->targetCRS()->nameStr());
@@ -747,7 +747,7 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
               "+v_3");
 
     auto inv_transf = transf->inverse();
-    ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 0);
+    ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 0U);
 
     EXPECT_EQ(transf->sourceCRS()->nameStr(),
               inv_transf->targetCRS()->nameStr());
@@ -3137,7 +3137,7 @@ TEST(operation, webmerc_import_from_GDAL_wkt1_with_EPSG_code) {
     auto obj = WKTParser().createFromWKT(wkt1);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers().size(), 1U);
 }
 
 // ---------------------------------------------------------------------------
@@ -4189,7 +4189,7 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
             authFactory->createCoordinateReferenceSystem("4179"), // Pulkovo 42
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
-        ASSERT_EQ(list.size(), 3);
+        ASSERT_EQ(list.size(), 3U);
         // Romania has a larger area than Poland (given our approx formula)
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
         EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
@@ -4212,7 +4212,7 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4258"),
             authFactory->createCoordinateReferenceSystem("4179"), ctxt);
-        ASSERT_EQ(list.size(), 3);
+        ASSERT_EQ(list.size(), 3U);
         // Romania has a larger area than Poland (given our approx formula)
         EXPECT_EQ(list[0]->nameStr(),
                   "Inverse of Pulkovo 1942(58) to ETRS89 (4)"); // Romania - 3m
@@ -4269,7 +4269,7 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_accuracy) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
             authFactory->createCoordinateReferenceSystem("4258"), ctxt);
-        ASSERT_EQ(list.size(), 1);
+        ASSERT_EQ(list.size(), 1U);
         EXPECT_EQ(list[0]->getEPSGCode(), 1644); // Poland - 1m
     }
     {
@@ -4281,7 +4281,7 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_accuracy) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
             authFactory->createCoordinateReferenceSystem("4258"), ctxt);
-        ASSERT_EQ(list.size(), 0);
+        ASSERT_EQ(list.size(), 0U);
     }
 }
 
@@ -4299,7 +4299,7 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
             authFactory->createCoordinateReferenceSystem("4258"), ctxt);
-        ASSERT_EQ(list.size(), 1);
+        ASSERT_EQ(list.size(), 1U);
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
     }
     {
@@ -4310,7 +4310,7 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
             authFactory->createCoordinateReferenceSystem("4258"), ctxt);
-        ASSERT_EQ(list.size(), 1);
+        ASSERT_EQ(list.size(), 1U);
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
     }
     {
@@ -4321,7 +4321,7 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
             authFactory->createCoordinateReferenceSystem("4258"), ctxt);
-        ASSERT_EQ(list.size(), 1);
+        ASSERT_EQ(list.size(), 1U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "");
@@ -4338,7 +4338,7 @@ TEST(operation, geogCRS_to_geogCRS_context_incompatible_area) {
         authFactory->createCoordinateReferenceSystem("4267"), // NAD27
         authFactory->createCoordinateReferenceSystem("4258"), // ETRS 89
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "");
 }
@@ -4356,7 +4356,7 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
-        ASSERT_EQ(list.size(), 3);
+        ASSERT_EQ(list.size(), 3U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +proj=push +v_3 +step +proj=axisswap "
@@ -4388,7 +4388,7 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -4403,7 +4403,7 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             ctxt);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -4429,7 +4429,7 @@ TEST(operation, geogCRS_to_geogCRS_context_ntv1_ntv2_ctable2) {
         authFactory->createCoordinateReferenceSystem("4267"), // NAD27
         authFactory->createCoordinateReferenceSystem("4269"), // NAD83
         ctxt);
-    ASSERT_EQ(list.size(), 7);
+    ASSERT_EQ(list.size(), 7U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
@@ -4461,7 +4461,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
                 "3855"), // EGM2008 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(list[1]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
@@ -4477,7 +4477,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
                 "3855"), // EGM2008 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=vgridshift +grids=egm08_25.gtx +multiplier=1");
@@ -4490,7 +4490,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem(
                 "3855"), // EGM2008 height
             ctxt);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +inv +proj=vgridshift +grids=egm08_25.gtx "
@@ -4554,7 +4554,7 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation_context) {
         authFactory->createCoordinateReferenceSystem("4807"), // NTF(Paris)
         authFactory->createCoordinateReferenceSystem("4275"), // NTF
         ctxt);
-    ASSERT_EQ(list.size(), 2);
+    ASSERT_EQ(list.size(), 2U);
     EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to NTF (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -4581,7 +4581,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
         authFactory->createCoordinateReferenceSystem("4807"), // NTF(Paris)
         authFactory->createCoordinateReferenceSystem("4171"), // RGF93
         ctxt);
-    ASSERT_EQ(list.size(), 3);
+    ASSERT_EQ(list.size(), 3U);
     EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to RGF93 (2)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -4593,7 +4593,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(list[0]) !=
                 nullptr);
     auto grids = list[0]->gridsNeeded(DatabaseContext::create());
-    EXPECT_EQ(grids.size(), 1);
+    EXPECT_EQ(grids.size(), 1U);
 }
 
 // ---------------------------------------------------------------------------
@@ -4625,7 +4625,7 @@ TEST(operation, geogCRS_to_geogCRS_geographic_offset_context) {
         authFactory->createCoordinateReferenceSystem("4120"), // NTF(Paris)
         authFactory->createCoordinateReferenceSystem("4121"), // NTF
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(), "Greek to GGRS87 (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -4644,7 +4644,7 @@ TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
         authFactory->createCoordinateReferenceSystem("4149"), // CH1903
         authFactory->createCoordinateReferenceSystem("4150"), // CH1903+
         ctxt);
-    ASSERT_EQ(list.size(), 2);
+    ASSERT_EQ(list.size(), 2U);
 
     EXPECT_EQ(list[0]->nameStr(),
               "CH1903 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
@@ -4684,7 +4684,7 @@ TEST(operation, geogCRS_to_geogCRS_init_IGNF_to_init_IGNF_context) {
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
 
     EXPECT_EQ(list[0]->nameStr(),
               "NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)");
@@ -4810,7 +4810,7 @@ TEST(operation, geocentricCRS_to_geogCRS_same_datum_context) {
         authFactory->createCoordinateReferenceSystem("4326"),
         // WGS84 geocentric
         authFactory->createCoordinateReferenceSystem("4978"), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
 
     EXPECT_EQ(list[0]->nameStr(),
               "Conversion from WGS 84 (geog2D) to WGS 84 (geocentric)");
@@ -4842,7 +4842,7 @@ TEST(operation, geocentricCRS_to_geogCRS_same_datum_context_all_auth) {
         authFactoryEPSG->createCoordinateReferenceSystem("4326"),
         // WGS84 geocentric
         authFactoryEPSG->createCoordinateReferenceSystem("4978"), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
 
     EXPECT_EQ(list[0]->nameStr(),
               "Conversion from WGS 84 (geog2D) to WGS 84 (geocentric)");
@@ -4859,7 +4859,7 @@ TEST(operation, geocentricCRS_to_geocentricCRS_different_datum_context) {
         authFactory->createCoordinateReferenceSystem("4919"),
         // ITRF2005 (geocentric)
         authFactory->createCoordinateReferenceSystem("4896"), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(), "ITRF2000 to ITRF2005 (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=helmert +x=-0.0001 "
@@ -4878,7 +4878,7 @@ TEST(operation, geogCRS_geocentricCRS_same_datum_to_context) {
         // WGS84 geocentric
         authFactory->createCoordinateReferenceSystem("4978"),
         authFactory->createCoordinateReferenceSystem("4326"), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Conversion from WGS 84 (geocentric) to WGS 84 (geog2D)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -4899,7 +4899,7 @@ TEST(operation,
         authFactory->createCoordinateReferenceSystem("7909"),
         // ITRF2005 (geog3D)
         authFactory->createCoordinateReferenceSystem("7910"), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Conversion from ITRF2000 (geog3D) to ITRF2000 (geocentric) + "
               "ITRF2000 to ITRF2005 (1) + "
@@ -4926,7 +4926,7 @@ TEST(operation, geogCRS_to_geocentricCRS_different_datum_context) {
         authFactory->createCoordinateReferenceSystem("7909"),
         // ITRF2005 (geocentric)
         authFactory->createCoordinateReferenceSystem("4896"), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Conversion from ITRF2000 (geog3D) to ITRF2000 (geocentric) + "
               "ITRF2000 to ITRF2005 (1)");
@@ -4950,7 +4950,7 @@ TEST(operation, geocentricCRS_to_geogCRS_different_datum_context) {
         authFactory->createCoordinateReferenceSystem("4919"),
         // ITRF2005 (geog3D)
         authFactory->createCoordinateReferenceSystem("7910"), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "ITRF2000 to ITRF2005 (1) + "
               "Conversion from ITRF2005 (geocentric) to ITRF2005 (geog3D)");
@@ -4976,7 +4976,7 @@ TEST(operation, esri_projectedCRS_to_geogCRS_with_ITRF_intermediate_context) {
         authFactoryESRI->createCoordinateReferenceSystem("103501"),
         // ITRF2005 (geog3D)
         authFactoryEPSG->createCoordinateReferenceSystem("7910"), ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of NAD_1983_CORS96_StatePlane_North_Carolina_"
               "FIPS_3200_Ft_US + "
@@ -5074,7 +5074,7 @@ TEST(operation, geogCRS_longlat_to_geogCS_latlong_database) {
         AuthorityFactory::create(DatabaseContext::create(), "EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=axisswap +order=2,1");
 }
@@ -5117,11 +5117,11 @@ TEST(operation,
         authFactory->createCoordinateReferenceSystem("4807"),  // NTF(Paris)
         authFactory->createCoordinateReferenceSystem("32631"), // UTM31 WGS84
         ctxt);
-    ASSERT_EQ(list.size(), 4);
+    ASSERT_EQ(list.size(), 4U);
     EXPECT_EQ(
         list[0]->nameStr(),
         "NTF (Paris) to NTF (1) + Inverse of WGS 84 to NTF (3) + UTM zone 31N");
-    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
+    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1U);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "1");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -5195,11 +5195,11 @@ TEST(operation, projCRS_to_projCRS_context_compatible_area) {
         authFactory->createCoordinateReferenceSystem(
             "2171"), // Pulkovo 42 Poland I
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of UTM zone 34N + Inverse of Pulkovo 1942(58) to WGS 84 "
               "(1) + Poland zone I");
-    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
+    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1U);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "1");
 }
 
@@ -5214,11 +5214,11 @@ TEST(operation, projCRS_to_projCRS_context_compatible_area_bis) {
             "3844"), // Pulkovo 42 Stereo 70 (Romania)
         authFactory->createCoordinateReferenceSystem("32634"), // UTM 34
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(), "Inverse of Stereo 70 + "
                                   "Pulkovo 1942(58) to WGS 84 "
                                   "(19) + UTM zone 34N");
-    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
+    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1U);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "3");
 }
 
@@ -5233,11 +5233,11 @@ TEST(operation, projCRS_to_projCRS_context_one_incompatible_area) {
         authFactory->createCoordinateReferenceSystem(
             "2171"), // Pulkovo 42 Poland I
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of UTM zone 31N + Inverse of Pulkovo 1942(58) to WGS 84 "
               "(1) + Poland zone I");
-    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
+    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1U);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "1");
 }
 
@@ -5251,9 +5251,9 @@ TEST(operation, projCRS_to_projCRS_context_incompatible_areas) {
         authFactory->createCoordinateReferenceSystem("32631"), // UTM 31
         authFactory->createCoordinateReferenceSystem("32633"), // UTM 33
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(), "Inverse of UTM zone 31N + UTM zone 33N");
-    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1);
+    ASSERT_EQ(list[0]->coordinateOperationAccuracies().size(), 1U);
     EXPECT_EQ(list[0]->coordinateOperationAccuracies()[0]->value(), "0");
 }
 
@@ -5270,7 +5270,7 @@ TEST(operation, projCRS_to_projCRS_north_pole_inverted_axis) {
         AuthorityFactory::create(DatabaseContext::create(), "EPSG")
             ->createCoordinateReferenceSystem("5041"),
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=axisswap +order=2,1");
 }
@@ -5288,7 +5288,7 @@ TEST(operation, projCRS_to_projCRS_south_pole_inverted_axis) {
         AuthorityFactory::create(DatabaseContext::create(), "EPSG")
             ->createCoordinateReferenceSystem("5042"),
         ctxt);
-    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=axisswap +order=2,1");
 }
@@ -5725,7 +5725,7 @@ TEST(operation, transformation_height_to_PROJ_string) {
               "+proj=vgridshift +grids=egm08_25.gtx +multiplier=1");
 
     auto grids = transf->gridsNeeded(DatabaseContext::create());
-    ASSERT_EQ(grids.size(), 1);
+    ASSERT_EQ(grids.size(), 1U);
     auto gridDesc = *(grids.begin());
     EXPECT_EQ(gridDesc.shortName, "egm08_25.gtx");
     EXPECT_EQ(gridDesc.packageName, "proj-datumgrid-world");
@@ -5968,7 +5968,7 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
               "+order=2,1");
 
     auto grids = op->gridsNeeded(DatabaseContext::create());
-    EXPECT_EQ(grids.size(), 1);
+    EXPECT_EQ(grids.size(), 1U);
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4979, compound);
@@ -6197,7 +6197,7 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
         AuthorityFactory::create(DatabaseContext::create(), "EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
-    ASSERT_EQ(list.size(), 2);
+    ASSERT_EQ(list.size(), 2U);
 
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=lcc +lat_1=49.5 +lat_0=49.5 "

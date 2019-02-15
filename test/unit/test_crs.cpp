@@ -72,13 +72,13 @@ static nn<std::shared_ptr<UnrelatedObject>> createUnrelatedObject() {
 
 TEST(crs, EPSG_4326_get_components) {
     auto crs = GeographicCRS::EPSG_4326;
-    ASSERT_EQ(crs->identifiers().size(), 1);
+    ASSERT_EQ(crs->identifiers().size(), 1U);
     EXPECT_EQ(crs->identifiers()[0]->code(), "4326");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(crs->nameStr(), "WGS 84");
 
     auto datum = crs->datum();
-    ASSERT_EQ(datum->identifiers().size(), 1);
+    ASSERT_EQ(datum->identifiers().size(), 1U);
     EXPECT_EQ(datum->identifiers()[0]->code(), "6326");
     EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(datum->nameStr(), "World Geodetic System 1984");
@@ -87,7 +87,7 @@ TEST(crs, EPSG_4326_get_components) {
     EXPECT_EQ(ellipsoid->semiMajorAxis().value(), 6378137.0);
     EXPECT_EQ(ellipsoid->semiMajorAxis().unit(), UnitOfMeasure::METRE);
     EXPECT_EQ(ellipsoid->inverseFlattening()->value(), 298.257223563);
-    ASSERT_EQ(ellipsoid->identifiers().size(), 1);
+    ASSERT_EQ(ellipsoid->identifiers().size(), 1U);
     EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");
     EXPECT_EQ(*(ellipsoid->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(ellipsoid->nameStr(), "WGS 84");
@@ -1160,11 +1160,11 @@ TEST(crs, geodeticcrs_identify_no_db) {
                 PropertyMap(), GeodeticReferenceFrame::EPSG_6326, nullptr,
                 CartesianCS::createGeocentric(UnitOfMeasure::METRE))
                 ->identify(nullptr);
-        ASSERT_EQ(res.size(), 0);
+        ASSERT_EQ(res.size(), 0U);
     }
     {
         auto res = GeographicCRS::EPSG_4326->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1172,7 +1172,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
         // Using virtual method
         auto res = static_cast<const CRS *>(GeographicCRS::EPSG_4326.get())
                        ->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1183,7 +1183,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
                 GeodeticReferenceFrame::EPSG_6326, nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1194,7 +1194,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
                 GeodeticReferenceFrame::EPSG_6326, nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
         EXPECT_EQ(res.front().second, 90);
     }
@@ -1206,7 +1206,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
                 GeodeticReferenceFrame::EPSG_6326, nullptr,
                 EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE))
                 ->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
         EXPECT_EQ(res.front().second, 25);
     }
@@ -1223,7 +1223,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
         auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1246,7 +1246,7 @@ TEST(crs, geodeticcrs_identify_db) {
                     optional<std::string>(), PrimeMeridian::GREENWICH),
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(nullptr);
-        ASSERT_EQ(res.size(), 0);
+        ASSERT_EQ(res.size(), 0U);
     }
     {
         // Identify by datum code
@@ -1255,7 +1255,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 PropertyMap(), GeodeticReferenceFrame::EPSG_6326, nullptr,
                 CartesianCS::createGeocentric(UnitOfMeasure::METRE))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4978);
         EXPECT_EQ(res.front().second, 70);
     }
@@ -1267,7 +1267,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 GeodeticReferenceFrame::EPSG_6326, nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
         EXPECT_EQ(res.front().second, 70);
     }
@@ -1279,14 +1279,14 @@ TEST(crs, geodeticcrs_identify_db) {
                 GeodeticReferenceFrame::EPSG_6326, nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
         EXPECT_EQ(res.front().second, 70);
     }
     {
         // Perfect match, and ID available. Hardcoded case
         auto res = GeographicCRS::EPSG_4326->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1298,7 +1298,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 GeodeticReferenceFrame::EPSG_6326, nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first.get(), GeographicCRS::EPSG_4326.get());
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1310,14 +1310,14 @@ TEST(crs, geodeticcrs_identify_db) {
                 GeographicCRS::EPSG_4807->datum(), nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::GRAD))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4807);
         EXPECT_EQ(res.front().second, 100);
     }
     {
         // Perfect match, and ID available
         auto res = GeographicCRS::EPSG_4807->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4807);
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1332,7 +1332,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 GeographicCRS::EPSG_4807->datum(), nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::GRAD))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 0);
+        ASSERT_EQ(res.size(), 0U);
     }
     {
         // The object has a unreliable ID
@@ -1345,7 +1345,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 GeographicCRS::EPSG_4807->datum(), nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::GRAD))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -1357,7 +1357,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 GeodeticReferenceFrame::EPSG_6326, nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
         EXPECT_EQ(res.front().second, 90);
     }
@@ -1369,7 +1369,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 GeodeticReferenceFrame::EPSG_6326, nullptr,
                 EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 3);
+        ASSERT_EQ(res.size(), 3U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -1410,7 +1410,7 @@ TEST(crs, geodeticcrs_identify_db) {
         ASSERT_TRUE(crs != nullptr);
         auto factoryAll = AuthorityFactory::create(dbContext, std::string());
         auto res = crs->identify(factoryAll);
-        EXPECT_EQ(res.size(), 5);
+        EXPECT_EQ(res.size(), 5U);
     }
     {
         // Identify by name, without any code
@@ -1456,7 +1456,7 @@ TEST(crs, geodeticcrs_identify_db) {
                 nullptr,
                 EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE))
                 ->identify(factory);
-        ASSERT_EQ(res.size(), 0);
+        ASSERT_EQ(res.size(), 0U);
     }
 }
 
@@ -1802,7 +1802,7 @@ TEST(crs, projectedCRS_identify_no_db) {
                        Conversion::createUTM(PropertyMap(), 1, true),
                        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE))
                        ->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 32601);
         EXPECT_EQ(res.front().second, 70);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
@@ -1821,7 +1821,7 @@ TEST(crs, projectedCRS_identify_no_db) {
             Conversion::createUTM(PropertyMap(), 60, false),
             CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
         auto res = static_cast<const CRS *>(crs.get())->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 32760);
         EXPECT_EQ(res.front().second, 100);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
@@ -1839,7 +1839,7 @@ TEST(crs, projectedCRS_identify_no_db) {
                        Conversion::createUTM(PropertyMap(), 11, true),
                        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE))
                        ->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 26711);
         EXPECT_EQ(res.front().second, 90);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
@@ -1855,7 +1855,7 @@ TEST(crs, projectedCRS_identify_no_db) {
                        Conversion::createUTM(PropertyMap(), 11, true),
                        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE))
                        ->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 26911);
         EXPECT_EQ(res.front().second, 70);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
@@ -1871,7 +1871,7 @@ TEST(crs, projectedCRS_identify_no_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(nullptr);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
         EXPECT_EQ(res.front().second, 70);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
@@ -1889,7 +1889,7 @@ TEST(crs, projectedCRS_identify_db) {
         // Identify by existing code
         auto res =
             factoryEPSG->createProjectedCRS("2172")->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1905,7 +1905,7 @@ TEST(crs, projectedCRS_identify_db) {
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factoryEPSG);
-        EXPECT_EQ(res.size(), 0);
+        EXPECT_EQ(res.size(), 0U);
     }
     {
         // Existing code, but not matching content
@@ -1919,7 +1919,7 @@ TEST(crs, projectedCRS_identify_db) {
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -1932,7 +1932,7 @@ TEST(crs, projectedCRS_identify_db) {
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 100);
     }
@@ -1945,7 +1945,7 @@ TEST(crs, projectedCRS_identify_db) {
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 90);
     }
@@ -1957,7 +1957,7 @@ TEST(crs, projectedCRS_identify_db) {
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 70);
     }
@@ -1970,7 +1970,7 @@ TEST(crs, projectedCRS_identify_db) {
             sourceCRS->baseCRS(), sourceCRS->derivingConversion(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -1985,7 +1985,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 3375);
         EXPECT_EQ(res.front().second, 70);
     }
@@ -1999,7 +1999,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 3375);
         EXPECT_EQ(res.front().second, 70);
     }
@@ -2021,7 +2021,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 3044);
         EXPECT_EQ(res.front().second, 100);
     }
@@ -2043,7 +2043,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 3044);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -2064,7 +2064,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 3044);
         EXPECT_EQ(res.front().second, 100);
     }
@@ -2086,7 +2086,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 32119);
         EXPECT_EQ(res.front().second, 70);
     }
@@ -2097,7 +2097,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 0);
+        ASSERT_EQ(res.size(), 0U);
     }
     {
         // ESRI:103729 definition as a PROJ string
@@ -2137,7 +2137,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        EXPECT_EQ(res.size(), 1);
+        EXPECT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2327);
         EXPECT_EQ(res.front().second, 50);
     }
@@ -2152,7 +2152,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        EXPECT_EQ(res.size(), 1);
+        EXPECT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 6646);
         EXPECT_EQ(res.front().second, 70);
     }
@@ -2650,14 +2650,14 @@ TEST(crs, scope_area_bbox_remark) {
         nn_dynamic_pointer_cast<GeodeticCRS>(WKTParser().createFromWKT(in_wkt));
     ASSERT_TRUE(crs != nullptr);
 
-    ASSERT_EQ(crs->domains().size(), 1);
+    ASSERT_EQ(crs->domains().size(), 1U);
     auto domain = crs->domains()[0];
     EXPECT_TRUE(domain->scope().has_value());
     EXPECT_EQ(*(domain->scope()), "Geodesy, topographic mapping and cadastre");
     ASSERT_TRUE(domain->domainOfValidity() != nullptr);
     EXPECT_TRUE(domain->domainOfValidity()->description().has_value());
     EXPECT_EQ(*(domain->domainOfValidity()->description()), "Japan");
-    ASSERT_EQ(domain->domainOfValidity()->geographicElements().size(), 1);
+    ASSERT_EQ(domain->domainOfValidity()->geographicElements().size(), 1U);
     auto geogElement = domain->domainOfValidity()->geographicElements()[0];
     auto bbox = nn_dynamic_pointer_cast<GeographicBoundingBox>(geogElement);
     ASSERT_TRUE(bbox != nullptr);
@@ -2666,13 +2666,13 @@ TEST(crs, scope_area_bbox_remark) {
     EXPECT_EQ(bbox->northBoundLatitude(), 46.05);
     EXPECT_EQ(bbox->eastBoundLongitude(), 157.64);
 
-    ASSERT_EQ(domain->domainOfValidity()->verticalElements().size(), 1);
+    ASSERT_EQ(domain->domainOfValidity()->verticalElements().size(), 1U);
     auto verticalElement = domain->domainOfValidity()->verticalElements()[0];
     EXPECT_EQ(verticalElement->minimumValue(), -10000);
     EXPECT_EQ(verticalElement->maximumValue(), 10000);
     EXPECT_EQ(*(verticalElement->unit()), UnitOfMeasure::METRE);
 
-    ASSERT_EQ(domain->domainOfValidity()->temporalElements().size(), 1);
+    ASSERT_EQ(domain->domainOfValidity()->temporalElements().size(), 1U);
     auto temporalElement = domain->domainOfValidity()->temporalElements()[0];
     EXPECT_EQ(temporalElement->start(), "2002-04-01");
     EXPECT_EQ(temporalElement->stop(), "2011-10-21");
@@ -2842,7 +2842,7 @@ TEST(crs, verticalCRS_identify_db) {
     {
         // Identify by existing code
         auto res = factory->createVerticalCRS("7651")->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 7651);
         EXPECT_EQ(res.front().second, 100);
 
@@ -2861,7 +2861,7 @@ TEST(crs, verticalCRS_identify_db) {
             sourceCRS->datum(), sourceCRS->datumEnsemble(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factory);
-        EXPECT_EQ(res.size(), 0);
+        EXPECT_EQ(res.size(), 0U);
     }
     {
         // Existing code, but not matching content
@@ -2874,7 +2874,7 @@ TEST(crs, verticalCRS_identify_db) {
             sourceCRS->datum(), sourceCRS->datumEnsemble(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 7652);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -2886,7 +2886,7 @@ TEST(crs, verticalCRS_identify_db) {
             sourceCRS->datum(), sourceCRS->datumEnsemble(),
             sourceCRS->coordinateSystem());
         auto res = static_cast<const CRS *>(crs.get())->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 7651);
         EXPECT_EQ(res.front().second, 100);
     }
@@ -2898,7 +2898,7 @@ TEST(crs, verticalCRS_identify_db) {
             sourceCRS->datum(), sourceCRS->datumEnsemble(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 7651);
         EXPECT_EQ(res.front().second, 90);
     }
@@ -2910,7 +2910,7 @@ TEST(crs, verticalCRS_identify_db) {
             sourceCRS->datum(), sourceCRS->datumEnsemble(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 7651);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -2921,7 +2921,7 @@ TEST(crs, verticalCRS_identify_db) {
             sourceCRS->datum(), sourceCRS->datumEnsemble(),
             sourceCRS->coordinateSystem());
         auto res = crs->identify(factory);
-        ASSERT_EQ(res.size(), 0);
+        ASSERT_EQ(res.size(), 0U);
     }
 }
 
@@ -3147,7 +3147,7 @@ TEST(crs, compoundCRS_identify_db) {
     {
         // Identify by existing code
         auto res = factory->createCompoundCRS("8769")->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
         EXPECT_EQ(res.front().second, 100);
 
@@ -3165,7 +3165,7 @@ TEST(crs, compoundCRS_identify_db) {
                 .set(Identifier::CODE_KEY, 1),
             sourceCRS->componentReferenceSystems());
         auto res = crs->identify(factory);
-        EXPECT_EQ(res.size(), 0);
+        EXPECT_EQ(res.size(), 0U);
     }
     {
         // Existing code, but not matching content
@@ -3177,7 +3177,7 @@ TEST(crs, compoundCRS_identify_db) {
                 .set(Identifier::CODE_KEY, 8770),
             sourceCRS->componentReferenceSystems());
         auto res = crs->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 8770);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -3188,7 +3188,7 @@ TEST(crs, compoundCRS_identify_db) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, sourceCRS->nameStr()),
             sourceCRS->componentReferenceSystems());
         auto res = static_cast<const CRS *>(crs.get())->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
         EXPECT_EQ(res.front().second, 100);
     }
@@ -3204,7 +3204,7 @@ TEST(crs, compoundCRS_identify_db) {
                               "NAD83_Ohio_North_ftUS_NAVD88_height_ftUS"),
             sourceCRS->componentReferenceSystems());
         auto res = crs->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
         EXPECT_EQ(res.front().second, 90);
     }
@@ -3216,7 +3216,7 @@ TEST(crs, compoundCRS_identify_db) {
                               "NAD83_Ohio_North_ftUS_NAVD88_height_ftUS"),
             sourceCRS->componentReferenceSystems());
         auto res = crs->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
         EXPECT_EQ(res.front().second, 25);
     }
@@ -3226,7 +3226,7 @@ TEST(crs, compoundCRS_identify_db) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, "unrelated name"),
             sourceCRS->componentReferenceSystems());
         auto res = crs->identify(factory);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
         EXPECT_EQ(res.front().second, 70);
     }
@@ -3261,7 +3261,7 @@ TEST(crs, boundCRS_to_WKT2) {
               GeographicCRS::EPSG_4326->nameStr());
 
     auto values = crs->transformation()->parameterValues();
-    ASSERT_EQ(values.size(), 7);
+    ASSERT_EQ(values.size(), 7U);
     {
         const auto &opParamvalue =
             nn_dynamic_pointer_cast<OperationParameterValue>(values[0]);
@@ -3586,7 +3586,7 @@ TEST(crs, boundCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         auto boundCRS = dynamic_cast<const BoundCRS *>(res.front().first.get());
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 2106);
@@ -3622,7 +3622,7 @@ TEST(crs, boundCRS_identify_db) {
         auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         auto res = crs->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1);
+        ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().second, 25);
         auto wkt = crs->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
@@ -4851,7 +4851,7 @@ TEST(crs, crs_stripVerticalComponent) {
         auto crs = GeographicCRS::EPSG_4979->stripVerticalComponent();
         auto geogCRS = nn_dynamic_pointer_cast<GeographicCRS>(crs);
         ASSERT_TRUE(geogCRS != nullptr);
-        EXPECT_EQ(geogCRS->coordinateSystem()->axisList().size(), 2);
+        EXPECT_EQ(geogCRS->coordinateSystem()->axisList().size(), 2U);
     }
 
     {
@@ -4877,7 +4877,7 @@ TEST(crs, crs_stripVerticalComponent) {
         auto projCRS = nn_dynamic_pointer_cast<ProjectedCRS>(
             projected3DCrs->stripVerticalComponent());
         ASSERT_TRUE(projCRS != nullptr);
-        EXPECT_EQ(projCRS->coordinateSystem()->axisList().size(), 2);
+        EXPECT_EQ(projCRS->coordinateSystem()->axisList().size(), 2U);
     }
 }
 
@@ -5037,14 +5037,14 @@ TEST(crs, getNonDeprecated) {
             Conversion::createUTM(PropertyMap(), 31, true),
             CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
         auto list = crs->getNonDeprecated(dbContext);
-        ASSERT_EQ(list.size(), 0);
+        ASSERT_EQ(list.size(), 0U);
     }
 
     {
         // Non-deprecated
         auto crs = factory->createGeodeticCRS("4326");
         auto list = crs->getNonDeprecated(dbContext);
-        ASSERT_EQ(list.size(), 0);
+        ASSERT_EQ(list.size(), 0U);
     }
 
     {
@@ -5052,29 +5052,29 @@ TEST(crs, getNonDeprecated) {
         auto crs = BoundCRS::createFromTOWGS84(
             createProjected(), std::vector<double>{1, 2, 3, 4, 5, 6, 7});
         auto list = crs->getNonDeprecated(dbContext);
-        ASSERT_EQ(list.size(), 0);
+        ASSERT_EQ(list.size(), 0U);
     }
 
     {
         auto crs = factory->createGeodeticCRS("4226");
         auto list = crs->getNonDeprecated(dbContext);
-        ASSERT_EQ(list.size(), 2);
+        ASSERT_EQ(list.size(), 2U);
     }
 
     {
         auto crs = factory->createProjectedCRS("26591");
         auto list = crs->getNonDeprecated(dbContext);
-        ASSERT_EQ(list.size(), 1);
+        ASSERT_EQ(list.size(), 1U);
     }
 
     {
         auto crs = factory->createVerticalCRS("5704");
         auto list = crs->getNonDeprecated(dbContext);
-        ASSERT_EQ(list.size(), 1);
+        ASSERT_EQ(list.size(), 1U);
     }
     {
         auto crs = factory->createCompoundCRS("7401");
         auto list = crs->getNonDeprecated(dbContext);
-        ASSERT_EQ(list.size(), 1);
+        ASSERT_EQ(list.size(), 1U);
     }
 }

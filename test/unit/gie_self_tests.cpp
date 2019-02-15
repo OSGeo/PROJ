@@ -181,7 +181,7 @@ TEST(gie, cart_selftest) {
     n = proj_trans_generic(P, PJ_FWD, &(obs[0].lpz.lam), sz, 2,
                            &(obs[0].lpz.phi), sz, 2, &(obs[0].lpz.z), sz, 2, 0,
                            sz, 0);
-    ASSERT_EQ(n, 2);
+    ASSERT_EQ(n, 2U);
 
     ASSERT_EQ(a.lpz.lam, obs[0].lpz.lam);
     ASSERT_EQ(a.lpz.phi, obs[0].lpz.phi);
@@ -197,7 +197,7 @@ TEST(gie, cart_selftest) {
     t = 33;
     n = proj_trans_generic(P, PJ_FWD, &(obs[0].lpz.lam), sz, 2,
                            &(obs[0].lpz.phi), sz, 2, &h, 0, 1, &t, 0, 1);
-    ASSERT_EQ(n, 2);
+    ASSERT_EQ(n, 2U);
 
     ASSERT_EQ(a.lpz.lam, obs[0].lpz.lam);
     ASSERT_EQ(a.lpz.phi, obs[0].lpz.phi);

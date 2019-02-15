@@ -370,7 +370,7 @@ TEST(datum, datum_ensemble) {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "test"),
         std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326, otherDatum},
         PositionalAccuracy::create("100"));
-    EXPECT_EQ(ensemble->datums().size(), 2);
+    EXPECT_EQ(ensemble->datums().size(), 2U);
     EXPECT_EQ(ensemble->positionalAccuracy()->value(), "100");
     EXPECT_THROW(ensemble->exportToWKT(WKTFormatter::create().get()),
                  FormattingException);

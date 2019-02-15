@@ -5,7 +5,7 @@ option(USE_EXTERNAL_GTEST "Compile against external GTest" OFF)
 if (USE_EXTERNAL_GTEST)
 
 message(STATUS "Using external GTest")
-find_package(GTest 1.8.0)
+find_package(GTest 1.8.1 CONFIG REQUIRED)
 
 else (USE_EXTERNAL_GTEST)
 
@@ -42,21 +42,19 @@ endif()
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # Add googletest directly to our build. This defines
 # the gtest and gtest_main targets.
+option(INSTALL_GTEST "Enable installation of googletest" OFF)
 add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  ${CMAKE_BINARY_DIR}/googletest-build
                  EXCLUDE_FROM_ALL)
-# The gtest/gtest_main targets carry header search path
-# dependencies automatically when using CMake 2.8.11 or
-# later. Otherwise we have to add them here ourselves.
-if (CMAKE_VERSION VERSION_LESS 2.8.11)
-  include_directories("${gtest_SOURCE_DIR}/include")
-endif()
 
 # FIXME: Deal with our old-school CMakeLists.txt behaving badly
 set(CMAKE_C_FLAGS "${_save_c_flags}")
 set(CMAKE_CXX_FLAGS "${_save_cxx_flags}")
 unset(_save_c_flags)
 unset(_save_cxx_flags)
+
+# Provide the same target name as find_package(GTest)
+add_library(GTest::gtest ALIAS gtest)
 
 endif(USE_EXTERNAL_GTEST)
 
@@ -75,7 +73,7 @@ add_executable(proj_pj_transform_test
   main.cpp
   pj_transform_test.cpp)
 target_link_libraries(proj_pj_transform_test
-  gtest
+  GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME proj_pj_transform_test COMMAND proj_pj_transform_test)
 
@@ -83,7 +81,7 @@ add_executable(proj_errno_string_test
   main.cpp
   proj_errno_string_test.cpp)
 target_link_libraries(proj_errno_string_test
-  gtest
+  GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME proj_errno_string_test COMMAND proj_errno_string_test)
 
@@ -91,7 +89,7 @@ add_executable(proj_angular_io_test
     main.cpp
     proj_angular_io_test.cpp)
 target_link_libraries(proj_angular_io_test
-    gtest
+    GTest::gtest
     ${PROJ_LIBRARIES})
 add_test(NAME proj_angular_io_test COMMAND proj_angular_io_test)
 
@@ -99,7 +97,7 @@ add_executable(proj_context_test
     main.cpp
     proj_context_test.cpp)
 target_link_libraries(proj_context_test
-    gtest
+    GTest::gtest
     ${PROJ_LIBRARIES})
 add_test(NAME proj_context_test COMMAND proj_context_test)
 
@@ -110,7 +108,7 @@ add_executable(pj_phi2_test
         main.cpp
         pj_phi2_test.cpp)
 target_link_libraries(pj_phi2_test
-        gtest
+        GTest::gtest
         ${PROJ_LIBRARIES})
 add_test(NAME pj_phi2_test COMMAND pj_phi2_test)
 endif()
@@ -127,7 +125,7 @@ add_executable(proj_test_cpp_api
   test_factory.cpp
   test_c_api.cpp)
 target_link_libraries(proj_test_cpp_api
-  gtest
+  GTest::gtest
   ${PROJ_LIBRARIES}
   ${SQLITE3_LIBRARY})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
@@ -136,6 +134,6 @@ add_executable(gie_self_tests
   main.cpp
   gie_self_tests.cpp)
 target_link_libraries(gie_self_tests
-  gtest
+  GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME gie_self_tests COMMAND gie_self_tests)

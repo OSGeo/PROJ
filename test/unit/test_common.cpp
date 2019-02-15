@@ -96,9 +96,9 @@ TEST(common, identifiedobject) {
     properties.set(IdentifiedObject::DEPRECATED_KEY, true);
     auto obj = OperationParameter::create(properties);
     EXPECT_EQ(*(obj->name()->description()), "name");
-    ASSERT_EQ(obj->identifiers().size(), 1);
+    ASSERT_EQ(obj->identifiers().size(), 1U);
     EXPECT_EQ(obj->identifiers()[0]->code(), "identifier_code");
-    ASSERT_EQ(obj->aliases().size(), 1);
+    ASSERT_EQ(obj->aliases().size(), 1U);
     EXPECT_EQ(obj->aliases()[0]->toString(), "alias");
     EXPECT_EQ(obj->remarks(), "remarks");
     EXPECT_TRUE(obj->isDeprecated());
@@ -141,7 +141,7 @@ TEST(common, identifiedobject_identifier_array_of_identifier) {
     array->add(Identifier::create("identifier_code2"));
     properties.set(IdentifiedObject::IDENTIFIERS_KEY, array);
     auto obj = OperationParameter::create(properties);
-    ASSERT_EQ(obj->identifiers().size(), 2);
+    ASSERT_EQ(obj->identifiers().size(), 2U);
     EXPECT_EQ(obj->identifiers()[0]->code(), "identifier_code1");
     EXPECT_EQ(obj->identifiers()[1]->code(), "identifier_code2");
 }
@@ -164,7 +164,7 @@ TEST(common, identifiedobject_alias_array_of_string) {
     properties.set(IdentifiedObject::ALIAS_KEY,
                    std::vector<std::string>{"alias1", "alias2"});
     auto obj = OperationParameter::create(properties);
-    ASSERT_EQ(obj->aliases().size(), 2);
+    ASSERT_EQ(obj->aliases().size(), 2U);
     EXPECT_EQ(obj->aliases()[0]->toString(), "alias1");
     EXPECT_EQ(obj->aliases()[1]->toString(), "alias2");
 }
