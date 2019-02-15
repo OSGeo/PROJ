@@ -110,8 +110,13 @@ Compilation and installation from source code
 
 The classical way of installing PROJ is via the source code distribution. The
 most recent version is available from the :ref:`download page<current_release>`.
+
+PROJ requires C and C++11 compilers. It also requires SQLite3 (headers,
+library and executable).
+
 You will need that and at least the standard *proj-datumgrid* package for a
 successful installation.
+
 The following guides show how to compile and install the software using the
 Autotools and CMake build systems.
 
@@ -186,6 +191,16 @@ From the build directory you can now configure CMake and build the binaries::
 On Windows, one may need to specify generator::
 
     cmake -G "Visual Studio 15 2017" ..
+
+If the SQLite3 dependency is installed in a custom location, specify the
+paths to the include directory and the library::
+
+    cmake -DSQLITE3_INCLUDE_DIR=/opt/SQLite/include -DSQLITE3_LIBRARY=/opt/SQLite/lib/libsqlite3.so ..
+
+Alternatively, the custom prefix for SQLite3 can be specified::
+
+    cmake -DCMAKE_PREFIX_PATH=/opt/SQLite ..
+
 
 Tests are run with::
 
