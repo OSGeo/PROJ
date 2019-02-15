@@ -20,8 +20,6 @@ set(PROJ_DICTIONARY  world
 file(GLOB GSB_FILES  *.gsb)
 file(GLOB GTX_FILES  *.gtx)
 set(GRIDSHIFT_FILES ${GSB_FILES} ${GTX_FILES})
-set(GRIDSHIFT_FILES ${GRIDSHIFT_FILES}
-                     )
 
 set(ALL_SQL_IN "${CMAKE_CURRENT_SOURCE_DIR}/all.sql.in")
 set(PROJ_DB "${CMAKE_CURRENT_SOURCE_DIR}/proj.db")
