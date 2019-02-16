@@ -818,23 +818,6 @@ std::string pj_add_type_crs_if_needed(const std::string& str)
 }
 
 /*****************************************************************************/
-static PJ* op_to_pj(PJ_CONTEXT* ctx, PJ* op)
-/*****************************************************************************/
-{
-    auto proj_string = proj_as_proj_string(ctx, op, PJ_PROJ_5, nullptr);
-    if( !proj_string) {
-        return nullptr;
-    }
-
-    if( proj_string[0] == '\0' ) {
-        /* Null transform ? */
-        return proj_create(ctx, "proj=affine");
-    } else {
-        return proj_create(ctx, proj_string);
-    }
-}
-
-/*****************************************************************************/
 static void reproject_bbox(PJ* pjGeogToCrs,
                           double west_lon, double south_lat,
                           double east_lon, double north_lat,
@@ -890,7 +873,7 @@ static void reproject_bbox(PJ* pjGeogToCrs,
 
 
 /*****************************************************************************/
-static PJ* add_coord_op_to_list(PJ_CONTEXT* ctx, PJ* op,
+static PJ* add_coord_op_to_list(PJ* op,
                             double west_lon, double south_lat,
                             double east_lon, double north_lat,
                             PJ* pjGeogToSrc,
@@ -916,15 +899,10 @@ static PJ* add_coord_op_to_list(PJ_CONTEXT* ctx, PJ* op,
     {
         const char* c_name = proj_get_name(op);
         std::string name(c_name ? c_name : "");
-        auto pj = op_to_pj(ctx, op);
-        proj_destroy(op);
+        altCoordOps.emplace_back(minxSrc, minySrc, maxxSrc, maxySrc,
+                                    minxDst, minyDst, maxxDst, maxyDst,
+                                    op, name);
         op = nullptr;
-        if( pj )
-        {
-            altCoordOps.emplace_back(minxSrc, minySrc, maxxSrc, maxySrc,
-                                     minxDst, minyDst, maxxDst, maxyDst,
-                                     pj, name);
-        }
     }
     return op;
 }
@@ -988,9 +966,7 @@ static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, PJ* crs) {
     auto opGeogToCrs = proj_list_get(ctx, op_list_to_geodetic, 0);
     assert(opGeogToCrs);
     proj_list_destroy(op_list_to_geodetic);
-    auto P = op_to_pj(ctx, opGeogToCrs);
-    proj_destroy(opGeogToCrs);
-    return P;
+    return opGeogToCrs;
 }
 
 /*****************************************************************************/
@@ -1072,13 +1048,8 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         return nullptr;
     }
 
-    PJ* P;
-    {
-        auto op = proj_list_get(ctx, op_list, 0);
-        assert(op);
-        P = op_to_pj(ctx, op);
-        proj_destroy(op);
-    }
+    PJ* P = proj_list_get(ctx, op_list, 0);
+    assert(P);
 
     if( P == nullptr || op_count == 1 || (area && area->bbox_set) ||
         proj_get_type(src) == PJ_TYPE_GEOCENTRIC_CRS ||
@@ -1141,7 +1112,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
             {
                 if( west_lon <= east_lon )
                 {
-                    op = add_coord_op_to_list(ctx, op,
+                    op = add_coord_op_to_list(op,
                         west_lon, south_lat, east_lon, north_lat,
                         pjGeogToSrc, pjGeogToDst,
                         P->alternativeCoordinateOperations);
@@ -1150,11 +1121,11 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
                 {
                     auto op_clone = proj_clone(ctx, op);
 
-                    op = add_coord_op_to_list(ctx, op,
+                    op = add_coord_op_to_list(op,
                         west_lon, south_lat, 180, north_lat,
                         pjGeogToSrc, pjGeogToDst,
                         P->alternativeCoordinateOperations);
-                    op_clone = add_coord_op_to_list(ctx, op_clone,
+                    op_clone = add_coord_op_to_list(op_clone,
                         -180, south_lat, east_lon, north_lat,
                         pjGeogToSrc, pjGeogToDst,
                         P->alternativeCoordinateOperations);
