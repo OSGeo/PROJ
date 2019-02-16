@@ -680,6 +680,18 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     EXPECT_EQ(P->fwd3d, nullptr);
     EXPECT_EQ(P->fwd4d, nullptr);
 
+    // get source CRS even if the P object is in a dummy state
+    auto src_crs = proj_get_source_crs(PJ_DEFAULT_CTX, P);
+    EXPECT_TRUE(src_crs != nullptr);
+    EXPECT_EQ(proj_get_name(src_crs), std::string("Pulkovo 1942(58)"));
+    proj_destroy(src_crs);
+
+    // get target CRS even if the P object is in a dummy state
+    auto target_crs = proj_get_target_crs(PJ_DEFAULT_CTX, P);
+    EXPECT_TRUE(target_crs != nullptr);
+    EXPECT_EQ(proj_get_name(target_crs), std::string("ETRS89"));
+    proj_destroy(target_crs);
+
     // Romania
     c.xyz.x = 45; // Lat
     c.xyz.y = 25; // Long

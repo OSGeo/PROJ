@@ -1736,6 +1736,10 @@ PJ *proj_get_source_crs(PJ_CONTEXT *ctx, const PJ *obj) {
         }
         return nullptr;
     }
+    if (!obj->alternativeCoordinateOperations.empty()) {
+        return proj_get_source_crs(ctx,
+                                   obj->alternativeCoordinateOperations[0].pj);
+    }
     proj_log_error(ctx, __FUNCTION__,
                    "Object is not a BoundCRS or a CoordinateOperation");
     return nullptr;
@@ -1770,6 +1774,10 @@ PJ *proj_get_target_crs(PJ_CONTEXT *ctx, const PJ *obj) {
             return pj_obj_create(ctx, NN_NO_CHECK(targetCRS));
         }
         return nullptr;
+    }
+    if (!obj->alternativeCoordinateOperations.empty()) {
+        return proj_get_target_crs(ctx,
+                                   obj->alternativeCoordinateOperations[0].pj);
     }
     proj_log_error(ctx, __FUNCTION__,
                    "Object is not a BoundCRS or a CoordinateOperation");
