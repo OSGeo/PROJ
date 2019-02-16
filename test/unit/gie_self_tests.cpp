@@ -258,6 +258,12 @@ TEST_F(gieTest, proj_create_crs_to_crs) {
     a = proj_trans(P, PJ_FWD, a);
     EXPECT_NEAR(a.xy.x, b.xy.x, 1e-9);
     EXPECT_NEAR(a.xy.y, b.xy.y, 1e-9);
+
+    auto src = proj_get_source_crs(PJ_DEFAULT_CTX, P);
+    ASSERT_TRUE(src != nullptr);
+    EXPECT_EQ(proj_get_name(src), std::string("ETRS89 / UTM zone 32N"));
+    proj_destroy(src);
+
     proj_destroy(P);
 
     /* we can also allow PROJ strings as a usable PJ */
