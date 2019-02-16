@@ -42,17 +42,15 @@ build_script:
 
 test_script:
   - echo test_script
-  - set PROJ_LIB=C:\projects\proj-4\data
+  - if "%platform%" == "x64" cd build_dll
+  - if "%platform%" == "x86" cd build_static
   - set CURDIR=%CD%
+  - set PROJ_LIB=%CD%\install\share
   - cd %PROJ_LIB%
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.7.zip
   - 7z e -aoa -y proj-datumgrid-1.7.zip
   - dir
-  - cd ..
   - cd %CURDIR%
-#
-  - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x86" cd build_static
   - ctest -V -C Release
   - cd ..
 
