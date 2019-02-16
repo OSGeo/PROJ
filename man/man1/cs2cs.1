@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CS2CS" "1" "Sep 10, 2018" "5.2.0" "PROJ.4"
+.TH "CS2CS" "1" "Feb 14, 2019" "6.0.0" "PROJ.4"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .
@@ -36,11 +36,35 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fBcs2cs\fP [ \fB\-eEfIlrstvwW\fP [ args ] ] [ \fI+opts[=arg]\fP ] [ +to [\fI+opts[=arg]\fP] ] file[s]
 .UNINDENT
 .UNINDENT
+.sp
+or
+.INDENT 0.0
+.INDENT 3.5
+\fBcs2cs\fP [ \fB\-eEfIlrstvwW\fP [ args ] ] {source_crs} +to {target_crs} file[s]
+.sp
+where {source_crs} or {target_crs} is a PROJ string, a WKT string or a AUTHORITY:CODE
+(where AUTHORITY is the name of a CRS authority and CODE the code of a CRS
+found in the proj.db database), expressing a coordinate reference system.
+.UNINDENT
+.UNINDENT
+.sp
+New in version 6.0.0.
+
+.sp
+or
+.INDENT 0.0
+.INDENT 3.5
+\fBcs2cs\fP [ \fB\-eEfIlrstvwW\fP [ args ] ] {source_crs} {target_crs}
+.UNINDENT
+.UNINDENT
+.sp
+New in version 6.0.0.
+
 .SH DESCRIPTION
 .sp
 \fBcs2cs\fP performs transformation between the source and destination
-cartographic coordinate system on a set of input points. The coordinate
-system transformation can include translation between projected and
+cartographic coordinate reference system on a set of input points. The coordinate
+reference system transformation can include translation between projected and
 geographic coordinates as well as the application of datum shifts.
 .sp
 The following control parameters can appear in any order:
@@ -153,22 +177,25 @@ the program to be printed prior to input data.
 The \fI+args\fP run\-line arguments are associated with cartographic
 parameters.
 .sp
-The \fBcs2cs\fP program requires two coordinate system definitions. The first (or
+The \fBcs2cs\fP program requires two coordinate reference system (CRS) definitions. The first (or
 primary is defined based on all projection parameters not appearing after the
 \fI+to\fP argument. All projection parameters appearing after the \fI+to\fP argument
-are considered the definition of the second coordinate system. If there is no
-second coordinate system defined, a geographic coordinate system based on the
-datum and ellipsoid of the source coordinate system is assumed. Note that the
-source and destination coordinate system can both be projections, both be
-geographic, or one of each and may have the same or different datums.
+are considered the definition of the second CRS. If there is no
+second CRS defined, a geographic CRS based on the
+datum and ellipsoid of the source CRS is assumed. Note that the
+source and destination CRS can both of same or different nature (geographic,
+projected, compound CRS), or one of each and may have the same or different datums.
 .sp
-Additional projection control parameters may be contained in two auxiliary
-control files: the first is optionally referenced with the
-\fI+init=file:id\fP and the second is always processed after the name of the
-projection has been established from either the run\-line or the contents of
-\fI+init\fP file. The environment parameter \fBPROJ_LIB\fP establishes the default
-directory for a file reference without an absolute path. This is also used
-for supporting files like datum shift files.
+When using a WKT definition or a AUTHORITY:CODE, the axis order of the CRS will
+be enforced. So for example if using EPSG:4326, the first value expected (or
+returned) will be a latitude.
+.sp
+Internally, \fBcs2cs\fP uses the \fBproj_create_crs_to_crs()\fP function
+to compute the appropriate coordinate operation, so implementation details of
+this function directly impact the results returned by the program.
+.sp
+The environment parameter \fBPROJ_LIB\fP establishes the
+directory for resource files (database, datum shift grids, etc.)
 .sp
 One or more files (processed in left to right order) specify the source of
 data to be transformed. A \fB\-\fP will specify the location of processing standard
@@ -183,7 +210,8 @@ ellipsoid major axis or sphere radius units. Output geographic coordinates will
 normally be in DMS format (use \fB\-f %.12f\fP for decimal degrees with 12 decimal
 places), while projected (cartesian) coordinates will be in linear
 (meter, feet) units.
-.SH EXAMPLE
+.SH EXAMPLES
+.SS Using PROJ strings
 .sp
 The following script
 .INDENT 0.0
@@ -210,14 +238,41 @@ The x\-y output data will appear as three lines of:
 .sp
 .nf
 .ft C
-1402285.98  5076292.42 \-0.00
+1402293.44  5076292.68 0.00
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS Using EPSG codes
+.sp
+Transforming from WGS 84 latitude/longitude (in that order) to UTM Zone 31N/WGS 84
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+cs2cs EPSG:4326 EPSG:32631 <<EOF
+45N 2E
+EOF
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+outputs
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+421184.70   4983436.77 0.00
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .SH SEE ALSO
 .sp
-\fBproj(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP
+\fBproj(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBprojinfo(1)\fP
 .SH BUGS
 .sp
 A list of know bugs can be found at \fI\%https://github.com/OSGeo/proj.4/issues\fP
@@ -228,6 +283,6 @@ where new bug reports can be submitted to.
 .SH AUTHOR
 Frank Warmerdam
 .SH COPYRIGHT
-1983-2018
+1983-2019
 .\" Generated by docutils manpage writer.
 .
