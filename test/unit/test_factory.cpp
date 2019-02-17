@@ -1612,7 +1612,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             {
                 auto ctxt =
                     CoordinateOperationContext::create(factory, nullptr, 0);
-                ctxt->setAllowUseIntermediateCRS(false);
+                ctxt->setAllowUseIntermediateCRS(
+                    CoordinateOperationContext::IntermediateCRSUse::NEVER);
                 res = CoordinateOperationFactory::create()->createOperations(
                     srcCRS, targetCRS, ctxt);
                 EXPECT_EQ(res.size(), 1U);

@@ -1475,7 +1475,8 @@ PJ *proj_crs_create_bound_crs(PJ_CONTEXT *ctx, const PJ *base_crs,
  * @param options null-terminated list of options, or NULL. Currently
  * supported options are:
  * <ul>
- * <li>ALLOW_INTERMEDIATE_CRS=YES/NO. Defaults to NO. When set to YES,
+ * <li>ALLOW_INTERMEDIATE_CRS=ALWAYS/IF_NO_DIRECT_TRANSFORMATION/NEVER. Defaults
+ * to NEVER. When set to ALWAYS/IF_NO_DIRECT_TRANSFORMATION,
  * intermediate CRS may be considered when computing the possible
  * transformations. Slower.</li>
  * </ul>
@@ -1493,11 +1494,18 @@ PJ *proj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx, const PJ *crs,
     }
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        bool allowIntermediateCRS = false;
+        CoordinateOperationContext::IntermediateCRSUse allowIntermediateCRS =
+            CoordinateOperationContext::IntermediateCRSUse::NEVER;
         for (auto iter = options; iter && iter[0]; ++iter) {
             const char *value;
             if ((value = getOptionValue(*iter, "ALLOW_INTERMEDIATE_CRS="))) {
-                allowIntermediateCRS = ci_equal(value, "YES");
+                if (ci_equal(value, "YES") || ci_equal(value, "ALWAYS")) {
+                    allowIntermediateCRS =
+                        CoordinateOperationContext::IntermediateCRSUse::ALWAYS;
+                } else if (ci_equal(value, "IF_NO_DIRECT_TRANSFORMATION")) {
+                    allowIntermediateCRS = CoordinateOperationContext::
+                        IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
+                }
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;
@@ -6378,22 +6386,36 @@ void proj_operation_factory_context_set_use_proj_alternative_grid_names(
  * The current implementation is limited to researching one intermediate
  * step.
  *
- * By default, all potential C candidates will be used.
- * proj_operation_factory_context_set_allowed_intermediate_crs()
- * can be used to restrict them.
- *
- * The default is true.
+ * By default, with the IF_NO_DIRECT_TRANSFORMATION stratgey, all potential
+ * C candidates will be used if there is no direct tranformation.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param factory_ctx Operation factory context. must not be NULL
- * @param allow whether intermediate CRS may be used.
+ * @param use whether and how intermediate CRS may be used.
  */
 void proj_operation_factory_context_set_allow_use_intermediate_crs(
-    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx, int allow) {
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    PROJ_INTERMEDIATE_CRS_USE use) {
     SANITIZE_CTX(ctx);
     assert(factory_ctx);
     try {
-        factory_ctx->operationContext->setAllowUseIntermediateCRS(allow != 0);
+        switch (use) {
+        case PROJ_INTERMEDIATE_CRS_USE_ALWAYS:
+            factory_ctx->operationContext->setAllowUseIntermediateCRS(
+                CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
+            break;
+
+        case PROJ_INTERMEDIATE_CRS_USE_IF_NO_DIRECT_TRANSFORMATION:
+            factory_ctx->operationContext->setAllowUseIntermediateCRS(
+                CoordinateOperationContext::IntermediateCRSUse::
+                    IF_NO_DIRECT_TRANSFORMATION);
+            break;
+
+        case PROJ_INTERMEDIATE_CRS_USE_NEVER:
+            factory_ctx->operationContext->setAllowUseIntermediateCRS(
+                CoordinateOperationContext::IntermediateCRSUse::NEVER);
+            break;
+        }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }

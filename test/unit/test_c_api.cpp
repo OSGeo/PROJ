@@ -1389,7 +1389,7 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
         ASSERT_NE(ctxt, nullptr);
         ContextKeeper keeper_ctxt(ctxt);
         proj_operation_factory_context_set_allow_use_intermediate_crs(
-            m_ctxt, ctxt, false);
+            m_ctxt, ctxt, PROJ_INTERMEDIATE_CRS_USE_NEVER);
 
         auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
@@ -1444,6 +1444,8 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
             m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
         proj_operation_factory_context_set_grid_availability_use(
             m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+        proj_operation_factory_context_set_allow_use_intermediate_crs(
+            m_ctxt, ctxt, PROJ_INTERMEDIATE_CRS_USE_ALWAYS);
 
         auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);

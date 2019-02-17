@@ -88,8 +88,8 @@ static void usage() {
         << "                [--grid-check none|discard_missing|sort] "
            "[--show-superseded]"
         << std::endl
-        << "                [--pivot-crs none|{auth:code[,auth:code]*}]"
-        << std::endl
+        << "                [--pivot-crs always|if_no_direct_transformation|"
+        << "never|{auth:code[,auth:code]*}]" << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
@@ -139,7 +139,7 @@ static std::string c_ify_string(const std::string &str) {
 static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
                                    const std::string &user_string,
                                    bool kindIsCRS, const std::string &context,
-                                   bool buildBoundCRSToWGS84, bool allowPivots,
+                                   bool buildBoundCRSToWGS84, CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
                                    bool quiet) {
     BaseObjectPtr obj;
 
@@ -213,7 +213,7 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
     if (buildBoundCRSToWGS84) {
         auto crs = std::dynamic_pointer_cast<CRS>(obj);
         if (crs) {
-            obj = crs->createBoundCRSToWGS84IfPossible(dbContext, allowPivots)
+            obj = crs->createBoundCRSToWGS84IfPossible(dbContext, allowUseIntermediateCRS)
                       .as_nullable();
         }
     }
@@ -224,7 +224,7 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
 // ---------------------------------------------------------------------------
 
 static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
-                         bool allowPivots, const OutputOptions &outputOpt) {
+                         CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS, const OutputOptions &outputOpt) {
 
     auto identified = dynamic_cast<const IdentifiedObject *>(obj.get());
     if (!outputOpt.quiet && identified && identified->isDeprecated()) {
@@ -272,7 +272,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                     objToExport =
                         nn_dynamic_pointer_cast<IPROJStringExportable>(
                             crs->createBoundCRSToWGS84IfPossible(dbContext,
-                                                                 allowPivots));
+                                                                 allowUseIntermediateCRS));
                 }
                 if (!objToExport) {
                     objToExport = projStringExportable;
@@ -412,7 +412,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (crs) {
                     objToExport = nn_dynamic_pointer_cast<IWKTExportable>(
                         crs->createBoundCRSToWGS84IfPossible(dbContext,
-                                                             allowPivots));
+                                                             allowUseIntermediateCRS));
                 }
                 if (!objToExport) {
                     objToExport = wktExportable;
@@ -516,12 +516,14 @@ static void outputOperations(
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
-    bool allowPivots,
+    CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
     bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
     auto sourceObj = buildObject(dbContext, sourceCRSStr, true, "source CRS",
-                                 false, false, outputOpt.quiet);
+                                 false,
+                                 CoordinateOperationContext::IntermediateCRSUse::NEVER,
+                                 outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
@@ -529,7 +531,9 @@ static void outputOperations(
     }
 
     auto targetObj = buildObject(dbContext, targetCRSStr, true, "target CRS",
-                                 false, false, outputOpt.quiet);
+                                 false,
+                                 CoordinateOperationContext::IntermediateCRSUse::NEVER,
+                                 outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -548,7 +552,7 @@ static void outputOperations(
         ctxt->setSpatialCriterion(spatialCriterion);
         ctxt->setSourceAndTargetCRSExtentUse(crsExtentUse);
         ctxt->setGridAvailabilityUse(gridAvailabilityUse);
-        ctxt->setAllowUseIntermediateCRS(allowPivots);
+        ctxt->setAllowUseIntermediateCRS(allowUseIntermediateCRS);
         ctxt->setIntermediateCRS(pivots);
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         ctxt->setDiscardSuperseded(!showSuperseded);
@@ -560,7 +564,7 @@ static void outputOperations(
         std::exit(1);
     }
     if (outputOpt.quiet && !list.empty()) {
-        outputObject(dbContext, list[0], allowPivots, outputOpt);
+        outputObject(dbContext, list[0], allowUseIntermediateCRS, outputOpt);
         return;
     }
     if (summary) {
@@ -586,7 +590,7 @@ static void outputOperations(
             }
             outputOperationSummary(op);
             std::cout << std::endl;
-            outputObject(dbContext, op, allowPivots, outputOpt);
+            outputObject(dbContext, op, allowUseIntermediateCRS, outputOpt);
         }
     }
 }
@@ -617,7 +621,8 @@ int main(int argc, char **argv) {
     bool buildBoundCRSToWGS84 = false;
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse =
         CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
-    bool allowPivots = true;
+    CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS =
+    CoordinateOperationContext::IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
     std::vector<std::pair<std::string, std::string>> pivots;
     bool usePROJGridAlternatives = true;
     std::string mainDBPath;
@@ -814,8 +819,15 @@ int main(int argc, char **argv) {
         } else if (arg == "--pivot-crs" && i + 1 < argc) {
             i++;
             auto value(argv[i]);
-            if (ci_equal(std::string(value), "none")) {
-                allowPivots = false;
+            if (ci_equal(std::string(value), "always")) {
+                allowUseIntermediateCRS =
+                    CoordinateOperationContext::IntermediateCRSUse::ALWAYS;
+            } else if (ci_equal(std::string(value), "if_no_direct_transformation")) {
+                allowUseIntermediateCRS =
+                    CoordinateOperationContext::IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
+            } else if (ci_equal(std::string(value), "never")) {
+                allowUseIntermediateCRS =
+                    CoordinateOperationContext::IntermediateCRSUse::NEVER;
             } else {
                 auto splitValue(split(value, ','));
                 for (const auto &v : splitValue) {
@@ -915,7 +927,7 @@ int main(int argc, char **argv) {
 
     if (!user_string.empty()) {
         auto obj(buildObject(dbContext, user_string, kindIsCRS, "input string",
-                             buildBoundCRSToWGS84, allowPivots,
+                             buildBoundCRSToWGS84, allowUseIntermediateCRS,
                              outputOpt.quiet));
         if (guessDialect) {
             auto dialect = WKTParser().guessDialect(user_string);
@@ -933,7 +945,7 @@ int main(int argc, char **argv) {
             }
             std::cout << std::endl;
         }
-        outputObject(dbContext, obj, allowPivots, outputOpt);
+        outputObject(dbContext, obj, allowUseIntermediateCRS, outputOpt);
         if (identify) {
             auto crs = dynamic_cast<CRS *>(obj.get());
             if (crs) {
@@ -1043,7 +1055,7 @@ int main(int argc, char **argv) {
 
         outputOperations(
             dbContext, sourceCRSStr, targetCRSStr, bboxFilter, spatialCriterion,
-            crsExtentUse, gridAvailabilityUse, allowPivots, pivots, authority,
+            crsExtentUse, gridAvailabilityUse, allowUseIntermediateCRS, pivots, authority,
             usePROJGridAlternatives, showSuperseded, outputOpt, summary);
     }
 
