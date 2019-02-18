@@ -4185,7 +4185,8 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
-    ctxt->setAllowUseIntermediateCRS(false);
+    ctxt->setAllowUseIntermediateCRS(
+        CoordinateOperationContext::IntermediateCRSUse::NEVER);
 
     // Directly found in database
     {
@@ -4241,7 +4242,8 @@ TEST(operation, geogCRS_to_geogCRS_context_match_by_name) {
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
-    ctxt->setAllowUseIntermediateCRS(false);
+    ctxt->setAllowUseIntermediateCRS(
+        CoordinateOperationContext::IntermediateCRSUse::NEVER);
     auto NAD27 = GeographicCRS::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY,
                           GeographicCRS::EPSG_4267->nameStr()),
@@ -4581,6 +4583,8 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setAllowUseIntermediateCRS(
+        CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4807"), // NTF(Paris)
         authFactory->createCoordinateReferenceSystem("4171"), // RGF93
@@ -4644,6 +4648,8 @@ TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setAllowUseIntermediateCRS(
+        CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4149"), // CH1903
         authFactory->createCoordinateReferenceSystem("4150"), // CH1903+
@@ -5127,6 +5133,8 @@ TEST(operation,
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setAllowUseIntermediateCRS(
+        CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4807"),  // NTF(Paris)
         authFactory->createCoordinateReferenceSystem("32631"), // UTM31 WGS84
@@ -6205,6 +6213,8 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setAllowUseIntermediateCRS(
+        CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
     auto list = CoordinateOperationFactory::create()->createOperations(
         AuthorityFactory::create(DatabaseContext::create(), "IGNF")
             ->createCoordinateReferenceSystem("LAMB1"),

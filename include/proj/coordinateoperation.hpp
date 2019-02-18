@@ -1726,9 +1726,22 @@ class PROJ_GCC_DLL CoordinateOperationContext {
 
     PROJ_DLL GridAvailabilityUse getGridAvailabilityUse() const;
 
-    PROJ_DLL void setAllowUseIntermediateCRS(bool use);
+    /** Describe if and how intermediate CRS should be used */
+    enum class IntermediateCRSUse {
+        /** Always search for intermediate CRS. */
+        ALWAYS,
 
-    PROJ_DLL bool getAllowUseIntermediateCRS() const;
+        /** Only attempt looking for intermediate CRS if there is no direct
+         * transformation available. */
+        IF_NO_DIRECT_TRANSFORMATION,
+
+        /* Do not attempt looking for intermediate CRS. */
+        NEVER,
+    };
+
+    PROJ_DLL void setAllowUseIntermediateCRS(IntermediateCRSUse use);
+
+    PROJ_DLL IntermediateCRSUse getAllowUseIntermediateCRS() const;
 
     PROJ_DLL void
     setIntermediateCRS(const std::vector<std::pair<std::string, std::string>>
