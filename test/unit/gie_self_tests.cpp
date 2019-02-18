@@ -256,8 +256,8 @@ TEST_F(gieTest, proj_create_crs_to_crs) {
     b.xy.y = 5999669.3036037628;
 
     a = proj_trans(P, PJ_FWD, a);
-    EXPECT_NEAR(a.xy.x, b.xy.x, 1e-9);
-    EXPECT_NEAR(a.xy.y, b.xy.y, 1e-9);
+    EXPECT_NEAR(a.xy.x, b.xy.x, 1e-8);
+    EXPECT_NEAR(a.xy.y, b.xy.y, 1e-8);
 
     auto src = proj_get_source_crs(PJ_DEFAULT_CTX, P);
     ASSERT_TRUE(src != nullptr);
@@ -419,11 +419,12 @@ TEST(gie, info_functions) {
     ASSERT_FALSE(proj_errno(P)); /* factors not created correctly */
 
     /* check a few key characteristics of the Mercator projection */
-    ASSERT_EQ(factors.angular_distortion,
-              0.0); /* angular distortion should be 0 */
-    ASSERT_EQ(factors.meridian_parallel_angle,
-              M_PI_2); /* Meridian/parallel angle should be 90 deg */
-    ASSERT_EQ(factors.meridian_convergence,
+    EXPECT_NEAR(factors.angular_distortion, 0.0, 1e-7)
+        << factors.angular_distortion; /* angular distortion should be 0 */
+    EXPECT_NEAR(factors.meridian_parallel_angle, M_PI_2, 1e-7)
+        << factors.meridian_parallel_angle; /* Meridian/parallel angle should be
+                                               90 deg */
+    EXPECT_EQ(factors.meridian_convergence,
               0.0); /* meridian convergence should be 0 */
 
     proj_destroy(P);

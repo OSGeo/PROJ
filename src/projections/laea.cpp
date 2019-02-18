@@ -82,7 +82,7 @@ eqcon:
         break;
     case N_POLE:
     case S_POLE:
-        if (q >= 0.) {
+        if (q >= 1e-15) {
             b = sqrt(q);
             xy.x = b * sinlam;
             xy.y = coslam * (Q->mode == S_POLE ? b : -b);
