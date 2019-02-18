@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 EXTRA_DIST = CMakeLists.txt
 
-noinst_HEADERS = gtest_include.h
+noinst_HEADERS = gtest_include.h test_primitives.hpp
 
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include -I$(top_srcdir)/test @GTEST_CFLAGS@ @SQLITE3_CFLAGS@
 AM_CXXFLAGS = @CXX_WFLAGS@ @NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG@
