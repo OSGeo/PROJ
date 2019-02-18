@@ -28,6 +28,8 @@
 
 #include "gtest_include.h"
 
+#include "test_primitives.hpp"
+
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
@@ -991,10 +993,12 @@ TEST(factory, AuthorityFactory_test_uom_9110) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     // This tests conversion from unit of measure EPSG:9110 DDD.MMSSsss
     auto crs = factory->createProjectedCRS("2172");
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=sterea +lat_0=53.0019444444444 +lon_0=21.5027777777778 "
-              "+k=0.9998 +x_0=4603000 +y_0=5806000 +ellps=krass +units=m "
-              "+no_defs +type=crs");
+    EXPECT_PRED_FORMAT2(
+        ComparePROJString,
+        crs->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=sterea +lat_0=53.0019444444444 +lon_0=21.5027777777778 "
+        "+k=0.9998 +x_0=4603000 +y_0=5806000 +ellps=krass +units=m "
+        "+no_defs +type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -1612,7 +1616,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             {
                 auto ctxt =
                     CoordinateOperationContext::create(factory, nullptr, 0);
-                ctxt->setAllowUseIntermediateCRS(false);
+                ctxt->setAllowUseIntermediateCRS(
+                    CoordinateOperationContext::IntermediateCRSUse::NEVER);
                 res = CoordinateOperationFactory::create()->createOperations(
                     srcCRS, targetCRS, ctxt);
                 EXPECT_EQ(res.size(), 1U);

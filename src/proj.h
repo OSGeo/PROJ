@@ -629,6 +629,19 @@ typedef enum {
     PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION
 } PROJ_SPATIAL_CRITERION;
 
+    /** Describe if and how intermediate CRS should be used */
+typedef enum {
+    /** Always search for intermediate CRS. */
+    PROJ_INTERMEDIATE_CRS_USE_ALWAYS,
+
+    /** Only attempt looking for intermediate CRS if there is no direct
+        * transformation available. */
+    PROJ_INTERMEDIATE_CRS_USE_IF_NO_DIRECT_TRANSFORMATION,
+
+    /* Do not attempt looking for intermediate CRS. */
+    PROJ_INTERMEDIATE_CRS_USE_NEVER,
+} PROJ_INTERMEDIATE_CRS_USE;
+
 /** Type of coordinate system. */
 typedef enum
 {
@@ -906,7 +919,7 @@ void PROJ_DLL proj_operation_factory_context_set_use_proj_alternative_grid_names
 void PROJ_DLL proj_operation_factory_context_set_allow_use_intermediate_crs(
     PJ_CONTEXT *ctx,
     PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
-    int allow);
+    PROJ_INTERMEDIATE_CRS_USE use);
 
 void PROJ_DLL proj_operation_factory_context_set_allowed_intermediate_crs(
     PJ_CONTEXT *ctx,

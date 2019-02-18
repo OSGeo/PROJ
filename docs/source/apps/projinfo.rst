@@ -21,7 +21,7 @@ Synopsis
     |    [--spatial-test contains|intersects]
     |    [--crs-extent-use none|both|intersection|smallest]
     |    [--grid-check none|discard_missing|sort] [--show-superseded]
-    |    [--pivot-crs none|{auth:code[,auth:code]*}]
+    |    [--pivot-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
     |    [--boundcrs-to-wgs84]
     |    [--main-db-path path] [--aux-db-path path]*
     |    [--identify]
@@ -157,13 +157,16 @@ The following control parameters can appear in any order:
 
     .. note:: only used for coordinate operation computation
 
-.. option:: --pivot-crs none|{auth:code[,auth:code]*}
+.. option:: --pivot-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}
 
     Determine if intermediate (pivot) CRS can be used when researching coordinate
     operation between 2 CRS. A typical example is the WGS84 pivot. By default,
-    projinfo will consider any potential pivot. If using the ``none`` strategy,
+    projinfo will consider any potential pivot if there is no direct transformation
+    ( ``if_no_direct_transformation``). If using the ``never`` strategy,
     only direct transformations between the source and target CRS will be
-    used. It is also possible to restrict the pivot CRS to consider by specifying
+    used. If using the ``always`` strategy, intermediate CRS will be considered
+    even if there are direct transformations.
+    It is also possible to restrict the pivot CRS to consider by specifying
     one or several CRS by their AUTHORITY:CODE.
 
     .. note:: only used for coordinate operation computation

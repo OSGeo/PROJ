@@ -9242,7 +9242,8 @@ struct CoordinateOperationContext::Private {
     bool usePROJNames_ = true;
     GridAvailabilityUse gridAvailabilityUse_ =
         GridAvailabilityUse::USE_FOR_SORTING;
-    bool allowUseIntermediateCRS_ = true;
+    IntermediateCRSUse allowUseIntermediateCRS_ = CoordinateOperationContext::
+        IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
     std::vector<std::pair<std::string, std::string>>
         intermediateCRSAuthCodes_{};
     bool discardSuperseded_ = true;
@@ -9436,18 +9437,17 @@ CoordinateOperationContext::getGridAvailabilityUse() const {
  *
  * Concretely if in the database there is an operation from A to C
  * (or C to A), and another one from C to B (or B to C), but no direct
- * operation between A and B, setting this parameter to true, allow
- * chaining both operations.
+ * operation between A and B, setting this parameter to
+ * ALWAYS/IF_NO_DIRECT_TRANSFORMATION, allow chaining both operations.
  *
  * The current implementation is limited to researching one intermediate
  * step.
  *
- * By default, all potential C candidates will be used. setIntermediateCRS()
- * can be used to restrict them.
- *
- * The default is true.
+ * By default, with the IF_NO_DIRECT_TRANSFORMATION stratgey, all potential
+ * C candidates will be used if there is no direct tranformation.
  */
-void CoordinateOperationContext::setAllowUseIntermediateCRS(bool use) {
+void CoordinateOperationContext::setAllowUseIntermediateCRS(
+    IntermediateCRSUse use) {
     d->allowUseIntermediateCRS_ = use;
 }
 
@@ -9458,12 +9458,13 @@ void CoordinateOperationContext::setAllowUseIntermediateCRS(bool use) {
  *
  * Concretely if in the database there is an operation from A to C
  * (or C to A), and another one from C to B (or B to C), but no direct
- * operation between A and B, setting this parameter to true, allow
- * chaining both operations.
+ * operation between A and B, setting this parameter to
+ * ALWAYS/IF_NO_DIRECT_TRANSFORMATION, allow chaining both operations.
  *
- * The default is true.
+ * The default is IF_NO_DIRECT_TRANSFORMATION.
  */
-bool CoordinateOperationContext::getAllowUseIntermediateCRS() const {
+CoordinateOperationContext::IntermediateCRSUse
+CoordinateOperationContext::getAllowUseIntermediateCRS() const {
     return d->allowUseIntermediateCRS_;
 }
 
@@ -10401,9 +10402,6 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
 static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     const CoordinateOperationContextNNPtr &context) {
-    if (!context->getAllowUseIntermediateCRS()) {
-        return std::vector<CoordinateOperationNNPtr>();
-    }
 
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
@@ -11215,7 +11213,13 @@ CoordinateOperationFactory::Private::createOperations(
 
             // NAD27 to NAD83 has tens of results already. No need to look
             // for a pivot
-            if (res.size() < 5 || getenv("PROJ_FORCE_SEARCH_PIVOT")) {
+            if ((res.empty() &&
+                 context.context->getAllowUseIntermediateCRS() ==
+                     CoordinateOperationContext::IntermediateCRSUse::
+                         IF_NO_DIRECT_TRANSFORMATION) ||
+                context.context->getAllowUseIntermediateCRS() ==
+                    CoordinateOperationContext::IntermediateCRSUse::ALWAYS ||
+                getenv("PROJ_FORCE_SEARCH_PIVOT")) {
                 auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
                     sourceCRS, targetCRS, context.context);
                 res.insert(res.end(), resWithIntermediate.begin(),
