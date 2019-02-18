@@ -32,26 +32,22 @@ build_script:
   - if "%platform%" == "x86" SET BUILD_LIBPROJ_SHARED=OFF
   - echo "%VS_FULL%"
 #
-  - if "%platform%" == "x64" mkdir build_dll
-  - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x86" mkdir build_static
-  - if "%platform%" == "x86" cd build_static
-  - cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED="%BUILD_LIBPROJ_SHARED%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%CD%/install"
+  - set PROJ_BUILD=%APPVEYOR_BUILD_FOLDER%\build
+  - mkdir %PROJ_BUILD%
+  - cd %PROJ_BUILD%
+  - set PROJ_DIR=%APPVEYOR_BUILD_FOLDER%\proj_dir
+  - cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED="%BUILD_LIBPROJ_SHARED%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
   - cmake --build . --config Release --target install
-  - cd ..
 
 test_script:
   - echo test_script
-  - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x86" cd build_static
-  - set CURDIR=%CD%
-  - set PROJ_LIB=%CD%\install\share
+  - set PROJ_LIB=%PROJ_DIR%\share\proj
   - cd %PROJ_LIB%
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.7.zip
   - 7z e -aoa -y proj-datumgrid-1.7.zip
-  - dir
-  - cd %CURDIR%
+  - cd %PROJ_BUILD%
   - ctest -V -C Release
-  - cd ..
+  - set PATH=%PATH%;%PROJ_DIR%\bin
+  - proj
 
 deploy: off
