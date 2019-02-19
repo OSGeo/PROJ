@@ -6773,7 +6773,7 @@ TEST(io, projparse_longlat_a_es) {
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->ellipsoid()->semiMajorAxis().getSIValue(), 2);
     auto rf = crs->ellipsoid()->computedInverseFlattening();
-    EXPECT_EQ(rf, 3.4142135623730958) << rf;
+    EXPECT_NEAR(rf, 3.4142135623730958, 1e-14) << rf;
 }
 
 // ---------------------------------------------------------------------------

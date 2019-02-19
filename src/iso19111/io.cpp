@@ -6920,7 +6920,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         const auto &lat_2 = getParamValue(step, "lat_2");
         const auto &k = getParamValueK(step);
         if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
-            getAngularValue(lat_0) == getAngularValue(lat_1)) {
+            (lat_0 == lat_1 ||
+             // For some reason with gcc 5.3.1-14ubuntu2 32bit, the following
+             // comparison returns false even if lat_0 == lat_1. Smells like
+             // a compiler bug
+             getAngularValue(lat_0) == getAngularValue(lat_1))) {
             mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
         } else if (!k.empty() && getNumericValue(k) != 1.0) {
             mapping = getMapping(
