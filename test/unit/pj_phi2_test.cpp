@@ -41,12 +41,12 @@ TEST(PjPhi2Test, Basic) {
 
     EXPECT_DOUBLE_EQ(M_PI_2, pj_phi2(ctx, 0.0, 0.0));
 
-    EXPECT_DOUBLE_EQ(0.0, pj_phi2(ctx, 1.0, 0.0));
+    EXPECT_NEAR(0.0, pj_phi2(ctx, 1.0, 0.0), 1e-16);
     EXPECT_DOUBLE_EQ(M_PI_2, pj_phi2(ctx, 0.0, 1.0));
     EXPECT_DOUBLE_EQ(M_PI, pj_phi2(ctx, -1.0, 0.0));
     EXPECT_DOUBLE_EQ(M_PI_2, pj_phi2(ctx, 0.0, -1.0));
 
-    EXPECT_DOUBLE_EQ(0.0, pj_phi2(ctx, 1.0, 1.0));
+    EXPECT_NEAR(0.0, pj_phi2(ctx, 1.0, 1.0), 1e-16);
     EXPECT_DOUBLE_EQ(M_PI, pj_phi2(ctx, -1.0, -1.0));
 
     // TODO(schwehr): M_PI_4, M_PI_2, M_PI, M_E
