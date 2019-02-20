@@ -6125,6 +6125,32 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_compoundCRS_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // NAD27 + NGVD29 height (ftUS)
+        authFactory->createCoordinateReferenceSystem("7406"),
+        // NAD83(NSRS2007) + NAVD88 height
+        authFactory->createCoordinateReferenceSystem("5500"), ctxt);
+    ASSERT_EQ(list.size(), 88U);
+    EXPECT_EQ(list[0]->nameStr(), "NGVD29 height (ftUS) to NAVD88 height (3) + "
+                                  "NAD27 to WGS 84 (79) + Inverse of "
+                                  "NAD83(NSRS2007) to WGS 84 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad +z_out=m "
+              "+step +proj=vgridshift +grids=vertcone.gtx +multiplier=0.001 "
+              "+step +proj=hgridshift +grids=conus +step +proj=push +v_3 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1 +step +proj=pop +v_3");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_vertCRS) {
 
     auto vertcrs_m_obj = PROJStringParser().createFromPROJString("+vunits=m");

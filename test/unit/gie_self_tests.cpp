@@ -421,9 +421,11 @@ TEST(gie, info_functions) {
     /* check a few key characteristics of the Mercator projection */
     EXPECT_NEAR(factors.angular_distortion, 0.0, 1e-7)
         << factors.angular_distortion; /* angular distortion should be 0 */
+
+    /* Meridian/parallel angle should be 90 deg */
     EXPECT_NEAR(factors.meridian_parallel_angle, M_PI_2, 1e-7)
-        << factors.meridian_parallel_angle; /* Meridian/parallel angle should be
-                                               90 deg */
+        << factors.meridian_parallel_angle;
+
     EXPECT_EQ(factors.meridian_convergence,
               0.0); /* meridian convergence should be 0 */
 

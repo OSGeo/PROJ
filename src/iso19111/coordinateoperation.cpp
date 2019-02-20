@@ -10748,8 +10748,13 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
             interpolationGeogCRS);
 
     bool dummy = false;
-    auto ops = std::vector<CoordinateOperationNNPtr>{
-        opSrcCRSToGeogCRS, verticalTransform, opGeogCRStoDstCRS};
+    auto ops = opSrcCRSToGeogCRS->sourceCRS()->_isEquivalentTo(
+                   opSrcCRSToGeogCRS->targetCRS().get())
+                   ? std::vector<CoordinateOperationNNPtr>{verticalTransform,
+                                                           opGeogCRStoDstCRS}
+                   : std::vector<CoordinateOperationNNPtr>{opSrcCRSToGeogCRS,
+                                                           verticalTransform,
+                                                           opGeogCRStoDstCRS};
     auto extent = getExtent(ops, true, dummy);
     auto properties = util::PropertyMap();
     properties.set(common::IdentifiedObject::NAME_KEY,
