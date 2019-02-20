@@ -6139,9 +6139,9 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad +z_out=m "
               "+step +proj=vgridshift +grids=vertcone.gtx +multiplier=0.001 "
-              "+step +proj=hgridshift +grids=conus +step +proj=push +v_3 +step "
+              "+step +proj=hgridshift +grids=conus +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
-              "+order=2,1 +step +proj=pop +v_3");
+              "+order=2,1");
 
     bool foundApprox = false;
     for (size_t i = 0; i < list.size(); i++) {
@@ -6162,10 +6162,9 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
             EXPECT_EQ(projString,
                       "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
                       "+proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad "
-                      "+z_out=m +step +proj=hgridshift +grids=conus +step "
-                      "+proj=push +v_3 +step +proj=unitconvert +xy_in=rad "
-                      "+xy_out=deg +step +proj=axisswap +order=2,1 +step "
-                      "+proj=pop +v_3");
+                      "+z_out=m +step +proj=hgridshift +grids=conus "
+                      "+step +proj=unitconvert +xy_in=rad "
+                      "+xy_out=deg +step +proj=axisswap +order=2,1");
             foundApprox = true;
             break;
         }

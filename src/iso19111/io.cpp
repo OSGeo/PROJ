@@ -5141,6 +5141,33 @@ const std::string &PROJStringFormatter::toString() const {
                 }
             }
 
+            // push v_3, unitconvert xy_in xy_out, axisswap order=2,1, pop v_3
+            // -> can suppress push/pop
+            if (i + 2 < d->steps_.size() && prevStep.name == "push" &&
+                prevStepParamCount == 1 &&
+                prevStep.paramValues[0].key == "v_3" &&
+                curStep.name == "unitconvert" && curStepParamCount == 2 &&
+                curStep.paramValues[0].key == "xy_in" &&
+                curStep.paramValues[1].key == "xy_out") {
+                auto iterNext = iterCur;
+                ++iterNext;
+                auto &nextStep = *iterNext;
+                auto iterNextNext = iterNext;
+                ++iterNextNext;
+                auto &nextNextStep = *iterNextNext;
+                if (nextStep.name == "axisswap" &&
+                    nextStep.paramValues.size() == 1 &&
+                    nextStep.paramValues[0].equals("order", "2,1") &&
+                    nextNextStep.name == "pop" &&
+                    nextNextStep.paramValues.size() == 1 &&
+                    nextNextStep.paramValues[0].key == "v_3") {
+                    d->steps_.erase(iterPrev);
+                    d->steps_.erase(iterNextNext);
+                    changeDone = true;
+                    break;
+                }
+            }
+
             // unitconvert xy_in=A xy_out=B, pop/push v_3, unitconvert xy_in=B
             // xy_out=A -> can suppress unitconvert
             if (i + 1 < d->steps_.size() && prevStep.name == "unitconvert" &&
