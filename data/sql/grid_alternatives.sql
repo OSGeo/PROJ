@@ -26,6 +26,12 @@ INSERT INTO grid_packages VALUES ('proj-datumgrid-europe',
                                   1,
                                   1);
 
+INSERT INTO grid_packages VALUES ('proj-datumgrid-oceania',
+                                  'Package with grids of interest for Oceania',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-oceania-latest.zip',
+                                  1,
+                                  1);
+
  -- not released yet at the time of writing
 INSERT INTO grid_packages VALUES ('proj-datumgrid-world',
                                   'Package with grids of global extent (too large to be included in proj-datumgrid)',
@@ -661,3 +667,68 @@ INSERT INTO grid_alternatives(original_grid_name,
                             1,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
+
+
+----------------------------
+-- Australian grids
+----------------------------
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('A66 National (13.09.01).gsb',
+                              'A66_National_13_09_01.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('National 84 (02.07.01).gsb',
+                              'National_84_02_07_01.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('GDA94_GDA2020_conformal.gsb',
+                              'GDA94_GDA2020_conformal.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('GDA94_GDA2020_conformal_and_distortion.gsb',
+                              'GDA94_GDA2020_conformal_and_distortion.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
