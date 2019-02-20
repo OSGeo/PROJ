@@ -8001,6 +8001,46 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
         }
     }
 
+    if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON) {
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
+                           EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+
+            auto filename = fileParameter->valueFile();
+            if (databaseContext->lookForGridAlternative(
+                    filename, projFilename, projGridFormat, inverseDirection)) {
+
+                if (filename == projFilename) {
+                    assert(!inverseDirection);
+                    return self;
+                }
+
+                auto parameters = std::vector<OperationParameterNNPtr>{
+                    createOpParamNameEPSGCode(
+                        EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE)};
+                if (inverseDirection) {
+                    return create(createPropertiesForInverse(
+                                      self.as_nullable().get(), true, false),
+                                  targetCRS(), sourceCRS(), nullptr,
+                                  createSimilarPropertiesMethod(method()),
+                                  parameters, {ParameterValue::createFilename(
+                                                  projFilename)},
+                                  coordinateOperationAccuracies())
+                        ->inverseAsTransformation();
+                } else {
+                    return create(
+                        createSimilarPropertiesTransformation(self),
+                        sourceCRS(), targetCRS(), nullptr,
+                        createSimilarPropertiesMethod(method()), parameters,
+                        {ParameterValue::createFilename(projFilename)},
+                        coordinateOperationAccuracies());
+                }
+            }
+        }
+    }
+
     return self;
 }
 // ---------------------------------------------------------------------------
