@@ -453,7 +453,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                 auto transf =
                     util::nn_dynamic_pointer_cast<operation::Transformation>(
                         op);
-                if (transf && !starts_with(transf->nameStr(), "Null geo")) {
+                if (transf && !starts_with(transf->nameStr(), "Ballpark geo")) {
                     try {
                         transf->getTOWGS84Parameters();
                     } catch (const std::exception &) {
@@ -486,7 +486,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                                     operation::Transformation>(subops[1]);
                                 if (transf &&
                                     !starts_with(transf->nameStr(),
-                                                 "Null geo")) {
+                                                 "Ballpark geo")) {
                                     try {
                                         transf->getTOWGS84Parameters();
                                     } catch (const std::exception &) {
@@ -3855,7 +3855,7 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 for (const auto &op : ops) {
                     std::string opTransfPROJString;
                     bool opTransfPROJStringValid = false;
-                    if (op->nameStr().find("Null geographic") == 0) {
+                    if (op->nameStr().find("Ballpark geographic") == 0) {
                         if (isTOWGS84Compatible()) {
                             auto params =
                                 transformation()->getTOWGS84Parameters();

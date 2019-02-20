@@ -508,6 +508,10 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op) {
         std::cout << "unknown domain of validity";
     }
 
+    if (op->hasBallparkTransformation()) {
+        std::cout << ", has ballpark transformation";
+    }
+
     std::cout << std::endl;
 }
 

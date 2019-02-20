@@ -5754,6 +5754,36 @@ int proj_coordoperation_is_instanciable(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether a coordinate operation has a "ballpark"
+ * transformation,
+ * that is a very approximate one, due to lack of more accurate transformations.
+ *
+ * Typically a null geographic offset between two horizontal datum, or a
+ * null vertical offset (or limited to unit changes) between two vertical
+ * datum. Errors of several tens to one hundred meters might be expected,
+ * compared to more accurate transformations.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param coordoperation Objet of type CoordinateOperation or derived classes
+ * (must not be NULL)
+ * @return TRUE or FALSE.
+ */
+
+int proj_coordoperation_has_ballpark_transformation(PJ_CONTEXT *ctx,
+                                                    const PJ *coordoperation) {
+    assert(coordoperation);
+    auto op = dynamic_cast<const CoordinateOperation *>(
+        coordoperation->iso_obj.get());
+    if (!op) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a CoordinateOperation");
+        return 0;
+    }
+    return op->hasBallparkTransformation();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the number of parameters of a SingleOperation
  *
  * @param ctx PROJ context, or NULL for default context

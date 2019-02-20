@@ -1345,6 +1345,7 @@ TEST_F(CApi, proj_create_operations) {
     auto op = proj_list_get(m_ctxt, res, 0);
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper_op(op);
+    EXPECT_FALSE(proj_coordoperation_has_ballpark_transformation(m_ctxt, op));
 
     EXPECT_EQ(proj_get_name(op), std::string("NAD27 to NAD83 (3)"));
 }
@@ -1401,8 +1402,9 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
-        EXPECT_EQ(proj_get_name(op),
-                  std::string("Null geographic offset from WGS 84 to JGD2011"));
+        EXPECT_EQ(
+            proj_get_name(op),
+            std::string("Ballpark geographic offset from WGS 84 to JGD2011"));
     }
 
     // Restrict pivot to Tokyo CRS

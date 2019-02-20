@@ -4199,7 +4199,7 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
         EXPECT_EQ(list[1]->getEPSGCode(), 1644);  // Poland - 1m
         EXPECT_EQ(list[2]->nameStr(),
-                  "Null geographic offset from Pulkovo 1942(58) to ETRS89");
+                  "Ballpark geographic offset from Pulkovo 1942(58) to ETRS89");
 
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -4507,7 +4507,8 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->nameStr(), "Null geographic offset from WGS 84 to WGS 84");
+    EXPECT_EQ(op->nameStr(),
+              "Ballpark geographic offset from WGS 84 to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
     EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
@@ -4768,9 +4769,10 @@ TEST(operation, geocentricCRS_to_geogCRS_different_datum) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         createGeocentricDatumWGS84(), GeographicCRS::EPSG_4269);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->nameStr(), "Null geocentric translation from WGS 84 to NAD83 "
-                             "(geocentric) + Conversion from NAD83 "
-                             "(geocentric) to NAD83");
+    EXPECT_EQ(op->nameStr(),
+              "Ballpark geocentric translation from WGS 84 to NAD83 "
+              "(geocentric) + Conversion from NAD83 "
+              "(geocentric) to NAD83");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=cart +ellps=GRS80 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
@@ -4785,7 +4787,7 @@ TEST(operation, geogCRS_to_geocentricCRS_different_datum) {
         GeographicCRS::EPSG_4269, createGeocentricDatumWGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(), "Conversion from NAD83 to NAD83 (geocentric) + "
-                             "Null geocentric translation from NAD83 "
+                             "Ballpark geocentric translation from NAD83 "
                              "(geocentric) to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -4801,7 +4803,7 @@ TEST(operation, geocentricCRS_to_geocentricCRS_noop) {
         createGeocentricDatumWGS84(), createGeocentricDatumWGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(),
-              "Null geocentric translation from WGS 84 to WGS 84");
+              "Ballpark geocentric translation from WGS 84 to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
     EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
@@ -6128,6 +6130,7 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
         authFactory->createCoordinateReferenceSystem("5500"), ctxt);
     // 152 or 155 depending if the VERTCON grids are there
     ASSERT_GE(list.size(), 152U);
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(list[0]->nameStr(), "NGVD29 height (ftUS) to NAVD88 height (3) + "
                                   "NAD27 to WGS 84 (79) + Inverse of "
                                   "NAD83(NSRS2007) to WGS 84 (1)");
@@ -6149,12 +6152,13 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
                             "+xy_out=rad +z_out=m") == 0)
             << list[i]->nameStr();
         if (list[i]->nameStr().find("Transformation from NGVD29 height (ftUS) "
-                                    "to NAVD88 height (approximate "
+                                    "to NAVD88 height (ballpark vertical "
                                     "transformation)") == 0) {
+            EXPECT_TRUE(list[i]->hasBallparkTransformation());
             EXPECT_EQ(list[i]->nameStr(),
                       "Transformation from NGVD29 height (ftUS) to NAVD88 "
-                      "height (approximate transformation) + NAD27 to WGS 84 "
-                      "(79) + Inverse of NAD83(NSRS2007) to WGS 84 (1)");
+                      "height (ballpark vertical transformation) + NAD27 to "
+                      "WGS 84 (79) + Inverse of NAD83(NSRS2007) to WGS 84 (1)");
             EXPECT_EQ(projString,
                       "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
                       "+proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad "
@@ -6254,6 +6258,7 @@ TEST(operation, compoundCRS_to_geogCRS_3D) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(compoundcrs_ft), NN_CHECK_ASSERT(geogcrs_m));
         ASSERT_TRUE(op != nullptr);
+        EXPECT_TRUE(op->hasBallparkTransformation());
         EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=pipeline +step +inv +proj=merc +lon_0=0 +k=1 +x_0=0 "
                   "+y_0=0 +ellps=WGS84 +step +proj=unitconvert +xy_in=rad "
@@ -6264,6 +6269,7 @@ TEST(operation, compoundCRS_to_geogCRS_3D) {
         auto op = CoordinateOperationFactory::create()->createOperation(
             NN_CHECK_ASSERT(geogcrs_m), NN_CHECK_ASSERT(compoundcrs_ft));
         ASSERT_TRUE(op != nullptr);
+        EXPECT_TRUE(op->hasBallparkTransformation());
         EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=pipeline +step +proj=unitconvert +xy_in=deg +z_in=m "
                   "+xy_out=rad +z_out=ft +step +proj=merc +lon_0=0 +k=1 +x_0=0 "
@@ -6287,9 +6293,10 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
         ASSERT_GE(list.size(), 1U);
+        EXPECT_TRUE(list[0]->hasBallparkTransformation());
         EXPECT_EQ(list[0]->nameStr(),
                   "NAD27 to WGS 84 (79) + Transformation from NGVD29 height "
-                  "(ftUS) to WGS 84 (approximate transformation, without "
+                  "(ftUS) to WGS 84 (ballpark vertical transformation, without "
                   "ellipsoid height to vertical height correction)");
         EXPECT_EQ(list[0]->exportToPROJString(
                       PROJStringFormatter::create(
@@ -6314,9 +6321,10 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
         ASSERT_GE(list.size(), 1U);
+        EXPECT_TRUE(list[0]->hasBallparkTransformation());
         EXPECT_EQ(list[0]->nameStr(),
                   "NAD83(NSRS2007) to WGS 84 (1) + Transformation from NAVD88 "
-                  "height to WGS 84 (approximate transformation, without "
+                  "height to WGS 84 (ballpark vertical transformation, without "
                   "ellipsoid height to vertical height correction)");
         EXPECT_EQ(list[0]->exportToPROJString(
                       PROJStringFormatter::create(
@@ -6343,6 +6351,7 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
         ctxt);
     ASSERT_EQ(list.size(), 2U);
 
+    EXPECT_FALSE(list[0]->hasBallparkTransformation());
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=lcc +lat_1=49.5 +lat_0=49.5 "
               "+lon_0=0 +k_0=0.99987734 +x_0=600000 +y_0=200000 "
@@ -6350,6 +6359,7 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
               "+grids=ntf_r93.gsb +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
 
+    EXPECT_FALSE(list[1]->hasBallparkTransformation());
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=lcc +lat_1=49.5 +lat_0=49.5 "
               "+lon_0=0 +k_0=0.99987734 +x_0=600000 +y_0=200000 "
