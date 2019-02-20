@@ -146,7 +146,9 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const = 0;
 
     PROJ_DLL bool
-    isPROJInstanciable(const io::DatabaseContextPtr &databaseContext) const;
+    isPROJInstantiable(const io::DatabaseContextPtr &databaseContext) const;
+
+    PROJ_DLL bool hasBallparkTransformation() const;
 
   protected:
     PROJ_INTERNAL CoordinateOperation();
@@ -167,6 +169,7 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_INTERNAL
     void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+    PROJ_INTERNAL void setHasBallparkTransformation(bool b);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1492,6 +1495,11 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
 
     PROJ_DLL TransformationNNPtr substitutePROJAlternativeGridNames(
         io::DatabaseContextNNPtr databaseContext) const;
+
+    PROJ_DLL static TransformationNNPtr createChangeVerticalUnit(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const common::Scale &factor,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

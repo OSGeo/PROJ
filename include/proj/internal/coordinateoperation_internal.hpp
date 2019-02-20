@@ -246,7 +246,8 @@ class PROJBasedOperation : public SingleOperation {
     create(const util::PropertyMap &properties,
            const io::IPROJStringExportableNNPtr &projExportable, bool inverse,
            const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-           const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+           const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies,
+           bool hasRoughTransformation);
 
     std::set<GridDescription>
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;

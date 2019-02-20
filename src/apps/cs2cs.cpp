@@ -206,10 +206,10 @@ static void process(FILE *fid)
 }
 
 /************************************************************************/
-/*                          instanciate_crs()                           */
+/*                          instantiate_crs()                           */
 /************************************************************************/
 
-static PJ *instanciate_crs(const std::string &definition,
+static PJ *instantiate_crs(const std::string &definition,
                                bool &isGeog, double &toRadians,
                                bool &isLatFirst) {
     PJ *crs = proj_create(nullptr,
@@ -541,7 +541,7 @@ int main(int argc, char **argv) {
     PJ *src = nullptr;
     if (!fromStr.empty()) {
         bool ignored;
-        src = instanciate_crs(fromStr, srcIsGeog,
+        src = instantiate_crs(fromStr, srcIsGeog,
                               srcToRadians, ignored);
         if (!src) {
             emess(3, "cannot instantiate source coordinate system");
@@ -550,7 +550,7 @@ int main(int argc, char **argv) {
 
     PJ *dst = nullptr;
     if (!toStr.empty()) {
-        dst = instanciate_crs(toStr, destIsGeog,
+        dst = instantiate_crs(toStr, destIsGeog,
                               destToRadians, destIsLatLong);
         if (!dst) {
             emess(3, "cannot instantiate target coordinate system");

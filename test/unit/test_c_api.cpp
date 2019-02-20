@@ -838,14 +838,16 @@ TEST_F(CApi, proj_create_from_database) {
         ASSERT_NE(info.definition, nullptr);
         EXPECT_EQ(
             info.definition,
-            std::string("proj=pipeline step proj=push v_3 step proj=axisswap "
+            std::string("proj=pipeline step proj=axisswap "
                         "order=2,1 step proj=unitconvert xy_in=deg xy_out=rad "
+                        "step proj=push v_3 "
                         "step proj=cart ellps=bessel step proj=helmert "
                         "x=601.705 y=84.263 z=485.227 rx=-4.7354 ry=-1.3145 "
-                        "rz=-5.393 s=-2.3887 convention=coordinate_frame step "
-                        "inv proj=cart ellps=GRS80 step proj=unitconvert "
-                        "xy_in=rad xy_out=deg step proj=axisswap order=2,1 "
-                        "step proj=pop v_3"));
+                        "rz=-5.393 s=-2.3887 convention=coordinate_frame "
+                        "step inv proj=cart ellps=GRS80 "
+                        "step proj=pop v_3 "
+                        "step proj=unitconvert xy_in=rad xy_out=deg "
+                        "step proj=axisswap order=2,1"));
         EXPECT_EQ(info.accuracy, 1);
     }
 }
@@ -1300,13 +1302,13 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_coordoperation_is_instanciable) {
+TEST_F(CApi, proj_coordoperation_is_instantiable) {
     auto op = proj_create_from_database(m_ctxt, "EPSG", "1671",
                                         PJ_CATEGORY_COORDINATE_OPERATION, true,
                                         nullptr);
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper(op);
-    EXPECT_EQ(proj_coordoperation_is_instanciable(m_ctxt, op), 1);
+    EXPECT_EQ(proj_coordoperation_is_instantiable(m_ctxt, op), 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -1343,6 +1345,7 @@ TEST_F(CApi, proj_create_operations) {
     auto op = proj_list_get(m_ctxt, res, 0);
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper_op(op);
+    EXPECT_FALSE(proj_coordoperation_has_ballpark_transformation(m_ctxt, op));
 
     EXPECT_EQ(proj_get_name(op), std::string("NAD27 to NAD83 (3)"));
 }
@@ -1399,8 +1402,9 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
-        EXPECT_EQ(proj_get_name(op),
-                  std::string("Null geographic offset from WGS 84 to JGD2011"));
+        EXPECT_EQ(
+            proj_get_name(op),
+            std::string("Ballpark geographic offset from WGS 84 to JGD2011"));
     }
 
     // Restrict pivot to Tokyo CRS
@@ -1421,7 +1425,7 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(proj_list_get_count(res), 7);
-        auto op = proj_list_get(m_ctxt, res, 1);
+        auto op = proj_list_get(m_ctxt, res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);
 
@@ -1451,7 +1455,7 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
         // includes results from ESRI
-        EXPECT_EQ(proj_list_get_count(res), 5);
+        EXPECT_EQ(proj_list_get_count(res), 4);
         auto op = proj_list_get(m_ctxt, res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);

@@ -203,7 +203,7 @@ PJ_COORD PROJ_DLL pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD co
 /* Grid functionality */
 int             proj_vgrid_init(PJ *P, const char *grids);
 int             proj_hgrid_init(PJ *P, const char *grids);
-double          proj_vgrid_value(PJ *P, PJ_LP lp);
+double          proj_vgrid_value(PJ *P, PJ_LP lp, double vmultiplier);
 PJ_LP           proj_hgrid_value(PJ *P, PJ_LP lp);
 PJ_LP           proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction);
 
