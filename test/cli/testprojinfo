@@ -102,6 +102,10 @@ echo "Testing CRS with towgs84: projinfo -o PROJ EPSG:25832" >> ${OUT}
 $EXE -o PROJ EPSG:25832 >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo "Testing RH2000 height to SWEREF99: projinfo -s EPSG:5613 -t EPSG:4377" >> ${OUT}
+$EXE -s EPSG:5613 -t EPSG:4377 >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
