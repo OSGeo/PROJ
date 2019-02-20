@@ -146,7 +146,7 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const = 0;
 
     PROJ_DLL bool
-    isPROJInstanciable(const io::DatabaseContextPtr &databaseContext) const;
+    isPROJInstantiable(const io::DatabaseContextPtr &databaseContext) const;
 
     PROJ_DLL bool hasBallparkTransformation() const;
 

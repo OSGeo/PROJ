@@ -1302,13 +1302,13 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_coordoperation_is_instanciable) {
+TEST_F(CApi, proj_coordoperation_is_instantiable) {
     auto op = proj_create_from_database(m_ctxt, "EPSG", "1671",
                                         PJ_CATEGORY_COORDINATE_OPERATION, true,
                                         nullptr);
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper(op);
-    EXPECT_EQ(proj_coordoperation_is_instanciable(m_ctxt, op), 1);
+    EXPECT_EQ(proj_coordoperation_is_instantiable(m_ctxt, op), 1);
 }
 
 // ---------------------------------------------------------------------------

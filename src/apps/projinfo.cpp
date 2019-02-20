@@ -521,7 +521,7 @@ static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
-    bool spatialCriterionExplictlySpecified,
+    bool spatialCriterionExplicitlySpecified,
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
@@ -565,7 +565,7 @@ static void outputOperations(
         ctxt->setDiscardSuperseded(!showSuperseded);
         list = CoordinateOperationFactory::create()->createOperations(
             NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), ctxt);
-        if (!spatialCriterionExplictlySpecified &&
+        if (!spatialCriterionExplicitlySpecified &&
             spatialCriterion == CoordinateOperationContext::SpatialCriterion::
                                     STRICT_CONTAINMENT) {
             try {
@@ -639,7 +639,7 @@ int main(int argc, char **argv) {
     bool summary = false;
     ExtentPtr bboxFilter = nullptr;
     std::string area;
-    bool spatialCriterionExplictlySpecified = false;
+    bool spatialCriterionExplicitlySpecified = false;
     CoordinateOperationContext::SpatialCriterion spatialCriterion =
         CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT;
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse =
@@ -795,7 +795,7 @@ int main(int argc, char **argv) {
         } else if (arg == "--spatial-test" && i + 1 < argc) {
             i++;
             std::string value(argv[i]);
-            spatialCriterionExplictlySpecified = true;
+            spatialCriterionExplicitlySpecified = true;
             if (ci_equal(value, "contains")) {
                 spatialCriterion = CoordinateOperationContext::
                     SpatialCriterion::STRICT_CONTAINMENT;
@@ -1084,7 +1084,7 @@ int main(int argc, char **argv) {
 
         outputOperations(
             dbContext, sourceCRSStr, targetCRSStr, bboxFilter, spatialCriterion,
-            spatialCriterionExplictlySpecified, crsExtentUse,
+            spatialCriterionExplicitlySpecified, crsExtentUse,
             gridAvailabilityUse, allowUseIntermediateCRS, pivots, authority,
             usePROJGridAlternatives, showSuperseded, outputOpt, summary);
     }

@@ -999,7 +999,7 @@ int PROJ_DLL proj_coordoperation_get_method_info(PJ_CONTEXT *ctx,
                                                  const char **out_method_auth_name,
                                                  const char **out_method_code);
 
-int PROJ_DLL proj_coordoperation_is_instanciable(PJ_CONTEXT *ctx,
+int PROJ_DLL proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
                                                  const PJ *coordoperation);
 
 int PROJ_DLL proj_coordoperation_has_ballpark_transformation(PJ_CONTEXT *ctx,

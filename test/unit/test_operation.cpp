@@ -6394,14 +6394,14 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, isPROJInstanciable) {
+TEST(operation, isPROJInstantiable) {
 
     {
         auto transformation = Transformation::createGeocentricTranslations(
             PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326,
             1.0, 2.0, 3.0, {});
         EXPECT_TRUE(
-            transformation->isPROJInstanciable(DatabaseContext::create()));
+            transformation->isPROJInstantiable(DatabaseContext::create()));
     }
 
     // Missing grid
@@ -6410,7 +6410,7 @@ TEST(operation, isPROJInstanciable) {
             PropertyMap(), GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
             "foo.gsb", std::vector<PositionalAccuracyNNPtr>());
         EXPECT_FALSE(
-            transformation->isPROJInstanciable(DatabaseContext::create()));
+            transformation->isPROJInstantiable(DatabaseContext::create()));
     }
 
     // Unsupported method
@@ -6422,7 +6422,7 @@ TEST(operation, isPROJInstanciable) {
             std::vector<GeneralParameterValueNNPtr>{},
             std::vector<PositionalAccuracyNNPtr>{});
         EXPECT_FALSE(
-            transformation->isPROJInstanciable(DatabaseContext::create()));
+            transformation->isPROJInstantiable(DatabaseContext::create()));
     }
 }
 

@@ -1950,7 +1950,7 @@ void proj_string_list_destroy(PROJ_STRING_LIST list) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a default set of parameters to be used by
+/** \brief Instantiate a default set of parameters to be used by
  * proj_get_crs_list().
  *
  * @return a new object to free with proj_get_crs_list_parameters_destroy() */
@@ -1987,7 +1987,7 @@ void proj_get_crs_list_parameters_destroy(PROJ_CRS_LIST_PARAMETERS *params) {
  * entry is NULL. This array should be freed with proj_crs_info_list_destroy()
  *
  * When no filter parameters are set, this is functionnaly equivalent to
- * proj_get_crs_info_list_from_database(), instanciating a PJ* object for each
+ * proj_get_crs_info_list_from_database(), instantiating a PJ* object for each
  * of the proj_create_from_database() and retrieving information with the
  * various getters. However this function will be much faster.
  *
@@ -5734,7 +5734,7 @@ PJ *proj_create_conversion_equal_earth(PJ_CONTEXT *ctx, double center_long,
  * @return TRUE or FALSE.
  */
 
-int proj_coordoperation_is_instanciable(PJ_CONTEXT *ctx,
+int proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
                                         const PJ *coordoperation) {
     assert(coordoperation);
     auto op = dynamic_cast<const CoordinateOperation *>(
@@ -5746,7 +5746,7 @@ int proj_coordoperation_is_instanciable(PJ_CONTEXT *ctx,
     }
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        return op->isPROJInstanciable(dbContext) ? 1 : 0;
+        return op->isPROJInstantiable(dbContext) ? 1 : 0;
     } catch (const std::exception &) {
         return 0;
     }

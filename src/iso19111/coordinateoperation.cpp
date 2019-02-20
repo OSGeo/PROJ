@@ -715,7 +715,7 @@ void CoordinateOperation::setAccuracies(
  * a PROJ pipeline, checking in particular that referenced grids are
  * available.
  */
-bool CoordinateOperation::isPROJInstanciable(
+bool CoordinateOperation::isPROJInstantiable(
     const io::DatabaseContextPtr &databaseContext) const {
     try {
         exportToPROJString(io::PROJStringFormatter::create().get());
