@@ -35,16 +35,16 @@
 #include "proj_internal.h"
 #include "proj_internal.h"
 
-static int is_nodata(float value)
+static int is_nodata(float value, double vmultiplier)
 {
     /* nodata?  */
     /* GTX official nodata value if  -88.88880f, but some grids also */
     /* use other  big values for nodata (e.g naptrans2008.gtx has */
     /* nodata values like -2147479936), so test them too */
-    return value > 1000 || value < -1000 || value == -88.88880f;
+    return value * vmultiplier > 1000 || value * vmultiplier < -1000 || value == -88.88880f;
 }
 
-static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
+static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
     int  itable = 0;
     double value = HUGE_VAL;
     double grid_x, grid_y;
@@ -129,28 +129,28 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ
             double total_weight = 0.0;
             int n_weights = 0;
             value = 0.0f;
-            if( !is_nodata(value_a) )
+            if( !is_nodata(value_a, vmultiplier) )
             {
                 double weight = (1.0-grid_x) * (1.0-grid_y);
                 value += value_a * weight;
                 total_weight += weight;
                 n_weights ++;
             }
-            if( !is_nodata(value_b) )
+            if( !is_nodata(value_b, vmultiplier) )
             {
                 double weight = (grid_x) * (1.0-grid_y);
                 value += value_b * weight;
                 total_weight += weight;
                 n_weights ++;
             }
-            if( !is_nodata(value_c) )
+            if( !is_nodata(value_c, vmultiplier) )
             {
                 double weight = (1.0-grid_x) * (grid_y);
                 value += value_c * weight;
                 total_weight += weight;
                 n_weights ++;
             }
-            if( !is_nodata(value_d) )
+            if( !is_nodata(value_d, vmultiplier) )
             {
                 double weight = (grid_x) * (grid_y);
                 value += value_d * weight;
@@ -218,7 +218,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
         input.phi = y[io];
         input.lam = x[io];
 
-        value = read_vgrid_value(defn, input, gridlist_count_p, tables, &ct);
+        value = read_vgrid_value(defn, input, 1.0, gridlist_count_p, tables, &ct);
 
         if( inverse )
             z[io] -= value;
@@ -310,7 +310,7 @@ int proj_vgrid_init(PJ* P, const char *grids) {
 }
 
 /***********************************************/
-double proj_vgrid_value(PJ *P, PJ_LP lp){
+double proj_vgrid_value(PJ *P, PJ_LP lp, double vmultiplier){
 /***********************************************
 
   Read grid value at position lp in grids loaded
@@ -324,7 +324,7 @@ double proj_vgrid_value(PJ *P, PJ_LP lp){
     double value;
     memset(&used_grid, 0, sizeof(struct CTABLE));
 
-    value = read_vgrid_value(P, lp, &(P->vgridlist_geoid_count), P->vgridlist_geoid, &used_grid);
+    value = read_vgrid_value(P, lp, vmultiplier, &(P->vgridlist_geoid_count), P->vgridlist_geoid, &used_grid);
     proj_log_trace(P, "proj_vgrid_value: (%f, %f) = %f", lp.lam*RAD_TO_DEG, lp.phi*RAD_TO_DEG, value);
 
     return value;

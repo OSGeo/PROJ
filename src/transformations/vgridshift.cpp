@@ -26,7 +26,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     if (P->vgridlist_geoid != nullptr) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.xyz.z += Q->forward_multiplier * proj_vgrid_value(P, point.lp);
+        point.xyz.z += Q->forward_multiplier * proj_vgrid_value(P, point.lp, Q->forward_multiplier);
     }
 
     return point.xyz;
@@ -41,7 +41,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     if (P->vgridlist_geoid != nullptr) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.xyz.z -= Q->forward_multiplier * proj_vgrid_value(P, point.lp);
+        point.xyz.z -= Q->forward_multiplier * proj_vgrid_value(P, point.lp, Q->forward_multiplier);
     }
 
     return point.lpz;
