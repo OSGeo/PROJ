@@ -1493,6 +1493,11 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_DLL TransformationNNPtr substitutePROJAlternativeGridNames(
         io::DatabaseContextNNPtr databaseContext) const;
 
+    PROJ_DLL static TransformationNNPtr createChangeVerticalUnit(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const common::Scale &factor,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL const std::string &

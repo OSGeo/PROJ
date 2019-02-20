@@ -4362,7 +4362,7 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             ctxt);
-        ASSERT_EQ(list.size(), 3U);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline +step +proj=push +v_3 +step +proj=axisswap "
@@ -4372,12 +4372,6 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
             "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1 +step "
             "+proj=pop +v_3");
         EXPECT_EQ(list[1]->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_5,
-                          authFactory->databaseContext())
-                          .get()),
-                  "");
-        EXPECT_EQ(list[2]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
                           authFactory->databaseContext())
@@ -6136,7 +6130,8 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
         authFactory->createCoordinateReferenceSystem("7406"),
         // NAD83(NSRS2007) + NAVD88 height
         authFactory->createCoordinateReferenceSystem("5500"), ctxt);
-    ASSERT_EQ(list.size(), 88U);
+    // 152 or 155 depending if the VERTCON grids are there
+    ASSERT_GE(list.size(), 152U);
     EXPECT_EQ(list[0]->nameStr(), "NGVD29 height (ftUS) to NAVD88 height (3) + "
                                   "NAD27 to WGS 84 (79) + Inverse of "
                                   "NAD83(NSRS2007) to WGS 84 (1)");
@@ -6147,6 +6142,35 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
               "+step +proj=hgridshift +grids=conus +step +proj=push +v_3 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1 +step +proj=pop +v_3");
+
+    bool foundApprox = false;
+    for (size_t i = 0; i < list.size(); i++) {
+        auto projString =
+            list[i]->exportToPROJString(PROJStringFormatter::create().get());
+        EXPECT_TRUE(
+            projString.find("+proj=pipeline +step +proj=axisswap +order=2,1 "
+                            "+step +proj=unitconvert +xy_in=deg +z_in=us-ft "
+                            "+xy_out=rad +z_out=m") == 0)
+            << list[i]->nameStr();
+        if (list[i]->nameStr().find("Transformation from NGVD29 height (ftUS) "
+                                    "to NAVD88 height (approximate "
+                                    "transformation)") == 0) {
+            EXPECT_EQ(list[i]->nameStr(),
+                      "Transformation from NGVD29 height (ftUS) to NAVD88 "
+                      "height (approximate transformation) + NAD27 to WGS 84 "
+                      "(79) + Inverse of NAD83(NSRS2007) to WGS 84 (1)");
+            EXPECT_EQ(projString,
+                      "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                      "+proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad "
+                      "+z_out=m +step +proj=hgridshift +grids=conus +step "
+                      "+proj=push +v_3 +step +proj=unitconvert +xy_in=rad "
+                      "+xy_out=deg +step +proj=axisswap +order=2,1 +step "
+                      "+proj=pop +v_3");
+            foundApprox = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundApprox);
 }
 
 // ---------------------------------------------------------------------------

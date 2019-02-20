@@ -106,6 +106,7 @@ constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
 static const std::string INVERSE_OF = "Inverse of ";
 static const char *NULL_GEOCENTRIC_TRANSLATION = "Null geocentric translation";
 static const char *NULL_GEOGRAPHIC_OFFSET = "Null geographic offset";
+static const char *APPROXIMATE_TRANSFORMATION = " (approximate transformation)";
 //! @endcond
 
 //! @cond Doxygen_Suppress
@@ -7054,6 +7055,39 @@ TransformationNNPtr Transformation::createVerticalOffset(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a transformation based on the Change of Vertical Unit
+ * method.
+ *
+ * This method is defined as [EPSG:1069]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1069)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param factor Conversion factor
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return a new Transformation.
+ */
+TransformationNNPtr Transformation::createChangeVerticalUnit(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const common::Scale &factor,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    return create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT),
+        VectorOfParameters{
+            createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR),
+        },
+        VectorOfValues{
+            factor,
+        },
+        accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 static const char *getCRSQualifierStr(const crs::CRSPtr &crs) {
     auto geod = dynamic_cast<crs::GeodeticCRS *>(crs.get());
     if (geod) {
@@ -7479,6 +7513,17 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
             createVerticalOffset(createPropertiesForInverse(this, false, false),
                                  l_targetCRS, l_sourceCRS, newOffsetHeight,
                                  coordinateOperationAccuracies()));
+    }
+
+    if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
+        const double convFactor = parameterValueNumericAsSI(
+            EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        return d->registerInv(
+            shared_from_this(),
+            createChangeVerticalUnit(
+                createPropertiesForInverse(this, false, false), l_targetCRS,
+                l_sourceCRS, common::Scale(1.0 / convFactor),
+                coordinateOperationAccuracies()));
     }
 
     return InverseTransformation::create(NN_NO_CHECK(
@@ -8835,6 +8880,31 @@ bool SingleOperation::exportToPROJStringGeneric(
                                       "conversion");
     }
 
+    if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
+        double convFactor = parameterValueNumericAsSI(
+            EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        auto uom = common::UnitOfMeasure(std::string(), convFactor,
+                                         common::UnitOfMeasure::Type::LINEAR)
+                       .exportToPROJString();
+        auto reverse_uom =
+            common::UnitOfMeasure(std::string(), 1.0 / convFactor,
+                                  common::UnitOfMeasure::Type::LINEAR)
+                .exportToPROJString();
+        if (!uom.empty()) {
+            formatter->addStep("unitconvert");
+            formatter->addParam("z_in", uom);
+            formatter->addParam("z_out", "m");
+        } else if (!reverse_uom.empty()) {
+            formatter->addStep("unitconvert");
+            formatter->addParam("z_in", "m");
+            formatter->addParam("z_out", reverse_uom);
+        } else {
+            formatter->addStep("affine");
+            formatter->addParam("s33", convFactor);
+        }
+        return true;
+    }
+
     return false;
 }
 
@@ -9667,14 +9737,18 @@ struct PrecomputedOpCharacteristics {
     bool gridsAvailable_ = false;
     bool gridsKnown_ = false;
     size_t stepCount_ = 0;
+    bool isApprox_ = false;
+    bool isNullTransformation_ = false;
 
     PrecomputedOpCharacteristics() = default;
     PrecomputedOpCharacteristics(double area, double accuracy, bool hasGrids,
                                  bool gridsAvailable, bool gridsKnown,
-                                 size_t stepCount)
+                                 size_t stepCount, bool isApprox,
+                                 bool isNullTransformation)
         : area_(area), accuracy_(accuracy), hasGrids_(hasGrids),
           gridsAvailable_(gridsAvailable), gridsKnown_(gridsKnown),
-          stepCount_(stepCount) {}
+          stepCount_(stepCount), isApprox_(isApprox),
+          isNullTransformation_(isNullTransformation) {}
 };
 
 // ---------------------------------------------------------------------------
@@ -9700,6 +9774,22 @@ struct SortFunction {
 
         // CAUTION: the order of the comparisons is extremely important
         // to get the intended result.
+
+        if (!iterA->second.isApprox_ && iterB->second.isApprox_) {
+            return true;
+        }
+        if (iterA->second.isApprox_ && !iterB->second.isApprox_) {
+            return false;
+        }
+
+        if (!iterA->second.isNullTransformation_ &&
+            iterB->second.isNullTransformation_) {
+            return true;
+        }
+        if (iterA->second.isNullTransformation_ &&
+            !iterB->second.isNullTransformation_) {
+            return false;
+        }
 
         if (iterA->second.hasGrids_ && iterB->second.hasGrids_) {
             // Operations where grids are all available go before other
@@ -9926,6 +10016,8 @@ struct FilterResults {
                     if (name.find(NULL_GEOGRAPHIC_OFFSET) ==
                             std::string::npos &&
                         name.find(NULL_GEOCENTRIC_TRANSLATION) ==
+                            std::string::npos &&
+                        name.find(APPROXIMATE_TRANSFORMATION) ==
                             std::string::npos) {
                         hasOpThatContainsAreaOfInterest = true;
                     }
@@ -9961,6 +10053,8 @@ struct FilterResults {
                     if (name.find(NULL_GEOGRAPHIC_OFFSET) ==
                             std::string::npos &&
                         name.find(NULL_GEOCENTRIC_TRANSLATION) ==
+                            std::string::npos &&
+                        name.find(APPROXIMATE_TRANSFORMATION) ==
                             std::string::npos) {
                         hasOpThatContainsAreaOfInterest = true;
                     }
@@ -10067,9 +10161,17 @@ struct FilterResults {
 
             const auto stepCount = getStepCount(op);
 
+            const bool isApprox =
+                op->nameStr().find(APPROXIMATE_TRANSFORMATION) !=
+                std::string::npos;
+            const bool isNullTransformation =
+                op->nameStr().find(NULL_GEOGRAPHIC_OFFSET) !=
+                    std::string::npos ||
+                op->nameStr().find(NULL_GEOCENTRIC_TRANSLATION) !=
+                    std::string::npos;
             map[op.get()] = PrecomputedOpCharacteristics(
                 area, getAccuracy(op), hasGrids, gridsAvailable, gridsKnown,
-                stepCount);
+                stepCount, isApprox, isNullTransformation);
         }
 
         // Sort !
@@ -10082,7 +10184,8 @@ struct FilterResults {
 
         // If we have more than one result, and than the last result is the
         // default "Null geographic offset" or "Null geocentric translation"
-        // operations we have synthetized, remove it as
+        // operations we have synthetized, and that at least one operation
+        // has the desired area of interest, remove it as
         // all previous results are necessarily better
         if (hasOpThatContainsAreaOfInterest && res.size() > 1) {
             const std::string &name = res.back()->nameStr();
@@ -11571,29 +11674,35 @@ CoordinateOperationFactory::Private::createOperations(
     if (vertSrc && vertDst) {
         const auto &srcDatum = vertSrc->datum();
         const auto &dstDatum = vertDst->datum();
-        if (srcDatum && dstDatum &&
-            srcDatum->_isEquivalentTo(
-                dstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
-            const double convSrc = vertSrc->coordinateSystem()
-                                       ->axisList()[0]
-                                       ->unit()
-                                       .conversionToSI();
-            const double convDst = vertDst->coordinateSystem()
-                                       ->axisList()[0]
-                                       ->unit()
-                                       .conversionToSI();
-            if (convSrc != convDst) {
-                const double factor = convSrc / convDst;
+        const bool equivalentVDatum =
+            (srcDatum && dstDatum &&
+             srcDatum->_isEquivalentTo(
+                 dstDatum.get(), util::IComparable::Criterion::EQUIVALENT));
+
+        const double convSrc =
+            vertSrc->coordinateSystem()->axisList()[0]->unit().conversionToSI();
+        const double convDst =
+            vertDst->coordinateSystem()->axisList()[0]->unit().conversionToSI();
+        if (convSrc != convDst) {
+            const double factor = convSrc / convDst;
+            auto name =
+                buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
+            if (!equivalentVDatum) {
+                name += APPROXIMATE_TRANSFORMATION;
+                auto conv = Transformation::createChangeVerticalUnit(
+                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                            name),
+                    sourceCRS, targetCRS, common::Scale(factor), {});
+                res.push_back(conv);
+            } else {
                 auto conv = Conversion::createChangeVerticalUnit(
-                    util::PropertyMap().set(
-                        common::IdentifiedObject::NAME_KEY,
-                        buildTransfName(sourceCRS->nameStr(),
-                                        targetCRS->nameStr())),
+                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                            name),
                     common::Scale(factor));
                 conv->setCRSs(sourceCRS, targetCRS, nullptr);
                 res.push_back(conv);
-                return res;
             }
+            return res;
         }
     }
 
