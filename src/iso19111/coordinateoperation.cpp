@@ -106,7 +106,12 @@ constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
 static const std::string INVERSE_OF = "Inverse of ";
 static const char *NULL_GEOCENTRIC_TRANSLATION = "Null geocentric translation";
 static const char *NULL_GEOGRAPHIC_OFFSET = "Null geographic offset";
+static const char *APPROXIMATE_TRANSFORMATION_PREFIX =
+    " (approximate transformation";
 static const char *APPROXIMATE_TRANSFORMATION = " (approximate transformation)";
+static const char *APPROXIMATE_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT =
+    " (approximate transformation, without ellipsoid height to vertical height "
+    "correction)";
 //! @endcond
 
 //! @cond Doxygen_Suppress
@@ -5645,7 +5650,9 @@ void Conversion::_exportToPROJString(
             common::UnitOfMeasure(std::string(), 1.0 / convFactor,
                                   common::UnitOfMeasure::Type::LINEAR)
                 .exportToPROJString();
-        if (!uom.empty()) {
+        if (uom == "m") {
+            // do nothing
+        } else if (!uom.empty()) {
             formatter->addStep("unitconvert");
             formatter->addParam("z_in", uom);
             formatter->addParam("z_out", "m");
@@ -8879,7 +8886,9 @@ bool SingleOperation::exportToPROJStringGeneric(
             common::UnitOfMeasure(std::string(), 1.0 / convFactor,
                                   common::UnitOfMeasure::Type::LINEAR)
                 .exportToPROJString();
-        if (!uom.empty()) {
+        if (uom == "m") {
+            // do nothing
+        } else if (!uom.empty()) {
             formatter->addStep("unitconvert");
             formatter->addParam("z_in", uom);
             formatter->addParam("z_out", "m");
@@ -10008,7 +10017,7 @@ struct FilterResults {
                             std::string::npos &&
                         name.find(NULL_GEOCENTRIC_TRANSLATION) ==
                             std::string::npos &&
-                        name.find(APPROXIMATE_TRANSFORMATION) ==
+                        name.find(APPROXIMATE_TRANSFORMATION_PREFIX) ==
                             std::string::npos) {
                         hasOpThatContainsAreaOfInterest = true;
                     }
@@ -10045,7 +10054,7 @@ struct FilterResults {
                             std::string::npos &&
                         name.find(NULL_GEOCENTRIC_TRANSLATION) ==
                             std::string::npos &&
-                        name.find(APPROXIMATE_TRANSFORMATION) ==
+                        name.find(APPROXIMATE_TRANSFORMATION_PREFIX) ==
                             std::string::npos) {
                         hasOpThatContainsAreaOfInterest = true;
                     }
@@ -10147,7 +10156,7 @@ struct FilterResults {
             const auto stepCount = getStepCount(op);
 
             const bool isApprox =
-                op->nameStr().find(APPROXIMATE_TRANSFORMATION) !=
+                op->nameStr().find(APPROXIMATE_TRANSFORMATION_PREFIX) !=
                 std::string::npos;
             const bool isNullTransformation =
                 op->nameStr().find(NULL_GEOGRAPHIC_OFFSET) !=
@@ -11668,27 +11677,25 @@ CoordinateOperationFactory::Private::createOperations(
             vertSrc->coordinateSystem()->axisList()[0]->unit().conversionToSI();
         const double convDst =
             vertDst->coordinateSystem()->axisList()[0]->unit().conversionToSI();
-        if (convSrc != convDst) {
-            const double factor = convSrc / convDst;
-            auto name =
-                buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
-            if (!equivalentVDatum) {
-                name += APPROXIMATE_TRANSFORMATION;
-                auto conv = Transformation::createChangeVerticalUnit(
-                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                            name),
-                    sourceCRS, targetCRS, common::Scale(factor), {});
-                res.push_back(conv);
-            } else {
-                auto conv = Conversion::createChangeVerticalUnit(
-                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                            name),
-                    common::Scale(factor));
-                conv->setCRSs(sourceCRS, targetCRS, nullptr);
-                res.push_back(conv);
-            }
-            return res;
+
+        const double factor = convSrc / convDst;
+        auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
+        if (!equivalentVDatum) {
+            name += APPROXIMATE_TRANSFORMATION;
+            auto conv = Transformation::createChangeVerticalUnit(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        name),
+                sourceCRS, targetCRS, common::Scale(factor), {});
+            res.push_back(conv);
+        } else if (convSrc != convDst) {
+            auto conv = Conversion::createChangeVerticalUnit(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        name),
+                common::Scale(factor));
+            conv->setCRSs(sourceCRS, targetCRS, nullptr);
+            res.push_back(conv);
         }
+        return res;
     }
 
     // A bit odd case as we are comparing apples to oranges, but in case
@@ -11701,17 +11708,16 @@ CoordinateOperationFactory::Private::createOperations(
         if (geogAxis.size() == 3) {
             convDst = geogAxis[2]->unit().conversionToSI();
         }
-        if (convSrc != convDst) {
-            const double factor = convSrc / convDst;
-            auto conv = Conversion::createChangeVerticalUnit(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        buildTransfName(sourceCRS->nameStr(),
-                                                        targetCRS->nameStr())),
-                common::Scale(factor));
-            conv->setCRSs(sourceCRS, targetCRS, nullptr);
-            res.push_back(conv);
-            return res;
-        }
+
+        const double factor = convSrc / convDst;
+        auto conv = Transformation::createChangeVerticalUnit(
+            util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY,
+                buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr()) +
+                    APPROXIMATE_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT),
+            sourceCRS, targetCRS, common::Scale(factor), {});
+        res.push_back(conv);
+        return res;
     }
 
     // reverse of previous case

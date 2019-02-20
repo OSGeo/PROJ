@@ -6273,6 +6273,62 @@ TEST(operation, compoundCRS_to_geogCRS_3D) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_geogCRS_3D_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // CompoundCRS to Geog3DCRS, with vertical unit change, but without
+    // ellipsoid height <--> vertical height correction
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem(
+                "7406"), // NAD27 + NGVD29 height (ftUS)
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
+            ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(),
+                  "NAD27 to WGS 84 (79) + Transformation from NGVD29 height "
+                  "(ftUS) to WGS 84 (approximate transformation, without "
+                  "ellipsoid height to vertical height correction)");
+        EXPECT_EQ(list[0]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step "
+                  "+proj=hgridshift +grids=conus +step +proj=unitconvert "
+                  "+xy_in=rad +z_in=us-ft +xy_out=deg +z_out=m +step "
+                  "+proj=axisswap +order=2,1");
+    }
+
+    // CompoundCRS to Geog3DCRS, with same vertical unit, but without
+    // ellipsoid height <--> vertical height correction
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem(
+                "5500"), // NAD83(NSRS2007) + NAVD88 height
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
+            ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(),
+                  "NAD83(NSRS2007) to WGS 84 (1) + Transformation from NAVD88 "
+                  "height to WGS 84 (approximate transformation, without "
+                  "ellipsoid height to vertical height correction)");
+        EXPECT_EQ(list[0]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), std::string());
