@@ -8101,13 +8101,18 @@ static void ThrowExceptionNotGeodeticGeographic(const char *trfrm_name) {
 // ---------------------------------------------------------------------------
 
 static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
-                                       const crs::CRSNNPtr &crs,
+                                       const crs::CRSNNPtr &crs, bool addPushV3,
                                        const char *trfrm_name) {
     auto sourceCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
     if (sourceCRSGeog) {
         formatter->startInversion();
         sourceCRSGeog->_exportToPROJString(formatter);
         formatter->stopInversion();
+
+        if (addPushV3) {
+            formatter->addStep("push");
+            formatter->addParam("v_3");
+        }
 
         formatter->addStep("cart");
         sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
@@ -8124,13 +8129,18 @@ static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
 // ---------------------------------------------------------------------------
 
 static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
-                                       const crs::CRSNNPtr &crs,
+                                       const crs::CRSNNPtr &crs, bool addPopV3,
                                        const char *trfrm_name) {
     auto targetCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
     if (targetCRSGeog) {
         formatter->addStep("cart");
         formatter->setCurrentStepInverted(true);
         targetCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+
+        if (addPopV3) {
+            formatter->addStep("pop");
+            formatter->addParam("v_3");
+        }
 
         targetCRSGeog->_exportToPROJString(formatter);
     } else {
@@ -8223,19 +8233,19 @@ void Transformation::_exportToPROJString(
         double z =
             parameterValueNumericAsSI(EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION);
 
-        if (methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-            methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) {
-            formatter->addStep("push");
-            formatter->addParam("v_3");
-        }
+        bool addPushPopV3 =
+            (methodEPSGCode ==
+                 EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+             methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D);
 
-        setupPROJGeodeticSourceCRS(formatter, sourceCRS(), "Helmert");
+        setupPROJGeodeticSourceCRS(formatter, sourceCRS(), addPushPopV3,
+                                   "Helmert");
 
         formatter->addStep("helmert");
         formatter->addParam("x", x);
@@ -8299,19 +8309,8 @@ void Transformation::_exportToPROJString(
             }
         }
 
-        setupPROJGeodeticTargetCRS(formatter, targetCRS(), "Helmert");
-
-        if (methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-            methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) {
-            formatter->addStep("pop");
-            formatter->addParam("v_3");
-        }
+        setupPROJGeodeticTargetCRS(formatter, targetCRS(), addPushPopV3,
+                                   "Helmert");
 
         return;
     }
@@ -8359,15 +8358,13 @@ void Transformation::_exportToPROJString(
         double pz = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_ORDINATE_3_EVAL_POINT);
 
-        if (methodEPSGCode ==
-                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D) {
-            formatter->addStep("push");
-            formatter->addParam("v_3");
-        }
+        bool addPushPopV3 =
+            (methodEPSGCode ==
+                 EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D ||
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D);
 
-        setupPROJGeodeticSourceCRS(formatter, sourceCRS(),
+        setupPROJGeodeticSourceCRS(formatter, sourceCRS(), addPushPopV3,
                                    "Molodensky-Badekas");
 
         formatter->addStep("molobadekas");
@@ -8387,16 +8384,8 @@ void Transformation::_exportToPROJString(
             formatter->addParam("convention", "coordinate_frame");
         }
 
-        setupPROJGeodeticTargetCRS(formatter, targetCRS(),
+        setupPROJGeodeticTargetCRS(formatter, targetCRS(), addPushPopV3,
                                    "Molodensky-Badekas");
-
-        if (methodEPSGCode ==
-                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D) {
-            formatter->addStep("pop");
-            formatter->addParam("v_3");
-        }
 
         return;
     }
