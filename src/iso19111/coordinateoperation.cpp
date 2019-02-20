@@ -9821,6 +9821,17 @@ struct SortFunction {
             return false;
         }
 
+        if (accuracyA < 0 && accuracyB < 0) {
+            // unknown accuracy ? then prefer operations with grids, which
+            // are likely to have best practical accuracy
+            if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
+                return true;
+            }
+            if (!iterA->second.hasGrids_ && iterB->second.hasGrids_) {
+                return false;
+            }
+        }
+
         // Operations with larger non-zero area of use go before those with
         // lower one
         const double areaA = iterA->second.area_;
@@ -9850,15 +9861,6 @@ struct SortFunction {
                 return true;
             }
             if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
-                return false;
-            }
-        } else if (accuracyA < 0 && accuracyB < 0) {
-            // unknown accuracy ? then prefer operations with grids, which
-            // are likely to have best practical accuracy
-            if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
-                return true;
-            }
-            if (!iterA->second.hasGrids_ && iterB->second.hasGrids_) {
                 return false;
             }
         }
@@ -10136,13 +10138,7 @@ struct FilterResults {
             bool hasGrids = false;
             bool gridsAvailable = true;
             bool gridsKnown = true;
-            if (context->getAuthorityFactory() &&
-                (gridAvailabilityUse ==
-                     CoordinateOperationContext::GridAvailabilityUse::
-                         USE_FOR_SORTING ||
-                 gridAvailabilityUse ==
-                     CoordinateOperationContext::GridAvailabilityUse::
-                         IGNORE_GRID_AVAILABILITY)) {
+            if (context->getAuthorityFactory()) {
                 const auto gridsNeeded = op->gridsNeeded(
                     context->getAuthorityFactory()->databaseContext());
                 for (const auto &gridDesc : gridsNeeded) {
