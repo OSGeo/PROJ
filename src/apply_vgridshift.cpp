@@ -165,7 +165,7 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier, int *
 
     }
 
-    return value;
+    return value * vmultiplier;
 }
 
 /************************************************************************/
