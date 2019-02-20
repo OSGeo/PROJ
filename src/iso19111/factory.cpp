@@ -3873,7 +3873,7 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
 /** \brief Return a list of information on CRS objects
  *
  * This is functionnaly equivalent of listing the codes from an authority,
- * instanciating
+ * instantiating
  * a CRS object for each of them and getting the information from this CRS
  * object, but this implementation has much less overhead.
  *

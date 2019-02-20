@@ -53,6 +53,10 @@ echo "Testing projinfo -s EPSG:4326 -t EPSG:32631" >> ${OUT}
 $EXE -s EPSG:4326 -t EPSG:32631 >>${OUT}
 echo "" >>${OUT}
 
+echo "Testing projinfo -s NAD27 -t NAD83" >> ${OUT}
+$EXE -s NAD27 -t NAD83 >>${OUT}
+echo "" >>${OUT}
+
 echo "Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary" >> ${OUT}
 $EXE -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary >>${OUT}
 echo "" >>${OUT}

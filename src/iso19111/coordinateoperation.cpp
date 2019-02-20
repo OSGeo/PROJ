@@ -104,8 +104,16 @@ constexpr double UTM_NORTH_FALSE_NORTHING = 0.0;
 constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
 
 static const std::string INVERSE_OF = "Inverse of ";
-static const char *NULL_GEOCENTRIC_TRANSLATION = "Null geocentric translation";
-static const char *NULL_GEOGRAPHIC_OFFSET = "Null geographic offset";
+static const char *BALLPARK_GEOCENTRIC_TRANSLATION =
+    "Ballpark geocentric translation";
+static const char *BALLPARK_GEOGRAPHIC_OFFSET = "Ballpark geographic offset";
+static const char *BALLPARK_VERTICAL_TRANSFORMATION_PREFIX =
+    " (ballpark vertical transformation";
+static const char *BALLPARK_VERTICAL_TRANSFORMATION =
+    " (ballpark vertical transformation)";
+static const char *BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT =
+    " (ballpark vertical transformation, without ellipsoid height to vertical "
+    "height correction)";
 //! @endcond
 
 //! @cond Doxygen_Suppress
@@ -513,6 +521,7 @@ struct CoordinateOperation::Private {
     crs::CRSPtr interpolationCRS_{};
     util::optional<common::DataEpoch> sourceCoordinateEpoch_{};
     util::optional<common::DataEpoch> targetCoordinateEpoch_{};
+    bool hasBallparkTransformation_ = false;
 
     // do not set this for a ProjectedCRS.definingConversion
     struct CRSStrongRef {
@@ -706,7 +715,7 @@ void CoordinateOperation::setAccuracies(
  * a PROJ pipeline, checking in particular that referenced grids are
  * available.
  */
-bool CoordinateOperation::isPROJInstanciable(
+bool CoordinateOperation::isPROJInstantiable(
     const io::DatabaseContextPtr &databaseContext) const {
     try {
         exportToPROJString(io::PROJStringFormatter::create().get());
@@ -719,6 +728,27 @@ bool CoordinateOperation::isPROJInstanciable(
         }
     }
     return true;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether a coordinate operation has a "ballpark"
+ * transformation,
+ * that is a very approximate one, due to lack of more accurate transformations.
+ *
+ * Typically a null geographic offset between two horizontal datum, or a
+ * null vertical offset (or limited to unit changes) between two vertical
+ * datum. Errors of several tens to one hundred meters might be expected,
+ * compared to more accurate transformations.
+ */
+bool CoordinateOperation::hasBallparkTransformation() const {
+    return d->hasBallparkTransformation_;
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperation::setHasBallparkTransformation(bool b) {
+    d->hasBallparkTransformation_ = b;
 }
 
 // ---------------------------------------------------------------------------
@@ -1523,11 +1553,12 @@ static SingleOperationNNPtr createPROJBased(
     const util::PropertyMap &properties,
     const io::IPROJStringExportableNNPtr &projExportable,
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies =
-        std::vector<metadata::PositionalAccuracyNNPtr>()) {
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies,
+    bool hasBallparkTransformation) {
     return util::nn_static_pointer_cast<SingleOperation>(
         PROJBasedOperation::create(properties, projExportable, false, sourceCRS,
-                                   targetCRS, accuracies));
+                                   targetCRS, accuracies,
+                                   hasBallparkTransformation));
 }
 //! @endcond
 
@@ -5644,7 +5675,9 @@ void Conversion::_exportToPROJString(
             common::UnitOfMeasure(std::string(), 1.0 / convFactor,
                                   common::UnitOfMeasure::Type::LINEAR)
                 .exportToPROJString();
-        if (!uom.empty()) {
+        if (uom == "m") {
+            // do nothing
+        } else if (!uom.empty()) {
             formatter->addStep("unitconvert");
             formatter->addParam("z_in", uom);
             formatter->addParam("z_out", "m");
@@ -6141,6 +6174,11 @@ TransformationNNPtr Transformation::create(
         accuracies);
     conv->assignSelf(conv);
     conv->setProperties(properties);
+    std::string name;
+    if (properties.getStringValue(common::IdentifiedObject::NAME_KEY, name) &&
+        ci_find(name, "ballpark") != std::string::npos) {
+        conv->setHasBallparkTransformation(true);
+    }
     return conv;
 }
 
@@ -7054,6 +7092,39 @@ TransformationNNPtr Transformation::createVerticalOffset(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a transformation based on the Change of Vertical Unit
+ * method.
+ *
+ * This method is defined as [EPSG:1069]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1069)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param factor Conversion factor
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return a new Transformation.
+ */
+TransformationNNPtr Transformation::createChangeVerticalUnit(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const common::Scale &factor,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    return create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT),
+        VectorOfParameters{
+            createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR),
+        },
+        VectorOfValues{
+            factor,
+        },
+        accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 static const char *getCRSQualifierStr(const crs::CRSPtr &crs) {
     auto geod = dynamic_cast<crs::GeodeticCRS *>(crs.get());
     if (geod) {
@@ -7114,10 +7185,10 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     // Forge a name for the inverse, either from the forward name, or
     // from the source and target CRS names
     const char *opType;
-    if (starts_with(forwardName, NULL_GEOCENTRIC_TRANSLATION)) {
-        opType = NULL_GEOCENTRIC_TRANSLATION;
-    } else if (starts_with(forwardName, NULL_GEOGRAPHIC_OFFSET)) {
-        opType = NULL_GEOGRAPHIC_OFFSET;
+    if (starts_with(forwardName, BALLPARK_GEOCENTRIC_TRANSLATION)) {
+        opType = BALLPARK_GEOCENTRIC_TRANSLATION;
+    } else if (starts_with(forwardName, BALLPARK_GEOGRAPHIC_OFFSET)) {
+        opType = BALLPARK_GEOGRAPHIC_OFFSET;
     } else if (dynamic_cast<const Transformation *>(op) ||
                starts_with(forwardName, "Transformation from ")) {
         opType = "Transformation";
@@ -7479,6 +7550,17 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
             createVerticalOffset(createPropertiesForInverse(this, false, false),
                                  l_targetCRS, l_sourceCRS, newOffsetHeight,
                                  coordinateOperationAccuracies()));
+    }
+
+    if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
+        const double convFactor = parameterValueNumericAsSI(
+            EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        return d->registerInv(
+            shared_from_this(),
+            createChangeVerticalUnit(
+                createPropertiesForInverse(this, false, false), l_targetCRS,
+                l_sourceCRS, common::Scale(1.0 / convFactor),
+                coordinateOperationAccuracies()));
     }
 
     return InverseTransformation::create(NN_NO_CHECK(
@@ -8001,6 +8083,46 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
         }
     }
 
+    if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON) {
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
+                           EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+
+            auto filename = fileParameter->valueFile();
+            if (databaseContext->lookForGridAlternative(
+                    filename, projFilename, projGridFormat, inverseDirection)) {
+
+                if (filename == projFilename) {
+                    assert(!inverseDirection);
+                    return self;
+                }
+
+                auto parameters = std::vector<OperationParameterNNPtr>{
+                    createOpParamNameEPSGCode(
+                        EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE)};
+                if (inverseDirection) {
+                    return create(createPropertiesForInverse(
+                                      self.as_nullable().get(), true, false),
+                                  targetCRS(), sourceCRS(), nullptr,
+                                  createSimilarPropertiesMethod(method()),
+                                  parameters, {ParameterValue::createFilename(
+                                                  projFilename)},
+                                  coordinateOperationAccuracies())
+                        ->inverseAsTransformation();
+                } else {
+                    return create(
+                        createSimilarPropertiesTransformation(self),
+                        sourceCRS(), targetCRS(), nullptr,
+                        createSimilarPropertiesMethod(method()), parameters,
+                        {ParameterValue::createFilename(projFilename)},
+                        coordinateOperationAccuracies());
+                }
+            }
+        }
+    }
+
     return self;
 }
 // ---------------------------------------------------------------------------
@@ -8016,13 +8138,18 @@ static void ThrowExceptionNotGeodeticGeographic(const char *trfrm_name) {
 // ---------------------------------------------------------------------------
 
 static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
-                                       const crs::CRSNNPtr &crs,
+                                       const crs::CRSNNPtr &crs, bool addPushV3,
                                        const char *trfrm_name) {
     auto sourceCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
     if (sourceCRSGeog) {
         formatter->startInversion();
         sourceCRSGeog->_exportToPROJString(formatter);
         formatter->stopInversion();
+
+        if (addPushV3) {
+            formatter->addStep("push");
+            formatter->addParam("v_3");
+        }
 
         formatter->addStep("cart");
         sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
@@ -8039,13 +8166,18 @@ static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
 // ---------------------------------------------------------------------------
 
 static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
-                                       const crs::CRSNNPtr &crs,
+                                       const crs::CRSNNPtr &crs, bool addPopV3,
                                        const char *trfrm_name) {
     auto targetCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
     if (targetCRSGeog) {
         formatter->addStep("cart");
         formatter->setCurrentStepInverted(true);
         targetCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+
+        if (addPopV3) {
+            formatter->addStep("pop");
+            formatter->addParam("v_3");
+        }
 
         targetCRSGeog->_exportToPROJString(formatter);
     } else {
@@ -8138,19 +8270,19 @@ void Transformation::_exportToPROJString(
         double z =
             parameterValueNumericAsSI(EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION);
 
-        if (methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-            methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) {
-            formatter->addStep("push");
-            formatter->addParam("v_3");
-        }
+        bool addPushPopV3 =
+            (methodEPSGCode ==
+                 EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+             methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D);
 
-        setupPROJGeodeticSourceCRS(formatter, sourceCRS(), "Helmert");
+        setupPROJGeodeticSourceCRS(formatter, sourceCRS(), addPushPopV3,
+                                   "Helmert");
 
         formatter->addStep("helmert");
         formatter->addParam("x", x);
@@ -8214,19 +8346,8 @@ void Transformation::_exportToPROJString(
             }
         }
 
-        setupPROJGeodeticTargetCRS(formatter, targetCRS(), "Helmert");
-
-        if (methodEPSGCode == EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-            methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) {
-            formatter->addStep("pop");
-            formatter->addParam("v_3");
-        }
+        setupPROJGeodeticTargetCRS(formatter, targetCRS(), addPushPopV3,
+                                   "Helmert");
 
         return;
     }
@@ -8274,15 +8395,13 @@ void Transformation::_exportToPROJString(
         double pz = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_ORDINATE_3_EVAL_POINT);
 
-        if (methodEPSGCode ==
-                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D) {
-            formatter->addStep("push");
-            formatter->addParam("v_3");
-        }
+        bool addPushPopV3 =
+            (methodEPSGCode ==
+                 EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D ||
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D);
 
-        setupPROJGeodeticSourceCRS(formatter, sourceCRS(),
+        setupPROJGeodeticSourceCRS(formatter, sourceCRS(), addPushPopV3,
                                    "Molodensky-Badekas");
 
         formatter->addStep("molobadekas");
@@ -8302,16 +8421,8 @@ void Transformation::_exportToPROJString(
             formatter->addParam("convention", "coordinate_frame");
         }
 
-        setupPROJGeodeticTargetCRS(formatter, targetCRS(),
+        setupPROJGeodeticTargetCRS(formatter, targetCRS(), addPushPopV3,
                                    "Molodensky-Badekas");
-
-        if (methodEPSGCode ==
-                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_PV_GEOGRAPHIC_2D ||
-            methodEPSGCode ==
-                EPSG_CODE_METHOD_MOLODENSKY_BADEKAS_CF_GEOGRAPHIC_2D) {
-            formatter->addStep("pop");
-            formatter->addParam("v_3");
-        }
 
         return;
     }
@@ -8795,6 +8906,33 @@ bool SingleOperation::exportToPROJStringGeneric(
                                       "conversion");
     }
 
+    if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
+        double convFactor = parameterValueNumericAsSI(
+            EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        auto uom = common::UnitOfMeasure(std::string(), convFactor,
+                                         common::UnitOfMeasure::Type::LINEAR)
+                       .exportToPROJString();
+        auto reverse_uom =
+            common::UnitOfMeasure(std::string(), 1.0 / convFactor,
+                                  common::UnitOfMeasure::Type::LINEAR)
+                .exportToPROJString();
+        if (uom == "m") {
+            // do nothing
+        } else if (!uom.empty()) {
+            formatter->addStep("unitconvert");
+            formatter->addParam("z_in", uom);
+            formatter->addParam("z_out", "m");
+        } else if (!reverse_uom.empty()) {
+            formatter->addStep("unitconvert");
+            formatter->addParam("z_in", "m");
+            formatter->addParam("z_out", reverse_uom);
+        } else {
+            formatter->addStep("affine");
+            formatter->addParam("s33", convFactor);
+        }
+        return true;
+    }
+
     return false;
 }
 
@@ -9080,7 +9218,9 @@ CoordinateOperationNNPtr ConcatenatedOperation::createComputeMetadata(
     }
 
     std::vector<CoordinateOperationNNPtr> flattenOps;
+    bool hasBallparkTransformation = false;
     for (const auto &subOp : operationsIn) {
+        hasBallparkTransformation |= subOp->hasBallparkTransformation();
         auto subOpConcat =
             dynamic_cast<const ConcatenatedOperation *>(subOp.get());
         if (subOpConcat) {
@@ -9120,6 +9260,7 @@ CoordinateOperationNNPtr ConcatenatedOperation::createComputeMetadata(
     }
 
     auto op = create(properties, flattenOps, accuracies);
+    op->setHasBallparkTransformation(hasBallparkTransformation);
     op->d->computedName_ = true;
     return op;
 }
@@ -9627,14 +9768,18 @@ struct PrecomputedOpCharacteristics {
     bool gridsAvailable_ = false;
     bool gridsKnown_ = false;
     size_t stepCount_ = 0;
+    bool isApprox_ = false;
+    bool isNullTransformation_ = false;
 
     PrecomputedOpCharacteristics() = default;
     PrecomputedOpCharacteristics(double area, double accuracy, bool hasGrids,
                                  bool gridsAvailable, bool gridsKnown,
-                                 size_t stepCount)
+                                 size_t stepCount, bool isApprox,
+                                 bool isNullTransformation)
         : area_(area), accuracy_(accuracy), hasGrids_(hasGrids),
           gridsAvailable_(gridsAvailable), gridsKnown_(gridsKnown),
-          stepCount_(stepCount) {}
+          stepCount_(stepCount), isApprox_(isApprox),
+          isNullTransformation_(isNullTransformation) {}
 };
 
 // ---------------------------------------------------------------------------
@@ -9660,6 +9805,22 @@ struct SortFunction {
 
         // CAUTION: the order of the comparisons is extremely important
         // to get the intended result.
+
+        if (!iterA->second.isApprox_ && iterB->second.isApprox_) {
+            return true;
+        }
+        if (iterA->second.isApprox_ && !iterB->second.isApprox_) {
+            return false;
+        }
+
+        if (!iterA->second.isNullTransformation_ &&
+            iterB->second.isNullTransformation_) {
+            return true;
+        }
+        if (iterA->second.isNullTransformation_ &&
+            !iterB->second.isNullTransformation_) {
+            return false;
+        }
 
         if (iterA->second.hasGrids_ && iterB->second.hasGrids_) {
             // Operations where grids are all available go before other
@@ -9691,6 +9852,17 @@ struct SortFunction {
             return false;
         }
 
+        if (accuracyA < 0 && accuracyB < 0) {
+            // unknown accuracy ? then prefer operations with grids, which
+            // are likely to have best practical accuracy
+            if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
+                return true;
+            }
+            if (!iterA->second.hasGrids_ && iterB->second.hasGrids_) {
+                return false;
+            }
+        }
+
         // Operations with larger non-zero area of use go before those with
         // lower one
         const double areaA = iterA->second.area_;
@@ -9720,15 +9892,6 @@ struct SortFunction {
                 return true;
             }
             if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
-                return false;
-            }
-        } else if (accuracyA < 0 && accuracyB < 0) {
-            // unknown accuracy ? then prefer operations with grids, which
-            // are likely to have best practical accuracy
-            if (iterA->second.hasGrids_ && !iterB->second.hasGrids_) {
-                return true;
-            }
-            if (!iterA->second.hasGrids_ && iterB->second.hasGrids_) {
                 return false;
             }
         }
@@ -9882,11 +10045,7 @@ struct FilterResults {
                 bool extentContains =
                     extent->contains(NN_NO_CHECK(areaOfInterest));
                 if (extentContains) {
-                    const auto &name = op->nameStr();
-                    if (name.find(NULL_GEOGRAPHIC_OFFSET) ==
-                            std::string::npos &&
-                        name.find(NULL_GEOCENTRIC_TRANSLATION) ==
-                            std::string::npos) {
+                    if (!op->hasBallparkTransformation()) {
                         hasOpThatContainsAreaOfInterest = true;
                     }
                 }
@@ -9917,11 +10076,7 @@ struct FilterResults {
                     !targetCRSExtent ||
                     extent->contains(NN_NO_CHECK(targetCRSExtent));
                 if (extentContainsSource && extentContainsTarget) {
-                    const auto &name = op->nameStr();
-                    if (name.find(NULL_GEOGRAPHIC_OFFSET) ==
-                            std::string::npos &&
-                        name.find(NULL_GEOCENTRIC_TRANSLATION) ==
-                            std::string::npos) {
+                    if (!op->hasBallparkTransformation()) {
                         hasOpThatContainsAreaOfInterest = true;
                     }
                 }
@@ -10002,13 +10157,7 @@ struct FilterResults {
             bool hasGrids = false;
             bool gridsAvailable = true;
             bool gridsKnown = true;
-            if (context->getAuthorityFactory() &&
-                (gridAvailabilityUse ==
-                     CoordinateOperationContext::GridAvailabilityUse::
-                         USE_FOR_SORTING ||
-                 gridAvailabilityUse ==
-                     CoordinateOperationContext::GridAvailabilityUse::
-                         IGNORE_GRID_AVAILABILITY)) {
+            if (context->getAuthorityFactory()) {
                 const auto gridsNeeded = op->gridsNeeded(
                     context->getAuthorityFactory()->databaseContext());
                 for (const auto &gridDesc : gridsNeeded) {
@@ -10027,9 +10176,17 @@ struct FilterResults {
 
             const auto stepCount = getStepCount(op);
 
+            const bool isApprox =
+                op->nameStr().find(BALLPARK_VERTICAL_TRANSFORMATION_PREFIX) !=
+                std::string::npos;
+            const bool isNullTransformation =
+                op->nameStr().find(BALLPARK_GEOGRAPHIC_OFFSET) !=
+                    std::string::npos ||
+                op->nameStr().find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
+                    std::string::npos;
             map[op.get()] = PrecomputedOpCharacteristics(
                 area, getAccuracy(op), hasGrids, gridsAvailable, gridsKnown,
-                stepCount);
+                stepCount, isApprox, isNullTransformation);
         }
 
         // Sort !
@@ -10041,13 +10198,16 @@ struct FilterResults {
     void removeSyntheticNullTransforms() {
 
         // If we have more than one result, and than the last result is the
-        // default "Null geographic offset" or "Null geocentric translation"
-        // operations we have synthetized, remove it as
+        // default "Ballpark geographic offset" or "Ballpark geocentric
+        // translation"
+        // operations we have synthetized, and that at least one operation
+        // has the desired area of interest, remove it as
         // all previous results are necessarily better
         if (hasOpThatContainsAreaOfInterest && res.size() > 1) {
             const std::string &name = res.back()->nameStr();
-            if (name.find(NULL_GEOGRAPHIC_OFFSET) != std::string::npos ||
-                name.find(NULL_GEOCENTRIC_TRANSLATION) != std::string::npos) {
+            if (name.find(BALLPARK_GEOGRAPHIC_OFFSET) != std::string::npos ||
+                name.find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
+                    std::string::npos) {
                 std::vector<CoordinateOperationNNPtr> resTemp;
                 for (size_t i = 0; i < res.size() - 1; i++) {
                     resTemp.emplace_back(res[i]);
@@ -10460,9 +10620,9 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
 
 //! @cond Doxygen_Suppress
 static TransformationNNPtr
-createNullGeographicOffset(const crs::CRSNNPtr &sourceCRS,
-                           const crs::CRSNNPtr &targetCRS) {
-    std::string name(NULL_GEOGRAPHIC_OFFSET);
+createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
+                               const crs::CRSNNPtr &targetCRS) {
+    std::string name(BALLPARK_GEOGRAPHIC_OFFSET);
     name += " from ";
     name += sourceCRS->nameStr();
     name += " to ";
@@ -10653,7 +10813,7 @@ createGeodToGeodPROJBased(const crs::CRSNNPtr &geodSrc,
     auto properties = util::PropertyMap().set(
         common::IdentifiedObject::NAME_KEY,
         buildTransfName(geodSrc->nameStr(), geodDst->nameStr()));
-    return createPROJBased(properties, exportable, geodSrc, geodDst);
+    return createPROJBased(properties, exportable, geodSrc, geodDst, {}, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -10690,7 +10850,9 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
     }
 
     return createPROJBased(properties, exportable, sourceCRS, targetCRS,
-                           accuracies);
+                           accuracies,
+                           horizTransform->hasBallparkTransformation() ||
+                               verticalTransform->hasBallparkTransformation());
 }
 
 // ---------------------------------------------------------------------------
@@ -10708,8 +10870,17 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
             interpolationGeogCRS);
 
     bool dummy = false;
-    auto ops = std::vector<CoordinateOperationNNPtr>{
-        opSrcCRSToGeogCRS, verticalTransform, opGeogCRStoDstCRS};
+    auto ops = opSrcCRSToGeogCRS->sourceCRS()->_isEquivalentTo(
+                   opSrcCRSToGeogCRS->targetCRS().get())
+                   ? std::vector<CoordinateOperationNNPtr>{verticalTransform,
+                                                           opGeogCRStoDstCRS}
+                   : std::vector<CoordinateOperationNNPtr>{opSrcCRSToGeogCRS,
+                                                           verticalTransform,
+                                                           opGeogCRStoDstCRS};
+    bool hasBallparkTransformation = false;
+    for (const auto &op : ops) {
+        hasBallparkTransformation |= op->hasBallparkTransformation();
+    }
     auto extent = getExtent(ops, true, dummy);
     auto properties = util::PropertyMap();
     properties.set(common::IdentifiedObject::NAME_KEY,
@@ -10728,7 +10899,7 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
     }
 
     return createPROJBased(properties, exportable, sourceCRS, targetCRS,
-                           accuracies);
+                           accuracies, hasBallparkTransformation);
 }
 
 //! @endcond
@@ -10784,6 +10955,11 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
 
     std::string name(buildTransfName(geogSrc->nameStr(), geogDst->nameStr()));
 
+    const bool sameDatum =
+        geogSrc->datum() != nullptr && geogDst->datum() != nullptr &&
+        geogSrc->datum()->_isEquivalentTo(
+            geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT);
+
     // Do they differ by vertical units ?
     if (vconvSrc != vconvDst &&
         geogSrc->ellipsoid()->_isEquivalentTo(
@@ -10799,18 +10975,19 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
                                         name),
                 common::Scale(factor));
             conv->setCRSs(sourceCRS, targetCRS, nullptr);
+            conv->setHasBallparkTransformation(!sameDatum);
             res.push_back(conv);
             return res;
         } else {
-            res.emplace_back(createGeodToGeodPROJBased(sourceCRS, targetCRS));
+            auto op = createGeodToGeodPROJBased(sourceCRS, targetCRS);
+            op->setHasBallparkTransformation(!sameDatum);
+            res.emplace_back(op);
             return res;
         }
     }
 
     // Do the CRS differ only by their axis order ?
-    if (geogSrc->datum() != nullptr && geogDst->datum() != nullptr &&
-        geogSrc->datum()->_isEquivalentTo(
-            geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT) &&
+    if (sameDatum &&
         !srcCS->_isEquivalentTo(dstCS.get(),
                                 util::IComparable::Criterion::EQUIVALENT)) {
         auto srcOrder = srcCS->axisOrder();
@@ -10871,7 +11048,8 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
                          metadata::Extent::WORLD),
                 datum, dstCS));
 
-        steps.emplace_back(createNullGeographicOffset(sourceCRS, interm_crs));
+        steps.emplace_back(
+            createBallparkGeographicOffset(sourceCRS, interm_crs));
 
         steps.emplace_back(Transformation::createLongitudeRotation(
             util::PropertyMap()
@@ -10906,15 +11084,17 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
                          metadata::Extent::WORLD),
                 sourceCRS, interm_crs, offset_pm));
             steps.emplace_back(
-                createNullGeographicOffset(interm_crs, targetCRS));
+                createBallparkGeographicOffset(interm_crs, targetCRS));
         } else {
             steps.emplace_back(
-                createNullGeographicOffset(sourceCRS, targetCRS));
+                createBallparkGeographicOffset(sourceCRS, targetCRS));
         }
     }
 
-    res.emplace_back(ConcatenatedOperation::createComputeMetadata(
-        steps, !allowEmptyIntersection));
+    auto op = ConcatenatedOperation::createComputeMetadata(
+        steps, !allowEmptyIntersection);
+    op->setHasBallparkTransformation(!sameDatum);
+    res.emplace_back(op);
     return res;
 }
 
@@ -10966,8 +11146,8 @@ findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
 
 static bool isNullTransformation(const std::string &name) {
 
-    return starts_with(name, NULL_GEOCENTRIC_TRANSLATION) ||
-           starts_with(name, NULL_GEOGRAPHIC_OFFSET);
+    return starts_with(name, BALLPARK_GEOCENTRIC_TRANSLATION) ||
+           starts_with(name, BALLPARK_GEOGRAPHIC_OFFSET);
 }
 
 // ---------------------------------------------------------------------------
@@ -11085,9 +11265,9 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 // ---------------------------------------------------------------------------
 
 static CoordinateOperationNNPtr
-createNullGeocentricTranslation(const crs::CRSNNPtr &sourceCRS,
-                                const crs::CRSNNPtr &targetCRS) {
-    std::string name(NULL_GEOCENTRIC_TRANSLATION);
+createBallparkGeocentricTranslation(const crs::CRSNNPtr &sourceCRS,
+                                    const crs::CRSNNPtr &targetCRS) {
+    std::string name(BALLPARK_GEOCENTRIC_TRANSLATION);
     name += " from ";
     name += sourceCRS->nameStr();
     name += " to ";
@@ -11309,7 +11489,7 @@ CoordinateOperationFactory::Private::createOperations(
                             util::nn_dynamic_pointer_cast<cs::CartesianCS>(
                                 geodSrc->coordinateSystem()))));
                 auto opFirst =
-                    createNullGeocentricTranslation(sourceCRS, interm_crs);
+                    createBallparkGeocentricTranslation(sourceCRS, interm_crs);
                 auto opSecond =
                     createGeographicGeocentric(interm_crs, targetCRS);
                 res.emplace_back(ConcatenatedOperation::createComputeMetadata(
@@ -11324,7 +11504,7 @@ CoordinateOperationFactory::Private::createOperations(
 
         if (isSrcGeocentric && isTargetGeocentric) {
             res.emplace_back(
-                createNullGeocentricTranslation(sourceCRS, targetCRS));
+                createBallparkGeocentricTranslation(sourceCRS, targetCRS));
             return res;
         }
 
@@ -11526,30 +11706,35 @@ CoordinateOperationFactory::Private::createOperations(
     if (vertSrc && vertDst) {
         const auto &srcDatum = vertSrc->datum();
         const auto &dstDatum = vertDst->datum();
-        if (srcDatum && dstDatum &&
-            srcDatum->_isEquivalentTo(
-                dstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
-            const double convSrc = vertSrc->coordinateSystem()
-                                       ->axisList()[0]
-                                       ->unit()
-                                       .conversionToSI();
-            const double convDst = vertDst->coordinateSystem()
-                                       ->axisList()[0]
-                                       ->unit()
-                                       .conversionToSI();
-            if (convSrc != convDst) {
-                const double factor = convSrc / convDst;
-                auto conv = Conversion::createChangeVerticalUnit(
-                    util::PropertyMap().set(
-                        common::IdentifiedObject::NAME_KEY,
-                        buildTransfName(sourceCRS->nameStr(),
-                                        targetCRS->nameStr())),
-                    common::Scale(factor));
-                conv->setCRSs(sourceCRS, targetCRS, nullptr);
-                res.push_back(conv);
-                return res;
-            }
+        const bool equivalentVDatum =
+            (srcDatum && dstDatum &&
+             srcDatum->_isEquivalentTo(
+                 dstDatum.get(), util::IComparable::Criterion::EQUIVALENT));
+
+        const double convSrc =
+            vertSrc->coordinateSystem()->axisList()[0]->unit().conversionToSI();
+        const double convDst =
+            vertDst->coordinateSystem()->axisList()[0]->unit().conversionToSI();
+
+        const double factor = convSrc / convDst;
+        auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
+        if (!equivalentVDatum) {
+            name += BALLPARK_VERTICAL_TRANSFORMATION;
+            auto conv = Transformation::createChangeVerticalUnit(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        name),
+                sourceCRS, targetCRS, common::Scale(factor), {});
+            conv->setHasBallparkTransformation(true);
+            res.push_back(conv);
+        } else if (convSrc != convDst) {
+            auto conv = Conversion::createChangeVerticalUnit(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        name),
+                common::Scale(factor));
+            conv->setCRSs(sourceCRS, targetCRS, nullptr);
+            res.push_back(conv);
         }
+        return res;
     }
 
     // A bit odd case as we are comparing apples to oranges, but in case
@@ -11562,17 +11747,17 @@ CoordinateOperationFactory::Private::createOperations(
         if (geogAxis.size() == 3) {
             convDst = geogAxis[2]->unit().conversionToSI();
         }
-        if (convSrc != convDst) {
-            const double factor = convSrc / convDst;
-            auto conv = Conversion::createChangeVerticalUnit(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        buildTransfName(sourceCRS->nameStr(),
-                                                        targetCRS->nameStr())),
-                common::Scale(factor));
-            conv->setCRSs(sourceCRS, targetCRS, nullptr);
-            res.push_back(conv);
-            return res;
-        }
+
+        const double factor = convSrc / convDst;
+        auto conv = Transformation::createChangeVerticalUnit(
+            util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY,
+                buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr()) +
+                    BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT),
+            sourceCRS, targetCRS, common::Scale(factor), {});
+        conv->setHasBallparkTransformation(true);
+        res.push_back(conv);
+        return res;
     }
 
     // reverse of previous case
@@ -11877,7 +12062,8 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     const util::PropertyMap &properties,
     const io::IPROJStringExportableNNPtr &projExportable, bool inverse,
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies,
+    bool hasBallparkTransformation) {
 
     auto formatter = io::PROJStringFormatter::create();
     if (inverse) {
@@ -11903,6 +12089,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     op->setAccuracies(accuracies);
     op->projStringExportable_ = projExportable.as_nullable();
     op->inverse_ = inverse;
+    op->setHasBallparkTransformation(hasBallparkTransformation);
     return op;
 }
 
@@ -11916,7 +12103,7 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
                 createPropertiesForInverse(this, false, false),
                 NN_NO_CHECK(projStringExportable_), !inverse_,
                 NN_NO_CHECK(targetCRS()), NN_NO_CHECK(sourceCRS()),
-                coordinateOperationAccuracies()));
+                coordinateOperationAccuracies(), hasBallparkTransformation()));
     }
 
     auto formatter = io::PROJStringFormatter::create();
@@ -11929,11 +12116,11 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
     }
     formatter->stopInversion();
 
-    return util::nn_static_pointer_cast<CoordinateOperation>(
-        PROJBasedOperation::create(
-            createPropertiesForInverse(this, false, false),
-            formatter->toString(), targetCRS(), sourceCRS(),
-            coordinateOperationAccuracies()));
+    auto op = PROJBasedOperation::create(
+        createPropertiesForInverse(this, false, false), formatter->toString(),
+        targetCRS(), sourceCRS(), coordinateOperationAccuracies());
+    op->setHasBallparkTransformation(hasBallparkTransformation());
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
 
 // ---------------------------------------------------------------------------

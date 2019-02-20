@@ -142,6 +142,53 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
+-- Continental USA VERTCON: NGVD (19)29 height to NAVD (19)88 height
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('vertconw.94',
+                              'vertconw.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('vertconc.94',
+                              'vertconc.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('vertcone.94',
+                              'vertcone.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
 -- EGM models
 
 INSERT INTO grid_alternatives(original_grid_name,

@@ -136,11 +136,11 @@ static std::string c_ify_string(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
-static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
-                                   const std::string &user_string,
-                                   bool kindIsCRS, const std::string &context,
-                                   bool buildBoundCRSToWGS84, CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
-                                   bool quiet) {
+static BaseObjectNNPtr buildObject(
+    DatabaseContextPtr dbContext, const std::string &user_string,
+    bool kindIsCRS, const std::string &context, bool buildBoundCRSToWGS84,
+    CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
+    bool quiet) {
     BaseObjectPtr obj;
 
     std::string l_user_string(user_string);
@@ -213,7 +213,8 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
     if (buildBoundCRSToWGS84) {
         auto crs = std::dynamic_pointer_cast<CRS>(obj);
         if (crs) {
-            obj = crs->createBoundCRSToWGS84IfPossible(dbContext, allowUseIntermediateCRS)
+            obj = crs->createBoundCRSToWGS84IfPossible(dbContext,
+                                                       allowUseIntermediateCRS)
                       .as_nullable();
         }
     }
@@ -223,8 +224,10 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
 
 // ---------------------------------------------------------------------------
 
-static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
-                         CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS, const OutputOptions &outputOpt) {
+static void outputObject(
+    DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
+    CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
+    const OutputOptions &outputOpt) {
 
     auto identified = dynamic_cast<const IdentifiedObject *>(obj.get());
     if (!outputOpt.quiet && identified && identified->isDeprecated()) {
@@ -260,7 +263,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 }
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
                 if (!outputOpt.quiet) {
-                    if( crs ) {
+                    if (crs) {
                         std::cout << "PROJ.4 string:" << std::endl;
                     } else {
                         std::cout << "PROJ string:" << std::endl;
@@ -271,8 +274,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (crs) {
                     objToExport =
                         nn_dynamic_pointer_cast<IPROJStringExportable>(
-                            crs->createBoundCRSToWGS84IfPossible(dbContext,
-                                                                 allowUseIntermediateCRS));
+                            crs->createBoundCRSToWGS84IfPossible(
+                                dbContext, allowUseIntermediateCRS));
                 }
                 if (!objToExport) {
                     objToExport = projStringExportable;
@@ -411,8 +414,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 std::shared_ptr<IWKTExportable> objToExport;
                 if (crs) {
                     objToExport = nn_dynamic_pointer_cast<IWKTExportable>(
-                        crs->createBoundCRSToWGS84IfPossible(dbContext,
-                                                             allowUseIntermediateCRS));
+                        crs->createBoundCRSToWGS84IfPossible(
+                            dbContext, allowUseIntermediateCRS));
                 }
                 if (!objToExport) {
                     objToExport = wktExportable;
@@ -505,6 +508,10 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op) {
         std::cout << "unknown domain of validity";
     }
 
+    if (op->hasBallparkTransformation()) {
+        std::cout << ", has ballpark transformation";
+    }
+
     std::cout << std::endl;
 }
 
@@ -514,26 +521,25 @@ static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
+    bool spatialCriterionExplicitlySpecified,
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
     bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
-    auto sourceObj = buildObject(dbContext, sourceCRSStr, true, "source CRS",
-                                 false,
-                                 CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                                 outputOpt.quiet);
+    auto sourceObj = buildObject(
+        dbContext, sourceCRSStr, true, "source CRS", false,
+        CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
 
-    auto targetObj = buildObject(dbContext, targetCRSStr, true, "target CRS",
-                                 false,
-                                 CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                                 outputOpt.quiet);
+    auto targetObj = buildObject(
+        dbContext, targetCRSStr, true, "target CRS", false,
+        CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -541,6 +547,7 @@ static void outputOperations(
     }
 
     std::vector<CoordinateOperationNNPtr> list;
+    size_t spatialCriterionPartialIntersectionResultCount = 0;
     try {
         auto authFactory =
             dbContext
@@ -558,6 +565,21 @@ static void outputOperations(
         ctxt->setDiscardSuperseded(!showSuperseded);
         list = CoordinateOperationFactory::create()->createOperations(
             NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), ctxt);
+        if (!spatialCriterionExplicitlySpecified &&
+            spatialCriterion == CoordinateOperationContext::SpatialCriterion::
+                                    STRICT_CONTAINMENT) {
+            try {
+                ctxt->setSpatialCriterion(
+                    CoordinateOperationContext::SpatialCriterion::
+                        PARTIAL_INTERSECTION);
+                spatialCriterionPartialIntersectionResultCount =
+                    CoordinateOperationFactory::create()
+                        ->createOperations(NN_NO_CHECK(sourceCRS),
+                                           NN_NO_CHECK(targetCRS), ctxt)
+                        .size();
+            } catch (const std::exception &) {
+            }
+        }
     } catch (const std::exception &e) {
         std::cerr << "createOperations() failed with: " << e.what()
                   << std::endl;
@@ -567,8 +589,14 @@ static void outputOperations(
         outputObject(dbContext, list[0], allowUseIntermediateCRS, outputOpt);
         return;
     }
+    std::cout << "Candidate operations found: " << list.size() << std::endl;
+    if (spatialCriterionPartialIntersectionResultCount > list.size()) {
+        std::cout << "Note: using '--spatial-test intersects' would bring "
+                     "more results ("
+                  << spatialCriterionPartialIntersectionResultCount << ")"
+                  << std::endl;
+    }
     if (summary) {
-        std::cout << "Candidate operations found: " << list.size() << std::endl;
         for (const auto &op : list) {
             outputOperationSummary(op);
         }
@@ -576,18 +604,15 @@ static void outputOperations(
         bool first = true;
         for (size_t i = 0; i < list.size(); ++i) {
             const auto &op = list[i];
-            if (list.size() > 1) {
-                if (!first) {
-                    std::cout << std::endl;
-                }
-                first = false;
-                std::cout << "-------------------------------------"
-                          << std::endl;
-                std::cout << "Operation n"
-                             "\xC2\xB0"
-                          << (i + 1) << ":" << std::endl
-                          << std::endl;
+            if (!first) {
+                std::cout << std::endl;
             }
+            first = false;
+            std::cout << "-------------------------------------" << std::endl;
+            std::cout << "Operation n"
+                         "\xC2\xB0"
+                      << (i + 1) << ":" << std::endl
+                      << std::endl;
             outputOperationSummary(op);
             std::cout << std::endl;
             outputObject(dbContext, op, allowUseIntermediateCRS, outputOpt);
@@ -614,6 +639,7 @@ int main(int argc, char **argv) {
     bool summary = false;
     ExtentPtr bboxFilter = nullptr;
     std::string area;
+    bool spatialCriterionExplicitlySpecified = false;
     CoordinateOperationContext::SpatialCriterion spatialCriterion =
         CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT;
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse =
@@ -622,7 +648,8 @@ int main(int argc, char **argv) {
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse =
         CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS =
-    CoordinateOperationContext::IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
+        CoordinateOperationContext::IntermediateCRSUse::
+            IF_NO_DIRECT_TRANSFORMATION;
     std::vector<std::pair<std::string, std::string>> pivots;
     bool usePROJGridAlternatives = true;
     std::string mainDBPath;
@@ -768,6 +795,7 @@ int main(int argc, char **argv) {
         } else if (arg == "--spatial-test" && i + 1 < argc) {
             i++;
             std::string value(argv[i]);
+            spatialCriterionExplicitlySpecified = true;
             if (ci_equal(value, "contains")) {
                 spatialCriterion = CoordinateOperationContext::
                     SpatialCriterion::STRICT_CONTAINMENT;
@@ -822,9 +850,10 @@ int main(int argc, char **argv) {
             if (ci_equal(std::string(value), "always")) {
                 allowUseIntermediateCRS =
                     CoordinateOperationContext::IntermediateCRSUse::ALWAYS;
-            } else if (ci_equal(std::string(value), "if_no_direct_transformation")) {
-                allowUseIntermediateCRS =
-                    CoordinateOperationContext::IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
+            } else if (ci_equal(std::string(value),
+                                "if_no_direct_transformation")) {
+                allowUseIntermediateCRS = CoordinateOperationContext::
+                    IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
             } else if (ci_equal(std::string(value), "never")) {
                 allowUseIntermediateCRS =
                     CoordinateOperationContext::IntermediateCRSUse::NEVER;
@@ -918,8 +947,8 @@ int main(int argc, char **argv) {
     }
 
     if (outputOpt.quiet &&
-        (outputOpt.PROJ5 + outputOpt.WKT2_2018 +
-         outputOpt.WKT2_2015 + outputOpt.WKT1_GDAL) != 1) {
+        (outputOpt.PROJ5 + outputOpt.WKT2_2018 + outputOpt.WKT2_2015 +
+         outputOpt.WKT1_GDAL) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();
@@ -1055,7 +1084,8 @@ int main(int argc, char **argv) {
 
         outputOperations(
             dbContext, sourceCRSStr, targetCRSStr, bboxFilter, spatialCriterion,
-            crsExtentUse, gridAvailabilityUse, allowUseIntermediateCRS, pivots, authority,
+            spatialCriterionExplicitlySpecified, crsExtentUse,
+            gridAvailabilityUse, allowUseIntermediateCRS, pivots, authority,
             usePROJGridAlternatives, showSuperseded, outputOpt, summary);
     }
 

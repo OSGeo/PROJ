@@ -660,13 +660,13 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_3) {
                  NoSuchAuthorityCodeException);
     auto op = factory->createCoordinateOperation("1113", false);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=push +v_3 +step +proj=axisswap "
-              "+order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
-              "+inv +proj=longlat +a=6378249.145 +rf=293.4663077 +step "
-              "+proj=cart +a=6378249.145 +rf=293.4663077 +step +proj=helmert "
-              "+x=-143 +y=-90 +z=-294 +step +inv +proj=cart +ellps=WGS84 +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
-              "+order=2,1 +step +proj=pop +v_3");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
+              "+proj=longlat +a=6378249.145 +rf=293.4663077 +step +proj=push "
+              "+v_3 +step +proj=cart +a=6378249.145 +rf=293.4663077 +step "
+              "+proj=helmert +x=-143 +y=-90 +z=-294 +step +inv +proj=cart "
+              "+ellps=WGS84 +step +proj=pop +v_3 +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -675,13 +675,13 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7_CF) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto op = factory->createCoordinateOperation("7676", false);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=push +v_3 +step +proj=axisswap "
-              "+order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
-              "+proj=cart +ellps=bessel +step +proj=helmert +x=577.88891 "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
+              "+step +proj=cart +ellps=bessel +step +proj=helmert +x=577.88891 "
               "+y=165.22205 +z=391.18289 +rx=-4.9145 +ry=0.94729 +rz=13.05098 "
               "+s=7.78664 +convention=coordinate_frame +step +inv +proj=cart "
-              "+ellps=WGS84 +step +proj=unitconvert +xy_in=rad +xy_out=deg "
-              "+step +proj=axisswap +order=2,1 +step +proj=pop +v_3");
+              "+ellps=WGS84 +step +proj=pop +v_3 +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -852,15 +852,15 @@ TEST(factory,
     EXPECT_TRUE(so->validateParameters().empty());
 
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=push +v_3 +step +proj=axisswap "
-              "+order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
-              "+proj=cart +ellps=bessel +step +proj=molobadekas +x=593.032 "
-              "+y=26 +z=478.741 +rx=0.409394387439237 +ry=-0.359705195614311 "
-              "+rz=1.86849100035057 +s=4.0772 +px=3903453.148 +py=368135.313 "
-              "+pz=5012970.306 +convention=coordinate_frame +step +inv "
-              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg +step +proj=axisswap +order=2,1 +step +proj=pop "
-              "+v_3");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
+              "+step +proj=cart +ellps=bessel +step +proj=molobadekas "
+              "+x=593.032 +y=26 +z=478.741 +rx=0.409394387439237 "
+              "+ry=-0.359705195614311 +rz=1.86849100035057 +s=4.0772 "
+              "+px=3903453.148 +py=368135.313 +pz=5012970.306 "
+              "+convention=coordinate_frame +step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=pop +v_3 +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -2071,12 +2071,12 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
     ASSERT_EQ(res.size(), 1U);
     EXPECT_EQ(res[0]->nameStr(), "My WKT string based op");
     EXPECT_EQ(res[0]->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=push +v_3 +step +proj=axisswap "
-              "+order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
-              "+proj=cart +ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 "
-              "+step +inv +proj=cart +ellps=WGS84 +step +proj=unitconvert "
-              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1 +step "
-              "+proj=pop +v_3");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
+              "+step +proj=cart +ellps=WGS84 +step +proj=helmert +x=1 +y=2 "
+              "+z=3 +step +inv +proj=cart +ellps=WGS84 +step +proj=pop +v_3 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
+              "+proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------

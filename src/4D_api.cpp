@@ -1102,8 +1102,8 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
             double north_lat = 0.0;
 
             const char* name = proj_get_name(op);
-            if( name && (strstr(name, "Null geographic offset") ||
-                         strstr(name, "Null geocentric translation")) )
+            if( name && (strstr(name, "Ballpark geographic offset") ||
+                         strstr(name, "Ballpark geocentric translation")) )
             {
                 // Skip default transformations
             }
