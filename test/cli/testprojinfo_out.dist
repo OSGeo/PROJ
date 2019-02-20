@@ -136,6 +136,10 @@ GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.25722
 
 
 Testing projinfo -s EPSG:4326 -t EPSG:32631
+Candidate operations found: 1
+-------------------------------------
+Operation n°1:
+
 EPSG:16031, UTM zone 31N, 0 m, World - N hemisphere - 0°E to 6°E
 
 PROJ string:
@@ -162,6 +166,70 @@ CONVERSION["UTM zone 31N",
         ID["EPSG",8807]],
     ID["EPSG",16031]]
 
+Testing projinfo -s NAD27 -t NAD83
+Candidate operations found: 1
+Note: using '--spatial-test intersects' would bring more results (7)
+-------------------------------------
+Operation n°1:
+
+unknown id, Null geographic offset from NAD27 to NAD83, unknown accuracy, World
+
+PROJ string:
+
+
+WKT2_2018 string:
+COORDINATEOPERATION["Null geographic offset from NAD27 to NAD83",
+    SOURCECRS[
+        GEOGCRS["NAD27",
+            DATUM["North American Datum 1927",
+                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            USAGE[
+                SCOPE["unknown"],
+                AREA["North America - NAD27"],
+                BBOX[7.15,167.65,83.17,-47.74]],
+            ID["EPSG",4267]]],
+    TARGETCRS[
+        GEOGCRS["NAD83",
+            DATUM["North American Datum 1983",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            USAGE[
+                SCOPE["unknown"],
+                AREA["North America - NAD83"],
+                BBOX[14.92,167.65,86.46,-47.74]],
+            ID["EPSG",4269]]],
+    METHOD["Geographic2D offsets",
+        ID["EPSG",9619]],
+    PARAMETER["Latitude offset",0,
+        ANGLEUNIT["degree",0.0174532925199433],
+        ID["EPSG",8601]],
+    PARAMETER["Longitude offset",0,
+        ANGLEUNIT["degree",0.0174532925199433],
+        ID["EPSG",8602]],
+    USAGE[
+        SCOPE["unknown"],
+        AREA["World"],
+        BBOX[-90,-180,90,180]]]
+
 Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary
 Candidate operations found: 7
 DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 1.0 m, Canada
@@ -173,6 +241,7 @@ EPSG:1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec
 unknown id, Null geographic offset from NAD27 to NAD83, unknown accuracy, World
 
 Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects
+Candidate operations found: 7
 -------------------------------------
 Operation n°1:
 
