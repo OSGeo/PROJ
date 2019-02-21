@@ -26,6 +26,12 @@ INSERT INTO grid_packages VALUES ('proj-datumgrid-europe',
                                   1,
                                   1);
 
+INSERT INTO grid_packages VALUES ('proj-datumgrid-oceania',
+                                  'Package with grids of interest for Oceania',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-oceania-latest.zip',
+                                  1,
+                                  1);
+
  -- not released yet at the time of writing
 INSERT INTO grid_packages VALUES ('proj-datumgrid-world',
                                   'Package with grids of global extent (too large to be included in proj-datumgrid)',
@@ -286,6 +292,74 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
+-- Faroe islands height models
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('fvr09.gtx',
+                              'fvr09.gtx', -- no change. Just document the package
+                              'GTX',
+                              'vgridshift',
+                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- Sweden height models
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('SWEN17_RH2000.gtx',
+                              'SWEN17_RH2000.gtx', -- no change. Just document the package
+                              'GTX',
+                              'vgridshift',
+                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- Ireland: OSGM15 height, Malin head datum -> ETRS89 ellipsoidal heights
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('OSGM15_Malin.gri',
+                              'OSGM15_Malin.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- Northern Ireland: OSGM15 height, Belfast height -> ETRS89 ellipsoidal heights
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('OSGM15_Belfast.gri',
+                              'OSGM15_Belfast.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
 ----------------------------
 -- US GEOID12B height models
 ----------------------------
@@ -302,7 +376,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012bu0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -318,7 +392,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012ba0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -334,7 +408,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012bp0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -350,7 +424,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012bg0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -366,7 +440,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012bs0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -644,3 +718,68 @@ INSERT INTO grid_alternatives(original_grid_name,
                             1,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
+
+
+----------------------------
+-- Australian grids
+----------------------------
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('A66 National (13.09.01).gsb',
+                              'A66_National_13_09_01.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('National 84 (02.07.01).gsb',
+                              'National_84_02_07_01.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('GDA94_GDA2020_conformal.gsb',
+                              'GDA94_GDA2020_conformal.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('GDA94_GDA2020_conformal_and_distortion.gsb',
+                              'GDA94_GDA2020_conformal_and_distortion.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
