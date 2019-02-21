@@ -694,3 +694,65 @@ Testing CRS with towgs84: projinfo -o PROJ EPSG:25832
 PROJ.4 string:
 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs
 
+Testing RH2000 height to SWEREF99: projinfo -s EPSG:5613 -t EPSG:4377
+Candidate operations found: 1
+-------------------------------------
+Operation n°1:
+
+PROJ:EPSG_5613_TO_EPSG_4377, RH2000 height to SWEREF99, unknown accuracy, Sweden - onshore
+
+PROJ string:
++proj=vgridshift +grids=SWEN17_RH2000.gtx +multiplier=1
+
+WKT2_2018 string:
+COORDINATEOPERATION["RH2000 height to SWEREF99",
+    SOURCECRS[
+        VERTCRS["RH2000 height",
+            VDATUM["Rikets hojdsystem 2000"],
+            CS[vertical,1],
+                AXIS["gravity-related height (H)",up,
+                    LENGTHUNIT["metre",1]]]],
+    TARGETCRS[
+        GEOGCRS["SWEREF99 (3D)",
+            DATUM["SWEREF99",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,3],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree minute second hemisphere",0.0174532925199433]],
+                AXIS["geodetic longitude (Long)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree minute second hemisphere",0.0174532925199433]],
+                AXIS["ellipsoidal height (h)",up,
+                    ORDER[3],
+                    LENGTHUNIT["metre",1]]]],
+    METHOD["GravityRelatedHeight to Geographic3D",
+        ID["PROJ","HEIGHT_TO_GEOGRAPHIC3D"]],
+    PARAMETERFILE["Geoid (height correction) model file","SWEN17_RH2000.gtx"],
+    USAGE[
+        SCOPE["unknown"],
+        AREA["Sweden - onshore"],
+        BBOX[55.28,10.93,69.07,24.17]],
+    ID["PROJ","EPSG_5613_TO_EPSG_4377"]]
+
+Testing NAD83(2011) + NAVD88 height -> NAD83(2011) : projinfo -s EPSG:6349 -t EPSG:6319 --spatial-test intersects -o PROJ
+Candidate operations found: 2
+-------------------------------------
+Operation n°1:
+
+unknown id, Inverse of NAD83(2011) to NAVD88 height (1), 0.1 m, USA - CONUS - onshore
+
+PROJ string:
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=g2012bu0.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
+
+-------------------------------------
+Operation n°2:
+
+unknown id, Inverse of NAD83(2011) to NAVD88 height (2), 0.2 m, USA - Alaska
+
+PROJ string:
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=g2012ba0.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
+
