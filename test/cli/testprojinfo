@@ -29,6 +29,8 @@ OUT=testprojinfo_out
 
 rm -f ${OUT}
 
+export PROJINFO_NO_GRID_CHECK=YES
+
 echo "Testing projinfo EPSG:4326" >> ${OUT}
 $EXE EPSG:4326 >>${OUT}
 echo "" >>${OUT}

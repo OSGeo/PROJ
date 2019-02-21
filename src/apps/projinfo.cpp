@@ -464,11 +464,42 @@ static void outputObject(
             }
         }
     }
+
+    auto op = dynamic_cast<CoordinateOperation *>(obj.get());
+    if (op && dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
+        try {
+            auto setGrids = op->gridsNeeded(dbContext);
+            bool firstWarning = true;
+            for (const auto &grid : setGrids) {
+                if (!grid.available) {
+                    if (firstWarning) {
+                        std::cout << std::endl;
+                        firstWarning = false;
+                    }
+                    std::cout << "Grid " << grid.shortName
+                              << " needed but not found on the system.";
+                    if (!grid.packageName.empty()) {
+                        std::cout << " Can be obtained from the "
+                                  << grid.packageName << " package";
+                        if (!grid.url.empty()) {
+                            std::cout << " at " << grid.url;
+                        }
+                    } else if (!grid.url.empty()) {
+                        std::cout << " Can be obtained at " << grid.url;
+                    }
+                    std::cout << std::endl;
+                }
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Error in gridsNeeded(): " << e.what() << std::endl;
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
 
-static void outputOperationSummary(const CoordinateOperationNNPtr &op) {
+static void outputOperationSummary(const CoordinateOperationNNPtr &op,
+                                   const DatabaseContextPtr &dbContext) {
     auto ids = op->identifiers();
     if (!ids.empty()) {
         std::cout << *(ids[0]->codeSpace()) << ":" << ids[0]->code();
@@ -512,6 +543,18 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op) {
         std::cout << ", has ballpark transformation";
     }
 
+    if (dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
+        try {
+            auto setGrids = op->gridsNeeded(dbContext);
+            for (const auto &grid : setGrids) {
+                if (!grid.available) {
+                    std::cout << ", at least one grid missing";
+                    break;
+                }
+            }
+        } catch (const std::exception &) {
+        }
+    }
     std::cout << std::endl;
 }
 
@@ -598,7 +641,7 @@ static void outputOperations(
     }
     if (summary) {
         for (const auto &op : list) {
-            outputOperationSummary(op);
+            outputOperationSummary(op, dbContext);
         }
     } else {
         bool first = true;
@@ -613,7 +656,7 @@ static void outputOperations(
                          "\xC2\xB0"
                       << (i + 1) << ":" << std::endl
                       << std::endl;
-            outputOperationSummary(op);
+            outputOperationSummary(op, dbContext);
             std::cout << std::endl;
             outputObject(dbContext, op, allowUseIntermediateCRS, outputOpt);
         }
