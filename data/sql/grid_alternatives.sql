@@ -376,7 +376,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012bu0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -392,7 +392,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012ba0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -408,7 +408,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012bp0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -424,7 +424,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012bg0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -440,7 +440,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'g2012bs0.gtx',
                               'GTX',
                               'vgridshift',
-                              0,
+                              1,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
