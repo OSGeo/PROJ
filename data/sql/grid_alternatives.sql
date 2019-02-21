@@ -292,6 +292,23 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
+-- Faroe islands height models
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('fvr09.gtx',
+                              'fvr09.gtx', -- no change. Just document the package
+                              'GTX',
+                              'vgridshift',
+                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
 -- Sweden height models
 
 INSERT INTO grid_alternatives(original_grid_name,

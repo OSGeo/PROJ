@@ -24,6 +24,19 @@ INSERT INTO "grid_transformation" VALUES(
     'EPSG','8666','Geoid (height correction) model file','dnn.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,0);
 
+-- Faroe Islands
+
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_5317_TO_EPSG_4937','FVR09 height to ETRS89',
+    NULL,NULL,
+    'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
+    'EPSG','5317', -- source CRS (FVR09 height)
+    'EPSG','4937', -- target CRS (ETRS89)
+    'EPSG','3248', -- area of use: Faroe Islands - onshore
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','fvr09.gtx',
+    NULL,NULL,NULL,NULL,NULL,NULL,0);
+
 -- Sweden
 
 INSERT INTO "grid_transformation" VALUES(
