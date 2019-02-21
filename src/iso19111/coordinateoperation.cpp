@@ -10829,30 +10829,58 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
     auto exportable = util::nn_make_shared<MyPROJStringExportableHorizVertical>(
         horizTransform, verticalTransform, geogDst);
 
-    bool dummy = false;
-    auto ops = std::vector<CoordinateOperationNNPtr>{horizTransform,
-                                                     verticalTransform};
-    auto extent = getExtent(ops, true, dummy);
-    auto properties = util::PropertyMap();
-    properties.set(common::IdentifiedObject::NAME_KEY,
-                   computeConcatenatedName(ops));
-
-    if (extent) {
-        properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                       NN_NO_CHECK(extent));
+    bool horizTransformIsNoOp = horizTransform->sourceCRS()->_isEquivalentTo(
+        horizTransform->targetCRS().get());
+    if (!horizTransformIsNoOp) {
+        const crs::GeographicCRS *geogSrc =
+            dynamic_cast<const crs::GeographicCRS *>(
+                horizTransform->sourceCRS().get());
+        if (geogSrc) {
+            horizTransformIsNoOp =
+                geogSrc->is2DPartOf3D(NN_NO_CHECK(geogDst.get()));
+        }
     }
 
-    std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
-    const double accuracy = getAccuracy(ops);
-    if (accuracy >= 0.0) {
-        accuracies.emplace_back(
-            metadata::PositionalAccuracy::create(toString(accuracy)));
-    }
+    if (horizTransformIsNoOp) {
+        auto properties = util::PropertyMap();
+        properties.set(common::IdentifiedObject::NAME_KEY,
+                       verticalTransform->nameStr());
+        bool dummy = false;
+        auto extent = getExtent(verticalTransform, true, dummy);
+        if (extent) {
+            properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                           NN_NO_CHECK(extent));
+        }
+        return createPROJBased(
+            properties, exportable, sourceCRS, targetCRS,
+            verticalTransform->coordinateOperationAccuracies(),
+            verticalTransform->hasBallparkTransformation());
+    } else {
+        bool dummy = false;
+        auto ops = std::vector<CoordinateOperationNNPtr>{horizTransform,
+                                                         verticalTransform};
+        auto extent = getExtent(ops, true, dummy);
+        auto properties = util::PropertyMap();
+        properties.set(common::IdentifiedObject::NAME_KEY,
+                       computeConcatenatedName(ops));
 
-    return createPROJBased(properties, exportable, sourceCRS, targetCRS,
-                           accuracies,
-                           horizTransform->hasBallparkTransformation() ||
-                               verticalTransform->hasBallparkTransformation());
+        if (extent) {
+            properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                           NN_NO_CHECK(extent));
+        }
+
+        std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+        const double accuracy = getAccuracy(ops);
+        if (accuracy >= 0.0) {
+            accuracies.emplace_back(
+                metadata::PositionalAccuracy::create(toString(accuracy)));
+        }
+
+        return createPROJBased(
+            properties, exportable, sourceCRS, targetCRS, accuracies,
+            horizTransform->hasBallparkTransformation() ||
+                verticalTransform->hasBallparkTransformation());
+    }
 }
 
 // ---------------------------------------------------------------------------

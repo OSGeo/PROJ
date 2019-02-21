@@ -738,3 +738,21 @@ COORDINATEOPERATION["RH2000 height to SWEREF99",
         BBOX[55.28,10.93,69.07,24.17]],
     ID["PROJ","EPSG_5613_TO_EPSG_4377"]]
 
+Testing NAD83(2011) + NAVD88 height -> NAD83(2011) : projinfo -s EPSG:6349 -t EPSG:6319 --spatial-test intersects -o PROJ
+Candidate operations found: 2
+-------------------------------------
+Operation n°1:
+
+unknown id, Inverse of NAD83(2011) to NAVD88 height (1), 0.1 m, USA - CONUS - onshore
+
+PROJ string:
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=g2012bu0.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
+
+-------------------------------------
+Operation n°2:
+
+unknown id, Inverse of NAD83(2011) to NAVD88 height (2), 0.2 m, USA - Alaska
+
+PROJ string:
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=g2012ba0.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
+

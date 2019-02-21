@@ -108,6 +108,10 @@ echo "Testing RH2000 height to SWEREF99: projinfo -s EPSG:5613 -t EPSG:4377" >> 
 $EXE -s EPSG:5613 -t EPSG:4377 >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo "Testing NAD83(2011) + NAVD88 height -> NAD83(2011) : projinfo -s EPSG:6349 -t EPSG:6319 --spatial-test intersects -o PROJ" >> ${OUT}
+$EXE -s EPSG:6349 -t EPSG:6319 --spatial-test intersects -o PROJ >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
