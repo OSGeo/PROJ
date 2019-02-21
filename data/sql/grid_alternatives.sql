@@ -326,6 +326,40 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
+-- Ireland: OSGM15 height, Malin head datum -> ETRS89 ellipsoidal heights
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('OSGM15_Malin.gri',
+                              'OSGM15_Malin.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- Northern Ireland: OSGM15 height, Belfast height -> ETRS89 ellipsoidal heights
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('OSGM15_Belfast.gri',
+                              'OSGM15_Belfast.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
 ----------------------------
 -- US GEOID12B height models
 ----------------------------
