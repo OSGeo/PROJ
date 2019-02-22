@@ -7,32 +7,6 @@ Oblique Mercator
 The Oblique Mercator projection is a cylindrical map projection that closes the
 gap between the Mercator and the Transverse Mercator projections.
 
-Figuratively, the cylinder used for developing the Mercator projection touches
-the planet along the Equator, while that of the Transverse Mercator touches the
-planet along a meridian, i.e. along a line perpendicular to the Equator.
-
-The cylinder for the Oblique Mercator, however, touches the planet along a line
-at an arbitrary angle with the Equator. Hence, the Oblique Mercator projection
-is useful for mapping areas having their greatest extent along a direction that
-is neither north-south, nor east-west.
-
-The Mercator and the Transverse Mercator projections are both limiting forms of
-the Oblique Mercator: The Mercator projection is equivalent to an Oblique Mercator
-with central line along the Equator, while the Transverse Mercator is equivalent
-to an Oblique Mercator with central line along a meridian.
-
-For the sphere, the construction of the Oblique Mercator projection can be
-imagined as "tilting the cylinder of a plain Mercator projection",
-so the cylinder, instead of touching the equator, touches an arbitrary great circle
-on the sphere. The great circle is defined by the tilt angle of the central line,
-hence putting land masses along that great circle near the centre of the map,
-where the Equator would go in the plain Mercator case.
-
-The ellipsoidal case, developed by Hotine, and refined by Snyder  :cite:`Snyder1987`
-is more complex, involving initial steps projecting from the ellipsoid to another
-curved surface, the "aposphere", then projection from the aposphere to the skew
-uv-plane, before finally rectifying the skew uv-plane onto the map XY plane.
-
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal cylindrical                                    |
 +---------------------+----------------------------------------------------------+
@@ -61,6 +35,32 @@ uv-plane, before finally rectifying the skew uv-plane onto the map XY plane.
 
 Usage
 ########
+
+Figuratively, the cylinder used for developing the Mercator projection touches
+the planet along the Equator, while that of the Transverse Mercator touches the
+planet along a meridian, i.e. along a line perpendicular to the Equator.
+
+The cylinder for the Oblique Mercator, however, touches the planet along a line
+at an arbitrary angle with the Equator. Hence, the Oblique Mercator projection
+is useful for mapping areas having their greatest extent along a direction that
+is neither north-south, nor east-west.
+
+The Mercator and the Transverse Mercator projections are both limiting forms of
+the Oblique Mercator: The Mercator projection is equivalent to an Oblique Mercator
+with central line along the Equator, while the Transverse Mercator is equivalent
+to an Oblique Mercator with central line along a meridian.
+
+For the sphere, the construction of the Oblique Mercator projection can be
+imagined as "tilting the cylinder of a plain Mercator projection",
+so the cylinder, instead of touching the equator, touches an arbitrary great circle
+on the sphere. The great circle is defined by the tilt angle of the central line,
+hence putting land masses along that great circle near the centre of the map,
+where the Equator would go in the plain Mercator case.
+
+The ellipsoidal case, developed by Hotine, and refined by Snyder  :cite:`Snyder1987`
+is more complex, involving initial steps projecting from the ellipsoid to another
+curved surface, the "aposphere", then projection from the aposphere to the skew
+uv-plane, before finally rectifying the skew uv-plane onto the map XY plane.
 
 The tilt angle (azimuth) of the central line can be given in two different ways.
 In the first case, the azimuth is given directly, using the option :option:`+alpha`
