@@ -23,7 +23,7 @@ which is a new feature), and is now an integral part of PROJ.
 A unified database of geodetic objects, coordinate reference systems and their
 metadata, and coordinate operations between those CRS is now available in a
 SQLite3 database file, proj.db. This includes definitions imported from the
-IOGP EPSG dataset (v9.5.5 release), the IGNF (French national mapping agency)
+IOGP EPSG dataset (v9.6.0 release), the IGNF (French national mapping agency)
 geodetic registry and the ESRI projection engine database. PROJ is now the
 reference software in the "OSGeo C stack" for this CRS and coordinate operation
 database, whereas previously this functionality was spread over PROJ, GDAL and
