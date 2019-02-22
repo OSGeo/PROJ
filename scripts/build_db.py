@@ -229,7 +229,15 @@ def fill_projected_crs(proj_db_cursor):
 def fill_compound_crs(proj_db_cursor):
     #proj_db_cursor.execute(
     #    "INSERT INTO crs SELECT ?, coord_ref_sys_code, coord_ref_sys_kind FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound')", (EPSG_AUTHORITY,))
-    proj_db_cursor.execute("INSERT INTO compound_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, NULL, ?, cmpd_horizcrs_code, ?, cmpd_vertcrs_code, ?, area_of_use_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+
+    proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, NULL, ?, cmpd_horizcrs_code, ?, cmpd_vertcrs_code, ?, area_of_use_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound') AND cmpd_horizcrs_code NOT IN (SELECT coord_ref_sys_code FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind = 'engineering')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+    for auth_name, code, name, description, scope, horiz_auth_name, horiz_code, vert_auth_name, vert_code, area_of_use_auth_name, area_of_use_code, deprecated in proj_db_cursor.fetchall():
+        try:
+            proj_db_cursor.execute("INSERT INTO compound_crs VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (auth_name, code, name, description, scope, horiz_auth_name, horiz_code, vert_auth_name, vert_code, area_of_use_auth_name, area_of_use_code, deprecated))
+        except sqlite3.IntegrityError as e:
+            print(e)
+            print(auth_name, code, name, description, scope, horiz_auth_name, horiz_code, vert_auth_name, vert_code, area_of_use_auth_name, area_of_use_code, deprecated)
+            raise
 
 def fill_helmert_transformation(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 9603, 9606, 9607, 9636) ")

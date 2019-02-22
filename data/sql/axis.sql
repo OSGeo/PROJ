@@ -47,6 +47,12 @@ INSERT INTO "axis" VALUES('EPSG','1526','Easting','E','North along 90°W','EPSG'
 INSERT INTO "axis" VALUES('EPSG','1044','Starboard','x','Starboard','EPSG','1045',1,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','1045','Forward','y','Ahead','EPSG','1045',2,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','1046','Platform Down','z','Downward','EPSG','1045',3,'EPSG','9001');
+INSERT INTO "axis" VALUES('EPSG','1042','Local northing','n','north','EPSG','1047',1,'EPSG','9001');
+INSERT INTO "axis" VALUES('EPSG','1043','Local easting','e','east','EPSG','1047',2,'EPSG','9001');
+INSERT INTO "axis" VALUES('EPSG','1049','Local northing','n','north','EPSG','1048',1,'EPSG','9002');
+INSERT INTO "axis" VALUES('EPSG','1050','Local easting','e','east','EPSG','1048',2,'EPSG','9002');
+INSERT INTO "axis" VALUES('EPSG','1051','Local depth','d','down','EPSG','1049',1,'EPSG','9001');
+INSERT INTO "axis" VALUES('EPSG','1053','Local depth','d','down','EPSG','1050',1,'EPSG','9002');
 INSERT INTO "axis" VALUES('EPSG','1','Easting','E','east','EPSG','4400',1,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','2','Northing','N','north','EPSG','4400',2,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','3','Easting','E','east','EPSG','4401',1,'EPSG','9062');
