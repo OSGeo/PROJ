@@ -37,6 +37,14 @@ set(PACKAGE_TARNAME "proj")
 set(PACKAGE_URL "https://proj4.org")
 set(PACKAGE_VERSION "${${PROJECT_INTERN_NAME}_VERSION}")
 
-configure_file(cmake/proj_config.cmake.in src/proj_config.h)
+# check if a second proj_config.h exists (created by ./configure)
+# as this is within CMake's C_INCLUDES / CXX_INCLUDES
+set(AUTOCONF_PROJ_CONFIG_H "${CMAKE_SOURCE_DIR}/src/proj_config.h")
+if(EXISTS ${AUTOCONF_PROJ_CONFIG_H})
+    message(WARNING "Autoconf's ${AUTOCONF_PROJ_CONFIG_H} may interfere "
+                    "with this CMake build. Run 'make distclean' in the "
+                    "source directory before CMake's build.")
+endif()
 
+configure_file(cmake/proj_config.cmake.in src/proj_config.h)
 
