@@ -74,13 +74,13 @@ Example: Verify that the Mercator projection is a limiting form of the Oblique
 Mercator
 
     $ echo 12 55 | proj +proj=merc +ellps=GRS80
-      1335833.89   7326837.71
-    # First case: Azimuth given directly
-    $ echo 12 55 | proj +proj=omerc +lonc=0 +alpha=90 +ellps=GRS80
-      1335833.89   7326837.71
+    1335833.89   7326837.71
 
-Example:
-    $ Second case: Indirectly
+    $ echo 12 55 | proj +proj=omerc +lonc=0 +alpha=90 +ellps=GRS80
+    1335833.89   7326837.71
+
+Example: Second case - indirectly given azimuth
+
     $ echo 12 55 | proj +proj=omerc +lon_1=-1 +lat_1=1 +lon_2=0 +lat_2=0 +ellps=GRS80
       349567.57   6839490.50
 
