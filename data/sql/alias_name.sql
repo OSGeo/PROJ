@@ -423,6 +423,7 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1216','SRB_VRS12','EPSG
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1219','MVGC','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1218','MGD-2000','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1218','MTRF-2000','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1205','Zero Depth Point (ZDP)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1039','NZVD2009','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1035','REGCAN95','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6761','HTRS96','EPSG');

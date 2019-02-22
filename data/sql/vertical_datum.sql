@@ -70,6 +70,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1190','Landshaedarkerfi Islands 2004
 INSERT INTO "vertical_datum" VALUES('EPSG','1199','Greenland  Vertical Reference 2000',NULL,NULL,'EPSG','4461',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1200','Greenland Vertical Reference 2016',NULL,NULL,'EPSG','4454',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1202','Baltic 1957',NULL,NULL,'EPSG','1306',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1205','EPSG example wellbore vertical datum',NULL,NULL,'EPSG','4393',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1210','Macao Height Datum',NULL,NULL,'EPSG','1147',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1213','Helsinki 1943',NULL,NULL,'EPSG','4522',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1215','Slovenian Vertical System 2010',NULL,NULL,'EPSG','3307',0);
