@@ -33,9 +33,6 @@ gap between the Mercator and the Transverse Mercator projections.
    proj-string: ``+proj=omerc +lat_1=45 +lat_2=55``
 
 
-Usage
-########
-
 Figuratively, the cylinder used for developing the Mercator projection touches
 the planet along the Equator, while that of the Transverse Mercator touches the
 planet along a meridian, i.e. along a line perpendicular to the Equator.
@@ -61,6 +58,10 @@ The ellipsoidal case, developed by Hotine, and refined by Snyder  :cite:`Snyder1
 is more complex, involving initial steps projecting from the ellipsoid to another
 curved surface, the "aposphere", then projection from the aposphere to the skew
 uv-plane, before finally rectifying the skew uv-plane onto the map XY plane.
+
+
+Usage
+########
 
 The tilt angle (azimuth) of the central line can be given in two different ways.
 In the first case, the azimuth is given directly, using the option :option:`+alpha`
