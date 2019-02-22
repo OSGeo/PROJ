@@ -74,6 +74,8 @@ the central line, using the options
 Example: Verify that the Mercator projection is a limiting form of the Oblique
 Mercator
 
+::
+
     $ echo 12 55 | proj +proj=merc +ellps=GRS80
     1335833.89   7326837.71
 
@@ -82,11 +84,15 @@ Mercator
 
 Example: Second case - indirectly given azimuth
 
+::
+
     $ echo 12 55 | proj +proj=omerc +lon_1=-1 +lat_1=1 +lon_2=0 +lat_2=0 +ellps=GRS80
       349567.57   6839490.50
 
 
 Example: An approximation of the Danish "System 34" from :cite:`Rittri2012`
+
+::
 
     $ echo 10.536498003 56.229892362 | proj +proj=omerc +axis=wnu +lonc=9.46 +lat_0=56.13333333 +x_0=-266906.229 +y_0=189617.957 +k=0.9999537 +alpha=-0.76324 +gamma=0 +ellps=GRS80
     200000.13   199999.89
@@ -150,8 +156,8 @@ Optional
 
     No rectification (not "no rotation" as one may well assume).
     Do not take the last step from the skew uv-plane to the map
-    XY plane. This option is probably only marginally useful, but
-    remains for (mostly) historical reasons.
+    XY plane.
+    .. note:: This option is probably only marginally useful, but remains for (mostly) historical reasons.
 
 .. option:: +no_off
 
