@@ -31,6 +31,7 @@ Projections map the spherical 3D space to a flat 2D space.
    cea
    chamb
    collg
+   comill
    crast
    denoy
    eck1
