@@ -103,7 +103,7 @@ The following control parameters can appear in any order:
 .. option:: --spatial-test contains|intersects
 
     Specify how the area of use of coordinate operations found in the database
-    are compared to the area of use specfied explicitly with :option:`--area` or :option:`--bbox`,
+    are compared to the area of use specified explicitly with :option:`--area` or :option:`--bbox`,
     or derivedi implictly from the area of use of the source and target CRS.
     By default, projinfo will only keep coordinate operations whose are of use
     is strictly within the area of interest (``contains`` strategy).
