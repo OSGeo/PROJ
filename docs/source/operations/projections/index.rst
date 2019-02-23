@@ -99,6 +99,7 @@ Projections map the spherical 3D space to a flat 2D space.
    omerc
    ortel
    ortho
+   patterson
    pconic
    poly
    putp1
