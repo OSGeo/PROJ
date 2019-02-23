@@ -126,6 +126,7 @@ Projections map the spherical 3D space to a flat 2D space.
    gstmerc
    tcc
    tcea
+   times
    tissot
    tmerc
    tobmerc
