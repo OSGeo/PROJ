@@ -89,6 +89,7 @@ Projections map the spherical 3D space to a flat 2D space.
    murd2
    murd3
    natearth
+   natearth2
    nell
    nell_h
    nicol
