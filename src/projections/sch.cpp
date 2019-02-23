@@ -215,7 +215,7 @@ PJ *PROJECTION(sch) {
         return pj_default_destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
     }
 
-    /* Check if peg latitude is defined */
+    /* Check if peg heading is defined */
     if (pj_param(P->ctx, P->params, "tphdg_0").i)
         Q->phdg = pj_param(P->ctx, P->params, "rphdg_0").f;
     else {
