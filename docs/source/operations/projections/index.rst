@@ -84,6 +84,7 @@ Projections map the spherical 3D space to a flat 2D space.
    merc
    mil_os
    mill
+   misrsom
    moll
    murd1
    murd2
