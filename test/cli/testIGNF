@@ -12,7 +12,6 @@
 #               the gsb grid is still ok
 
 TEST_CLI_DIR=`dirname $0`
-DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
 usage()
@@ -32,7 +31,7 @@ if test ! -x ${EXE}; then
 fi
 
 if test -z "${PROJ_LIB}"; then
-    export PROJ_LIB=${DATA_DIR}
+    export PROJ_LIB="`dirname $0`/../../data"
 fi
 
 echo "============================================"
