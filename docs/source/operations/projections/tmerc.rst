@@ -28,7 +28,7 @@ The transverse Mercator projection in its various forms is the most widely used 
 .. figure:: ./images/tmerc.png
    :width: 500 px
    :align: center
-   :alt:   Transverse Mercator  
+   :alt:   Transverse Mercator
 
    proj-string: ``+proj=tmerc``
 
@@ -79,7 +79,9 @@ Parameters
 
     .. versionadded:: 6.0.0
 
-    Use faster, less accurate algorithm for the Transverse Mercator.
+    Use the algorithm described in section "Elliptical Form" below.
+    It is faster than the default algorithm, but also diverges faster
+    as the distance from the central meridian increases.
 
 .. include:: ../options/lon_0.rst
 
@@ -98,7 +100,7 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Transverse Mercator are all taken from Evenden's [Evenden2005]_.
+The formulas describing the Transverse Mercator below are quoted from Evenden's [Evenden2005]_.
 
 :math:`\phi_0` is the latitude of origin that match the center of the map. It can be set with ``+lat_0``.
 
@@ -148,6 +150,11 @@ Inverse projection
 Elliptical form
 ***************
 
+The formulas below describe the algorithm used when giving the
+:option:`+approx` option. They are originally from :cite:`Snyder1987`,
+but here quoted from :cite:`Evenden1995`.
+The default algorithm is given by Poder and Engsager in :cite:`Poder1998`
+
 Forward projection
 ==================
 
@@ -169,7 +176,7 @@ Forward projection
 
 .. math::
 
-  x &= k_0 \lambda \cos \phi \\ 
+  x &= k_0 \lambda \cos \phi \\
     &+ \frac{k_0 \lambda^3 \cos^3\phi}{3!}(1-t^2+\eta^2) \\
     &+ \frac{k_0 \lambda^5 \cos^5\phi}{5!}(5-18t^2+t^4+14\eta^2-58t^2\eta^2) \\
     &+\frac{k_0 \lambda^7 \cos^7\phi}{7!}(61-479t^2+179t^4-t^6)
