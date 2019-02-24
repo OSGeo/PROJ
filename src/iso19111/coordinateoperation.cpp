@@ -106,6 +106,7 @@ constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
 static const std::string INVERSE_OF = "Inverse of ";
 static const char *BALLPARK_GEOCENTRIC_TRANSLATION =
     "Ballpark geocentric translation";
+static const char *NULL_GEOGRAPHIC_OFFSET = "Null geographic offset";
 static const char *BALLPARK_GEOGRAPHIC_OFFSET = "Ballpark geographic offset";
 static const char *BALLPARK_VERTICAL_TRANSFORMATION_PREFIX =
     " (ballpark vertical transformation";
@@ -2155,52 +2156,55 @@ void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
     const auto &l_type = type();
-    const auto &l_value = value();
-    if (formatter->abridgedTransformation() && l_type == Type::MEASURE) {
-        const auto &unit = l_value.unit();
-        const auto &unitType = unit.type();
-        if (unitType == common::UnitOfMeasure::Type::LINEAR) {
-            formatter->add(l_value.getSIValue());
-        } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
-            formatter->add(
-                l_value.convertToUnit(common::UnitOfMeasure::ARC_SECOND));
-        } else if (unit == common::UnitOfMeasure::PARTS_PER_MILLION) {
-            formatter->add(1.0 + l_value.value() * 1e-6);
-        } else {
-            formatter->add(l_value.value());
-        }
-    } else if (l_type == Type::MEASURE) {
-        const auto &unit = l_value.unit();
-        if (isWKT2) {
-            formatter->add(l_value.value());
-        } else {
-            // In WKT1, as we don't output the natural unit, output to the
-            // registered linear / angular unit.
+    if (l_type == Type::MEASURE) {
+        const auto &l_value = value();
+        if (formatter->abridgedTransformation()) {
+            const auto &unit = l_value.unit();
             const auto &unitType = unit.type();
             if (unitType == common::UnitOfMeasure::Type::LINEAR) {
-                const auto &targetUnit = *(formatter->axisLinearUnit());
-                if (targetUnit.conversionToSI() == 0.0) {
-                    throw io::FormattingException(
-                        "cannot convert value to target linear unit");
-                }
-                formatter->add(l_value.convertToUnit(targetUnit));
-            } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
-                const auto &targetUnit = *(formatter->axisAngularUnit());
-                if (targetUnit.conversionToSI() == 0.0) {
-                    throw io::FormattingException(
-                        "cannot convert value to target angular unit");
-                }
-                formatter->add(l_value.convertToUnit(targetUnit));
-            } else {
                 formatter->add(l_value.getSIValue());
+            } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
+                formatter->add(
+                    l_value.convertToUnit(common::UnitOfMeasure::ARC_SECOND));
+            } else if (unit == common::UnitOfMeasure::PARTS_PER_MILLION) {
+                formatter->add(1.0 + l_value.value() * 1e-6);
+            } else {
+                formatter->add(l_value.value());
             }
-        }
-        if (isWKT2 && unit != common::UnitOfMeasure::NONE) {
-            if (!formatter->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
-                (unit != common::UnitOfMeasure::SCALE_UNITY &&
-                 unit != *(formatter->axisLinearUnit()) &&
-                 unit != *(formatter->axisAngularUnit()))) {
-                unit._exportToWKT(formatter);
+        } else {
+            const auto &unit = l_value.unit();
+            if (isWKT2) {
+                formatter->add(l_value.value());
+            } else {
+                // In WKT1, as we don't output the natural unit, output to the
+                // registered linear / angular unit.
+                const auto &unitType = unit.type();
+                if (unitType == common::UnitOfMeasure::Type::LINEAR) {
+                    const auto &targetUnit = *(formatter->axisLinearUnit());
+                    if (targetUnit.conversionToSI() == 0.0) {
+                        throw io::FormattingException(
+                            "cannot convert value to target linear unit");
+                    }
+                    formatter->add(l_value.convertToUnit(targetUnit));
+                } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
+                    const auto &targetUnit = *(formatter->axisAngularUnit());
+                    if (targetUnit.conversionToSI() == 0.0) {
+                        throw io::FormattingException(
+                            "cannot convert value to target angular unit");
+                    }
+                    formatter->add(l_value.convertToUnit(targetUnit));
+                } else {
+                    formatter->add(l_value.getSIValue());
+                }
+            }
+            if (isWKT2 && unit != common::UnitOfMeasure::NONE) {
+                if (!formatter
+                         ->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
+                    (unit != common::UnitOfMeasure::SCALE_UNITY &&
+                     unit != *(formatter->axisLinearUnit()) &&
+                     unit != *(formatter->axisAngularUnit()))) {
+                    unit._exportToWKT(formatter);
+                }
             }
         }
     } else if (l_type == Type::STRING || l_type == Type::FILENAME) {
@@ -7189,6 +7193,8 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
         opType = BALLPARK_GEOCENTRIC_TRANSLATION;
     } else if (starts_with(forwardName, BALLPARK_GEOGRAPHIC_OFFSET)) {
         opType = BALLPARK_GEOGRAPHIC_OFFSET;
+    } else if (starts_with(forwardName, NULL_GEOGRAPHIC_OFFSET)) {
+        opType = NULL_GEOGRAPHIC_OFFSET;
     } else if (dynamic_cast<const Transformation *>(op) ||
                starts_with(forwardName, "Transformation from ")) {
         opType = "Transformation";
@@ -10182,6 +10188,8 @@ struct FilterResults {
             const bool isNullTransformation =
                 op->nameStr().find(BALLPARK_GEOGRAPHIC_OFFSET) !=
                     std::string::npos ||
+                op->nameStr().find(NULL_GEOGRAPHIC_OFFSET) !=
+                    std::string::npos ||
                 op->nameStr().find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
                     std::string::npos;
             map[op.get()] = PrecomputedOpCharacteristics(
@@ -10206,6 +10214,7 @@ struct FilterResults {
         if (hasOpThatContainsAreaOfInterest && res.size() > 1) {
             const std::string &name = res.back()->nameStr();
             if (name.find(BALLPARK_GEOGRAPHIC_OFFSET) != std::string::npos ||
+                name.find(NULL_GEOGRAPHIC_OFFSET) != std::string::npos ||
                 name.find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
                     std::string::npos) {
                 std::vector<CoordinateOperationNNPtr> resTemp;
@@ -10622,7 +10631,18 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
 static TransformationNNPtr
 createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
                                const crs::CRSNNPtr &targetCRS) {
-    std::string name(BALLPARK_GEOGRAPHIC_OFFSET);
+
+    const crs::GeographicCRS *geogSrc =
+        dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
+    const crs::GeographicCRS *geogDst =
+        dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
+    const bool isSameDatum =
+        geogSrc && geogDst && geogSrc->datum() && geogDst->datum() &&
+        geogSrc->datum()->_isEquivalentTo(
+            geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT);
+
+    std::string name(isSameDatum ? NULL_GEOGRAPHIC_OFFSET
+                                 : BALLPARK_GEOGRAPHIC_OFFSET);
     name += " from ";
     name += sourceCRS->nameStr();
     name += " to ";
@@ -10641,6 +10661,12 @@ createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
              sameExtent ? NN_NO_CHECK(sourceCRSExtent)
                         : metadata::Extent::WORLD);
     const common::Angle angle0(0);
+
+    std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+    if (isSameDatum) {
+        accuracies.emplace_back(metadata::PositionalAccuracy::create("0"));
+    }
+
     if (dynamic_cast<const crs::SingleCRS *>(sourceCRS.get())
                 ->coordinateSystem()
                 ->axisList()
@@ -10650,10 +10676,11 @@ createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
                 ->axisList()
                 .size() == 3) {
         return Transformation::createGeographic3DOffsets(
-            map, sourceCRS, targetCRS, angle0, angle0, common::Length(0), {});
+            map, sourceCRS, targetCRS, angle0, angle0, common::Length(0),
+            accuracies);
     } else {
         return Transformation::createGeographic2DOffsets(
-            map, sourceCRS, targetCRS, angle0, angle0, {});
+            map, sourceCRS, targetCRS, angle0, angle0, accuracies);
     }
 }
 //! @endcond
@@ -10829,30 +10856,58 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
     auto exportable = util::nn_make_shared<MyPROJStringExportableHorizVertical>(
         horizTransform, verticalTransform, geogDst);
 
-    bool dummy = false;
-    auto ops = std::vector<CoordinateOperationNNPtr>{horizTransform,
-                                                     verticalTransform};
-    auto extent = getExtent(ops, true, dummy);
-    auto properties = util::PropertyMap();
-    properties.set(common::IdentifiedObject::NAME_KEY,
-                   computeConcatenatedName(ops));
-
-    if (extent) {
-        properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                       NN_NO_CHECK(extent));
+    bool horizTransformIsNoOp = horizTransform->sourceCRS()->_isEquivalentTo(
+        horizTransform->targetCRS().get());
+    if (!horizTransformIsNoOp) {
+        const crs::GeographicCRS *geogSrc =
+            dynamic_cast<const crs::GeographicCRS *>(
+                horizTransform->sourceCRS().get());
+        if (geogSrc) {
+            horizTransformIsNoOp =
+                geogSrc->is2DPartOf3D(NN_NO_CHECK(geogDst.get()));
+        }
     }
 
-    std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
-    const double accuracy = getAccuracy(ops);
-    if (accuracy >= 0.0) {
-        accuracies.emplace_back(
-            metadata::PositionalAccuracy::create(toString(accuracy)));
-    }
+    if (horizTransformIsNoOp) {
+        auto properties = util::PropertyMap();
+        properties.set(common::IdentifiedObject::NAME_KEY,
+                       verticalTransform->nameStr());
+        bool dummy = false;
+        auto extent = getExtent(verticalTransform, true, dummy);
+        if (extent) {
+            properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                           NN_NO_CHECK(extent));
+        }
+        return createPROJBased(
+            properties, exportable, sourceCRS, targetCRS,
+            verticalTransform->coordinateOperationAccuracies(),
+            verticalTransform->hasBallparkTransformation());
+    } else {
+        bool dummy = false;
+        auto ops = std::vector<CoordinateOperationNNPtr>{horizTransform,
+                                                         verticalTransform};
+        auto extent = getExtent(ops, true, dummy);
+        auto properties = util::PropertyMap();
+        properties.set(common::IdentifiedObject::NAME_KEY,
+                       computeConcatenatedName(ops));
 
-    return createPROJBased(properties, exportable, sourceCRS, targetCRS,
-                           accuracies,
-                           horizTransform->hasBallparkTransformation() ||
-                               verticalTransform->hasBallparkTransformation());
+        if (extent) {
+            properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                           NN_NO_CHECK(extent));
+        }
+
+        std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+        const double accuracy = getAccuracy(ops);
+        if (accuracy >= 0.0) {
+            accuracies.emplace_back(
+                metadata::PositionalAccuracy::create(toString(accuracy)));
+        }
+
+        return createPROJBased(
+            properties, exportable, sourceCRS, targetCRS, accuracies,
+            horizTransform->hasBallparkTransformation() ||
+                verticalTransform->hasBallparkTransformation());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -11147,7 +11202,8 @@ findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
 static bool isNullTransformation(const std::string &name) {
 
     return starts_with(name, BALLPARK_GEOCENTRIC_TRANSLATION) ||
-           starts_with(name, BALLPARK_GEOGRAPHIC_OFFSET);
+           starts_with(name, BALLPARK_GEOGRAPHIC_OFFSET) ||
+           starts_with(name, NULL_GEOGRAPHIC_OFFSET);
 }
 
 // ---------------------------------------------------------------------------

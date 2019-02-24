@@ -1233,6 +1233,17 @@
         "type": "line"
     },
     {
+        "filename": "times.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "times",
+        "projstring": "+proj=times",
+        "res": "low",
+        "type": "poly"
+    },
+    {
         "filename": "tissot.png",
         "latmax": 90,
         "latmin": -90,

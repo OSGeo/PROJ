@@ -4507,8 +4507,7 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->nameStr(),
-              "Ballpark geographic offset from WGS 84 to WGS 84");
+    EXPECT_EQ(op->nameStr(), "Null geographic offset from WGS 84 to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
     EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
