@@ -42,18 +42,22 @@ justifies adding this otherwise non-standard projection.
    :align: center
    :alt:   Lambert Conformal Conic
 
-   proj-string: ``+proj=lcc +lon_0=-90``
+   proj-string: ``+proj=lcc +lon_0=-90 +lat_1=33 +lat_2=45``
 
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the projection.
+Required
+--------------------------------------------------------------------------------
+
+.. include:: ../options/lat_1.rst
+
+Optional
+--------------------------------------------------------------------------------
 
 .. include:: ../options/lon_0.rst
 
 .. include:: ../options/lat_0.rst
-
-.. include:: ../options/lat_1.rst
 
 .. include:: ../options/lat_2.rst
 
