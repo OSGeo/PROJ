@@ -2156,52 +2156,55 @@ void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
     const auto &l_type = type();
-    const auto &l_value = value();
-    if (formatter->abridgedTransformation() && l_type == Type::MEASURE) {
-        const auto &unit = l_value.unit();
-        const auto &unitType = unit.type();
-        if (unitType == common::UnitOfMeasure::Type::LINEAR) {
-            formatter->add(l_value.getSIValue());
-        } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
-            formatter->add(
-                l_value.convertToUnit(common::UnitOfMeasure::ARC_SECOND));
-        } else if (unit == common::UnitOfMeasure::PARTS_PER_MILLION) {
-            formatter->add(1.0 + l_value.value() * 1e-6);
-        } else {
-            formatter->add(l_value.value());
-        }
-    } else if (l_type == Type::MEASURE) {
-        const auto &unit = l_value.unit();
-        if (isWKT2) {
-            formatter->add(l_value.value());
-        } else {
-            // In WKT1, as we don't output the natural unit, output to the
-            // registered linear / angular unit.
+    if (l_type == Type::MEASURE) {
+        const auto &l_value = value();
+        if (formatter->abridgedTransformation()) {
+            const auto &unit = l_value.unit();
             const auto &unitType = unit.type();
             if (unitType == common::UnitOfMeasure::Type::LINEAR) {
-                const auto &targetUnit = *(formatter->axisLinearUnit());
-                if (targetUnit.conversionToSI() == 0.0) {
-                    throw io::FormattingException(
-                        "cannot convert value to target linear unit");
-                }
-                formatter->add(l_value.convertToUnit(targetUnit));
-            } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
-                const auto &targetUnit = *(formatter->axisAngularUnit());
-                if (targetUnit.conversionToSI() == 0.0) {
-                    throw io::FormattingException(
-                        "cannot convert value to target angular unit");
-                }
-                formatter->add(l_value.convertToUnit(targetUnit));
-            } else {
                 formatter->add(l_value.getSIValue());
+            } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
+                formatter->add(
+                    l_value.convertToUnit(common::UnitOfMeasure::ARC_SECOND));
+            } else if (unit == common::UnitOfMeasure::PARTS_PER_MILLION) {
+                formatter->add(1.0 + l_value.value() * 1e-6);
+            } else {
+                formatter->add(l_value.value());
             }
-        }
-        if (isWKT2 && unit != common::UnitOfMeasure::NONE) {
-            if (!formatter->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
-                (unit != common::UnitOfMeasure::SCALE_UNITY &&
-                 unit != *(formatter->axisLinearUnit()) &&
-                 unit != *(formatter->axisAngularUnit()))) {
-                unit._exportToWKT(formatter);
+        } else {
+            const auto &unit = l_value.unit();
+            if (isWKT2) {
+                formatter->add(l_value.value());
+            } else {
+                // In WKT1, as we don't output the natural unit, output to the
+                // registered linear / angular unit.
+                const auto &unitType = unit.type();
+                if (unitType == common::UnitOfMeasure::Type::LINEAR) {
+                    const auto &targetUnit = *(formatter->axisLinearUnit());
+                    if (targetUnit.conversionToSI() == 0.0) {
+                        throw io::FormattingException(
+                            "cannot convert value to target linear unit");
+                    }
+                    formatter->add(l_value.convertToUnit(targetUnit));
+                } else if (unitType == common::UnitOfMeasure::Type::ANGULAR) {
+                    const auto &targetUnit = *(formatter->axisAngularUnit());
+                    if (targetUnit.conversionToSI() == 0.0) {
+                        throw io::FormattingException(
+                            "cannot convert value to target angular unit");
+                    }
+                    formatter->add(l_value.convertToUnit(targetUnit));
+                } else {
+                    formatter->add(l_value.getSIValue());
+                }
+            }
+            if (isWKT2 && unit != common::UnitOfMeasure::NONE) {
+                if (!formatter
+                         ->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
+                    (unit != common::UnitOfMeasure::SCALE_UNITY &&
+                     unit != *(formatter->axisLinearUnit()) &&
+                     unit != *(formatter->axisAngularUnit()))) {
+                    unit._exportToWKT(formatter);
+                }
             }
         }
     } else if (l_type == Type::STRING || l_type == Type::FILENAME) {
