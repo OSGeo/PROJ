@@ -23,7 +23,7 @@ cd $TAR_DIRECTORY
 mkdir build_autoconf
 cd build_autoconf
 if [ -f /usr/lib/jvm/java-7-openjdk-amd64/include/jni.h ]; then
-    CXXFLAGS="-I/usr/lib/jvm/java-7-openjdk-amd64/include -I/usr/lib/jvm/java-7-openjdk-amd64/include/linux" ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all --with-jni
+    CXXFLAGS="-I/usr/lib/jvm/java-7-openjdk-amd64/include -I/usr/lib/jvm/java-7-openjdk-amd64/include/linux $CXXFLAGS" ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all --with-jni
 else
     ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 fi
