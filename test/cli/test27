@@ -7,7 +7,6 @@
 #   Mercator due to greater precision of meridional distance function.
 #
 TEST_CLI_DIR=`dirname $0`
-DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
 usage()
@@ -26,12 +25,16 @@ if test ! -x ${EXE}; then
     exit 1
 fi
 
+if test -z "${PROJ_LIB}"; then
+    export PROJ_LIB="`dirname $0`/../../data"
+fi
+
 echo "============================================"
 echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
 OUT=proj_out27
-INIT_FILE=${DATA_DIR}/nad27
+INIT_FILE=${PROJ_LIB}/nad27
 #
 echo "doing tests into file ${OUT}, please wait"
 #

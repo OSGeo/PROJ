@@ -2,7 +2,6 @@
 # Test projinfo
 
 TEST_CLI_DIR=`dirname $0`
-DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
 usage()
