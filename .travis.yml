@@ -19,6 +19,24 @@ matrix:
       env:
         - BUILD_NAME=linux_gcc
         - DETAILS="linux, gcc"
+
+    - os: linux
+      dist: trusty
+      sudo: required
+      services:
+        - docker
+      env:
+        - BUILD_NAME=linux_gcc7
+        - DETAILS="linux, gcc7"
+        - CC=gcc-7
+        - CXX=g++-7
+        - CXXFLAGS='-g -D_GLIBCXX_ASSERTIONS'
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages: ['g++-7','make','autoconf','automake']
+
     - os: linux
       dist: trusty
       compiler: clang
@@ -29,11 +47,13 @@ matrix:
       env:
         - BUILD_NAME=linux_clang
         - DETAILS="linux, clang"
+
     - os: osx
       language: cpp
       env:
         - BUILD_NAME=osx
         - DETAILS="osx"
+
     - os: linux
       dist: trusty
       compiler: gcc
