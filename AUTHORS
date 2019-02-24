@@ -1,19 +1,42 @@
-Original Author:
-Gerald Evenden
+--------------------------------------------------------------------------------
+Authors
+--------------------------------------------------------------------------------
 
-Maintainer(s):
+Original Author
+................................................................................
+
+Gerald Evenden (1935-2016)
+
+Maintainer(s)
+................................................................................
+
+Kristian Evers <kreve@sdfe.dk>
+Even Rouault <even.rouault@spatialys.com>
+
+
+Project Steering Committee
+--------------------------------------------------------------------------------
+
+Process and membership can be found at:
+https://proj4.org/community/rfc/rfc-1.html
+
+Chair
+................................................................................
+
+Kristian Evers <kreve@sdfe.dk>
+
+Members
+................................................................................
+
 Frank Warmerdam <warmerdam@pobox.com>
 Howard Butler <howard@hobu.co>
-
-Contributors:
-Brent Fraser <bfraser@geoanalytic.com>
-Chris Stuber <imap@chesapeake.net>
-Craig Bruce <cbruce@cubewerx.com>
-Victor Osipkov <vctos@email.com>
-Andrea Antonello <andrea.antonello@hydrologis.com>
 Charles Karney <charles.karney@sri.com>
-Karsten Engsager
-Knud Poder
-Kristian Evers <kreve@sdfe.dk>
 Thomas Knudsen <thokn@sdfe.dk>
 Even Rouault <even.rouault@spatialys.com>
+Kurt Schwehr <schwehr@gmail.com>
+
+Contributors
+--------------------------------------------------------------------------------
+
+The full list of contributors can be found on GitHub
+https://github.com/OSGeo/proj.4/graphs/contributors

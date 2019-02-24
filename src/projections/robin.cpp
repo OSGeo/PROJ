@@ -7,7 +7,7 @@
 PROJ_HEAD(robin, "Robinson") "\n\tPCyl, Sph";
 
 #define V(C,z) (C.c0 + z * (C.c1 + z * (C.c2 + z * C.c3)))
-#define DV(C,z) (C.c1 + z * (C.c2 + C.c2 + z * 3. * C.c3))
+#define DV(C,z) (C.c1 + 2 * z * C.c2 + z * z * 3. * C.c3)
 
 /*
 note: following terms based upon 5 deg. intervals in degrees.
@@ -74,7 +74,7 @@ static const struct COEFS Y[] = {
 #define RC1 0.08726646259971647884
 #define NODES   18
 #define ONEEPS  1.000001
-#define EPS 1e-8
+#define EPS 1e-10
 /* Not sure at all of the appropriate number for MAX_ITER... */
 #define MAX_ITER 100
 
@@ -90,7 +90,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
     }
-    if (i >= NODES) i = NODES - 1;
+    if (i >= NODES) i = NODES;
     dphi = RAD_TO_DEG * (dphi - RC1 * i);
     xy.x = V(X[i], dphi) * FXC * lp.lam;
     xy.y = V(Y[i], dphi) * FYC;
@@ -133,10 +133,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
         T = Y[i];
         /* first guess, linear interp */
         t = 5. * (lp.phi - T.c0)/(Y[i+1].c0 - T.c0);
-        /* make into root */
-        T.c0 = (float)(T.c0 - lp.phi);
         for (iters = MAX_ITER; iters ; --iters) { /* Newton-Raphson */
-            t -= t1 = V(T,t) / DV(T,t);
+            t -= t1 = (V(T,t) - lp.phi) / DV(T,t);
             if (fabs(t1) < EPS)
                 break;
         }
