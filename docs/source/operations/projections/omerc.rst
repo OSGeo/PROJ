@@ -157,6 +157,7 @@ Optional
     No rectification (not "no rotation" as one may well assume).
     Do not take the last step from the skew uv-plane to the map
     XY plane.
+    
     .. note:: This option is probably only marginally useful, but remains for (mostly) historical reasons.
 
 .. option:: +no_off
