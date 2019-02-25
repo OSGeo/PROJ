@@ -128,25 +128,27 @@ CRSs.
  Version 6.0.0 is made possible by the following contributors:
 
  Aaron Puchert
+ Thomas Knudsen
  Phil Elson
  Mateusz Łoskot
  Markus Neteler
  Jürgen Fischer
- Howard Butler
  Charles Karney
- Alan D. Snow
- Marco Bernasocchi
+ Bas Couwenberg
  Karoline Skaar
+ Alan D. Snow
+ Howard Butler
+ Marco Bernasocchi
  Ben Boeckel
  Ivan Veselov
- Mike Taves
  Philippe Rivière
+ Mike Taves
  Elliott Sales de Andrade
  Kai Pastor
  Kristian Evers
  Even Rouault
 
-5.2.0 Release Notes
+ 5.2.0 Release Notes
 -------------------
 
  UPDATES
