@@ -119,6 +119,9 @@ CRSs.
 
  o Fixed use of grid paths including spaces (#1152)
 
+ o Robinson: fix wrong values for forward path for latitudes >= 87.5 (#1172),
+   and fix inaccurate inverse method.
+
  THANKS TO
  ------------
 
