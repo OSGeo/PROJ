@@ -2557,13 +2557,13 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
 
     auto &dynamicNode = nodeP->lookForChild(WKTConstants::DYNAMIC);
 
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS);
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     const auto &nodeName = nodeP->value();
     if (isNull(csNode) && !ci_equal(nodeName, WKTConstants::GEOGCS) &&
         !ci_equal(nodeName, WKTConstants::GEOCCS) &&
         !ci_equal(nodeName, WKTConstants::BASEGEODCRS) &&
         !ci_equal(nodeName, WKTConstants::BASEGEOGCRS)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
 
     auto &primeMeridianNode =
@@ -2713,9 +2713,9 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
     auto derivingConversion = buildConversion(
         derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS);
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
 
@@ -3540,11 +3540,11 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             ? buildConversion(conversionNode, linearUnit, angularUnit)
             : buildProjection(node, projectionNode, linearUnit, angularUnit);
 
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS);
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     const auto &nodeValue = nodeP->value();
     if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::PROJCS) &&
         !ci_equal(nodeValue, WKTConstants::BASEPROJCRS)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
@@ -3727,11 +3727,11 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
             ? buildDatumEnsemble(ensembleNode, nullptr, false).as_nullable()
             : nullptr;
 
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS);
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     const auto &nodeValue = nodeP->value();
     if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::VERT_CS) &&
         !ci_equal(nodeValue, WKTConstants::BASEVERTCRS)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(cs);
@@ -3788,9 +3788,9 @@ WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
     auto derivingConversion = buildConversion(
         derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS);
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
 
@@ -3893,10 +3893,10 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
 TemporalCSNNPtr
 WKTParser::Private::buildTemporalCS(const WKTNodeNNPtr &parentNode) {
 
-    auto &csNode = parentNode->GP()->lookForChild(WKTConstants::CS);
+    auto &csNode = parentNode->GP()->lookForChild(WKTConstants::CS_);
     if (isNull(csNode) &&
         !ci_equal(parentNode->GP()->value(), WKTConstants::BASETIMECRS)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, parentNode, UnitOfMeasure::NONE);
     auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
@@ -3954,9 +3954,9 @@ WKTParser::Private::buildEngineeringCRS(const WKTNodeNNPtr &node) {
         throw ParsingException("Missing EDATUM / ENGINEERINGDATUM node");
     }
 
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS);
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode) && !ci_equal(nodeP->value(), WKTConstants::BASEENGCRS)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
 
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
@@ -3999,9 +3999,9 @@ WKTParser::Private::buildDerivedEngineeringCRS(const WKTNodeNNPtr &node) {
     auto derivingConversion = buildConversion(
         derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE);
 
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS);
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
 
@@ -4014,10 +4014,10 @@ WKTParser::Private::buildDerivedEngineeringCRS(const WKTNodeNNPtr &node) {
 ParametricCSNNPtr
 WKTParser::Private::buildParametricCS(const WKTNodeNNPtr &parentNode) {
 
-    auto &csNode = parentNode->GP()->lookForChild(WKTConstants::CS);
+    auto &csNode = parentNode->GP()->lookForChild(WKTConstants::CS_);
     if (isNull(csNode) &&
         !ci_equal(parentNode->GP()->value(), WKTConstants::BASEPARAMCRS)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, parentNode, UnitOfMeasure::NONE);
     auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
@@ -4087,9 +4087,9 @@ WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
 
     auto conversion = buildConversion(conversionNode, linearUnit, angularUnit);
 
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS);
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode) && !ci_equal(nodeP->value(), WKTConstants::PROJCS)) {
-        ThrowMissing(WKTConstants::CS);
+        ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     return DerivedProjectedCRS::create(buildProperties(node), baseProjCRS,
