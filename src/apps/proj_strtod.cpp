@@ -309,7 +309,7 @@ double proj_strtod(const char *str, char **endptr) {
         number = exponent < 0? number / ex: number * ex;
     }
     else
-        number *= pow (10, exponent);
+        number *= pow (10.0, static_cast<double>(exponent));
 
     return number;
 }

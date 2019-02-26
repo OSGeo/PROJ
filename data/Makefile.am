@@ -56,6 +56,7 @@ install-data-local:
           fi; \
 	done
 
+# head -c1 not handled on Solaris
 proj.db: $(DATAPATH)/sql/*.sql
 	@echo "Make proj.db"
 	$(RM) proj.db
@@ -69,12 +70,15 @@ proj.db: $(DATAPATH)/sql/*.sql
 		$(RM) proj.db; \
 		exit 1; \
 	fi; \
+	echo "" | head -c1; \
+        if [ $$? -eq 0 ] ; then \
+         echo "Running foreign_key_check"; \ 
 	 if [[ $$(echo "pragma foreign_key_check;" | sqlite3 proj.db | head -c1 | wc -c) -ne 0 ]]; then \
 		echo "Foreign key check failed"; \
 		$(RM) proj.db; \
 		exit 1; \
-	 fi
-
+	 fi \
+	fi
 
 # For out-of-tree builds, link all file of the source data dir to the generated data
 check-local:
