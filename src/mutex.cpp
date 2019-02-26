@@ -25,14 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-
-/* projects.h and windows.h conflict - avoid this! */
-
-#if defined(MUTEX_pthread) && !defined(_XOPEN_SOURCE) && !defined(__sun)
-/* For pthread_mutexattr_settype */
-#define _XOPEN_SOURCE 500
-#endif
-
 /* For PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
