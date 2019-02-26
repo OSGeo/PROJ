@@ -483,7 +483,7 @@ void CoordinateSystem::_exportToWKT(
 
     const auto &l_axisList = axisList();
     if (isWKT2) {
-        formatter->startNode(io::WKTConstants::CS, !identifiers().empty());
+        formatter->startNode(io::WKTConstants::CS_, !identifiers().empty());
         formatter->add(getWKT2Type(formatter->use2018Keywords()));
         formatter->add(static_cast<int>(l_axisList.size()));
         formatter->endNode();
