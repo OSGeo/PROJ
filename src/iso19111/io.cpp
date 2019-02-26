@@ -973,7 +973,7 @@ const std::vector<WKTNodeNNPtr> &WKTNode::children() const {
 //! @cond Doxygen_Suppress
 static size_t skipSpace(const std::string &str, size_t start) {
     size_t i = start;
-    while (i < str.size() && ::isspace(str[i])) {
+    while (i < str.size() && ::isspace(static_cast<unsigned char>(str[i]))) {
         ++i;
     }
     return i;
@@ -1002,8 +1002,9 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
     bool inString = false;
 
     for (; i < wkt.size() &&
-           (inString || (wkt[i] != '[' && wkt[i] != '(' && wkt[i] != ',' &&
-                         wkt[i] != ']' && wkt[i] != ')' && !::isspace(wkt[i])));
+           (inString ||
+            (wkt[i] != '[' && wkt[i] != '(' && wkt[i] != ',' && wkt[i] != ']' &&
+             wkt[i] != ')' && !::isspace(static_cast<unsigned char>(wkt[i]))));
          ++i) {
         if (wkt[i] == '"') {
             if (!inString) {
@@ -5317,7 +5318,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
     {
         size_t i = 0;
         while (true) {
-            for (; isspace(c_str[i]); i++) {
+            for (; isspace(static_cast<unsigned char>(c_str[i])); i++) {
             }
             std::string token;
             bool in_string = false;
@@ -5334,7 +5335,7 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                     token += c_str[i];
                     i++;
                     continue;
-                } else if (isspace(c_str[i])) {
+                } else if (isspace(static_cast<unsigned char>(c_str[i]))) {
                     break;
                 }
                 token += c_str[i];
