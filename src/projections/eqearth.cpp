@@ -26,7 +26,7 @@ PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl, Sph&Ell";
 #define A2 -0.081106
 #define A3 0.000893
 #define A4 0.003796
-#define M (sqrt(3) / 2.0)
+#define M (sqrt(3.0) / 2.0)
 
 #define MAX_Y 1.3173627591574  /* 90° latitude on a sphere with radius 1 */
 #define EPS 1e-11
