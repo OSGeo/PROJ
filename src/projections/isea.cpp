@@ -847,7 +847,7 @@ static long isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
         return g->serial;
     }
     /* hexes in a quad */
-    hexes = lround(pow(g->aperture, g->resolution));
+    hexes = lround(pow(static_cast<double>(g->aperture), static_cast<double>(g->resolution)));
     if (quad == 11) {
         g->serial = 1 + 10 * hexes + 1;
         return g->serial;
