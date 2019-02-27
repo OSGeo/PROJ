@@ -326,7 +326,7 @@ AC_ARG_WITH(external-gtest,
             AS_HELP_STRING([--with-external-gtest],
                [Whether to use external Google Test]),,)
 
-if test "x$with_external_gtest" == "xyes" ; then
+if test "x$with_external_gtest" = "xyes" ; then
     AC_MSG_RESULT([using external GTest.])
     PKG_CHECK_MODULES([GTEST], [gtest >= 1.8.0])
 else
@@ -334,7 +334,7 @@ else
     GTEST_CFLAGS="-I\$(top_srcdir)/test/googletest/include"
     GTEST_LIBS="\$(top_builddir)/test/googletest/libgtest.la"
 fi
-AM_CONDITIONAL(USE_EXTERNAL_GTEST, [test "x$with_external_gtest" == "xyes"])
+AM_CONDITIONAL(USE_EXTERNAL_GTEST, [test "x$with_external_gtest" = "xyes"])
 AC_SUBST(GTEST_CFLAGS,$GTEST_CFLAGS)
 AC_SUBST(GTEST_LIBS,$GTEST_LIBS)
 
