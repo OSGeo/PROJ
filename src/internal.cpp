@@ -491,9 +491,7 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
     passed as first arg at each call to the logger
 ******************************************************************************/
     if (nullptr==ctx)
-        pj_get_default_ctx ();
-    if (nullptr==ctx)
-        return;
+        ctx = pj_get_default_ctx ();
     ctx->logger_app_data = app_data;
     if (nullptr!=logf)
         ctx->logger = logf;
