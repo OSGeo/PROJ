@@ -3,7 +3,7 @@
 set -e
 
 # Download grid files
-wget http://download.osgeo.org/proj/proj-datumgrid-1.7.zip
+wget http://download.osgeo.org/proj/proj-datumgrid-1.8.zip
 
 # prepare build files
 ./autogen.sh
@@ -49,7 +49,7 @@ cd ..
 cd ../..
 
 # Install grid files
-(cd data && unzip -o ../proj-datumgrid-1.7.zip)
+(cd data && unzip -o ../proj-datumgrid-1.8.zip)
 
 # autoconf build with grids
 mkdir build_autoconf_grids
