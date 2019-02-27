@@ -43,8 +43,8 @@ test_script:
   - echo test_script
   - set PROJ_LIB=%PROJ_DIR%\share\proj
   - cd %PROJ_LIB%
-  - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.7.zip
-  - 7z e -aoa -y proj-datumgrid-1.7.zip
+  - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.8.zip
+  - 7z e -aoa -y proj-datumgrid-1.8.zip
   - cd %PROJ_BUILD%
   - ctest -V -C Release
   - set PATH=%PATH%;%PROJ_DIR%\bin
