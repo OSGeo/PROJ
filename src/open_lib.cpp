@@ -194,10 +194,10 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             sysname = name;
 
         /* or try to use application provided file finder */
-        else if( ctx && ctx->file_finder != nullptr && (sysname = ctx->file_finder( ctx, name, ctx->file_finder_user_data )) != nullptr )
+        else if( ctx->file_finder != nullptr && (sysname = ctx->file_finder( ctx, name, ctx->file_finder_user_data )) != nullptr )
             ;
 
-        else if( ctx && ctx->file_finder_legacy != nullptr && (sysname = ctx->file_finder_legacy( name )) != nullptr )
+        else if( ctx->file_finder_legacy != nullptr && (sysname = ctx->file_finder_legacy( name )) != nullptr )
             ;
 
         /* or is environment PROJ_LIB defined */
@@ -234,7 +234,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         }
 
         /* If none of those work and we have a search path, try it */
-        if (!fid && ctx && !ctx->search_paths.empty() )
+        if( !fid && !ctx->search_paths.empty() )
         {
             for( const auto& path: ctx->search_paths ) {
                 try {
