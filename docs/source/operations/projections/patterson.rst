@@ -7,7 +7,7 @@ Patterson
 The Patterson projection is a cylindrical map projection designed for
 general-purpose mapmaking.
 
-See :cite:`Patterson2015`
+See :cite:`Patterson2014`
 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Cylindrical                                              |
