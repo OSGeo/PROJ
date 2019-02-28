@@ -5,6 +5,8 @@ To cite PROJ in publications use:
 
 A BibTeX entry for LaTeX users is
 
+.. code-block:: latex
+
   @Manual{,
     title = {{PROJ} coordinate transformation software library},
     author = {{PROJ contributors}},

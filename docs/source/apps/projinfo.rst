@@ -67,7 +67,7 @@ The following control parameters can appear in any order:
 .. option:: --summary
 
     When listing coordinate operations available between 2 CRS, return the
-    result in a summary format, mentionning only the name of the coordinate
+    result in a summary format, mentioning only the name of the coordinate
     operation, its accuracy and its area of use.
 
     .. note:: only used for coordinate operation computation
@@ -104,7 +104,7 @@ The following control parameters can appear in any order:
 
     Specify how the area of use of coordinate operations found in the database
     are compared to the area of use specified explicitly with :option:`--area` or :option:`--bbox`,
-    or derivedi implictly from the area of use of the source and target CRS.
+    or derived implicitly from the area of use of the source and target CRS.
     By default, projinfo will only keep coordinate operations whose are of use
     is strictly within the area of interest (``contains`` strategy).
     If using the ``intersects`` strategy, the spatial test is relaxed, and any
