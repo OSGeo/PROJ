@@ -5,7 +5,7 @@ Download
 ================================================================================
 
 Here you can download current and previous releases of PROJ. We only supply a
-distribution of the source code and various resource files archives. See
+distribution of the source code and various resource file archives. See
 :ref:`install` for information on how to get pre-built packages of PROJ.
 
 .. _current_release:
