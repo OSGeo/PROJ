@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -79,7 +79,7 @@ using CRSNNPtr = util::nn<CRSPtr>;
 /** \brief Abstract class modelling a coordinate reference system which is
  * usually single but may be compound.
  *
- * \remark Implements CRS from \ref ISO_19111_2018
+ * \remark Implements CRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CRS : public common::ObjectUsage {
   public:
@@ -149,7 +149,7 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
  * one Coordinate System and either one datum::Datum or one
  * datum::DatumEnsemble.
  *
- * \remark Implements SingleCRS from \ref ISO_19111_2018
+ * \remark Implements SingleCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL SingleCRS : public CRS {
   public:
@@ -204,7 +204,7 @@ using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
  * association to a velocity model then the geodetic CRS is dynamic, else it
  * is static.
  *
- * \remark Implements GeodeticCRS from \ref ISO_19111_2018
+ * \remark Implements GeodeticCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
                                  public io::IPROJStringExportable {
@@ -312,7 +312,7 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
  * association to a velocity model then the geodetic CRS is dynamic, else it is
  * static.
  *
- * \remark Implements GeographicCRS from \ref ISO_19111_2018
+ * \remark Implements GeographicCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
   public:
@@ -398,7 +398,7 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
  * reference system. They exist only as an inseparable part of a 3D coordinate
  * tuple defined in a geographic 3D coordinate reference system.
  *
- * \remark Implements VerticalCRS from \ref ISO_19111_2018
+ * \remark Implements VerticalCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS,
                                  public io::IPROJStringExportable {
@@ -476,7 +476,7 @@ class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS,
  * coordinate reference system is implemented using the parameters and
  * formula(s) specified in the definition of the coordinate conversion.
  *
- * \remark Implements DerivedCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DerivedCRS : virtual public SingleCRS {
   public:
@@ -539,7 +539,7 @@ using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
  * height is passed through unchanged and forms the vertical axis of the
  * projected CRS's Cartesian coordinate system.
  *
- * \remark Implements ProjectedCRS from \ref ISO_19111_2018
+ * \remark Implements ProjectedCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
                                         public io::IPROJStringExportable {
@@ -612,7 +612,7 @@ using TemporalCRSNNPtr = util::nn<TemporalCRSPtr>;
 /** \brief A coordinate reference system associated with a temporal datum and a
  * one-dimensional temporal coordinate system.
  *
- * \remark Implements TemporalCRS from \ref ISO_19111_2018
+ * \remark Implements TemporalCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL TemporalCRS : virtual public SingleCRS {
   public:
@@ -671,7 +671,7 @@ using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
  * In \ref WKT2, it maps to a ENGINEERINGCRS / ENGCRS keyword. In \ref WKT1,
  * it maps to a LOCAL_CS keyword.
  *
- * \remark Implements EngineeringCRS from \ref ISO_19111_2018
+ * \remark Implements EngineeringCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL EngineeringCRS : virtual public SingleCRS {
   public:
@@ -725,7 +725,7 @@ using ParametricCRSNNPtr = util::nn<ParametricCRSPtr>;
  * without geodetic corrections, or on moving platforms such as road vehicles
  * vessels, aircraft or spacecraft, or as the internal CRS of an image.
  *
- * \remark Implements ParametricCRS from \ref ISO_19111_2018
+ * \remark Implements ParametricCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ParametricCRS : virtual public SingleCRS {
   public:
@@ -781,11 +781,11 @@ using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
  * if coordinate values in one cannot be converted or transformed into
  * coordinate values in the other.
  *
- * \note As a departure to \ref ISO_19111_2018, we allow to build a CompoundCRS
- * from CRS objects, whereas ISO19111:2018 restricts the components to
+ * \note As a departure to \ref ISO_19111_2019, we allow to build a CompoundCRS
+ * from CRS objects, whereas ISO19111:2019 restricts the components to
  * SingleCRS.
  *
- * \remark Implements CompoundCRS from \ref ISO_19111_2018
+ * \remark Implements CompoundCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CompoundCRS final : public CRS,
                                        public io::IPROJStringExportable {
@@ -857,7 +857,7 @@ class PROJ_GCC_DLL CompoundCRS final : public CRS,
  * present in \ref WKT1.
  *
  * \note Contrary to other CRS classes of this package, there is no
- * \ref ISO_19111_2018 modelling of a BoundCRS.
+ * \ref ISO_19111_2019 modelling of a BoundCRS.
  *
  * \remark Implements BoundCRS from \ref WKT2
  */
@@ -935,7 +935,7 @@ using DerivedGeodeticCRSNNPtr = util::nn<DerivedGeodeticCRSPtr>;
  * inheriting a geodetic reference frame, and associated with a 3D Cartesian
  * or spherical coordinate system.
  *
- * \remark Implements DerivedGeodeticCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedGeodeticCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DerivedGeodeticCRS final : public GeodeticCRS,
                                               public DerivedCRS {
@@ -1010,7 +1010,7 @@ using DerivedGeographicCRSNNPtr = util::nn<DerivedGeographicCRSPtr>;
  * A derived geographic CRS can be based on a geodetic CRS only if that
  * geodetic CRS definition includes an ellipsoid.
  *
- * \remark Implements DerivedGeographicCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedGeographicCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS,
                                                 public DerivedCRS {
@@ -1075,7 +1075,7 @@ using DerivedProjectedCRSNNPtr = util::nn<DerivedProjectedCRSPtr>;
  *
  * A DerivedProjectedCRS is not a ProjectedCRS.
  *
- * \remark Implements DerivedProjectedCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedProjectedCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DerivedProjectedCRS final : public DerivedCRS {
   public:
@@ -1129,7 +1129,7 @@ using DerivedVerticalCRSNNPtr = util::nn<DerivedVerticalCRSPtr>;
  * coordinate reference system as its base CRS, thereby inheriting a vertical
  * reference frame, and a vertical coordinate system.
  *
- * \remark Implements DerivedVerticalCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedVerticalCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DerivedVerticalCRS final : public VerticalCRS,
                                               public DerivedCRS {
@@ -1275,7 +1275,7 @@ struct PROJ_GCC_DLL DerivedEngineeringCRSTraits {
  * engineering datum, and is associated with one of the coordinate system
  * types for an EngineeringCRS
  *
- * \remark Implements DerivedEngineeringCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedEngineeringCRS from \ref ISO_19111_2019
  */
 #ifdef DOXYGEN_ENABLED
 class DerivedEngineeringCRS
@@ -1312,7 +1312,7 @@ struct PROJ_GCC_DLL DerivedParametricCRSTraits {
  * coordinate reference system as its base CRS, thereby inheriting a parametric
  * datum, and a parametric coordinate system.
  *
- * \remark Implements DerivedParametricCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedParametricCRS from \ref ISO_19111_2019
  */
 #ifdef DOXYGEN_ENABLED
 class DerivedParametricCRS
@@ -1349,7 +1349,7 @@ struct PROJ_GCC_DLL DerivedTemporalCRSTraits {
  * coordinate reference system as its base CRS, thereby inheriting a temporal
  * datum, and a temporal coordinate system.
  *
- * \remark Implements DerivedTemporalCRS from \ref ISO_19111_2018
+ * \remark Implements DerivedTemporalCRS from \ref ISO_19111_2019
  */
 #ifdef DOXYGEN_ENABLED
 class DerivedTemporalCRS : public DerivedCRSTemplate<DerivedTemporalCRSTraits> {

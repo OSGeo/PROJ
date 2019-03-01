@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -291,7 +291,7 @@ using IdentifiedObjectNNPtr = util::nn<IdentifiedObjectPtr>;
 /** \brief Abstract class representating a CRS-related object that has an
  * identification.
  *
- * \remark Implements IdentifiedObject from \ref ISO_19111_2018
+ * \remark Implements IdentifiedObject from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
                                       public util::IComparable,
@@ -364,7 +364,7 @@ using ObjectDomainNNPtr = util::nn<ObjectDomainPtr>;
 
 /** \brief The scope and validity of a CRS-related object.
  *
- * \remark Implements ObjectDomain from \ref ISO_19111_2018
+ * \remark Implements ObjectDomain from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ObjectDomain : public util::BaseObject,
                                   public util::IComparable {
@@ -419,7 +419,7 @@ using ObjectUsageNNPtr = util::nn<ObjectUsagePtr>;
 
 /** \brief Abstract class of a CRS-related object that has usages.
  *
- * \remark Implements ObjectUsage from \ref ISO_19111_2018
+ * \remark Implements ObjectUsage from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ObjectUsage : public IdentifiedObject {
   public:

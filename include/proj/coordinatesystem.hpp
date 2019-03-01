@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -51,7 +51,7 @@ namespace cs {
 /** \brief The direction of positive increase in the coordinate value for a
  * coordinate system axis.
  *
- * \remark Implements AxisDirection from \ref ISO_19111_2018
+ * \remark Implements AxisDirection from \ref ISO_19111_2019
  */
 class AxisDirection : public util::CodeList {
   public:
@@ -119,7 +119,7 @@ using MeridianNNPtr = util::nn<MeridianPtr>;
 /** \brief The meridian that the axis follows from the pole, for a coordinate
  * reference system centered on a pole.
  *
- * \note There is no modelling for this concept in \ref ISO_19111_2018
+ * \note There is no modelling for this concept in \ref ISO_19111_2019
  *
  * \remark Implements MERIDIAN from \ref WKT2
  */
@@ -163,7 +163,7 @@ using CoordinateSystemAxisNNPtr = util::nn<CoordinateSystemAxisPtr>;
 
 /** \brief The definition of a coordinate system axis.
  *
- * \remark Implements CoordinateSystemAxis from \ref ISO_19111_2018
+ * \remark Implements CoordinateSystemAxis from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CoordinateSystemAxis final
     : public common::IdentifiedObject {
@@ -233,7 +233,7 @@ class PROJ_GCC_DLL CoordinateSystemAxis final
  * The coordinate values in a coordinate tuple shall be recorded in the order
  * in which the coordinate system axes associations are recorded.
  *
- * \remark Implements CoordinateSystem from \ref ISO_19111_2018
+ * \remark Implements CoordinateSystem from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject {
   public:
@@ -289,7 +289,7 @@ using SphericalCSNNPtr = util::nn<SphericalCSPtr>;
  * ellipsoid "degenerated" into a sphere. A SphericalCS shall have three
  * axis associations.
  *
- * \remark Implements SphericalCS from \ref ISO_19111_2018
+ * \remark Implements SphericalCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL SphericalCS final : public CoordinateSystem {
   public:
@@ -332,7 +332,7 @@ using EllipsoidalCSNNPtr = util::nn<EllipsoidalCSPtr>;
  *
  * An EllipsoidalCS shall have two or three associations.
  *
- * \remark Implements EllipsoidalCS from \ref ISO_19111_2018
+ * \remark Implements EllipsoidalCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL EllipsoidalCS final : public CoordinateSystem {
   public:
@@ -411,7 +411,7 @@ using VerticalCSNNPtr = util::nn<VerticalCSPtr>;
  * Such a coordinate system is usually dependent on the Earth's gravity field.
  * A VerticalCS shall have one axis association.
  *
- * \remark Implements VerticalCS from \ref ISO_19111_2018
+ * \remark Implements VerticalCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL VerticalCS final : public CoordinateSystem {
   public:
@@ -460,7 +460,7 @@ using CartesianCSNNPtr = util::nn<CartesianCSPtr>;
  * three axis associations; the number of associations shall equal the
  * dimension of the CS.
  *
- * \remark Implements CartesianCS from \ref ISO_19111_2018
+ * \remark Implements CartesianCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CartesianCS final : public CoordinateSystem {
   public:
@@ -529,7 +529,7 @@ using OrdinalCSNNPtr = util::nn<OrdinalCSPtr>;
  * The number of associations shall equal the
  * dimension of the CS.
  *
- * \remark Implements OrdinalCS from \ref ISO_19111_2018
+ * \remark Implements OrdinalCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL OrdinalCS final : public CoordinateSystem {
   public:
@@ -565,7 +565,7 @@ using ParametricCSNNPtr = util::nn<ParametricCSPtr>;
 /** \brief one-dimensional coordinate reference system which uses parameter
  * values or functions that may vary monotonically with height.
  *
- * \remark Implements ParametricCS from \ref ISO_19111_2018
+ * \remark Implements ParametricCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ParametricCS final : public CoordinateSystem {
   public:
@@ -603,7 +603,7 @@ using TemporalCSNNPtr = util::nn<TemporalCSPtr>;
  *
  * A TemporalCS shall have one axis association.
  *
- * \remark Implements TemporalCS from \ref ISO_19111_2018
+ * \remark Implements TemporalCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL TemporalCS : public CoordinateSystem {
   public:
@@ -637,7 +637,7 @@ using DateTimeTemporalCSNNPtr = util::nn<DateTimeTemporalCSPtr>;
  * axisUnitID; the temporal quantities are defined through the ISO 8601
  * representation.
  *
- * \remark Implements DateTimeTemporalCS from \ref ISO_19111_2018
+ * \remark Implements DateTimeTemporalCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DateTimeTemporalCS final : public TemporalCS {
   public:
@@ -673,7 +673,7 @@ using TemporalCountCSNNPtr = util::nn<TemporalCountCSPtr>;
  *
  * A TemporalCountCS shall have one axis association.
  *
- * \remark Implements TemporalCountCS from \ref ISO_19111_2018
+ * \remark Implements TemporalCountCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL TemporalCountCS final : public TemporalCS {
   public:
@@ -709,7 +709,7 @@ using TemporalMeasureCSNNPtr = util::nn<TemporalMeasureCSPtr>;
  *
  * A TemporalMeasureCS shall have one axis association.
  *
- * \remark Implements TemporalMeasureCS from \ref ISO_19111_2018
+ * \remark Implements TemporalMeasureCS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL TemporalMeasureCS final : public TemporalCS {
   public:

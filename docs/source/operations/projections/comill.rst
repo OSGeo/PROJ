@@ -7,7 +7,7 @@ Compact Miller
 The Compact Miller projection is a cylindrical map projection with a
 height-to-width ratio of 0.6:1.
 
-See :cite:`Jenny2014`
+See :cite:`Jenny2015`
 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Cylindrical                                              |

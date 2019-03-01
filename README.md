@@ -48,7 +48,7 @@ On Windows, one may need to specify generator:
     cmake -G "Visual Studio 15 2017" ..
 
 If the SQLite3 dependency is installed in a custom location, specify the
-paths to the include directory and the library::
+paths to the include directory and the library:
 
     cmake -DSQLITE3_INCLUDE_DIR=/opt/SQLite/include -DSQLITE3_LIBRARY=/opt/SQLite/lib/libsqlite3.so ..
 

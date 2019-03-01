@@ -3,7 +3,7 @@
 
 
 @Article{Altamimi2002,
-  Title                    = {ITRF2000: A new release of the International Terrestrial Reference Frame for earth science applications},
+  Title                    = {{ITRF2000}: A new release of the {International Terrestrial Reference Frame} for earth science applications},
   Author                   = {Z. Altamimi and P. Sillard and C. Boucher},
   Journal                  = {Journal of Geophysical Research: Solid Earth},
   Year                     = {2002},
@@ -73,21 +73,13 @@
 
 @Article{EberHewitt1979,
   Title                    = {Conversion algorithms for the {CalCOFI} station grid},
-  Author                   = {L. E. Eber and R.P. Hewitt},
+  Author                   = {L. E. Eber and R. P. Hewitt},
   Journal                  = {California Cooperative Oceanic Fisheries Investigations Reports},
   Year                     = {1979},
   Pages                    = {135--137},
   Volume                   = {20},
 
   Url                      = {http://www.calcofi.org/publications/calcofireports/v20/Vol_20_Eber___Hewitt.pdf}
-}
-
-@Manual{EPSGGuidanceNumber7Part2,
-  Title                    = {Geomatics Guidance Note 7, part 2 - Coordinate Conversions & Transformations including Formulas},
-  Institution              = {International Association For Oil And Gas Producers},
-  Year                     = {2018},
-
-  Url                      = {https://www.iogp.org/bookstore/product/coordinate-conversions-and-transformation-including-formulas/}
 }
 
 @Manual{Evenden2005,
@@ -140,19 +132,24 @@
   Doi                      = {10.5281/zenodo.32050}
 }
 
-@Article{Hensley2002,
-  Title                    = {Improved Processing of AIRSAR Data Based on the GeoSAR Processor},
-  Author                   = {Scott Hensley and Elaine Chapin and Adam Freedman and Thierry Michel},
-  Journal                  = {Airsar earth science and applications workshop},
+@InProceedings{Hensley2002,
+  Title                    = {Improved Processing of {AIRSAR} Data Based on the {GeoSAR} Processor},
+  Author                   = {S. Hensley and E. Chapin and A. Freedman and T. Michel},
+  Booktitle                = {AIRSAR Earth Science and Application Workshop},
   Year                     = {2002},
+  Organization             = {Jet Propulsion Laboratory},
+
   Url                      = {https://airsar.jpl.nasa.gov/documents/workshop2002/papers/T3.pdf}
 }
 
-@Article{Jenny2014,
+@Article{Jenny2015,
   Title                    = {A compromise aspect-adaptive cylindrical projection for world maps},
-  Author                   = {Bernhard Jenny, Bojan Šavrič, Tom Patterson},
+  Author                   = {B. Jenny and B. Šavrič and T. Patterson},
   Journal                  = {International Journal of Geographical Information Science},
-  Year                     = {2014},
+  Year                     = {2015},
+  Number                   = {6},
+  Pages                    = {935--952},
+  Volume                   = {29},
 
   Doi                      = {10.1080/13658816.2014.997734},
   Url                      = {http://www.cartography.oregonstate.edu/pdf/2015_Jenny_etal_ACompromiseAspect-adaptiveCylindricalProjectionForWorldMaps.pdf}
@@ -215,47 +212,77 @@
   Url                      = {https://archive.org/details/DTIC_ADA026294}
 }
 
-@techreport{Poder1998,
-  author       = {Knud Poder and Karsten Engsager},
-  year         = {1998},
-  title        = {Some Conformal Mappings and Transformations for Geodesy
-                  and Topographic Cartography},
-  address      = {Copenhagen, Denmark},
-  institution  = {National Survey and Cadastre},
-  type         = {National Survey and Cadastre Publications},
-  series       = {4},
-  volume       = {6},
-  isbn         = {87-7866-085-8},
-  pages        = {63}
-}
-
-@Article{Patterson2015,
-  Title                    = {Introducing the Patterson Cylindrical Projection},
-  Author                   = {Tom Patterson, Bojan Šavrič, Bernhard Jenny},
+@Article{Patterson2014,
+  Title                    = {Introducing the {Patterson} Cylindrical Projection},
+  Author                   = {T. Patterson and B. Šavrič and B. Jenny},
   Journal                  = {Cartographic Perspectives},
-  Year                     = {2015},
-  Number                   = {78},
+  Year                     = {2014},
+  Volume                   = {78},
 
   Doi                      = {10.14714/CP78.1270}
 }
 
-@Misc{Rittri2012,
-    author = {Mikael Rittri},
-    title  = {New omerc approximations of Denmark System 34},
-    year   = {2012},
-    url    = {https://lists.osgeo.org/pipermail/proj/2012-June/005926.html}
+@TechReport{Poder1998,
+  Title                    = {Some Conformal Mappings and Transformations for Geodesy and Topographic Cartography},
+  Author                   = {K. Poder and K. Engsager},
+  Institution              = {National Survey and Cadastre},
+  Year                     = {1998},
+
+  Address                  = {Copenhagen, Denmark},
+  Type                     = {National Survey and Cadastre Publications},
+
+  ISBN                     = {87-7866-085-8},
+  Pages                    = {63},
+  Series                   = {4},
+  Volume                   = {6}
 }
 
-@article{Ruffhead2016,
-    author = {A. C. Ruffhead},
-    title = {Introduction to multiple regression equations in datum transformations and their reversibility},
-    journal = {Survey Review},
-    volume = {50},
-    number = {358},
-    pages = {82-90},
-    year  = {2016},
-    publisher = {Taylor & Francis},
-    doi = {10.1080/00396265.2016.1244143},
+@Misc{Rittri2012,
+  Title                    = {New omerc approximations of {Denmark System 34}},
+
+  Author                   = {M. Rittri},
+  HowPublished             = {e-mail},
+  Year                     = {2012},
+
+  Url                      = {https://lists.osgeo.org/pipermail/proj/2012-June/005926.html}
+}
+
+@Article{Ruffhead2016,
+  Title                    = {Introduction to multiple regression equations in datum transformations and their reversibility},
+  Author                   = {A. C. Ruffhead},
+  Journal                  = {Survey Review},
+  Year                     = {2016},
+  Number                   = {358},
+  Pages                    = {82-90},
+  Volume                   = {50},
+
+  Doi                      = {10.1080/00396265.2016.1244143},
+  Publisher                = {Taylor \& Francis}
+}
+
+@Article{Savric2018,
+  Title                    = {The {Equal Earth} map projection},
+  Author                   = {B. Šavrič and T. Patterson and B. Jenny},
+  Journal                  = {International Journal of Geographical Information Science},
+  Year                     = {2018},
+  Number                   = {3},
+  Volume                   = {33},
+
+  Doi                      = {10.1080/13658816.2018.1504949},
+  Url                      = {https://www.researchgate.net/publication/326879978_The_Equal_Earth_map_projection}
+}
+
+@Article{Savric2015,
+  Title                    = {The {Natural Earth II} world map projection},
+  Author                   = {B. Šavrič and T. Patterson and B. Jenny},
+  Journal                  = {International Journal of Geographical Information Science},
+  Year                     = {2015},
+  Number                   = {2},
+  Pages                    = {123--133},
+  Volume                   = {1},
+
+  Doi                      = {10.1080/23729333.2015.1093312},
+  Url                      = {https://www.researchgate.net/publication/290447301_The_Natural_Earth_II_world_map_projection}
 }
 
 @Book{Snyder1993,
@@ -265,39 +292,18 @@
   Year                     = {1993}
 }
 
-@Article{Savric2016,
-  Title                    = {The Natural Earth II world map projection},
-  Author                   = {Bojan Šavrič, Tom Patterson, Bernhard Jenny},
-  Journal                  = {International Journal of Geographical Information Science},
-  Year                     = {2016},
-
-  Doi                      = {10.1080/23729333.2015.1093312},
-  Url                      = {http://berniejenny.info/pdf/2016_Savric_etal_NaturalEarthII.pdf}
-}
-
-@Article{Savric2018,
-  Author                   = {B. Šavrič and T. Patterson and B. Jenny},
-  Title                    = {The Equal Earth map projection},
-  Journal                  = {International Journal of Geographical Information Science},
-  Year                     = {2018},
-  Publisher                = {Taylor & Francis},
-  Doi                      = {10.1080/13658816.2018.1504949},
-  Url                      = {https://www.researchgate.net/profile/Bojan_Savric2/publication/326879978_The_Equal_Earth_map_projection/links/5b69d0ae299bf14c6d951b77/The-Equal-Earth-map-projection.pdf}
-}
-
 @Article{Snyder1988,
-  Author                   = {J. P. Snyder },
   Title                    = {New Equal-Area Map Projections For Noncircular Regions},
+  Author                   = {J. P. Snyder},
   Journal                  = {The American Cartographer},
-  Volume                   = {15},
-  Number                   = {4},
-  Pages                    = {341-356},
   Year                     = {1988},
-  Publisher                = {Taylor and Francis},
+  Number                   = {4},
+  Pages                    = {341--356},
+  Volume                   = {15},
 
-  Doi                      = {10.1559/152304088783886784}
+  Doi                      = {10.1559/152304088783886784},
+  Publisher                = {Taylor and Francis}
 }
-
 
 @TechReport{Snyder1987,
   Title                    = {Map Projections --- {A} Working Manual},
@@ -319,15 +325,16 @@
 }
 
 @Article{Tobler2017,
+  Title                    = {A new companion for {Mercator}},
   Author                   = {W. Tobler},
-  Title                    = {A new companion for Mercator},
   Journal                  = {Cartography and Geographic Information Science},
-  Volume                   = {45},
-  Number                   = {3},
-  Pages                    = {284-285},
-  Publisher                = {Taylor & Francis},
   Year                     = {2017},
+  Number                   = {3},
+  Pages                    = {284--285},
+  Volume                   = {45},
+
   Doi                      = {10.1080/15230406.2017.1308837},
+  Publisher                = {Taylor \& Francis}
 }
 
 @Article{Verey2017,
@@ -375,5 +382,13 @@
   Volume                   = {27},
 
   Doi                      = {10.2307/1219899}
+}
+
+@Manual{EPSGGuidanceNumber7Part2,
+  Title                    = {Geomatics Guidance Note 7, part 2 - Coordinate Conversions \& Transformations including Formulas},
+  Year                     = {2018},
+
+  Institution              = {International Association For Oil And Gas Producers},
+  Url                      = {https://www.iogp.org/bookstore/product/coordinate-conversions-and-transformation-including-formulas/}
 }
 
