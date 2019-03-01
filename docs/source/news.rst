@@ -5,7 +5,7 @@ News
 
 6.0.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
-*Marhc 1st 2019*
+*March 1st 2019*
 
 
 PROJ 6 has undergone extensive changes to increase its functional scope from a
@@ -51,12 +51,12 @@ CRSs.
  UPDATES
  -------
 
- o Removed projects.h as a public interface (`#835 <<https://github.com/OSGeo/proj.4/issues/835>`_)
+ o Removed projects.h as a public interface (`#835 <https://github.com/OSGeo/proj.4/issues/835>`_)
 
  o Deprecated the proj_api.h interface. The header file is still available
    but will be removed with the next major version release of PROJ. It is
    now required to define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H before the
-   interface can be used (`#836 <<https://github.com/OSGeo/proj.4/issues/836>`_)
+   interface can be used (`#836 <https://github.com/OSGeo/proj.4/issues/836>`_)
 
  o Removed support for the nmake build system (`#838 <https://github.com/OSGeo/proj.4/issues/838>`_)
 
