@@ -54,9 +54,9 @@ To install PROJ do the following:
 3. Select "Advanced Install" and press Next.
 4. Select "Install from Internet" and press Next.
 5. Select a installation directory. The default suggestion is fine in most cases. Press Next.
-6. Select "Local packacke directory". The suggestions is fine in most cases. Press Next.
+6. Select "Local package directory". The default suggestion is fine in most cases. Press Next.
 7. Select "Direct connection" and press Next.
-8. Choose the download.osgeo.org and press Next.
+8. Choose the download.osgeo.org server and press Next.
 9. Find "proj" under "Commandline_Utilities" and click the package in the "New" column until the version you want to install appears.
 10. Press next to install PROJ.
 
