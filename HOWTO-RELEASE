@@ -94,7 +94,7 @@ slightly since not all authors has properly configured their names in git.
 1.4 Update `CITATION`
 -------------------------------------------------------------------------------
 
-If needed, update the year in `CITATION` and `docs/source/about.rst`.
+If needed, update the year in `CITATION`.
 
 *Commit the changes to master.*
 

@@ -30,9 +30,9 @@ Natural Earth II
 
 The Natural Earth II projection is intended for making world maps. At high
 latitudes, meridians bend steeply toward short pole lines resulting in a map
-with highly rounded corners that resembles an elongated globe
+with highly rounded corners that resembles an elongated globe.
 
-See :cite:`Savric2016`
+See :cite:`Savric2015`
 
 
 Parameters

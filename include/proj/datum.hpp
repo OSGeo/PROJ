@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -59,7 +59,7 @@ namespace datum {
  * subtype can be associated with only specific types of coordinate reference
  * systems.
  *
- * \remark Implements Datum from \ref ISO_19111_2018
+ * \remark Implements Datum from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL Datum : public common::ObjectUsage {
   public:
@@ -115,7 +115,7 @@ using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
  * Every frame within the datum ensemble must be a realizations of the same
  * Terrestrial Reference System or Vertical Reference System.
  *
- * \remark Implements DatumEnsemble from \ref ISO_19111_2018
+ * \remark Implements DatumEnsemble from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject {
   public:
@@ -168,7 +168,7 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
  * \note The default value for prime meridian name is "Greenwich". When the
  * default applies, the value for the longitude shall be 0 (degrees).
  *
- * \remark Implements PrimeMeridian from \ref ISO_19111_2018
+ * \remark Implements PrimeMeridian from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
                                          public io::IPROJStringExportable {
@@ -240,7 +240,7 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
  * For the Earth an oblate biaxial ellipsoid is used: in mathematical terms,
  * it is a surface formed by the rotation of an ellipse about its minor axis.
  *
- * \remark Implements Ellipsoid from \ref ISO_19111_2018
+ * \remark Implements Ellipsoid from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
                                      public io::IPROJStringExportable {
@@ -369,7 +369,7 @@ using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
  *
  * \note In \ref ISO_19111_2007, this class was called GeodeticDatum.
  *
- * \remark Implements GeodeticReferenceFrame from \ref ISO_19111_2018
+ * \remark Implements GeodeticReferenceFrame from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
   public:
@@ -443,7 +443,7 @@ using DynamicGeodeticReferenceFrameNNPtr =
  * For example defining station coordinates having linear velocities to account
  * for crustal motion.
  *
- * \remark Implements DynamicGeodeticReferenceFrame from \ref ISO_19111_2018
+ * \remark Implements DynamicGeodeticReferenceFrame from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DynamicGeodeticReferenceFrame final
     : public GeodeticReferenceFrame {
@@ -498,7 +498,7 @@ class PROJ_GCC_DLL DynamicGeodeticReferenceFrame final
 /** \brief The specification of the method by which the vertical reference frame
  * is realized.
  *
- * \remark Implements RealizationMethod from \ref ISO_19111_2018
+ * \remark Implements RealizationMethod from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL RealizationMethod : public util::CodeList {
   public:
@@ -528,7 +528,7 @@ using VerticalReferenceFrameNNPtr = util::nn<VerticalReferenceFramePtr>;
  *
  * \note In \ref ISO_19111_2007, this class was called VerticalDatum.
 
- * \remark Implements VerticalReferenceFrame from \ref ISO_19111_2018
+ * \remark Implements VerticalReferenceFrame from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
   public:
@@ -585,7 +585,7 @@ using DynamicVerticalReferenceFrameNNPtr =
  * For example defining station heights have velocity to account for
  * post-glacial isostatic rebound motion.
  *
- * \remark Implements DynamicVerticalReferenceFrame from \ref ISO_19111_2018
+ * \remark Implements DynamicVerticalReferenceFrame from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL DynamicVerticalReferenceFrame final
     : public VerticalReferenceFrame {
@@ -645,7 +645,7 @@ using TemporalDatumNNPtr = util::nn<TemporalDatumPtr>;
 /** \brief The definition of the relationship of a temporal coordinate system
  * to an object. The object is normally time on the Earth.
  *
- * \remark Implements TemporalDatum from \ref ISO_19111_2018
+ * \remark Implements TemporalDatum from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL TemporalDatum final : public Datum {
   public:
@@ -698,7 +698,7 @@ using EngineeringDatumNNPtr = util::nn<EngineeringDatumPtr>;
  * point at a construction site), or be a defined point on a moving vehicle
  * (such as on a ship or satellite), or a defined point of an image.
  *
- * \remark Implements EngineeringDatum from \ref ISO_19111_2018
+ * \remark Implements EngineeringDatum from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL EngineeringDatum final : public Datum {
   public:
@@ -742,7 +742,7 @@ using ParametricDatumNNPtr = util::nn<ParametricDatumPtr>;
  * particular reference surface used as the origin of a parametric coordinate
  * system, including its position with respect to the Earth.
  *
- * \remark Implements ParametricDatum from \ref ISO_19111_2018
+ * \remark Implements ParametricDatum from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ParametricDatum final : public Datum {
   public:

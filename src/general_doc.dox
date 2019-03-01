@@ -4,7 +4,7 @@
 
 \section general_api_design General API design
 
-The design of the class hierarchy is strongly derived from \ref ISO_19111_2018.
+The design of the class hierarchy is strongly derived from \ref ISO_19111_2019.
 
 Classes for which the constructors are not directly accessible have their
 instances constructed with create() methods. The returned object is a non-null
@@ -78,13 +78,12 @@ Coordinate Reference Systems (CRS), coordinate systems (CS) and coordinate
 transformation or coordinate conversion between two different coordinate
 reference systems.
 
-\subsubsection ISO_19111_2018 ISO 19111:2018
+\subsubsection ISO_19111_2019 ISO 19111:2019
 
 This is the revision mostly used for PROJ C++ modelling.
 
-[OGC 18-005r1, 2018-04-04, ISO 19111:2018]
-(https://portal.opengeospatial.org/files/?artifact_id=78556)
-(not yet adopted, at time of writing)
+[OGC 18-005r4, 2019-02-08, ISO 19111:2019]
+(http://docs.opengeospatial.org/as/18-005r4/18-005r4.html)
 
 \subsubsection ISO_19111_2007 ISO 19111:2007
 
@@ -111,7 +110,7 @@ PROJ implements the two following revisions of the standard:
 
 \subsubsection WKT2_2015 WKT2:2015
 
-[OGC 12-063r5, 2015-05-01, WKT2-2015]
+[OGC 12-063r5, 2015-05-01, ISO 19162:2015(E), WKT2-2015]
 (http://docs.opengeospatial.org/is/12-063r5/12-063r5.html)
 
 \subsection WKT1 WKT1 specification

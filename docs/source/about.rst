@@ -23,22 +23,9 @@ datums using all but the most obscure geodetic techniques.
 Citation
 -------------------------------------------------------------------------------
 
-To cite PROJ in publications use:
 
-  PROJ contributors (2018). PROJ coordinate transformation software
-  library. Open Source Geospatial Foundation. URL https://proj4.org/.
+.. include:: ../../CITATION
 
-A BibTeX entry for LaTeX users is
-
-.. code-block:: latex
-
-  @Manual{,
-    title = {{PROJ} coordinate transformation software library},
-    author = {{PROJ contributors}},
-    organization = {Open Source Geospatial Foundation},
-    year = {2018},
-    url = {https://proj4.org/},
-  }
 
 License
 -------------------------------------------------------------------------------

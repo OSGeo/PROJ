@@ -72,7 +72,7 @@ proj.db: $(DATAPATH)/sql/*.sql
 	fi; \
 	echo "" | head -c1; \
         if [ $$? -eq 0 ] ; then \
-         echo "Running foreign_key_check"; \ 
+         echo "Running foreign_key_check"; \
 	 if [[ $$(echo "pragma foreign_key_check;" | sqlite3 proj.db | head -c1 | wc -c) -ne 0 ]]; then \
 		echo "Foreign key check failed"; \
 		$(RM) proj.db; \
