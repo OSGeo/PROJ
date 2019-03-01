@@ -48,8 +48,8 @@ a geodetic object of the database, import and export geodetic objects from/into
 WKT and PROJ strings, and display coordinate operations available between two
 CRSs.
 
- UPDATES
- -------
+UPDATES
+-------
 
  o Removed projects.h as a public interface (`#835 <https://github.com/OSGeo/proj.4/issues/835>`_)
 
@@ -107,8 +107,8 @@ CRSs.
  o Added +dt parameter to deformation as replacement for
    removed +t_obs (`#1264 <https://github.com/OSGeo/proj.4/issues/1264>`_)
 
- BUG FIXES
- ---------
+BUG FIXES
+---------
 
  o Read +towgs84 values correctly on locales not using dot as comma separator (`#1136 <https://github.com/OSGeo/proj.4/issues/1136>`_)
 
