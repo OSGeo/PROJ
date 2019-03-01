@@ -69,8 +69,8 @@ struct GridDescription {
     std::string url{}; /**< Grid URL (if packageName is empty), or package
                             URL (or empty) */
     bool directDownload = false; /**< Whether url can be fetched directly. */
-    bool openLicense =
-        false; /**< Whether the grid is released with an open license. */
+    /** Whether the grid is released with an open license. */
+    bool openLicense = false;
     bool available = false; /**< Whether GRID is available. */
 
     //! @cond Doxygen_Suppress
