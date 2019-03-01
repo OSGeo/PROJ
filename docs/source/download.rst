@@ -13,7 +13,7 @@ distribution of the source code and various resource file archives. See
 Current Release
 --------------------------------------------------------------------------------
 
-* **2019-03-01** `proj-6.6.0.tar.gz`_ (`md5`_)
+* **2019-03-01** `proj-6.0.0.tar.gz`_ (`md5`_)
 * **2018-09-15** `proj-datumgrid-1.8.zip`_
 * **2019-03-01** `proj-datumgrid-europe-1.2.zip`_
 * **2019-03-01** `proj-datumgrid-north-america-1.2.zip`_
