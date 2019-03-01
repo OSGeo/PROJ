@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -113,7 +113,7 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  * (some) entirely different parameter values are needed, a different coordinate
  * operation shall be defined.
  *
- * \remark Implements CoordinateOperation from \ref ISO_19111_2018
+ * \remark Implements CoordinateOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
                                          public io::IPROJStringExportable {
@@ -181,7 +181,7 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
 /** \brief Abstract class modelling a parameter value (OperationParameter)
  * or group of parameters.
  *
- * \remark Implements GeneralOperationParameter from \ref ISO_19111_2018
+ * \remark Implements GeneralOperationParameter from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL GeneralOperationParameter : public common::IdentifiedObject {
   public:
@@ -225,7 +225,7 @@ using OperationParameterNNPtr = util::nn<OperationParameterPtr>;
  * Most parameter values are numeric, but other types of parameter values are
  * possible.
  *
- * \remark Implements OperationParameter from \ref ISO_19111_2018
+ * \remark Implements OperationParameter from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL OperationParameter final : public GeneralOperationParameter {
   public:
@@ -271,7 +271,7 @@ struct MethodMapping;
 /** \brief Abstract class modelling a parameter value (OperationParameterValue)
  * or group of parameter values.
  *
- * \remark Implements GeneralParameterValue from \ref ISO_19111_2018
+ * \remark Implements GeneralParameterValue from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
                                            public io::IWKTExportable,
@@ -325,7 +325,7 @@ using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
  * Most parameter values are numeric, but other types of parameter values are
  * possible.
  *
- * \remark Implements ParameterValue from \ref ISO_19111_2018
+ * \remark Implements ParameterValue from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ParameterValue final : public util::BaseObject,
                                           public io::IWKTExportable,
@@ -400,7 +400,7 @@ using OperationParameterValueNNPtr = util::nn<OperationParameterValuePtr>;
  *
  * This combines a OperationParameter with the corresponding ParameterValue.
  *
- * \remark Implements OperationParameterValue from \ref ISO_19111_2018
+ * \remark Implements OperationParameterValue from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL OperationParameterValue final
     : public GeneralParameterValue {
@@ -463,7 +463,7 @@ using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
  * For a projection method, this contains the name of the projection method
  * and the name of the projection parameters.
  *
- * \remark Implements OperationMethod from \ref ISO_19111_2018
+ * \remark Implements OperationMethod from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
   public:
@@ -534,7 +534,7 @@ using SingleOperationNNPtr = util::nn<SingleOperationPtr>;
 /** \brief A single (not concatenated) coordinate operation
  * (CoordinateOperation)
  *
- * \remark Implements SingleOperation from \ref ISO_19111_2018
+ * \remark Implements SingleOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
   public:
@@ -633,7 +633,7 @@ using ConversionNNPtr = util::nn<ConversionPtr>;
  * associations, but through associations from crs::DerivedCRS to
  * crs::SingleCRS.
  *
- * \remark Implements Conversion from \ref ISO_19111_2018
+ * \remark Implements Conversion from \ref ISO_19111_2019
  */
 
 /*!
@@ -1353,7 +1353,7 @@ using TransformationNNPtr = util::nn<TransformationPtr>;
  * coordinates are referenced to different datums (reference frames) will be a
  * coordinate transformation.
  *
- * \remark Implements Transformation from \ref ISO_19111_2018
+ * \remark Implements Transformation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL Transformation : public SingleOperation {
   public:
@@ -1553,7 +1553,7 @@ using PointMotionOperationNNPtr = util::nn<PointMotionOperationPtr>;
  *
  * The motion is due to tectonic plate movement or deformation.
  *
- * \remark Implements PointMotionOperation from \ref ISO_19111_2018
+ * \remark Implements PointMotionOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL PointMotionOperation : public SingleOperation {
   public:
@@ -1582,7 +1582,7 @@ using ConcatenatedOperationNNPtr = util::nn<ConcatenatedOperationPtr>;
  * the source coordinate reference system of step n+1 shall be the same as
  * the target coordinate reference system of step n.
  *
- * \remark Implements ConcatenatedOperation from \ref ISO_19111_2018
+ * \remark Implements ConcatenatedOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
   public:
