@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -641,7 +641,7 @@ const std::string &IdentifiedObject::remarks() PROJ_PURE_DEFN {
 
 /** \brief Return whether the object is deprecated.
  *
- * \remark Extension of \ref ISO_19111_2018
+ * \remark Extension of \ref ISO_19111_2019
  */
 bool IdentifiedObject::isDeprecated() PROJ_PURE_DEFN { return d->isDeprecated; }
 
