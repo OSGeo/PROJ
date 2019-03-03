@@ -36,6 +36,8 @@ the place to go. Please *do not* use the GitHub issue tracker as a
 support forum. Your question is much more likely to be answered on the
 mailing list, as many more people follow that than the issue tracker.
 
+.. _add_bug_report:
+
 Adding bug reports
 ------------------
 
