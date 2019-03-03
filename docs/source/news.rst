@@ -51,83 +51,87 @@ CRSs.
 UPDATES
 -------
 
- o Removed projects.h as a public interface (`#835 <https://github.com/OSGeo/proj.4/issues/835>`_)
+* Removed projects.h as a public interface (`#835 <https://github.com/OSGeo/proj.4/issues/835>`_)
 
- o Deprecated the proj_api.h interface. The header file is still available
-   but will be removed with the next major version release of PROJ. It is
-   now required to define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H before the
-   interface can be used (`#836 <https://github.com/OSGeo/proj.4/issues/836>`_)
+* Deprecated the proj_api.h interface. The header file is still available
+  but will be removed with the next major version release of PROJ. It is
+  now required to define :c:macro:`ACCEPT_USE_OF_DEPRECATED_PROJ_API_H`
+  before the interface can be used (`#836 <https://github.com/OSGeo/proj.4/issues/836>`_)
 
- o Removed support for the nmake build system (`#838 <https://github.com/OSGeo/proj.4/issues/838>`_)
+* Removed support for the nmake build system (`#838 <https://github.com/OSGeo/proj.4/issues/838>`_)
 
- o Removed support for the proj_def.dat defaults file (`#201 <https://github.com/OSGeo/proj.4/issues/201>`_)
+* Removed support for the ``proj_def.dat`` defaults file (`#201 <https://github.com/OSGeo/proj.4/issues/201>`_)
 
- o C++11 required for building PROJ (`#1203 <https://github.com/OSGeo/proj.4/issues/1203>`_)
+* C++11 required for building PROJ (`#1203 <https://github.com/OSGeo/proj.4/issues/1203>`_)
 
- o Added build dependency on SQLite 3.7 (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
+* Added build dependency on SQLite 3.7 (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
 
- o Added projinfo command line application (`#1189 <https://github.com/OSGeo/proj.4/issues/1189>`_)
+* Added :program:`projinfo` command line application (`#1189 <https://github.com/OSGeo/proj.4/issues/1189>`_)
 
- o Added many functions to proj.h for handling ISO19111 functionality (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
+* Added many functions to ``proj.h`` for handling ISO19111 functionality (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
 
- o Added C++ API exposing ISO19111 functionality (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
+* Added C++ API exposing ISO19111 functionality (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
 
- o Updated cs2cs to use late-binding features (`#1182 <https://github.com/OSGeo/proj.4/issues/1182>`_)
+* Updated :program:`cs2cs` to use late-binding features (`#1182 <https://github.com/OSGeo/proj.4/issues/1182>`_)
 
- o Removed the nad2bin application. Now available in the proj-datumgrid
-   git repository (`#1236 <https://github.com/OSGeo/proj.4/issues/1236>`_)
+* Removed the ``nad2bin`` application. Now available in the
+  `proj-datumgrid <https://github.com/OSGeo/proj-datumgrid>`_
+  git repository (`#1236 <https://github.com/OSGeo/proj.4/issues/1236>`_)
 
- o Removed support for Chebyshev polynomials in proj (`#1226 <https://github.com/OSGeo/proj.4/issues/1226>`_)
+* Removed support for Chebyshev polynomials in :program:`proj`
+  (`#1226 <https://github.com/OSGeo/proj.4/issues/1226>`_)
 
- o Removed proj_geocentric_latitude from proj.h API (`#1170 <https://github.com/OSGeo/proj.4/issues/1170>`_)
+* Removed :c:func:`proj_geocentric_latitude` from `proj.h` API
+  (`#1170 <https://github.com/OSGeo/proj.4/issues/1170>`_)
 
- o Changed behaviour of proj: Now only allow initialization of
-   projections (`#1162 <https://github.com/OSGeo/proj.4/issues/1162>`_)
+* Changed behaviour of :program:`proj`: Now only allow initialization of
+  projections (`#1162 <https://github.com/OSGeo/proj.4/issues/1162>`_)
 
- o Changed behaviour of tmerc: Now default to the Extended Transverse
-   Mercator algorithm (etmerc). Old implementation available by adding
-   +approx (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
+* Changed behaviour of :ref:`tmerc <tmerc>`: Now defaults to the Extended
+  Transverse Mercator algorithm (``etmerc``). Old implementation available
+  by adding ``+approx``
+  (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
 
- o Chaged behaviour: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
+* Chaged behaviour: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
 
- o Allow multiple directories in PROJ_LIB environment variable (`#1281 <https://github.com/OSGeo/proj.4/issues/1281>`_)
+* Allow multiple directories in :envvar:`PROJ_LIB` environment variable (`#1281 <https://github.com/OSGeo/proj.4/issues/1281>`_)
 
- o Added Lambert Conic Conformal (2SP Michigan) projection (`#1142 <https://github.com/OSGeo/proj.4/issues/1142>`_)
+* Added :ref:`Lambert Conic Conformal (2SP Michigan) <lcc>` projection (`#1142 <https://github.com/OSGeo/proj.4/issues/1142>`_)
 
- o Added Bertin1953 projection (`#1133 <https://github.com/OSGeo/proj.4/issues/1133>`_)
+* Added :ref:`Bertin1953 <bertin1953>` projection (`#1133 <https://github.com/OSGeo/proj.4/issues/1133>`_)
 
- o Added Tobler-Mercator projection (`#1153 <https://github.com/OSGeo/proj.4/issues/1153>`_)
+* Added :ref:`Tobler-Mercator <tobmerc>` projection (`#1153 <https://github.com/OSGeo/proj.4/issues/1153>`_)
 
- o Added Molodensky-Badekas transform (`#1160 <https://github.com/OSGeo/proj.4/issues/1160>`_)
+* Added :ref:`Molodensky-Badekas <molobadekas>` transform (`#1160 <https://github.com/OSGeo/proj.4/issues/1160>`_)
 
- o Added push and pop coordinate operations (`#1250 <https://github.com/OSGeo/proj.4/issues/1250>`_)
+* Added :ref:`push <push>` and :ref:`pop <pop>` coordinate operations (`#1250 <https://github.com/OSGeo/proj.4/issues/1250>`_)
 
- o Removed +t_obs parameter from helmert and deformation (`#1264 <https://github.com/OSGeo/proj.4/issues/1264>`_)
+* Removed ``+t_obs`` parameter from helmert and deformation (`#1264 <https://github.com/OSGeo/proj.4/issues/1264>`_)
 
- o Added +dt parameter to deformation as replacement for
-   removed +t_obs (`#1264 <https://github.com/OSGeo/proj.4/issues/1264>`_)
+* Added :option:`+dt` parameter to deformation as replacement for
+  removed ``+t_obs`` (`#1264 <https://github.com/OSGeo/proj.4/issues/1264>`_)
 
 BUG FIXES
 ---------
 
- o Read +towgs84 values correctly on locales not using dot as comma separator (`#1136 <https://github.com/OSGeo/proj.4/issues/1136>`_)
+* Read :option:`+towgs84` values correctly on locales not using dot as comma separator (`#1136 <https://github.com/OSGeo/proj.4/issues/1136>`_)
 
- o Fixed file offset for reading of shift values in NTv1 files (`#1144 <https://github.com/OSGeo/proj.4/issues/1144>`_)
+* Fixed file offset for reading of shift values in NTv1 files (`#1144 <https://github.com/OSGeo/proj.4/issues/1144>`_)
 
- o Avoid problems with PTHREAD_MUTEX_RECURSIVE when using CMake (`#1158 <https://github.com/OSGeo/proj.4/issues/1158>`_)
+* Avoid problems with :c:macro:`PTHREAD_MUTEX_RECURSIVE` when using CMake (`#1158 <https://github.com/OSGeo/proj.4/issues/1158>`_)
 
- o Avoid raising errors when setting ellipsoid flattening to zero (`#1191 <https://github.com/OSGeo/proj.4/issues/1191>`_)
+* Avoid raising errors when setting ellipsoid flattening to zero (`#1191 <https://github.com/OSGeo/proj.4/issues/1191>`_)
 
- o Fixed lower square calculations in rHealpix projection (`#1206 <https://github.com/OSGeo/proj.4/issues/1206>`_)
+* Fixed lower square calculations in :ref:`rHealpix <rhealpix>` projection (`#1206 <https://github.com/OSGeo/proj.4/issues/1206>`_)
 
- o Allow Molodensky transform parameters to be zero (`#1194 <https://github.com/OSGeo/proj.4/issues/1194>`_)
+* Allow :ref:`Molodensky <molodensky>` transform parameters to be zero (`#1194 <https://github.com/OSGeo/proj.4/issues/1194>`_)
 
- o Fixed wrong parameter in ITRF2000 init file (`#1240 <https://github.com/OSGeo/proj.4/issues/1240>`_)
+* Fixed wrong parameter in ``ITRF2000`` init file (`#1240 <https://github.com/OSGeo/proj.4/issues/1240>`_)
 
- o Fixed use of grid paths including spaces (`#1152 <https://github.com/OSGeo/proj.4/issues/1152>`_)
+* Fixed use of grid paths including spaces (`#1152 <https://github.com/OSGeo/proj.4/issues/1152>`_)
 
- o Robinson: fix wrong values for forward path for latitudes >= 87.5,
-   and fix inaccurate inverse method (`#1172 <https://github.com/OSGeo/proj.4/issues/1172>`_)
+* :ref:`Robinson <robin>`: fix wrong values for forward path for latitudes >= 87.5,
+  and fix inaccurate inverse method (`#1172 <https://github.com/OSGeo/proj.4/issues/1172>`_)
 
 
 PROJ 5.2.0
