@@ -21,11 +21,11 @@ latitude coordinates, and an offset to the ellipsoidal height.
 
 This method is normally only used when low accuracy is tolerated. It is documented
 as coordinate operation method code 9619 (for geographic 2D) and 9660 (for
-geographic 3D) in the EPSG dataset (:cite:`EPSGGuidanceNumber7Part2`)
+geographic 3D) in the EPSG dataset (:cite:`IOGP2018`)
 
 It can also be used to implement the method Geographic2D with Height Offsets
 (code 9618) by noting that the input vertical component is a gravity-related
-height and the output vertical component is the ellispoid height (dh being
+height and the output vertical component is the ellipsoid height (dh being
 the geoid undulation).
 
 It can also be used to implement the method Vertical offset (code 9616)

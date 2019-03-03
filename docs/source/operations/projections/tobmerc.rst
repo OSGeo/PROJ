@@ -66,7 +66,7 @@ Mathematical definition
 #######################
 
 The formulas describing the Tobler-Mercator are taken from Waldo Tobler's
-article :cite:`Tobler2017`
+article :cite:`Tobler2018`
 
 Spherical form
 **************
