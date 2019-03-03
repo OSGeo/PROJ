@@ -28,7 +28,7 @@ space used.
 
 PROJ implements two versions of the Horner evaluation scheme: Real and complex
 polynomial evaluation. Below both are briefly described. For more details consult
-:cite:`Ruffhead2016` and :cite:`EPSGGuidanceNumber7Part2`.
+:cite:`Ruffhead2016` and :cite:`IOGP2018`.
 
 The polynomial evaluation in real number space is defined by the following equations:
 
