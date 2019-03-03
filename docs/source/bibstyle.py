@@ -1,5 +1,6 @@
 ###############################################################################
 #
+#  Project:  PROJ
 #  Purpose: Configure custom bibliography style for sphinxcontrib-bibtex
 #  Author:  Mike Toews <mwtoews at gmail.com>
 #
@@ -53,11 +54,15 @@ class LinkLabelStyle(LabelStyle):
 
 class CustomStyle(UnsrtStyle):
     """Citation style in the References section"""
+    # TODO: Make more Harvard-like, i.e. year after name(s)
 
     default_label_style = 'linklabel'
     default_name_style = 'lastfirst'
     default_sorting_style = 'author_year_title'
-    # TODO: Make more Harvard-like, i.e. year after name(s)
+
+    def __init__(self, **kwargs):
+        kwargs['abbreviate_names'] = True
+        UnsrtStyle.__init__(self, **kwargs)
 
 
 register_plugin('pybtex.style.labels', 'linklabel', LinkLabelStyle)
