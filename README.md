@@ -27,7 +27,7 @@ The following command line utilities are included in the PROJ package:
 - geod, for geodesic (great circle) computations.
 - cct, for generic Coordinate Conversions and Transformations.
 - gie, the Geospatial Integrity Investigation Environment.
-
+- projinfo, for geodetic object and coordinate operation queries
 
 ## Installation
 ### Build dependencies
