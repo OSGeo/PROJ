@@ -300,6 +300,20 @@ int main (int argc, char **argv) {
         return 1;
     }
 
+    for (i = 0; i < o->fargc; i++ ) {
+        FILE* f = fopen (o->fargv[i], "rt");
+        if (f == nullptr) {
+            fprintf (
+                T.fout,
+                "%sCannot open specified input file '%s' - bye!\n",
+                delim,
+                o->fargv[i]
+            );
+            return 1;
+        }
+        fclose(f);
+    }
+
     for (i = 0;  i < o->fargc;  i++)
         process_file (o->fargv[i]);
 
@@ -370,8 +384,6 @@ static int another_failing_roundtrip (void) {
 }
 
 static int process_file (const char *fname) {
-    FILE *f;
-
     F->lineno = F->next_lineno = F->level = 0;
     T.op_ok = T.total_ok = 0;
     T.op_ko = T.total_ko = 0;
@@ -383,15 +395,8 @@ static int process_file (const char *fname) {
         return 0;
     }
 
-    f = fopen (fname, "rt");
-    if (nullptr==f) {
-        if (T.verbosity > 0) {
-            fprintf (T.fout, "%sCannot open spec'd input file '%s' - bye!\n", delim, fname);
-            return 2;
-        }
-        errmsg (2, "Cannot open spec'd input file '%s' - bye!\n", fname);
-    }
-    F->f = f;
+    /* We have already tested in main that the file exists */
+    F->f = fopen (fname, "rt");
 
     if (T.verbosity > 0)
         fprintf (T.fout, "%sReading file '%s'\n", delim, fname);
@@ -405,7 +410,7 @@ static int process_file (const char *fname) {
         }
     }
 
-    fclose (f);
+    fclose (F->f);
     F->lineno = F->next_lineno = 0;
 
     T.grand_ok   += T.total_ok;
