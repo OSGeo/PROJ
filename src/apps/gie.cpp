@@ -148,7 +148,7 @@ static ffio *ffio_destroy (ffio *G);
 static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
 
 static const char *gie_tags[] = {
-    "<gie>", "operation", "use_proj4_init_rules",
+    "<gie>", "operation", "crs_src", "crs_dst", "use_proj4_init_rules",
     "accept", "expect", "roundtrip", "banner", "verbose",
     "direction", "tolerance", "ignore", "require_grid", "echo", "skip", "</gie>"
 };
@@ -175,6 +175,8 @@ static const char *err_const_from_errno (int err);
 
 typedef struct {
     char operation[MAX_OPERATION+1];
+    char crs_dst[MAX_OPERATION+1];
+    char crs_src[MAX_OPERATION+1];
     PJ *P;
     PJ_COORD a, b, c, e;
     PJ_DIRECTION dir;
@@ -607,6 +609,65 @@ either a conversion or a transformation)
     return 0;
 }
 
+static int crs_to_crs_operation() {
+    T.op_id++;
+    T.operation_lineno = F->lineno;
+
+    if (T.verbosity > 1) {
+        char buffer[80];
+        finish_previous_operation (F->args);
+        snprintf(buffer, 80, "%-38.38s -> %-38.38s", T.crs_src, T.crs_dst);
+        banner (buffer);
+    }
+
+    T.op_ok = 0;
+    T.op_ko = 0;
+    T.op_skip = 0;
+    T.skip_test = 0;
+
+    direction ("forward");
+    tolerance ("0.5 mm");
+    ignore ("pjd_err_dont_skip");
+
+    proj_errno_reset (T.P);
+
+    if (T.P)
+        proj_destroy (T.P);
+    proj_errno_reset (nullptr);
+    proj_context_use_proj4_init_rules(nullptr, T.use_proj4_init_rules);
+
+
+    T.P = proj_create_crs_to_crs(nullptr, T.crs_src, T.crs_dst, nullptr);
+
+    strcpy(T.crs_src, "");
+    strcpy(T.crs_dst, "");
+    return 0;
+}
+
+static int crs_src(const char *args) {
+    strncpy (&(T.crs_src[0]), F->args, MAX_OPERATION);
+    T.crs_src[MAX_OPERATION] = '\0';
+    (void) args;
+
+    if (strcmp(T.crs_src, "") != 0 && strcmp(T.crs_dst, "") != 0) {
+        crs_to_crs_operation();
+    }
+
+    return 0;
+}
+
+static int crs_dst(const char *args) {
+    strncpy (&(T.crs_dst[0]), F->args, MAX_OPERATION);
+    T.crs_dst[MAX_OPERATION] = '\0';
+    (void) args;
+
+    if (strcmp(T.crs_src, "") != 0 && strcmp(T.crs_dst, "") != 0) {
+        crs_to_crs_operation();
+    }
+
+    return 0;
+}
+
 static PJ_COORD torad_coord (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
     size_t i, n;
     const char *axis = "enut";
@@ -1000,6 +1061,8 @@ static int dispatch (const char *cmnd, const char *args) {
     if (T.skip)
         return SKIP;
     if  (0==strcmp (cmnd, "operation")) return  operation ((char *) args);
+    if  (0==strcmp (cmnd, "crs_src"))   return  crs_src   (args);
+    if  (0==strcmp (cmnd, "crs_dst"))   return  crs_dst   (args);
     if (T.skip_test)
     {
         if  (0==strcmp (cmnd, "expect"))    return  another_skip();
