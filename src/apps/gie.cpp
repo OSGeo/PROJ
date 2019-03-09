@@ -616,7 +616,7 @@ static int crs_to_crs_operation() {
     if (T.verbosity > 1) {
         char buffer[80];
         finish_previous_operation (F->args);
-        snprintf(buffer, 80, "%-38.38s -> %-38.38s", T.crs_src, T.crs_dst);
+        snprintf(buffer, 80, "%-36.36s -> %-36.36s", T.crs_src, T.crs_dst);
         banner (buffer);
     }
 
