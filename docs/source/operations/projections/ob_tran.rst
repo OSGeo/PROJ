@@ -17,7 +17,7 @@ Usage
 All of the projections of spherical library can be used as an
 oblique projection by means of the General Oblique Transformation. The user
 performs the oblique transformation by selecting the oblique projection
-``+proj=obt_ran``, specifying the translation factors, :option:`+o_lat_p`, and
+``+proj=ob_tran``, specifying the translation factors, :option:`+o_lat_p`, and
 :option:`+o_lon_p`, and the projection to be used, :option:`+o_proj`. In the
 example of the Fairgrieve projection the latitude and longitude of the pole of
 the new coordinates, :math:`\alpha` and :math:`\beta` respectively, are to be placed
