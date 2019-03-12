@@ -4,6 +4,12 @@
 # be relocated.)
 file(RELATIVE_PATH PROJECT_ROOT_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKECONFIGDIR} ${CMAKE_INSTALL_PREFIX})
 
+if (CMAKE_CROSSCOMPILING)
+  set (CMAKE_CROSSCOMPILING_STR "ON")
+else ()
+  set (CMAKE_CROSSCOMPILING_STR "OFF")
+endif ()
+
 string(TOLOWER "${PROJECT_NAME}" PROJECT_NAME_LOWER)
 configure_file (project-config.cmake.in project-config.cmake @ONLY)
 configure_file (project-config-version.cmake.in
