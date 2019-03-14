@@ -146,10 +146,20 @@ static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
     dphi  = (-dx*sphi*clam) - (dy*sphi*slam) + (dz*cphi)
             + ((nu * P->es * sphi * cphi * da) / a)
             + (sphi*cphi * ( rho/(1-f) + nu*(1-f))*df);
-    dphi /= (rho + lpz.z);
+    const double dphi_denom = rho + lpz.z;
+    if( dphi_denom == 0.0 ) {
+        lpz.lam = HUGE_VAL;
+        return lpz;
+    }
+    dphi /= dphi_denom;
 
     /* delta lambda */
-    dlam = (-dx*slam + dy*clam) / ((nu+lpz.z)*cphi);
+    const double dlam_denom = (nu+lpz.z)*cphi;
+    if( dlam_denom == 0.0 ) {
+        lpz.lam = HUGE_VAL;
+        return lpz;
+    }
+    dlam = (-dx*slam + dy*clam) / dlam_denom;
 
     /* delta h */
     dh = dx*cphi*clam + dy*cphi*slam + dz*sphi - (a/nu)*da + nu*(1-f)*sphi*sphi*df;
@@ -183,7 +193,12 @@ static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
 
     /* delta lambda */
     dlam = -dx*slam + dy*clam;
-    dlam /= RN(P->a, P->e2s, lpz.phi)*cphi;
+    const double dlam_denom = RN(P->a, P->e2s, lpz.phi)*cphi;
+    if( dlam_denom == 0.0 ) {
+        lpz.lam = HUGE_VAL;
+        return lpz;
+    }
+    dlam /= dlam_denom;
 
     /* delta h */
     dh = dx*cphi*clam + dy*cphi*slam + dz*sphi - da + adffda*sphi*sphi;
@@ -230,6 +245,10 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     } else {
         lpz = calc_standard_params(lpz, P);
     }
+    if( lpz.lam == HUGE_VAL ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return proj_coord_error().xyz;
+    }
 
     /* offset coordinate */
     point.lpz.phi += lpz.phi;
@@ -257,6 +276,11 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
         lpz = calc_abridged_params(point.lpz, P);
     else
         lpz = calc_standard_params(point.lpz, P);
+
+    if( lpz.lam == HUGE_VAL ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return proj_coord_error().lpz;
+    }
 
     /* offset coordinate */
     point.lpz.phi -= lpz.phi;
