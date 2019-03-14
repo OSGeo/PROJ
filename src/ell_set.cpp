@@ -280,8 +280,8 @@ static int ellps_shape (PJ *P) {
         P->es = pj_atof (pj_param_value (par));
         if (HUGE_VAL==P->es)
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (1==P->es)
-            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
+        if (P->es >= 1)
+            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
         break;
 
     /* eccentricity, e */
@@ -291,8 +291,8 @@ static int ellps_shape (PJ *P) {
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
         if (0==P->e)
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (1==P->e)
-             return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
+        if (P->e >= 1)
+             return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
         P->es = P->e * P->e;
         break;
 
@@ -301,8 +301,8 @@ static int ellps_shape (PJ *P) {
         P->b = pj_atof (pj_param_value (par));
         if (HUGE_VAL==P->b)
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->b)
-            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
+        if (P->b <= 0)
+            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
         if (P->b==P->a)
             break;
         P->f = (P->a - P->b) / P->a;
@@ -556,8 +556,8 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
 
     P->one_es = 1. - P->es;
     if (P->one_es == 0.) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_ECCENTRICITY_IS_ONE);
-        return PJD_ERR_ECCENTRICITY_IS_ONE;
+        pj_ctx_set_errno( P->ctx, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
+        return PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER;
     }
 
     P->rone_es = 1./P->one_es;
@@ -710,6 +710,10 @@ bomb:
     /* some remaining checks */
     if (*es < 0.) {
         pj_ctx_set_errno(ctx, PJD_ERR_ES_LESS_THAN_ZERO);
+        return 1;
+    }
+    if (*es >= 1.) {
+        pj_ctx_set_errno(ctx, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
         return 1;
     }
     if (*a <= 0.) {

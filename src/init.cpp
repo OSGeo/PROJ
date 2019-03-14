@@ -680,7 +680,7 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
     PIN->a_orig = PIN->a;
     PIN->es_orig = PIN->es;
     if (pj_calc_ellipsoid_params (PIN, PIN->a, PIN->es))
-        return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
+        return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
 
     /* Now that we have ellipse information check for WGS84 datum */
     if( PIN->datum_type == PJD_3PARAM
