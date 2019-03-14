@@ -134,6 +134,9 @@ expect     failure errno rev_flattening_is_zero
 operation  proj=utm zone=32   ellps=GRS80 es=1
 expect     failure errno eccentricity_is_one
 
+operation  proj=utm zone=32   a=1 es=1.1
+expect     failure errno eccentricity_is_one
+
 operation  proj=utm zone=32   ellps=GRS80 b=0
 expect     failure errno eccentricity_is_one
 
