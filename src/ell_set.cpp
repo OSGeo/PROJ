@@ -399,6 +399,10 @@ static int ellps_spherification (PJ *P) {
         break;
     }
 
+    if (P->a <= 0.) {
+        return proj_errno_set(P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+    }
+
     /* Clean up the ellipsoidal parameters to reflect the sphere */
     P->es = P->e = P->f = 0;
     P->rf = HUGE_VAL;
