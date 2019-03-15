@@ -63,6 +63,11 @@ expect  -0.001790494 0.000895246
 accept  -200 -100
 expect  -0.001790493 -0.000895247
 
+operation +proj=aea +ellps=GRS80 +lat_1=900
+expect  failure errno lat_larger_than_90
+
+operation +proj=aea +ellps=GRS80 +lat_2=900
+expect  failure errno lat_larger_than_90
 
 ===============================================================================
 Azimuthal Equidistant
