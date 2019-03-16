@@ -15,8 +15,6 @@ struct pj_opaque {
     double  rtk;
     double  sinphi;
     double  cosphi;
-    double  singam;
-    double  cosgam;
 };
 } // anonymous namespace
 
@@ -61,15 +59,16 @@ PJ *PROJECTION(ocea) {
 
     Q->rok = 1. / P->k0;
     Q->rtk = P->k0;
+    double lam_p, phi_p;
     /*If the keyword "alpha" is found in the sentence then use 1point+1azimuth*/
     if ( pj_param(P->ctx, P->params, "talpha").i) {
         /*Define Pole of oblique transformation from 1 point & 1 azimuth*/
         alpha   = pj_param(P->ctx, P->params, "ralpha").f;
         lonz = pj_param(P->ctx, P->params, "rlonc").f;
         /*Equation 9-8 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
-        Q->singam = atan(-cos(alpha)/(-sin(phi_0) * sin(alpha))) + lonz;
+        lam_p = atan(-cos(alpha)/(-sin(phi_0) * sin(alpha))) + lonz;
         /*Equation 9-7 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
-        Q->sinphi = asin(cos(phi_0) * sin(alpha));
+        phi_p = asin(cos(phi_0) * sin(alpha));
     /*If the keyword "alpha" is NOT found in the sentence then use 2points*/
     } else {
         /*Define Pole of oblique transformation from 2 points*/
@@ -78,23 +77,21 @@ PJ *PROJECTION(ocea) {
         lam_1 = pj_param(P->ctx, P->params, "rlon_1").f;
         lam_2 = pj_param(P->ctx, P->params, "rlon_2").f;
         /*Equation 9-1 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
-        Q->singam = atan2(cos(phi_1) * sin(phi_2) * cos(lam_1) -
+        lam_p = atan2(cos(phi_1) * sin(phi_2) * cos(lam_1) -
             sin(phi_1) * cos(phi_2) * cos(lam_2),
             sin(phi_1) * cos(phi_2) * sin(lam_2) -
             cos(phi_1) * sin(phi_2) * sin(lam_1) );
 
         /* take care of P->lam0 wrap-around when +lam_1=-90*/
         if (lam_1 == -M_HALFPI)
-            Q->singam = -Q->singam;
+            lam_p = -lam_p;
 
         /*Equation 9-2 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
-        Q->sinphi = atan(-cos(Q->singam - lam_1) / tan(phi_1));
+        phi_p = atan(-cos(lam_p - lam_1) / tan(phi_1));
     }
-    P->lam0 = Q->singam + M_HALFPI;
-    Q->cosphi = cos(Q->sinphi);
-    Q->sinphi = sin(Q->sinphi);
-    Q->cosgam = cos(Q->singam);
-    Q->singam = sin(Q->singam);
+    P->lam0 = lam_p + M_HALFPI;
+    Q->cosphi = cos(phi_p);
+    Q->sinphi = sin(phi_p);
     P->inv = s_inverse;
     P->fwd = s_forward;
     P->es = 0.;
