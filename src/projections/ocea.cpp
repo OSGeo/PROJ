@@ -87,7 +87,16 @@ PJ *PROJECTION(ocea) {
             lam_p = -lam_p;
 
         /*Equation 9-2 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
-        phi_p = atan(-cos(lam_p - lam_1) / tan(phi_1));
+        double cos_lamp_m_minus_lam_1 = cos(lam_p - lam_1);
+        double tan_phi_1 = tan(phi_1);
+        if( tan_phi_1 == 0.0 ) {
+            // Not sure if we want to support this case, but at least this avoids
+            // a division by zero, and gives the same result as the below atan()
+            phi_p = (cos_lamp_m_minus_lam_1 >= 0.0 ) ? -M_HALFPI : M_HALFPI;
+        }
+        else {
+            phi_p = atan(- cos_lamp_m_minus_lam_1 / tan_phi_1);
+        }
     }
     P->lam0 = lam_p + M_HALFPI;
     Q->cosphi = cos(phi_p);
