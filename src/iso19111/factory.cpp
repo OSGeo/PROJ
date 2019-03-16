@@ -1359,6 +1359,25 @@ const DatabaseContextNNPtr &AuthorityFactory::databaseContext() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+AuthorityFactory::CRSInfo::CRSInfo():
+    authName{},
+    code{},
+    name{},
+    type{ObjectType::CRS},
+    deprecated{},
+    bbox_valid{},
+    west_lon_degree{},
+    south_lat_degree{},
+    east_lon_degree{},
+    north_lat_degree{},
+    areaName{},
+    projectionMethodName{}
+{}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns an arbitrary object from a code.
  *
  * The returned object will typically be an instance of Datum,

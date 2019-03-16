@@ -891,31 +891,35 @@ class PROJ_GCC_DLL AuthorityFactory {
     /** CRS information */
     struct CRSInfo {
         /** Authority name */
-        std::string authName{};
+        std::string authName;
         /** Code */
-        std::string code{};
+        std::string code;
         /** Name */
-        std::string name{};
+        std::string name;
         /** Type */
-        ObjectType type{ObjectType::CRS};
+        ObjectType type;
         /** Whether the object is deprecated */
-        bool deprecated{};
+        bool deprecated;
         /** Whereas the west_lon_degree, south_lat_degree, east_lon_degree and
         * north_lat_degree fields are valid. */
-        bool bbox_valid{};
+        bool bbox_valid;
         /** Western-most longitude of the area of use, in degrees. */
-        double west_lon_degree{};
+        double west_lon_degree;
         /** Southern-most latitude of the area of use, in degrees. */
-        double south_lat_degree{};
+        double south_lat_degree;
         /** Eastern-most longitude of the area of use, in degrees. */
-        double east_lon_degree{};
+        double east_lon_degree;
         /** Northern-most latitude of the area of use, in degrees. */
-        double north_lat_degree{};
+        double north_lat_degree;
         /** Name of the area of use. */
-        std::string areaName{};
+        std::string areaName;
         /** Name of the projection method for a projected CRS. Might be empty
          * even for projected CRS in some cases. */
-        std::string projectionMethodName{};
+        std::string projectionMethodName;
+
+        //! @cond Doxygen_Suppress
+        CRSInfo();
+        //! @endcond
     };
 
     PROJ_DLL std::list<CRSInfo> getCRSInfoList() const;
