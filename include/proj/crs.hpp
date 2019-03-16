@@ -1205,23 +1205,23 @@ class PROJ_GCC_DLL DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
     typedef util::nn<std::shared_ptr<CSType>> CSNNPtr;
 
     /** \brief Return the base CRS of a DerivedCRSTemplate.
-    *
-    * @return the base CRS.
-    */
+     *
+     * @return the base CRS.
+     */
     PROJ_DLL const BaseNNPtr baseCRS() const;
 
     /** \brief Instantiate a DerivedCRSTemplate from a base CRS, a deriving
-    * conversion and a cs::CoordinateSystem.
-    *
-    * @param properties See \ref general_properties.
-    * At minimum the name should be defined.
-    * @param baseCRSIn base CRS.
-    * @param derivingConversionIn the deriving conversion from the base CRS to
-    * this
-    * CRS.
-    * @param csIn the coordinate system.
-    * @return new DerivedCRSTemplate.
-    */
+     * conversion and a cs::CoordinateSystem.
+     *
+     * @param properties See \ref general_properties.
+     * At minimum the name should be defined.
+     * @param baseCRSIn base CRS.
+     * @param derivingConversionIn the deriving conversion from the base CRS to
+     * this
+     * CRS.
+     * @param csIn the coordinate system.
+     * @return new DerivedCRSTemplate.
+     */
     PROJ_DLL static NNPtr
     create(const util::PropertyMap &properties, const BaseNNPtr &baseCRSIn,
            const operation::ConversionNNPtr &derivingConversionIn,

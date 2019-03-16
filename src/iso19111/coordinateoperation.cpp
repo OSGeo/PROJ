@@ -552,16 +552,9 @@ struct CoordinateOperation::Private {
 
 // ---------------------------------------------------------------------------
 
-GridDescription::GridDescription():
-    shortName{},
-    fullName{},
-    packageName{},
-    url{},
-    directDownload(false),
-    openLicense(false),
-    available(false)
-{}
-
+GridDescription::GridDescription()
+    : shortName{}, fullName{}, packageName{}, url{}, directDownload(false),
+      openLicense(false), available(false) {}
 
 GridDescription::~GridDescription() = default;
 
@@ -10811,7 +10804,7 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
 
 MyPROJStringExportableHorizVerticalHorizPROJBased::
     ~MyPROJStringExportableHorizVerticalHorizPROJBased() = default;
-}
+} // namespace operation
 NS_PROJ_END
 
 #if 0

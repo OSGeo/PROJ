@@ -66,9 +66,9 @@ struct GridDescription {
     std::string shortName;   /**< Grid short filename */
     std::string fullName;    /**< Grid full path name (if found) */
     std::string packageName; /**< Package name (or empty) */
-    std::string url; /**< Grid URL (if packageName is empty), or package
-                            URL (or empty) */
-    bool directDownload; /**< Whether url can be fetched directly. */
+    std::string url;         /**< Grid URL (if packageName is empty), or package
+                                    URL (or empty) */
+    bool directDownload;     /**< Whether url can be fetched directly. */
     /** Whether the grid is released with an open license. */
     bool openLicense;
     bool available; /**< Whether GRID is available. */
