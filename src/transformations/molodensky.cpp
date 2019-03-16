@@ -140,7 +140,7 @@ static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
 
     /* ellipsoid radii of curvature */
     double rho = RM(a, P->es, lpz.phi);
-    double nu  = RN(a, P->e2s, lpz.phi);
+    double nu  = RN(a, P->es, lpz.phi);
 
     /* delta phi */
     dphi  = (-dx*sphi*clam) - (dy*sphi*slam) + (dz*cphi)
@@ -193,7 +193,7 @@ static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
 
     /* delta lambda */
     dlam = -dx*slam + dy*clam;
-    const double dlam_denom = RN(P->a, P->e2s, lpz.phi)*cphi;
+    const double dlam_denom = RN(P->a, P->es, lpz.phi)*cphi;
     if( dlam_denom == 0.0 ) {
         lpz.lam = HUGE_VAL;
         return lpz;
