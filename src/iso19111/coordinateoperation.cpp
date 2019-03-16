@@ -11879,6 +11879,34 @@ CoordinateOperationFactory::Private::createOperations(
             }
         }
 
+        auto vertCRSOfBaseOfBoundSrc =
+            boundSrc->baseCRS()->extractVerticalCRS();
+        auto vertCRSOfBaseOfBoundDst =
+            boundDst->baseCRS()->extractVerticalCRS();
+        if (hubSrcGeog && hubDstGeog &&
+            hubSrcGeog->_isEquivalentTo(
+                hubDstGeog, util::IComparable::Criterion::EQUIVALENT) &&
+            vertCRSOfBaseOfBoundSrc && vertCRSOfBaseOfBoundDst) {
+            auto opsFirst = createOperations(sourceCRS, hubSrc, context);
+            auto opsLast = createOperations(hubSrc, targetCRS, context);
+            if (!opsFirst.empty() && !opsLast.empty()) {
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opLast : opsLast) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opFirst, opLast},
+                                    !allowEmptyIntersection));
+                        } catch (const InvalidOperationEmptyIntersection &) {
+                        }
+                    }
+                }
+                if (!res.empty()) {
+                    return res;
+                }
+            }
+        }
+
         return createOperations(boundSrc->baseCRS(), boundDst->baseCRS(),
                                 context);
     }
@@ -11986,6 +12014,21 @@ CoordinateOperationFactory::Private::createOperations(
                                                 crs::GeographicCRS>(
                                         nn_interpTransformCRS));
                             }
+                        }
+                    } else {
+                        auto compSrc0BoundCrs = dynamic_cast<crs::BoundCRS *>(
+                            componentsSrc[0].get());
+                        auto compDst0BoundCrs = dynamic_cast<crs::BoundCRS *>(
+                            componentsDst[0].get());
+                        if (compSrc0BoundCrs && compDst0BoundCrs &&
+                            dynamic_cast<crs::GeographicCRS *>(
+                                compSrc0BoundCrs->hubCRS().get()) &&
+                            compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
+                                compDst0BoundCrs->hubCRS().get())) {
+                            interpolationGeogCRS =
+                                NN_NO_CHECK(util::nn_dynamic_pointer_cast<
+                                            crs::GeographicCRS>(
+                                    compSrc0BoundCrs->hubCRS()));
                         }
                     }
                     auto opSrcCRSToGeogCRS = createOperations(
