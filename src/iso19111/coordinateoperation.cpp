@@ -552,7 +552,16 @@ struct CoordinateOperation::Private {
 
 // ---------------------------------------------------------------------------
 
-GridDescription::GridDescription() = default;
+GridDescription::GridDescription():
+    shortName{},
+    fullName{},
+    packageName{},
+    url{},
+    directDownload(false),
+    openLicense(false),
+    available(false)
+{}
+
 
 GridDescription::~GridDescription() = default;
 
