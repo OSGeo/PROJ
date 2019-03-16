@@ -11914,11 +11914,40 @@ CoordinateOperationFactory::Private::createOperations(
                 return horizTransforms;
             }
         }
+    } else if (compoundSrc && geodDst) {
+        auto datum = geodDst->datum();
+        if (datum) {
+            auto cs =
+                cs::EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
+                    common::UnitOfMeasure::DEGREE,
+                    common::UnitOfMeasure::METRE);
+            auto intermGeog3DCRS = util::nn_static_pointer_cast<crs::CRS>(
+                crs::GeographicCRS::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             geodDst->nameStr())
+                        .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                             metadata::Extent::WORLD),
+                    NN_NO_CHECK(datum), cs));
+            auto sourceToGeog3DOps =
+                createOperations(sourceCRS, intermGeog3DCRS, context);
+            auto geog3DToTargetOps =
+                createOperations(intermGeog3DCRS, targetCRS, context);
+            if (!geog3DToTargetOps.empty()) {
+                for (const auto &op : sourceToGeog3DOps) {
+                    res.emplace_back(
+                        ConcatenatedOperation::createComputeMetadata(
+                            {op, geog3DToTargetOps.front()},
+                            !allowEmptyIntersection));
+                }
+                return res;
+            }
+        }
     }
 
     // reverse of previous case
     auto compoundDst = dynamic_cast<const crs::CompoundCRS *>(targetCRS.get());
-    if (geogSrc && compoundDst) {
+    if (geodSrc && compoundDst) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
