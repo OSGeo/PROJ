@@ -901,7 +901,7 @@ class PROJ_GCC_DLL AuthorityFactory {
         /** Whether the object is deprecated */
         bool deprecated;
         /** Whereas the west_lon_degree, south_lat_degree, east_lon_degree and
-        * north_lat_degree fields are valid. */
+         * north_lat_degree fields are valid. */
         bool bbox_valid;
         /** Western-most longitude of the area of use, in degrees. */
         double west_lon_degree;
