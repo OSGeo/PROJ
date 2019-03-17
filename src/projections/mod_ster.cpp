@@ -72,7 +72,6 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         z = 2. * atan(.5 * rh);
         sinz = sin(z);
         cosz = cos(z);
-        lp.lam = P->lam0;
         if (fabs(rh) <= EPSLN) {
             /* if we end up here input coordinates were (0,0).
              * pj_inv() adds P->lam0 to lp.lam, this way we are

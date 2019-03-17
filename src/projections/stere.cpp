@@ -165,7 +165,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         break;
     }
 
-    for (i = NITER;  i--;  phi_l = lp.phi) {
+    for (i = NITER;  i--; ) {
         sinphi = P->e * sin(phi_l);
         lp.phi = 2. * atan (tp * pow ((1.+sinphi)/(1.-sinphi), halfe)) - halfpi;
         if (fabs (phi_l - lp.phi) < CONV) {
@@ -174,6 +174,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
             lp.lam = (xy.x == 0. && xy.y == 0.) ? 0. : atan2 (xy.x, xy.y);
             return lp;
         }
+        phi_l = lp.phi;
     }
 
     proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);

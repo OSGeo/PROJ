@@ -310,7 +310,6 @@ PJ *PROJECTION(aeqd) {
                 break;
             case EQUIT:
             case OBLIQ:
-                P->inv = e_inverse; P->fwd = e_forward;
                 Q->N1 = 1. / sqrt(1. - P->es * Q->sinph0 * Q->sinph0);
                 Q->G = Q->sinph0 * (Q->He = P->e / sqrt(P->one_es));
                 Q->He *= Q->cosph0;

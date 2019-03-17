@@ -673,8 +673,8 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
             if (PJD_ERR_MAJOR_AXIS_NOT_GIVEN==proj_errno (PIN))
                 proj_errno_reset (PIN);
             PIN->f = 1.0/298.257223563;
-            PIN->a_orig  = PIN->a  = 6378137.0;
-            PIN->es_orig = PIN->es = PIN->f*(2-PIN->f);
+            PIN->a  = 6378137.0;
+            PIN->es = PIN->f*(2-PIN->f);
         }
     }
     PIN->a_orig = PIN->a;

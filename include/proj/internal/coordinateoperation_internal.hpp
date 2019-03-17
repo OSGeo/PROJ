@@ -253,7 +253,7 @@ class PROJBasedOperation : public SingleOperation {
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
   protected:
-    PROJBasedOperation(const OperationMethodNNPtr &methodIn);
+    explicit PROJBasedOperation(const OperationMethodNNPtr &methodIn);
 
     void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
