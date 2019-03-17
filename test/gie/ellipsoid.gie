@@ -67,6 +67,9 @@ expect    failure errno major_axis_not_given
 operation proj=merc +R=0
 expect    failure errno major_axis_not_given
 
+operation +proj=merc +R_a +a=2 +f=2
+expect  failure errno major_axis_not_given
+
 operation
 expect    failure
 operation cobra

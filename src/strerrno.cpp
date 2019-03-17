@@ -30,7 +30,7 @@ pj_err_list[] = {
     "acos/asin: |arg| >1.+1e-14",                                      /* -19 */
     "tolerance condition error",                                       /* -20 */
     "conic lat_1 = -lat_2",                                            /* -21 */
-    "lat_1 >= 90",                                                     /* -22 */
+    "lat_0, lat_1 or lat_2 >= 90",                                     /* -22 */
     "lat_1 = 0",                                                       /* -23 */
     "lat_ts >= 90",                                                    /* -24 */
     "no distance between control points",                              /* -25 */

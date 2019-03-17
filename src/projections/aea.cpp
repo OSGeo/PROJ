@@ -155,6 +155,8 @@ static PJ *setup(PJ *P) {
     P->inv = e_inverse;
     P->fwd = e_forward;
 
+    if (fabs(Q->phi1) > M_HALFPI || fabs(Q->phi2) > M_HALFPI)
+        return destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
     if (fabs(Q->phi1 + Q->phi2) < EPS10)
         return destructor(P, PJD_ERR_CONIC_LAT_EQUAL);
     Q->n = sinphi = sin(Q->phi1);

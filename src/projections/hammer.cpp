@@ -24,7 +24,14 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosphi, d;
 
-    d = sqrt(2./(1. + (cosphi = cos(lp.phi)) * cos(lp.lam *= Q->w)));
+    cosphi = cos(lp.phi);
+    lp.lam *= Q->w;
+    double denom = 1. + cosphi * cos(lp.lam);
+    if( denom == 0.0 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return proj_coord_error().xy;
+    }
+    d = sqrt(2./denom);
     xy.x = Q->m * d * cosphi * sin(lp.lam);
     xy.y = Q->rm * d * sin(lp.phi);
     return xy;

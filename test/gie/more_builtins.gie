@@ -433,6 +433,11 @@ expect     failure   errno invalid_arg
 operation  proj=helmert transpose
 expect     failure   errno invalid_arg
 
+# Use of 2D Helmert interface with 3D Helmert setup
+operation  +proj=ob_tran +o_proj=helmert +o_lat_p=0
+direction  inverse
+accept     0 0
+expect     failure   errno 22
 
 -------------------------------------------------------------------------------
 Molodensky-Badekas from IOGP Guidance 7.2, Transformation from La Canoa to REGVEN
