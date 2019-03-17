@@ -172,7 +172,7 @@ gie command language
                     proj=urm5 n=0.5 inv
         expect      failure pjd_err_malformed_pipeline
 
-    See ``gie -l`` for a list of error codes that can be expected.
+    See :option:`gie --list<--list>` for a list of error codes that can be expected.
 
 .. option:: tolerance <tolerance>
 
@@ -273,7 +273,7 @@ gie command language
         expect    173                 -45
 
 
-    See ``gie -l`` for a list of error codes that can be ignored.
+    See :option:`gie --list<--list>` for a list of error codes that can be ignored.
 
 .. option:: require_grid <grid_name>
 
