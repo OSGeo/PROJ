@@ -11879,6 +11879,34 @@ CoordinateOperationFactory::Private::createOperations(
             }
         }
 
+        auto vertCRSOfBaseOfBoundSrc =
+            boundSrc->baseCRS()->extractVerticalCRS();
+        auto vertCRSOfBaseOfBoundDst =
+            boundDst->baseCRS()->extractVerticalCRS();
+        if (hubSrcGeog && hubDstGeog &&
+            hubSrcGeog->_isEquivalentTo(
+                hubDstGeog, util::IComparable::Criterion::EQUIVALENT) &&
+            vertCRSOfBaseOfBoundSrc && vertCRSOfBaseOfBoundDst) {
+            auto opsFirst = createOperations(sourceCRS, hubSrc, context);
+            auto opsLast = createOperations(hubSrc, targetCRS, context);
+            if (!opsFirst.empty() && !opsLast.empty()) {
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opLast : opsLast) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opFirst, opLast},
+                                    !allowEmptyIntersection));
+                        } catch (const InvalidOperationEmptyIntersection &) {
+                        }
+                    }
+                }
+                if (!res.empty()) {
+                    return res;
+                }
+            }
+        }
+
         return createOperations(boundSrc->baseCRS(), boundDst->baseCRS(),
                                 context);
     }
@@ -11914,11 +11942,40 @@ CoordinateOperationFactory::Private::createOperations(
                 return horizTransforms;
             }
         }
+    } else if (compoundSrc && geodDst) {
+        auto datum = geodDst->datum();
+        if (datum) {
+            auto cs =
+                cs::EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
+                    common::UnitOfMeasure::DEGREE,
+                    common::UnitOfMeasure::METRE);
+            auto intermGeog3DCRS = util::nn_static_pointer_cast<crs::CRS>(
+                crs::GeographicCRS::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             geodDst->nameStr())
+                        .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                             metadata::Extent::WORLD),
+                    NN_NO_CHECK(datum), cs));
+            auto sourceToGeog3DOps =
+                createOperations(sourceCRS, intermGeog3DCRS, context);
+            auto geog3DToTargetOps =
+                createOperations(intermGeog3DCRS, targetCRS, context);
+            if (!geog3DToTargetOps.empty()) {
+                for (const auto &op : sourceToGeog3DOps) {
+                    res.emplace_back(
+                        ConcatenatedOperation::createComputeMetadata(
+                            {op, geog3DToTargetOps.front()},
+                            !allowEmptyIntersection));
+                }
+                return res;
+            }
+        }
     }
 
     // reverse of previous case
     auto compoundDst = dynamic_cast<const crs::CompoundCRS *>(targetCRS.get());
-    if (geogSrc && compoundDst) {
+    if (geodSrc && compoundDst) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
@@ -11958,6 +12015,21 @@ CoordinateOperationFactory::Private::createOperations(
                                         nn_interpTransformCRS));
                             }
                         }
+                    } else {
+                        auto compSrc0BoundCrs = dynamic_cast<crs::BoundCRS *>(
+                            componentsSrc[0].get());
+                        auto compDst0BoundCrs = dynamic_cast<crs::BoundCRS *>(
+                            componentsDst[0].get());
+                        if (compSrc0BoundCrs && compDst0BoundCrs &&
+                            dynamic_cast<crs::GeographicCRS *>(
+                                compSrc0BoundCrs->hubCRS().get()) &&
+                            compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
+                                compDst0BoundCrs->hubCRS().get())) {
+                            interpolationGeogCRS =
+                                NN_NO_CHECK(util::nn_dynamic_pointer_cast<
+                                            crs::GeographicCRS>(
+                                    compSrc0BoundCrs->hubCRS()));
+                        }
                     }
                     auto opSrcCRSToGeogCRS = createOperations(
                         componentsSrc[0], interpolationGeogCRS, context);
@@ -11980,6 +12052,89 @@ CoordinateOperationFactory::Private::createOperations(
                 }
             }
         }
+    }
+
+    // '+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +type=crs' to
+    // '+proj=longlat +ellps=GRS80 +nadgrids=@bar.gsb +geoidgrids=@bar.gtx
+    // +type=crs'
+    if (boundSrc && compoundDst) {
+        const auto &componentsDst = compoundDst->componentReferenceSystems();
+        if (!componentsDst.empty()) {
+            auto compDst0BoundCrs =
+                dynamic_cast<crs::BoundCRS *>(componentsDst[0].get());
+            if (compDst0BoundCrs) {
+                auto boundSrcHubAsGeogCRS = dynamic_cast<crs::GeographicCRS *>(
+                    boundSrc->hubCRS().get());
+                auto compDst0BoundCrsHubAsGeogCRS =
+                    dynamic_cast<crs::GeographicCRS *>(
+                        compDst0BoundCrs->hubCRS().get());
+                if (boundSrcHubAsGeogCRS && compDst0BoundCrsHubAsGeogCRS) {
+                    const auto &boundSrcHubAsGeogCRSDatum =
+                        boundSrcHubAsGeogCRS->datum();
+                    const auto &compDst0BoundCrsHubAsGeogCRSDatum =
+                        compDst0BoundCrsHubAsGeogCRS->datum();
+                    if (boundSrcHubAsGeogCRSDatum &&
+                        compDst0BoundCrsHubAsGeogCRSDatum &&
+                        boundSrcHubAsGeogCRSDatum->_isEquivalentTo(
+                            compDst0BoundCrsHubAsGeogCRSDatum.get())) {
+                        auto cs = cs::EllipsoidalCS::
+                            createLatitudeLongitudeEllipsoidalHeight(
+                                common::UnitOfMeasure::DEGREE,
+                                common::UnitOfMeasure::METRE);
+                        auto intermGeog3DCRS = util::nn_static_pointer_cast<
+                            crs::CRS>(crs::GeographicCRS::create(
+                            util::PropertyMap()
+                                .set(common::IdentifiedObject::NAME_KEY,
+                                     boundSrcHubAsGeogCRS->nameStr())
+                                .set(
+                                    common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                                    metadata::Extent::WORLD),
+                            NN_NO_CHECK(boundSrcHubAsGeogCRSDatum), cs));
+                        auto sourceToGeog3DOps = createOperations(
+                            sourceCRS, intermGeog3DCRS, context);
+                        auto geog3DToTargetOps = createOperations(
+                            intermGeog3DCRS, targetCRS, context);
+                        for (const auto &opSrc : sourceToGeog3DOps) {
+                            for (const auto &opDst : geog3DToTargetOps) {
+                                if (opSrc->targetCRS() && opDst->sourceCRS() &&
+                                    !opSrc->targetCRS()->_isEquivalentTo(
+                                        opDst->sourceCRS().get())) {
+                                    // Shouldn't happen normally, but typically
+                                    // one of them can be 2D and the other 3D
+                                    // due to above createOperations() not
+                                    // exactly setting the expected source and
+                                    // target CRS.
+                                    // So create an adapter operation...
+                                    auto intermOps = createOperations(
+                                        NN_NO_CHECK(opSrc->targetCRS()),
+                                        NN_NO_CHECK(opDst->sourceCRS()),
+                                        context);
+                                    if (!intermOps.empty()) {
+                                        res.emplace_back(
+                                            ConcatenatedOperation::
+                                                createComputeMetadata(
+                                                    {opSrc, intermOps.front(),
+                                                     opDst},
+                                                    !allowEmptyIntersection));
+                                    }
+                                } else {
+                                    res.emplace_back(
+                                        ConcatenatedOperation::
+                                            createComputeMetadata(
+                                                {opSrc, opDst},
+                                                !allowEmptyIntersection));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // reverse of previous case
+    if (boundDst && compoundSrc) {
+        return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
     return res;

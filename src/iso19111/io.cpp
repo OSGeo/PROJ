@@ -5049,7 +5049,7 @@ const std::string &PROJStringFormatter::toString() const {
                     first.paramValues[1].keyEquals("z_in") &&
                     first.paramValues[2].keyEquals("xy_out") &&
                     first.paramValues[3].keyEquals("z_out") &&
-                    second.paramValues[0].keyEquals("xy_in=") &&
+                    second.paramValues[0].keyEquals("xy_in") &&
                     second.paramValues[1].keyEquals("xy_out") &&
                     first.paramValues[0].value == second.paramValues[1].value &&
                     first.paramValues[2].value == second.paramValues[0].value) {
@@ -5072,6 +5072,22 @@ const std::string &PROJStringFormatter::toString() const {
             }
             if (changeDone) {
                 break;
+            }
+
+            // unitconvert (1), axisswap order=2,1, unitconvert(2)  ==>
+            // axisswap order=2,1, unitconvert (1), unitconvert(2) which
+            // will get further optimized by previous case
+            if (i + 1 < d->steps_.size() && prevStep.name == "unitconvert" &&
+                curStep.name == "axisswap" && curStepParamCount == 1 &&
+                curStep.paramValues[0].equals("order", "2,1")) {
+                auto iterNext = iterCur;
+                ++iterNext;
+                auto &nextStep = *iterNext;
+                if (nextStep.name == "unitconvert") {
+                    std::swap(*iterPrev, *iterCur);
+                    changeDone = true;
+                    break;
+                }
             }
 
             // axisswap order=2,1 followed by itself is a no-op
@@ -6707,7 +6723,7 @@ PROJStringParser::Private::buildGeocentricCRS(int iStep, int iUnitConvert) {
 
     auto datum = buildDatum(step, title);
 
-    UnitOfMeasure unit = UnitOfMeasure::METRE;
+    UnitOfMeasure unit = buildUnit(step, "units", "");
     if (iUnitConvert >= 0) {
         auto &stepUnitConvert = steps_[iUnitConvert];
         const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
