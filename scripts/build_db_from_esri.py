@@ -247,7 +247,7 @@ def import_spheroid():
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
                 map_spheroid_esri_name_to_auth_code[esri_name] = [
-                    'ESRI', latestWkid]
+                    'ESRI', code]
 
                 if abs(float(a) - 6375000) > 0.01 * 6375000:
                     pos = esri_name.find('_19')
@@ -267,7 +267,7 @@ def import_spheroid():
                     body_code = 'EARTH'
 
                 sql = """INSERT INTO ellipsoid VALUES('ESRI','%s','%s','%s','%s','%s',%s,'EPSG','9001',%s,NULL,%d);""" % (
-                    latestWkid, esri_name, description, body_auth, body_code, a, rf, deprecated)
+                    code, esri_name, description, body_auth, body_code, a, rf, deprecated)
                 all_sql.append(sql)
 
 ########################
@@ -341,10 +341,10 @@ def import_prime_meridian():
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                map_pm_esri_name_to_auth_code[esri_name] = ['ESRI', latestWkid]
+                map_pm_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
                 sql = """INSERT INTO "prime_meridian" VALUES('ESRI','%s','%s',%s,'EPSG','9110',%d);""" % (
-                    latestWkid, esri_name, value, deprecated)
+                    code, esri_name, value, deprecated)
                 all_sql.append(sql)
 
 
@@ -411,7 +411,7 @@ def import_datum():
                 assert authority.upper() == 'ESRI', row
 
                 map_datum_esri_name_to_auth_code[esri_name] = [
-                    'ESRI', latestWkid]
+                    'ESRI', code]
 
                 wkt = row[idx_wkt]
                 pos = wkt.find('SPHEROID["')
@@ -429,7 +429,7 @@ def import_datum():
                 description = row[idx_description]
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                map_datum_esri_to_parameters[latestWkid] = {
+                map_datum_esri_to_parameters[code] = {
                     'esri_name': esri_name,
                     'description': description,
                     'ellps_auth_name': ellps_auth_name,
