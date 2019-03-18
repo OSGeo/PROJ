@@ -2096,7 +2096,6 @@ void VerticalCRS::addLinearUnitConvert(
     auto &axisList = coordinateSystem()->axisList();
 
     if (!axisList.empty()) {
-        auto projUnit = axisList[0]->unit().exportToPROJString();
         if (axisList[0]->unit().conversionToSI() != 1.0) {
             formatter->addStep("unitconvert");
             formatter->addParam("z_in", "m");

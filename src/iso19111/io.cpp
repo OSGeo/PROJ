@@ -1186,7 +1186,7 @@ struct WKTParser::Private {
     buildPrimeMeridian(const WKTNodeNNPtr &node,
                        const UnitOfMeasure &defaultAngularUnit);
 
-    optional<std::string> getAnchor(const WKTNodeNNPtr &node);
+    static optional<std::string> getAnchor(const WKTNodeNNPtr &node);
 
     static void parseDynamic(const WKTNodeNNPtr &dynamicNode,
                              double &frameReferenceEpoch,
@@ -6545,9 +6545,9 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                                ? AxisDirection::NORTH
                                : (axisType == AxisType::NORTH_POLE)
                                      ? AxisDirection::SOUTH
-                                     : (axisType == AxisType::SOUTH_POLE)
-                                           ? AxisDirection::NORTH
-                                           : AxisDirection::NORTH;
+                                     /*: (axisType == AxisType::SOUTH_POLE)
+                                           ? AxisDirection::NORTH*/
+                                     : AxisDirection::NORTH;
     CoordinateSystemAxisNNPtr north = createAxis(
         northName, northAbbev, northDir, unit,
         (!isGeographic && axisType == AxisType::NORTH_POLE)

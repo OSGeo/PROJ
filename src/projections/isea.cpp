@@ -1051,14 +1051,6 @@ PJ *PROJECTION(isea) {
         Q->dgg.o_lat = pj_param(P->ctx,P->params, "rlat_0").f;
     }
 
-    if (pj_param(P->ctx,P->params, "taperture").i) {
-        Q->dgg.aperture = pj_param(P->ctx,P->params, "iaperture").i;
-    }
-
-    if (pj_param(P->ctx,P->params, "tresolution").i) {
-        Q->dgg.resolution = pj_param(P->ctx,P->params, "iresolution").i;
-    }
-
     opt = pj_param(P->ctx,P->params, "smode").s;
     if (opt) {
         if (!strcmp(opt, "plane")) {

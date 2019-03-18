@@ -783,7 +783,7 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
                 if (::fabs(b - b_iter) < 1e-10 * b_iter) {
                     projEllpsName = proj_ellps[i].id;
                     ellpsName = proj_ellps[i].name;
-                    if (ellpsName.find("GRS 1980") == 0) {
+                    if (starts_with(ellpsName, "GRS 1980")) {
                         ellpsName = "GRS 1980";
                     }
                     return true;
@@ -794,7 +794,7 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
                 if (::fabs(rf - rf_iter) < 1e-10 * rf_iter) {
                     projEllpsName = proj_ellps[i].id;
                     ellpsName = proj_ellps[i].name;
-                    if (ellpsName.find("GRS 1980") == 0) {
+                    if (starts_with(ellpsName, "GRS 1980")) {
                         ellpsName = "GRS 1980";
                     }
                     return true;

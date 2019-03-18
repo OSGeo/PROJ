@@ -22,7 +22,6 @@
 
 static PJ *Proj;
 static union {
-    PJ_UV (*generic)(PJ_UV, PJ *);
     PJ_XY (*fwd)(PJ_LP, PJ *);
     PJ_LP (*inv)(PJ_XY, PJ *);
 } proj;
