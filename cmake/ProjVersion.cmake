@@ -6,7 +6,7 @@
 # Distributed under the Boost Software License, Version 1.0
 ################################################################################
 # Macros in this module:
-#   
+#
 #   proj_version - defines version information for PROJ library
 ################################################################################
 
@@ -33,18 +33,21 @@ macro(proj_version)
 
   # Set VERSION string
   set(${PROJECT_INTERN_NAME}_VERSION
-    "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}.${${PROJECT_INTERN_NAME}_VERSION_MINOR}.${${PROJECT_INTERN_NAME}_VERSION_PATCH}")
+    "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}.\
+${${PROJECT_INTERN_NAME}_VERSION_MINOR}.\
+${${PROJECT_INTERN_NAME}_VERSION_PATCH}")
 
-  # Set ABI version string used to name binary output 
+  # Set ABI version string used to name binary output
   # On Windows, ABI version is specified using binary file name suffix.
   if(WIN32)
     set(${PROJECT_INTERN_NAME}_ABI_VERSION
-      "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}_${${PROJECT_INTERN_NAME}_VERSION_MINOR}")
+      "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}_\
+${${PROJECT_INTERN_NAME}_VERSION_MINOR}")
   endif()
 
   message(STATUS "")
   boost_report_value(${PROJECT_INTERN_NAME}_VERSION)
   if(WIN32)
     boost_report_value(${PROJECT_INTERN_NAME}_ABI_VERSION)
-  endif(WIN32)
+  endif()
 endmacro()

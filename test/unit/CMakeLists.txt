@@ -2,12 +2,12 @@
 
 option(USE_EXTERNAL_GTEST "Compile against external GTest" OFF)
 
-if (USE_EXTERNAL_GTEST)
+if(USE_EXTERNAL_GTEST)
 
 message(STATUS "Using external GTest")
 find_package(GTest 1.8.1 CONFIG REQUIRED)
 
-else (USE_EXTERNAL_GTEST)
+else()
 
 message(STATUS "Using internal GTest")
 
@@ -23,11 +23,11 @@ string(REGEX REPLACE "\\-W[a-z\\-]+" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 # Source https://github.com/google/googletest/blob/master/googletest/README.md
 # Download and unpack googletest at configure time
 configure_file(
-    ${CMAKE_SOURCE_DIR}/test/googletest/CMakeLists.txt.in
-    ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
+  ${CMAKE_SOURCE_DIR}/test/googletest/CMakeLists.txt.in
+  ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
 if(result)
   message(FATAL_ERROR "CMake step for googletest failed: ${result}")
 endif()
@@ -43,9 +43,10 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # Add googletest directly to our build. This defines
 # the gtest and gtest_main targets.
 option(INSTALL_GTEST "Enable installation of googletest" OFF)
-add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-                 ${CMAKE_BINARY_DIR}/googletest-build
-                 EXCLUDE_FROM_ALL)
+add_subdirectory(
+  ${CMAKE_BINARY_DIR}/googletest-src
+  ${CMAKE_BINARY_DIR}/googletest-build
+  EXCLUDE_FROM_ALL)
 
 # FIXME: Deal with our old-school CMakeLists.txt behaving badly
 set(CMAKE_C_FLAGS "${_save_c_flags}")
@@ -56,14 +57,14 @@ unset(_save_cxx_flags)
 # Provide the same target name as find_package(GTest)
 add_library(GTest::gtest ALIAS gtest)
 
-endif(USE_EXTERNAL_GTEST)
+endif()  # USE_EXTERNAL_GTEST
 
 #
 # Build PROJ unit tests
 #
 
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC" AND BUILD_LIBPROJ_SHARED)
-add_definitions(-DPROJ_MSVC_DLL_IMPORT=1)
+  add_definitions(-DPROJ_MSVC_DLL_IMPORT=1)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -86,31 +87,31 @@ target_link_libraries(proj_errno_string_test
 add_test(NAME proj_errno_string_test COMMAND proj_errno_string_test)
 
 add_executable(proj_angular_io_test
-    main.cpp
-    proj_angular_io_test.cpp)
+  main.cpp
+  proj_angular_io_test.cpp)
 target_link_libraries(proj_angular_io_test
-    GTest::gtest
-    ${PROJ_LIBRARIES})
+  GTest::gtest
+  ${PROJ_LIBRARIES})
 add_test(NAME proj_angular_io_test COMMAND proj_angular_io_test)
 
 add_executable(proj_context_test
-    main.cpp
-    proj_context_test.cpp)
+  main.cpp
+  proj_context_test.cpp)
 target_link_libraries(proj_context_test
-    GTest::gtest
-    ${PROJ_LIBRARIES})
+  GTest::gtest
+  ${PROJ_LIBRARIES})
 add_test(NAME proj_context_test COMMAND proj_context_test)
 
-if (MSVC AND BUILD_LIBPROJ_SHARED)
-# ph_phi2_test not compatible of a .dll build
+if(MSVC AND BUILD_LIBPROJ_SHARED)
+  # ph_phi2_test not compatible of a .dll build
 else()
-add_executable(pj_phi2_test
-        main.cpp
-        pj_phi2_test.cpp)
-target_link_libraries(pj_phi2_test
-        GTest::gtest
-        ${PROJ_LIBRARIES})
-add_test(NAME pj_phi2_test COMMAND pj_phi2_test)
+  add_executable(pj_phi2_test
+    main.cpp
+    pj_phi2_test.cpp)
+  target_link_libraries(pj_phi2_test
+    GTest::gtest
+    ${PROJ_LIBRARIES})
+  add_test(NAME pj_phi2_test COMMAND pj_phi2_test)
 endif()
 
 add_executable(proj_test_cpp_api

@@ -1,4 +1,4 @@
-#################################################################################
+################################################################################
 #
 # This file is part of CMake configuration for PROJ library (inspired from SOCI
 # CMake,  Copyright (C) 2009-2010 Mateusz Loskot <mateusz@loskot.net> )
@@ -6,24 +6,25 @@
 # Copyright (C) 2011 Nicolas David <nicolas.david@ign.fr>
 # Distributed under the MIT license
 #
-#################################################################################
+################################################################################
 # General settings
-#################################################################################
+################################################################################
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 # For historic reasons, the CMake PROJECT-NAME is PROJ4
 project(PROJ4 LANGUAGES C CXX)
 set(PROJECT_INTERN_NAME PROJ)
 
-if (NOT CMAKE_VERSION VERSION_LESS 3.1)
+if(NOT CMAKE_VERSION VERSION_LESS 3.1)
   cmake_policy(SET CMP0054 NEW)
-endif ()
+endif()
 
 add_definitions(-DPROJ_COMPILATION=1)
 
 # Set C++ version
 # Make CMAKE_CXX_STANDARD available as cache option overridable by user
-set(CMAKE_CXX_STANDARD 11 CACHE STRING "C++ standard version to use (default is 11)")
+set(CMAKE_CXX_STANDARD 11
+  CACHE STRING "C++ standard version to use (default is 11)")
 message(STATUS "Requiring C++${CMAKE_CXX_STANDARD}")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -33,32 +34,43 @@ message(STATUS "Requiring C++${CMAKE_CXX_STANDARD} - done")
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   # Suppress warning 4706 about assignment within conditional expression
   # Suppress warning 4996 about sprintf, etc., being unsafe
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
+/W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+/EHsc /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
+-fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
+-Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+-fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
+-Wmissing-declarations -Wformat -Wformat-security")
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
+-fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
+-Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security \
+-Wfloat-conversion -Wc99-extensions -Wc11-extensions")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+-fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
+-Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion")
 endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to
 # stop the compiler from ignoring parentheses in expressions like
 # (a + b) + c and from simplifying 0.0 + x to x (which is wrong if
 # x = -0.0).
-if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
-  if (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:precise")
-  else ()
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fp-model precise")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-  endif ()
-endif ()
+if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
+  if(MSVC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:precise")
+  else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fp-model precise")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+  endif()
+endif()
 
-#################################################################################
+################################################################################
 # PROJ CMake modules
-#################################################################################
+################################################################################
 # Path to additional CMake modules
 set(CMAKE_MODULE_PATH ${PROJ4_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
@@ -67,70 +79,71 @@ include(ProjUtilities)
 message(STATUS "")
 colormsg(_HIBLUE_ "Configuring PROJ:")
 
-#################################################################################
+################################################################################
 #PROJ version information
-#################################################################################
+################################################################################
 include(ProjVersion)
 proj_version(MAJOR 6 MINOR 1 PATCH 0)
 set(PROJ_API_VERSION "15")
 set(PROJ_BUILD_VERSION "15.0.0")
 
-#################################################################################
+################################################################################
 # Build features and variants
-#################################################################################
+################################################################################
 include(ProjSystemInfo)
 include(ProjConfig)
 include(ProjMac)
 include(policies)
 
-#################################################################################
+################################################################################
 # Check for sqlite3
-#################################################################################
+################################################################################
 find_program(EXE_SQLITE3 sqlite3)
-if (NOT EXE_SQLITE3)
-MESSAGE (SEND_ERROR "sqlite3 binary not found!")
-ENDIF (NOT EXE_SQLITE3)
+if(NOT EXE_SQLITE3)
+  message(SEND_ERROR "sqlite3 binary not found!")
+endif()
 
-FIND_PACKAGE(Sqlite3 REQUIRED)
-IF (NOT SQLITE3_FOUND)
-MESSAGE (SEND_ERROR "sqlite3 dependency not found!")
-ENDIF (NOT SQLITE3_FOUND)
+find_package(Sqlite3 REQUIRED)
+if(NOT SQLITE3_FOUND)
+  message(SEND_ERROR "sqlite3 dependency not found!")
+endif()
 
-
-#################################################################################
+################################################################################
 # threading configuration
-#################################################################################
+################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-find_package (Threads)
+find_package(Threads)
 
 include(CheckIncludeFiles)
 
-include (CheckCSourceCompiles)
-if (MSVC)
-  set (CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} /WX")
-else ()
-  set (CMAKE_REQUIRED_LIBRARIES m)
-  set (CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} -Werror")
-endif ()
+include(CheckCSourceCompiles)
+if(MSVC)
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} /WX")
+else()
+  set(CMAKE_REQUIRED_LIBRARIES m)
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} -Werror")
+endif()
 # Check whether the C99 math function: hypot, atanh, etc. are available.
-check_c_source_compiles (
-  "#include <math.h>
+check_c_source_compiles("
+#include <math.h>
 int main() {
   int q;
-  return (int)(hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
-               remquo(100.0, 90.0, &q) +
-               remainder(100.0, 90.0) + copysign(1.0, -0.0) +
-               log1p(0.1) + asinh(0.1)) +
-               isnan(0.0);
-}\n" C99_MATH)
-if (C99_MATH)
-  add_definitions (-DHAVE_C99_MATH=1)
-else ()
-  add_definitions (-DHAVE_C99_MATH=0)
-endif ()
+  return (int)(
+    hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
+    remquo(100.0, 90.0, &q) +
+    remainder(100.0, 90.0) + copysign(1.0, -0.0) +
+    log1p(0.1) + asinh(0.1)) + isnan(0.0);
+}
+" C99_MATH)
+if(C99_MATH)
+  add_definitions(-DHAVE_C99_MATH=1)
+else()
+  add_definitions(-DHAVE_C99_MATH=0)
+endif()
 
-if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
-  set (CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT}")
+if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+  set(CMAKE_REQUIRED_LIBRARIES
+    "${CMAKE_REQUIRED_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT}")
   check_c_source_compiles("
 #include <pthread.h>
 
@@ -140,31 +153,31 @@ int main(int argc, char* argv[]) {
   return argc;
 }
   " HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
-  if (HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
+  if(HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
     add_definitions(-DHAVE_PTHREAD_MUTEX_RECURSIVE=1)
   endif()
-endif ()
+endif()
 
 boost_report_value(PROJ_PLATFORM_NAME)
 boost_report_value(PROJ_COMPILER_NAME)
 
 # Set a default build type for single-configuration cmake generators if
 # no build type is set.
-if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Release)
-endif ()
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
-if (MSVC OR CMAKE_CONFIGURATION_TYPES)
+if(MSVC OR CMAKE_CONFIGURATION_TYPES)
   # For multi-config systems and for Visual Studio, the debug version of
   # the library has _d appended.
-  set (CMAKE_DEBUG_POSTFIX _d)
-endif ()
+  set(CMAKE_DEBUG_POSTFIX _d)
+endif()
 
 option(PROJ_TESTS "Enable build of collection of PROJ tests" ON)
 boost_report_value(PROJ_TESTS)
 if(PROJ_TESTS)
-    enable_testing()
-endif(PROJ_TESTS)
+  enable_testing()
+endif()
 include(ProjTest)
 
 # Put the libraries and binaries that get built into directories at the
@@ -176,20 +189,26 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-#################################################################################
+################################################################################
 # Installation
-#################################################################################
+################################################################################
 include(ProjInstallPath)
-set(BINDIR "${DEFAULT_BINDIR}" CACHE PATH "The directory to install binaries into.")
-set(LIBDIR "${DEFAULT_LIBDIR}" CACHE PATH "The directory to install libraries into.")
-set(DATADIR "${DEFAULT_DATADIR}" CACHE PATH "The directory to install data files into.")
-set(DOCDIR "${DEFAULT_DOCDIR}" CACHE PATH "The directory to install doc files into.")
-set(INCLUDEDIR "${DEFAULT_INCLUDEDIR}" CACHE PATH "The directory to install includes into.")
-set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}" CACHE PATH "The directory to install cmake config files into.")
+set(BINDIR "${DEFAULT_BINDIR}"
+  CACHE PATH "The directory to install binaries into.")
+set(LIBDIR "${DEFAULT_LIBDIR}"
+  CACHE PATH "The directory to install libraries into.")
+set(DATADIR "${DEFAULT_DATADIR}"
+  CACHE PATH "The directory to install data files into.")
+set(DOCDIR "${DEFAULT_DOCDIR}"
+  CACHE PATH "The directory to install doc files into.")
+set(INCLUDEDIR "${DEFAULT_INCLUDEDIR}"
+  CACHE PATH "The directory to install includes into.")
+set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}"
+  CACHE PATH "The directory to install cmake config files into.")
 
-#################################################################################
+################################################################################
 # Build configured components
-#################################################################################
+################################################################################
 include_directories(${PROJ4_SOURCE_DIR}/src)
 
 message(STATUS "")
@@ -199,5 +218,5 @@ add_subdirectory(src)
 add_subdirectory(man)
 add_subdirectory(cmake)
 if(PROJ_TESTS)
-    add_subdirectory(test)
+  add_subdirectory(test)
 endif()
