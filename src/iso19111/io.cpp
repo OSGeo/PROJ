@@ -4455,8 +4455,10 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>WKT string</li>
  * <li>PROJ string</li>
  * <li>database code, prefixed by its authoriy. e.g. "EPSG:4326"</li>
- * <li>URN. e.g. "urn:ogc:def:crs:EPSG::4326",
- *     "urn:ogc:def:coordinateOperation:EPSG::1671"</li>
+ * <li>OGC URN. e.g. "urn:ogc:def:crs:EPSG::4326",
+ *     "urn:ogc:def:coordinateOperation:EPSG::1671",
+ *     "urn:ogc:def:ellipsoid:EPSG::7001"
+ *     or "urn:ogc:def:datum:EPSG::6326"</li>
  * <li>an objet name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
@@ -4489,8 +4491,10 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>WKT string</li>
  * <li>PROJ string</li>
  * <li>database code, prefixed by its authoriy. e.g. "EPSG:4326"</li>
- * <li>URN. e.g. "urn:ogc:def:crs:EPSG::4326",
- *     "urn:ogc:def:coordinateOperation:EPSG::1671"</li>
+ * <li>OGC URN. e.g. "urn:ogc:def:crs:EPSG::4326",
+ *     "urn:ogc:def:coordinateOperation:EPSG::1671",
+ *     "urn:ogc:def:ellipsoid:EPSG::7001"
+ *     or "urn:ogc:def:datum:EPSG::6326"</li>
  * <li>an objet name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
