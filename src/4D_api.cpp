@@ -51,6 +51,7 @@
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
 #include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
 
 using namespace NS_PROJ::internal;
 
@@ -192,6 +193,8 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
         direction = opposite_direction(direction);
 
     if( !P->alternativeCoordinateOperations.empty() ) {
+        // Do a first pass and select the first coordinate operation whose area
+        // of use is compatible with the input coordinate
         int i = 0;
         for( const auto &alt: P->alternativeCoordinateOperations ) {
             if( direction == PJ_FWD ) {
@@ -223,6 +226,35 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             }
             i ++;
         }
+
+        // In case we did not find an operation whose area of use is compatible
+        // with the input coordinate, then goes through again the list, and
+        // use the first operation that does not require grids.
+        i = 0;
+        for( const auto &alt: P->alternativeCoordinateOperations ) {
+            auto coordOperation = dynamic_cast<
+            NS_PROJ::operation::CoordinateOperation*>(alt.pj->iso_obj.get());
+            if( coordOperation ) {
+                if( coordOperation->gridsNeeded(P->ctx->cpp_context ?
+                    P->ctx->cpp_context->databaseContext.as_nullable() :
+                    nullptr).empty() ) {
+                    if( P->iCurCoordOp != i ) {
+                        std::string msg("Using coordinate operation ");
+                        msg += alt.name;
+                        pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                        P->iCurCoordOp = i;
+                    }
+                    if( direction == PJ_FWD ) {
+                        return pj_fwd4d( coord, alt.pj );
+                    }
+                    else {
+                        return pj_inv4d( coord, alt.pj );
+                    }
+                }
+            }
+            i++;
+        }
+
         proj_errno_set (P, EINVAL);
         return proj_coord_error ();
     }
