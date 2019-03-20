@@ -248,6 +248,9 @@ PJ *PROJECTION(laea) {
     P->destructor = destructor;
 
     t = fabs(P->phi0);
+    if (t > M_HALFPI + EPS10 ) {
+        return destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
+    }
     if (fabs(t - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
     else if (fabs(t) < EPS10)
