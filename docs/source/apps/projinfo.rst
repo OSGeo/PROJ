@@ -16,7 +16,7 @@ Synopsis
 ********
 
     | **projinfo**
-    |    [-o formats] [-k crs|operation] [--summary] [-q]
+    |    [-o formats] [-k crs|operation|ellipsoid] [--summary] [-q]
     |    [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]
     |    [--spatial-test contains|intersects]
     |    [--crs-extent-use none|both|intersection|smallest]
@@ -60,10 +60,10 @@ The following control parameters can appear in any order:
 
     Except ``all`` and ``default``, other formats can be preceded by ``-`` to disable them.
 
-.. option:: -k crs|operation
+.. option:: -k crs|operation|ellipsoid
 
     When used to query a single object with a AUTHORITY:CODE, determines the (k)ind of the object
-    in case there are CRS or coordinate operations with the same CODE.
+    in case there are CRS, coordinate operations or ellipsoids with the same CODE.
     The default is crs.
 
 .. option:: --summary
