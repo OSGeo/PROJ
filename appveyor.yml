@@ -2,6 +2,10 @@ platform:
 - x64
 - x86
 
+branches:
+  except:
+    - /(cherry-pick-)?backport-\d+-on-/
+
 environment:
   matrix:
 
