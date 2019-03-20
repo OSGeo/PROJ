@@ -748,4 +748,27 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     proj_destroy(P);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(gie, proj_create_crs_to_crs_outside_area_of_use) {
+
+    // See https://github.com/OSGeo/proj.4/issues/1329
+    auto P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4275", "EPSG:4807",
+                                    nullptr);
+    ASSERT_TRUE(P != nullptr);
+    PJ_COORD c;
+
+    EXPECT_EQ(P->fwd, nullptr);
+
+    // Test point outside area of use of both candidate coordinate operations
+    c.xyz.x = 58; // Lat in deg
+    c.xyz.y = 5;  // Long in deg
+    c.xyz.z = 0;
+    c = proj_trans(P, PJ_FWD, c);
+    EXPECT_NEAR(c.xy.x, 64.44444444444444, 1e-9); // Lat in grad
+    EXPECT_NEAR(c.xy.y, 2.958634259259258, 1e-9); // Long in grad
+
+    proj_destroy(P);
+}
+
 } // namespace
