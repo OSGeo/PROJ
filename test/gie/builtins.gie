@@ -4743,6 +4743,8 @@ accept  -2 1
 expect  -223407.810259507 111737.938996443
 accept  -2 -1
 expect  -223407.810259507 -111737.938996443
+accept  180 0
+expect  failure errno tolerance_condition
 
 direction inverse
 accept  200 100
