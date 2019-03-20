@@ -77,7 +77,7 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation] [--summary] [-q]"
+        << "usage: projinfo [-o formats] [-k crs|operation|ellipsoid] [--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
            "[--bbox west_long,south_lat,east_long,north_lat]) "
@@ -138,7 +138,7 @@ static std::string c_ify_string(const std::string &str) {
 
 static BaseObjectNNPtr buildObject(
     DatabaseContextPtr dbContext, const std::string &user_string,
-    bool kindIsCRS, const std::string &context, bool buildBoundCRSToWGS84,
+    const std::string &kind, const std::string &context, bool buildBoundCRSToWGS84,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     bool quiet) {
     BaseObjectPtr obj;
@@ -174,8 +174,12 @@ static BaseObjectNNPtr buildObject(
 
     try {
         auto tokens = split(l_user_string, ':');
-        if (!kindIsCRS && tokens.size() == 2) {
+        if (kind == "operation" && tokens.size() == 2) {
             auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
+                       tokens[1];
+            obj = createFromUserInput(urn, dbContext).as_nullable();
+        } else if (kind == "ellipsoid" && tokens.size() == 2) {
+            auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" +
                        tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
@@ -572,7 +576,7 @@ static void outputOperations(
     const std::string &authority, bool usePROJGridAlternatives,
     bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
     auto sourceObj = buildObject(
-        dbContext, sourceCRSStr, true, "source CRS", false,
+        dbContext, sourceCRSStr, "crs", "source CRS", false,
         CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
@@ -581,7 +585,7 @@ static void outputOperations(
     }
 
     auto targetObj = buildObject(
-        dbContext, targetCRSStr, true, "target CRS", false,
+        dbContext, targetCRSStr, "crs", "target CRS", false,
         CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
@@ -678,7 +682,7 @@ int main(int argc, char **argv) {
     std::string targetCRSStr;
     bool outputSwithSpecified = false;
     OutputOptions outputOpt;
-    bool kindIsCRS = true;
+    std::string objectKind;
     bool summary = false;
     ExtentPtr bboxFilter = nullptr;
     std::string area;
@@ -806,9 +810,11 @@ int main(int argc, char **argv) {
             i++;
             std::string kind(argv[i]);
             if (ci_equal(kind, "crs") || ci_equal(kind, "srs")) {
-                kindIsCRS = true;
+                objectKind = "crs";
             } else if (ci_equal(kind, "operation")) {
-                kindIsCRS = false;
+                objectKind = "operation";
+            } else if (ci_equal(kind, "ellipsoid")) {
+                objectKind = "ellipsoid";
             } else {
                 std::cerr << "Unrecognized value for option -k: " << kind
                           << std::endl;
@@ -998,7 +1004,7 @@ int main(int argc, char **argv) {
     }
 
     if (!user_string.empty()) {
-        auto obj(buildObject(dbContext, user_string, kindIsCRS, "input string",
+        auto obj(buildObject(dbContext, user_string, objectKind, "input string",
                              buildBoundCRSToWGS84, allowUseIntermediateCRS,
                              outputOpt.quiet));
         if (guessDialect) {
