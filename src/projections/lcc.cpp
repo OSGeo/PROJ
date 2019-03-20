@@ -108,6 +108,10 @@ PJ *PROJECTION(lcc) {
         if (secant) { /* secant cone */
             sinphi = sin(Q->phi2);
             Q->n = log(m1 / pj_msfn(sinphi, cos(Q->phi2), P->es));
+            if (Q->n == 0) {
+                // Not quite, but es is very close to 1...
+                return pj_default_destructor(P, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
+            }
             Q->n /= log(ml1 / pj_tsfn(Q->phi2, sinphi, P->e));
         }
         Q->c = (Q->rho0 = m1 * pow(ml1, -Q->n) / Q->n);
