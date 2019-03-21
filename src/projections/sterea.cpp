@@ -53,7 +53,12 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     sinc = sin(lp.phi);
     cosc = cos(lp.phi);
     cosl = cos(lp.lam);
-    k = P->k0 * Q->R2 / (1. + Q->sinc0 * sinc + Q->cosc0 * cosc * cosl);
+    const double denom = 1. + Q->sinc0 * sinc + Q->cosc0 * cosc * cosl;
+    if( denom == 0.0 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return proj_coord_error().xy;
+    }
+    k = P->k0 * Q->R2 / denom;
     xy.x = k * cosc * sin(lp.lam);
     xy.y = k * (Q->cosc0 * sinc - Q->sinc0 * cosc * cosl);
     return xy;
