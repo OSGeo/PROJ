@@ -69,6 +69,11 @@ expect  failure errno lat_larger_than_90
 operation +proj=aea +ellps=GRS80 +lat_2=900
 expect  failure errno lat_larger_than_90
 
+-------------------------------------------------------------------------------
+operation +proj=aea +a=9999999 +b=.9 +lat_2=1
+-------------------------------------------------------------------------
+expect     failure errno eccentricity_is_one
+
 ===============================================================================
 Azimuthal Equidistant
 	Azi, Sph&Ell
