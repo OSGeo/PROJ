@@ -1,6 +1,10 @@
 # This is the config file for building proj.4 and running its test suite
 # with Travis-ci.org
 
+branches:
+  except:
+  - /^(cherry-pick-)?backport-\d+-on-/
+
 cache:
     directories:
         - $HOME/.ccache

@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <limits>
+
 #define PJ_LIB__
 #include "proj_internal.h"
 #include "proj_math.h"
@@ -89,6 +91,9 @@ static void hexbin2(double width, double x, double y, long *i, long *j) {
     y = y - x / 2.0; /* adjustment for rotated X */
 
     /* adjust for actual hexwidth */
+    if( width == 0 ) {
+        throw "Division by zero";
+    }
     x /= width;
     y /= width;
 
@@ -100,6 +105,9 @@ static void hexbin2(double width, double x, double y, long *i, long *j) {
     iy = lround(ry);
     rz = floor(z + 0.5);
     iz = lround(rz);
+    if( fabs(rx + ry + rz) > std::numeric_limits<int>::max() ) {
+        throw "Integer overflow";
+    }
 
     s = ix + iy + iz;
 
@@ -764,11 +772,18 @@ static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
     }
     /* todo might want to do this as an iterated loop */
     if (g->aperture >0) {
-        sidelength = lround(pow(g->aperture, g->resolution / 2.0));
+        double sidelengthDouble = pow(g->aperture, g->resolution / 2.0);
+        if( fabs(sidelengthDouble) > std::numeric_limits<int>::max() ) {
+            throw "Integer overflow";
+        }
+        sidelength = lround(sidelengthDouble);
     } else {
         sidelength = g->resolution;
     }
 
+    if( sidelength == 0 ) {
+        throw "Division by zero";
+    }
     hexwidth = 1.0 / sidelength;
 
     v = *pt;
@@ -1004,7 +1019,12 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     in.lon = lp.lam;
     in.lat = lp.phi;
 
-    out = isea_forward(&Q->dgg, &in);
+    try {
+        out = isea_forward(&Q->dgg, &in);
+    } catch( const char* ) {
+        proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+        return proj_coord_error().xy;
+    }
 
     xy.x = out.x;
     xy.y = out.y;

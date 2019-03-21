@@ -542,6 +542,10 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
     /* flattening */
     if (0==P->f)
         P->f  = 1 - cos (P->alpha);   /* = 1 - sqrt (1 - PIN->es); */
+    if (P->f == 1.0) {
+        pj_ctx_set_errno( P->ctx, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
+        return PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER;
+    }
     P->rf = P->f != 0.0 ? 1.0/P->f: HUGE_VAL;
 
     /* second flattening */
