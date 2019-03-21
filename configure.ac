@@ -219,6 +219,7 @@ CFLAGS="$save_CFLAGS $C99_MATH"
 AC_SEARCH_LIBS([sqrt], [m])
 
 AC_CHECK_FUNC(localeconv, [AC_DEFINE(HAVE_LOCALECONV,1,[Define to 1 if you have localeconv])])
+AC_CHECK_FUNCS([strerror])
 
 dnl ---------------------------------------------------------------------------
 dnl Check for JNI support.
