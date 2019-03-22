@@ -24,7 +24,8 @@ check_include_files (sys/types.h HAVE_SYS_TYPES_H)
 check_include_files (unistd.h HAVE_UNISTD_H)
 check_include_files("stdlib.h;stdarg.h;string.h;float.h" STDC_HEADERS)
 
-CHECK_FUNCTION_EXISTS(localeconv HAVE_LOCALECONV)
+check_function_exists(localeconv HAVE_LOCALECONV)
+check_function_exists(strerror HAVE_STRERROR)
 
 # check libm need on unix 
 check_library_exists(m ceil "" HAVE_LIBM) 
