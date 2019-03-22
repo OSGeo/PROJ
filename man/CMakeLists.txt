@@ -4,6 +4,7 @@ install(FILES
   man1/geod.1
   man1/cct.1
   man1/gie.1
+  man1/projinfo.1
   DESTINATION share/man/man1)
 
 install(FILES
