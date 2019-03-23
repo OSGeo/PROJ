@@ -193,8 +193,8 @@ struct projCppContext;
 /* not sure why we need to export it, but mingw needs it */
 void PROJ_DLL proj_context_delete_cpp_context(struct projCppContext* cppContext);
 
-PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
-PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
+PJ_COORD pj_fwd4d (const PJ_COORD& coo, PJ *P);
+PJ_COORD pj_inv4d (const PJ_COORD& coo, PJ *P);
 
 PJ_COORD PROJ_DLL pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 PJ_COORD PROJ_DLL pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
@@ -291,7 +291,7 @@ PJ_OPERATOR:
 *****************************************************************************/
 typedef    PJ       *(* PJ_CONSTRUCTOR) (PJ *);
 typedef    PJ       *(* PJ_DESTRUCTOR)  (PJ *, int);
-typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
+typedef    PJ_COORD  (* PJ_OPERATOR)    (const PJ_COORD&, PJ *);
 /****************************************************************************/
 
 
@@ -352,8 +352,8 @@ struct PJconsts {
 
     PJ_XY  (*fwd)(PJ_LP,    PJ *) = nullptr;
     PJ_LP  (*inv)(PJ_XY,    PJ *) = nullptr;
-    PJ_XYZ (*fwd3d)(PJ_LPZ, PJ *) = nullptr;
-    PJ_LPZ (*inv3d)(PJ_XYZ, PJ *) = nullptr;
+    PJ_XYZ (*fwd3d)(const PJ_LPZ&, PJ *) = nullptr;
+    PJ_LPZ (*inv3d)(const PJ_XYZ&, PJ *) = nullptr;
     PJ_OPERATOR fwd4d = nullptr;
     PJ_OPERATOR inv4d = nullptr;
 

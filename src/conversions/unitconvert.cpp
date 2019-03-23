@@ -313,7 +313,7 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
 
 
 /***********************************************************************/
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(const PJ_LPZ& lpz, PJ *P) {
 /************************************************************************
     Forward unit conversions the vertical component
 ************************************************************************/
@@ -330,7 +330,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 }
 
 /***********************************************************************/
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(const PJ_XYZ& xyz, PJ *P) {
 /************************************************************************
     Reverse unit conversions the vertical component
 ************************************************************************/
@@ -348,7 +348,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 
 
 /***********************************************************************/
-static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+static PJ_COORD forward_4d(const PJ_COORD& obs, PJ *P) {
 /************************************************************************
     Forward conversion of time units
 ************************************************************************/
@@ -368,7 +368,7 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
 
 
 /***********************************************************************/
-static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
+static PJ_COORD reverse_4d(const PJ_COORD& obs, PJ *P) {
 /************************************************************************
     Reverse conversion of time units
 ************************************************************************/

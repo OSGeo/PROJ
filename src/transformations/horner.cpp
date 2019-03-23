@@ -116,7 +116,7 @@ struct horner {
 } // anonymous namespace
 
 typedef struct horner HORNER;
-static PJ_UV   horner_func (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position);
+static PJ_UV   horner_func (const HORNER *transformation, PJ_DIRECTION direction, const PJ_UV& position);
 static HORNER *horner_alloc (size_t order, int complex_polynomia);
 static void    horner_free (HORNER *h);
 
@@ -182,7 +182,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
 
 /**********************************************************************/
-static PJ_UV horner_func (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
+static PJ_UV horner_func (const HORNER *transformation, PJ_DIRECTION direction, const PJ_UV& position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -284,11 +284,11 @@ summing the tiny high order elements first.
             E = n*E + v;
         }
 
-        position.u = E;
-        position.v = N;
+        PJ_UV out;
+        out.u = E;
+        out.v = N;
+        return out;
     }
-
-    return position;
 }
 
 
@@ -297,21 +297,23 @@ summing the tiny high order elements first.
 
 
 
-static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
-    point.uv = horner_func ((HORNER *) P->opaque, PJ_FWD, point.uv);
-    return point;
+static PJ_COORD horner_forward_4d (const PJ_COORD& point, PJ *P) {
+    PJ_COORD pointOut(point);
+    pointOut.uv = horner_func ((HORNER *) P->opaque, PJ_FWD, point.uv);
+    return pointOut;
 }
 
-static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
-    point.uv = horner_func ((HORNER *) P->opaque, PJ_INV, point.uv);
-    return point;
+static PJ_COORD horner_reverse_4d (const PJ_COORD& point, PJ *P) {
+    PJ_COORD pointOut(point);
+    pointOut.uv = horner_func ((HORNER *) P->opaque, PJ_INV, point.uv);
+    return pointOut;
 }
 
 
 
 
 /**********************************************************************/
-static PJ_UV complex_horner (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
+static PJ_UV complex_horner (const HORNER *transformation, PJ_DIRECTION direction, const PJ_UV& position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
@@ -380,21 +382,24 @@ polynomial evaluation engine.
         E = w;
     }
 
-    position.u = E;
-    position.v = N;
-    return position;
+    PJ_UV out;
+    out.u = E;
+    out.v = N;
+    return out;
 }
 
 
 
-static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
-    point.uv = complex_horner ((HORNER *) P->opaque, PJ_FWD, point.uv);
-    return point;
+static PJ_COORD complex_horner_forward_4d (const PJ_COORD& point, PJ *P) {
+    PJ_COORD pointOut(point);
+    pointOut.uv = complex_horner ((HORNER *) P->opaque, PJ_FWD, point.uv);
+    return pointOut;
 }
 
-static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
-    point.uv = complex_horner ((HORNER *) P->opaque, PJ_INV, point.uv);
-    return point;
+static PJ_COORD complex_horner_reverse_4d (const PJ_COORD& point, PJ *P) {
+    PJ_COORD pointOut(point);
+    pointOut.uv = complex_horner ((HORNER *) P->opaque, PJ_INV, point.uv);
+    return pointOut;
 }
 
 

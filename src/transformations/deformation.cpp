@@ -72,7 +72,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 /********************************************************************************/
-static PJ_XYZ get_grid_shift(PJ* P, PJ_XYZ cartesian) {
+static PJ_XYZ get_grid_shift(PJ* P, const PJ_XYZ& cartesian) {
 /********************************************************************************
     Read correction values from grid. The cartesian input coordinates are
     converted to geodetic coordinates in order look up the correction values
@@ -122,7 +122,7 @@ static PJ_XYZ get_grid_shift(PJ* P, PJ_XYZ cartesian) {
 }
 
 /********************************************************************************/
-static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
+static PJ_XYZ reverse_shift(PJ *P, const PJ_XYZ& input, double dt) {
 /********************************************************************************
     Iteratively determine the reverse grid shift correction values.
 *********************************************************************************/
@@ -163,7 +163,7 @@ static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
     return out;
 }
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(const PJ_LPZ& lpz, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     PJ_COORD out, in;
     PJ_XYZ shift;
@@ -186,7 +186,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 }
 
 
-static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
+static PJ_COORD forward_4d(const PJ_COORD& in, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     double dt;
     PJ_XYZ shift;
@@ -209,7 +209,7 @@ static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
 }
 
 
-static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
+static PJ_LPZ reverse_3d(const PJ_XYZ& in, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     PJ_COORD out;
     out.xyz = in;
@@ -225,7 +225,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
     return out.lpz;
 }
 
-static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
+static PJ_COORD reverse_4d(const PJ_COORD& in, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     PJ_COORD out = in;
     double dt;

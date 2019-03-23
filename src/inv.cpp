@@ -173,8 +173,8 @@ PJ_LP pj_inv(PJ_XY xy, PJ *P) {
     return error_or_coord(P, coo, last_errno).lp;
 }
 
-
-
+// public interface defined in proj_api.h for now
+// cppcheck-suppress passedByValue
 PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
     int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
@@ -209,7 +209,8 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
 
 
 
-PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
+PJ_COORD pj_inv4d (const PJ_COORD& cooIn, PJ *P) {
+    PJ_COORD coo(cooIn);
     int last_errno = proj_errno_reset(P);
 
     if (!P->skip_inv_prepare)

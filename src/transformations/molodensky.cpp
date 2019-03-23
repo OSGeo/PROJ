@@ -53,8 +53,8 @@
 
 PROJ_HEAD(molodensky, "Molodensky transform");
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P);
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P);
+static PJ_XYZ forward_3d(const PJ_LPZ& lpz, PJ *P);
+static PJ_LPZ reverse_3d(const PJ_XYZ& xyz, PJ *P);
 
 namespace { // anonymous namespace
 struct pj_opaque_molodensky {
@@ -123,7 +123,7 @@ static double RM (double a, double es, double phi) {
 }
 
 
-static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
+static void calc_standard_params(PJ_LPZ& lpz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
     double dphi, dlam, dh;
 
@@ -149,7 +149,7 @@ static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
     const double dphi_denom = rho + lpz.z;
     if( dphi_denom == 0.0 ) {
         lpz.lam = HUGE_VAL;
-        return lpz;
+        return;
     }
     dphi /= dphi_denom;
 
@@ -157,7 +157,7 @@ static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
     const double dlam_denom = (nu+lpz.z)*cphi;
     if( dlam_denom == 0.0 ) {
         lpz.lam = HUGE_VAL;
-        return lpz;
+        return;
     }
     dlam = (-dx*slam + dy*clam) / dlam_denom;
 
@@ -167,12 +167,10 @@ static PJ_LPZ calc_standard_params(PJ_LPZ lpz, PJ *P) {
     lpz.phi = dphi;
     lpz.lam = dlam;
     lpz.z   = dh;
-
-    return lpz;
 }
 
 
-static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
+static void calc_abridged_params(PJ_LPZ& lpz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
     double dphi, dlam, dh;
 
@@ -196,7 +194,7 @@ static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
     const double dlam_denom = RN(P->a, P->es, lpz.phi)*cphi;
     if( dlam_denom == 0.0 ) {
         lpz.lam = HUGE_VAL;
-        return lpz;
+        return;
     }
     dlam /= dlam_denom;
 
@@ -207,8 +205,6 @@ static PJ_LPZ calc_abridged_params(PJ_LPZ lpz, PJ *P) {
     lpz.phi = dphi;
     lpz.lam = dlam;
     lpz.z   = dh;
-
-    return lpz;
 }
 
 
@@ -233,17 +229,18 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
 }
 
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(const PJ_LPZ& lpzIn, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
+    PJ_LPZ lpz(lpzIn);
 
     point.lpz = lpz;
 
     /* calculate parameters depending on the mode we are in */
     if (Q->abridged) {
-        lpz = calc_abridged_params(lpz, P);
+        calc_abridged_params(lpz, P);
     } else {
-        lpz = calc_standard_params(lpz, P);
+        calc_standard_params(lpz, P);
     }
     if( lpz.lam == HUGE_VAL ) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -259,23 +256,28 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 }
 
 
-static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
-    obs.xyz = forward_3d(obs.lpz, P);
-    return obs;
+static PJ_COORD forward_4d(const PJ_COORD& obs, PJ *P) {
+    PJ_COORD out;
+    out.xyz = forward_3d(obs.lpz, P);
+    out.xyzt.t = obs.xyzt.t;
+    return out;
 }
 
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(const PJ_XYZ& xyz, PJ *P) {
     struct pj_opaque_molodensky *Q = (struct pj_opaque_molodensky *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
     PJ_LPZ lpz;
+    lpz.lam = xyz.x;
+    lpz.phi = xyz.y;
+    lpz.z = xyz.z;
 
     /* calculate parameters depending on the mode we are in */
     point.xyz = xyz;
     if (Q->abridged)
-        lpz = calc_abridged_params(point.lpz, P);
+        calc_abridged_params(lpz, P);
     else
-        lpz = calc_standard_params(point.lpz, P);
+        calc_standard_params(lpz, P);
 
     if( lpz.lam == HUGE_VAL ) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -291,9 +293,11 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 }
 
 
-static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
-    obs.lpz = reverse_3d(obs.xyz, P);
-    return obs;
+static PJ_COORD reverse_4d(const PJ_COORD& obs, PJ *P) {
+    PJ_COORD out;
+    out.lpz = reverse_3d(obs.xyz, P);
+    out.lpzt.t = obs.xyzt.t;
+    return out;
 }
 
 

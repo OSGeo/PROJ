@@ -18,7 +18,7 @@ struct pj_opaque_vgridshift {
 };
 } // anonymous namespace
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(const PJ_LPZ& lpz, PJ *P) {
     struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
@@ -33,7 +33,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 }
 
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(const PJ_XYZ& xyz, PJ *P) {
     struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
@@ -48,7 +48,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 }
 
 
-static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+static PJ_COORD forward_4d(const PJ_COORD& obs, PJ *P) {
     struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
     PJ_COORD point = obs;
 
@@ -66,7 +66,7 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
     return point;
 }
 
-static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
+static PJ_COORD reverse_4d(const PJ_COORD& obs, PJ *P) {
     struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
     PJ_COORD point = obs;
 

@@ -56,7 +56,7 @@ static PJ_LP latlong_inverse(PJ_XY xy, PJ *P) {
 }
 
 
- static PJ_XYZ latlong_forward_3d (PJ_LPZ lpz, PJ *P) {
+ static PJ_XYZ latlong_forward_3d (const PJ_LPZ& lpz, PJ *P) {
     PJ_XYZ xyz = {0,0,0};
     (void) P;
     xyz.x = lpz.lam;
@@ -66,7 +66,7 @@ static PJ_LP latlong_inverse(PJ_XY xy, PJ *P) {
 }
 
 
-static PJ_LPZ latlong_inverse_3d (PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ latlong_inverse_3d (const PJ_XYZ& xyz, PJ *P) {
     PJ_LPZ lpz = {0,0,0};
     (void) P;
     lpz.lam = xyz.x;
@@ -75,13 +75,13 @@ static PJ_LPZ latlong_inverse_3d (PJ_XYZ xyz, PJ *P) {
     return lpz;
 }
 
-static PJ_COORD latlong_forward_4d (PJ_COORD obs, PJ *P) {
+static PJ_COORD latlong_forward_4d (const PJ_COORD& obs, PJ *P) {
     (void) P;
     return obs;
 }
 
 
-static PJ_COORD latlong_inverse_4d (PJ_COORD obs, PJ *P) {
+static PJ_COORD latlong_inverse_4d (const PJ_COORD& obs, PJ *P) {
     (void) P;
     return obs;
 }

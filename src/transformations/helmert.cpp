@@ -59,8 +59,8 @@ Last update: 2018-10-26
 PROJ_HEAD(helmert, "3(6)-, 4(8)- and 7(14)-parameter Helmert shift");
 PROJ_HEAD(molobadekas, "Molodensky-Badekas transformation");
 
-static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P);
-static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P);
+static PJ_XYZ helmert_forward_3d (const PJ_LPZ& lpz, PJ *P);
+static PJ_LPZ helmert_reverse_3d (const PJ_XYZ& xyz, PJ *P);
 
 
 
@@ -362,7 +362,7 @@ static PJ_LP helmert_reverse (PJ_XY xy, PJ *P) {
 
 
 /***********************************************************************/
-static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ helmert_forward_3d (const PJ_LPZ& lpz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
@@ -402,7 +402,7 @@ static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P) {
 
 
 /***********************************************************************/
-static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ helmert_reverse_3d (const PJ_XYZ& xyz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
@@ -438,7 +438,7 @@ static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P) {
 }
 
 
-static PJ_COORD helmert_forward_4d (PJ_COORD point, PJ *P) {
+static PJ_COORD helmert_forward_4d (const PJ_COORD& point, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
 
     /* We only need to rebuild the rotation matrix if the
@@ -450,13 +450,15 @@ static PJ_COORD helmert_forward_4d (PJ_COORD point, PJ *P) {
         build_rot_matrix(P);
     }
 
-    point.xyz = helmert_forward_3d (point.lpz, P);
+    PJ_COORD pointOut;
+    pointOut.xyz = helmert_forward_3d (point.lpz, P);
+    pointOut.xyzt.t = point.lpzt.t;
 
-    return point;
+    return pointOut;
 }
 
 
-static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
+static PJ_COORD helmert_reverse_4d (const PJ_COORD& point, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
 
     /* We only need to rebuild the rotation matrix if the
@@ -468,9 +470,11 @@ static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
         build_rot_matrix(P);
     }
 
-    point.lpz = helmert_reverse_3d (point.xyz, P);
+    PJ_COORD pointOut;
+    pointOut.lpz = helmert_reverse_3d (point.xyz, P);
+    pointOut.lpzt.t = point.xyzt.t;
 
-    return point;
+    return pointOut;
 }
 
 /* Arcsecond to radians */

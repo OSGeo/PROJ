@@ -131,7 +131,7 @@ static double geocentric_radius (double a, double b, double phi) {
 
 
 /*********************************************************************/
-static PJ_XYZ cartesian (PJ_LPZ geod,  PJ *P) {
+static PJ_XYZ cartesian (const PJ_LPZ& geod,  PJ *P) {
 /*********************************************************************/
     double N, cosphi = cos(geod.phi);
     PJ_XYZ xyz;
@@ -148,7 +148,7 @@ static PJ_XYZ cartesian (PJ_LPZ geod,  PJ *P) {
 
 
 /*********************************************************************/
-static PJ_LPZ geodetic (PJ_XYZ cart,  PJ *P) {
+static PJ_LPZ geodetic (const PJ_XYZ& cart,  PJ *P) {
 /*********************************************************************/
     double N, p, theta, c, s;
     PJ_LPZ lpz;

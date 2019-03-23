@@ -104,7 +104,7 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
 }
 
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(const PJ_LPZ& lpz, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out, in;
@@ -118,7 +118,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     return out.xyz;
 }
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(const PJ_XYZ& xyz, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD in, out;
@@ -133,7 +133,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 }
 
 
-static PJ_COORD forward_4d(PJ_COORD coo, PJ *P) {
+static PJ_COORD forward_4d(const PJ_COORD& coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out;
@@ -147,7 +147,7 @@ static PJ_COORD forward_4d(PJ_COORD coo, PJ *P) {
 }
 
 
-static PJ_COORD reverse_4d(PJ_COORD coo, PJ *P) {
+static PJ_COORD reverse_4d(const PJ_COORD& coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out;

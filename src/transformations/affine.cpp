@@ -59,7 +59,7 @@ struct pj_opaque_affine {
 } // anonymous namespace
 
 
-static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+static PJ_COORD forward_4d(const PJ_COORD& obs, PJ *P) {
     PJ_COORD newObs;
     const struct pj_opaque_affine *Q = (const struct pj_opaque_affine *) P->opaque;
     const struct pj_affine_coeffs *C = &(Q->forward);
@@ -70,7 +70,7 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
     return newObs;
 }
 
-static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ forward_3d(const PJ_LPZ& lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
     return forward_4d(point, P).xyz;
@@ -84,21 +84,21 @@ static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
 }
 
 
-static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
+static PJ_COORD reverse_4d(const PJ_COORD& obs, PJ *P) {
     PJ_COORD newObs;
     const struct pj_opaque_affine *Q = (const struct pj_opaque_affine *) P->opaque;
     const struct pj_affine_coeffs *C = &(Q->reverse);
-    obs.xyzt.x -= Q->xoff;
-    obs.xyzt.y -= Q->yoff;
-    obs.xyzt.z -= Q->zoff;
-    newObs.xyzt.x = C->s11 * obs.xyzt.x + C->s12 * obs.xyzt.y + C->s13 * obs.xyzt.z;
-    newObs.xyzt.y = C->s21 * obs.xyzt.x + C->s22 * obs.xyzt.y + C->s23 * obs.xyzt.z;
-    newObs.xyzt.z = C->s31 * obs.xyzt.x + C->s32 * obs.xyzt.y + C->s33 * obs.xyzt.z;
+    const double x = obs.xyzt.x - Q->xoff;
+    const double y = obs.xyzt.y - Q->yoff;
+    const double z = obs.xyzt.z - Q->zoff;
+    newObs.xyzt.x = C->s11 * x + C->s12 * y + C->s13 * z;
+    newObs.xyzt.y = C->s21 * x + C->s22 * y + C->s23 * z;
+    newObs.xyzt.z = C->s31 * x + C->s32 * y + C->s33 * z;
     newObs.xyzt.t = C->tscale * (obs.xyzt.t - Q->toff);
     return newObs;
 }
 
-static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ reverse_3d(const PJ_XYZ& xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
     return reverse_4d(point, P).lpz;

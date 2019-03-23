@@ -130,22 +130,13 @@ struct pj_opaque_pushpop {
 } // anonymous namespace
 
 
-static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P);
-static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P);
-static PJ_XYZ    pipeline_forward_3d (PJ_LPZ lpz, PJ *P);
-static PJ_LPZ    pipeline_reverse_3d (PJ_XYZ xyz, PJ *P);
-static PJ_XY     pipeline_forward (PJ_LP lp, PJ *P);
-static PJ_LP     pipeline_reverse (PJ_XY xy, PJ *P);
-
-
-
-
-static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
+static PJ_COORD pipeline_forward_4d (const PJ_COORD& pointIn, PJ *P) {
     int i, first_step, last_step;
 
     first_step = 1;
     last_step  = static_cast<struct pj_opaque*>(P->opaque)->steps + 1;
 
+    PJ_COORD point(pointIn);
     for (i = first_step;  i != last_step;  i++)
         point = proj_trans (static_cast<struct pj_opaque*>(P->opaque)->pipeline[i], PJ_FWD, point);
 
@@ -153,12 +144,13 @@ static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
 }
 
 
-static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
+static PJ_COORD pipeline_reverse_4d (const PJ_COORD& pointIn, PJ *P) {
     int i, first_step, last_step;
 
     first_step = static_cast<struct pj_opaque*>(P->opaque)->steps;
     last_step  =  0;
 
+    PJ_COORD point(pointIn);
     for (i = first_step;  i != last_step;  i--)
         point = proj_trans (static_cast<struct pj_opaque*>(P->opaque)->pipeline[i], PJ_INV, point);
 
@@ -168,7 +160,7 @@ static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
 
 
 
-static PJ_XYZ pipeline_forward_3d (PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ pipeline_forward_3d (const PJ_LPZ& lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     int i;
     point.lpz = lpz;
@@ -180,7 +172,7 @@ static PJ_XYZ pipeline_forward_3d (PJ_LPZ lpz, PJ *P) {
 }
 
 
-static PJ_LPZ pipeline_reverse_3d (PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ pipeline_reverse_3d (const PJ_XYZ& xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     int i;
     point.xyz = xyz;
@@ -570,7 +562,7 @@ PJ *OPERATION(pipeline,0) {
     return P;
 }
 
-static PJ_COORD push(PJ_COORD point, PJ *P) {
+static PJ_COORD push(const PJ_COORD& point, PJ *P) {
     if (P->parent == nullptr)
         return point;
 
@@ -589,7 +581,8 @@ static PJ_COORD push(PJ_COORD point, PJ *P) {
     return point;
 }
 
-static PJ_COORD pop(PJ_COORD point, PJ *P) {
+static PJ_COORD pop(const PJ_COORD& pointIn, PJ *P) {
+    PJ_COORD point(pointIn);
     if (P->parent == nullptr)
         return point;
 
