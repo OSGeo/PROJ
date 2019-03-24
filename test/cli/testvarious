@@ -953,6 +953,19 @@ $EXE EPSG:32631 EPSG:4326 -E >> ${OUT} <<EOF
 EOF
 
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test EPSG:4896 to EPSG:7930" >> ${OUT}
+# Here we test that 4D coordinates are handled by cs2cs. Due to backwards
+# compatibility, the t-component is not written to STDOUT as part of the
+# coordinate data, but rather as part of the string that follows the xyz
+# components. This is only seen by users when the -E option is used. Which
+# means that this test also experience that behaviour.
+$EXE -f %.4f EPSG:4896 EPSG:7930 -E >> ${OUT} <<EOF
+3496737.2679    743254.4507  5264462.9620 2019.0
+3496737.2679    743254.4507  5264462.9620 2029.0
+EOF
+
+
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
