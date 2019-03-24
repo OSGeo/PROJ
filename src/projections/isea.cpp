@@ -105,8 +105,8 @@ static void hexbin2(double width, double x, double y, long *i, long *j) {
     iy = lround(ry);
     rz = floor(z + 0.5);
     iz = lround(rz);
-    if( fabs(rx + ry) > std::numeric_limits<int>::max() ||
-        fabs(rx + ry + rz) > std::numeric_limits<int>::max() ) {
+    if( fabs((double)ix + iy) > std::numeric_limits<int>::max() ||
+        fabs((double)ix + iy + iz) > std::numeric_limits<int>::max() ) {
         throw "Integer overflow";
     }
 
