@@ -12,9 +12,9 @@ proj
 
 Synopsis
 ********
-    **proj** [ **-beEfiIlmorsStTvVwW** ] [ args ] ] [ *+args* ] file[s]
+    **proj** [**-beEfiIlmorsStTvVwW**] [args]] [*+opt[=arg]* ...] file ...
 
-    **invproj** [ **-beEfiIlmorsStTvVwW** ] [ args ] ] [ *+args* ] file[s]
+    **invproj** [**-beEfiIlmorsStTvVwW**] [args]] [*+opt[=arg]* ...] file ...
 
 
 Description
@@ -156,7 +156,7 @@ The following control parameters can appear in any order
     the projected point. :option:`-v` is implied with this option.
 
 
-The *+args* run-line arguments are associated with cartographic parameters.
+The *+opt* run-line arguments are associated with cartographic parameters.
 Additional projection control parameters may be contained in two auxiliary
 control files: the first is optionally referenced with the
 *+init=file:id* and the second is always processed after the name of the
@@ -167,7 +167,7 @@ also used for supporting files like datum shift files.
 
 .. only:: html
 
-    Usage of *+args* varies with projection and for a complete description
+    Usage of *+opt* varies with projection and for a complete description
     consult the :ref:`projection pages <projections>`.
 
 

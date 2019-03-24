@@ -13,7 +13,7 @@ cct
 Synopsis
 ********
 
-    **cct** [ **-cIostvz** [ args ] ] *+opts[=arg]* file[s]
+    **cct** [**-cIostvz** [args]] *+opt[=arg]* ... file ...
 
 Description
 ***********
@@ -70,7 +70,7 @@ The following control parameters can appear in any order:
 
     Print version number.
 
-The *+args* arguments are associated with coordinate operation parameters.
+The *+opt* arguments are associated with coordinate operation parameters.
 Usage varies with operation.
 
 .. only:: html
