@@ -32,3 +32,6 @@ build_fuzzer()
 }
 
 build_fuzzer standard_fuzzer $(dirname $0)/standard_fuzzer.cpp
+
+echo "[libfuzzer]" > $OUT/standard_fuzzer.options
+echo "max_len = 10000" >> $OUT/standard_fuzzer.options
