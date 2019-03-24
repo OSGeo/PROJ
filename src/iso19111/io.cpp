@@ -1581,6 +1581,17 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
         }
     }
 
+    auto &versionNode = nodeP->lookForChild(WKTConstants::VERSION);
+    if (!isNull(versionNode)) {
+        const auto &versionChildren = versionNode->GP()->children();
+        if (versionChildren.size() == 1) {
+            properties->set(CoordinateOperation::OPERATION_VERSION_KEY,
+                            stripQuotes(versionChildren[0]));
+        } else {
+            ThrowNotRequiredNumberOfChildren(versionNode->GP()->value());
+        }
+    }
+
     return *properties;
 }
 

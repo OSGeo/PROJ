@@ -1640,6 +1640,33 @@ TEST(wkt_parse, wkt2_projected) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt2_2018_projected_with_id_in_basegeodcrs) {
+    auto wkt = "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        ID[\"EPSG\",4326]],\n"
+               "    CONVERSION[\"UTM zone 31N\",\n"
+               "        METHOD[\"Transverse Mercator\"],\n"
+               "        PARAMETER[\"Latitude of natural origin\",0],\n"
+               "        PARAMETER[\"Longitude of natural origin\",3],\n"
+               "        PARAMETER[\"Scale factor at natural origin\",0.9996],\n"
+               "        PARAMETER[\"False easting\",500000],\n"
+               "        PARAMETER[\"False northing\",0]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"(E)\",east],\n"
+               "        AXIS[\"(N)\",north],\n"
+               "        UNIT[\"metre\",1],\n"
+               "    ID[\"EPSG\",32631]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    ASSERT_EQ(crs->baseCRS()->identifiers().size(), 1U);
+    EXPECT_EQ(crs->baseCRS()->identifiers().front()->code(), "4326");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt2_2018_simplified_projected) {
     auto wkt = "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
                "    BASEGEOGCRS[\"WGS 84\",\n"
@@ -2280,6 +2307,95 @@ TEST(wkt_parse, COORDINATEOPERATION) {
               GeographicCRS::EPSG_4979->nameStr());
     EXPECT_EQ(transf->method()->nameStr(), "operationMethodName");
     EXPECT_EQ(transf->parameterValues().size(), 1U);
+
+    {
+        auto outWkt = transf->exportToWKT(WKTFormatter::create().get());
+        EXPECT_EQ(replaceAll(replaceAll(outWkt, "\n", ""), " ", ""),
+                  replaceAll(replaceAll(wkt, "\n", ""), " ", ""));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, COORDINATEOPERATION_wkt2018) {
+
+    std::string src_wkt;
+    {
+        auto formatter =
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+        formatter->setOutputId(false);
+        src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter.get());
+    }
+
+    std::string dst_wkt;
+    {
+        auto formatter =
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+        formatter->setOutputId(false);
+        dst_wkt = GeographicCRS::EPSG_4807->exportToWKT(formatter.get());
+    }
+
+    std::string interpolation_wkt;
+    {
+        auto formatter =
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+        formatter->setOutputId(false);
+        interpolation_wkt =
+            GeographicCRS::EPSG_4979->exportToWKT(formatter.get());
+    }
+
+    auto wkt =
+        "COORDINATEOPERATION[\"transformationName\",\n"
+        "    VERSION[\"my version\"],\n"
+        "    SOURCECRS[" +
+        src_wkt + "],\n"
+                  "    TARGETCRS[" +
+        dst_wkt +
+        "],\n"
+        "    METHOD[\"operationMethodName\",\n"
+        "        ID[\"codeSpaceOperationMethod\",\"codeOperationMethod\"]],\n"
+        "    PARAMETERFILE[\"paramName\",\"foo.bin\"],\n"
+        "    INTERPOLATIONCRS[" +
+        interpolation_wkt +
+        "],\n"
+        "    OPERATIONACCURACY[0.1],\n"
+        "    ID[\"codeSpaceTransformation\",\"codeTransformation\"],\n"
+        "    REMARK[\"my remarks\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->nameStr(), "transformationName");
+    EXPECT_EQ(*transf->operationVersion(), "my version");
+    ASSERT_EQ(transf->identifiers().size(), 1U);
+    EXPECT_EQ(transf->identifiers()[0]->code(), "codeTransformation");
+    EXPECT_EQ(*(transf->identifiers()[0]->codeSpace()),
+              "codeSpaceTransformation");
+    ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1U);
+    EXPECT_EQ(transf->coordinateOperationAccuracies()[0]->value(), "0.1");
+    EXPECT_EQ(transf->sourceCRS()->nameStr(),
+              GeographicCRS::EPSG_4326->nameStr());
+    EXPECT_EQ(transf->targetCRS()->nameStr(),
+              GeographicCRS::EPSG_4807->nameStr());
+    ASSERT_TRUE(transf->interpolationCRS() != nullptr);
+    EXPECT_EQ(transf->interpolationCRS()->nameStr(),
+              GeographicCRS::EPSG_4979->nameStr());
+    EXPECT_EQ(transf->method()->nameStr(), "operationMethodName");
+    EXPECT_EQ(transf->parameterValues().size(), 1U);
+
+    {
+        auto outWkt = transf->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        EXPECT_EQ(replaceAll(replaceAll(outWkt, "\n", ""), " ", ""),
+                  replaceAll(replaceAll(wkt, "\n", ""), " ", ""));
+    }
+
+    {
+        auto outWkt = transf->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2015).get());
+        EXPECT_FALSE(outWkt.find("VERSION[\"my version\"],") !=
+                     std::string::npos);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2339,6 +2455,7 @@ TEST(wkt_parse, CONCATENATEDOPERATION) {
     auto concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(obj);
     ASSERT_TRUE(concat != nullptr);
     EXPECT_EQ(concat->nameStr(), "name");
+    EXPECT_FALSE(concat->operationVersion().has_value());
     ASSERT_EQ(concat->identifiers().size(), 1U);
     EXPECT_EQ(concat->identifiers()[0]->code(), "code");
     EXPECT_EQ(*(concat->identifiers()[0]->codeSpace()), "codeSpace");
@@ -2487,6 +2604,7 @@ TEST(wkt_parse,
     auto wkt =
         "CONCATENATEDOPERATION[\"Inverse of UTM zone 11N + NAD27 to WGS 84 "
         "(79) + UTM zone 11N\",\n"
+        "    VERSION[\"my version\"],\n"
         "    SOURCECRS[\n"
         "        PROJCRS[\"NAD27 / UTM zone 11N\",\n"
         "            BASEGEOGCRS[\"NAD27\",\n"
@@ -2639,6 +2757,7 @@ TEST(wkt_parse,
     auto obj = WKTParser().createFromWKT(wkt);
     auto concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(obj);
     ASSERT_TRUE(concat != nullptr);
+    EXPECT_EQ(*concat->operationVersion(), "my version");
 
     EXPECT_EQ(concat->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=utm +zone=11 +ellps=clrk66 "
