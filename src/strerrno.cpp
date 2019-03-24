@@ -40,8 +40,8 @@ pj_err_list[] = {
     "path not in range",                                               /* -29 */
     "h <= 0",                                                          /* -30 */
     "k <= 0",                                                          /* -31 */
-    "lat_0 = 0 or 90 or alpha = 90",                                   /* -32 */
-    "lat_1=lat_2 or lat_1=0 or lat_2=90",                              /* -33 */
+    "lat_1=lat_2 or lat_1=0 or lat_2=90",                              /* -32 */
+    "lat_0 = 0 or 90 or alpha = 90",                                   /* -33 */
     "elliptical usage required",                                       /* -34 */
     "invalid UTM zone number",                                         /* -35 */
     "", /* no longer used */                                           /* -36 */
