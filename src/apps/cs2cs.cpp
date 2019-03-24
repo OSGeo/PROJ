@@ -68,8 +68,8 @@ static const char *oform =
 static char oform_buffer[16]; /* buffer for oform when using -d */
 static const char *oterr = "*\t*"; /* output line for unprojectable input */
 static const char *usage =
-    "%s\nusage: %s [ -dDeEfIlrstvwW [args] ] [ +opts[=arg] ]\n"
-    "                   [+to [+opts[=arg] [ files ]\n";
+    "%s\nusage: %s [-dDeEfIlrstvwW [args]] [+opt[=arg] ...]\n"
+    "                   [+to +opt[=arg] ...] [file ...]\n";
 
 static double (*informat)(const char *,
                           char **); /* input data deformatter function */

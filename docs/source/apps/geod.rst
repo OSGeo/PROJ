@@ -7,9 +7,9 @@ geod
 Synopsis
 ********
 
-    **geod** *+ellps=<ellipse>* [ **-afFIlptwW** [ args ] ] [ *+args* ] file[s]
+    **geod** *+ellps=<ellipse>* [**-afFIlptwW** [args]] [*+opt[=arg]* ...] file ...
 
-    **invgeod** *+ellps=<ellipse>* [ **-afFIlptwW** [ args ] ] [ *+args* ] file[s]
+    **invgeod** *+ellps=<ellipse>* [**-afFIlptwW** [args]] [*+opt[=arg]* ...] file ...
 
 Description
 ***********
@@ -85,7 +85,7 @@ The following command-line options can appear in any order:
     This option causes the azimuthal values to be output as unsigned DMS
     numbers between 0 and 360 degrees. Also note :option:`-f`.
 
-The *+args* command-line options are associated with geodetic
+The *+opt* command-line options are associated with geodetic
 parameters for specifying the ellipsoidal or sphere to use.
 controls. The options are processed in left to right order
 from the command line. Reentry of an option is ignored with
