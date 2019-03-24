@@ -113,6 +113,17 @@ static void process(FILE *fid)
 
         z = strtod(s, &s);
 
+        /* To avoid breaking existing tests, we read what is a possible t    */
+        /* component of the input and rewind the s-pointer so that the final */
+        /* output has consistant behaviour, with or without t values.        */
+        /* This is a bit of a hack, in most cases 4D coordinates will be     */
+        /* written to STDOUT (except when using -E) but the output format    */
+        /* speficied with -f is not respected for the t component, rather it */
+        /* is forward verbatim from the input.                               */
+        char *before_time = s;
+        double t = strtod(s, &s);
+        s = before_time;
+
         if (data.v == HUGE_VAL)
             data.u = HUGE_VAL;
 
@@ -120,11 +131,11 @@ static void process(FILE *fid)
             --s; /* assumed we gobbled \n */
 
         if (echoin) {
-            char t;
-            t = *s;
+            char temp;
+            temp = *s;
             *s = '\0';
             (void)fputs(line, stdout);
-            *s = t;
+            *s = temp;
             putchar('\t');
         }
 
@@ -141,7 +152,7 @@ static void process(FILE *fid)
             coord.xyzt.x = data.u;
             coord.xyzt.y = data.v;
             coord.xyzt.z = z;
-            coord.xyzt.t = HUGE_VAL;
+            coord.xyzt.t = t;
             coord = proj_trans(transformation, PJ_FWD, coord);
             data.u = coord.xyz.x;
             data.v = coord.xyz.y;
