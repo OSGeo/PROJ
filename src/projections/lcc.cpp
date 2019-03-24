@@ -105,6 +105,9 @@ PJ *PROJECTION(lcc) {
 
         m1 = pj_msfn(sinphi, cosphi, P->es);
         ml1 = pj_tsfn(Q->phi1, sinphi, P->e);
+        if( ml1 == 0 ) {
+            return pj_default_destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
+        }
         if (secant) { /* secant cone */
             sinphi = sin(Q->phi2);
             Q->n = log(m1 / pj_msfn(sinphi, cos(Q->phi2), P->es));
@@ -112,7 +115,11 @@ PJ *PROJECTION(lcc) {
                 // Not quite, but es is very close to 1...
                 return pj_default_destructor(P, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
             }
-            Q->n /= log(ml1 / pj_tsfn(Q->phi2, sinphi, P->e));
+            const double ml2 = pj_tsfn(Q->phi2, sinphi, P->e);
+            if( ml2 == 0 ) {
+                return pj_default_destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
+            }
+            Q->n /= log(ml1 / ml2);
         }
         Q->c = (Q->rho0 = m1 * pow(ml1, -Q->n) / Q->n);
         Q->rho0 *= (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :
