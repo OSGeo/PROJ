@@ -150,6 +150,8 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
 
     PROJ_DLL bool hasBallparkTransformation() const;
 
+    PROJ_DLL static const std::string OPERATION_VERSION_KEY;
+
   protected:
     PROJ_INTERNAL CoordinateOperation();
     PROJ_INTERNAL CoordinateOperation(const CoordinateOperation &other);
@@ -170,6 +172,10 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
     PROJ_INTERNAL void setHasBallparkTransformation(bool b);
+
+    PROJ_INTERNAL void
+    setProperties(const util::PropertyMap
+                      &properties); // throw(InvalidValueTypeException)
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

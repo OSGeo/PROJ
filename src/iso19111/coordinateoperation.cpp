@@ -756,6 +756,15 @@ void CoordinateOperation::setHasBallparkTransformation(bool b) {
 
 // ---------------------------------------------------------------------------
 
+void CoordinateOperation::setProperties(
+    const util::PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    ObjectUsage::setProperties(properties);
+    properties.getStringValue(OPERATION_VERSION_KEY, d->operationVersion_);
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct OperationMethod::Private {
     util::optional<std::string> formula_{};
@@ -6175,17 +6184,17 @@ TransformationNNPtr Transformation::create(
         throw InvalidOperation(
             "Inconsistent number of parameters and parameter values");
     }
-    auto conv = Transformation::nn_make_shared<Transformation>(
+    auto transf = Transformation::nn_make_shared<Transformation>(
         sourceCRSIn, targetCRSIn, interpolationCRSIn, methodIn, values,
         accuracies);
-    conv->assignSelf(conv);
-    conv->setProperties(properties);
+    transf->assignSelf(transf);
+    transf->setProperties(properties);
     std::string name;
     if (properties.getStringValue(common::IdentifiedObject::NAME_KEY, name) &&
         ci_find(name, "ballpark") != std::string::npos) {
-        conv->setHasBallparkTransformation(true);
+        transf->setHasBallparkTransformation(true);
     }
-    return conv;
+    return transf;
 }
 
 // ---------------------------------------------------------------------------
@@ -7652,6 +7661,15 @@ void SingleOperation::exportTransformationToWKT(
     }
 
     formatter->addQuotedString(nameStr());
+
+    if (isWKT2 && formatter->use2018Keywords()) {
+        const auto &version = operationVersion();
+        if (version.has_value()) {
+            formatter->startNode(io::WKTConstants::VERSION, false);
+            formatter->addQuotedString(*version);
+            formatter->endNode();
+        }
+    }
 
     if (!formatter->abridgedTransformation()) {
         formatter->startNode(io::WKTConstants::SOURCECRS, false);
@@ -9309,6 +9327,15 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->startNode(io::WKTConstants::CONCATENATEDOPERATION,
                          !identifiers().empty());
     formatter->addQuotedString(nameStr());
+
+    if (isWKT2 && formatter->use2018Keywords()) {
+        const auto &version = operationVersion();
+        if (version.has_value()) {
+            formatter->startNode(io::WKTConstants::VERSION, false);
+            formatter->addQuotedString(*version);
+            formatter->endNode();
+        }
+    }
 
     formatter->startNode(io::WKTConstants::SOURCECRS, false);
     sourceCRS()->_exportToWKT(formatter);
