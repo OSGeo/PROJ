@@ -80,7 +80,14 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     al = c1 / c3 - THIRD * c2 * c2;
     m = 2. * sqrt(-THIRD * al);
     d = C2_27 * c2 * c2 * c2 + (c0 * c0 - THIRD * c2 * c1) / c3;
-    if (((t = fabs(d = 3. * d / (al * m))) - TOL) <= 1.) {
+    const double al_mul_m = al * m;
+    if( al_mul_m == 0 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return proj_coord_error().lp;
+    }
+    d = 3. * d /al_mul_m;
+    t = fabs(d);
+    if ((t - TOL) <= 1.) {
         d = t > 1. ? (d > 0. ? 0. : M_PI) : acos(d);
         lp.phi = M_PI * (m * cos(d * THIRD + PI4_3) - THIRD * c2);
         if (xy.y < 0.) lp.phi = -lp.phi;
