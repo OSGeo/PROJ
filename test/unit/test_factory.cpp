@@ -2799,7 +2799,7 @@ TEST(factory, getMetadata) {
     EXPECT_EQ(ctxt->getMetadata("i_do_not_exist"), nullptr);
     const char *IGNF_VERSION = ctxt->getMetadata("IGNF.VERSION");
     ASSERT_TRUE(IGNF_VERSION != nullptr);
-    EXPECT_EQ(std::string(IGNF_VERSION), "3.0.2");
+    EXPECT_EQ(std::string(IGNF_VERSION), "3.0.3");
 }
 
 // ---------------------------------------------------------------------------
