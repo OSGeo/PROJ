@@ -150,7 +150,8 @@ TEST(factory, AuthorityFactory_createPrimeMeridian) {
     EXPECT_THROW(factory->createPrimeMeridian("-1"),
                  NoSuchAuthorityCodeException);
     EXPECT_TRUE(nn_dynamic_pointer_cast<PrimeMeridian>(
-                    factory->createObject("8903")) != nullptr);
+                    AuthorityFactory::create(DatabaseContext::create(), "ESRI")
+                        ->createObject("108900")) != nullptr);
     auto pm = factory->createPrimeMeridian("8903");
     ASSERT_EQ(pm->identifiers().size(), 1U);
     EXPECT_EQ(pm->identifiers()[0]->code(), "8903");
