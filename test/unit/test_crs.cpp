@@ -148,32 +148,72 @@ TEST(crs, GeographicCRS_datum_ensemble) {
         std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326,
                                 GeodeticReferenceFrame::EPSG_6326},
         PositionalAccuracy::create("100"));
-    auto crs = GeographicCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), nullptr,
-        ensemble_vdatum,
-        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
-    WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
-    f->simulCurNodeHasId();
-    crs->exportToWKT(f.get());
-    auto expected = "GEOGCRS[\"unnamed\",\n"
-                    "    ENSEMBLE[\"unnamed\",\n"
-                    "        MEMBER[\"World Geodetic System 1984\"],\n"
-                    "        MEMBER[\"World Geodetic System 1984\"],\n"
-                    "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-                    "            LENGTHUNIT[\"metre\",1]],\n"
-                    "        ENSEMBLEACCURACY[100]],\n"
-                    "    PRIMEM[\"Greenwich\",0,\n"
-                    "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-                    "    CS[ellipsoidal,2],\n"
-                    "        AXIS[\"latitude\",north,\n"
-                    "            ORDER[1],\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-                    "        AXIS[\"longitude\",east,\n"
-                    "            ORDER[2],\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+    {
+        auto crs = GeographicCRS::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, "unnamed")
+                .set(Identifier::CODESPACE_KEY, "MY_CODESPACE")
+                .set(Identifier::CODE_KEY, "MY_ID"),
+            nullptr, ensemble_vdatum,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+        WKTFormatterNNPtr f(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+        crs->exportToWKT(f.get());
+        auto expected =
+            "GEOGCRS[\"unnamed\",\n"
+            "    ENSEMBLE[\"unnamed\",\n"
+            "        MEMBER[\"World Geodetic System 1984\"],\n"
+            "        MEMBER[\"World Geodetic System 1984\"],\n"
+            "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        ENSEMBLEACCURACY[100]],\n"
+            "    PRIMEM[\"Greenwich\",0,\n"
+            "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "    CS[ellipsoidal,2],\n"
+            "        AXIS[\"latitude\",north,\n"
+            "            ORDER[1],\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        AXIS[\"longitude\",east,\n"
+            "            ORDER[2],\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "    ID[\"MY_CODESPACE\",\"MY_ID\"]]";
 
-    EXPECT_EQ(f->toString(), expected);
+        EXPECT_EQ(f->toString(), expected);
+    }
+
+    {
+        auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), nullptr,
+            ensemble_vdatum,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+        WKTFormatterNNPtr f(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+        crs->exportToWKT(f.get());
+        auto expected = "GEOGCRS[\"unnamed\",\n"
+                        "    ENSEMBLE[\"unnamed\",\n"
+                        "        MEMBER[\"World Geodetic System 1984\",\n"
+                        "            ID[\"EPSG\",6326]],\n"
+                        "        MEMBER[\"World Geodetic System 1984\",\n"
+                        "            ID[\"EPSG\",6326]],\n"
+                        "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                        "            LENGTHUNIT[\"metre\",1],\n"
+                        "            ID[\"EPSG\",7030]],\n"
+                        "        ENSEMBLEACCURACY[100]],\n"
+                        "    PRIMEM[\"Greenwich\",0,\n"
+                        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                        "        ID[\"EPSG\",8901]],\n"
+                        "    CS[ellipsoidal,2],\n"
+                        "        AXIS[\"latitude\",north,\n"
+                        "            ORDER[1],\n"
+                        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                        "                ID[\"EPSG\",9122]]],\n"
+                        "        AXIS[\"longitude\",east,\n"
+                        "            ORDER[2],\n"
+                        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                        "                ID[\"EPSG\",9122]]]]";
+
+        EXPECT_EQ(f->toString(), expected);
+    }
 }
 
 // ---------------------------------------------------------------------------
