@@ -141,6 +141,7 @@ struct WKTFormatter::Private {
     std::vector<bool> stackHasChild_{};
     std::vector<bool> stackHasId_{false};
     std::vector<bool> stackEmptyKeyword_{};
+    std::vector<bool> stackDisableUsage_{};
     std::vector<bool> outputUnitStack_{true};
     std::vector<bool> outputIdStack_{true};
     std::vector<UnitOfMeasureNNPtr> axisLinearUnitStack_{
@@ -272,6 +273,11 @@ const std::string &WKTFormatter::toString() const {
     if (d->outputUnitStack_.size() != 1)
         throw FormattingException(
             "Unbalanced pushOutputUnit() / popOutputUnit()");
+    if (d->stackHasId_.size() != 1)
+        throw FormattingException("Unbalanced pushHasId() / popHasId()");
+    if (!d->stackDisableUsage_.empty())
+        throw FormattingException(
+            "Unbalanced pushDisableUsage() / popDisableUsage()");
 
     return d->result_;
 }
@@ -552,6 +558,28 @@ void WKTFormatter::popOutputId() { d->outputIdStack_.pop_back(); }
 
 bool WKTFormatter::outputId() const {
     return !d->params_.useESRIDialect_ && d->outputIdStack_.back();
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::pushHasId(bool hasId) { d->stackHasId_.push_back(hasId); }
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::popHasId() { d->stackHasId_.pop_back(); }
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::pushDisableUsage() { d->stackDisableUsage_.push_back(true); }
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::popDisableUsage() { d->stackDisableUsage_.pop_back(); }
+
+// ---------------------------------------------------------------------------
+
+bool WKTFormatter::outputUsage() const {
+    return outputId() && d->stackDisableUsage_.empty();
 }
 
 // ---------------------------------------------------------------------------
