@@ -718,6 +718,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
     auto op = factory->createCoordinateOperation("6276", false);
     auto expected =
         "COORDINATEOPERATION[\"ITRF2008 to GDA94 (1)\",\n"
+        "    VERSION[\"GA-Aus 2010\"],\n"
         "    SOURCECRS[\n"
         "        GEODCRS[\"ITRF2008\",\n"
         "            DATUM[\"International Terrestrial Reference Frame "
@@ -875,6 +876,7 @@ TEST(
     auto op = factory->createCoordinateOperation("1295", false);
     auto expected =
         "COORDINATEOPERATION[\"RGNC91-93 to NEA74 Noumea (4)\",\n"
+        "    VERSION[\"ESRI-Ncl 0.05m\"],\n"
         "    SOURCECRS[\n"
         "        GEOGCRS[\"RGNC91-93\",\n"
         "            DATUM[\"Reseau Geodesique de Nouvelle Caledonie 91-93\",\n"
@@ -944,6 +946,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
     auto op = factory->createCoordinateOperation("1884", false);
     auto expected =
         "COORDINATEOPERATION[\"S-JTSK (Ferro) to S-JTSK (1)\",\n"
+        "    VERSION[\"EPSG-Cze\"],\n"
         "    SOURCECRS[\n"
         "        GEOGCRS[\"S-JTSK (Ferro)\",\n"
         "            DATUM[\"System of the Unified Trigonometrical Cadastral "
@@ -1472,7 +1475,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "'EPSG','4326','EPSG','1262',44.0,-143."
             "0,-90.0,-294.0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(execute(
@@ -1481,7 +1484,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "'EPSG','9615'"
             ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
             "8656','Latitude and longitude difference "
-            "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+            "0);"))
             << last_error();
 
         ASSERT_TRUE(execute(
@@ -1498,7 +1502,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(execute(
@@ -1506,7 +1510,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "VALUES('EPSG','DUMMY_CONCATENATED','name',NULL,NULL,"
             "'EPSG','4326','EPSG'"
             ",'4326','EPSG','1262',NULL,'EPSG','DUMMY_OTHER_TRANSFORMATION'"
-            ",'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL,NULL,0);"))
+            ",'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL,NULL,NULL,0);"))
             << last_error();
     }
 
@@ -1537,7 +1541,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "','EPSG'"
             ",'1262',1.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
     }
 
@@ -1845,7 +1849,7 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','OTHER','OTHER_4326','EPSG','1262',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     {
         auto res = factoryGeneral->createFromCoordinateReferenceSystemCodes(
@@ -1877,7 +1881,7 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',10.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(
@@ -1886,7 +1890,8 @@ TEST_F(FactoryWithTmpDatabase,
                 "TRANSFORMATION_1M_SMALL_EXTENT',NULL,NULL,'EPSG','9615'"
                 ",'NTv2','EPSG','4326','EPSG','4326','EPSG','2060',1.0,'EPSG','"
                 "8656','Latitude and longitude difference "
-                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(execute(
@@ -1895,7 +1900,7 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(
@@ -1904,7 +1909,8 @@ TEST_F(FactoryWithTmpDatabase,
                 "TRANSFORMATION_0.5M_DEPRECATED',NULL,NULL,'EPSG','9615'"
                 ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
                 "8656','Latitude and longitude difference "
-                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,1);"))
+                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,1);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2007,7 +2013,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-        "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2068,7 +2074,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2103,7 +2109,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2130,7 +2136,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2620,7 +2626,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(
@@ -2632,7 +2638,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto dbContext = DatabaseContext::create(m_ctxt);

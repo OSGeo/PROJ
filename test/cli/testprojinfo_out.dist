@@ -442,6 +442,7 @@ PROJ string:
 
 WKT2_2018 string:
 COORDINATEOPERATION["NAD27 to NAD83 (5)",
+    VERSION["SGQ-Can QC NT1"],
     SOURCECRS[
         GEOGCRS["NAD27",
             DATUM["North American Datum 1927",
@@ -492,6 +493,7 @@ PROJ string:
 
 WKT2_2018 string:
 COORDINATEOPERATION["NAD27 to NAD83 (6)",
+    VERSION["SGQ-Can QC NT2"],
     SOURCECRS[
         GEOGCRS["NAD27",
             DATUM["North American Datum 1927",

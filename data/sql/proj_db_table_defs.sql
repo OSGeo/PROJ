@@ -558,6 +558,8 @@ CREATE TABLE helmert_transformation(
     pivot_uom_auth_name TEXT,
     pivot_uom_code TEXT,
 
+    operation_version TEXT, -- normally mandatory in OGC Topic 2 but optional here
+
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_helmert_transformation PRIMARY KEY (auth_name, code),
@@ -633,6 +635,8 @@ CREATE TABLE grid_transformation(
 
     interpolation_crs_auth_name TEXT,
     interpolation_crs_code TEXT,
+
+    operation_version TEXT, -- normally mandatory in OGC Topic 2 but optional here
 
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
@@ -790,6 +794,8 @@ CREATE TABLE other_transformation(
     param7_uom_auth_name TEXT,
     param7_uom_code TEXT,
 
+    operation_version TEXT, -- normally mandatory in OGC Topic 2 but optional here
+
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_other_transformation PRIMARY KEY (auth_name, code),
@@ -851,6 +857,8 @@ CREATE TABLE concatenated_operation(
 
     step3_auth_name TEXT,
     step3_code TEXT,
+
+    operation_version TEXT, -- normally mandatory in OGC Topic 2 but optional here
 
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
