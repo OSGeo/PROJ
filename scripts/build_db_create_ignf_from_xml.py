@@ -501,9 +501,10 @@ for node in root.iterfind('.//Transformation'):
             print('Fixing URL of ' + filename + ' to ' + mapGridURLs[filename])
             filename = mapGridURLs[filename]
 
-        r = requests.head(filename, allow_redirects = True  )
-        if r.status_code not in (200, 302):
-            assert False, (r.status_code, id, name, filename)
+        if not filename.endswith('RAF09.mnt'): # no longer available
+            r = requests.head(filename, allow_redirects = True  )
+            if r.status_code not in (200, 302):
+                assert False, (r.status_code, id, name, filename)
 
         setVerticalGrids.add(filename)
 
