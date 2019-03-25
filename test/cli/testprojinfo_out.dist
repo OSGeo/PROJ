@@ -762,18 +762,18 @@ Candidate operations found: 3
 -------------------------------------
 Operation n°1:
 
-INVERSE(DERIVED_FROM(EPSG)):8371, Inverse of RGF93 to NGF IGN69 height (2), 0.02 m, France - mainland onshore
+INVERSE(DERIVED_FROM(EPSG)):8885, Inverse of RGF93 to NGF IGN69 height (3), 0.01 m, France - mainland onshore
 
 PROJ string:
-+proj=vgridshift +grids=RAF09.gtx +multiplier=1
++proj=vgridshift +grids=RAF18.gtx +multiplier=1
 
 -------------------------------------
 Operation n°2:
 
-INVERSE(EPSG):8885, Inverse of RGF93 to NGF IGN69 height (3), 0.01 m, France - mainland onshore
+INVERSE(DERIVED_FROM(EPSG)):8371, Inverse of RGF93 to NGF IGN69 height (2), 0.02 m, France - mainland onshore
 
 PROJ string:
-+proj=pipeline +step +inv +proj=vgridshift +grids=RAF18.tac +multiplier=1
++proj=vgridshift +grids=RAF09.gtx +multiplier=1
 
 -------------------------------------
 Operation n°3:
