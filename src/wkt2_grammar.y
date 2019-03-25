@@ -115,6 +115,7 @@
 %token T_COORDEPOCH             "COORDEPOCH"
 %token T_COORDINATEMETADATA     "COORDINATEMETADATA"
 %token T_POINTMOTIONOPERATION   "POINTMOTIONOPERATION"
+%token T_VERSION                "VERSION"
 
 /* WKT2 alternate (longer or shorter) */
 %token T_GEODETICCRS            "GEODETICCRS";
@@ -993,29 +994,30 @@ base_geodetic_crs: base_static_geodetic_crs | base_dynamic_geodetic_crs |
 
 base_static_geodetic_crs: base_geodetic_crs_keyword left_delimiter base_crs_name
                           wkt_separator geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
-                          opt_separator_pm_ellipsoidal_cs_unit
+                          opt_separator_pm_ellipsoidal_cs_unit_opt_separator_identifier_list
                           right_delimiter
 
-opt_separator_pm_ellipsoidal_cs_unit:
-    | wkt_separator prime_meridian
-    | wkt_separator prime_meridian wkt_separator ellipsoidal_cs_unit
-    | wkt_separator ellipsoidal_cs_unit
+opt_separator_pm_ellipsoidal_cs_unit_opt_separator_identifier_list:
+    | wkt_separator prime_meridian opt_separator_identifier_list
+    | wkt_separator prime_meridian wkt_separator ellipsoidal_cs_unit opt_separator_identifier_list
+    | wkt_separator ellipsoidal_cs_unit opt_separator_identifier_list
+    | wkt_separator identifier opt_separator_identifier_list
 
 base_dynamic_geodetic_crs: base_geodetic_crs_keyword left_delimiter base_crs_name
                            wkt_separator dynamic_crs
                            wkt_separator geodetic_reference_frame_without_pm
-                           opt_separator_pm_ellipsoidal_cs_unit
+                           opt_separator_pm_ellipsoidal_cs_unit_opt_separator_identifier_list
                            right_delimiter
 
 base_static_geographic_crs: base_geographic_crs_keyword left_delimiter base_crs_name
                             wkt_separator geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
-                            opt_separator_pm_ellipsoidal_cs_unit
+                            opt_separator_pm_ellipsoidal_cs_unit_opt_separator_identifier_list
                             right_delimiter
 
 base_dynamic_geographic_crs: base_geographic_crs_keyword left_delimiter base_crs_name
                              wkt_separator dynamic_crs
                              wkt_separator geodetic_reference_frame_without_pm
-                             opt_separator_pm_ellipsoidal_cs_unit
+                             opt_separator_pm_ellipsoidal_cs_unit_opt_separator_identifier_list
                              right_delimiter
 
 base_geodetic_crs_keyword: T_BASEGEODCRS
@@ -1281,27 +1283,28 @@ derived_dynamic_geog_crs: geographic_crs_keyword
 
 base_static_geod_crs: base_geodetic_crs_keyword left_delimiter base_crs_name
                           wkt_separator geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
-                          opt_separator_pm
+                          opt_separator_pm_opt_separator_identifier_list
                           right_delimiter
 
-opt_separator_pm:
-    | wkt_separator prime_meridian
+opt_separator_pm_opt_separator_identifier_list:
+    | wkt_separator prime_meridian opt_separator_identifier_list
+    | wkt_separator identifier opt_separator_identifier_list
 
 base_dynamic_geod_crs: base_geodetic_crs_keyword left_delimiter base_crs_name
                           wkt_separator dynamic_crs
                           wkt_separator geodetic_reference_frame_without_pm
-                          opt_separator_pm
+                          opt_separator_pm_opt_separator_identifier_list
                           right_delimiter
 
 base_static_geog_crs: base_geographic_crs_keyword left_delimiter base_crs_name
                           wkt_separator geodetic_reference_frame_or_geodetic_datum_ensemble_without_pm
-                          opt_separator_pm
+                          opt_separator_pm_opt_separator_identifier_list
                           right_delimiter
 
 base_dynamic_geog_crs: base_geographic_crs_keyword left_delimiter base_crs_name
                           wkt_separator dynamic_crs
                           wkt_separator geodetic_reference_frame_without_pm
-                          opt_separator_pm
+                          opt_separator_pm_opt_separator_identifier_list
                           right_delimiter
 
 // Derived projected CRS
@@ -1319,6 +1322,7 @@ derived_crs_name: quoted_latin_text
 base_projected_crs: base_projected_crs_keyword left_delimiter base_crs_name
                     wkt_separator base_geodetic_geographic_crs
                     wkt_separator map_projection
+                    opt_separator_identifier_list
                     right_delimiter
 
 base_projected_crs_keyword: T_BASEPROJCRS
@@ -1337,11 +1341,15 @@ derived_vertical_crs: vertical_crs_keyword left_delimiter crs_name
 base_vertical_crs: base_static_vertical_crs | base_dynamic_vertical_crs
 
 base_static_vertical_crs: base_vertical_crs_keyword left_delimiter base_crs_name
-                          wkt_separator vertical_reference_frame right_delimiter
+                          wkt_separator vertical_reference_frame
+                          opt_separator_identifier_list
+                          right_delimiter
 
 base_dynamic_vertical_crs: base_vertical_crs_keyword left_delimiter base_crs_name
                            wkt_separator dynamic_crs
-                           wkt_separator vertical_reference_frame right_delimiter
+                           wkt_separator vertical_reference_frame
+                           opt_separator_identifier_list
+                           right_delimiter
 
 base_vertical_crs_keyword: T_BASEVERTCRS
 
@@ -1355,7 +1363,9 @@ derived_engineering_crs: engineering_crs_keyword left_delimiter crs_name
                          right_delimiter
 
 base_engineering_crs: base_engineering_crs_keyword left_delimiter base_crs_name
-                     wkt_separator engineering_datum right_delimiter
+                      wkt_separator engineering_datum
+                      opt_separator_identifier_list
+                      right_delimiter
 
 base_engineering_crs_keyword: T_BASEENGCRS
 
@@ -1369,7 +1379,9 @@ derived_parametric_crs: parametric_crs_keyword left_delimiter crs_name
                         right_delimiter
 
 base_parametric_crs: base_parametric_crs_keyword left_delimiter base_crs_name
-                     wkt_separator parametric_datum right_delimiter
+                     wkt_separator parametric_datum
+                     opt_separator_identifier_list
+                     right_delimiter
 
 base_parametric_crs_keyword: T_BASEPARAMCRS
 
@@ -1383,7 +1395,9 @@ derived_temporal_crs: temporal_crs_keyword left_delimiter crs_name
                       right_delimiter
 
 base_temporal_crs: base_temporal_crs_keyword left_delimiter base_crs_name
-                   wkt_separator temporal_datum right_delimiter
+                   wkt_separator temporal_datum
+                   opt_separator_identifier_list
+                   right_delimiter
 
 base_temporal_crs_keyword: T_BASETIMECRS
 
@@ -1451,6 +1465,13 @@ dynamic_crs_coordinate_metadata: dynamic_geodetic_crs | dynamic_geographic_crs |
 // Coordinate operations
 
 coordinate_operation: operation_keyword left_delimiter operation_name
+                      coordinate_operation_next
+
+coordinate_operation_next:
+    wkt_separator operation_version coordinate_operation_end
+    | coordinate_operation_end
+
+coordinate_operation_end:
                       wkt_separator source_crs wkt_separator target_crs
                       wkt_separator operation_method
                       opt_parameter_or_parameter_file_list_opt_interpolation_crs_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark
@@ -1467,6 +1488,13 @@ opt_parameter_or_parameter_file_list_opt_interpolation_crs_opt_operation_accurac
 operation_keyword: T_COORDINATEOPERATION
 
 operation_name: quoted_latin_text
+
+operation_version: operation_version_keyword left_delimiter
+                   operation_version_text right_delimiter
+
+operation_version_keyword: T_VERSION
+
+operation_version_text: quoted_latin_text
 
 source_crs: source_crs_keyword left_delimiter crs right_delimiter
 
@@ -1488,6 +1516,13 @@ operation_accuracy_keyword: T_OPERATIONACCURACY
 // Point motion operation
 
 point_motion_operation: point_motion_keyword left_delimiter operation_name
+                        point_motion_operation_next
+
+point_motion_operation_next:
+    wkt_separator operation_version point_motion_operation_end
+    | point_motion_operation_end
+
+point_motion_operation_end:
                         wkt_separator source_crs
                         wkt_separator operation_method
                         opt_parameter_or_parameter_file_list_opt_operation_accuracy_opt_separator_scope_extent_identifier_remark
@@ -1506,6 +1541,13 @@ point_motion_keyword: T_POINTMOTIONOPERATION
 
 concatenated_operation: concatenated_operation_keyword left_delimiter
                         operation_name
+                        concatenated_operation_next
+
+concatenated_operation_next:
+    wkt_separator operation_version concatenated_operation_end
+    | concatenated_operation_end
+
+concatenated_operation_end:
                         wkt_separator source_crs wkt_separator target_crs
                         wkt_separator step_keyword left_delimiter step right_delimiter
                         wkt_separator step_keyword left_delimiter step right_delimiter
@@ -1535,8 +1577,16 @@ bound_crs: bound_crs_keyword left_delimiter
 bound_crs_keyword: T_BOUNDCRS
 
 abridged_coordinate_transformation: abridged_transformation_keyword left_delimiter
-                                    operation_name wkt_separator
-                                    operation_method wkt_separator
+                                    operation_name
+                                    abridged_coordinate_transformation_next
+
+abridged_coordinate_transformation_next:
+    wkt_separator operation_version abridged_coordinate_transformation_end
+    | abridged_coordinate_transformation_end
+
+abridged_coordinate_transformation_end:
+                                    wkt_separator operation_method
+                                    wkt_separator
                                     abridged_parameter_or_parameter_file
                                     opt_end_abridged_coordinate_transformation
                                     right_delimiter
