@@ -55,11 +55,18 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     }
 
     switch (Q->mode) {
-    case OBLIQ:
-        A = Q->akm1 / (Q->cosX1 * (1. + Q->sinX1 * sinX +
-           Q->cosX1 * cosX * coslam));
+    case OBLIQ: {
+        const double denom = Q->cosX1 * (1. + Q->sinX1 * sinX +
+           Q->cosX1 * cosX * coslam);
+        if( denom == 0 ) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return proj_coord_error().xy;
+        }
+        A = Q->akm1 / denom;
         xy.y = A * (Q->cosX1 * sinX - Q->sinX1 * cosX * coslam);
-        goto xmul; /* but why not just  xy.x = A * cosX; break;  ? */
+        xy.x = A * cosX;
+        break;
+    }
 
     case EQUIT:
         /* avoid zero division */
@@ -69,7 +76,6 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
             A = Q->akm1 / (1. + cosX * coslam);
             xy.y = A * sinX;
         }
-xmul:
         xy.x = A * cosX;
         break;
 
