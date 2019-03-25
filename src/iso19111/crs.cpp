@@ -2421,7 +2421,7 @@ void DerivedCRS::setDerivingConversionCRS() {
 
 // ---------------------------------------------------------------------------
 
-void DerivedCRS::baseExportToWKT(io::WKTFormatter *&formatter,
+void DerivedCRS::baseExportToWKT(io::WKTFormatter *formatter,
                                  const std::string &keyword,
                                  const std::string &baseKeyword) const {
     formatter->startNode(keyword, !identifiers().empty());
@@ -4848,7 +4848,7 @@ DerivedCRSTemplate<DerivedCRSTraits>::create(
 
 // ---------------------------------------------------------------------------
 
-static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *&formatter,
+static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *formatter,
                                                const std::string &crsName,
                                                bool wkt2_2018_only) {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
