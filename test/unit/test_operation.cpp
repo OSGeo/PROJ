@@ -5762,6 +5762,59 @@ TEST(operation, transformation_height_to_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, transformation_Geographic3D_to_GravityRelatedHeight_gtx) {
+    auto wkt =
+        "COORDINATEOPERATION[\"ETRS89 to NAP height (1)\",\n"
+        "    VERSION[\"RDNAP-Nld 2008\"],\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"ETRS89\",\n"
+        "            DATUM[\"European Terrestrial Reference System 1989\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",4937]]],\n"
+        "    TARGETCRS[\n"
+        "        VERTCRS[\"NAP height\",\n"
+        "            VDATUM[\"Normaal Amsterdams Peil\"],\n"
+        "            CS[vertical,1],\n"
+        "                AXIS[\"gravity-related height (H)\",up,\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",5709]]],\n"
+        "    METHOD[\"Geographic3D to GravityRelatedHeight (US .gtx)\",\n"
+        "        ID[\"EPSG\",9665]],\n"
+        "    PARAMETERFILE[\"Geoid (height correction) model "
+        "file\",\"naptrans2008.gtx\"],\n"
+        "    OPERATIONACCURACY[0.01],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"unknown\"],\n"
+        "        AREA[\"Netherlands - onshore\"],\n"
+        "        BBOX[50.75,3.2,53.7,7.22]],\n"
+        "    ID[\"EPSG\",7001]]";
+    ;
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+
+    // Check that we correctly inverse files in the case of
+    // "Geographic3D to GravityRelatedHeight (US .gtx)"
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +inv +proj=vgridshift "
+              "+grids=naptrans2008.gtx +multiplier=1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, transformation_ntv2_to_PROJ_string) {
     auto transformation = Transformation::createNTv2(
         PropertyMap(), GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
