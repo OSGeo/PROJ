@@ -2433,7 +2433,8 @@ void DerivedCRS::baseExportToWKT(io::WKTFormatter *formatter,
                                           !l_baseCRS->identifiers().empty());
     formatter->addQuotedString(l_baseCRS->nameStr());
     l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
-    if (formatter->use2018Keywords() && formatter->outputId()) {
+    if (formatter->use2018Keywords() &&
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
         l_baseCRS->formatID(formatter);
     }
     formatter->endNode();
@@ -2674,7 +2675,8 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             geodeticCRSAxisList[0]->unit()._exportToWKT(formatter);
         }
         l_baseCRS->primeMeridian()->_exportToWKT(formatter);
-        if (formatter->use2018Keywords() && formatter->outputId()) {
+        if (formatter->use2018Keywords() &&
+            !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
             l_baseCRS->formatID(formatter);
         }
         formatter->endNode();
