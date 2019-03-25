@@ -68,6 +68,8 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${SQLITE3_INCLUDE_DIR})
+# Add the directory containing proj_config.h
+include_directories(${CMAKE_BINARY_DIR}/src)
 
 add_executable(proj_pj_transform_test
   main.cpp
