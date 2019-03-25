@@ -4562,7 +4562,8 @@ TEST(crs, DerivedVerticalCRS_WKT2) {
 
     auto expected = "VERTCRS[\"Derived vertCRS\",\n"
                     "    BASEVERTCRS[\"ODN height\",\n"
-                    "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
+                    "        VDATUM[\"Ordnance Datum Newlyn\",\n"
+                    "            ID[\"EPSG\",5101]]],\n"
                     "    DERIVINGCONVERSION[\"unnamed\",\n"
                     "        METHOD[\"PROJ unimplemented\"]],\n"
                     "    CS[vertical,1],\n"
