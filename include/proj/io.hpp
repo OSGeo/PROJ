@@ -261,6 +261,13 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL void popOutputId();
     PROJ_INTERNAL bool outputId() const;
 
+    PROJ_INTERNAL void pushHasId(bool hasId);
+    PROJ_INTERNAL void popHasId();
+
+    PROJ_INTERNAL void pushDisableUsage();
+    PROJ_INTERNAL void popDisableUsage();
+    PROJ_INTERNAL bool outputUsage() const;
+
     PROJ_INTERNAL void
     pushAxisLinearUnit(const common::UnitOfMeasureNNPtr &unit);
     PROJ_INTERNAL void popAxisLinearUnit();
