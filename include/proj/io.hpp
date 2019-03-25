@@ -195,8 +195,7 @@ class PROJ_GCC_DLL WKTFormatter {
         WKT2_2018_SIMPLIFIED,
 
         /** WKT1 as traditionally output by GDAL, deriving from OGC 01-009.
-            A notable departuPROJ_GCC_DLLre from WKT1_GDAL with respect to OGC
-           01-009 is
+            A notable departure from WKT1_GDAL with respect to OGC 01-009 is
             that in WKT1_GDAL, the unit of the PRIMEM value is always degrees.
            */
         WKT1_GDAL,
