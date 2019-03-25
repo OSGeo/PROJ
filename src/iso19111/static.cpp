@@ -31,6 +31,7 @@
 #endif
 
 #include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -57,6 +58,7 @@ using namespace NS_PROJ::crs;
 using namespace NS_PROJ::datum;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
+using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
 
 NS_PROJ_START
@@ -271,6 +273,7 @@ DEFINE_WKT_CONSTANT(BASEVERTCRS);
 DEFINE_WKT_CONSTANT(BASEENGCRS);
 DEFINE_WKT_CONSTANT(BASEPARAMCRS);
 DEFINE_WKT_CONSTANT(BASETIMECRS);
+DEFINE_WKT_CONSTANT(VERSION);
 
 DEFINE_WKT_CONSTANT(GEODETICCRS);
 DEFINE_WKT_CONSTANT(GEODETICDATUM);
@@ -638,6 +641,15 @@ const GeographicCRSNNPtr
 /** \brief EPSG:4979 / "WGS 84" 3D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4979(GeographicCRS::createEPSG_4979());
+
+// ---------------------------------------------------------------------------
+
+/** \brief Key to set the operation version of a operation::CoordinateOperation
+ *
+ * The value is to be provided as a string.
+ */
+const std::string
+    operation::CoordinateOperation::OPERATION_VERSION_KEY("operationVersion");
 
 // ---------------------------------------------------------------------------
 
