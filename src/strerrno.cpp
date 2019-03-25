@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "proj.h"
+#include "proj_config.h"
 #include "proj_internal.h"
 
 static const char * const
