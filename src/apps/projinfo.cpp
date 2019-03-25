@@ -77,7 +77,8 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation|ellipsoid] [--summary] [-q]"
+        << "usage: projinfo [-o formats] [-k crs|operation|ellipsoid] "
+           "[--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
            "[--bbox west_long,south_lat,east_long,north_lat]) "
@@ -138,7 +139,8 @@ static std::string c_ify_string(const std::string &str) {
 
 static BaseObjectNNPtr buildObject(
     DatabaseContextPtr dbContext, const std::string &user_string,
-    const std::string &kind, const std::string &context, bool buildBoundCRSToWGS84,
+    const std::string &kind, const std::string &context,
+    bool buildBoundCRSToWGS84,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     bool quiet) {
     BaseObjectPtr obj;
@@ -179,8 +181,7 @@ static BaseObjectNNPtr buildObject(
                        tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else if (kind == "ellipsoid" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" +
-                       tokens[1];
+            auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
             // Convenience to be able to use C escaped strings...
