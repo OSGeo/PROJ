@@ -302,6 +302,8 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL bool primeMeridianOrParameterUnitOmittedIfSameAsAxis() const;
     PROJ_INTERNAL bool primeMeridianInDegree() const;
     PROJ_INTERNAL bool outputCSUnitOnlyOnceIfSame() const;
+    PROJ_INTERNAL bool idOnTopLevelOnly() const;
+    PROJ_INTERNAL bool topLevelHasId() const;
 
     /** WKT version. */
     enum class Version {

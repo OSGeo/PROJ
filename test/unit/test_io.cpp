@@ -1663,6 +1663,21 @@ TEST(wkt_parse, wkt2_2018_projected_with_id_in_basegeodcrs) {
     ASSERT_TRUE(crs != nullptr);
     ASSERT_EQ(crs->baseCRS()->identifiers().size(), 1U);
     EXPECT_EQ(crs->baseCRS()->identifiers().front()->code(), "4326");
+
+    {
+        auto got_wkt = crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        EXPECT_TRUE(got_wkt.find("ID[\"EPSG\",4326]]") != std::string::npos)
+            << got_wkt;
+    }
+
+    {
+        auto got_wkt = crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED)
+                .get());
+        EXPECT_TRUE(got_wkt.find("ID[\"EPSG\",4326]]") == std::string::npos)
+            << got_wkt;
+    }
 }
 
 // ---------------------------------------------------------------------------

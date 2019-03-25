@@ -634,6 +634,18 @@ bool WKTFormatter::primeMeridianInDegree() const {
 
 // ---------------------------------------------------------------------------
 
+bool WKTFormatter::idOnTopLevelOnly() const {
+    return d->params_.idOnTopLevelOnly_;
+}
+
+// ---------------------------------------------------------------------------
+
+bool WKTFormatter::topLevelHasId() const {
+    return d->stackHasId_.size() >= 2 && d->stackHasId_[1];
+}
+
+// ---------------------------------------------------------------------------
+
 WKTFormatter::Version WKTFormatter::version() const {
     return d->params_.version_;
 }

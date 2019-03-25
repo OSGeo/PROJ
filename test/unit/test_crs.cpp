@@ -1601,6 +1601,52 @@ TEST(crs, projectedCRS_as_WKT2) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_as_WKT2_2018) {
+    auto crs = createProjected();
+
+    auto expected =
+        "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+        "    BASEGEOGCRS[\"WGS 84\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4326]],\n"
+        "    CONVERSION[\"UTM zone 31N\",\n"
+        "        METHOD[\"Transverse Mercator\",\n"
+        "            ID[\"EPSG\",9807]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",3,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8805]],\n"
+        "        PARAMETER[\"False easting\",500000,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    ID[\"EPSG\",32631]]";
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+        expected);
+}
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_as_WKT2_simplified) {
     auto crs = createProjected();
 
