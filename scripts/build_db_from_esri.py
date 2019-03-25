@@ -51,10 +51,10 @@ cursor = conn.cursor()
 all_sql = []
 
 # TODO: update this !
-version = 'ArcMap 10.6.1 / ArcGISPro 2.2'
+version = 'ArcMap 10.7.0'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.VERSION', '%s');""" % (version))
-date = '2018-09-19'
+date = '2019-03-25'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.DATE', '%s');""" % (date))
 
@@ -568,6 +568,7 @@ def import_geogcs():
                         assert map_datum_esri_to_parameters[datum_code]['pm_auth_name'] == pm_auth_name, (
                             row, map_datum_esri_to_parameters[datum_code]['pm_auth_name'], pm_auth_name)
                         if map_datum_esri_to_parameters[datum_code]['pm_code'] != pm_code:
+                            p = map_datum_esri_to_parameters[datum_code]
 
                             # Case of GCS_Voirol_Unifie_1960 and GCS_Voirol_Unifie_1960_Paris which use the same
                             # datum D_Voirol_Unifie_1960 but with different prime meridian
@@ -585,7 +586,6 @@ def import_geogcs():
                                 'ellps_code': p['ellps_code'],
                                 'deprecated': p['deprecated']
                             }
-                            p = map_datum_esri_to_parameters[datum_code]
 
                             sql = """INSERT INTO "geodetic_datum" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s','%s',%d);""" % (
                                 datum_code, p['esri_name'], p['description'], p['ellps_auth_name'], p['ellps_code'], pm_auth_name, pm_code, area_auth_name, area_code, p['deprecated'])
@@ -603,11 +603,11 @@ def import_geogcs():
                     code, esri_name, cs_code, datum_auth_name, datum_code, area_auth_name, area_code, deprecated)
                 all_sql.append(sql)
 
-                if deprecated and code != latestWkid:
+                if deprecated and code != latestWkid and code not in ('4305', '4812'): # Voirol 1960 no longer in EPSG
                     cursor.execute(
                         "SELECT name FROM geodetic_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                     src_row = cursor.fetchone()
-                    assert src_row
+                    assert src_row, (code, latestWkid)
 
                     sql = """INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','%s','geodetic_crs','EPSG','%s','ESRI');""" % (
                         code, latestWkid)
