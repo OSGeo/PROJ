@@ -6734,6 +6734,9 @@ static double getNumericValue(const std::string &paramValue,
 }
 
 // ---------------------------------------------------------------------------
+namespace {
+template <class T> inline void ignoreRetVal(T) {}
+}
 
 GeographicCRSNNPtr
 PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
@@ -6746,7 +6749,7 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
 
     // units=m is often found in the wild.
     // No need to create a extension string for this
-    hasParamValue(step, "units");
+    ignoreRetVal(hasParamValue(step, "units"));
 
     auto datum = buildDatum(step, title);
 
