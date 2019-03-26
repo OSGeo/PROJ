@@ -442,6 +442,7 @@ PROJ string:
 
 WKT2_2018 string:
 COORDINATEOPERATION["NAD27 to NAD83 (5)",
+    VERSION["SGQ-Can QC NT1"],
     SOURCECRS[
         GEOGCRS["NAD27",
             DATUM["North American Datum 1927",
@@ -492,6 +493,7 @@ PROJ string:
 
 WKT2_2018 string:
 COORDINATEOPERATION["NAD27 to NAD83 (6)",
+    VERSION["SGQ-Can QC NT2"],
     SOURCECRS[
         GEOGCRS["NAD27",
             DATUM["North American Datum 1927",
@@ -760,18 +762,18 @@ Candidate operations found: 3
 -------------------------------------
 Operation n°1:
 
-INVERSE(DERIVED_FROM(EPSG)):8371, Inverse of RGF93 to NGF IGN69 height (2), 0.02 m, France - mainland onshore
+INVERSE(DERIVED_FROM(EPSG)):8885, Inverse of RGF93 to NGF IGN69 height (3), 0.01 m, France - mainland onshore
 
 PROJ string:
-+proj=vgridshift +grids=RAF09.gtx +multiplier=1
++proj=vgridshift +grids=RAF18.gtx +multiplier=1
 
 -------------------------------------
 Operation n°2:
 
-INVERSE(EPSG):8885, Inverse of RGF93 to NGF IGN69 height (3), 0.01 m, France - mainland onshore
+INVERSE(DERIVED_FROM(EPSG)):8371, Inverse of RGF93 to NGF IGN69 height (2), 0.02 m, France - mainland onshore
 
 PROJ string:
-+proj=pipeline +step +inv +proj=vgridshift +grids=RAF18.tac +multiplier=1
++proj=vgridshift +grids=RAF09.gtx +multiplier=1
 
 -------------------------------------
 Operation n°3:
