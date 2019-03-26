@@ -228,6 +228,7 @@ int main(int argc, char **argv) {
 
     fout = stdout;
 
+    /* coverity[tainted_data] */
     o = opt_parse (argc, argv, "hvI", "cdozts", longflags, longkeys);
     if (nullptr==o)
         return 0;
