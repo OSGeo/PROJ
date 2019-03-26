@@ -1892,9 +1892,7 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     if (order[0] && order[1] && (order[0] != one || order[1] != two)) {
         formatter->addStep("axisswap");
         char orderStr[10];
-        strcpy(orderStr, order[0]);
-        strcat(orderStr, ",");
-        strcat(orderStr, order[1]);
+        sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
         formatter->addParam("order", orderStr);
     }
 }
@@ -2851,9 +2849,7 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
             if (order[0] && order[1]) {
                 formatter->addStep("axisswap");
                 char orderStr[10];
-                strcpy(orderStr, order[0]);
-                strcat(orderStr, ",");
-                strcat(orderStr, order[1]);
+                sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
                 formatter->addParam("order", orderStr);
             }
         } else {
