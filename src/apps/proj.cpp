@@ -532,7 +532,7 @@ int main(int argc, char **argv) {
 
         } else {
             if ((fid = fopen(*eargv, "rb")) == nullptr) {
-                emess(-2, *eargv, "input file");
+                emess(-2, "input file: %s", *eargv);
                 continue;
             }
             emess_dat.File_name = *eargv;
