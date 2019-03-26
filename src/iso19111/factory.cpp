@@ -259,7 +259,7 @@ struct DatabaseContext::Private {
     static void getFromCache(LRUCacheOfObjects &cache, const std::string &code,
                              util::BaseObjectPtr &obj);
 
-    void closeDB();
+    void closeDB() noexcept;
 
     // cppcheck-suppress functionStatic
     void registerFunctions();
@@ -295,7 +295,7 @@ DatabaseContext::Private::~Private() {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::closeDB() {
+void DatabaseContext::Private::closeDB() noexcept {
 
     if (detach_) {
         // Workaround a bug visible in SQLite 3.8.1 and 3.8.2 that causes
@@ -309,7 +309,10 @@ void DatabaseContext::Private::closeDB() {
         // https://github.com/mackyle/sqlite/commit/ccf328c4318eacedab9ed08c404bc4f402dcad19
         // also seemed to hide the issue.
         // Detaching a database hides the issue, not sure if it is by chance...
-        run("DETACH DATABASE db_0");
+        try {
+            run("DETACH DATABASE db_0");
+        } catch (...) {
+        }
         detach_ = false;
     }
 
