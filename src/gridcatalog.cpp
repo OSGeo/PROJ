@@ -37,6 +37,13 @@
 
 static PJ_GridCatalog *grid_catalog_list = nullptr;
 
+static
+PJ_GRIDINFO *pj_gc_findgrid( projCtx_t *ctx,
+                             PJ_GridCatalog *catalog, int after,
+                             PJ_LP location, double date,
+                             PJ_Region *optional_region,
+                             double *grid_date );
+
 /************************************************************************/
 /*                          pj_gc_unloadall()                           */
 /*                                                                      */
@@ -236,6 +243,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
 /*                           pj_c_findgrid()                            */
 /************************************************************************/
 
+static
 PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
                              PJ_LP location, double date,
                              PJ_Region *optional_region,
@@ -287,6 +295,8 @@ PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
         int grid_count = 0;
         gridlist = pj_gridlist_from_nadgrids( ctx, entry->definition, 
                                               &grid_count);
+        // FIXME: this leaks gridlist itself, and memory ownership of
+        // entry->gridinfo is also confusing. Coverity CID 193539
         if( grid_count == 1 )
             entry->gridinfo = gridlist[0];
     }

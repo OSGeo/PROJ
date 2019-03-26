@@ -898,12 +898,6 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                            long point_count, int point_offset,
                            double *x, double *y, double *z );
 
-PJ_GRIDINFO *pj_gc_findgrid( projCtx_t *ctx,
-                             PJ_GridCatalog *catalog, int after,
-                             PJ_LP location, double date,
-                             PJ_Region *optional_region,
-                             double *grid_date );
-
 double pj_gc_parsedate( projCtx_t *, const char * );
 
 void  *proj_mdist_ini(double);
