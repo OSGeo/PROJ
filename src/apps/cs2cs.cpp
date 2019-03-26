@@ -274,13 +274,6 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
                                                           double &toRadians,
                                                           bool &isLatFirst) {
     auto srcType = proj_get_type(src);
-    if (srcType == PJ_TYPE_BOUND_CRS) {
-        auto base = proj_get_source_crs(nullptr, src);
-        assert(base);
-        proj_destroy(src);
-        src = base;
-        srcType = proj_get_type(src);
-    }
     if (srcType != PJ_TYPE_PROJECTED_CRS) {
         return std::string();
     }
