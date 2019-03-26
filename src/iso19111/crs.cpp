@@ -2421,16 +2421,21 @@ void DerivedCRS::setDerivingConversionCRS() {
 
 // ---------------------------------------------------------------------------
 
-void DerivedCRS::baseExportToWKT(io::WKTFormatter *&formatter,
+void DerivedCRS::baseExportToWKT(io::WKTFormatter *formatter,
                                  const std::string &keyword,
                                  const std::string &baseKeyword) const {
     formatter->startNode(keyword, !identifiers().empty());
     formatter->addQuotedString(nameStr());
 
     const auto &l_baseCRS = d->baseCRS_;
-    formatter->startNode(baseKeyword, !l_baseCRS->identifiers().empty());
+    formatter->startNode(baseKeyword, formatter->use2018Keywords() &&
+                                          !l_baseCRS->identifiers().empty());
     formatter->addQuotedString(l_baseCRS->nameStr());
     l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
+    if (formatter->use2018Keywords() &&
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
+        l_baseCRS->formatID(formatter);
+    }
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
@@ -2658,7 +2663,7 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
              dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                 ? io::WKTConstants::BASEGEOGCRS
                 : io::WKTConstants::BASEGEODCRS,
-            !l_baseCRS->identifiers().empty());
+            formatter->use2018Keywords() && !l_baseCRS->identifiers().empty());
         formatter->addQuotedString(l_baseCRS->nameStr());
         l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
         // insert ellipsoidal cs unit when the units of the map
@@ -2669,6 +2674,10 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             geodeticCRSAxisList[0]->unit()._exportToWKT(formatter);
         }
         l_baseCRS->primeMeridian()->_exportToWKT(formatter);
+        if (formatter->use2018Keywords() &&
+            !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
+            l_baseCRS->formatID(formatter);
+        }
         formatter->endNode();
     } else {
         const auto oldAxisOutputRule = formatter->outputAxis();
@@ -4848,7 +4857,7 @@ DerivedCRSTemplate<DerivedCRSTraits>::create(
 
 // ---------------------------------------------------------------------------
 
-static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *&formatter,
+static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *formatter,
                                                const std::string &crsName,
                                                bool wkt2_2018_only) {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;

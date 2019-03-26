@@ -7639,6 +7639,53 @@ void Transformation::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+static void exportSourceCRSAndTargetCRSToWKT(const CoordinateOperation *co,
+                                             io::WKTFormatter *formatter) {
+    auto l_sourceCRS = co->sourceCRS();
+    assert(l_sourceCRS);
+    auto l_targetCRS = co->targetCRS();
+    assert(l_targetCRS);
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    const bool canExportCRSId =
+        (isWKT2 && formatter->use2018Keywords() &&
+         !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId()));
+
+    const bool hasDomains = !co->domains().empty();
+    if (hasDomains) {
+        formatter->pushDisableUsage();
+    }
+
+    formatter->startNode(io::WKTConstants::SOURCECRS, false);
+    if (canExportCRSId && !l_sourceCRS->identifiers().empty()) {
+        // fake that top node has no id, so that the sourceCRS id is
+        // considered
+        formatter->pushHasId(false);
+        l_sourceCRS->_exportToWKT(formatter);
+        formatter->popHasId();
+    } else {
+        l_sourceCRS->_exportToWKT(formatter);
+    }
+    formatter->endNode();
+
+    formatter->startNode(io::WKTConstants::TARGETCRS, false);
+    if (canExportCRSId && !l_targetCRS->identifiers().empty()) {
+        // fake that top node has no id, so that the targetCRS id is
+        // considered
+        formatter->pushHasId(false);
+        l_targetCRS->_exportToWKT(formatter);
+        formatter->popHasId();
+    } else {
+        l_targetCRS->_exportToWKT(formatter);
+    }
+    formatter->endNode();
+
+    if (hasDomains) {
+        formatter->popDisableUsage();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 void SingleOperation::exportTransformationToWKT(
     io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
@@ -7646,11 +7693,6 @@ void SingleOperation::exportTransformationToWKT(
         throw io::FormattingException(
             "Transformation can only be exported to WKT2");
     }
-
-    auto l_sourceCRS = sourceCRS();
-    assert(l_sourceCRS);
-    auto l_targetCRS = targetCRS();
-    assert(l_targetCRS);
 
     if (formatter->abridgedTransformation()) {
         formatter->startNode(io::WKTConstants::ABRIDGEDTRANSFORMATION,
@@ -7672,13 +7714,7 @@ void SingleOperation::exportTransformationToWKT(
     }
 
     if (!formatter->abridgedTransformation()) {
-        formatter->startNode(io::WKTConstants::SOURCECRS, false);
-        l_sourceCRS->_exportToWKT(formatter);
-        formatter->endNode();
-
-        formatter->startNode(io::WKTConstants::TARGETCRS, false);
-        l_targetCRS->_exportToWKT(formatter);
-        formatter->endNode();
+        exportSourceCRSAndTargetCRSToWKT(this, formatter);
     }
 
     method()->_exportToWKT(formatter);
@@ -9337,18 +9373,32 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
         }
     }
 
-    formatter->startNode(io::WKTConstants::SOURCECRS, false);
-    sourceCRS()->_exportToWKT(formatter);
-    formatter->endNode();
+    exportSourceCRSAndTargetCRSToWKT(this, formatter);
 
-    formatter->startNode(io::WKTConstants::TARGETCRS, false);
-    targetCRS()->_exportToWKT(formatter);
-    formatter->endNode();
+    const bool canExportOperationId =
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId());
+
+    const bool hasDomains = !domains().empty();
+    if (hasDomains) {
+        formatter->pushDisableUsage();
+    }
 
     for (const auto &operation : operations()) {
         formatter->startNode(io::WKTConstants::STEP, false);
-        operation->_exportToWKT(formatter);
+        if (canExportOperationId && !operation->identifiers().empty()) {
+            // fake that top node has no id, so that the operation id is
+            // considered
+            formatter->pushHasId(false);
+            operation->_exportToWKT(formatter);
+            formatter->popHasId();
+        } else {
+            operation->_exportToWKT(formatter);
+        }
         formatter->endNode();
+    }
+
+    if (hasDomains) {
+        formatter->popDisableUsage();
     }
 
     ObjectUsage::baseExportToWKT(formatter);

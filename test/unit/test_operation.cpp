@@ -442,7 +442,6 @@ TEST(operation, concatenated_operation) {
     {
         auto formatter =
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
-        formatter->setOutputId(false);
         src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter.get());
     }
 
@@ -450,7 +449,6 @@ TEST(operation, concatenated_operation) {
     {
         auto formatter =
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
-        formatter->setOutputId(false);
         dst_wkt = GeographicCRS::EPSG_4979->exportToWKT(formatter.get());
     }
 
@@ -458,7 +456,6 @@ TEST(operation, concatenated_operation) {
     {
         auto formatter =
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
-        formatter->setOutputId(false);
         step1_wkt = transf_1->exportToWKT(formatter.get());
     }
 
@@ -466,7 +463,6 @@ TEST(operation, concatenated_operation) {
     {
         auto formatter =
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
-        formatter->setOutputId(false);
         step2_wkt = transf_2->exportToWKT(formatter.get());
     }
 

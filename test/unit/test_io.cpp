@@ -1663,6 +1663,50 @@ TEST(wkt_parse, wkt2_2018_projected_with_id_in_basegeodcrs) {
     ASSERT_TRUE(crs != nullptr);
     ASSERT_EQ(crs->baseCRS()->identifiers().size(), 1U);
     EXPECT_EQ(crs->baseCRS()->identifiers().front()->code(), "4326");
+
+    {
+        auto got_wkt = crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        EXPECT_TRUE(got_wkt.find("ID[\"EPSG\",4326]]") != std::string::npos)
+            << got_wkt;
+    }
+
+    {
+        auto got_wkt = crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED)
+                .get());
+        EXPECT_TRUE(got_wkt.find("ID[\"EPSG\",4326]]") == std::string::npos)
+            << got_wkt;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt2_2018_projected_no_id_but_id_in_basegeodcrs) {
+    auto wkt = "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        ID[\"EPSG\",4326]],\n"
+               "    CONVERSION[\"UTM zone 31N\",\n"
+               "        METHOD[\"Transverse Mercator\"],\n"
+               "        PARAMETER[\"Latitude of natural origin\",0],\n"
+               "        PARAMETER[\"Longitude of natural origin\",3],\n"
+               "        PARAMETER[\"Scale factor at natural origin\",0.9996],\n"
+               "        PARAMETER[\"False easting\",500000],\n"
+               "        PARAMETER[\"False northing\",0]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"(E)\",east],\n"
+               "        AXIS[\"(N)\",north],\n"
+               "        UNIT[\"metre\",1]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto got_wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+    EXPECT_TRUE(got_wkt.find("ID[\"EPSG\",4326]]") != std::string::npos)
+        << got_wkt;
 }
 
 // ---------------------------------------------------------------------------
