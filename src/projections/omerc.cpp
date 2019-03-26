@@ -97,6 +97,10 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         u = xy.y * Q->cosrot + xy.x * Q->sinrot + Q->u_0;
     }
     Qp = exp(- Q->BrA * v);
+    if( Qp == 0 ) {
+        proj_errno_set(P, PJD_ERR_INVALID_X_OR_Y);
+        return proj_coord_error().lp;
+    }
     Sp = .5 * (Qp - 1. / Qp);
     Tp = .5 * (Qp + 1. / Qp);
     Vp = sin(Q->BrA * u);
