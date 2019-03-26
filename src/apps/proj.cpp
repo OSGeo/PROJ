@@ -45,7 +45,7 @@ static char oform_buffer[16];   /* Buffer for oform when using -d */
 
 static const char
     *oterr = "*\t*",    /* output line for unprojectable input */
-    *usage = "%s\nusage: %s [ -bdeEfiIlmorsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
+    *usage = "%s\nusage: %s [-bdeEfiIlmorsStTvVwW [args]] [+opt[=arg] ...] [file ...]\n";
 
 static PJ_FACTORS facs;
 

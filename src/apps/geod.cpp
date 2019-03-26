@@ -22,7 +22,7 @@ static const char *osform = "%.3f"; /* output format for S */
 
 static char pline[50];              /* work string */
 static const char *usage =
-"%s\nusage: %s [ -afFIlptwW [args] ] [ +opts[=arg] ] [ files ]\n";
+"%s\nusage: %s [-afFIlptwW [args]] [+opt[=arg] ...] [file ...]\n";
 
 	static void
 printLL(double p, double l) {
