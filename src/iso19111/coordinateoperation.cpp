@@ -9163,6 +9163,7 @@ void ConcatenatedOperation::fixStepsDirection(
                     op = op->inverse();
                 }
             } else if (i + 1 < operationsInOut.size()) {
+                /* coverity[copy_paste_error] */
                 l_targetCRS = operationsInOut[i + 1]->sourceCRS();
                 if (l_targetCRS) {
                     op->setCRSs(concatOpSourceCRS, NN_NO_CHECK(l_targetCRS),
