@@ -151,10 +151,14 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         lamdp -= TOL;
     spp = sin(phidp);
     sppsq = spp * spp;
+    const double denom = 1. - sppsq * (1. + Q->u);
+    if( denom == 0.0 ) {
+        proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+        return proj_coord_error().lp;
+    }
     lamt = atan(((1. - sppsq * P->rone_es) * tan(lamdp) *
             Q->ca - spp * Q->sa * sqrt((1. + Q->q * dd) * (
-            1. - sppsq) - sppsq * Q->u) / cos(lamdp)) / (1. - sppsq
-            * (1. + Q->u)));
+            1. - sppsq) - sppsq * Q->u) / cos(lamdp)) / denom);
     sl = lamt >= 0. ? 1. : -1.;
     scl = cos(lamdp) >= 0. ? 1. : -1;
     lamt -= M_HALFPI * (1. - scl) * sl;
