@@ -1615,7 +1615,8 @@ static double normalizeMeasure(const std::string &uom_code,
         assert(seconds.size() == precision - 2);
         normalized_value =
             (normalized_value < 0 ? -1.0 : 1.0) *
-            (int(std::fabs(normalized_value)) + c_locale_stod(minutes) / 60. +
+            (std::floor(std::fabs(normalized_value)) +
+             c_locale_stod(minutes) / 60. +
              (c_locale_stod(seconds) / std::pow(10, seconds.size() - 2)) /
                  3600.);
         normalized_uom_code = common::UnitOfMeasure::DEGREE.code();
