@@ -3168,7 +3168,6 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     }
 
     const auto *wkt2_mapping = getMapping(esriMapping->wkt2_name);
-    assert(wkt2_mapping);
     if (ci_equal(esriProjectionName, "Stereographic")) {
         try {
             if (std::fabs(io::asDouble(
@@ -3179,6 +3178,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
         } catch (const std::exception &) {
         }
     }
+    assert(wkt2_mapping);
 
     PropertyMap propertiesMethod;
     propertiesMethod.set(IdentifiedObject::NAME_KEY, wkt2_mapping->wkt2_name);
