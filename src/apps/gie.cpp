@@ -249,6 +249,7 @@ int main (int argc, char **argv) {
     T.ignore = 5555; /* Error code that will not be issued by proj_create() */
     T.use_proj4_init_rules = FALSE;
 
+    /* coverity[tainted_data] */
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (nullptr==o)
         return 0;
