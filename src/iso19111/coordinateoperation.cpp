@@ -7704,7 +7704,7 @@ void SingleOperation::exportTransformationToWKT(
 
     formatter->addQuotedString(nameStr());
 
-    if (isWKT2 && formatter->use2018Keywords()) {
+    if (formatter->use2018Keywords()) {
         const auto &version = operationVersion();
         if (version.has_value()) {
             formatter->startNode(io::WKTConstants::VERSION, false);
@@ -7719,10 +7719,8 @@ void SingleOperation::exportTransformationToWKT(
 
     method()->_exportToWKT(formatter);
 
-    const MethodMapping *mapping =
-        !isWKT2 ? getMapping(method().get()) : nullptr;
     for (const auto &paramValue : parameterValues()) {
-        paramValue->_exportToWKT(formatter, mapping);
+        paramValue->_exportToWKT(formatter, nullptr);
     }
 
     if (!formatter->abridgedTransformation()) {
