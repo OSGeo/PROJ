@@ -1132,11 +1132,18 @@ int main(int argc, char **argv) {
             }
         }
 
-        outputOperations(
-            dbContext, sourceCRSStr, targetCRSStr, bboxFilter, spatialCriterion,
-            spatialCriterionExplicitlySpecified, crsExtentUse,
-            gridAvailabilityUse, allowUseIntermediateCRS, pivots, authority,
-            usePROJGridAlternatives, showSuperseded, outputOpt, summary);
+        try {
+            outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
+                             spatialCriterion,
+                             spatialCriterionExplicitlySpecified, crsExtentUse,
+                             gridAvailabilityUse, allowUseIntermediateCRS,
+                             pivots, authority, usePROJGridAlternatives,
+                             showSuperseded, outputOpt, summary);
+        } catch (const std::exception &e) {
+            std::cerr << "outputOperations() failed with: " << e.what()
+                      << std::endl;
+            std::exit(1);
+        }
     }
 
     return 0;
