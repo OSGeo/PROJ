@@ -1024,8 +1024,8 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
         info.url = url;
         info.directDownload = directDownload;
         info.openLicense = openLicense;
-        info.gridAvailable = gridAvailable;
     }
+    info.gridAvailable = gridAvailable;
     info.found = ret;
     d->cache(projFilename, info);
     return ret;

@@ -8742,13 +8742,25 @@ void Transformation::_exportToPROJString(
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             auto filename = fileParameter->valueFile();
-            if (isMethodInverseOf) {
+            bool doInversion = isMethodInverseOf;
+            if (!identifiers().empty() &&
+                *identifiers().front()->codeSpace() ==
+                    metadata::Identifier::EPSG &&
+                method()->nameStr() ==
+                    "Geographic3D to GravityRelatedHeight (US .gtx)" &&
+                ends_with(filename, ".gtx")) {
+                // gtx files, from straight EPSG definition, must be applied in
+                // reverse order for "Geographic3D to GravityRelatedHeight"
+                // method
+                doInversion = !doInversion;
+            }
+            if (doInversion) {
                 formatter->startInversion();
             }
             formatter->addStep("vgridshift");
             formatter->addParam("grids", filename);
             formatter->addParam("multiplier", 1.0);
-            if (isMethodInverseOf) {
+            if (doInversion) {
                 formatter->stopInversion();
             }
             return;
