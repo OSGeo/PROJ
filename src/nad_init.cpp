@@ -265,7 +265,6 @@ struct CTABLE *nad_ctable2_init( projCtx ctx, struct projFileAPI_t* fileapi )
 
 struct CTABLE *nad_init(projCtx ctx, char *name) 
 {
-    char 	fname[MAX_PATH_FILENAME+1];
     struct CTABLE *ct;
     PAFile      fid;
 
@@ -274,8 +273,7 @@ struct CTABLE *nad_init(projCtx ctx, char *name)
 /* -------------------------------------------------------------------- */
 /*      Open the file using the usual search rules.                     */
 /* -------------------------------------------------------------------- */
-    strcpy(fname, name);
-    if (!(fid = pj_open_lib(ctx, fname, "rb"))) {
+    if (!(fid = pj_open_lib(ctx, name, "rb"))) {
         return nullptr;
     }
 
