@@ -851,7 +851,6 @@ static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 
 {
-    char 	fname[MAX_PATH_FILENAME+1];
     PJ_GRIDINFO *gilist;
     PAFile 	fp;
     char	header[160];
@@ -885,13 +884,12 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 /* -------------------------------------------------------------------- */
 /*      Open the file using the usual search rules.                     */
 /* -------------------------------------------------------------------- */
-    strcpy(fname, gridname);
-    if (!(fp = pj_open_lib(ctx, fname, "rb"))) {
+    if (!(fp = pj_open_lib(ctx, gridname, "rb"))) {
         ctx->last_errno = 0; /* don't treat as a persistent error */
         return gilist;
     }
 
-    gilist->filename = pj_strdup(fname);
+    gilist->filename = pj_strdup(gridname);
     if (!gilist->filename) {
         pj_dalloc(gilist->gridname);
         pj_dalloc(gilist);
