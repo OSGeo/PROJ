@@ -2597,7 +2597,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             "rate_scale_difference, rate_scale_difference_uom_auth_name, "
             "rate_scale_difference_uom_code, epoch, epoch_uom_auth_name, "
             "epoch_uom_code, px, py, pz, pivot_uom_auth_name, pivot_uom_code, "
-            "deprecated FROM "
+            "operation_version, deprecated FROM "
             "helmert_transformation WHERE auth_name = ? AND code = ?",
             code);
         if (res.empty()) {
@@ -2658,6 +2658,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &pivot_uom_auth_name = row[idx++];
             const auto &pivot_uom_code = row[idx++];
 
+            const auto &operation_version = row[idx++];
             const auto &deprecated_str = row[idx++];
             const bool deprecated = deprecated_str == "1";
             assert(idx == row.size());
@@ -2798,6 +2799,10 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             auto props =
                 d->createProperties(code, name, deprecated,
                                     area_of_use_auth_name, area_of_use_code);
+            if (!operation_version.empty()) {
+                props.set(operation::CoordinateOperation::OPERATION_VERSION_KEY,
+                          operation_version);
+            }
 
             auto propsMethod =
                 util::PropertyMap()
@@ -2828,8 +2833,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             "grid_name, "
             "grid2_param_auth_name, grid2_param_code, grid2_param_name, "
             "grid2_name, "
-            "interpolation_crs_auth_name, interpolation_crs_code, deprecated "
-            "FROM "
+            "interpolation_crs_auth_name, interpolation_crs_code, "
+            "operation_version, deprecated FROM "
             "grid_transformation WHERE auth_name = ? AND code = ?",
             code);
         if (res.empty()) {
@@ -2861,7 +2866,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &grid2_name = row[idx++];
             const auto &interpolation_crs_auth_name = row[idx++];
             const auto &interpolation_crs_code = row[idx++];
-
+            const auto &operation_version = row[idx++];
             const auto &deprecated_str = row[idx++];
             const bool deprecated = deprecated_str == "1";
             assert(idx == row.size());
@@ -2907,6 +2912,10 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             auto props =
                 d->createProperties(code, name, deprecated,
                                     area_of_use_auth_name, area_of_use_code);
+            if (!operation_version.empty()) {
+                props.set(operation::CoordinateOperation::OPERATION_VERSION_KEY,
+                          operation_version);
+            }
             auto propsMethod =
                 util::PropertyMap()
                     .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
@@ -2948,8 +2957,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             buffer << ", param" << i << "_uom_auth_name";
             buffer << ", param" << i << "_uom_code";
         }
-        buffer << ", deprecated FROM other_transformation WHERE auth_name = ? "
-                  "AND code = ?";
+        buffer << ", operation_version, deprecated FROM other_transformation "
+                  "WHERE auth_name = ? AND code = ?";
 
         auto res = d->runWithCodeParam(buffer.str(), code);
         if (res.empty()) {
@@ -3002,6 +3011,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             }
             idx = base_param_idx + 6 * N_MAX_PARAMS;
 
+            const auto &operation_version = row[idx++];
             const auto &deprecated_str = row[idx++];
             const bool deprecated = deprecated_str == "1";
             assert(idx == row.size());
@@ -3016,6 +3026,10 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             auto props =
                 d->createProperties(code, name, deprecated,
                                     area_of_use_auth_name, area_of_use_code);
+            if (!operation_version.empty()) {
+                props.set(operation::CoordinateOperation::OPERATION_VERSION_KEY,
+                          operation_version);
+            }
 
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
             if (!accuracy.empty()) {
@@ -3069,7 +3083,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             "target_crs_auth_name, target_crs_code, "
             "area_of_use_auth_name, area_of_use_code, accuracy, "
             "step1_auth_name, step1_code, step2_auth_name, step2_code, "
-            "step3_auth_name, step3_code, deprecated FROM "
+            "step3_auth_name, step3_code, operation_version, deprecated FROM "
             "concatenated_operation WHERE auth_name = ? AND code = ?",
             code);
         if (res.empty()) {
@@ -3094,6 +3108,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &step2_code = row[idx++];
             const auto &step3_auth_name = row[idx++];
             const auto &step3_code = row[idx++];
+            const auto &operation_version = row[idx++];
             const auto &deprecated_str = row[idx++];
             const bool deprecated = deprecated_str == "1";
 
@@ -3127,6 +3142,10 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             auto props =
                 d->createProperties(code, name, deprecated,
                                     area_of_use_auth_name, area_of_use_code);
+            if (!operation_version.empty()) {
+                props.set(operation::CoordinateOperation::OPERATION_VERSION_KEY,
+                          operation_version);
+            }
 
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
             if (!accuracy.empty()) {

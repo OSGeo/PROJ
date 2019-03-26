@@ -503,7 +503,7 @@ class PROJ_GCC_DLL DerivedCRS : virtual public SingleCRS {
     PROJ_INTERNAL void setDerivingConversionCRS();
 
     PROJ_INTERNAL void baseExportToWKT(
-        io::WKTFormatter *&formatter, const std::string &keyword,
+        io::WKTFormatter *formatter, const std::string &keyword,
         const std::string &baseKeyword) const; // throw(FormattingException)
 
     PROJ_INTERNAL bool
