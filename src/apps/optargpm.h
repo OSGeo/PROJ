@@ -526,6 +526,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 c = opt_ordinal (o, crepr);
                 if (0==c) {
                     fprintf (stderr, "Invalid option \"%s\"\n", crepr);
+                    free (o);
                     return nullptr;
                 }
 
