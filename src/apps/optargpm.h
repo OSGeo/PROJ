@@ -534,6 +534,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                     *equals = '=';
                     if (opt_is_flag (o, c)) {
                         fprintf (stderr, "Option \"%s\" takes no arguments\n", crepr);
+                        free (o);
                         return nullptr;
                     }
                     o->optarg[c] = equals + 1;
@@ -544,6 +545,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 if (!opt_is_flag (o, c)) {
                     if ((argc==i + 1) || ('+'==argv[i+1][0]) || ('-'==argv[i+1][0])) {
                         fprintf (stderr, "Missing argument for option \"%s\"\n", crepr);
+                        free (o);
                         return nullptr;
                     }
                     o->optarg[c] = argv[i + 1];
@@ -553,6 +555,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
 
                 if (!opt_is_flag (o, c)) {
                     fprintf (stderr, "Expected flag style long option here, but got \"%s\"\n", crepr);
+                    free (o);
                     return nullptr;
                 }
 
@@ -564,6 +567,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
             /* classic short options */
             if (nullptr==o->optarg[c]) {
                 fprintf (stderr, "Invalid option \"%s\"\n", crepr);
+                free (o);
                 return nullptr;
             }
 
@@ -580,6 +584,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 if ((argc==i + 1) || ('+'==argv[i+1][0]) || ('-'==argv[i+1][0]))
                 {
                     fprintf (stderr, "Bad or missing arg for option \"%s\"\n", crepr);
+                    free (o);
                     return nullptr;
                 }
                 o->optarg[(int) c] = argv[i + 1];

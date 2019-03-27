@@ -98,10 +98,13 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier, int *
         }
 
         /* load the grid shift info if we don't have it. */
-        if( ct->cvs == nullptr && !pj_gridinfo_load( pj_get_ctx(defn), gi ) )
+        if( ct->cvs == nullptr )
         {
-            pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-            return PJD_ERR_FAILED_TO_LOAD_GRID;
+            if( !pj_gridinfo_load( pj_get_ctx(defn), gi ) || ct->cvs == nullptr )
+            {
+                pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+                return PJD_ERR_FAILED_TO_LOAD_GRID;
+            }
         }
 
 

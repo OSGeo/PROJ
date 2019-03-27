@@ -228,6 +228,7 @@ int main(int argc, char **argv) {
 
     fout = stdout;
 
+    /* coverity[tainted_data] */
     o = opt_parse (argc, argv, "hvI", "cdozts", longflags, longkeys);
     if (nullptr==o)
         return 0;
@@ -368,6 +369,7 @@ int main(int argc, char **argv) {
             point.lpzt.phi = proj_torad (point.lpzt.phi);
         }
         err = proj_errno_reset (P);
+        /* coverity[returned_value] */
         point = proj_trans (P, direction, point);
 
         if (HUGE_VAL==point.xyzt.x) {

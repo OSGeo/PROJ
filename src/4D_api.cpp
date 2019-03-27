@@ -1365,6 +1365,7 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
         pj_dealloc (buf);
         buf = p;
     }
+    assert(buf);
 
     /* Only append a semicolon if something's already there */
     if (0 != buflen)

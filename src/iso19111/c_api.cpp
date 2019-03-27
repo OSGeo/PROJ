@@ -975,29 +975,18 @@ int proj_is_equivalent_to(const PJ *obj, const PJ *other,
         return false;
     }
 
-    // Make sure that the C and C++ enumerations match
-    static_assert(static_cast<int>(PJ_COMP_STRICT) ==
-                      static_cast<int>(IComparable::Criterion::STRICT),
-                  "");
-    static_assert(static_cast<int>(PJ_COMP_EQUIVALENT) ==
-                      static_cast<int>(IComparable::Criterion::EQUIVALENT),
-                  "");
-    static_assert(
-        static_cast<int>(PJ_COMP_EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS) ==
-            static_cast<int>(
-                IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS),
-        "");
+    const auto cppCriterion = ([](PJ_COMPARISON_CRITERION l_criterion) {
+        switch (l_criterion) {
+        case PJ_COMP_STRICT:
+            return IComparable::Criterion::STRICT;
+        case PJ_COMP_EQUIVALENT:
+            return IComparable::Criterion::EQUIVALENT;
+        case PJ_COMP_EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS:
+            break;
+        }
+        return IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS;
+    })(criterion);
 
-    // Make sure we enumerate all values. If adding a new value, as we
-    // don't have a default clause, the compiler will warn.
-    switch (criterion) {
-    case PJ_COMP_STRICT:
-    case PJ_COMP_EQUIVALENT:
-    case PJ_COMP_EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS:
-        break;
-    }
-    const IComparable::Criterion cppCriterion =
-        static_cast<IComparable::Criterion>(criterion);
     return obj->iso_obj->isEquivalentTo(other->iso_obj.get(), cppCriterion);
 }
 
@@ -1121,40 +1110,24 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
         return nullptr;
     }
 
-    // Make sure that the C and C++ enumerations match
-    static_assert(static_cast<int>(PJ_WKT2_2015) ==
-                      static_cast<int>(WKTFormatter::Convention::WKT2_2015),
-                  "");
-    static_assert(
-        static_cast<int>(PJ_WKT2_2015_SIMPLIFIED) ==
-            static_cast<int>(WKTFormatter::Convention::WKT2_2015_SIMPLIFIED),
-        "");
-    static_assert(static_cast<int>(PJ_WKT2_2018) ==
-                      static_cast<int>(WKTFormatter::Convention::WKT2_2018),
-                  "");
-    static_assert(
-        static_cast<int>(PJ_WKT2_2018_SIMPLIFIED) ==
-            static_cast<int>(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED),
-        "");
-    static_assert(static_cast<int>(PJ_WKT1_GDAL) ==
-                      static_cast<int>(WKTFormatter::Convention::WKT1_GDAL),
-                  "");
-    static_assert(static_cast<int>(PJ_WKT1_ESRI) ==
-                      static_cast<int>(WKTFormatter::Convention::WKT1_ESRI),
-                  "");
-    // Make sure we enumerate all values. If adding a new value, as we
-    // don't have a default clause, the compiler will warn.
-    switch (type) {
-    case PJ_WKT2_2015:
-    case PJ_WKT2_2015_SIMPLIFIED:
-    case PJ_WKT2_2018:
-    case PJ_WKT2_2018_SIMPLIFIED:
-    case PJ_WKT1_GDAL:
-    case PJ_WKT1_ESRI:
-        break;
-    }
-    const WKTFormatter::Convention convention =
-        static_cast<WKTFormatter::Convention>(type);
+    const auto convention = ([](PJ_WKT_TYPE l_type) {
+        switch (l_type) {
+        case PJ_WKT2_2015:
+            return WKTFormatter::Convention::WKT2_2015;
+        case PJ_WKT2_2015_SIMPLIFIED:
+            return WKTFormatter::Convention::WKT2_2015_SIMPLIFIED;
+        case PJ_WKT2_2018:
+            return WKTFormatter::Convention::WKT2_2018;
+        case PJ_WKT2_2018_SIMPLIFIED:
+            return WKTFormatter::Convention::WKT2_2018_SIMPLIFIED;
+        case PJ_WKT1_GDAL:
+            return WKTFormatter::Convention::WKT1_GDAL;
+        case PJ_WKT1_ESRI:
+            break;
+        }
+        return WKTFormatter::Convention::WKT1_ESRI;
+    })(type);
+
     try {
         auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
         auto formatter = WKTFormatter::create(convention, dbContext);
