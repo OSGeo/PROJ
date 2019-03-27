@@ -29,6 +29,7 @@
 #include <cstring>
 
 #include "proj.h"
+#include "proj_config.h"
 
 #include "gtest_include.h"
 
