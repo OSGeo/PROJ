@@ -1005,69 +1005,78 @@ int main(int argc, char **argv) {
     }
 
     if (!user_string.empty()) {
-        auto obj(buildObject(dbContext, user_string, objectKind, "input string",
-                             buildBoundCRSToWGS84, allowUseIntermediateCRS,
-                             outputOpt.quiet));
-        if (guessDialect) {
-            auto dialect = WKTParser().guessDialect(user_string);
-            std::cout << "Guessed WKT dialect: ";
-            if (dialect == WKTParser::WKTGuessedDialect::WKT2_2018) {
-                std::cout << "WKT2_2018";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT2_2015) {
-                std::cout << "WKT2_2015";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_GDAL) {
-                std::cout << "WKT1_GDAL";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_ESRI) {
-                std::cout << "WKT1_ESRI";
-            } else {
-                std::cout << "Not WKT / unknown";
+        try {
+            auto obj(buildObject(dbContext, user_string, objectKind,
+                                 "input string", buildBoundCRSToWGS84,
+                                 allowUseIntermediateCRS, outputOpt.quiet));
+            if (guessDialect) {
+                auto dialect = WKTParser().guessDialect(user_string);
+                std::cout << "Guessed WKT dialect: ";
+                if (dialect == WKTParser::WKTGuessedDialect::WKT2_2018) {
+                    std::cout << "WKT2_2018";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT2_2015) {
+                    std::cout << "WKT2_2015";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_GDAL) {
+                    std::cout << "WKT1_GDAL";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_ESRI) {
+                    std::cout << "WKT1_ESRI";
+                } else {
+                    std::cout << "Not WKT / unknown";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
-        }
-        outputObject(dbContext, obj, allowUseIntermediateCRS, outputOpt);
-        if (identify) {
-            auto crs = dynamic_cast<CRS *>(obj.get());
-            if (crs) {
-                try {
-                    auto res = crs->identify(
-                        dbContext
-                            ? AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                       authority)
-                                  .as_nullable()
-                            : nullptr);
-                    std::cout << std::endl;
-                    std::cout << "Identification match count: " << res.size()
-                              << std::endl;
-                    for (const auto &pair : res) {
-                        const auto &identifiedCRS = pair.first;
-                        const auto &ids = identifiedCRS->identifiers();
-                        if (!ids.empty()) {
-                            std::cout << *ids[0]->codeSpace() << ":"
-                                      << ids[0]->code() << ": " << pair.second
-                                      << " %" << std::endl;
-                        } else {
-                            auto boundCRS =
-                                dynamic_cast<BoundCRS *>(identifiedCRS.get());
-                            if (boundCRS &&
-                                !boundCRS->baseCRS()->identifiers().empty()) {
-                                const auto &idsBase =
-                                    boundCRS->baseCRS()->identifiers();
-                                std::cout << "BoundCRS of "
-                                          << *idsBase[0]->codeSpace() << ":"
-                                          << idsBase[0]->code() << ": "
+            outputObject(dbContext, obj, allowUseIntermediateCRS, outputOpt);
+            if (identify) {
+                auto crs = dynamic_cast<CRS *>(obj.get());
+                if (crs) {
+                    try {
+                        auto res = crs->identify(
+                            dbContext
+                                ? AuthorityFactory::create(
+                                      NN_NO_CHECK(dbContext), authority)
+                                      .as_nullable()
+                                : nullptr);
+                        std::cout << std::endl;
+                        std::cout
+                            << "Identification match count: " << res.size()
+                            << std::endl;
+                        for (const auto &pair : res) {
+                            const auto &identifiedCRS = pair.first;
+                            const auto &ids = identifiedCRS->identifiers();
+                            if (!ids.empty()) {
+                                std::cout << *ids[0]->codeSpace() << ":"
+                                          << ids[0]->code() << ": "
                                           << pair.second << " %" << std::endl;
                             } else {
-                                std::cout
-                                    << "un-identifier CRS: " << pair.second
-                                    << " %" << std::endl;
+                                auto boundCRS = dynamic_cast<BoundCRS *>(
+                                    identifiedCRS.get());
+                                if (boundCRS &&
+                                    !boundCRS->baseCRS()
+                                         ->identifiers()
+                                         .empty()) {
+                                    const auto &idsBase =
+                                        boundCRS->baseCRS()->identifiers();
+                                    std::cout << "BoundCRS of "
+                                              << *idsBase[0]->codeSpace() << ":"
+                                              << idsBase[0]->code() << ": "
+                                              << pair.second << " %"
+                                              << std::endl;
+                                } else {
+                                    std::cout
+                                        << "un-identifier CRS: " << pair.second
+                                        << " %" << std::endl;
+                                }
                             }
                         }
+                    } catch (const std::exception &e) {
+                        std::cerr << "Identification failed: " << e.what()
+                                  << std::endl;
                     }
-                } catch (const std::exception &e) {
-                    std::cerr << "Identification failed: " << e.what()
-                              << std::endl;
                 }
             }
+        } catch (const std::exception &e) {
+            std::cerr << "buildObject failed: " << e.what() << std::endl;
+            std::exit(1);
         }
     } else {
 
