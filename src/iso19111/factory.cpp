@@ -1623,6 +1623,7 @@ static double normalizeMeasure(const std::string &uom_code,
              (c_locale_stod(seconds) / std::pow(10, seconds.size() - 2)) /
                  3600.);
         normalized_uom_code = common::UnitOfMeasure::DEGREE.code();
+        /* coverity[overflow_sink] */
         return normalized_value;
     } else {
         normalized_uom_code = uom_code;
