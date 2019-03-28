@@ -96,3 +96,63 @@ erroneous transformations.
 
 For compatibility reasons PROJ supports several WKT dialects
 (see :option:`projinfo -o`). If possible WKT2 should be used.
+
+Why is the axis ordering in PROJ not consistent?
+--------------------------------------------------------------------------------
+
+PROJ respects the axis ordering as it was defined by the authority in charge of
+a given coordinate reference system. This is in accordance to the ISO19111 standard
+:cite:`ISO19111`. Unfortunately most GIS software on the market doesn't follow this
+standard. Before version 6, PROJ did not respect the standard either. This causes
+some problems while the rest of the industry conforms to the standard. PROJ intends
+to spearhead this effort, hopefully setting a good example for the rest of the
+geospatial industry.
+
+Customarily in GIS the first component in a coordinate tuple has been aligned with
+the east/west direction and the second component with the north/south direction.
+For many coordinate reference systems this is also what is defined by the authority.
+There are however exceptions, especially when dealing with coordinate systems that
+don't align with the cardinal directions of a compass. For example it is not
+obvious which coordinate component aligns to which axis in a skewed coordinate
+system with a 45 degrees angle against the north direction. Similarly, a geocentric
+cartesain coordinate system usually has the z-component aligned with the rotational
+axis of the earth and hence the axis points towards north. Both cases are
+incompatible with the convention of always having the x-component be the east/west
+axis, the y-component the north/south axis and the z-component the up/down axis.
+
+In most cases coordinate reference systems with geodetic coordinates expect the
+input ordered as latitude/longitude  (typically with the EPSG dataset), however,
+internally PROJ expects an longitude/latitude ordering for all projections. This
+is generally hidden for users but in a few cases it is exposed at the surface
+level of PROJ, most prominently in the :program:`proj` utility which expects
+longitude/latitude ordering of input date (unless :program:`proj -r` is used).
+
+In case of doubt about the axis order of a specific CRS :program:`projinfo` is
+able to provide an answer. Simply look up the CRS and examine the axis specification
+of the Well-Known Text output:
+
+.. code-block:: console
+
+    projinfo EPSG:4326
+    PROJ.4 string:
+    +proj=longlat +datum=WGS84 +no_defs +type=crs
+
+    WKT2_2018 string:
+    GEOGCRS["WGS 84",
+        DATUM["World Geodetic System 1984",
+            ELLIPSOID["WGS 84",6378137,298.257223563,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        CS[ellipsoidal,2],
+            AXIS["geodetic latitude (Lat)",north,
+                ORDER[1],
+                ANGLEUNIT["degree",0.0174532925199433]],
+            AXIS["geodetic longitude (Lon)",east,
+                ORDER[2],
+                ANGLEUNIT["degree",0.0174532925199433]],
+        USAGE[
+            SCOPE["unknown"],
+            AREA["World"],
+            BBOX[-90,-180,90,180]],
+        ID["EPSG",4326]]
