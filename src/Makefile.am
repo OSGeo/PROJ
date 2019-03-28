@@ -173,6 +173,7 @@ libproj_la_SOURCES = \
 	conversions/cart.cpp \
 	conversions/geoc.cpp \
 	conversions/geocent.cpp \
+	conversions/noop.cpp \
 	conversions/unitconvert.cpp \
 	\
 	transformations/affine.cpp \
