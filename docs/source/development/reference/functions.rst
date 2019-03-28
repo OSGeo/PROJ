@@ -221,10 +221,16 @@ Coordinate transformation
         3. of length one, i.e. a constant, which will be treated as a fully
            populated array of that constant value
 
+    .. note:: Even though he coordinate components are named :c:data:`x`, :c:data:`y`,
+              :c:data:`z` and :c:data:`t`, axis ordering of the to and from CRS
+              is respected. Transformations exhibit the same behaviour
+              as if they were gathered in a :c:type:`PJ_COORD` struct.
+
+
     The strides, :c:data:`sx`, :c:data:`sy`, :c:data:`sz`, :c:data:`st`,
     represent the step length, in bytes, between
     consecutive elements of the corresponding array. This makes it possible for
-    :c:func:`proj_transform` to handle transformation of a large class of application
+    :c:func:`proj_trans_generic` to handle transformation of a large class of application
     specific data structures, without necessarily understanding the data structure
     format, as in:
 
@@ -250,21 +256,22 @@ Coordinate transformation
             0, 0                          /*  and the time is the constant 0.00 s */
         );
 
-    This is similar to the inner workings of the deprecated pj_transform function, but the
-    stride functionality has been generalized to work for any size of basic unit,
-    not just a fixed number of doubles.
+    This is similar to the inner workings of the deprecated :c:func:`pj_transform`
+    function, but the stride functionality has been generalized to work for any
+    size of basic unit, not just a fixed number of doubles.
 
     In most cases, the stride will be identical for x, y, z, and t, since they will
-    typically be either individual arrays (stride = sizeof(double)), or strided
-    views into an array of application specific data structures (stride = sizeof (...)).
+    typically be either individual arrays (``stride = sizeof(double)``), or strided
+    views into an array of application specific data structures (``stride = sizeof (...)``).
 
     But in order to support cases where :c:data:`x`, :c:data:`y`, :c:data:`z`,
     and :c:data:`t` come from heterogeneous sources, individual strides,
     :c:data:`sx`, :c:data:`sy`, :c:data:`sz`, :c:data:`st`, are used.
 
-    .. note:: Since :c:func:`proj_transform` does its work *in place*, this means that even the
-              supposedly constants (i.e. length 1 arrays) will return from the call in altered
-              state. Hence, remember to reinitialize between repeated calls.
+    .. note:: Since :c:func:`proj_trans_generic` does its work *in place*,
+              this means that even the supposedly constants (i.e. length 1 arrays)
+              will return from the call in altered state. Hence, remember to
+              reinitialize between repeated calls.
 
     :param PJ* P: Transformation object
     :param `direction`: Transformation direction
