@@ -50,7 +50,7 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 
 PJ *PROJECTION(ocea) {
-    double phi_0=0.0, phi_1, phi_2, lam_1, lam_2, lonz, alpha;
+    double phi_1, phi_2, lam_1, lam_2, lonz, alpha;
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
@@ -63,12 +63,17 @@ PJ *PROJECTION(ocea) {
     /*If the keyword "alpha" is found in the sentence then use 1point+1azimuth*/
     if ( pj_param(P->ctx, P->params, "talpha").i) {
         /*Define Pole of oblique transformation from 1 point & 1 azimuth*/
-        alpha   = pj_param(P->ctx, P->params, "ralpha").f;
+        // ERO: I've added M_PI so that the alpha is the angle from point 1 to point 2
+        // from the North in a clockwise direction
+        // (to be consistent with omerc behaviour)
+        alpha   = M_PI + pj_param(P->ctx, P->params, "ralpha").f;
         lonz = pj_param(P->ctx, P->params, "rlonc").f;
         /*Equation 9-8 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
-        lam_p = atan(-cos(alpha)/(-sin(phi_0) * sin(alpha))) + lonz;
+        // Actually slightliy modified to use atan2(), as it is suggested by
+        // Snyder for equation 9-1, but this is not mentionned here
+        lam_p = atan2(-cos(alpha) , -sin(P->phi0) * sin(alpha)) + lonz;
         /*Equation 9-7 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
-        phi_p = asin(cos(phi_0) * sin(alpha));
+        phi_p = asin(cos(P->phi0) * sin(alpha));
     /*If the keyword "alpha" is NOT found in the sentence then use 2points*/
     } else {
         /*Define Pole of oblique transformation from 2 points*/
