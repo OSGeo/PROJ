@@ -152,6 +152,8 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
 
     PROJ_DLL static const std::string OPERATION_VERSION_KEY;
 
+    PROJ_DLL CoordinateOperationNNPtr normalizeForVisualization() const;
+
   protected:
     PROJ_INTERNAL CoordinateOperation();
     PROJ_INTERNAL CoordinateOperation(const CoordinateOperation &other);

@@ -7648,3 +7648,123 @@ TEST(operation, validateParameters) {
         EXPECT_EQ(validation, expected);
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, normalizeForVisualization) {
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+
+    // Source(geographic) must be inverted
+    {
+        auto src = authFactory->createCoordinateReferenceSystem("4326");
+        auto dst = authFactory->createCoordinateReferenceSystem("32631");
+        auto op =
+            CoordinateOperationFactory::create()->createOperation(src, dst);
+        ASSERT_TRUE(op != nullptr);
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
+        EXPECT_EQ(opNormalized->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=pipeline "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=utm +zone=31 +ellps=WGS84");
+    }
+
+    // Target(geographic) must be inverted
+    {
+        auto src = authFactory->createCoordinateReferenceSystem("32631");
+        auto dst = authFactory->createCoordinateReferenceSystem("4326");
+        auto op =
+            CoordinateOperationFactory::create()->createOperation(src, dst);
+        ASSERT_TRUE(op != nullptr);
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
+        EXPECT_EQ(opNormalized->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=pipeline "
+                  "+step +inv +proj=utm +zone=31 +ellps=WGS84 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+    }
+
+    // Source(geographic) and target(projected) must be inverted
+    {
+        auto src = authFactory->createCoordinateReferenceSystem("4326");
+        auto dst = authFactory->createCoordinateReferenceSystem("3040");
+        auto op =
+            CoordinateOperationFactory::create()->createOperation(src, dst);
+        ASSERT_TRUE(op != nullptr);
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
+        EXPECT_EQ(opNormalized->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=pipeline "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=utm +zone=28 +ellps=GRS80");
+    }
+
+    // No inversion
+    {
+        auto src = authFactory->createCoordinateReferenceSystem("32631");
+        auto dst = authFactory->createCoordinateReferenceSystem("32632");
+        auto op =
+            CoordinateOperationFactory::create()->createOperation(src, dst);
+        ASSERT_TRUE(op != nullptr);
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_TRUE(opNormalized->_isEquivalentTo(op.get()));
+    }
+
+    // Source(compoundCRS) and target(geographic 3D) must be inverted
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setUsePROJAlternativeGridNames(false);
+        auto src = CompoundCRS::create(
+            PropertyMap(),
+            std::vector<CRSNNPtr>{
+                authFactory->createCoordinateReferenceSystem("4326"),
+                // EGM2008 height
+                authFactory->createCoordinateReferenceSystem("3855")});
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            src,
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84 3D
+            ctxt);
+        ASSERT_EQ(list.size(), 2U);
+        auto op = list[1];
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
+        EXPECT_EQ(opNormalized->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=vgridshift +grids=egm08_25.gtx +multiplier=1 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+    }
+
+    // Source(boundCRS) and target(geographic) must be inverted
+    {
+        auto src = BoundCRS::createFromTOWGS84(
+            GeographicCRS::EPSG_4269, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+        auto dst = authFactory->createCoordinateReferenceSystem("4326");
+        auto op =
+            CoordinateOperationFactory::create()->createOperation(src, dst);
+        ASSERT_TRUE(op != nullptr);
+        auto opNormalized = op->normalizeForVisualization();
+        EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
+        EXPECT_EQ(opNormalized->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=pipeline "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=push +v_3 "
+                  "+step +proj=cart +ellps=GRS80 "
+                  "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+                  "+convention=position_vector "
+                  "+step +inv +proj=cart +ellps=WGS84 "
+                  "+step +proj=pop +v_3 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+    }
+}
