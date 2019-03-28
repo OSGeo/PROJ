@@ -5342,6 +5342,11 @@ const std::string &PROJStringFormatter::toString() const {
             }
         }
     }
+
+    if (d->result_.empty()) {
+        d->appendToResult("+proj=noop");
+    }
+
     return d->result_;
 }
 

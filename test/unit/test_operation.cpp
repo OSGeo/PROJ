@@ -636,7 +636,7 @@ TEST(operation, transformation_createGeocentricTranslations_null) {
 
     EXPECT_EQ(transf->inverse()->exportToPROJString(
                   PROJStringFormatter::create().get()),
-              "");
+              "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -956,7 +956,7 @@ TEST(operation, transformation_successive_helmert_noop) {
         std::vector<PositionalAccuracyNNPtr>{});
 
     EXPECT_EQ(concat->exportToPROJString(PROJStringFormatter::create().get()),
-              "");
+              "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -4131,7 +4131,7 @@ TEST(operation, PROJ_based_empty) {
         SingleOperation::createPROJBased(PropertyMap(), "", nullptr, nullptr);
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
-              "");
+              "+proj=noop");
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"PROJ-based coordinate operation\",\n"
@@ -4144,7 +4144,7 @@ TEST(operation, PROJ_based_empty) {
 
     EXPECT_EQ(conv->inverse()->exportToPROJString(
                   PROJStringFormatter::create().get()),
-              "");
+              "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -4328,7 +4328,7 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
         ASSERT_EQ(list.size(), 1U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "");
+            "+proj=noop");
     }
 }
 
@@ -4344,7 +4344,7 @@ TEST(operation, geogCRS_to_geogCRS_context_incompatible_area) {
         ctxt);
     ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-              "");
+              "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -4504,7 +4504,7 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
         GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(), "Null geographic offset from WGS 84 to WGS 84");
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "+proj=noop");
     EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
 
@@ -4651,7 +4651,7 @@ TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
     EXPECT_EQ(list[0]->nameStr(),
               "CH1903 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-              "");
+              "+proj=noop");
 
     EXPECT_EQ(list[1]->nameStr(), "CH1903 to CH1903+ (1)");
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -4799,7 +4799,7 @@ TEST(operation, geocentricCRS_to_geocentricCRS_noop) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(),
               "Ballpark geocentric translation from WGS 84 to WGS 84");
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "+proj=noop");
     EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
 
@@ -6449,7 +6449,7 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                           PROJStringFormatter::Convention::PROJ_5,
                           authFactory->databaseContext())
                           .get()),
-                  "");
+                  "+proj=noop");
     }
 }
 

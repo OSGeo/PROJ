@@ -6541,7 +6541,7 @@ TEST(io, projstringformatter_helmert_3_param_noop) {
     fmt->addParam("x", 0);
     fmt->addParam("y", 0);
     fmt->addParam("z", 0);
-    EXPECT_EQ(fmt->toString(), "");
+    EXPECT_EQ(fmt->toString(), "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -6557,7 +6557,7 @@ TEST(io, projstringformatter_helmert_7_param_noop) {
     fmt->addParam("rz", 0);
     fmt->addParam("s", 0);
     fmt->addParam("convention", "position_vector");
-    EXPECT_EQ(fmt->toString(), "");
+    EXPECT_EQ(fmt->toString(), "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -6587,7 +6587,7 @@ TEST(io, projstringformatter_merge_consecutive_helmert_3_param_noop) {
     fmt->addParam("x", -10);
     fmt->addParam("y", -20);
     fmt->addParam("z", -30);
-    EXPECT_EQ(fmt->toString(), "");
+    EXPECT_EQ(fmt->toString(), "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -6599,7 +6599,7 @@ TEST(io, projstringformatter_cart_grs80_wgs84) {
     fmt->addStep("cart");
     fmt->setCurrentStepInverted(true);
     fmt->addParam("ellps", "GRS80");
-    EXPECT_EQ(fmt->toString(), "");
+    EXPECT_EQ(fmt->toString(), "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -7334,7 +7334,7 @@ TEST(io, projparse_longlat_axis_neu) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, NN_NO_CHECK(crs));
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "+proj=noop");
 }
 
 // ---------------------------------------------------------------------------
@@ -7437,7 +7437,7 @@ TEST(io, projparse_longlat_axisswap) {
                 EXPECT_EQ(
                     op->exportToPROJString(PROJStringFormatter::create().get()),
                     (atoi(order1) == 2 && atoi(order2) == 1)
-                        ? ""
+                        ? "+proj=noop"
                         : "+proj=pipeline +step +proj=axisswap +order=2,1 "
                           "+step +proj=axisswap +order=" +
                               std::string(order1) + "," + order2);

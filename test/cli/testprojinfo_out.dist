@@ -175,7 +175,7 @@ Operation n°1:
 unknown id, Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, World, has ballpark transformation
 
 PROJ string:
-
++proj=noop
 
 WKT2_2018 string:
 COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
@@ -540,7 +540,7 @@ Operation n°7:
 unknown id, Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, World, has ballpark transformation
 
 PROJ string:
-
++proj=noop
 
 WKT2_2018 string:
 COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
