@@ -193,6 +193,16 @@ The following control parameters can appear in any order:
     and their entries can refer to entries of the main database.
     The option may be repeated to specify several auxiliary databases.
 
+.. option:: --identify
+
+    When used with an object definition, this queries the PROJ database to find
+    known objects, typically CRS, that are close or identical to the object.
+    Each candidate object is associated with an approximate likelihood percentage.
+    This is useful when used with a WKT string that lacks a EPSG identifier,
+    such as ESRI WKT1. This might also be used with PROJ strings.
+    For example, `+proj=utm +zone=31 +datum=WGS84 +type=crs` will be identified
+    with a likelihood of 70% to EPSG:32631
+
 .. option:: --c-ify
 
     For developers only. Modify the string output of the utility so that it
