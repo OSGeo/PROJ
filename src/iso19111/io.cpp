@@ -4510,7 +4510,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  *     "urn:ogc:def:coordinateOperation:EPSG::1671",
  *     "urn:ogc:def:ellipsoid:EPSG::7001"
  *     or "urn:ogc:def:datum:EPSG::6326"</li>
- * <li>an objet name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
+ * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
  * </ul>
@@ -4546,7 +4546,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  *     "urn:ogc:def:coordinateOperation:EPSG::1671",
  *     "urn:ogc:def:ellipsoid:EPSG::7001"
  *     or "urn:ogc:def:datum:EPSG::6326"</li>
- * <li>an objet name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
+ * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
  * </ul>
