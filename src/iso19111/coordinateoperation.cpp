@@ -11272,16 +11272,37 @@ static bool hasIdentifiers(const CoordinateOperationNNPtr &op) {
 
 static std::vector<crs::CRSNNPtr>
 findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
-                             const datum::GeodeticReferenceFramePtr &datum) {
+                             const datum::GeodeticReferenceFrame *datum) {
     std::vector<crs::CRSNNPtr> candidates;
-    for (const auto &id : datum->identifiers()) {
-        const auto &authName = *(id->codeSpace());
-        const auto &code = id->code();
-        if (!authName.empty()) {
-            auto l_candidates = authFactory->createGeodeticCRSFromDatum(
-                authName, code, std::string());
-            for (const auto &candidate : l_candidates) {
-                candidates.emplace_back(candidate);
+    assert(datum);
+    const auto &ids = datum->identifiers();
+    const auto &datumName = datum->nameStr();
+    if (!ids.empty()) {
+        for (const auto &id : ids) {
+            const auto &authName = *(id->codeSpace());
+            const auto &code = id->code();
+            if (!authName.empty()) {
+                auto l_candidates = authFactory->createGeodeticCRSFromDatum(
+                    authName, code, std::string());
+                for (const auto &candidate : l_candidates) {
+                    candidates.emplace_back(candidate);
+                }
+            }
+        }
+    } else if (datumName != "unknown" && datumName != "unnamed") {
+        auto matches = authFactory->createObjectsFromName(
+            datumName,
+            {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, false,
+            2);
+        if (matches.size() == 1) {
+            const auto &match = matches.front();
+            if (datum->_isEquivalentTo(
+                    match.get(), util::IComparable::Criterion::EQUIVALENT) &&
+                !match->identifiers().empty()) {
+                return findCandidateGeodCRSForDatum(
+                    authFactory,
+                    dynamic_cast<const datum::GeodeticReferenceFrame *>(
+                        match.get()));
             }
         }
     }
@@ -11323,9 +11344,9 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 
     const auto &authFactory = context.context->getAuthorityFactory();
     const auto candidatesSrcGeod(
-        findCandidateGeodCRSForDatum(authFactory, geodSrc->datum()));
+        findCandidateGeodCRSForDatum(authFactory, geodSrc->datum().get()));
     const auto candidatesDstGeod(
-        findCandidateGeodCRSForDatum(authFactory, geodDst->datum()));
+        findCandidateGeodCRSForDatum(authFactory, geodDst->datum().get()));
 
     auto createTransformations = [&](const crs::CRSNNPtr &candidateSrcGeod,
                                      const crs::CRSNNPtr &candidateDstGeod,
@@ -11566,12 +11587,8 @@ CoordinateOperationFactory::Private::createOperations(
             // but transformations are only available between their
             // corresponding geocentric CRS.
             const auto &srcDatum = geodSrc->datum();
-            const bool srcHasDatumWithId =
-                srcDatum && !srcDatum->identifiers().empty();
             const auto &dstDatum = geodDst->datum();
-            const bool dstHasDatumWithId =
-                dstDatum && !dstDatum->identifiers().empty();
-            if (srcHasDatumWithId && dstHasDatumWithId &&
+            if (srcDatum != nullptr && dstDatum != nullptr &&
                 !srcDatum->_isEquivalentTo(
                     dstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
                 createOperationsWithDatumPivot(res, sourceCRS, targetCRS,
@@ -11916,6 +11933,31 @@ CoordinateOperationFactory::Private::createOperations(
     // A bit odd case as we are comparing apples to oranges, but in case
     // the vertical unit differ, do something useful.
     if (vertSrc && geogDst) {
+
+        if (vertSrc->identifiers().empty()) {
+            const auto &authFactory = context.context->getAuthorityFactory();
+            const auto &vertSrcName = vertSrc->nameStr();
+            if (authFactory != nullptr && vertSrcName != "unnamed" &&
+                vertSrcName != "unknown") {
+                auto matches = authFactory->createObjectsFromName(
+                    vertSrcName,
+                    {io::AuthorityFactory::ObjectType::VERTICAL_CRS}, false, 2);
+                if (matches.size() == 1) {
+                    const auto &match = matches.front();
+                    if (vertSrc->_isEquivalentTo(
+                            match.get(),
+                            util::IComparable::Criterion::EQUIVALENT) &&
+                        !match->identifiers().empty()) {
+                        return createOperations(
+                            NN_NO_CHECK(
+                                util::nn_dynamic_pointer_cast<crs::VerticalCRS>(
+                                    match)),
+                            targetCRS, context);
+                    }
+                }
+            }
+        }
+
         const double convSrc =
             vertSrc->coordinateSystem()->axisList()[0]->unit().conversionToSI();
         double convDst = 1.0;
@@ -12261,6 +12303,67 @@ CoordinateOperationFactory::Private::createOperations(
 
 // ---------------------------------------------------------------------------
 
+static crs::CRSNNPtr
+getResolvedCRS(const crs::CRSNNPtr &crs,
+               const CoordinateOperationContextNNPtr &context) {
+    const auto &authFactory = context->getAuthorityFactory();
+
+    auto projectedCrs = dynamic_cast<crs::ProjectedCRS *>(crs.get());
+    if (projectedCrs && authFactory) {
+        const auto &ids = projectedCrs->identifiers();
+        if (!ids.empty() && projectedCrs->baseCRS()->identifiers().empty()) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(), *ids.front()->codeSpace());
+            try {
+                crs::CRSNNPtr resolvedCrs(
+                    tmpAuthFactory->createProjectedCRS(ids.front()->code()));
+                if (resolvedCrs->_isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
+                    return resolvedCrs;
+                }
+            } catch (const std::exception &) {
+            }
+        }
+    }
+
+    auto compoundCrs = dynamic_cast<crs::CompoundCRS *>(crs.get());
+    // If we get a CompoundCRS that has an EPSG code, but whose component CRS
+    // lack one, typically from WKT2, this might be an issue to get proper
+    // results in createOperations(), so import the CompoundCRS from the
+    // registry, and if equivalent to the original one, then use the version
+    // from the registry.
+    if (compoundCrs && authFactory) {
+        const auto &ids = compoundCrs->identifiers();
+        if (!ids.empty()) {
+            const auto &components = compoundCrs->componentReferenceSystems();
+            bool hasMissingId = false;
+            for (const auto &comp : components) {
+                if (comp->identifiers().empty()) {
+                    hasMissingId = true;
+                    break;
+                }
+            }
+            if (hasMissingId) {
+                const auto tmpAuthFactory = io::AuthorityFactory::create(
+                    authFactory->databaseContext(), *ids.front()->codeSpace());
+                try {
+                    crs::CRSNNPtr resolvedCrs(
+                        tmpAuthFactory->createCompoundCRS(ids.front()->code()));
+                    if (resolvedCrs->_isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        return resolvedCrs;
+                    }
+                } catch (const std::exception &) {
+                }
+            }
+        }
+    }
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Find a list of CoordinateOperation from sourceCRS to targetCRS.
  *
  * The operations are sorted with the most relevant ones first: by
@@ -12289,10 +12392,14 @@ CoordinateOperationFactory::createOperations(
     auto l_sourceCRS = srcBoundCRS ? NN_NO_CHECK(srcBoundCRS) : sourceCRS;
     auto l_targetCRS = targetBoundCRS ? NN_NO_CHECK(targetBoundCRS) : targetCRS;
 
-    Private::Context contextPrivate(sourceCRS, targetCRS, context);
-    return filterAndSort(
-        Private::createOperations(l_sourceCRS, l_targetCRS, contextPrivate),
-        context, l_sourceCRS, l_targetCRS);
+    auto l_resolvedSourceCRS = getResolvedCRS(l_sourceCRS, context);
+    auto l_resolvedTargetCRS = getResolvedCRS(l_targetCRS, context);
+    Private::Context contextPrivate(l_resolvedSourceCRS, l_resolvedTargetCRS,
+                                    context);
+    return filterAndSort(Private::createOperations(l_resolvedSourceCRS,
+                                                   l_resolvedTargetCRS,
+                                                   contextPrivate),
+                         context, l_resolvedSourceCRS, l_resolvedTargetCRS);
 }
 
 // ---------------------------------------------------------------------------
