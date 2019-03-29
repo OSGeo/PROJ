@@ -1,8 +1,7 @@
 #define PJ_LIB__
-#include "proj_math.h"
-#include "proj_internal.h"
 #include "proj.h"
 #include "proj_internal.h"
+#include "proj_math.h"
 
 PROJ_HEAD(robin, "Robinson") "\n\tPCyl, Sph";
 

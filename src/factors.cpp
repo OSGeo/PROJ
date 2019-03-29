@@ -3,7 +3,6 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "proj_internal.h"
 
 #include <errno.h>
 

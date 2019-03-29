@@ -33,7 +33,6 @@
 #include <errno.h>
 #include <math.h>
 
-#include "proj_internal.h"
 #include "proj.h"
 #include "proj_internal.h"
 

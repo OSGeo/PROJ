@@ -105,7 +105,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 #include "geodesic.h"
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_internal.h"
 
 PROJ_HEAD(pipeline,         "Transformation pipeline manager");
 PROJ_HEAD(pop, "Retrieve coordinate value from pipeline stack");
