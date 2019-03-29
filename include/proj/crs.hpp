@@ -126,6 +126,10 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage {
     PROJ_FOR_TEST CRSNNPtr
     alterCSLinearUnit(const common::UnitOfMeasure &unit) const;
 
+    PROJ_INTERNAL bool mustAxisOrderBeSwitchedForVisualization() const;
+
+    PROJ_INTERNAL CRSNNPtr normalizeForVisualization() const;
+
     //! @endcond
 
   protected:

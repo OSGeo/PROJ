@@ -591,6 +591,104 @@ CRSNNPtr CRS::alterId(const std::string &authName,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+static bool isAxisListNorthEast(
+    const std::vector<cs::CoordinateSystemAxisNNPtr> &axisList) {
+    const auto &dir0 = axisList[0]->direction();
+    const auto &dir1 = axisList[1]->direction();
+    return (&dir0 == &cs::AxisDirection::NORTH &&
+            &dir1 == &cs::AxisDirection::EAST);
+}
+// ---------------------------------------------------------------------------
+
+bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
+
+    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        const auto &comps = compoundCRS->componentReferenceSystems();
+        if (!comps.empty()) {
+            return comps[0]->mustAxisOrderBeSwitchedForVisualization();
+        }
+    }
+
+    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        return isAxisListNorthEast(geogCRS->coordinateSystem()->axisList());
+    }
+
+    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        return isAxisListNorthEast(projCRS->coordinateSystem()->axisList());
+    }
+
+    return false;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+CRSNNPtr CRS::normalizeForVisualization() const {
+    auto props = util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY,
+        nameStr() + " (with axis order normalized for visualization)");
+
+    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        const auto &comps = compoundCRS->componentReferenceSystems();
+        if (!comps.empty()) {
+            std::vector<CRSNNPtr> newComps;
+            newComps.emplace_back(comps[0]->normalizeForVisualization());
+            for (size_t i = 1; i < comps.size(); i++) {
+                newComps.emplace_back(comps[i]);
+            }
+            return util::nn_static_pointer_cast<CRS>(
+                CompoundCRS::create(props, newComps));
+        }
+    }
+
+    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        const auto &axisList = geogCRS->coordinateSystem()->axisList();
+        if (isAxisListNorthEast(axisList)) {
+            auto cs = axisList.size() == 2
+                          ? cs::EllipsoidalCS::create(util::PropertyMap(),
+                                                      axisList[1], axisList[0])
+                          : cs::EllipsoidalCS::create(util::PropertyMap(),
+                                                      axisList[1], axisList[0],
+                                                      axisList[2]);
+            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
+                props, geogCRS->datum(), geogCRS->datumEnsemble(), cs));
+        }
+    }
+
+    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        const auto &axisList = projCRS->coordinateSystem()->axisList();
+        if (isAxisListNorthEast(axisList)) {
+            auto cs =
+                axisList.size() == 2
+                    ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0])
+                    : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0], axisList[2]);
+            return util::nn_static_pointer_cast<CRS>(
+                ProjectedCRS::create(props, projCRS->baseCRS(),
+                                     projCRS->derivingConversionRef(), cs));
+        }
+    }
+
+    return NN_NO_CHECK(
+        std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Identify the CRS with reference CRSs.
  *
  * The candidate CRSs are either hard-coded, or looked in the database when

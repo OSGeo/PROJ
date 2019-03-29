@@ -765,6 +765,46 @@ void CoordinateOperation::setProperties(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a variation of the current coordinate operation whose axis
+ * order is the one expected for visualization purposes.
+ */
+CoordinateOperationNNPtr
+CoordinateOperation::normalizeForVisualization() const {
+    auto l_sourceCRS = sourceCRS();
+    auto l_targetCRS = targetCRS();
+    if (!l_sourceCRS || !l_targetCRS) {
+        throw util::UnsupportedOperationException(
+            "Cannot retrieve source or target CRS");
+    }
+    const bool swapSource =
+        l_sourceCRS->mustAxisOrderBeSwitchedForVisualization();
+    const bool swapTarget =
+        l_targetCRS->mustAxisOrderBeSwitchedForVisualization();
+    auto l_this = NN_NO_CHECK(std::dynamic_pointer_cast<CoordinateOperation>(
+        shared_from_this().as_nullable()));
+    if (!swapSource && !swapTarget) {
+        return l_this;
+    }
+    std::vector<CoordinateOperationNNPtr> subOps;
+    if (swapSource) {
+        auto op = Conversion::createAxisOrderReversal(false);
+        op->setCRSs(l_sourceCRS->normalizeForVisualization(),
+                    NN_NO_CHECK(l_sourceCRS), nullptr);
+        subOps.emplace_back(op);
+    }
+    subOps.emplace_back(l_this);
+    if (swapTarget) {
+        auto op = Conversion::createAxisOrderReversal(false);
+        op->setCRSs(NN_NO_CHECK(l_targetCRS),
+                    l_targetCRS->normalizeForVisualization(), nullptr);
+        subOps.emplace_back(op);
+    }
+    return util::nn_static_pointer_cast<CoordinateOperation>(
+        ConcatenatedOperation::createComputeMetadata(subOps, true));
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct OperationMethod::Private {
     util::optional<std::string> formula_{};
