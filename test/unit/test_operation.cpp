@@ -5485,6 +5485,38 @@ TEST(operation, boundCRS_of_geogCRS_to_projCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, boundCRS_of_geogCRS_to_unrelated_geogCRS_context) {
+    auto src = BoundCRS::createFromTOWGS84(
+        GeographicCRS::EPSG_4807, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // ETRS89
+    auto dst = authFactory->createCoordinateReferenceSystem("4258");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    // Check with it is a concatenated operation, since it doesn't particularly
+    // show up in the PROJ string
+    EXPECT_TRUE(dynamic_cast<ConcatenatedOperation *>(list[0].get()) !=
+                nullptr);
+    EXPECT_EQ(list[0]->nameStr(), "Transformation from NTF (Paris) to WGS84 + "
+                                  "Inverse of ETRS89 to WGS 84 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=grad +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=clrk80ign +pm=paris "
+              "+step +proj=push +v_3 +step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector "
+              "+step +inv +proj=cart +ellps=GRS80 +step +proj=pop +v_3 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_boundCRS_of_geogCRS) {
     auto boundCRS = BoundCRS::createFromTOWGS84(
         GeographicCRS::EPSG_4807, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
