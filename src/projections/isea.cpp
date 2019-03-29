@@ -13,10 +13,9 @@
 #include <limits>
 
 #define PJ_LIB__
-#include "proj_internal.h"
-#include "proj_math.h"
 #include "proj.h"
 #include "proj_internal.h"
+#include "proj_math.h"
 
 #define DEG36 0.62831853071795864768
 #define DEG72 1.25663706143591729537

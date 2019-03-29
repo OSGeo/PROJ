@@ -3,10 +3,9 @@
 #include <float.h>
 #include <math.h>
 
-#include "proj_internal.h"
 #include "proj.h"
-#include "proj_math.h"
 #include "proj_internal.h"
+#include "proj_math.h"
 
 PROJ_HEAD(tobmerc, "Tobler-Mercator") "\n\tCyl, Sph";
 

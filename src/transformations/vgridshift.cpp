@@ -6,7 +6,6 @@
 #include <time.h>
 
 #include "proj_internal.h"
-#include "proj_internal.h"
 
 PROJ_HEAD(vgridshift, "Vertical grid shift");
 

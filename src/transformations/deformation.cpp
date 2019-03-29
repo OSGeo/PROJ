@@ -56,7 +56,6 @@ grid-values in units of mm/year in ENU-space.
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "proj_internal.h"
 
 PROJ_HEAD(deformation, "Kinematic grid shift");
 

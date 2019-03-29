@@ -117,7 +117,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 #include "proj_internal.h"
 #include "proj_math.h"
 #include "proj_strtod.h"
-#include "proj_internal.h"
 
 #include "optargpm.h"
 

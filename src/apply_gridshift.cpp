@@ -34,7 +34,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "proj_internal.h"
 #include "proj.h"
 #include "proj_internal.h"
 

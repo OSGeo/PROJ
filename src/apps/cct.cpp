@@ -81,7 +81,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_strtod.h"
-#include "proj_internal.h"
 #include "optargpm.h"
 
 
