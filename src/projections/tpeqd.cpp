@@ -87,6 +87,10 @@ PJ *PROJECTION(tpeqd) {
     Q->sc = Q->sp1 * Q->cp2;
     Q->ccs = Q->cp1 * Q->cp2 * sin(Q->dlam2);
     Q->z02 = aacos(P->ctx, Q->sp1 * Q->sp2 + Q->cp1 * Q->cp2 * cos (Q->dlam2));
+    if( Q->z02 == 0.0 ) {
+        // Actually happens when both lat_1 = lat_2 and |lat_1| = 90
+        return pj_default_destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
+    }
     Q->hz0 = .5 * Q->z02;
     A12 = atan2(Q->cp2 * sin (Q->dlam2),
         Q->cp1 * Q->sp2 - Q->sp1 * Q->cp2 * cos (Q->dlam2));
