@@ -11690,7 +11690,6 @@ CoordinateOperationFactory::Private::createOperations(
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
-    // boundCRS to a geogCRS that is the same as the hubCRS
     auto boundSrc = dynamic_cast<const crs::BoundCRS *>(sourceCRS.get());
     auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
     if (boundSrc && geogDst) {
@@ -11699,6 +11698,7 @@ CoordinateOperationFactory::Private::createOperations(
             dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
         auto geogCRSOfBaseOfBoundSrc =
             boundSrc->baseCRS()->extractGeographicCRS();
+        // Is it: boundCRS to a geogCRS that is the same as the hubCRS ?
         if (hubSrcGeog && geogCRSOfBaseOfBoundSrc &&
             (hubSrcGeog->_isEquivalentTo(
                  geogDst, util::IComparable::Criterion::EQUIVALENT) ||
@@ -11814,6 +11814,35 @@ CoordinateOperationFactory::Private::createOperations(
             dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get())) {
             res.emplace_back(boundSrc->transformation());
             return res;
+        }
+
+        if (hubSrcGeog && geogCRSOfBaseOfBoundSrc) {
+            // This one should go to the above 'Is it: boundCRS to a geogCRS
+            // that is the same as the hubCRS ?' case
+            auto opsFirst = createOperations(sourceCRS, hubSrc, context);
+            auto opsLast = createOperations(hubSrc, targetCRS, context);
+            if (!opsFirst.empty() && !opsLast.empty()) {
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opLast : opsLast) {
+                        // Exclude artificial transformations from the hub
+                        // to the target CRS
+                        if (!opLast->hasBallparkTransformation()) {
+                            try {
+                                res.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {opFirst, opLast},
+                                            !allowEmptyIntersection));
+                            } catch (
+                                const InvalidOperationEmptyIntersection &) {
+                            }
+                        }
+                    }
+                }
+                if (!res.empty()) {
+                    return res;
+                }
+            }
         }
 
         return createOperations(boundSrc->baseCRS(), targetCRS, context);
