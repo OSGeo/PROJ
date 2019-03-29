@@ -43,4 +43,28 @@ operation   proj=unitconvert z_in=rad z_out=m
 accept      1 1 1 1
 expect      failure
 
+operation   proj=unitconvert xy_in=0
+expect      failure
+
+operation   proj=unitconvert xy_out=0
+expect      failure
+
+operation   proj=unitconvert xy_in=1e400
+expect      failure
+
+operation   proj=unitconvert xy_out=1e400
+expect      failure
+
+operation   proj=unitconvert z_in=0
+expect      failure
+
+operation   proj=unitconvert z_out=0
+expect      failure
+
+operation   proj=unitconvert z_in=1e400
+expect      failure
+
+operation   proj=unitconvert z_out=1e400
+expect      failure
+
 </gie>
