@@ -4946,6 +4946,9 @@ accept  0 0
 expect  0.000000000000   12493602.143489977345
 
 
+operation +proj=sterea   +a=9999 +b=.9 +lat_0=73
+expect failure
+
 ===============================================================================
 Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reunion)
 	Cyl, Sph&Ell
