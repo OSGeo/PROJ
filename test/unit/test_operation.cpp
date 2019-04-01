@@ -4746,6 +4746,52 @@ TEST(operation, geogCRS_to_geogCRS_3D) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_without_id_to_geogCRS_3D_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto src =
+        authFactory->createCoordinateReferenceSystem("4289"); // Amersfoort
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4937"); // ETRS89 3D
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    auto wkt2 = "GEOGCRS[\"unnamed\",\n"
+                "    DATUM[\"Amersfoort\",\n"
+                "        ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+                "            LENGTHUNIT[\"metre\",1]]],\n"
+                "    PRIMEM[\"Greenwich\",0,\n"
+                "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                "    CS[ellipsoidal,2],\n"
+                "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+                "            ORDER[1],\n"
+                "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+                "            ORDER[2],\n"
+                "            ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                "    USAGE[\n"
+                "        SCOPE[\"unknown\"],\n"
+                "        AREA[\"Netherlands - onshore\"],\n"
+                "        BBOX[50.75,3.2,53.7,7.22]]]\n";
+
+    auto obj = WKTParser().createFromWKT(wkt2);
+    auto src_from_wkt2 = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(src_from_wkt2 != nullptr);
+    auto list2 = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src_from_wkt2), dst, ctxt);
+    ASSERT_GE(list.size(), list2.size());
+    for (size_t i = 0; i < list.size(); i++) {
+        const auto &op = list[i];
+        const auto &op2 = list2[i];
+        EXPECT_TRUE(
+            op->isEquivalentTo(op2.get(), IComparable::Criterion::EQUIVALENT))
+            << op->nameStr() << " " << op2->nameStr();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geocentricCRS_to_geogCRS_same_datum) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -5168,6 +5214,50 @@ TEST(operation, projCRS_to_geogCRS) {
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, projCRS_no_id_to_geogCRS_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto src = authFactory->createCoordinateReferenceSystem(
+        "28992"); // Amersfoort / RD New
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4258"); // ETRS89 2D
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    auto wkt2 =
+        "PROJCRS[\"unknown\",\n"
+        "    BASEGEOGCRS[\"Amersfoort\",\n"
+        "       DATUM[\"Amersfoort\",\n"
+        "            ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128]]],\n"
+        "    CONVERSION[\"unknown\",\n"
+        "        METHOD[\"Oblique Stereographic\"],\n"
+        "        PARAMETER[\"Latitude of natural origin\",52.1561605555556],\n"
+        "        PARAMETER[\"Longitude of natural origin\",5.38763888888889],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",0.9999079],\n"
+        "        PARAMETER[\"False easting\",155000],\n"
+        "        PARAMETER[\"False northing\",463000]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east],\n"
+        "        AXIS[\"(N)\",north],\n"
+        "    LENGTHUNIT[\"metre\",1],\n"
+        "    ID[\"EPSG\",28992]]";
+    auto obj = WKTParser().createFromWKT(wkt2);
+    auto src_from_wkt2 = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(src_from_wkt2 != nullptr);
+    auto list2 = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src_from_wkt2), dst, ctxt);
+    ASSERT_GE(list.size(), list2.size() - 1);
+    for (size_t i = 0; i < list.size(); i++) {
+        const auto &op = list[i];
+        const auto &op2 = list2[i];
+        EXPECT_TRUE(
+            op->isEquivalentTo(op2.get(), IComparable::Criterion::EQUIVALENT));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -6482,6 +6572,87 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                           authFactory->databaseContext())
                           .get()),
                   "");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_from_WKT2_to_geogCRS_3D_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto src = authFactory->createCoordinateReferenceSystem(
+        "7415"); // Amersfoort / RD New + NAP height
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4937"); // ETRS89 3D
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    auto wkt2 = src->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+    auto obj = WKTParser().createFromWKT(wkt2);
+    auto src_from_wkt2 = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(src_from_wkt2 != nullptr);
+    auto list2 = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src_from_wkt2), dst, ctxt);
+    ASSERT_GE(list.size(), list2.size());
+    for (size_t i = 0; i < list.size(); i++) {
+        const auto &op = list[i];
+        const auto &op2 = list2[i];
+        EXPECT_TRUE(
+            op->isEquivalentTo(op2.get(), IComparable::Criterion::EQUIVALENT));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto src = authFactory->createCoordinateReferenceSystem(
+        "7415"); // Amersfoort / RD New + NAP height
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4937"); // ETRS89 3D
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    auto wkt2 =
+        "COMPOUNDCRS[\"unknown\",\n"
+        "  PROJCRS[\"unknown\",\n"
+        "    BASEGEOGCRS[\"Amersfoort\",\n"
+        "            DATUM[\"Amersfoort\",\n"
+        "                ELLIPSOID[\"Bessel "
+        "1841\",6377397.155,299.1528128]]],\n"
+        "    CONVERSION[\"unknown\",\n"
+        "        METHOD[\"Oblique Stereographic\"],\n"
+        "        PARAMETER[\"Latitude of natural origin\",52.1561605555556],\n"
+        "        PARAMETER[\"Longitude of natural origin\",5.38763888888889],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",0.9999079],\n"
+        "        PARAMETER[\"False easting\",155000],\n"
+        "        PARAMETER[\"False northing\",463000]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east],\n"
+        "        AXIS[\"(N)\",north],\n"
+        "    LENGTHUNIT[\"metre\",1]],\n"
+        "  VERTCRS[\"NAP height\",\n"
+        "    VDATUM[\"Normaal Amsterdams Peil\"],\n"
+        "    CS[vertical,1],\n"
+        "        AXIS[\"gravity-related height (H)\",up,\n"
+        "            LENGTHUNIT[\"metre\",1]]]]";
+    auto obj = WKTParser().createFromWKT(wkt2);
+    auto src_from_wkt2 = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(src_from_wkt2 != nullptr);
+    auto list2 = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src_from_wkt2), dst, ctxt);
+    ASSERT_GE(list.size(), list2.size() - 1);
+    for (size_t i = 0; i < list.size(); i++) {
+        const auto &op = list[i];
+        const auto &op2 = list2[i];
+        EXPECT_TRUE(
+            op->isEquivalentTo(op2.get(), IComparable::Criterion::EQUIVALENT));
     }
 }
 
