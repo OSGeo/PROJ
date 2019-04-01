@@ -26,9 +26,14 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double rh, E, c;
 
     rh = Q->am1 + Q->m1 - pj_mlfn(lp.phi, E = sin(lp.phi), c = cos(lp.phi), Q->en);
-    E = c * lp.lam / (rh * sqrt(1. - P->es * E * E));
-    xy.x = rh * sin(E);
-    xy.y = Q->am1 - rh * cos(E);
+    if (fabs(rh) > EPS10) {
+        E = c * lp.lam / (rh * sqrt(1. - P->es * E * E));
+        xy.x = rh * sin(E);
+        xy.y = Q->am1 - rh * cos(E);
+    } else {
+        xy.x = 0.;
+        xy.y = 0.;
+    }
     return xy;
 }
 
