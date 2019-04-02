@@ -638,23 +638,23 @@ Various
 
 .. c:function:: int proj_angular_input (PJ *P, enum PJ_DIRECTION dir)
 
-    Check if a operation expects angular input.
+    Check if a operation expects input in radians or not.
 
     :param `P`: Transformation object
     :type `P`: const PJ*
     :param `direction`: Starting direction of transformation
     :type `direction`: PJ_DIRECTION
-    :returns: :c:type:`int` 1 if angular input is expected, otherwise 0
+    :returns: :c:type:`int` 1 if input units is expected in radians, otherwise 0
 
 .. c:function:: int proj_angular_output (PJ *P, enum PJ_DIRECTION dir)
 
-    Check if an operation returns angular output.
+    Check if an operation returns output in radians or not.
 
     :param `P`: Transformation object
     :type `P`: const PJ*
     :param `direction`: Starting direction of transformation
     :type `direction`: PJ_DIRECTION
-    :returns: :c:type:`int` 1 if angular output is returned, otherwise 0
+    :returns: :c:type:`int` 1 if output units is expected in radians, otherwise 0
 
 C API for ISO-19111 functionality
 +++++++++++++++++++++++++++++++++
