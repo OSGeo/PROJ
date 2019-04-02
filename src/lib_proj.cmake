@@ -174,6 +174,7 @@ set(SRC_LIBPROJ_CONVERSIONS
   conversions/cart.cpp
   conversions/geoc.cpp
   conversions/geocent.cpp
+  conversions/noop.cpp
   conversions/unitconvert.cpp
 )
 

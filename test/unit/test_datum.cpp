@@ -175,7 +175,7 @@ TEST(datum, prime_meridian_to_PROJString) {
 
     EXPECT_EQ(PrimeMeridian::GREENWICH->exportToPROJString(
                   PROJStringFormatter::create().get()),
-              "");
+              "+proj=noop");
 
     EXPECT_EQ(PrimeMeridian::PARIS->exportToPROJString(
                   PROJStringFormatter::create().get()),
@@ -195,7 +195,7 @@ TEST(datum, prime_meridian_to_PROJString) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, "Origin meridian"),
             Angle(0))
             ->exportToPROJString(PROJStringFormatter::create().get()),
-        "");
+        "+proj=noop");
 
     EXPECT_TRUE(PrimeMeridian::GREENWICH->isEquivalentTo(
         PrimeMeridian::GREENWICH.get()));

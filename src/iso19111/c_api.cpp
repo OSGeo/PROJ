@@ -134,8 +134,7 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
             auto formatter = PROJStringFormatter::create(
                 PROJStringFormatter::Convention::PROJ_5, dbContext);
             auto projString = coordop->exportToPROJString(formatter.get());
-            auto pj = pj_create_internal(
-                ctx, projString.empty() ? "+proj=affine" : projString.c_str());
+            auto pj = pj_create_internal(ctx, projString.c_str());
             if (pj) {
                 pj->iso_obj = objIn;
                 return pj;
