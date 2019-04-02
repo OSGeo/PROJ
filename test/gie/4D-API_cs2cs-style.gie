@@ -465,4 +465,11 @@ accept      0 0 1000
 expect      0 0 1
 roundtrip   1
 
+-------------------------------------------------------------------------------
+Check that proj_create() returns a generic error when an exception is caught
+in the creation of a PJ object.
+-------------------------------------------------------------------------------
+operation   this is a bogus CRS meant to trigger a generic error in proj_create()
+expect      failure   errno generic error
+
 </gie>

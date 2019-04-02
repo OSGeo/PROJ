@@ -77,6 +77,11 @@ static void PROJ_NO_INLINE proj_log_error(PJ_CONTEXT *ctx, const char *function,
     msg += ": ";
     msg += text;
     ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
+    auto previous_errno = pj_ctx_get_errno(ctx);
+    if (previous_errno == 0) {
+        // only set errno if it wasn't set deeper down the call stack
+        pj_ctx_set_errno(ctx, PJD_ERR_GENERIC_ERROR);
+    }
 }
 
 // ---------------------------------------------------------------------------
