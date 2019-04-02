@@ -65,13 +65,18 @@ void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
     }
     *chi = asin(sphi / en->C);
     en->ratexp = 0.5 * en->C * e;
+    double srat_val = srat(en->e * sphi, en->ratexp);
+    if (srat_val == 0.0) {
+        free(en);
+        return nullptr;
+    }
     if( .5 * phi0 + M_FORTPI < 1e-10 ) {
-        en->K = 1.0 / srat(en->e * sphi, en->ratexp);
+        en->K = 1.0 / srat_val;
     }
     else {
         en->K = tan(.5 * *chi + M_FORTPI) / (
             pow(tan(.5 * phi0 + M_FORTPI), en->C) *
-            srat(en->e * sphi, en->ratexp)  );
+            srat_val  );
     }
     return ((void *)en);
 }
