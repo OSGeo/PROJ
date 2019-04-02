@@ -1005,7 +1005,8 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     else
         d = proj_xyz_dist (co, ce);
 
-    if (d > T.tolerance)
+    // Test written like that to handle NaN
+    if (!(d <= T.tolerance))
         return expect_message (d, args);
     succs++;
 
