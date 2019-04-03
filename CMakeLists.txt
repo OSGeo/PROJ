@@ -30,6 +30,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 message(STATUS "Requiring C++${CMAKE_CXX_STANDARD} - done")
 
+# Set global -fvisibility=hidden
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
 # Set warnings
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   # Suppress warning 4706 about assignment within conditional expression
@@ -40,18 +44,18 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 /EHsc /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
--fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
+-Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
 -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
--fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
+-Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
 -Wmissing-declarations -Wformat -Wformat-security")
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
--fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
+-Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
 -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security \
 -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
--fvisibility=hidden -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
+-Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
 -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion")
 endif()
 
@@ -63,8 +67,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
   if(MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:precise")
   else()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fp-model precise")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fp-model precise")
   endif()
 endif()
 
