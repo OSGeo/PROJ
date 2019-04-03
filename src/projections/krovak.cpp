@@ -115,7 +115,14 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forwar
     deltav = -lp.lam * Q->alpha;
 
     s = asin(cos(Q->ad) * sin(u) + sin(Q->ad) * cos(u) * cos(deltav));
-    d = asin(cos(u) * sin(deltav) / cos(s));
+    const double cos_s =  cos(s);
+    if( cos_s < 1e-12 )
+    {
+        xy.x = 0;
+        xy.y = 0;
+        return xy;
+    }
+    d = asin(cos(u) * sin(deltav) / cos_s);
 
     eps = Q->n * d;
     rho = Q->rho0 * pow(tan(S0 / 2. + M_PI_4) , Q->n) / pow(tan(s / 2. + M_PI_4) , Q->n);
@@ -148,7 +155,12 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal, invers
     eps = atan2(xy.y, xy.x);
 
     d = eps / sin(S0);
-    s = 2. * (atan(  pow(Q->rho0 / rho, 1. / Q->n) * tan(S0 / 2. + M_PI_4)) - M_PI_4);
+    if( rho == 0.0 ) {
+        s = M_PI_2;
+    }
+    else {
+        s = 2. * (atan(  pow(Q->rho0 / rho, 1. / Q->n) * tan(S0 / 2. + M_PI_4)) - M_PI_4);
+    }
 
     u = asin(cos(Q->ad) * sin(s) - sin(Q->ad) * cos(s) * cos(d));
     deltav = asin(cos(s) * sin(d) / cos(u));
