@@ -72,7 +72,7 @@ expect  failure errno lat_larger_than_90
 -------------------------------------------------------------------------------
 operation +proj=aea +a=9999999 +b=.9 +lat_2=1
 -------------------------------------------------------------------------
-expect     failure errno eccentricity_is_one
+expect     failure errno invalid_eccentricity
 
 ===============================================================================
 Azimuthal Equidistant
@@ -2703,7 +2703,7 @@ expect 1 2
 -------------------------------------------------------------------------------
 operation +proj=lcc +a=9999999 +b=.9 +lat_2=1
 -------------------------------------------------------------------------
-expect     failure errno eccentricity_is_one
+expect     failure errno invalid_eccentricity
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=GRS80 +lat_1=0 +lat_2=90

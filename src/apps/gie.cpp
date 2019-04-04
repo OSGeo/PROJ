@@ -1097,7 +1097,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_no_colon_in_init_string"  ,  -3},
     {"pjd_err_proj_not_named"           ,  -4},
     {"pjd_err_unknown_projection_id"    ,  -5},
-    {"pjd_err_eccentricity_is_one"      ,  -6},
+    {"pjd_err_invalid_eccentricity"      ,  -6},
     {"pjd_err_unknown_unit_id"          ,  -7},
     {"pjd_err_invalid_boolean_param"    ,  -8},
     {"pjd_err_unknown_ellp_param"       ,  -9},
