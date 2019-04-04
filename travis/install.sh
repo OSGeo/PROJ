@@ -27,7 +27,7 @@ if [ -f /usr/lib/jvm/java-7-openjdk-amd64/include/jni.h ]; then
 else
     ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 fi
-make -j3
+make -j2
 make check
 make install
 find /tmp/proj_autoconf_install_from_dist_all
@@ -37,7 +37,7 @@ cd ..
 mkdir build_cmake
 cd build_cmake
 cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
-make -j3
+VERBOSE=1 make -j2
 make install
 # The cmake build is not able to generate the null file, so copy it at hand
 cp /tmp/proj_autoconf_install_from_dist_all/share/proj/null /tmp/proj_cmake_install/share/proj
@@ -55,7 +55,7 @@ cd ../..
 mkdir build_autoconf_grids
 cd build_autoconf_grids
 ../configure --prefix=/tmp/proj_autoconf_install_grids
-make -j3
+make -j2
 make check
 (cd src && make multistresstest && make test228)
 PROJ_LIB=../data src/multistresstest
@@ -74,7 +74,7 @@ if [ "$BUILD_NAME" != "linux_clang" ]; then
 else
     ./configure
 fi
-make -j3
+make -j2
 make check
 
 # Rerun tests without grids not included in proj-datumgrid
