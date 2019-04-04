@@ -42,15 +42,9 @@ if(ENABLE_LTO)
     set(CMAKE_REQUIRED_FLAGS "-Wl,-flto")
     check_cxx_source_compiles("int main(){ return 0; }"
       COMPILER_SUPPORTS_FLTO_FLAG)
-    if(COMPILER_SUPPORTS_FLTO_FLAG)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
-    endif()
   else()
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag("-flto" COMPILER_SUPPORTS_FLTO_FLAG)
-    if(COMPILER_SUPPORTS_FLTO_FLAG)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
-    endif()
   endif()
 endif()
 
@@ -351,6 +345,18 @@ add_library(
   ${ALL_LIBPROJ_HEADERS}
   ${PROJ_RESOURCES}
 )
+target_compile_options(${PROJ_CORE_TARGET}
+  PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
+  PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
+)
+
+if(COMPILER_SUPPORTS_FLTO_FLAG)
+  # See https://gitlab.kitware.com/cmake/cmake/issues/15245
+  # CMake v3.9:
+  # set_property(TARGET ${PROJ_CORE_TARGET}
+  #   PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+  target_compile_options(${PROJ_CORE_TARGET} PRIVATE -flto)
+endif()
 
 if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
   target_include_directories(${PROJ_CORE_TARGET} INTERFACE

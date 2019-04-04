@@ -11,12 +11,6 @@ else()
 
 message(STATUS "Using internal GTest")
 
-# FIXME: Deal with our old-school CMakeLists.txt behaving badly
-set(_save_c_flags "${CMAKE_C_FLAGS}")
-set(_save_cxx_flags "${CMAKE_CXX_FLAGS}")
-string(REGEX REPLACE "\\-W[a-z\\-]+" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
-string(REGEX REPLACE "\\-W[a-z\\-]+" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-
 #
 # Build Google Test
 #
@@ -48,12 +42,6 @@ add_subdirectory(
   ${CMAKE_BINARY_DIR}/googletest-build
   EXCLUDE_FROM_ALL)
 
-# FIXME: Deal with our old-school CMakeLists.txt behaving badly
-set(CMAKE_C_FLAGS "${_save_c_flags}")
-set(CMAKE_CXX_FLAGS "${_save_cxx_flags}")
-unset(_save_c_flags)
-unset(_save_cxx_flags)
-
 # Provide the same target name as find_package(GTest)
 add_library(GTest::gtest ALIAS gtest)
 
@@ -71,6 +59,9 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${SQLITE3_INCLUDE_DIR})
 # Add the directory containing proj_config.h
 include_directories(${CMAKE_BINARY_DIR}/src)
+
+# Apply to targets in the current directory and below
+add_compile_options(${PROJ_CXX_WARN_FLAGS})
 
 add_executable(proj_pj_transform_test
   main.cpp
