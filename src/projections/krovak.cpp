@@ -222,7 +222,11 @@ PJ *PROJECTION(krovak) {
     Q->alpha = sqrt(1. + (P->es * pow(cos(P->phi0), 4)) / (1. - P->es));
     u0 = asin(sin(P->phi0) / Q->alpha);
     g = pow( (1. + P->e * sin(P->phi0)) / (1. - P->e * sin(P->phi0)) , Q->alpha * P->e / 2. );
-    Q->k = tan( u0 / 2. + M_PI_4) / pow  (tan(P->phi0 / 2. + M_PI_4) , Q->alpha) * g;
+    double tan_half_phi0_plus_pi_4 = tan(P->phi0 / 2. + M_PI_4);
+    if( tan_half_phi0_plus_pi_4 == 0.0 ) {
+        return pj_default_destructor(P, PJD_ERR_INVALID_ARG);
+    }
+    Q->k = tan( u0 / 2. + M_PI_4) / pow  (tan_half_phi0_plus_pi_4 , Q->alpha) * g;
     n0 = sqrt(1. - P->es) / (1. - P->es * pow(sin(P->phi0), 2));
     Q->n = sin(S0);
     Q->rho0 = P->k0 * n0 / tan(S0);
