@@ -117,12 +117,16 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     do {
         t = loc_for(lp, P, &yc);
         const double denom = t.y - yc;
-        if( denom == 0 ) {
-            proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
-            return proj_coord_error().lp;
+        if( denom != 0 || fabs(t.y - xy.y) > TOL )
+        {
+            if( denom == 0 ) {
+                proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+                return proj_coord_error().lp;
+            }
+            lp.phi = ((lp.phi - Q->phi_1) * (xy.y - yc) / denom) + Q->phi_1;
         }
-        lp.phi = ((lp.phi - Q->phi_1) * (xy.y - yc) / denom) + Q->phi_1;
-        lp.lam = lp.lam * xy.x / t.x;
+        if( t.x != 0 || fabs(t.x - xy.x) > TOL )
+            lp.lam = lp.lam * xy.x / t.x;
         i ++;
     } while (i < N_MAX_ITER &&
              (fabs(t.x - xy.x) > TOL || fabs(t.y - xy.y) > TOL));
