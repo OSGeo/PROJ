@@ -125,6 +125,9 @@ PJ *PROJECTION(lcc) {
         Q->rho0 *= (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :
             pow(pj_tsfn(P->phi0, sin(P->phi0), P->e), Q->n);
     } else {
+        if( fabs(cosphi) < EPS10 || fabs(cos(Q->phi2)) < EPS10 ) {
+            return pj_default_destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
+        }
         if (secant)
             Q->n = log(cosphi / cos(Q->phi2)) /
                log(tan(M_FORTPI + .5 * Q->phi2) /
