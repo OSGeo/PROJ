@@ -44,7 +44,7 @@ tolerance 10 nm
 accept    1 2
 expect    111319.4907932736  221194.0771604237
 
-accept    12 55
+accept    12 55s
 expect    1335833.8895192828  7326837.7148738774
 -------------------------------------------------------------------------------
 
@@ -134,17 +134,23 @@ Shape parameters
 operation  proj=utm zone=32   ellps=GRS80 rf=0
 expect     failure errno rev_flattening_is_zero
 
+operation  proj=utm zone=32   ellps=GRS80 e=-0.5
+expect     failure errno invalid_eccentricity
+
+operation  proj=utm zone=32   ellps=GRS80 e=1
+expect     failure errno invalid_eccentricity
+
 operation  proj=utm zone=32   ellps=GRS80 es=1
-expect     failure errno eccentricity_is_one
+expect     failure errno invalid_eccentricity
 
 operation  proj=utm zone=32   a=1 es=1.1
-expect     failure errno eccentricity_is_one
+expect     failure errno invalid_eccentricity
 
 operation  proj=utm zone=32   ellps=GRS80 b=0
-expect     failure errno eccentricity_is_one
+expect     failure errno invalid_eccentricity
 
 operation  proj=utm zone=32   ellps=GRS80 f=1
-expect     failure errno eccentricity_is_one
+expect     failure errno invalid_eccentricity
 
 operation  proj=utm zone=32   ellps=GRS80 b=6000000
 accept     12 55

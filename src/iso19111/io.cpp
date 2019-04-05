@@ -6091,6 +6091,9 @@ static UnitOfMeasure _buildUnit(const LinearUnitDesc *unitsMatch) {
 
 static UnitOfMeasure _buildUnit(double to_meter_value) {
     // TODO: look-up in EPSG catalog
+    if (to_meter_value == 0) {
+        throw ParsingException("invalid unit value");
+    }
     return UnitOfMeasure("unknown", to_meter_value,
                          UnitOfMeasure::Type::LINEAR);
 }

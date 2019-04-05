@@ -15,7 +15,7 @@ pj_err_list[] = {
     "no colon in init= string",                                        /*  -3 */
     "projection not named",                                            /*  -4 */
     "unknown projection id",                                           /*  -5 */
-    "effective eccentricity >= 1.",                                    /*  -6 */
+    "effective eccentricity < 0 or >= 1.",                             /*  -6 */
     "unknown unit conversion id",                                      /*  -7 */
     "invalid boolean param argument",                                  /*  -8 */
     "unknown elliptical parameter name",                               /*  -9 */

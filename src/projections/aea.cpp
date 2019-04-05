@@ -182,7 +182,7 @@ static PJ *setup(PJ *P) {
             Q->n = (m1 * m1 - m2 * m2) / (ml2 - ml1);
             if (Q->n == 0) {
                 // Not quite, but es is very close to 1...
-                return destructor(P, PJD_ERR_ECCENTRICITY_IS_ONE_OR_GREATER);
+                return destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
             }
         }
         Q->ec = 1. - .5 * P->one_es * log((1. - P->e) /
