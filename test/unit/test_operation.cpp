@@ -4504,7 +4504,8 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
         GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(), "Null geographic offset from WGS 84 to WGS 84");
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "+proj=noop");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
     EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
 
@@ -4845,7 +4846,8 @@ TEST(operation, geocentricCRS_to_geocentricCRS_noop) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(),
               "Ballpark geocentric translation from WGS 84 to WGS 84");
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), "+proj=noop");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
     EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
 }
 
