@@ -34,6 +34,7 @@
 #define FROM_PROJ_CPP
 #endif
 
+#include <assert.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -239,6 +240,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             sysname = name;
         }
 
+        assert(sysname); // to make Coverity Scan happy
         if ( fid != nullptr || (fid = pj_ctx_fopen(ctx, sysname, mode)) != nullptr)
         {
             if( out_full_filename != nullptr && out_full_filename_size > 0 )
