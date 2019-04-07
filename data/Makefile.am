@@ -87,3 +87,6 @@ check-local:
 			ln -sf $$x .; \
 		done \
 	fi
+
+clean-local:
+	$(RM) proj.db
