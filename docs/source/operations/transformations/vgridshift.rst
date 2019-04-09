@@ -23,7 +23,7 @@ a specific amount determined by the loaded grids. The simplest use case of the
 horizontal grid shift is applying a single grid. Here we change the vertical
 reference from the ellipsoid to the global geoid model, EGM96::
 
-    +proj=vgridshift +grids=egm96_16.gtx
+    +proj=vgridshift +grids=egm96_15.gtx
 
 
 More than one grid can be loaded at the same time, for instance in the case where
@@ -31,7 +31,7 @@ a better geoid model than the global is available for a certain area. Here the
 gridshift is set up so that the local DVR90 geoid model takes precedence over
 the global model::
 
-    +proj=vgridshift +grids=@dvr90.gtx,egm96_16.gtx
+    +proj=vgridshift +grids=@dvr90.gtx,egm96_15.gtx
 
 The ``@`` in the above example states that the grid is optional, in case the grid
 is not found in the PROJ search path. The list of grids is prioritized so that
