@@ -35,7 +35,7 @@ this in detail.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 48
+  :lines: 49
   :dedent: 4
 
 Next we create the ``PJ`` transformation object ``P`` with the function
@@ -51,7 +51,7 @@ details.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 50-52
+  :lines: 51-53
   :dedent: 4
 
 PROJ uses it's own data structures for handling coordinates. Here we use a
@@ -62,17 +62,17 @@ for further details.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 56
+  :lines: 57
   :dedent: 4
 
-The coordinate defined above is transformed with ``proj_trans_coord``. For this
+The coordinate defined above is transformed with ``proj_trans``. For this
 a ``PJ`` object, a transformation direction (either forward or inverse) and the
 coordinate is needed. The transformed coordinate is returned in ``b``.
 Here the forward (``PJ_FWD``) transformation from geodetic to UTM is made.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 59-60
+  :lines: 60-61
   :dedent: 4
 
 The inverse transformation (UTM to geodetic) is done similar to above,
@@ -80,14 +80,14 @@ this time using ``PJ_INV`` as the direction.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 61-62
+  :lines: 62-63
   :dedent: 4
 
 Before ending the program the allocated memory needs to be released again:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 65-66
+  :lines: 66-67
   :dedent: 4
 
 
