@@ -28,7 +28,7 @@ See the :doc:`reference for more info on data types <reference/datatypes>`.
   :lines: 43-45
   :dedent: 4
 
-For use in multi-threaded programs the ``PJ_CONTEXT`` threading-context is used.
+For use in multi-threaded programs the :c:type:`PJ_CONTEXT` threading-context is used.
 In this particular example it is not needed, but for the sake of completeness
 it created here. The section on :doc:`threads <threads>` discusses
 this in detail.
@@ -38,8 +38,8 @@ this in detail.
   :lines: 49
   :dedent: 4
 
-Next we create the ``PJ`` transformation object ``P`` with the function
-``proj_create``. ``proj_create`` takes the threading context ``C`` created above,
+Next we create the :c:type:`PJ` transformation object ``P`` with the function
+:c:func:`proj_create`. ``proj_create`` takes the threading context ``C`` created above,
 and a proj-string that defines the desired transformation. Here we transform
 from geodetic coordinate to UTM zone 32N.
 It is recommended to create one threading-context per thread used by the program.
@@ -55,8 +55,8 @@ details.
   :dedent: 4
 
 PROJ uses it's own data structures for handling coordinates. Here we use a
-``PJ_COORD`` which is easily assigned with the function ``proj_coord``. Note
-that the input values are converted to radians with ``proj_torad``. This is
+:c:type:`PJ_COORD` which is easily assigned with the function :c:func:`proj_coord`. Note
+that the input values are converted to radians with :c:func:`proj_torad`. This is
 necessary since PROJ is using radians internally. See :doc:`transformations`
 for further details.
 
@@ -65,7 +65,7 @@ for further details.
   :lines: 57
   :dedent: 4
 
-The coordinate defined above is transformed with ``proj_trans``. For this
+The coordinate defined above is transformed with :c:func:`proj_trans`. For this
 a ``PJ`` object, a transformation direction (either forward or inverse) and the
 coordinate is needed. The transformed coordinate is returned in ``b``.
 Here the forward (``PJ_FWD``) transformation from geodetic to UTM is made.
