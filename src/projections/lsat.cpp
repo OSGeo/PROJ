@@ -112,7 +112,6 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int nn;
     double lamt, sdsq, s, lamdp, phidp, sppsq, dd, sd, sl, fac, scl, sav, spp;
-
     lamdp = xy.x / Q->b;
     nn = 50;
     do {
@@ -135,10 +134,14 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         lamdp -= TOL;
     spp = sin(phidp);
     sppsq = spp * spp;
+    const double denom = 1. - sppsq * (1. + Q->u);
+    if( denom == 0.0 ) {
+        proj_errno_set(P, PJD_ERR_INVALID_X_OR_Y);
+        return proj_coord_error().lp;
+    }
     lamt = atan(((1. - sppsq * P->rone_es) * tan(lamdp) *
         Q->ca - spp * Q->sa * sqrt((1. + Q->q * dd) * (
-        1. - sppsq) - sppsq * Q->u) / cos(lamdp)) / (1. - sppsq
-        * (1. + Q->u)));
+        1. - sppsq) - sppsq * Q->u) / cos(lamdp)) / denom);
     sl = lamt >= 0. ? 1. : -1.;
     scl = cos(lamdp) >= 0. ? 1. : -1;
     lamt -= M_HALFPI * (1. - scl) * sl;
