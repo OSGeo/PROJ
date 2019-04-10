@@ -191,6 +191,9 @@ PJ *PROJECTION(omerc) {
                 gamma = alpha_c;
         } else
             alpha_c = aasin(P->ctx, D*sin(gamma0 = gamma));
+        if( fabs(fabs(P->phi0) - M_HALFPI) <= TOL ) {
+            return pj_default_destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+        }
         P->lam0 = lamc - aasin(P->ctx, .5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
     } else {
