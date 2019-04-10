@@ -34,30 +34,45 @@ message(STATUS "Requiring C++${CMAKE_CXX_STANDARD} - done")
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-# Set warnings
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-  # Suppress warning 4706 about assignment within conditional expression
-  # Suppress warning 4996 about sprintf, etc., being unsafe
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
-/W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-/EHsc /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
-elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
--Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
--Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
--Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
--Wmissing-declarations -Wformat -Wformat-security")
+# Set warnings as variables, then store as cache options
+set(PROJ_common_WARN_FLAGS  # common only to GNU/Clang C/C++
+  -Wall
+  -Wextra
+  -Wswitch
+  -Wshadow
+  -Wunused-parameter
+  -Wmissing-declarations
+  -Wformat
+  -Wformat-security
+)
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
+    -Wmissing-prototypes
+  )
+  set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS})
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
--Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
--Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security \
--Wfloat-conversion -Wc99-extensions -Wc11-extensions")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
--Wall -Wextra -Wswitch -Wshadow -Wunused-parameter \
--Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion")
+  set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
+    -Wmissing-prototypes
+    -Wfloat-conversion
+    -Wc99-extensions
+    -Wc11-extensions
+  )
+  set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
+    -Wfloat-conversion
+  )
+elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+  add_definitions(/D_CRT_SECURE_NO_WARNINGS) # Eliminate deprecation warnings
+  set(PROJ_C_WARN_FLAGS
+    /W4
+    /wd4706  # Suppress warning about assignment within conditional expression
+    /wd4996  # Suppress warning about sprintf, etc., being unsafe
+  )
+  set(PROJ_CXX_WARN_FLAGS /EHsc ${PROJ_C_WARN_FLAGS})
 endif()
+set(PROJ_C_WARN_FLAGS "${PROJ_C_WARN_FLAGS}"
+  CACHE STRING "C flags used to compile PROJ targets")
+set(PROJ_CXX_WARN_FLAGS "${PROJ_CXX_WARN_FLAGS}"
+  CACHE STRING "C++ flags used to compile PROJ targets")
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to
 # stop the compiler from ignoring parentheses in expressions like
@@ -121,10 +136,10 @@ include(CheckIncludeFiles)
 
 include(CheckCSourceCompiles)
 if(MSVC)
-  set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} /WX")
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} /WX /W4")
 else()
   set(CMAKE_REQUIRED_LIBRARIES m)
-  set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} -Werror -Wall")
 endif()
 # Check whether the C99 math function: hypot, atanh, etc. are available.
 check_c_source_compiles("
