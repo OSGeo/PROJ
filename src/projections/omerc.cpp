@@ -191,6 +191,9 @@ PJ *PROJECTION(omerc) {
                 gamma = alpha_c;
         } else
             alpha_c = aasin(P->ctx, D*sin(gamma0 = gamma));
+        if( fabs(fabs(P->phi0) - M_HALFPI) <= TOL ) {
+            return pj_default_destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+        }
         P->lam0 = lamc - aasin(P->ctx, .5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
     } else {
@@ -206,8 +209,11 @@ PJ *PROJECTION(omerc) {
             lam2 += M_TWOPI;
         P->lam0 = adjlon(.5 * (lam1 + lam2) - atan(
            J * tan(.5 * Q->B * (lam1 - lam2)) / p) / Q->B);
-        gamma0 = atan(2. * sin(Q->B * adjlon(lam1 - P->lam0)) /
-           (F - 1. / F));
+        const double denom = F - 1. / F;
+        if( denom == 0 ) {
+            return pj_default_destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+        }
+        gamma0 = atan(2. * sin(Q->B * adjlon(lam1 - P->lam0)) / denom);
         gamma = alpha_c = aasin(P->ctx, D * sin(gamma0));
     }
     Q->singam = sin(gamma0);
