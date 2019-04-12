@@ -94,6 +94,8 @@ PJ *PROJECTION(lcc) {
         if (!pj_param(P->ctx, P->params, "tlat_0").i)
             P->phi0 = Q->phi1;
     }
+    if (fabs(Q->phi1) > M_HALFPI || fabs(Q->phi2) > M_HALFPI)
+        return pj_default_destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
     if (fabs(Q->phi1 + Q->phi2) < EPS10)
         return pj_default_destructor(P, PJD_ERR_CONIC_LAT_EQUAL);
 

@@ -772,5 +772,9 @@ expect  25  25  25  25
 -------------------------------------------------------------------------------
 
 
+# Test invalid lat_0
+operation +proj=aeqd +R=1 +lat_0=91
+expect  failure errno lat_larger_than_90
+
 
 </gie>
