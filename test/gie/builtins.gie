@@ -69,6 +69,9 @@ expect  failure errno lat_larger_than_90
 operation +proj=aea +ellps=GRS80 +lat_2=900
 expect  failure errno lat_larger_than_90
 
+operation +proj=aea   +R=6400000    +lat_1=1 +lat_2=-1
+expect failure errno conic_lat_equal
+
 -------------------------------------------------------------------------------
 operation +proj=aea +a=9999999 +b=.9 +lat_2=1
 -------------------------------------------------------------------------
@@ -1301,6 +1304,17 @@ expect  -0.001790221 0.000895246
 accept  -200 -100
 expect  -0.001790220 -0.000895247
 
+operation +proj=eqdc +a=9999999 +b=.9 +lat_2=1
+expect    failure errno invalid_eccentricity
+
+operation +proj=eqdc   +R=6400000    +lat_1=1 +lat_2=-1
+expect    failure errno conic_lat_equal
+
+operation +proj=eqdc   +R=6400000    +lat_1=91
+expect    failure errno lat_larger_than_90
+
+operation +proj=eqdc   +R=6400000    +lat_2=91
+expect    failure errno lat_larger_than_90
 
 ===============================================================================
 Euler
@@ -2753,6 +2767,16 @@ expect     failure errno lat_1_or_2_zero_or_90
 operation +proj=lcc +ellps=sphere +lat_1=90 +lat_2=0
 -------------------------------------------------------------------------------
 expect     failure errno lat_1_or_2_zero_or_90
+
+-------------------------------------------------------------------------------
+operation +proj=lcc +ellps=sphere +lat_1=91
+-------------------------------------------------------------------------------
+expect     failure errno lat_larger_than_90
+
+-------------------------------------------------------------------------------
+operation +proj=lcc +ellps=sphere +lat_2=91
+-------------------------------------------------------------------------------
+expect     failure errno lat_larger_than_90
 
 ===============================================================================
 Lambert Conformal Conic Alternative

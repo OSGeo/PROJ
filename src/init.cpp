@@ -736,6 +736,8 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
 
     /* Central latitude */
     PIN->phi0 = pj_param(ctx, start, "rlat_0").f;
+    if( fabs(PIN->phi0) > M_HALFPI )
+        return pj_default_destructor (PIN, PJD_ERR_LAT_LARGER_THAN_90);
 
     /* False easting and northing */
     PIN->x0 = pj_param(ctx, start, "dx_0").f;

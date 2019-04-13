@@ -84,12 +84,14 @@ PJ *PROJECTION(eqdc) {
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
+    if (fabs(Q->phi1) > M_HALFPI || fabs(Q->phi2) > M_HALFPI)
+        return destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
 
     if (fabs(Q->phi1 + Q->phi2) < EPS10)
-        return pj_default_destructor (P, PJD_ERR_CONIC_LAT_EQUAL);
+        return destructor (P, PJD_ERR_CONIC_LAT_EQUAL);
 
     if (!(Q->en = pj_enfn(P->es)))
-        return pj_default_destructor(P, ENOMEM);
+        return destructor(P, ENOMEM);
 
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);
@@ -104,6 +106,10 @@ PJ *PROJECTION(eqdc) {
             cosphi = cos(Q->phi2);
             Q->n = (m1 - pj_msfn(sinphi, cosphi, P->es)) /
                 (pj_mlfn(Q->phi2, sinphi, cosphi, Q->en) - ml1);
+            if (Q->n == 0) {
+                // Not quite, but es is very close to 1...
+                return destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+            }
         }
         Q->c = ml1 + m1 / Q->n;
         Q->rho0 = Q->c - pj_mlfn(P->phi0, sin(P->phi0),
