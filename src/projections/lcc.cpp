@@ -121,7 +121,12 @@ PJ *PROJECTION(lcc) {
             if( ml2 == 0 ) {
                 return pj_default_destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
             }
-            Q->n /= log(ml1 / ml2);
+            const double denom = log(ml1 / ml2);
+            if( denom == 0 ) {
+                // Not quite, but es is very close to 1...
+                return pj_default_destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+            }
+            Q->n /= denom;
         }
         Q->c = (Q->rho0 = m1 * pow(ml1, -Q->n) / Q->n);
         Q->rho0 *= (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :

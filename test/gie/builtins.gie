@@ -2740,8 +2740,17 @@ expect 1 2
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +a=9999999 +b=.9 +lat_2=1
--------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 expect     failure errno invalid_eccentricity
+
+-------------------------------------------------------------------------------
+# This case is incredible. ossfuzz has found the exact value of lat_1 that
+# triggers a division by zero
+operation +proj=lcc +lat_1=2D32 +lat_2=0 +a=6378137 +b=0.2
+-------------------------------------------------------------------------------
+expect     failure
+# For some reason fails on MacOSX with a different error
+# errno invalid_eccentricity
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=GRS80 +lat_1=0 +lat_2=90
