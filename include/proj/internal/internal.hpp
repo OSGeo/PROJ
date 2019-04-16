@@ -53,7 +53,7 @@
 #if ((defined(__clang__) &&                                                    \
       (__clang_major__ > 3 ||                                                  \
        (__clang_major__ == 3 && __clang_minor__ >= 7))) ||                     \
-     __GNUC__ >= 7)
+     (__GNUC__ >= 7 && !__INTEL_COMPILER))
 /** Macro for fallthrough in a switch case construct */
 #define PROJ_FALLTHROUGH [[clang::fallthrough]];
 #else

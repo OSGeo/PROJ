@@ -37,11 +37,16 @@ endif()
 
 option(ENABLE_LTO "Build library with LTO optimization (if available)." OFF)
 if(ENABLE_LTO)
-  if("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
+  # TODO: CMake v3.9 use CheckIPOSupported and set property; see
+  # https://cmake.org/cmake/help/v3.9/module/CheckIPOSupported.html
+  if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     include(CheckCXXSourceCompiles)
     set(CMAKE_REQUIRED_FLAGS "-Wl,-flto")
     check_cxx_source_compiles("int main(){ return 0; }"
       COMPILER_SUPPORTS_FLTO_FLAG)
+  elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+    # Set INTERPROCEDURAL_OPTIMIZATION property later
+    set(COMPILER_SUPPORTS_FLTO_FLAG TRUE)
   else()
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag("-flto" COMPILER_SUPPORTS_FLTO_FLAG)
@@ -350,12 +355,31 @@ target_compile_options(${PROJ_CORE_TARGET}
   PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
 )
 
+# Tell Intel compiler to do arithmetic accurately.  This is needed to stop the
+# compiler from ignoring parentheses in expressions like (a + b) + c and from
+# simplifying 0.0 + x to x (which is wrong if x = -0.0).
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+  if(MSVC)
+    set(FP_PRECISE "/fp:precise")
+  else()
+    set(FP_PRECISE "-fp-model precise")
+  endif()
+  # Apply to source files that require this option
+  set_source_files_properties(
+    geodesic.c
+    PROPERTIES COMPILE_FLAGS ${FP_PRECISE})
+endif()
+
 if(COMPILER_SUPPORTS_FLTO_FLAG)
-  # See https://gitlab.kitware.com/cmake/cmake/issues/15245
-  # CMake v3.9:
-  # set_property(TARGET ${PROJ_CORE_TARGET}
-  #   PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-  target_compile_options(${PROJ_CORE_TARGET} PRIVATE -flto)
+  if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+    # Intel supported only, before v3.9
+    set_property(TARGET ${PROJ_CORE_TARGET}
+      PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+  else()
+    # Pre CMake v3.9 needs to set flag for other compilers
+    # see https://gitlab.kitware.com/cmake/cmake/issues/15245
+    target_compile_options(${PROJ_CORE_TARGET} PRIVATE -flto)
+  endif()
 endif()
 
 if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
