@@ -19,8 +19,6 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.1)
   cmake_policy(SET CMP0054 NEW)
 endif()
 
-add_definitions(-DPROJ_COMPILATION=1)
-
 # Set C++ version
 # Make CMAKE_CXX_STANDARD available as cache option overridable by user
 set(CMAKE_CXX_STANDARD 11
