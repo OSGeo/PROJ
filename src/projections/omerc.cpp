@@ -201,6 +201,10 @@ PJ *PROJECTION(omerc) {
         L = pow(pj_tsfn(phi2, sin(phi2), P->e), Q->B);
         F = Q->E / H;
         p = (L - H) / (L + H);
+        if( p == 0 ) {
+            // Not quite, but es is very close to 1...
+            return pj_default_destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+        }
         J = Q->E * Q->E;
         J = (J - L * H) / (J + L * H);
         if ((con = lam1 - lam2) < -M_PI)
