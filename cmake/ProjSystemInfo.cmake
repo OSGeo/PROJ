@@ -62,6 +62,10 @@ if(WIN32)
     set(PROJ_COMPILER_NAME "mingw-${GCC_VERSION}")
   endif()
 
+  if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    set(PROJ_COMPILER_NAME "intel-win")
+  endif()
+
   if(CMAKE_GENERATOR MATCHES "Win64")
     set(PROJ_PLATFORM_NAME "x64")
   else()
@@ -70,7 +74,12 @@ if(WIN32)
 endif()  # WIN32
 
 if(UNIX)
-  set(PROJ_COMPILER_NAME "gcc-${GCC_VERSION}")
+  if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    set(PROJ_COMPILER_NAME "gcc-${GCC_VERSION}")
+  elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+    set(PROJ_COMPILER_NAME "intel-linux")
+  endif()
+
   if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
     set(PROJ_PLATFORM_NAME "x64")
   else()

@@ -68,23 +68,19 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     /wd4996  # Suppress warning about sprintf, etc., being unsafe
   )
   set(PROJ_CXX_WARN_FLAGS /EHsc ${PROJ_C_WARN_FLAGS})
+elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+  if(MSVC)
+    set(PROJ_C_WARN_FLAGS /Wall)
+    set(PROJ_CXX_WARN_FLAGS /Wall)
+  else()
+    set(PROJ_C_WARN_FLAGS -Wall)
+    set(PROJ_CXX_WARN_FLAGS -Wall)
+  endif()
 endif()
 set(PROJ_C_WARN_FLAGS "${PROJ_C_WARN_FLAGS}"
   CACHE STRING "C flags used to compile PROJ targets")
 set(PROJ_CXX_WARN_FLAGS "${PROJ_CXX_WARN_FLAGS}"
   CACHE STRING "C++ flags used to compile PROJ targets")
-
-# Tell Intel compiler to do arithmetic accurately.  This is needed to
-# stop the compiler from ignoring parentheses in expressions like
-# (a + b) + c and from simplifying 0.0 + x to x (which is wrong if
-# x = -0.0).
-if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
-  if(MSVC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:precise")
-  else()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fp-model precise")
-  endif()
-endif()
 
 ################################################################################
 # PROJ CMake modules
