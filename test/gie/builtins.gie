@@ -2167,6 +2167,9 @@ expect  -1575486.353641554 3442168.342028188
 accept  -2 -1
 expect  -1575486.353880283 3234352.695594706
 
+operation +proj=isea   +mode=hex +resolution=31
+accept  0 0
+expect  failure
 
 ===============================================================================
 Kavraisky V

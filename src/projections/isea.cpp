@@ -898,6 +898,10 @@ static int isea_hex(struct isea_dgg *g, int tri,
 
     quad = isea_ptdi(g, tri, pt, &v);
 
+    if( v.x < (INT_MIN >> 4) || v.x > (INT_MAX >> 4) )
+    {
+        throw "Invalid shift";
+    }
     hex->x = ((int)v.x << 4) + quad;
     hex->y = v.y;
 
