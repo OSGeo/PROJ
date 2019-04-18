@@ -1518,12 +1518,20 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         const auto vals = std::vector<std::string>{"SOURCE", "TARGET", "PIVOT"};
         for (const auto &val : vals) {
 
+            ASSERT_TRUE(
+                execute("INSERT INTO geodetic_datum "
+                        "VALUES('FOO','" +
+                        val + "','" + val +
+                        "','',NULL,"
+                        "'EPSG','7030','EPSG','8901','EPSG','1262',0);"))
+                << last_error();
             ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
                                 "VALUES('NS_" +
                                 val + "','" + val + "','" + val +
                                 "',NULL,NULL,'geographic 2D','EPSG','6422',"
-                                "'EPSG','6326',"
-                                "'EPSG','1262',NULL,0);"))
+                                "'FOO','" +
+                                val + "',"
+                                      "'EPSG','1262',NULL,0);"))
                 << last_error();
         }
     }

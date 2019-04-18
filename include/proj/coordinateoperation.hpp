@@ -154,6 +154,12 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
 
     PROJ_DLL CoordinateOperationNNPtr normalizeForVisualization() const;
 
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_FOR_TEST CoordinateOperationNNPtr
+        shallowClone() const;
+    //! @endcond
+
   protected:
     PROJ_INTERNAL CoordinateOperation();
     PROJ_INTERNAL CoordinateOperation(const CoordinateOperation &other);
@@ -178,6 +184,8 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_INTERNAL void
     setProperties(const util::PropertyMap
                       &properties); // throw(InvalidValueTypeException)
+
+    PROJ_INTERNAL virtual CoordinateOperationNNPtr _shallowClone() const = 0;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1328,6 +1336,8 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     PROJ_FRIEND(crs::ProjectedCRS);
     PROJ_INTERNAL bool addWKTExtensionNode(io::WKTFormatter *formatter) const;
 
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     Conversion &operator=(const Conversion &other) = delete;
@@ -1543,6 +1553,8 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
 
     PROJ_INTERNAL TransformationNNPtr inverseAsTransformation() const;
 
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };
@@ -1634,11 +1646,14 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
     //! @endcond
 
   protected:
+    PROJ_INTERNAL ConcatenatedOperation(const ConcatenatedOperation &other);
     PROJ_INTERNAL explicit ConcatenatedOperation(
         const std::vector<CoordinateOperationNNPtr> &operationsIn);
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
 
     INLINED_MAKE_SHARED
 

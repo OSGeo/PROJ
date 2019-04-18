@@ -56,6 +56,10 @@
 #include <string>
 #include <vector>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 using namespace NS_PROJ::internal;
 
 #if 0
@@ -802,6 +806,14 @@ CoordinateOperation::normalizeForVisualization() const {
     return util::nn_static_pointer_cast<CoordinateOperation>(
         ConcatenatedOperation::createComputeMetadata(subOps, true));
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+CoordinateOperationNNPtr CoordinateOperation::shallowClone() const {
+    return _shallowClone();
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -2341,6 +2353,10 @@ ConversionNNPtr Conversion::shallowClone() const {
     conv->assignSelf(conv);
     conv->setCRSs(this, false);
     return conv;
+}
+
+CoordinateOperationNNPtr Conversion::_shallowClone() const {
+    return util::nn_static_pointer_cast<CoordinateOperation>(shallowClone());
 }
 //! @endcond
 
@@ -4679,6 +4695,16 @@ InverseConversion::create(const ConversionNNPtr &forward) {
     return conv;
 }
 
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr InverseConversion::_shallowClone() const {
+    auto op = InverseConversion::nn_make_shared<InverseConversion>(
+        inverseAsConversion()->shallowClone());
+    op->assignSelf(op);
+    op->setCRSs(this, false);
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -5181,6 +5207,7 @@ const char *Conversion::getWKT1GDALMethodName() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
 void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     const auto &l_method = method();
     const auto &methodName = l_method->nameStr();
@@ -5209,6 +5236,17 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->pushOutputUnit(false);
         formatter->pushOutputId(false);
     }
+
+#ifdef DEBUG_CONVERSION_ID
+    if (sourceCRS() && targetCRS()) {
+        formatter->startNode("SOURCECRS_ID", false);
+        sourceCRS()->formatID(formatter);
+        formatter->endNode();
+        formatter->startNode("TARGETCRS_ID", false);
+        targetCRS()->formatID(formatter);
+        formatter->endNode();
+    }
+#endif
 
     bool bAlreadyWritten = false;
     if (!isWKT2 && formatter->useESRIDialect()) {
@@ -6036,10 +6074,14 @@ const crs::CRSNNPtr &Transformation::targetCRS() PROJ_PURE_DEFN {
 
 //! @cond Doxygen_Suppress
 TransformationNNPtr Transformation::shallowClone() const {
-    auto conv = Transformation::nn_make_shared<Transformation>(*this);
-    conv->assignSelf(conv);
-    conv->setCRSs(this, false);
-    return conv;
+    auto transf = Transformation::nn_make_shared<Transformation>(*this);
+    transf->assignSelf(transf);
+    transf->setCRSs(this, false);
+    return transf;
+}
+
+CoordinateOperationNNPtr Transformation::_shallowClone() const {
+    return util::nn_static_pointer_cast<CoordinateOperation>(shallowClone());
 }
 //! @endcond
 
@@ -7656,6 +7698,13 @@ InverseTransformation::create(const TransformationNNPtr &forward) {
 
 // ---------------------------------------------------------------------------
 
+TransformationNNPtr InverseTransformation::inverseAsTransformation() const {
+    return NN_NO_CHECK(
+        util::nn_dynamic_pointer_cast<Transformation>(forwardOperation_));
+}
+
+// ---------------------------------------------------------------------------
+
 void InverseTransformation::_exportToWKT(io::WKTFormatter *formatter) const {
 
     auto approxInverse = createApproximateInverseIfPossible(
@@ -7665,6 +7714,16 @@ void InverseTransformation::_exportToWKT(io::WKTFormatter *formatter) const {
     } else {
         Transformation::_exportToWKT(formatter);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr InverseTransformation::_shallowClone() const {
+    auto op = InverseTransformation::nn_make_shared<InverseTransformation>(
+        inverseAsTransformation()->shallowClone());
+    op->assignSelf(op);
+    op->setCRSs(this, false);
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
 
 //! @endcond
@@ -9063,6 +9122,7 @@ struct ConcatenatedOperation::Private {
 
     explicit Private(const std::vector<CoordinateOperationNNPtr> &operationsIn)
         : operations_(operationsIn) {}
+    Private(const Private &) = default;
 };
 //! @endcond
 
@@ -9070,6 +9130,14 @@ struct ConcatenatedOperation::Private {
 
 //! @cond Doxygen_Suppress
 ConcatenatedOperation::~ConcatenatedOperation() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+ConcatenatedOperation::ConcatenatedOperation(const ConcatenatedOperation &other)
+    : CoordinateOperation(other),
+      d(internal::make_unique<Private>(*(other.d))) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -9136,6 +9204,22 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
         }
         if (i >= 1) {
             if (!compareStepCRS(l_sourceCRS.get(), lastTargetCRS.get())) {
+#ifdef DEBUG_CONCATENATED_OPERATION
+                {
+                    auto f(io::WKTFormatter::create(
+                        io::WKTFormatter::Convention::WKT2_2018));
+                    std::cerr << "Source CRS of step " << i << ":" << std::endl;
+                    std::cerr << l_sourceCRS->exportToWKT(f.get()) << std::endl;
+                }
+                {
+                    auto f(io::WKTFormatter::create(
+                        io::WKTFormatter::Convention::WKT2_2018));
+                    std::cerr << "Target CRS of step " << i - 1 << ":"
+                              << std::endl;
+                    std::cerr << lastTargetCRS->exportToWKT(f.get())
+                              << std::endl;
+                }
+#endif
                 throw InvalidOperation(
                     "Inconsistent chaining of CRS in operations");
             }
@@ -9149,6 +9233,14 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
     op->setCRSs(NN_NO_CHECK(operationsIn[0]->sourceCRS()),
                 NN_NO_CHECK(operationsIn.back()->targetCRS()), nullptr);
     op->setAccuracies(accuracies);
+#ifdef DEBUG_CONCATENATED_OPERATION
+    {
+        auto f(
+            io::WKTFormatter::create(io::WKTFormatter::Convention::WKT2_2018));
+        std::cerr << "ConcatenatedOperation::create()" << std::endl;
+        std::cerr << op->exportToWKT(f.get()) << std::endl;
+    }
+#endif
     return op;
 }
 
@@ -9454,6 +9546,18 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
 
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+CoordinateOperationNNPtr ConcatenatedOperation::_shallowClone() const {
+    auto op =
+        ConcatenatedOperation::nn_make_shared<ConcatenatedOperation>(*this);
+    op->assignSelf(op);
+    op->setCRSs(this, false);
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
 //! @endcond
 
@@ -11359,11 +11463,46 @@ static bool isNullTransformation(const std::string &name) {
 
 // ---------------------------------------------------------------------------
 
+#ifdef DEBUG
+
+static int nCallLevel = 0;
+
+struct EnterDebugLevel {
+    EnterDebugLevel() { ++nCallLevel; }
+    ~EnterDebugLevel() { --nCallLevel; }
+};
+
+static void debugTrace(const std::string &str) {
+    for (int i = 1; i < nCallLevel; i++)
+        std::cerr << " ";
+    std::cerr << str << std::endl;
+}
+
+static std::string objectAsStr(const common::IdentifiedObject *obj) {
+    std::string ret(obj->nameStr());
+    const auto &ids = obj->identifiers();
+    if (!ids.empty()) {
+        ret += " (";
+        ret += (*ids[0]->codeSpace()) + ":" + ids[0]->code();
+        ret += ")";
+    }
+    return ret;
+}
+#endif
+
+// ---------------------------------------------------------------------------
+
 void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
     const crs::CRSNNPtr &targetCRS, const crs::GeodeticCRS *geodSrc,
     const crs::GeodeticCRS *geodDst, Private::Context &context) {
 
+#ifdef DEBUG
+    EnterDebugLevel enterFunction;
+    debugTrace("createOperationsWithDatumPivot(" +
+               objectAsStr(sourceCRS.get()) + "," +
+               objectAsStr(targetCRS.get()) + ")");
+#endif
     const bool allowEmptyIntersection = true;
 
     struct CreateOperationsWithDatumPivotAntiRecursion {
@@ -11411,20 +11550,73 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
             }
 
             std::vector<CoordinateOperationNNPtr> subOps;
+            const bool isNullThird =
+                isNullTransformation(opsThird[0]->nameStr());
+            CoordinateOperationNNPtr opSecondCloned(
+                (isNullFirst || isNullThird) ? opSecond->shallowClone()
+                                             : opSecond);
+            CoordinateOperation *invCOForward = nullptr;
+            if (isNullFirst || isNullThird) {
+                if (opSecondCloned->identifiers().size() == 1 &&
+                    (*opSecondCloned->identifiers()[0]->codeSpace())
+                            .find("DERIVED_FROM") == std::string::npos) {
+                    {
+                        util::PropertyMap map;
+                        addModifiedIdentifier(map, opSecondCloned.get(), false,
+                                              true);
+                        opSecondCloned->setProperties(map);
+                    }
+                    auto invCO = dynamic_cast<InverseCoordinateOperation *>(
+                        opSecondCloned.get());
+                    if (invCO) {
+                        invCOForward = invCO->forwardOperation().get();
+                        if (invCOForward->identifiers().size() == 1 &&
+                            (*invCOForward->identifiers()[0]->codeSpace())
+                                    .find("DERIVED_FROM") ==
+                                std::string::npos) {
+                            util::PropertyMap map;
+                            addModifiedIdentifier(map, invCOForward, false,
+                                                  true);
+                            invCOForward->setProperties(map);
+                        }
+                    }
+                }
+            }
             if (isNullFirst) {
-                opSecond->setCRSs(
-                    sourceCRS, NN_CHECK_ASSERT(opSecond->targetCRS()), nullptr);
+                auto oldTarget(NN_CHECK_ASSERT(opSecondCloned->targetCRS()));
+                opSecondCloned->setCRSs(sourceCRS, oldTarget, nullptr);
+                if (invCOForward) {
+                    invCOForward->setCRSs(oldTarget, sourceCRS, nullptr);
+                }
             } else {
                 subOps.emplace_back(opFirst);
             }
-            if (isNullTransformation(opsThird[0]->nameStr())) {
-                opSecond->setCRSs(NN_CHECK_ASSERT(opSecond->sourceCRS()),
-                                  targetCRS, nullptr);
-                subOps.emplace_back(opSecond);
+            if (isNullThird) {
+                auto oldSource(NN_CHECK_ASSERT(opSecondCloned->sourceCRS()));
+                opSecondCloned->setCRSs(oldSource, targetCRS, nullptr);
+                if (invCOForward) {
+                    invCOForward->setCRSs(targetCRS, oldSource, nullptr);
+                }
+                subOps.emplace_back(opSecondCloned);
             } else {
-                subOps.emplace_back(opSecond);
+                subOps.emplace_back(opSecondCloned);
                 subOps.emplace_back(opsThird[0]);
             }
+#ifdef DEBUG
+            std::string debugStr;
+            for (const auto &op : subOps) {
+                if (!debugStr.empty()) {
+                    debugStr += " + ";
+                }
+                debugStr += objectAsStr(op.get());
+                debugStr += " (";
+                debugStr += objectAsStr(op->sourceCRS().get());
+                debugStr += "->";
+                debugStr += objectAsStr(op->targetCRS().get());
+                debugStr += ")";
+            }
+            debugTrace("transformation " + debugStr);
+#endif
             res.emplace_back(ConcatenatedOperation::createComputeMetadata(
                 subOps, !allowEmptyIntersection));
         }
@@ -11436,6 +11628,14 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
         if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
             for (const auto &candidateDstGeod : candidatesDstGeod) {
                 if (candidateDstGeod->nameStr() == targetCRS->nameStr()) {
+#ifdef DEBUG
+                    EnterDebugLevel loopLevel;
+                    debugTrace("try " + objectAsStr(sourceCRS.get()) + "->" +
+                               objectAsStr(candidateSrcGeod.get()) + "->" +
+                               objectAsStr(candidateDstGeod.get()) + "->" +
+                               objectAsStr(targetCRS.get()) + ")");
+                    EnterDebugLevel loopLevel2;
+#endif
                     const auto opsFirst =
                         createOperations(sourceCRS, candidateSrcGeod, context);
                     assert(!opsFirst.empty());
@@ -11454,17 +11654,28 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     }
 
     for (const auto &candidateSrcGeod : candidatesSrcGeod) {
+#ifdef DEBUG
+        EnterDebugLevel loopLevel;
+#endif
         const auto opsFirst =
             createOperations(sourceCRS, candidateSrcGeod, context);
         assert(!opsFirst.empty());
         const bool isNullFirst = isNullTransformation(opsFirst[0]->nameStr());
 
         for (const auto &candidateDstGeod : candidatesDstGeod) {
+#ifdef DEBUG
+            EnterDebugLevel loopLevel2;
+            debugTrace("try " + objectAsStr(sourceCRS.get()) + "->" +
+                       objectAsStr(candidateSrcGeod.get()) + "->" +
+                       objectAsStr(candidateDstGeod.get()) + "->" +
+                       objectAsStr(targetCRS.get()) + ")");
+            EnterDebugLevel loopLevel3;
+#endif
             createTransformations(candidateSrcGeod, candidateDstGeod,
                                   opsFirst[0], isNullFirst);
-        }
-        if (!res.empty()) {
-            return;
+            if (!res.empty()) {
+                return;
+            }
         }
     }
 }
@@ -11518,6 +11729,13 @@ std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperations(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     Private::Context &context) {
+
+#ifdef DEBUG
+    EnterDebugLevel enterFunction;
+    auto debugStr("createOperations(" + objectAsStr(sourceCRS.get()) + "," +
+                  objectAsStr(targetCRS.get()) + ")");
+    debugTrace(debugStr);
+#endif
 
     std::vector<CoordinateOperationNNPtr> res;
     const bool allowEmptyIntersection = true;
@@ -11598,41 +11816,53 @@ CoordinateOperationFactory::Private::createOperations(
 
             doFilterAndCheckPerfectOp = false;
 
+            bool sameGeodeticDatum = false;
+            if (geodSrc && geodDst) {
+                const auto &srcDatum = geodSrc->datum();
+                const auto &dstDatum = geodDst->datum();
+                sameGeodeticDatum =
+                    srcDatum != nullptr && dstDatum != nullptr &&
+                    srcDatum->_isEquivalentTo(
+                        dstDatum.get(),
+                        util::IComparable::Criterion::EQUIVALENT);
+            }
+
+            if (res.empty() && !sameGeodeticDatum &&
+                !context.inCreateOperationsWithDatumPivotAntiRecursion &&
+                geodSrc && geodDst) {
+                // If we still didn't find a transformation, and that the source
+                // and target are GeodeticCRS, then go through their underlying
+                // datum to find potential transformations between other
+                // GeodeticRSs
+                // that are made of those datum
+                // The typical example is if transforming between two
+                // GeographicCRS,
+                // but transformations are only available between their
+                // corresponding geocentric CRS.
+                const auto &srcDatum = geodSrc->datum();
+                const auto &dstDatum = geodDst->datum();
+                if (srcDatum != nullptr && dstDatum != nullptr) {
+                    createOperationsWithDatumPivot(res, sourceCRS, targetCRS,
+                                                   geodSrc, geodDst, context);
+                    doFilterAndCheckPerfectOp = !res.empty();
+                }
+            }
+
             // NAD27 to NAD83 has tens of results already. No need to look
             // for a pivot
-            if ((res.empty() &&
+            if (!sameGeodeticDatum &&
+                ((res.empty() &&
+                  context.context->getAllowUseIntermediateCRS() ==
+                      CoordinateOperationContext::IntermediateCRSUse::
+                          IF_NO_DIRECT_TRANSFORMATION) ||
                  context.context->getAllowUseIntermediateCRS() ==
-                     CoordinateOperationContext::IntermediateCRSUse::
-                         IF_NO_DIRECT_TRANSFORMATION) ||
-                context.context->getAllowUseIntermediateCRS() ==
-                    CoordinateOperationContext::IntermediateCRSUse::ALWAYS ||
-                getenv("PROJ_FORCE_SEARCH_PIVOT")) {
+                     CoordinateOperationContext::IntermediateCRSUse::ALWAYS ||
+                 getenv("PROJ_FORCE_SEARCH_PIVOT"))) {
                 auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
                     sourceCRS, targetCRS, context.context);
                 res.insert(res.end(), resWithIntermediate.begin(),
                            resWithIntermediate.end());
                 doFilterAndCheckPerfectOp = true;
-            }
-        }
-
-        if (res.empty() &&
-            !context.inCreateOperationsWithDatumPivotAntiRecursion && geodSrc &&
-            geodDst) {
-            // If we still didn't find a transformation, and that the source
-            // and target are GeodeticCRS, then go through their underlying
-            // datum to find potential transformations between other GeodeticRSs
-            // that are made of those datum
-            // The typical example is if transforming between two GeographicCRS,
-            // but transformations are only available between their
-            // corresponding geocentric CRS.
-            const auto &srcDatum = geodSrc->datum();
-            const auto &dstDatum = geodDst->datum();
-            if (srcDatum != nullptr && dstDatum != nullptr &&
-                !srcDatum->_isEquivalentTo(
-                    dstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
-                createOperationsWithDatumPivot(res, sourceCRS, targetCRS,
-                                               geodSrc, geodDst, context);
-                doFilterAndCheckPerfectOp = !res.empty();
             }
         }
 
@@ -12459,8 +12689,9 @@ InverseCoordinateOperation::~InverseCoordinateOperation() = default;
 // ---------------------------------------------------------------------------
 
 InverseCoordinateOperation::InverseCoordinateOperation(
-    const CoordinateOperationNNPtr &forwardOperation, bool wktSupportsInversion)
-    : forwardOperation_(forwardOperation),
+    const CoordinateOperationNNPtr &forwardOperationIn,
+    bool wktSupportsInversion)
+    : forwardOperation_(forwardOperationIn),
       wktSupportsInversion_(wktSupportsInversion) {}
 
 // ---------------------------------------------------------------------------
@@ -12647,6 +12878,15 @@ void PROJBasedOperation::_exportToPROJString(
             std::string("PROJBasedOperation::exportToPROJString() failed: ") +
             e.what());
     }
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr PROJBasedOperation::_shallowClone() const {
+    auto op = PROJBasedOperation::nn_make_shared<PROJBasedOperation>(*this);
+    op->assignSelf(op);
+    op->setCRSs(this, false);
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
 
 // ---------------------------------------------------------------------------

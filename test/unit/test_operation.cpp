@@ -218,6 +218,11 @@ TEST(operation, SingleOperation) {
     EXPECT_TRUE(sop1->isEquivalentTo(sop1.get()));
     EXPECT_FALSE(sop1->isEquivalentTo(createUnrelatedObject().get()));
 
+    EXPECT_TRUE(
+        sop1->isEquivalentTo(sop1->CoordinateOperation::shallowClone().get()));
+    EXPECT_TRUE(sop1->inverse()->isEquivalentTo(
+        sop1->inverse()->CoordinateOperation::shallowClone().get()));
+
     auto sop2 = Transformation::create(
         PropertyMap(), nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
         nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4807),
@@ -510,6 +515,8 @@ TEST(operation, concatenated_operation) {
 
     EXPECT_TRUE(concat->isEquivalentTo(concat.get()));
     EXPECT_FALSE(concat->isEquivalentTo(createUnrelatedObject().get()));
+    EXPECT_TRUE(concat->isEquivalentTo(
+        concat->CoordinateOperation::shallowClone().get()));
     EXPECT_FALSE(
         ConcatenatedOperation::create(PropertyMap(),
                                       std::vector<CoordinateOperationNNPtr>{
@@ -4050,6 +4057,11 @@ TEST(operation, conversion_inverse) {
 
     EXPECT_TRUE(inv->isEquivalentTo(inv.get()));
     EXPECT_FALSE(inv->isEquivalentTo(createUnrelatedObject().get()));
+
+    EXPECT_TRUE(
+        conv->isEquivalentTo(conv->CoordinateOperation::shallowClone().get()));
+    EXPECT_TRUE(
+        inv->isEquivalentTo(inv->CoordinateOperation::shallowClone().get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -4943,6 +4955,24 @@ TEST(operation, geogCRS_geocentricCRS_same_datum_to_context) {
 // ---------------------------------------------------------------------------
 
 TEST(operation,
+     geog2D_to_geog3D_same_datum_but_with_potential_other_pivot_context) {
+    // Check that when going from geog2D to geog3D of same datum, we don't
+    // try to go through a WGS84 pivot...
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("5365"), // CR 05 2D
+        authFactory->createCoordinateReferenceSystem("5364"), // CR 05 3D
+        ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
      geogCRS_to_geogCRS_different_datum_though_geocentric_transform_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
@@ -5398,6 +5428,37 @@ TEST(operation, projCRS_to_projCRS_south_pole_inverted_axis) {
     ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, projCRS_to_projCRS_through_geog3D) {
+    // Check that when going from projCRS to projCRS, using
+    // geog2D-->geog3D-->geog3D-->geog2D we do not have issues with
+    // inconsistent CRS chaining, due to how we 'hack' a bit some intermediate
+    // steps
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("5367"), // CR05 / CRTM05
+        authFactory->createCoordinateReferenceSystem(
+            "8908"), // CR-SIRGAS / CRTM05
+        ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +inv +proj=tmerc +lat_0=0 +lon_0=-84 +k=0.9999 "
+              "+x_0=500000 +y_0=0 +ellps=WGS84 "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=helmert +x=-0.16959 +y=0.35312 +z=0.51846 "
+              "+rx=-0.03385 +ry=0.16325 +rz=-0.03446 +s=0.03693 "
+              "+convention=position_vector "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=tmerc +lat_0=0 +lon_0=-84 +k=0.9999 +x_0=500000 "
+              "+y_0=0 +ellps=GRS80");
 }
 
 // ---------------------------------------------------------------------------
