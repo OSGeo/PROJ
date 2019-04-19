@@ -45,6 +45,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "emess.h"
+#include "utils.h"
 // clang-format on
 
 #define MAX_LINE 1000
@@ -521,6 +522,13 @@ int main(int argc, char **argv) {
     }
     if (eargc == 0) /* if no specific files force sysin */
         eargv[eargc++] = const_cast<char *>("-");
+
+    if( oform ) {
+        if( !validate_form_string_for_numbers(oform) ) {
+            emess(3, "invalid format string");
+            exit(0);
+        }
+    }
 
     /*
      * If the user has requested inverse, then just reverse the

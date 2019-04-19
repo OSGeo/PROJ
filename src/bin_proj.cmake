@@ -1,6 +1,7 @@
 set(PROJ_SRC
   apps/proj.cpp
   apps/emess.cpp
+  apps/utils.cpp
 )
 
 source_group("Source Files\\Bin" FILES ${PROJ_SRC})

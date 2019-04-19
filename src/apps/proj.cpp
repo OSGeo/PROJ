@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include "emess.h"
+#include "utils.h"
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__WIN32__)
 #  include <fcntl.h>
@@ -461,6 +462,13 @@ int main(int argc, char **argv) {
     if (eargc == 0) /* if no specific files force sysin */
         eargv[eargc++] = const_cast<char*>("-");
 
+    if( oform ) {
+        if( !validate_form_string_for_numbers(oform) ) {
+            emess(3, "invalid format string");
+            exit(0);
+        }
+    }
+
     /* done with parameter and control input */
     if (inverse && postscale) {
         prescale = 1;
@@ -487,7 +495,6 @@ int main(int argc, char **argv) {
         proj.inv = pj_inv;
     } else
         proj.fwd = pj_fwd;
-
     /* set input formatting control */
     if (mon) {
         pj_pr_list(Proj);
