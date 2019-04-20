@@ -106,7 +106,7 @@ Brazil
 Netherlands
 ................................................................................
 
-`Dutch grid <https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm>`__ (Registration required before download)
+`Dutch grid <https://zakelijk.kadaster.nl/transformatie-van-coordinaten>`__ (Registration required before download)
 
 Portugal
 ................................................................................
