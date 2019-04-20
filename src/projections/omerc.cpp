@@ -154,6 +154,8 @@ PJ *PROJECTION(omerc) {
         phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
         lam2 = pj_param(P->ctx, P->params, "rlon_2").f;
         phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
+        if (fabs(phi1) > M_HALFPI || fabs(phi2) > M_HALFPI)
+            return pj_default_destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
         if (fabs(phi1 - phi2) <= TOL ||
             (con = fabs(phi1)) <= TOL ||
             fabs(con - M_HALFPI) <= TOL ||
