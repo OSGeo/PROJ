@@ -115,6 +115,17 @@ CREATE TABLE geodetic_datum (
     CONSTRAINT fk_geodetic_datum_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
 
+CREATE TRIGGER geodetic_datum_insert_trigger
+BEFORE INSERT ON geodetic_datum
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: ellipsoid must not be deprecated when geodetic_datum is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM ellipsoid WHERE ellipsoid.auth_name = NEW.ellipsoid_auth_name AND ellipsoid.code = NEW.ellipsoid_code AND ellipsoid.deprecated != 0) AND NEW.deprecated = 0;
+    SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: prime_meridian must not be deprecated when geodetic_datum is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM prime_meridian WHERE prime_meridian.auth_name = NEW.prime_meridian_auth_name AND prime_meridian.code = NEW.prime_meridian_code AND prime_meridian.deprecated != 0) AND NEW.deprecated = 0;
+    SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: area_of_use must not be deprecated when geodetic_datum is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
+END;
+
 CREATE TABLE vertical_datum (
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code TEXT NOT NULL CHECK (length(code) >= 1),
@@ -127,6 +138,13 @@ CREATE TABLE vertical_datum (
     CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_vertical_datum_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
+
+CREATE TRIGGER vertical_datum_insert_trigger
+BEFORE INSERT ON vertical_datum
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on vertical_datum violates constraint: area_of_use must not be deprecated when vertical_datum is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
+END;
 
 CREATE TABLE coordinate_system(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -210,8 +228,14 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must NOT be defined when text_definition is NOT NULL')
         WHERE (NOT(NEW.datum_auth_name IS NULL OR NEW.datum_code IS NULL)) AND NEW.text_definition IS NOT NULL;
 
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must not be deprecated when geodetic_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM geodetic_datum datum WHERE datum.auth_name = NEW.datum_auth_name AND datum.code = NEW.datum_code AND datum.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
+
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: area_of_use must be defined when text_definition is NULL')
         WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: area_of_use must not be deprecated when geodetic_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
 
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system.dimension must be 3 for type = ''geocentric''')
         WHERE NEW.type = 'geocentric' AND (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 3;
@@ -254,6 +278,12 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: (auth_name, code) must not already exist in crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
+
+    SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: datum must not be deprecated when vertical_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM vertical_crs datum WHERE datum.auth_name = NEW.datum_auth_name AND datum.code = NEW.datum_code AND datum.deprecated != 0) AND NEW.deprecated = 0;
+
+    SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: area_of_use must not be deprecated when vertical_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: coordinate_system.type must be ''vertical''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'vertical';
@@ -676,8 +706,14 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must be defined when text_definition is NULL')
         WHERE (NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL) AND NEW.text_definition IS NULL;
 
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must not be deprecated when projected_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM geodetic_crs WHERE geodetic_crs.auth_name = NEW.geodetic_crs_auth_name AND geodetic_crs.code = NEW.geodetic_crs_code AND geodetic_crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI' AND NEW.geodetic_crs_auth_name != 'ESRI');
+
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must exist when text_definition is NULL')
         WHERE NOT EXISTS(SELECT 1 FROM conversion WHERE conversion.auth_name = NEW.conversion_auth_name AND conversion.code = NEW.conversion_code) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must not be deprecated when projected_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM conversion WHERE conversion.auth_name = NEW.conversion_auth_name AND conversion.code = NEW.conversion_code AND conversion.deprecated != 0) AND NEW.deprecated = 0;
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system must NOT be defined when text_definition is NOT NULL')
         WHERE (NOT(NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL)) AND NEW.text_definition IS NOT NULL;
@@ -690,6 +726,9 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must be defined when text_definition is NULL')
         WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must not be deprecated when projected_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system.type must be ''cartesian''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'Cartesian';
@@ -732,6 +771,15 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: vertical_crs must be equal to ''vertical''')
         WHERE (SELECT type FROM crs_view WHERE crs_view.auth_name = NEW.vertical_crs_auth_name AND crs_view.code = NEW.vertical_crs_code) NOT IN ('vertical');
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: horiz_crs must not be deprecated when compound_crs is not deprecated')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.horiz_crs_auth_name AND crs_view.code = NEW.horiz_crs_code AND crs_view.deprecated != 0) AND NEW.deprecated = 0;
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: vertical_crs must not be deprecated when compound_crs is not deprecated')
+        WHERE EXISTS (SELECT 1 FROM vertical_crs WHERE vertical_crs.auth_name = NEW.vertical_crs_auth_name AND vertical_crs.code = NEW.vertical_crs_code AND vertical_crs.deprecated != 0) AND NEW.deprecated = 0;
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: area_of_use must not be deprecated when compound_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 CREATE TABLE coordinate_operation_method(
@@ -981,6 +1029,12 @@ FOR EACH ROW BEGIN
         WHERE (SELECT type FROM unit_of_measure WHERE unit_of_measure.auth_name = NEW.epoch_uom_auth_name AND unit_of_measure.code = NEW.epoch_uom_code) != 'time';
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: pivot_uom.type must be ''length''')
         WHERE (SELECT type FROM unit_of_measure WHERE unit_of_measure.auth_name = NEW.pivot_uom_auth_name AND unit_of_measure.code = NEW.pivot_uom_code) != 'length';
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: source_crs must not be deprecated when helmert_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: target_crs must not be deprecated when helmert_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: area_of_use must not be deprecated when helmert_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 CREATE TABLE grid_transformation(
@@ -1042,6 +1096,12 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
 
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: source_crs must not be deprecated when grid_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs must not be deprecated when grid_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: area_of_use must not be deprecated when grid_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 -- Table that describe packages/archives that contain several grids
@@ -1209,6 +1269,12 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: method_code should be in (PROJString, WKT) when method_auth_name = PROJ')
         WHERE NEW.method_auth_name = 'PROJ' AND NEW.method_code NOT IN ('PROJString', 'WKT');
 
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: source_crs must not be deprecated when other_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: target_crs must not be deprecated when other_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: area_of_use must not be deprecated when other_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 -- Note: in EPSG, the steps might be to be chained in reverse order, so we cannot
@@ -1282,6 +1348,13 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step2_auth_name AND code = NEW.step2_code);
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step3 should not be a concatenated_operation')
         WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step3_auth_name AND code = NEW.step3_code);
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: source_crs must not be deprecated when concatenated_operation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: target_crs must not be deprecated when concatenated_operation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: area_of_use must not be deprecated when concatenated_operation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 
