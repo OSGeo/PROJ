@@ -5964,7 +5964,8 @@ int proj_coordoperation_get_param(
  * @param out_values Pointer to an array of value_count double values.
  * @param value_count Size of out_values array. The suggested size is 7 to get
  * translation, rotation and scale difference parameters. Rotation and scale
- * difference terms might be zero if the transformation only includes translation
+ * difference terms might be zero if the transformation only includes
+ * translation
  * parameters. In that case, value_count could be set to 3.
  * @param emit_error_if_incompatible Boolean to inicate if an error must be
  * logged if coordoperation is not compatible with a WKT1 TOWGS84

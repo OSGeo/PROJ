@@ -5180,6 +5180,43 @@ TEST(wkt_parse, wkt1_esri_ups_south) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_esri_gauss_kruger) {
+    auto wkt = "PROJCS[\"ETRS_1989_UWPP_2000_PAS_8\",GEOGCS[\"GCS_ETRS_1989\","
+               "DATUM[\"D_ETRS_1989\","
+               "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+               "PRIMEM[\"Greenwich\",0.0],"
+               "UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Gauss_Kruger\"],"
+               "PARAMETER[\"False_Easting\",8500000.0],"
+               "PARAMETER[\"False_Northing\",0.0],"
+               "PARAMETER[\"Central_Meridian\",24.0],"
+               "PARAMETER[\"Scale_Factor\",0.999923],"
+               "PARAMETER[\"Latitude_Of_Origin\",0.0],"
+               "UNIT[\"Meter\",1.0]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
+
+    auto crs2 = AuthorityFactory::create(dbContext, "ESRI")
+                    ->createProjectedCRS("102177");
+
+    EXPECT_EQ(
+        crs2->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);

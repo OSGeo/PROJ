@@ -3257,7 +3257,10 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     }
 
     return Conversion::create(
-               PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+               PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                 esriProjectionName == "Gauss_Kruger"
+                                     ? "unnnamed (Gauss Kruger)"
+                                     : "unnamed"),
                propertiesMethod, parameters, values)
         ->identify();
 }
