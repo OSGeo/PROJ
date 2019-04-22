@@ -2413,6 +2413,11 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
 
         auto conv = d->createFactory(conversion_auth_name)
                         ->createConversion(conversion_code);
+        if (conv->nameStr() == "unnamed") {
+            conv = conv->shallowClone();
+            conv->setProperties(util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY, name));
+        }
 
         auto cartesianCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (cartesianCS) {
