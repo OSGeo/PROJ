@@ -79,6 +79,10 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
         }
         if (fabs(s = 1. - cosz) > EPS) {
             t = 0.5 * (1. + cosz);
+            if(t == 0) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                return xy;
+            }
             Krho = -log(t)/s - Q->Cb / t;
         } else
             Krho = 0.5 - Q->Cb;
