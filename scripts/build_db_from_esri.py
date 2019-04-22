@@ -246,8 +246,9 @@ def import_spheroid():
                 description = row[idx_description]
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                map_spheroid_esri_name_to_auth_code[esri_name] = [
-                    'ESRI', code]
+                if esri_name not in map_spheroid_esri_name_to_auth_code:
+                    map_spheroid_esri_name_to_auth_code[esri_name] = [
+                        'ESRI', code]
 
                 if abs(float(a) - 6375000) > 0.01 * 6375000:
                     pos = esri_name.find('_19')
@@ -341,7 +342,8 @@ def import_prime_meridian():
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                map_pm_esri_name_to_auth_code[esri_name] = ['ESRI', code]
+                if esri_name not in map_pm_esri_name_to_auth_code:
+                    map_pm_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
                 sql = """INSERT INTO "prime_meridian" VALUES('ESRI','%s','%s',%s,'EPSG','9110',%d);""" % (
                     code, esri_name, value, deprecated)

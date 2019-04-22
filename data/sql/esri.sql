@@ -1428,9 +1428,9 @@ INSERT INTO "geodetic_datum" VALUES('ESRI','106003','D_Fischer_1968','Fischer 19
 INSERT INTO "geodetic_crs" VALUES('ESRI','37003','GCS_Fischer_1968',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106003','EPSG','1262',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('ESRI','106004','D_Fischer_Modified','Fischer modified',NULL,'ESRI','107004','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('ESRI','37004','GCS_Fischer_Modified',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106004','EPSG','1262',NULL,0);
-INSERT INTO "geodetic_datum" VALUES('ESRI','106005','D_Hough_1960','Hough 1960',NULL,'ESRI','107005','EPSG','8901','EPSG','1262',0);
+INSERT INTO "geodetic_datum" VALUES('ESRI','106005','D_Hough_1960','Hough 1960',NULL,'EPSG','7053','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('ESRI','37005','GCS_Hough_1960',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106005','EPSG','1262',NULL,0);
-INSERT INTO "geodetic_datum" VALUES('ESRI','106006','D_Everest_Modified_1969','Everest modified 1969',NULL,'ESRI','107006','EPSG','8901','EPSG','1262',0);
+INSERT INTO "geodetic_datum" VALUES('ESRI','106006','D_Everest_Modified_1969','Everest modified 1969',NULL,'EPSG','7056','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('ESRI','37006','GCS_Everest_Modified_1969',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106006','EPSG','1262',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('ESRI','106007','D_Walbeck','Walbeck',NULL,'ESRI','107007','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_crs" VALUES('ESRI','37007','GCS_Walbeck',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106007','EPSG','1262',NULL,0);
@@ -1505,7 +1505,7 @@ INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','37227','geodetic_crs','
 INSERT INTO "geodetic_datum" VALUES('ESRI','106228','D_Viti_Levu_1916','Viti Levu 1916',NULL,'EPSG','7012','EPSG','8901','EPSG','3195',1);
 INSERT INTO "geodetic_crs" VALUES('ESRI','37228','GCS_Viti_Levu_1916',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106228','EPSG','3195',NULL,1);
 INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','37228','geodetic_crs','EPSG','4731','ESRI');
-INSERT INTO "geodetic_datum" VALUES('ESRI','106229','D_Wake_Eniwetok_1960','Wake-Eniwetok 1960 (Marshall Islands 1960)',NULL,'ESRI','107005','EPSG','8901','EPSG','3191',1);
+INSERT INTO "geodetic_datum" VALUES('ESRI','106229','D_Wake_Eniwetok_1960','Wake-Eniwetok 1960 (Marshall Islands 1960)',NULL,'EPSG','7053','EPSG','8901','EPSG','3191',1);
 INSERT INTO "geodetic_crs" VALUES('ESRI','37229','GCS_Wake_Eniwetok_1960',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106229','EPSG','3191',NULL,1);
 INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','37229','geodetic_crs','EPSG','4732','ESRI');
 INSERT INTO "geodetic_datum" VALUES('ESRI','106230','D_Wake_Island_1952','Wake Island Astro 1952',NULL,'EPSG','7022','EPSG','8901','EPSG','3190',1);
@@ -1680,7 +1680,7 @@ INSERT INTO "geodetic_crs" VALUES('ESRI','104133','GCS_JAD_2001',NULL,NULL,'geog
 INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','104133','geodetic_crs','EPSG','4758','ESRI');
 INSERT INTO "geodetic_crs" VALUES('ESRI','104134','GCS_MONREF_1997',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6656','EPSG','1164',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('ESRI','104135','GCS_MSK_1942',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6284','EPSG','1164',NULL,0);
-INSERT INTO "geodetic_datum" VALUES('ESRI','106281','D_TWD_1967','Taiwan 1967',NULL,'ESRI','107036','EPSG','8901','EPSG','3315',1);
+INSERT INTO "geodetic_datum" VALUES('ESRI','106281','D_TWD_1967','Taiwan 1967',NULL,'EPSG','7050','EPSG','8901','EPSG','3315',1);
 INSERT INTO "geodetic_crs" VALUES('ESRI','104136','GCS_TWD_1967',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106281','EPSG','3315',NULL,1);
 INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','104136','geodetic_crs','EPSG','3821','ESRI');
 INSERT INTO "geodetic_datum" VALUES('ESRI','106282','D_TWD_1997','Taiwan 1997',NULL,'EPSG','7019','EPSG','8901','EPSG','1228',1);
@@ -1713,7 +1713,7 @@ INSERT INTO "geodetic_crs" VALUES('ESRI','104183','ETRF94',NULL,NULL,'geographic
 INSERT INTO "geodetic_crs" VALUES('ESRI','104184','ETRF96',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1184','EPSG','1298',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('ESRI','104185','ETRF97',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1185','EPSG','1298',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('ESRI','104186','ETRF2000',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1186','EPSG','1298',NULL,0);
-INSERT INTO "geodetic_datum" VALUES('ESRI','106283','D_WGS_1984_Major_Auxiliary_Sphere','Major auxiliary sphere based on WGS 1984',NULL,'ESRI','107037','EPSG','8901','EPSG','1262',1);
+INSERT INTO "geodetic_datum" VALUES('ESRI','106283','D_WGS_1984_Major_Auxiliary_Sphere','Major auxiliary sphere based on WGS 1984',NULL,'EPSG','7059','EPSG','8901','EPSG','1262',1);
 INSERT INTO "geodetic_crs" VALUES('ESRI','104199','GCS_WGS_1984_Major_Auxiliary_Sphere',NULL,NULL,'geographic 2D','EPSG','6422','ESRI','106283','EPSG','1262',NULL,1);
 INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','104199','geodetic_crs','EPSG','4055','ESRI');
 INSERT INTO "geodetic_datum" VALUES('ESRI','106223','D_NAD_1983_CORS96','NAD 1983 (CORS96)',NULL,'EPSG','7019','EPSG','8901','EPSG','1511',1);
