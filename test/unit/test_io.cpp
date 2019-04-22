@@ -8775,6 +8775,39 @@ TEST(io, createFromUserInput) {
     EXPECT_THROW(
         createFromUserInput("urn:ogc:def:unhandled:EPSG::4326", dbContext),
         ParsingException);
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:crs:non_existing_auth::4326",
+                                     dbContext),
+                 NoSuchAuthorityCodeException);
+    EXPECT_THROW(createFromUserInput(
+                     "urn:ogc:def:crs,crs:EPSG::2393,unhandled_type:EPSG::5717",
+                     dbContext),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput(
+                     "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::unexisting_code",
+                     dbContext),
+                 NoSuchAuthorityCodeException);
+    EXPECT_THROW(
+        createFromUserInput(
+            "urn:ogc:def:crs,crs:EPSG::2393::extra_element,crs:EPSG::EPSG",
+            dbContext),
+        ParsingException);
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:coordinateOperation,"
+                                     "coordinateOperation:EPSG::3895,"
+                                     "unhandled_type:EPSG::1618",
+                                     dbContext),
+                 ParsingException);
+    EXPECT_THROW(
+        createFromUserInput("urn:ogc:def:coordinateOperation,"
+                            "coordinateOperation:EPSG::3895,"
+                            "coordinateOperation:EPSG::unexisting_code",
+                            dbContext),
+        NoSuchAuthorityCodeException);
+    EXPECT_THROW(
+        createFromUserInput("urn:ogc:def:coordinateOperation,"
+                            "coordinateOperation:EPSG::3895::extra_element,"
+                            "coordinateOperation:EPSG::1618",
+                            dbContext),
+        ParsingException);
 
     EXPECT_NO_THROW(createFromUserInput("+proj=longlat", nullptr));
     EXPECT_NO_THROW(createFromUserInput("EPSG:4326", dbContext));
@@ -8789,6 +8822,31 @@ TEST(io, createFromUserInput) {
         createFromUserInput("urn:ogc:def:meridian:EPSG::8901", dbContext));
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:ellipsoid:EPSG::7030", dbContext));
+    {
+        auto obj = createFromUserInput("EPSG:2393+5717", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(),
+                  "KKJ / Finland Uniform Coordinate System + N60 height");
+    }
+    {
+        auto obj = createFromUserInput(
+            "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(),
+                  "KKJ / Finland Uniform Coordinate System + N60 height");
+    }
+    {
+        auto obj = createFromUserInput("urn:ogc:def:coordinateOperation,"
+                                       "coordinateOperation:EPSG::3895,"
+                                       "coordinateOperation:EPSG::1618",
+                                       dbContext);
+        auto concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(obj);
+        ASSERT_TRUE(concat != nullptr);
+        EXPECT_EQ(concat->nameStr(),
+                  "MGI (Ferro) to MGI (1) + MGI to WGS 84 (3)");
+    }
     EXPECT_NO_THROW(createFromUserInput(
         "GEOGCRS[\"WGS 84\",\n"
         "    DATUM[\"World Geodetic System 1984\",\n"

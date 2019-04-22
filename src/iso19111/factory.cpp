@@ -2484,6 +2484,8 @@ crs::CRSNNPtr AuthorityFactory::createCoordinateReferenceSystem(
     return createCoordinateReferenceSystem(code, true);
 }
 
+//! @cond Doxygen_Suppress
+
 crs::CRSNNPtr
 AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                                   bool allowCompound) const {
@@ -2513,6 +2515,9 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
     }
     throw FactoryException("unhandled CRS type: " + type);
 }
+
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
