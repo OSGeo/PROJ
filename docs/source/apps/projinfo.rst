@@ -29,12 +29,17 @@ Synopsis
     |    {object_definition} | (-s {srs_def} -t {srs_def})
     |
 
-    where {object_definition} or {object_definition} is a PROJ string, a
-    WKT string, an object name, AUTHORITY:CODE
-    (where AUTHORITY is the name of a CRS authority and CODE the code of a CRS
-    found in the proj.db database) or a OGC URN (such as  "urn:ogc:def:crs:EPSG::4326",
-    "urn:ogc:def:coordinateOperation:EPSG::1671", "urn:ogc:def:ellipsoid:EPSG::7001"
-    or "urn:ogc:def:datum:EPSG::6326")
+    where {object_definition} or {srs_def} is
+
+    - a proj-string,
+    - a WKT string,
+    - an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+      "urn:ogc:def:coordinateOperation:EPSG::1671"),
+    - a OGC URN combining references for compound coordinate reference systems
+      (e.g "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717" or custom abbreviated
+      syntax "EPSG:2393+5717"),
+    - a OGC URN combining references for concatenated operations
+      (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
 
 Description
 ***********

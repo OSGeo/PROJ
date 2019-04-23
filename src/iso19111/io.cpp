@@ -4397,13 +4397,95 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             const auto authorities = dbContextNNPtr->getAuthorities();
             for (const auto &authCandidate : authorities) {
                 if (ci_equal(authCandidate, authName)) {
-                    return AuthorityFactory::create(dbContextNNPtr,
-                                                    authCandidate)
-                        ->createCoordinateReferenceSystem(code);
+                    factory =
+                        AuthorityFactory::create(dbContextNNPtr, authCandidate);
+                    try {
+                        return factory->createCoordinateReferenceSystem(code);
+                    } catch (...) {
+                        // EPSG:4326+3855
+                        auto tokensCode = split(code, '+');
+                        if (tokensCode.size() == 2) {
+                            auto crs1(factory->createCoordinateReferenceSystem(
+                                tokensCode[0], false));
+                            auto crs2(factory->createCoordinateReferenceSystem(
+                                tokensCode[1], false));
+                            return CompoundCRS::create(
+                                util::PropertyMap().set(
+                                    IdentifiedObject::NAME_KEY,
+                                    crs1->nameStr() + " + " + crs2->nameStr()),
+                                {crs1, crs2});
+                        }
+                        throw;
+                    }
                 }
             }
             throw;
         }
+    }
+
+    // OGC 07-092r2: para 7.5.2
+    // URN combined references for compound coordinate reference systems
+    if (starts_with(text, "urn:ogc:def:crs,")) {
+        if (!dbContext) {
+            throw ParsingException("no database context specified");
+        }
+        auto tokensComma = split(text, ',');
+        std::vector<CRSNNPtr> components;
+        std::string name;
+        for (size_t i = 1; i < tokensComma.size(); i++) {
+            tokens = split(tokensComma[i], ':');
+            if (tokens.size() != 4) {
+                throw ParsingException(
+                    concat("invalid crs component: ", tokensComma[i]));
+            }
+            const auto &type = tokens[0];
+            auto factory =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[1]);
+            const auto &code = tokens[3];
+            if (type == "crs") {
+                auto crs(factory->createCoordinateReferenceSystem(code, false));
+                components.emplace_back(crs);
+                if (!name.empty()) {
+                    name += " + ";
+                }
+                name += crs->nameStr();
+            } else {
+                throw ParsingException(
+                    concat("unexpected object type: ", type));
+            }
+        }
+        return CompoundCRS::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY, name),
+            components);
+    }
+
+    // OGC 07-092r2: para 7.5.3
+    // 7.5.3 URN combined references for concatenated operations
+    if (starts_with(text, "urn:ogc:def:coordinateOperation,")) {
+        if (!dbContext) {
+            throw ParsingException("no database context specified");
+        }
+        auto tokensComma = split(text, ',');
+        std::vector<CoordinateOperationNNPtr> components;
+        for (size_t i = 1; i < tokensComma.size(); i++) {
+            tokens = split(tokensComma[i], ':');
+            if (tokens.size() != 4) {
+                throw ParsingException(concat(
+                    "invalid coordinateOperation component: ", tokensComma[i]));
+            }
+            const auto &type = tokens[0];
+            auto factory =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[1]);
+            const auto &code = tokens[3];
+            if (type == "coordinateOperation") {
+                auto op(factory->createCoordinateOperation(code, false));
+                components.emplace_back(op);
+            } else {
+                throw ParsingException(
+                    concat("unexpected object type: ", type));
+            }
+        }
+        return ConcatenatedOperation::createComputeMetadata(components, true);
     }
 
     // urn:ogc:def:crs:EPSG::4326
@@ -4510,6 +4592,13 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  *     "urn:ogc:def:coordinateOperation:EPSG::1671",
  *     "urn:ogc:def:ellipsoid:EPSG::7001"
  *     or "urn:ogc:def:datum:EPSG::6326"</li>
+ * <li> OGC URN combining references for compound coordinate reference systems
+ *      e.g. "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717"
+ *      We also accept a custom abbreviated syntax EPSG:2393+5717
+ * </li>
+ * <li> OGC URN combining references for concatenated operations
+ *      e.g.
+ * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
@@ -4546,6 +4635,13 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  *     "urn:ogc:def:coordinateOperation:EPSG::1671",
  *     "urn:ogc:def:ellipsoid:EPSG::7001"
  *     or "urn:ogc:def:datum:EPSG::6326"</li>
+ * <li> OGC URN combining references for compound coordinate reference systems
+ *      e.g. "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717"
+ *      We also accept a custom abbreviated syntax EPSG:2393+5717
+ * </li>
+ * <li> OGC URN combining references for concatenated operations
+ *      e.g.
+ * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>

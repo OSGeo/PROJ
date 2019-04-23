@@ -29,9 +29,17 @@ paragraph for more details.
 
 .. c:function:: PJ* proj_create(PJ_CONTEXT *ctx, const char *definition)
 
-    Create a transformation object, or a CRS object, from a proj-string,
-    a WKT string, or object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
-    "urn:ogc:def:coordinateOperation:EPSG::1671").
+    Create a transformation object, or a CRS object, from:
+
+    - a proj-string,
+    - a WKT string,
+    - an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+      "urn:ogc:def:coordinateOperation:EPSG::1671"),
+    - a OGC URN combining references for compound coordinate reference systems
+      (e.g "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717" or custom abbreviated
+      syntax "EPSG:2393+5717"),
+    - a OGC URN combining references for concatenated operations
+      (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
 
     Example call:
 
@@ -110,7 +118,8 @@ paragraph for more details.
 
         - the name of a CRS as found in the PROJ database, e.g "WGS84", "NAD27", etc.
 
-        - more generally any string accepted by :c:func:`proj_create`
+        - more generally any string accepted by :c:func:`proj_create` representing
+          a CRS
 
     An "area of use" can be specified in area. When it is supplied, the more
     accurate transformation between two given systems can be chosen.

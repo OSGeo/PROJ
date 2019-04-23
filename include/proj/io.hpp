@@ -993,15 +993,15 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_INTERNAL std::list<crs::CompoundCRSNNPtr>
     createCompoundCRSFromExisting(const crs::CompoundCRSNNPtr &crs) const;
+
+    PROJ_INTERNAL crs::CRSNNPtr
+    createCoordinateReferenceSystem(const std::string &code,
+                                    bool allowCompound) const;
     //! @endcond
 
   protected:
     PROJ_INTERNAL AuthorityFactory(const DatabaseContextNNPtr &context,
                                    const std::string &authorityName);
-
-    PROJ_INTERNAL crs::CRSNNPtr
-    createCoordinateReferenceSystem(const std::string &code,
-                                    bool allowCompound) const;
 
     PROJ_INTERNAL crs::GeodeticCRSNNPtr
     createGeodeticCRS(const std::string &code, bool geographicOnly) const;
