@@ -1853,6 +1853,10 @@ expect  4030931.833981509 1323687.864777399
 accept  -80.000000000 36.000000000
 expect  3450764.261536101 -175619.041820732
 
+# For some reason, does not fail on MacOSX
+#accept  60 -45
+#expect  failure errno tolerance_condition
+
 direction inverse
 accept  -1800000.000000000 2600000.000000000
 expect  -157.989285000 64.851559610

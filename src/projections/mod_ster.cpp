@@ -35,7 +35,12 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
         pow((1. - esphi) / (1. + esphi), P->e * .5)) - M_HALFPI;
     schi = sin(chi);
     cchi = cos(chi);
-    s = 2. / (1. + Q->schio * schi + Q->cchio * cchi * coslon);
+    const double denom = 1. + Q->schio * schi + Q->cchio * cchi * coslon;
+    if( denom == 0 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
+    s = 2. / denom;
     p.r = s * cchi * sinlon;
     p.i = s * (Q->cchio * schi - Q->schio * cchi * coslon);
     p = pj_zpoly1(p, Q->zcoeff, Q->n);
