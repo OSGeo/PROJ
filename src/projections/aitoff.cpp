@@ -117,7 +117,12 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
             sp = sin(lp.phi); cp = cos(lp.phi);
             D = cp * cl;
             C = 1. - D * D;
-            D = acos(D) / pow(C, 1.5);
+            const double denom = pow(C, 1.5);
+            if( denom == 0 ) {
+                proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+                return lp;
+            }
+            D = acos(D) / denom;
             f1 = 2. * D * C * cp * sl;
             f2 = D * C * sp;
             f1p = 2.* (sl * cl * sp * cp / C - D * sp * sl);
