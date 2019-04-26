@@ -7,6 +7,7 @@ wget http://download.osgeo.org/proj/proj-datumgrid-1.8.zip
 
 # prepare build files
 ./autogen.sh
+TOP_DIR=$PWD
 
 # autoconf build
 mkdir build_autoconf
@@ -28,6 +29,13 @@ else
     ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 fi
 make -j2
+
+if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
+    echo "Checking exported symbols..."
+    ${TOP_DIR}/scripts/dump_exported_symbols.sh src/.libs/libproj.so > /tmp/got_symbols.txt
+    diff -u ${TOP_DIR}/scripts/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
+fi
+
 make check
 make install
 find /tmp/proj_autoconf_install_from_dist_all
