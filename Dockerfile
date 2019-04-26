@@ -34,16 +34,18 @@ RUN apt-get update; \
         libsqlite3-0 \
         curl unzip
 
-COPY --from=builder  /build/usr/bin/ /usr/bin/
-COPY --from=builder  /build/usr/lib/ /usr/lib/
-COPY --from=builder  /build/usr/include/ /usr/include/
-COPY --from=builder  /build/usr/share/proj/ /usr/share/proj/
-
+# Put this first as this is rarely changing
 RUN \
+    mkdir -p /usr/share/proj; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-1.8.zip &&  unzip -j -u -o proj-datumgrid-1.8.zip  -d /usr/share/proj; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-europe-1.2.zip &&  unzip -j -u -o proj-datumgrid-europe-1.2.zip -d /usr/share/proj; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip &&  unzip -j -u -o proj-datumgrid-oceania-1.0.zip -d /usr/share/proj; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip &&  unzip -j -u -o proj-datumgrid-world-1.0.zip -d /usr/share/proj; \
     curl -LOs http://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip &&  unzip -j -u -o proj-datumgrid-north-america-1.2.zip -d /usr/share/proj; \
     rm *.zip
+
+COPY --from=builder  /build/usr/share/proj/ /usr/share/proj/
+COPY --from=builder  /build/usr/include/ /usr/include/
+COPY --from=builder  /build/usr/bin/ /usr/bin/
+COPY --from=builder  /build/usr/lib/ /usr/lib/
 
