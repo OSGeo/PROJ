@@ -34,7 +34,7 @@ PROJ_HEAD(natearth2, "Natural Earth 2") "\n\tPCyl, Sph";
 #define MAX_ITER 100
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY natearth2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     double phi2, phi4, phi6;
     (void) P;
@@ -49,7 +49,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP natearth2_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double yc, tol, y2, y4, y6, f, fder;
     int i;
@@ -91,8 +91,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(natearth2) {
     P->es = 0;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = natearth2_s_inverse;
+    P->fwd = natearth2_s_forward;
 
     return P;
 }

@@ -22,7 +22,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY mod_ster_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double sinlon, coslon, esphi, chi, schi, cchi, s;
@@ -51,7 +51,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP mod_ster_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int nn;
@@ -119,8 +119,8 @@ static PJ *setup(PJ *P) { /* general initialization */
         chio = P->phi0;
     Q->schio = sin(chio);
     Q->cchio = cos(chio);
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = mod_ster_e_inverse;
+    P->fwd = mod_ster_e_forward;
 
     return P;
 }

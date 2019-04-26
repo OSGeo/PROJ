@@ -23,7 +23,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY gn_sinu_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     double s, c;
 
@@ -33,7 +33,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP gn_sinu_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double s;
 
@@ -50,7 +50,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY gn_sinu_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -80,7 +80,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP gn_sinu_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -109,8 +109,8 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
 static void setup(PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     P->es = 0;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = gn_sinu_s_inverse;
+    P->fwd = gn_sinu_s_forward;
 
     Q->C_x = (Q->C_y = sqrt((Q->m + 1.) / Q->n))/(Q->m + 1.);
 }
@@ -127,8 +127,8 @@ PJ *PROJECTION(sinu) {
         return pj_default_destructor (P, ENOMEM);
 
     if (P->es != 0.0) {
-        P->inv = e_inverse;
-        P->fwd = e_forward;
+        P->inv = gn_sinu_e_inverse;
+        P->fwd = gn_sinu_e_forward;
     } else {
         Q->n = 1.;
         Q->m = 0.;

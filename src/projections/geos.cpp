@@ -52,7 +52,7 @@ struct pj_opaque {
 PROJ_HEAD(geos, "Geostationary Satellite View") "\n\tAzi, Sph&Ell\n\th=";
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY geos_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double Vx, Vy, Vz, tmp;
@@ -82,7 +82,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY geos_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double r, Vx, Vy, Vz, tmp;
@@ -118,7 +118,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP geos_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double Vx, Vy, Vz, a, b, det, k;
@@ -155,7 +155,7 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP geos_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double Vx, Vy, Vz, a, b, det, k;
@@ -226,12 +226,12 @@ PJ *PROJECTION(geos) {
         Q->radius_p      = sqrt (P->one_es);
         Q->radius_p2     = P->one_es;
         Q->radius_p_inv2 = P->rone_es;
-        P->inv = e_inverse;
-        P->fwd = e_forward;
+        P->inv = geos_e_inverse;
+        P->fwd = geos_e_forward;
     } else {
         Q->radius_p = Q->radius_p2 = Q->radius_p_inv2 = 1.0;
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = geos_s_inverse;
+        P->fwd = geos_s_forward;
     }
 
     return P;

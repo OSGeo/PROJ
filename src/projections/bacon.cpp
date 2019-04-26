@@ -20,7 +20,7 @@ PROJ_HEAD(ortel, "Ortelius Oval") "\n\tMisc Sph, no inv";
 PROJ_HEAD(bacon, "Bacon Globular") "\n\tMisc Sph, no inv";
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY bacon_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 	double ax, f;
@@ -50,7 +50,7 @@ PJ *PROJECTION(bacon) {
 	Q->bacn = 1;
 	Q->ortl = 0;
 	P->es = 0.;
-    P->fwd = s_forward;
+    P->fwd = bacon_s_forward;
     return P;
 }
 
@@ -63,7 +63,7 @@ PJ *PROJECTION(apian) {
 
 	Q->bacn = Q->ortl = 0;
 	P->es = 0.;
-    P->fwd = s_forward;
+    P->fwd = bacon_s_forward;
     return P;
 }
 
@@ -77,6 +77,6 @@ PJ *PROJECTION(ortel) {
 	Q->bacn = 0;
 	Q->ortl = 1;
 	P->es = 0.;
-    P->fwd = s_forward;
+    P->fwd = bacon_s_forward;
     return P;
 }

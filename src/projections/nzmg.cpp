@@ -58,7 +58,7 @@ static const double tpsi[] = { .6399175073, -.1358797613, .063294409, -.02526853
 #define Ntphi 8
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY nzmg_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     COMPLEX p;
     const double *C;
@@ -77,7 +77,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP nzmg_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     int nn, i;
     COMPLEX p, f, fp, dp;
@@ -116,8 +116,8 @@ PJ *PROJECTION(nzmg) {
     P->x0 = 2510000.;
     P->y0 = 6023150.;
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = nzmg_e_inverse;
+    P->fwd = nzmg_e_forward;
 
 
     return P;

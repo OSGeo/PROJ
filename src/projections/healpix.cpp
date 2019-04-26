@@ -281,7 +281,7 @@ static PJ_XY healpix_sphere(PJ_LP lp) {
 /**
  * Return the inverse of healpix_sphere().
 **/
-static PJ_LP healpix_sphere_inverse(PJ_XY xy) {
+static PJ_LP healpix_spherhealpix_e_inverse(PJ_XY xy) {
     PJ_LP lp;
     double x = xy.x;
     double y = xy.y;
@@ -532,7 +532,7 @@ static PJ_LP s_healpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
         pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
         return lp;
     }
-    return healpix_sphere_inverse(xy);
+    return healpix_spherhealpix_e_inverse(xy);
 }
 
 
@@ -546,7 +546,7 @@ static PJ_LP e_healpix_inverse(PJ_XY xy, PJ *P) { /* ellipsoid */
         pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
         return lp;
     }
-    lp = healpix_sphere_inverse(xy);
+    lp = healpix_spherhealpix_e_inverse(xy);
     lp.phi = auth_lat(P, lp.phi, 1);
     return lp;
 }
@@ -581,7 +581,7 @@ static PJ_LP s_rhealpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
         return lp;
     }
     xy = combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 1);
-    return healpix_sphere_inverse(xy);
+    return healpix_spherhealpix_e_inverse(xy);
 }
 
 
@@ -597,7 +597,7 @@ static PJ_LP e_rhealpix_inverse(PJ_XY xy, PJ *P) { /* ellipsoid */
         return lp;
     }
     xy = combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 1);
-    lp = healpix_sphere_inverse(xy);
+    lp = healpix_spherhealpix_e_inverse(xy);
     lp.phi = auth_lat(P, lp.phi, 1);
     return lp;
 }

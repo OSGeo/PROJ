@@ -19,7 +19,7 @@ static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
     return log(tan(M_FORTPI + .5 * x));
 }
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY merc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -31,7 +31,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY merc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -43,7 +43,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP merc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -54,7 +54,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP merc_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     lp.phi = atan(sinh(xy.y / P->k0));
     lp.lam = xy.x / P->k0;
@@ -75,15 +75,15 @@ PJ *PROJECTION(merc) {
     if (P->es != 0.0) { /* ellipsoid */
         if (is_phits)
             P->k0 = pj_msfn(sin(phits), cos(phits), P->es);
-        P->inv = e_inverse;
-        P->fwd = e_forward;
+        P->inv = merc_e_inverse;
+        P->fwd = merc_e_forward;
     }
 
     else { /* sphere */
         if (is_phits)
             P->k0 = cos(phits);
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = merc_s_inverse;
+        P->fwd = merc_s_forward;
     }
 
     return P;
@@ -94,7 +94,7 @@ PJ *PROJECTION(webmerc) {
     /* Overriding k_0 with fixed parameter */
     P->k0 = 1.0;
 
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = merc_s_inverse;
+    P->fwd = merc_s_forward;
     return P;
 }

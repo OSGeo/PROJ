@@ -58,11 +58,11 @@ PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";
 
 
 #if 0
-FORWARD(s_forward); /* spheroid */
+FORWARD(aitoff_s_forward); /* spheroid */
 #endif
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY aitoff_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double c, d;
@@ -100,7 +100,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 *
 ************************************************************************************/
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int iter, MAXITER = 10, round = 0, MAXROUND = 20;
@@ -171,8 +171,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 
 static PJ *setup(PJ *P) {
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = aitoff_s_inverse;
+    P->fwd = aitoff_s_forward;
     P->es = 0.;
     return P;
 }

@@ -19,7 +19,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY ocea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double t;
@@ -34,7 +34,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP ocea_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double t, s;
@@ -106,8 +106,8 @@ PJ *PROJECTION(ocea) {
     P->lam0 = lam_p + M_HALFPI;
     Q->cosphi = cos(phi_p);
     Q->sinphi = sin(phi_p);
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = ocea_s_inverse;
+    P->fwd = ocea_s_forward;
     P->es = 0.;
 
     return P;

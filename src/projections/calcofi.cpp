@@ -35,7 +35,7 @@ whatever ellipsoid is provided. */
 #define ROTATION_ANGLE 0.52359877559829882 /*CalCOFI angle of 30 deg in rad */
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY calcofi_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     double oy; /* pt O y value in Mercator */
     double l1; /* l1 and l2 are distances calculated using trig that sum
@@ -67,7 +67,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY calcofi_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     double oy;
     double l1;
@@ -93,7 +93,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP calcofi_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double ry;     /* y value of point r */
     double oymctr; /* Mercator-transformed y value of point O */
@@ -116,7 +116,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP calcofi_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double ry;
     double oymctr;
@@ -153,11 +153,11 @@ PJ *PROJECTION(calcofi) {
     P->over = 1;
 
     if (P->es != 0.0) { /* ellipsoid */
-        P->inv = e_inverse;
-        P->fwd = e_forward;
+        P->inv = calcofi_e_inverse;
+        P->fwd = calcofi_e_forward;
     } else { /* sphere */
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = calcofi_s_inverse;
+        P->fwd = calcofi_s_forward;
     }
     return P;
 }

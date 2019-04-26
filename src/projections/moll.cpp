@@ -20,7 +20,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY moll_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double k, V;
@@ -43,7 +43,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP moll_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     lp.phi = aasin(P->ctx, xy.y / Q->C_y);
@@ -70,8 +70,8 @@ static PJ * setup(PJ *P, double p) {
     Q->C_y = r / sp;
     Q->C_p = p2 + sin(p2);
 
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = moll_s_inverse;
+    P->fwd = moll_s_forward;
     return P;
 }
 
@@ -106,8 +106,8 @@ PJ *PROJECTION(wag5) {
     Q->C_y = 1.65014;
     Q->C_p = 3.00896;
 
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = moll_s_inverse;
+    P->fwd = moll_s_forward;
 
     return P;
 }
