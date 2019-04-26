@@ -116,15 +116,15 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
             sl = sin(lp.lam * 0.5); cl = cos(lp.lam * 0.5);
             sp = sin(lp.phi); cp = cos(lp.phi);
             D = cp * cl;
-                C = 1. - D * D;
+            C = 1. - D * D;
             D = acos(D) / pow(C, 1.5);
-                f1 = 2. * D * C * cp * sl;
-                f2 = D * C * sp;
-                f1p = 2.* (sl * cl * sp * cp / C - D * sp * sl);
-                f1l = cp * cp * sl * sl / C + D * cp * cl * sp * sp;
-                f2p = sp * sp * cl / C + D * sl * sl * cp;
-                f2l = 0.5 * (sp * cp * sl / C - D * sp * cp * cp * sl * cl);
-                if (Q->mode == WINKEL_TRIPEL) {
+            f1 = 2. * D * C * cp * sl;
+            f2 = D * C * sp;
+            f1p = 2.* (sl * cl * sp * cp / C - D * sp * sl);
+            f1l = cp * cp * sl * sl / C + D * cp * cl * sp * sp;
+            f2p = sp * sp * cl / C + D * sl * sl * cp;
+            f2l = 0.5 * (sp * cp * sl / C - D * sp * cp * cp * sl * cl);
+            if (Q->mode == WINKEL_TRIPEL) {
                 f1 = 0.5 * (f1 + lp.lam * Q->cosphi1);
                 f2 = 0.5 * (f2 + lp.phi);
                 f1p *= 0.5;
@@ -156,10 +156,10 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     } while (((fabs(xy.x-x) > EPSILON) || (fabs(xy.y-y) > EPSILON)) && (round++ < MAXROUND));
 
     if (iter == MAXITER && round == MAXROUND)
-        {
-            pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
-            /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
-        }
+    {
+        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
+    }
 
     return lp;
 }
