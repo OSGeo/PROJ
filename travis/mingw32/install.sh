@@ -3,6 +3,7 @@
 set -e
 
 export CCACHE_CPP2=yes
+export PROJ_DB_CACHE_DIR="$HOME/.ccache"
 
 # prepare wine environment
 wine64 cmd /c dir

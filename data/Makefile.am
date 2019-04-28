@@ -64,7 +64,13 @@ proj.db: $(DATAPATH)/sql/*.sql
 	 for x in $(SQL_ORDERED_LIST); do \
 		export SQL_EXPANDED_LIST="$${SQL_EXPANDED_LIST} $(DATAPATH)/$$x"; \
 	 done; \
-	 cat $${SQL_EXPANDED_LIST} | sqlite3 proj.db; \
+	 if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" ; then \
+	    cat $${SQL_EXPANDED_LIST} | md5sum | diff - "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" > /dev/null \
+	    && (echo "Reusing cached proj.db"; cp "$(PROJ_DB_CACHE_DIR)/proj.db" proj.db); \
+	 fi; \
+	 if test ! -f proj.db ; then \
+	   cat $${SQL_EXPANDED_LIST} | sqlite3 proj.db; \
+	 fi; \
 	 if [ $$? -ne 0 ] ; then \
 		echo "Build of proj.db failed"; \
 		$(RM) proj.db; \
@@ -77,6 +83,12 @@ proj.db: $(DATAPATH)/sql/*.sql
 		echo "Foreign key check failed"; \
 		$(RM) proj.db; \
 		exit 1; \
+	 else \
+	   if test "x$(PROJ_DB_CACHE_DIR)" != "x" ; then \
+		mkdir -p "$(PROJ_DB_CACHE_DIR)"; \
+		cat $${SQL_EXPANDED_LIST} | md5sum > "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5"; \
+		cp proj.db "$(PROJ_DB_CACHE_DIR)"; \
+	   fi \
 	 fi \
 	fi
 
