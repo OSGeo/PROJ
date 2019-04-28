@@ -12584,11 +12584,11 @@ getResolvedCRS(const crs::CRSNNPtr &crs,
             const auto tmpAuthFactory = io::AuthorityFactory::create(
                 authFactory->databaseContext(), *ids.front()->codeSpace());
             try {
-                crs::CRSNNPtr resolvedCrs(
+                auto resolvedCrs(
                     tmpAuthFactory->createProjectedCRS(ids.front()->code()));
-                if (resolvedCrs->_isEquivalentTo(
+                if (resolvedCrs->isEquivalentTo(
                         crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
-                    return resolvedCrs;
+                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
                 }
             } catch (const std::exception &) {
             }
@@ -12616,12 +12616,13 @@ getResolvedCRS(const crs::CRSNNPtr &crs,
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
                     authFactory->databaseContext(), *ids.front()->codeSpace());
                 try {
-                    crs::CRSNNPtr resolvedCrs(
+                    auto resolvedCrs(
                         tmpAuthFactory->createCompoundCRS(ids.front()->code()));
-                    if (resolvedCrs->_isEquivalentTo(
+                    if (resolvedCrs->isEquivalentTo(
                             crs.get(),
                             util::IComparable::Criterion::EQUIVALENT)) {
-                        return resolvedCrs;
+                        return util::nn_static_pointer_cast<crs::CRS>(
+                            resolvedCrs);
                     }
                 } catch (const std::exception &) {
                 }
