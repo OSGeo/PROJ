@@ -7484,6 +7484,8 @@ Transformation::Private::registerInv(util::BaseObjectNNPtr thisIn,
                                      TransformationNNPtr invTransform) {
     invTransform->d->forwardOperation_ =
         util::nn_dynamic_pointer_cast<Transformation>(thisIn);
+    invTransform->setHasBallparkTransformation(
+        invTransform->d->forwardOperation_->hasBallparkTransformation());
     return invTransform;
 }
 //! @endcond
@@ -9490,6 +9492,7 @@ CoordinateOperationNNPtr ConcatenatedOperation::inverse() const {
     auto op =
         create(properties, inversedOperations, coordinateOperationAccuracies());
     op->d->computedName_ = d->computedName_;
+    op->setHasBallparkTransformation(hasBallparkTransformation());
     return op;
 }
 
@@ -12704,6 +12707,8 @@ void InverseCoordinateOperation::setPropertiesFromForward() {
     if (forwardOperation_->sourceCRS() && forwardOperation_->targetCRS()) {
         setCRSs(forwardOperation_.get(), true);
     }
+    setHasBallparkTransformation(
+        forwardOperation_->hasBallparkTransformation());
 }
 
 // ---------------------------------------------------------------------------
