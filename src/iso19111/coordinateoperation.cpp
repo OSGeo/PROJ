@@ -12669,6 +12669,17 @@ CoordinateOperationFactory::createOperations(
     auto l_resolvedTargetCRS = getResolvedCRS(l_targetCRS, context);
     Private::Context contextPrivate(l_resolvedSourceCRS, l_resolvedTargetCRS,
                                     context);
+
+    if (context->getSourceAndTargetCRSExtentUse() ==
+        CoordinateOperationContext::SourceTargetCRSExtentUse::INTERSECTION) {
+        auto sourceCRSExtent(getExtent(l_resolvedSourceCRS));
+        auto targetCRSExtent(getExtent(l_resolvedTargetCRS));
+        if (sourceCRSExtent && targetCRSExtent &&
+            !sourceCRSExtent->intersects(NN_NO_CHECK(targetCRSExtent))) {
+            return std::vector<CoordinateOperationNNPtr>();
+        }
+    }
+
     return filterAndSort(Private::createOperations(l_resolvedSourceCRS,
                                                    l_resolvedTargetCRS,
                                                    contextPrivate),
