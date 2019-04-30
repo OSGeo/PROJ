@@ -6477,6 +6477,18 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
               "+step +proj=hgridshift +grids=conus +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
+    {
+        // Test that we can round-trip this through WKT and still get the same
+        // PROJ string.
+        auto wkt = list[0]->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
+        ASSERT_TRUE(co != nullptr);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            co->exportToPROJString(PROJStringFormatter::create().get()));
+    }
 
     bool foundApprox = false;
     for (size_t i = 0; i < list.size(); i++) {

@@ -12802,7 +12802,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
 
     auto method = OperationMethod::create(
         util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                "PROJ-based operation method (approximate) : " +
+                                "PROJ-based operation method (approximate): " +
                                     projString),
         std::vector<GeneralOperationParameterNNPtr>{});
     auto op = PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method);

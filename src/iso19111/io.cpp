@@ -1342,7 +1342,7 @@ struct WKTParser::Private {
 
     CRSPtr buildCRS(const WKTNodeNNPtr &node);
 
-    CoordinateOperationNNPtr buildCoordinateOperation(const WKTNodeNNPtr &node);
+    TransformationNNPtr buildCoordinateOperation(const WKTNodeNNPtr &node);
 
     ConcatenatedOperationNNPtr
     buildConcatenatedOperation(const WKTNodeNNPtr &node);
@@ -2940,7 +2940,7 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
 
 // ---------------------------------------------------------------------------
 
-CoordinateOperationNNPtr
+TransformationNNPtr
 WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     auto &methodNode = nodeP->lookForChild(WKTConstants::METHOD);
@@ -2991,11 +2991,10 @@ WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
             stripQuotes(accuracyNode->GP()->children()[0])));
     }
 
-    return util::nn_static_pointer_cast<CoordinateOperation>(
-        Transformation::create(buildProperties(node), NN_NO_CHECK(sourceCRS),
-                               NN_NO_CHECK(targetCRS), interpolationCRS,
-                               buildProperties(methodNode), parameters, values,
-                               accuracies));
+    return Transformation::create(buildProperties(node), NN_NO_CHECK(sourceCRS),
+                                  NN_NO_CHECK(targetCRS), interpolationCRS,
+                                  buildProperties(methodNode), parameters,
+                                  values, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -4307,16 +4306,31 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
     }
 
     if (ci_equal(name, WKTConstants::COORDINATEOPERATION)) {
-        return util::nn_static_pointer_cast<BaseObject>(
-            buildCoordinateOperation(node));
+        auto transf = buildCoordinateOperation(node);
+
+        const char *prefixes[] = {
+            "PROJ-based operation method: ",
+            "PROJ-based operation method (approximate): "};
+        for (const char *prefix : prefixes) {
+            if (starts_with(transf->method()->nameStr(), prefix)) {
+                auto projString =
+                    transf->method()->nameStr().substr(strlen(prefix));
+                return util::nn_static_pointer_cast<BaseObject>(
+                    PROJBasedOperation::create(
+                        PropertyMap(), projString, transf->sourceCRS(),
+                        transf->targetCRS(),
+                        transf->coordinateOperationAccuracies()));
+            }
+        }
+
+        return util::nn_static_pointer_cast<BaseObject>(transf);
     }
 
     if (ci_equal(name, WKTConstants::CONVERSION)) {
         auto conv =
             buildConversion(node, UnitOfMeasure::METRE, UnitOfMeasure::DEGREE);
 
-        if (conv->nameStr() == "PROJ-based coordinate operation" &&
-            starts_with(conv->method()->nameStr(),
+        if (starts_with(conv->method()->nameStr(),
                         "PROJ-based operation method: ")) {
             auto projString = conv->method()->nameStr().substr(
                 strlen("PROJ-based operation method: "));
