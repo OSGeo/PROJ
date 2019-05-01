@@ -17,7 +17,7 @@ PROJ_HEAD(putp3p, "Putnins P3'") "\n\tPCyl, Sph";
 #define RPISQ   0.1013211836
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY putp3_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
 
     xy.x = C * lp.lam * (1. - static_cast<struct pj_opaque*>(P->opaque)->A * lp.phi * lp.phi);
@@ -27,7 +27,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP putp3_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
 
     lp.phi = xy.y / C;
@@ -46,8 +46,8 @@ PJ *PROJECTION(putp3) {
     Q->A = 4. * RPISQ;
 
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = putp3_s_inverse;
+    P->fwd = putp3_s_forward;
 
     return P;
 }
@@ -61,8 +61,8 @@ PJ *PROJECTION(putp3p) {
     Q->A = 2. * RPISQ;
 
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = putp3_s_inverse;
+    P->fwd = putp3_s_forward;
 
     return P;
 }

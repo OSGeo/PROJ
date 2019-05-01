@@ -103,7 +103,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forward */
+static PJ_XY krovak_e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forward */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     PJ_XY xy = {0.0,0.0};
 
@@ -137,7 +137,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forwar
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal, inverse */
+static PJ_LP krovak_e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal, inverse */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     PJ_LP lp = {0.0,0.0};
 
@@ -232,8 +232,8 @@ PJ *PROJECTION(krovak) {
     Q->rho0 = P->k0 * n0 / tan(S0);
     Q->ad = M_PI_2 - UQ;
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = krovak_e_inverse;
+    P->fwd = krovak_e_forward;
 
     return P;
 }

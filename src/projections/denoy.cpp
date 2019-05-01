@@ -13,7 +13,7 @@ PROJ_HEAD(denoy, "Denoyer Semi-Elliptical") "\n\tPCyl, no inv, Sph";
 #define D5  0.03
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {            /* Spheroidal, forward */
+static PJ_XY denoy_s_forward (PJ_LP lp, PJ *P) {            /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     (void) P;
     xy.y = lp.phi;
@@ -27,7 +27,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {            /* Spheroidal, forward */
 
 PJ *PROJECTION(denoy) {
     P->es = 0.0;
-    P->fwd = s_forward;
+    P->fwd = denoy_s_forward;
 
     return P;
 }

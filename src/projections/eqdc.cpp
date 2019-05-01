@@ -25,7 +25,7 @@ PROJ_HEAD(eqdc, "Equidistant Conic")
 # define EPS10  1.e-10
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY eqdc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -38,7 +38,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP eqdc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -121,8 +121,8 @@ PJ *PROJECTION(eqdc) {
         Q->rho0 = Q->c - P->phi0;
     }
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = eqdc_e_inverse;
+    P->fwd = eqdc_e_forward;
 
     return P;
 }

@@ -8,7 +8,7 @@
 PROJ_HEAD(tcea, "Transverse Cylindrical Equal Area") "\n\tCyl, Sph";
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY tcea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     xy.x = cos (lp.phi) * sin (lp.lam) / P->k0;
     xy.y = P->k0 * (atan2 (tan (lp.phi), cos (lp.lam)) - P->phi0);
@@ -16,7 +16,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP tcea_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     double t;
 
@@ -30,8 +30,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 
 PJ *PROJECTION(tcea) {
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = tcea_s_inverse;
+    P->fwd = tcea_s_forward;
     P->es = 0.;
     return P;
 }

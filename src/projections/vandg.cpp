@@ -13,7 +13,7 @@ PROJ_HEAD(vandg, "van der Grinten (I)") "\n\tMisc Sph";
 # define HPISQ      4.93480220054467930934
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY vandg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     double  al, al2, g, g2, p2;
 
@@ -58,7 +58,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP vandg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double t, c0, c1, c2, c3, al, r2, r, m, d, ay, x2, y2;
 
@@ -105,8 +105,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(vandg) {
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = vandg_s_inverse;
+    P->fwd = vandg_s_forward;
 
     return P;
 }

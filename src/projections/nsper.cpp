@@ -38,7 +38,7 @@ PROJ_HEAD(tpers, "Tilted perspective") "\n\tAzi, Sph\n\ttilt= azi= h=";
 # define EPS10 1.e-10
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY nsper_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi;
@@ -93,7 +93,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP nsper_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  rh;
@@ -165,8 +165,8 @@ static PJ *setup(PJ *P) {
     Q->rp = 1. / Q->p;
     Q->h = 1. / Q->pn1;
     Q->pfact = (Q->p + 1.) * Q->h;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = nsper_s_inverse;
+    P->fwd = nsper_s_forward;
     P->es = 0.;
 
     return P;

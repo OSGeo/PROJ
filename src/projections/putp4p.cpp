@@ -16,7 +16,7 @@ PROJ_HEAD(putp4p, "Putnins P4'") "\n\tPCyl, Sph";
 PROJ_HEAD(weren, "Werenskiold I") "\n\tPCyl, Sph";
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY putp4p_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -29,7 +29,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP putp4p_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -53,8 +53,8 @@ PJ *PROJECTION(putp4p) {
     Q->C_y = 3.883251825;
 
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = putp4p_s_inverse;
+    P->fwd = putp4p_s_forward;
 
     return P;
 }
@@ -70,8 +70,8 @@ PJ *PROJECTION(weren) {
     Q->C_y = 4.442882938;
 
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = putp4p_s_inverse;
+    P->fwd = putp4p_s_forward;
 
     return P;
 }

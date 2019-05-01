@@ -119,7 +119,7 @@ static double qsc_shift_lon_origin(double lon, double offset) {
 }
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY qsc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double lat, lon;
@@ -235,7 +235,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP qsc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double mu, nu, cosmu, tannu;
@@ -382,8 +382,8 @@ PJ *PROJECTION(qsc) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = qsc_e_inverse;
+    P->fwd = qsc_e_forward;
     /* Determine the cube face from the center of projection. */
     if (P->phi0 >= M_HALFPI - M_FORTPI / 2.0) {
         Q->face = FACE_TOP;
