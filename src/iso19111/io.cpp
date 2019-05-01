@@ -757,13 +757,22 @@ const std::string &WKTFormatter::getHDatumExtension() const {
 // ---------------------------------------------------------------------------
 
 std::string WKTFormatter::morphNameToESRI(const std::string &name) {
+
+    for (const auto *suffix : {"(m)", "(ftUS)", "(E-N)", "(N-E)"}) {
+        if (ends_with(name, suffix)) {
+            return morphNameToESRI(
+                       name.substr(0, name.size() - strlen(suffix))) +
+                   suffix;
+        }
+    }
+
     std::string ret;
     bool insertUnderscore = false;
     // Replace any special character by underscore, except at the beginning
     // and of the name where those characters are removed.
     for (char ch : name) {
-        if (ch == '+' || (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') ||
-            (ch >= 'A' && ch <= 'Z')) {
+        if (ch == '+' || ch == '-' || (ch >= '0' && ch <= '9') ||
+            (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
             if (insertUnderscore && !ret.empty()) {
                 ret += '_';
             }
@@ -3256,7 +3265,10 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     }
 
     return Conversion::create(
-               PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+               PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                 esriProjectionName == "Gauss_Kruger"
+                                     ? "unnnamed (Gauss Kruger)"
+                                     : "unnamed"),
                propertiesMethod, parameters, values)
         ->identify();
 }

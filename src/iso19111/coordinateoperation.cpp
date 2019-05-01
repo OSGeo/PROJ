@@ -5120,10 +5120,11 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
             }
         } else if (esriMapping->epsg_code ==
                    EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
-            if (l_targetCRS &&
-                (ci_find(l_targetCRS->nameStr(), "Gauss") !=
-                     std::string::npos ||
-                 ci_find(l_targetCRS->nameStr(), "GK_") != std::string::npos)) {
+            if (ci_find(conv->nameStr(), "Gauss Kruger") != std::string::npos ||
+                (l_targetCRS && (ci_find(l_targetCRS->nameStr(), "Gauss") !=
+                                     std::string::npos ||
+                                 ci_find(l_targetCRS->nameStr(), "GK_") !=
+                                     std::string::npos))) {
                 esriParams = paramsESRI_Gauss_Kruger;
                 esriMethodName = "Gauss_Kruger";
             } else {
