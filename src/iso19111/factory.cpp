@@ -614,11 +614,16 @@ void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
 // ---------------------------------------------------------------------------
 
 std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
-    auto sqlRes = run("SELECT sql FROM sqlite_master WHERE type "
-                      "IN ('table', 'trigger', 'view') ORDER BY type");
+    const char *sqls[] = {
+        "SELECT sql FROM sqlite_master WHERE type = 'table'",
+        "SELECT sql FROM sqlite_master WHERE type = 'view'",
+        "SELECT sql FROM sqlite_master WHERE type = 'trigger'"};
     std::vector<std::string> res;
-    for (const auto &row : sqlRes) {
-        res.emplace_back(row[0]);
+    for (const auto &sql : sqls) {
+        auto sqlRes = run(sql);
+        for (const auto &row : sqlRes) {
+            res.emplace_back(row[0]);
+        }
     }
     return res;
 }
@@ -2408,6 +2413,11 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
 
         auto conv = d->createFactory(conversion_auth_name)
                         ->createConversion(conversion_code);
+        if (conv->nameStr() == "unnamed") {
+            conv = conv->shallowClone();
+            conv->setProperties(util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY, name));
+        }
 
         auto cartesianCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (cartesianCS) {
@@ -3934,13 +3944,16 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     sql += "SELECT c.auth_name, c.code, c.name, 'projected', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.name, conv.method_name FROM projected_crs c "
+           "a.name, cm.name AS conversion_method_name FROM projected_crs c "
            "JOIN area a ON "
            "c.area_of_use_auth_name = a.auth_name AND "
            "c.area_of_use_code = a.code "
-           "LEFT JOIN conversion conv ON "
+           "LEFT JOIN conversion_table conv ON "
            "c.conversion_auth_name = conv.auth_name AND "
-           "c.conversion_code = conv.code";
+           "c.conversion_code = conv.code "
+           "LEFT JOIN conversion_method cm ON "
+           "conv.method_auth_name = cm.auth_name AND "
+           "conv.method_code = cm.code";
     if (d->hasAuthorityRestriction()) {
         sql += " WHERE c.auth_name = ?";
         params.emplace_back(d->authority());
@@ -4663,9 +4676,9 @@ AuthorityFactory::createProjectedCRSFromExisting(
 
     std::string sql(
         "SELECT projected_crs.auth_name, projected_crs.code FROM projected_crs "
-        "JOIN conversion ON "
-        "projected_crs.conversion_auth_name = conversion.auth_name AND "
-        "projected_crs.conversion_code = conversion.code WHERE "
+        "JOIN conversion_table conv ON "
+        "projected_crs.conversion_auth_name = conv.auth_name AND "
+        "projected_crs.conversion_code = conv.code WHERE "
         "projected_crs.deprecated = 0 AND ");
     ListOfParams params;
     if (!candidatesGeodCRS.empty()) {
@@ -4673,8 +4686,8 @@ AuthorityFactory::createProjectedCRSFromExisting(
                                            "projected_crs.geodetic_crs_");
         sql += " AND ";
     }
-    sql += "conversion.method_auth_name = 'EPSG' AND "
-           "conversion.method_code = ?";
+    sql += "conv.method_auth_name = 'EPSG' AND "
+           "conv.method_code = ?";
     params.emplace_back(toString(methodEPSGCode));
     if (d->hasAuthorityRestriction()) {
         sql += " AND projected_crs.auth_name = ?";
@@ -4701,11 +4714,11 @@ AuthorityFactory::createProjectedCRSFromExisting(
         if (unit == common::UnitOfMeasure::DEGREE &&
             geogCRS->coordinateSystem()->axisList()[0]->unit() == unit) {
             const auto iParamAsStr(toString(iParam));
-            sql += " AND conversion.param";
+            sql += " AND conv.param";
             sql += iParamAsStr;
-            sql += "_code = ? AND conversion.param";
+            sql += "_code = ? AND conv.param";
             sql += iParamAsStr;
-            sql += "_auth_name = 'EPSG' AND conversion.param";
+            sql += "_auth_name = 'EPSG' AND conv.param";
             sql += iParamAsStr;
             sql += "_value BETWEEN ? AND ?";
             // As angles might be expressed with the odd unit EPSG:9110

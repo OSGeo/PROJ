@@ -10,7 +10,7 @@ PROJ_HEAD(tcc, "Transverse Central Cylindrical") "\n\tCyl, Sph, no inv";
 #define EPS10 1.e-10
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY tcc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     double b, bt;
 
@@ -27,7 +27,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 
 PJ *PROJECTION(tcc) {
     P->es  = 0.;
-    P->fwd = s_forward;
+    P->fwd = tcc_s_forward;
     P->inv = nullptr;
 
     return P;

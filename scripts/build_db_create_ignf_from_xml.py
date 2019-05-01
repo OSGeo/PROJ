@@ -923,7 +923,7 @@ for node in root.iterfind('.//Conversion'):
         #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','conversion');""" % (id)
         #all_sql.append(sql)
 
-        sql = """INSERT INTO "conversion" VALUES('IGNF','%s','%s',NULL,NULL,'EPSG','1262',NULL,NULL,'Gauss Schreiber Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (id, name, d['lat_0'], d['lon_0'], d['k_0'], d['x_0'], d['y_0'])
+        sql = """INSERT INTO "conversion" VALUES('IGNF','%s','%s',NULL,NULL,'EPSG','1262','PROJ','gstm','Gauss Schreiber Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','9102','EPSG','8802','Longitude of natural origin',%s,'EPSG','9102','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','9001','EPSG','8807','False northing',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (id, name, d['lat_0'], d['lon_0'], d['k_0'], d['x_0'], d['y_0'])
         all_sql.append(sql)
 
         mapConversionId[id] = ('IGNF', id)
@@ -963,7 +963,7 @@ for node in root.iterfind('.//Conversion'):
         #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','conversion');""" % (id)
         #all_sql.append(sql)
 
-        sql = """INSERT INTO "conversion" VALUES('IGNF','%s','%s',NULL,NULL,'EPSG','1262',NULL,NULL,'PROJ mill',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (id,name)
+        sql = """INSERT INTO "conversion" VALUES('IGNF','%s','%s',NULL,NULL,'EPSG','1262','PROJ','mill','PROJ mill',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);""" % (id,name)
         all_sql.append(sql)
 
         mapConversionId[id] = ('IGNF', id)

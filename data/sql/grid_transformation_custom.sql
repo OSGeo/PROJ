@@ -40,11 +40,11 @@ INSERT INTO "grid_transformation" VALUES(
 -- Sweden
 
 INSERT INTO "grid_transformation" VALUES(
-    'PROJ','EPSG_5613_TO_EPSG_4377','RH2000 height to SWEREF99',
+    'PROJ','EPSG_5613_TO_EPSG_4977','RH2000 height to SWEREF99',
     NULL,NULL,
     'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
     'EPSG','5613', -- source CRS (RH2000 height)
-    'EPSG','4377', -- target CRS (SWEREF99)
+    'EPSG','4977', -- target CRS (SWEREF99)
     'EPSG','3313', -- area of use: Sweden onshore
     NULL,
     'EPSG','8666','Geoid (height correction) model file','SWEN17_RH2000.gtx',

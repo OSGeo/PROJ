@@ -9,7 +9,7 @@ PROJ_HEAD(wag7, "Wagner VII") "\n\tMisc Sph, no inv";
 
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY wag7_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
 	double theta, ct, D;
 
@@ -24,7 +24,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 
 
 PJ *PROJECTION(wag7) {
-    P->fwd = s_forward;
+    P->fwd = wag7_s_forward;
     P->inv = nullptr;
     P->es = 0.;
     return P;

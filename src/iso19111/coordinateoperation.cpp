@@ -5120,10 +5120,11 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
             }
         } else if (esriMapping->epsg_code ==
                    EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
-            if (l_targetCRS &&
-                (ci_find(l_targetCRS->nameStr(), "Gauss") !=
-                     std::string::npos ||
-                 ci_find(l_targetCRS->nameStr(), "GK_") != std::string::npos)) {
+            if (ci_find(conv->nameStr(), "Gauss Kruger") != std::string::npos ||
+                (l_targetCRS && (ci_find(l_targetCRS->nameStr(), "Gauss") !=
+                                     std::string::npos ||
+                                 ci_find(l_targetCRS->nameStr(), "GK_") !=
+                                     std::string::npos))) {
                 esriParams = paramsESRI_Gauss_Kruger;
                 esriMethodName = "Gauss_Kruger";
             } else {
@@ -7484,6 +7485,8 @@ Transformation::Private::registerInv(util::BaseObjectNNPtr thisIn,
                                      TransformationNNPtr invTransform) {
     invTransform->d->forwardOperation_ =
         util::nn_dynamic_pointer_cast<Transformation>(thisIn);
+    invTransform->setHasBallparkTransformation(
+        invTransform->d->forwardOperation_->hasBallparkTransformation());
     return invTransform;
 }
 //! @endcond
@@ -9490,6 +9493,7 @@ CoordinateOperationNNPtr ConcatenatedOperation::inverse() const {
     auto op =
         create(properties, inversedOperations, coordinateOperationAccuracies());
     op->d->computedName_ = d->computedName_;
+    op->setHasBallparkTransformation(hasBallparkTransformation());
     return op;
 }
 
@@ -12584,11 +12588,11 @@ getResolvedCRS(const crs::CRSNNPtr &crs,
             const auto tmpAuthFactory = io::AuthorityFactory::create(
                 authFactory->databaseContext(), *ids.front()->codeSpace());
             try {
-                crs::CRSNNPtr resolvedCrs(
+                auto resolvedCrs(
                     tmpAuthFactory->createProjectedCRS(ids.front()->code()));
-                if (resolvedCrs->_isEquivalentTo(
+                if (resolvedCrs->isEquivalentTo(
                         crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
-                    return resolvedCrs;
+                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
                 }
             } catch (const std::exception &) {
             }
@@ -12616,12 +12620,13 @@ getResolvedCRS(const crs::CRSNNPtr &crs,
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
                     authFactory->databaseContext(), *ids.front()->codeSpace());
                 try {
-                    crs::CRSNNPtr resolvedCrs(
+                    auto resolvedCrs(
                         tmpAuthFactory->createCompoundCRS(ids.front()->code()));
-                    if (resolvedCrs->_isEquivalentTo(
+                    if (resolvedCrs->isEquivalentTo(
                             crs.get(),
                             util::IComparable::Criterion::EQUIVALENT)) {
-                        return resolvedCrs;
+                        return util::nn_static_pointer_cast<crs::CRS>(
+                            resolvedCrs);
                     }
                 } catch (const std::exception &) {
                 }
@@ -12665,6 +12670,17 @@ CoordinateOperationFactory::createOperations(
     auto l_resolvedTargetCRS = getResolvedCRS(l_targetCRS, context);
     Private::Context contextPrivate(l_resolvedSourceCRS, l_resolvedTargetCRS,
                                     context);
+
+    if (context->getSourceAndTargetCRSExtentUse() ==
+        CoordinateOperationContext::SourceTargetCRSExtentUse::INTERSECTION) {
+        auto sourceCRSExtent(getExtent(l_resolvedSourceCRS));
+        auto targetCRSExtent(getExtent(l_resolvedTargetCRS));
+        if (sourceCRSExtent && targetCRSExtent &&
+            !sourceCRSExtent->intersects(NN_NO_CHECK(targetCRSExtent))) {
+            return std::vector<CoordinateOperationNNPtr>();
+        }
+    }
+
     return filterAndSort(Private::createOperations(l_resolvedSourceCRS,
                                                    l_resolvedTargetCRS,
                                                    contextPrivate),
@@ -12703,6 +12719,8 @@ void InverseCoordinateOperation::setPropertiesFromForward() {
     if (forwardOperation_->sourceCRS() && forwardOperation_->targetCRS()) {
         setCRSs(forwardOperation_.get(), true);
     }
+    setHasBallparkTransformation(
+        forwardOperation_->hasBallparkTransformation());
 }
 
 // ---------------------------------------------------------------------------
@@ -12785,7 +12803,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
 
     auto method = OperationMethod::create(
         util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                "PROJ-based operation method (approximate) : " +
+                                "PROJ-based operation method (approximate): " +
                                     projString),
         std::vector<GeneralOperationParameterNNPtr>{});
     auto op = PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method);

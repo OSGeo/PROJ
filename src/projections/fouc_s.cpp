@@ -18,7 +18,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY fouc_s_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double t;
@@ -30,7 +30,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP fouc_s_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double V;
@@ -66,7 +66,7 @@ PJ *PROJECTION(fouc_s) {
 
     Q->n1 = 1. - Q->n;
     P->es = 0;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = fouc_s_s_inverse;
+    P->fwd = fouc_s_s_forward;
     return P;
 }

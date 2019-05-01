@@ -35,23 +35,36 @@ elseif(USE_THREAD AND NOT Threads_FOUND)
     "required by USE_THREAD option")
 endif()
 
-option(ENABLE_LTO "Build library with LTO optimization (if available)." OFF)
+option(ENABLE_LTO
+  "Build library with LTO/IPO optimization (if available)." OFF)
 if(ENABLE_LTO)
-  # TODO: CMake v3.9 use CheckIPOSupported and set property; see
-  # https://cmake.org/cmake/help/v3.9/module/CheckIPOSupported.html
-  if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    include(CheckCXXSourceCompiles)
-    set(CMAKE_REQUIRED_FLAGS "-Wl,-flto")
-    check_cxx_source_compiles("int main(){ return 0; }"
-      COMPILER_SUPPORTS_FLTO_FLAG)
-  elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
-    # Set INTERPROCEDURAL_OPTIMIZATION property later
-    set(COMPILER_SUPPORTS_FLTO_FLAG TRUE)
-  else()
-    include(CheckCXXCompilerFlag)
-    check_cxx_compiler_flag("-flto" COMPILER_SUPPORTS_FLTO_FLAG)
+  # Determine ENABLE_LTO_METHOD to either "flag" or "property"
+  if(CMAKE_C_COMPILER_ID STREQUAL "Intel"
+      AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(ENABLE_LTO_METHOD "property")
+  elseif(CMAKE_VERSION VERSION_LESS 3.9)
+    # Maual checks required
+    if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+      include(CheckCXXSourceCompiles)
+      set(CMAKE_REQUIRED_FLAGS "-Wl,-flto")
+      check_cxx_source_compiles("int main(){ return 0; }"
+        COMPILER_SUPPORTS_FLTO_FLAG)
+    else()
+      include(CheckCXXCompilerFlag)
+      check_cxx_compiler_flag("-flto" COMPILER_SUPPORTS_FLTO_FLAG)
+    endif()
+    set(ENABLE_LTO_METHOD "flag")
+    if(NOT COMPILER_SUPPORTS_FLTO_FLAG)
+      set(ENABLE_LTO OFF)
+    endif()
+  else()  # CMake v3.9
+    cmake_policy(SET CMP0069 NEW)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT ENABLE_LTO)
+    set(ENABLE_LTO_METHOD "property")
   endif()
 endif()
+boost_report_value(ENABLE_LTO)
 
 
 ##############################################
@@ -370,14 +383,12 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
     PROPERTIES COMPILE_FLAGS ${FP_PRECISE})
 endif()
 
-if(COMPILER_SUPPORTS_FLTO_FLAG)
-  if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
-    # Intel supported only, before v3.9
+if(ENABLE_LTO)
+  if(ENABLE_LTO_METHOD STREQUAL "property")
     set_property(TARGET ${PROJ_CORE_TARGET}
       PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-  else()
-    # Pre CMake v3.9 needs to set flag for other compilers
-    # see https://gitlab.kitware.com/cmake/cmake/issues/15245
+  elseif(ENABLE_LTO_METHOD STREQUAL "flag")
+    # pre-CMake 3.9 workaround
     target_compile_options(${PROJ_CORE_TARGET} PRIVATE -flto)
   endif()
 endif()

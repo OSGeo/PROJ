@@ -18,7 +18,7 @@ static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
     return log(tan(M_FORTPI + .5 * x));
 }
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY tobmerc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     double cosphi;
 
@@ -33,7 +33,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     return xy;
 }
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP tobmerc_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0, 0.0};
     double cosphi;
 
@@ -44,7 +44,7 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 PJ *PROJECTION(tobmerc) {
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = tobmerc_s_inverse;
+    P->fwd = tobmerc_s_forward;
     return P;
 }

@@ -115,6 +115,17 @@ CREATE TABLE geodetic_datum (
     CONSTRAINT fk_geodetic_datum_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
 
+CREATE TRIGGER geodetic_datum_insert_trigger
+BEFORE INSERT ON geodetic_datum
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: ellipsoid must not be deprecated when geodetic_datum is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM ellipsoid WHERE ellipsoid.auth_name = NEW.ellipsoid_auth_name AND ellipsoid.code = NEW.ellipsoid_code AND ellipsoid.deprecated != 0) AND NEW.deprecated = 0;
+    SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: prime_meridian must not be deprecated when geodetic_datum is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM prime_meridian WHERE prime_meridian.auth_name = NEW.prime_meridian_auth_name AND prime_meridian.code = NEW.prime_meridian_code AND prime_meridian.deprecated != 0) AND NEW.deprecated = 0;
+    SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: area_of_use must not be deprecated when geodetic_datum is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
+END;
+
 CREATE TABLE vertical_datum (
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code TEXT NOT NULL CHECK (length(code) >= 1),
@@ -127,6 +138,13 @@ CREATE TABLE vertical_datum (
     CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_vertical_datum_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
+
+CREATE TRIGGER vertical_datum_insert_trigger
+BEFORE INSERT ON vertical_datum
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on vertical_datum violates constraint: area_of_use must not be deprecated when vertical_datum is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
+END;
 
 CREATE TABLE coordinate_system(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -210,8 +228,14 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must NOT be defined when text_definition is NOT NULL')
         WHERE (NOT(NEW.datum_auth_name IS NULL OR NEW.datum_code IS NULL)) AND NEW.text_definition IS NOT NULL;
 
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must not be deprecated when geodetic_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM geodetic_datum datum WHERE datum.auth_name = NEW.datum_auth_name AND datum.code = NEW.datum_code AND datum.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
+
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: area_of_use must be defined when text_definition is NULL')
         WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: area_of_use must not be deprecated when geodetic_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
 
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system.dimension must be 3 for type = ''geocentric''')
         WHERE NEW.type = 'geocentric' AND (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 3;
@@ -255,14 +279,35 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: (auth_name, code) must not already exist in crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
 
+    SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: datum must not be deprecated when vertical_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM vertical_crs datum WHERE datum.auth_name = NEW.datum_auth_name AND datum.code = NEW.datum_code AND datum.deprecated != 0) AND NEW.deprecated = 0;
+
+    SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: area_of_use must not be deprecated when vertical_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
+
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: coordinate_system.type must be ''vertical''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'vertical';
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: coordinate_system.dimension must be 1')
         WHERE (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 1;
 END;
 
+CREATE TABLE conversion_method(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
 
-CREATE TABLE conversion(
+    CONSTRAINT pk_conversion_method PRIMARY KEY (auth_name, code)
+);
+
+CREATE TABLE conversion_param(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
+
+    CONSTRAINT pk_conversion_param PRIMARY KEY (auth_name, code)
+);
+
+CREATE TABLE conversion_table(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
@@ -275,53 +320,53 @@ CREATE TABLE conversion(
 
     method_auth_name TEXT CHECK (method_auth_name IS NULL OR length(method_auth_name) >= 1),
     method_code TEXT CHECK (method_code IS NULL OR length(method_code) >= 1),
-    method_name NOT NULL CHECK (length(method_name) >= 2),
+    -- method_name TEXT,
 
     param1_auth_name TEXT,
     param1_code TEXT,
-    param1_name TEXT,
+    -- param1_name TEXT,
     param1_value FLOAT,
     param1_uom_auth_name TEXT,
     param1_uom_code TEXT,
 
     param2_auth_name TEXT,
     param2_code TEXT,
-    param2_name TEXT,
+    --param2_name TEXT,
     param2_value FLOAT,
     param2_uom_auth_name TEXT,
     param2_uom_code TEXT,
 
     param3_auth_name TEXT,
     param3_code TEXT,
-    param3_name TEXT,
+    --param3_name TEXT,
     param3_value FLOAT,
     param3_uom_auth_name TEXT,
     param3_uom_code TEXT,
 
     param4_auth_name TEXT,
     param4_code TEXT,
-    param4_name TEXT,
+    --param4_name TEXT,
     param4_value FLOAT,
     param4_uom_auth_name TEXT,
     param4_uom_code TEXT,
 
     param5_auth_name TEXT,
     param5_code TEXT,
-    param5_name TEXT,
+    --param5_name TEXT,
     param5_value FLOAT,
     param5_uom_auth_name TEXT,
     param5_uom_code TEXT,
 
     param6_auth_name TEXT,
     param6_code TEXT,
-    param6_name TEXT,
+    --param6_name TEXT,
     param6_value FLOAT,
     param6_uom_auth_name TEXT,
     param6_uom_code TEXT,
 
     param7_auth_name TEXT,
     param7_code TEXT,
-    param7_name TEXT,
+    --param7_name TEXT,
     param7_value FLOAT,
     param7_uom_auth_name TEXT,
     param7_uom_code TEXT,
@@ -330,6 +375,7 @@ CREATE TABLE conversion(
 
     CONSTRAINT pk_conversion PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_conversion_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
+    CONSTRAINT fk_conversion_method FOREIGN KEY (method_auth_name, method_code) REFERENCES conversion_method(auth_name, code),
     --CONSTRAINT fk_conversion_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_conversion_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_conversion_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -340,15 +386,89 @@ CREATE TABLE conversion(
     CONSTRAINT fk_conversion_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code)
 );
 
-CREATE TRIGGER conversion_insert_trigger
-BEFORE INSERT ON conversion
-FOR EACH ROW BEGIN
+CREATE VIEW conversion AS SELECT
+    c.auth_name,
+    c.code,
+    c.name,
 
-    SELECT RAISE(ABORT, 'insert on conversion violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
-        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
+    c.description,
+    c.scope,
+
+    c.area_of_use_auth_name,
+    c.area_of_use_code,
+
+    c.method_auth_name,
+    c.method_code,
+    m.name AS method_name,
+
+    c.param1_auth_name,
+    c.param1_code,
+    param1.name AS param1_name,
+    c.param1_value,
+    c.param1_uom_auth_name,
+    c.param1_uom_code,
+
+    c.param2_auth_name,
+    c.param2_code,
+    param2.name AS param2_name,
+    c.param2_value,
+    c.param2_uom_auth_name,
+    c.param2_uom_code,
+
+    c.param3_auth_name,
+    c.param3_code,
+    param3.name AS param3_name,
+    c.param3_value,
+    c.param3_uom_auth_name,
+    c.param3_uom_code,
+
+    c.param4_auth_name,
+    c.param4_code,
+    param4.name AS param4_name,
+    c.param4_value,
+    c.param4_uom_auth_name,
+    c.param4_uom_code,
+
+    c.param5_auth_name,
+    c.param5_code,
+    param5.name AS param5_name,
+    c.param5_value,
+    c.param5_uom_auth_name,
+    c.param5_uom_code,
+
+    c.param6_auth_name,
+    c.param6_code,
+    param6.name AS param6_name,
+    c.param6_value,
+    c.param6_uom_auth_name,
+    c.param6_uom_code,
+
+    c.param7_auth_name,
+    c.param7_code,
+    param7.name AS param7_name,
+    c.param7_value,
+    c.param7_uom_auth_name,
+    c.param7_uom_code,
+
+    c.deprecated
+
+    FROM conversion_table c
+    LEFT JOIN conversion_method m ON c.method_auth_name = m.auth_name AND c.method_code = m.code
+    LEFT JOIN conversion_param param1 ON c.param1_auth_name = param1.auth_name AND c.param1_code = param1.code
+    LEFT JOIN conversion_param param2 ON c.param2_auth_name = param2.auth_name AND c.param2_code = param2.code
+    LEFT JOIN conversion_param param3 ON c.param3_auth_name = param3.auth_name AND c.param3_code = param3.code
+    LEFT JOIN conversion_param param4 ON c.param4_auth_name = param4.auth_name AND c.param4_code = param4.code
+    LEFT JOIN conversion_param param5 ON c.param5_auth_name = param5.auth_name AND c.param5_code = param5.code
+    LEFT JOIN conversion_param param6 ON c.param6_auth_name = param6.auth_name AND c.param6_code = param6.code
+    LEFT JOIN conversion_param param7 ON c.param7_auth_name = param7.auth_name AND c.param7_code = param7.code
+;
+
+CREATE TRIGGER conversion_method_insert_trigger
+BEFORE INSERT ON conversion_method
+BEGIN
 
     SELECT RAISE(ABORT, 'insert on conversion violates constraint: method should be known')
-        WHERE ((CASE WHEN NEW.method_auth_name is NULL THEN '' ELSE NEW.method_auth_name END) || '_' || (CASE WHEN NEW.method_code is NULL THEN '' ELSE NEW.method_code END) || '_' || NEW.method_name) NOT IN (
+        WHERE (NEW.auth_name || '_' || NEW.code || '_' || NEW.name) NOT IN (
             'EPSG_1024_Popular Visualisation Pseudo Mercator',
             'EPSG_1027_Lambert Azimuthal Equal Area (Spherical)',
             'EPSG_1028_Equidistant Cylindrical',
@@ -403,8 +523,151 @@ FOR EACH ROW BEGIN
             'EPSG_9843_Axis Order Reversal (2D)',
             'EPSG_9844_Axis Order Reversal (Geographic3D horizontal)',
             'EPSG_9827_Bonne',
-            '__Gauss Schreiber Transverse Mercator',
-            '__PROJ mill');
+            'PROJ_gstm_Gauss Schreiber Transverse Mercator',
+            'PROJ_mill_PROJ mill');
+END;
+
+CREATE TRIGGER conversion_table_insert_trigger
+BEFORE INSERT ON conversion_table
+BEGIN
+    SELECT RAISE(ABORT, 'insert on conversion_table violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
+        WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_method
+INSTEAD OF INSERT ON conversion
+    WHEN NOT EXISTS (SELECT 1 FROM conversion_method m WHERE
+        m.auth_name = NEW.method_auth_name AND m.code = NEW.method_code AND m.name = NEW.method_name)
+BEGIN
+    INSERT INTO conversion_method VALUES (NEW.method_auth_name, NEW.method_code, NEW.method_name);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_param1
+INSTEAD OF INSERT ON conversion
+    WHEN NEW.param1_auth_name is NOT NULL AND NOT EXISTS
+        (SELECT 1 FROM conversion_param p WHERE p.auth_name = NEW.param1_auth_name AND p.code = NEW.param1_code AND p.name = NEW.param1_name)
+BEGIN
+    INSERT INTO conversion_param VALUES (NEW.param1_auth_name, NEW.param1_code, NEW.param1_name);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_param2
+INSTEAD OF INSERT ON conversion
+    WHEN NEW.param2_auth_name is NOT NULL AND NOT EXISTS
+        (SELECT 1 FROM conversion_param p WHERE p.auth_name = NEW.param2_auth_name AND p.code = NEW.param2_code AND p.name = NEW.param2_name)
+BEGIN
+    INSERT INTO conversion_param VALUES (NEW.param2_auth_name, NEW.param2_code, NEW.param2_name);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_param3
+INSTEAD OF INSERT ON conversion
+    WHEN NEW.param3_auth_name is NOT NULL AND NOT EXISTS
+        (SELECT 1 FROM conversion_param p WHERE p.auth_name = NEW.param3_auth_name AND p.code = NEW.param3_code AND p.name = NEW.param3_name)
+BEGIN
+    INSERT INTO conversion_param VALUES (NEW.param3_auth_name, NEW.param3_code, NEW.param3_name);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_param4
+INSTEAD OF INSERT ON conversion
+    WHEN NEW.param4_auth_name is NOT NULL AND NOT EXISTS
+        (SELECT 1 FROM conversion_param p WHERE p.auth_name = NEW.param4_auth_name AND p.code = NEW.param4_code AND p.name = NEW.param4_name)
+BEGIN
+    INSERT INTO conversion_param VALUES (NEW.param4_auth_name, NEW.param4_code, NEW.param4_name);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_param5
+INSTEAD OF INSERT ON conversion
+    WHEN NEW.param5_auth_name is NOT NULL AND NOT EXISTS
+        (SELECT 1 FROM conversion_param p WHERE p.auth_name = NEW.param5_auth_name AND p.code = NEW.param5_code AND p.name = NEW.param5_name)
+BEGIN
+    INSERT INTO conversion_param VALUES (NEW.param5_auth_name, NEW.param5_code, NEW.param5_name);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_param6
+INSTEAD OF INSERT ON conversion
+    WHEN NEW.param6_auth_name is NOT NULL AND NOT EXISTS
+        (SELECT 1 FROM conversion_param p WHERE p.auth_name = NEW.param6_auth_name AND p.code = NEW.param6_code AND p.name = NEW.param6_name)
+BEGIN
+    INSERT INTO conversion_param VALUES (NEW.param6_auth_name, NEW.param6_code, NEW.param6_name);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_param7
+INSTEAD OF INSERT ON conversion
+    WHEN NEW.param7_auth_name is NOT NULL AND NOT EXISTS
+        (SELECT 1 FROM conversion_param p WHERE p.auth_name = NEW.param7_auth_name AND p.code = NEW.param7_code AND p.name = NEW.param7_name)
+BEGIN
+    INSERT INTO conversion_param VALUES (NEW.param7_auth_name, NEW.param7_code, NEW.param7_name);
+END;
+
+CREATE TRIGGER conversion_insert_trigger_insert_into_conversion_table
+INSTEAD OF INSERT ON conversion
+BEGIN
+INSERT INTO conversion_table VALUES
+(
+    NEW.auth_name,
+    NEW.code,
+    NEW.name,
+
+    NEW.description,
+    NEW.scope,
+
+    NEW.area_of_use_auth_name,
+    NEW.area_of_use_code,
+
+    NEW.method_auth_name,
+    NEW.method_code,
+    --NEW.method_name,
+
+    NEW.param1_auth_name,
+    NEW.param1_code,
+    --NEW.param1_name,
+    NEW.param1_value,
+    NEW.param1_uom_auth_name,
+    NEW.param1_uom_code,
+
+    NEW.param2_auth_name,
+    NEW.param2_code,
+    --NEW.param2_name,
+    NEW.param2_value,
+    NEW.param2_uom_auth_name,
+    NEW.param2_uom_code,
+
+    NEW.param3_auth_name,
+    NEW.param3_code,
+    --NEW.param3_name,
+    NEW.param3_value,
+    NEW.param3_uom_auth_name,
+    NEW.param3_uom_code,
+
+    NEW.param4_auth_name,
+    NEW.param4_code,
+    --NEW.param4_name,
+    NEW.param4_value,
+    NEW.param4_uom_auth_name,
+    NEW.param4_uom_code,
+
+    NEW.param5_auth_name,
+    NEW.param5_code,
+    --NEW.param5_name,
+    NEW.param5_value,
+    NEW.param5_uom_auth_name,
+    NEW.param5_uom_code,
+
+    NEW.param6_auth_name,
+    NEW.param6_code,
+    --NEW.param6_name,
+    NEW.param6_value,
+    NEW.param6_uom_auth_name,
+    NEW.param6_uom_code,
+
+    NEW.param7_auth_name,
+    NEW.param7_code,
+    --NEW.param7_name,
+    NEW.param7_value,
+    NEW.param7_uom_auth_name,
+    NEW.param7_uom_code,
+
+    NEW.deprecated
+);
 END;
 
 CREATE TABLE projected_crs(
@@ -426,7 +689,7 @@ CREATE TABLE projected_crs(
     CONSTRAINT pk_projected_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_projected_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_projected_crs_geodetic_crs FOREIGN KEY (geodetic_crs_auth_name, geodetic_crs_code) REFERENCES geodetic_crs(auth_name, code),
-    CONSTRAINT fk_projected_crs_conversion FOREIGN KEY (conversion_auth_name, conversion_code) REFERENCES conversion(auth_name, code),
+    CONSTRAINT fk_projected_crs_conversion FOREIGN KEY (conversion_auth_name, conversion_code) REFERENCES conversion_table(auth_name, code),
     CONSTRAINT fk_projected_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
 
@@ -443,8 +706,14 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must be defined when text_definition is NULL')
         WHERE (NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL) AND NEW.text_definition IS NULL;
 
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must be defined when text_definition is NULL')
-        WHERE (NEW.conversion_auth_name IS NULL OR NEW.conversion_code IS NULL) AND NEW.text_definition IS NULL;
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must not be deprecated when projected_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM geodetic_crs WHERE geodetic_crs.auth_name = NEW.geodetic_crs_auth_name AND geodetic_crs.code = NEW.geodetic_crs_code AND geodetic_crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI' AND NEW.geodetic_crs_auth_name != 'ESRI');
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must exist when text_definition is NULL')
+        WHERE NOT EXISTS(SELECT 1 FROM conversion WHERE conversion.auth_name = NEW.conversion_auth_name AND conversion.code = NEW.conversion_code) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must not be deprecated when projected_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM conversion WHERE conversion.auth_name = NEW.conversion_auth_name AND conversion.code = NEW.conversion_code AND conversion.deprecated != 0) AND NEW.deprecated = 0;
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system must NOT be defined when text_definition is NOT NULL')
         WHERE (NOT(NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL)) AND NEW.text_definition IS NOT NULL;
@@ -457,6 +726,9 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must be defined when text_definition is NULL')
         WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
+
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must not be deprecated when projected_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system.type must be ''cartesian''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'Cartesian';
@@ -499,9 +771,26 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: vertical_crs must be equal to ''vertical''')
         WHERE (SELECT type FROM crs_view WHERE crs_view.auth_name = NEW.vertical_crs_auth_name AND crs_view.code = NEW.vertical_crs_code) NOT IN ('vertical');
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: horiz_crs must not be deprecated when compound_crs is not deprecated')
+        WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.horiz_crs_auth_name AND crs_view.code = NEW.horiz_crs_code AND crs_view.deprecated != 0) AND NEW.deprecated = 0;
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: vertical_crs must not be deprecated when compound_crs is not deprecated')
+        WHERE EXISTS (SELECT 1 FROM vertical_crs WHERE vertical_crs.auth_name = NEW.vertical_crs_auth_name AND vertical_crs.code = NEW.vertical_crs_code AND vertical_crs.deprecated != 0) AND NEW.deprecated = 0;
+
+    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: area_of_use must not be deprecated when compound_crs is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
-CREATE TABLE helmert_transformation(
+CREATE TABLE coordinate_operation_method(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
+
+    CONSTRAINT pk_coordinate_operation_method PRIMARY KEY (auth_name, code)
+);
+
+CREATE TABLE helmert_transformation_table(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
@@ -511,7 +800,7 @@ CREATE TABLE helmert_transformation(
 
     method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
     method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
-    method_name NOT NULL CHECK (length(method_name) >= 2),
+    --method_name NOT NULL CHECK (length(method_name) >= 2),
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
@@ -566,6 +855,7 @@ CREATE TABLE helmert_transformation(
     CONSTRAINT fk_helmert_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_helmert_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_helmert_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
+    CONSTRAINT fk_helmert_transformation_method FOREIGN KEY (method_auth_name, method_code) REFERENCES coordinate_operation_method(auth_name, code),
     --CONSTRAINT fk_helmert_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_helmert_translation_uom FOREIGN KEY (translation_uom_auth_name, translation_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_helmert_rotation_uom FOREIGN KEY (rotation_uom_auth_name, rotation_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -577,8 +867,148 @@ CREATE TABLE helmert_transformation(
     CONSTRAINT fk_helmert_pivot_uom FOREIGN KEY (pivot_uom_auth_name, pivot_uom_code) REFERENCES unit_of_measure(auth_name, code)
 );
 
+CREATE VIEW helmert_transformation AS SELECT
+    h.auth_name,
+    h.code,
+    h.name,
+
+    h.description,
+    h.scope,
+
+    h.method_auth_name,
+    h.method_code,
+    m.name AS method_name,
+
+    h.source_crs_auth_name,
+    h.source_crs_code,
+    h.target_crs_auth_name,
+    h.target_crs_code,
+
+    h.area_of_use_auth_name,
+    h.area_of_use_code,
+
+    h.accuracy,
+
+    h.tx,
+    h.ty,
+    h.tz,
+    h.translation_uom_auth_name,
+    h.translation_uom_code,
+    h.rx,
+    h.ry,
+    h.rz,
+    h.rotation_uom_auth_name,
+    h.rotation_uom_code,
+    h.scale_difference,
+    h.scale_difference_uom_auth_name,
+    h.scale_difference_uom_code,
+    h.rate_tx,
+    h.rate_ty,
+    h.rate_tz,
+    h.rate_translation_uom_auth_name,
+    h.rate_translation_uom_code,
+    h.rate_rx,
+    h.rate_ry,
+    h.rate_rz,
+    h.rate_rotation_uom_auth_name,
+    h.rate_rotation_uom_code,
+    h.rate_scale_difference,
+    h.rate_scale_difference_uom_auth_name,
+    h.rate_scale_difference_uom_code,
+    h.epoch,
+    h.epoch_uom_auth_name,
+    h.epoch_uom_code,
+    h.px,
+    h.py,
+    h.pz,
+    h.pivot_uom_auth_name,
+    h.pivot_uom_code,
+
+    h.operation_version,
+
+    h.deprecated
+
+    FROM helmert_transformation_table h
+    LEFT JOIN coordinate_operation_method m ON h.method_auth_name = m.auth_name AND h.method_code = m.code
+;
+
+CREATE TRIGGER helmert_transformation_insert_trigger_method
+INSTEAD OF INSERT ON helmert_transformation
+    WHEN NOT EXISTS (SELECT 1 FROM coordinate_operation_method m WHERE
+        m.auth_name = NEW.method_auth_name AND m.code = NEW.method_code AND m.name = NEW.method_name)
+BEGIN
+    INSERT INTO coordinate_operation_method VALUES (NEW.method_auth_name, NEW.method_code, NEW.method_name);
+END;
+
+CREATE TRIGGER helmert_transformation_insert_trigger_into_helmert_transformation_table
+INSTEAD OF INSERT ON helmert_transformation
+BEGIN
+INSERT INTO helmert_transformation_table VALUES
+(
+    NEW.auth_name,
+    NEW.code,
+    NEW.name,
+
+    NEW.description,
+    NEW.scope,
+
+    NEW.method_auth_name,
+    NEW.method_code,
+    -- method_name
+
+    NEW.source_crs_auth_name,
+    NEW.source_crs_code,
+    NEW.target_crs_auth_name,
+    NEW.target_crs_code,
+
+    NEW.area_of_use_auth_name,
+    NEW.area_of_use_code,
+
+    NEW.accuracy,
+
+    NEW.tx,
+    NEW.ty,
+    NEW.tz,
+    NEW.translation_uom_auth_name,
+    NEW.translation_uom_code,
+    NEW.rx,
+    NEW.ry,
+    NEW.rz,
+    NEW.rotation_uom_auth_name,
+    NEW.rotation_uom_code,
+    NEW.scale_difference,
+    NEW.scale_difference_uom_auth_name,
+    NEW.scale_difference_uom_code,
+    NEW.rate_tx,
+    NEW.rate_ty,
+    NEW.rate_tz,
+    NEW.rate_translation_uom_auth_name,
+    NEW.rate_translation_uom_code,
+    NEW.rate_rx,
+    NEW.rate_ry,
+    NEW.rate_rz,
+    NEW.rate_rotation_uom_auth_name,
+    NEW.rate_rotation_uom_code,
+    NEW.rate_scale_difference,
+    NEW.rate_scale_difference_uom_auth_name,
+    NEW.rate_scale_difference_uom_code,
+    NEW.epoch,
+    NEW.epoch_uom_auth_name,
+    NEW.epoch_uom_code,
+    NEW.px,
+    NEW.py,
+    NEW.pz,
+    NEW.pivot_uom_auth_name,
+    NEW.pivot_uom_code,
+
+    NEW.operation_version,
+
+    NEW.deprecated
+);
+END;
+
 CREATE TRIGGER helmert_transformation_insert_trigger
-BEFORE INSERT ON helmert_transformation
+BEFORE INSERT ON helmert_transformation_table
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
@@ -599,6 +1029,12 @@ FOR EACH ROW BEGIN
         WHERE (SELECT type FROM unit_of_measure WHERE unit_of_measure.auth_name = NEW.epoch_uom_auth_name AND unit_of_measure.code = NEW.epoch_uom_code) != 'time';
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: pivot_uom.type must be ''length''')
         WHERE (SELECT type FROM unit_of_measure WHERE unit_of_measure.auth_name = NEW.pivot_uom_auth_name AND unit_of_measure.code = NEW.pivot_uom_code) != 'length';
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: source_crs must not be deprecated when helmert_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: target_crs must not be deprecated when helmert_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: area_of_use must not be deprecated when helmert_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 CREATE TABLE grid_transformation(
@@ -660,6 +1096,12 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
 
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: source_crs must not be deprecated when grid_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs must not be deprecated when grid_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: area_of_use must not be deprecated when grid_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 -- Table that describe packages/archives that contain several grids
@@ -827,6 +1269,12 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: method_code should be in (PROJString, WKT) when method_auth_name = PROJ')
         WHERE NEW.method_auth_name = 'PROJ' AND NEW.method_code NOT IN ('PROJString', 'WKT');
 
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: source_crs must not be deprecated when other_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: target_crs must not be deprecated when other_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: area_of_use must not be deprecated when other_transformation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 -- Note: in EPSG, the steps might be to be chained in reverse order, so we cannot
@@ -900,6 +1348,13 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step2_auth_name AND code = NEW.step2_code);
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step3 should not be a concatenated_operation')
         WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step3_auth_name AND code = NEW.step3_code);
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: source_crs must not be deprecated when concatenated_operation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: target_crs must not be deprecated when concatenated_operation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: area_of_use must not be deprecated when concatenated_operation is not deprecated')
+        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 
@@ -1011,7 +1466,7 @@ CREATE VIEW coordinate_operation_view AS
 
 CREATE VIEW coordinate_operation_with_conversion_view AS
     SELECT auth_name, code, table_name AS type FROM coordinate_operation_view UNION ALL
-    SELECT auth_name, code, 'conversion' FROM conversion;
+    SELECT auth_name, code, 'conversion' FROM conversion_table;
 
 CREATE VIEW crs_view AS
     SELECT 'geodetic_crs' AS table_name, auth_name, code, name, type,
@@ -1054,7 +1509,7 @@ CREATE VIEW object_view AS
     UNION ALL
     SELECT table_name, auth_name, code, name, type, area_of_use_auth_name, area_of_use_code, deprecated FROM crs_view
     UNION ALL
-    SELECT 'conversion', auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM conversion
+    SELECT 'conversion', auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM conversion_table
     UNION ALL
     SELECT table_name, auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM coordinate_operation_view
 ;

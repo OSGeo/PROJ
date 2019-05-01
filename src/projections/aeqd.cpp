@@ -91,7 +91,7 @@ static PJ_XY e_guam_fwd(PJ_LP lp, PJ *P) {        /* Guam elliptical */
 }
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY aeqd_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi, rho;
@@ -130,7 +130,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY aeqd_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi;
@@ -195,7 +195,7 @@ static PJ_LP e_guam_inv(PJ_XY xy, PJ *P) { /* Guam elliptical */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP aeqd_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double c;
@@ -227,7 +227,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP aeqd_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosc, c_rh, sinc;
@@ -291,8 +291,8 @@ PJ *PROJECTION(aeqd) {
         Q->cosph0 = cos(P->phi0);
     }
     if (P->es == 0.0) {
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = aeqd_s_inverse;
+        P->fwd = aeqd_s_forward;
     } else {
         if (!(Q->en = pj_enfn(P->es)))
             return pj_default_destructor (P, 0);
@@ -315,8 +315,8 @@ PJ *PROJECTION(aeqd) {
                 Q->He *= Q->cosph0;
                 break;
             }
-            P->inv = e_inverse;
-            P->fwd = e_forward;
+            P->inv = aeqd_e_inverse;
+            P->fwd = aeqd_e_forward;
         }
     }
 

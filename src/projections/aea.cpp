@@ -99,7 +99,7 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
 
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
+static PJ_XY aea_e_forward (PJ_LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     Q->rho = Q->c - (Q->ellips ? Q->n * pj_qsfn(sin(lp.phi), P->e, P->one_es) : Q->n2 * sin(lp.phi));;
@@ -114,7 +114,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
+static PJ_LP aea_e_inverse (PJ_XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     if( (Q->rho = hypot(xy.x, xy.y = Q->rho0 - xy.y)) != 0.0 ) {
@@ -152,8 +152,8 @@ static PJ *setup(PJ *P) {
     int secant;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = aea_e_inverse;
+    P->fwd = aea_e_forward;
 
     if (fabs(Q->phi1) > M_HALFPI || fabs(Q->phi2) > M_HALFPI)
         return destructor(P, PJD_ERR_LAT_LARGER_THAN_90);

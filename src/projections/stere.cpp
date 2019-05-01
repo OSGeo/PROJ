@@ -41,7 +41,7 @@ static double ssfn_ (double phit, double sinphi, double eccen) {
 }
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY stere_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double coslam, sinlam, sinX = 0.0, cosX = 0.0, X, A = 0.0, sinphi;
@@ -95,7 +95,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY stere_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  sinphi, cosphi, coslam, sinlam;
@@ -137,7 +137,7 @@ oblcon:
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP stere_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosphi, sinphi, tp=0.0, phi_l=0.0, rho, halfe=0.0, halfpi=0.0;
@@ -188,7 +188,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP stere_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  c, rh, sinc, cosc;
@@ -265,8 +265,8 @@ static PJ *setup(PJ *P) {                   /* general initialization */
             Q->cosX1 = cos (X);
             break;
         }
-        P->inv = e_inverse;
-        P->fwd = e_forward;
+        P->inv = stere_e_inverse;
+        P->fwd = stere_e_forward;
     } else {
         switch (Q->mode) {
         case OBLIQ:
@@ -284,8 +284,8 @@ static PJ *setup(PJ *P) {                   /* general initialization */
             break;
         }
 
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = stere_s_inverse;
+        P->fwd = stere_s_forward;
     }
     return P;
 }
