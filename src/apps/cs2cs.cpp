@@ -123,6 +123,8 @@ static void process(FILE *fid)
         /* is forward verbatim from the input.                               */
         char *before_time = s;
         double t = strtod(s, &s);
+        if( s == before_time )
+            t = HUGE_VAL;
         s = before_time;
 
         if (data.v == HUGE_VAL)

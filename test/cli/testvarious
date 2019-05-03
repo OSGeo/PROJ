@@ -966,6 +966,16 @@ $EXE -f %.4f EPSG:4896 EPSG:7930 -E >> ${OUT} <<EOF
 EOF
 
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test ITRF2000 to ITRF1993" >> ${OUT}
+# Here we test that HUGE_VAL is passed as the time value if not explicitly
+# specified
+$EXE -f %.7f ITRF2000 ITRF1993 -E >> ${OUT} <<EOF
+59.4967 -117.61748 329.396
+59.4967 -117.61748 329.396 1988
+EOF
+
+
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
