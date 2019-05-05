@@ -648,7 +648,7 @@ struct FACTORS {
 #define PJD_ERR_W_OR_M_ZERO_OR_LESS     -27
 #define PJD_ERR_LSAT_NOT_IN_RANGE       -28
 #define PJD_ERR_PATH_NOT_IN_RANGE       -29
-#define PJD_ERR_H_LESS_THAN_ZERO        -30
+#define PJD_ERR_INVALID_H               -30
 #define PJD_ERR_K_LESS_THAN_ZERO        -31
 #define PJD_ERR_LAT_1_OR_2_ZERO_OR_90   -32
 #define PJD_ERR_LAT_0_OR_ALPHA_EQ_90    -33

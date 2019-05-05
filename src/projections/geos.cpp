@@ -202,8 +202,7 @@ PJ *PROJECTION(geos) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
-    if ((Q->h = pj_param(P->ctx, P->params, "dh").f) <= 0.)
-        return pj_default_destructor (P, PJD_ERR_H_LESS_THAN_ZERO);
+    Q->h = pj_param(P->ctx, P->params, "dh").f;
 
     sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
     if (sweep_axis == nullptr)
@@ -220,6 +219,8 @@ PJ *PROJECTION(geos) {
     }
 
     Q->radius_g_1 = Q->h / P->a;
+    if ( Q->radius_g_1 <= 0 || Q->radius_g_1 > 1e10 )
+        return pj_default_destructor (P, PJD_ERR_INVALID_H);
     Q->radius_g = 1. + Q->radius_g_1;
     Q->C  = Q->radius_g * Q->radius_g - 1.0;
     if (P->es != 0.0) {

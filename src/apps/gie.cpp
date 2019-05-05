@@ -1121,7 +1121,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_w_or_m_zero_or_less"      ,  -27},
     {"pjd_err_lsat_not_in_range"        ,  -28},
     {"pjd_err_path_not_in_range"        ,  -29},
-    {"pjd_err_h_less_than_zero"         ,  -30},
+    {"pjd_err_invalid_h"                ,  -30},
     {"pjd_err_k_less_than_zero"         ,  -31},
     {"pjd_err_lat_1_or_2_zero_or_90"    ,  -32},
     {"pjd_err_lat_0_or_alpha_eq_90"     ,  -33},

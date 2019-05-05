@@ -148,8 +148,7 @@ static PJ_LP nsper_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
 static PJ *setup(PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    if ((Q->height = pj_param(P->ctx, P->params, "dh").f) <= 0.)
-        return pj_default_destructor(P, PJD_ERR_H_LESS_THAN_ZERO);
+    Q->height = pj_param(P->ctx, P->params, "dh").f;
 
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
@@ -161,6 +160,8 @@ static PJ *setup(PJ *P) {
         Q->cosph0 = cos(P->phi0);
     }
     Q->pn1 = Q->height / P->a; /* normalize by radius */
+    if ( Q->pn1 <= 0 || Q->pn1 > 1e10 )
+        return pj_default_destructor (P, PJD_ERR_INVALID_H);
     Q->p = 1. + Q->pn1;
     Q->rp = 1. / Q->p;
     Q->h = 1. / Q->pn1;
