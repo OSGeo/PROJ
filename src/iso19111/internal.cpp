@@ -298,6 +298,21 @@ std::vector<std::string> split(const std::string &str, char separator) {
 
 // ---------------------------------------------------------------------------
 
+std::vector<std::string> split(const std::string &str,
+                               const std::string &separator) {
+    std::vector<std::string> res;
+    size_t lastPos = 0;
+    size_t newPos = 0;
+    while ((newPos = str.find(separator, lastPos)) != std::string::npos) {
+        res.push_back(str.substr(lastPos, newPos - lastPos));
+        lastPos = newPos + separator.size();
+    }
+    res.push_back(str.substr(lastPos));
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 #ifdef _WIN32
 
 // For some reason, sqlite3_snprintf() in the sqlite3 builds used on AppVeyor

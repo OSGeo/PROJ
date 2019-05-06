@@ -140,6 +140,9 @@ std::string toupper(const std::string &osStr);
 PROJ_FOR_TEST std::vector<std::string> split(const std::string &osStr,
                                              char separator);
 
+PROJ_FOR_TEST std::vector<std::string> split(const std::string &osStr,
+                                             const std::string &separator);
+
 bool ci_equal(const char *a, const char *b) noexcept;
 
 #ifdef SUPPORT_DELETED_FUNCTION
