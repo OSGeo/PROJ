@@ -798,3 +798,41 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
+
+-- Netherlands / RDNAP (non-free grids)
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('naptrans2008.gtx',
+                              'naptrans2008.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              NULL, -- package name
+                              'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/naptrans2008.gtx',
+                              1, -- direct download
+                              0, -- non-freely licensed. See https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/master/debian/copyright
+                              NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('rdtrans2008.gsb',
+                              'rdtrans2008.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              NULL, -- package name
+                              'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',
+                              1, -- direct download
+                              0, -- non-freely licensed. See https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/master/debian/copyright
+                              NULL);
