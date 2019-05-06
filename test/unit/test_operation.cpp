@@ -5970,8 +5970,8 @@ static BoundCRSNNPtr createBoundVerticalCRS() {
     auto vertCRS = createVerticalCRS();
     auto transformation =
         Transformation::createGravityRelatedHeightToGeographic3D(
-            PropertyMap(), vertCRS, GeographicCRS::EPSG_4979, "egm08_25.gtx",
-            std::vector<PositionalAccuracyNNPtr>());
+            PropertyMap(), vertCRS, GeographicCRS::EPSG_4979, nullptr,
+            "egm08_25.gtx", std::vector<PositionalAccuracyNNPtr>());
     return BoundCRS::create(vertCRS, GeographicCRS::EPSG_4979, transformation);
 }
 
@@ -6756,6 +6756,22 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
     auto list =
         CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
     ASSERT_GE(list.size(), 1U);
+
+    {
+        // Important here is vgridshift before hgridshift
+        auto op_proj =
+            list[0]->exportToPROJString(PROJStringFormatter::create().get());
+        EXPECT_EQ(
+            op_proj,
+            "+proj=pipeline +step +inv +proj=sterea +lat_0=52.1561605555556 "
+            "+lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 "
+            "+ellps=bessel "
+            "+step +proj=vgridshift +grids=naptrans2008.gtx +multiplier=1 "
+            "+step +proj=hgridshift +grids=rdtrans2008.gsb "
+            "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+            "+step +proj=axisswap +order=2,1");
+    }
+
     auto wkt2 =
         "COMPOUNDCRS[\"unknown\",\n"
         "  PROJCRS[\"unknown\",\n"
@@ -6788,8 +6804,12 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
     for (size_t i = 0; i < list.size(); i++) {
         const auto &op = list[i];
         const auto &op2 = list2[i];
-        EXPECT_TRUE(
-            op->isEquivalentTo(op2.get(), IComparable::Criterion::EQUIVALENT));
+        auto op_proj =
+            op->exportToPROJString(PROJStringFormatter::create().get());
+        auto op2_proj =
+            op2->exportToPROJString(PROJStringFormatter::create().get());
+        EXPECT_EQ(op_proj, op2_proj) << "op=" << op->nameStr()
+                                     << " op2=" << op2->nameStr();
     }
 }
 
