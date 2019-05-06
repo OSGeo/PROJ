@@ -12135,6 +12135,37 @@ CoordinateOperationFactory::Private::createOperations(
             }
         }
 
+        auto vertCRSOfBaseOfBoundSrc =
+            dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get());
+        if (vertCRSOfBaseOfBoundSrc && hubSrcGeog &&
+            hubSrcGeog->coordinateSystem()->axisList().size() == 3 &&
+            geogDst->coordinateSystem()->axisList().size() == 3) {
+            auto opsFirst = createOperations(sourceCRS, hubSrc, context);
+            auto opsSecond = createOperations(hubSrc, targetCRS, context);
+            if (!opsFirst.empty() && !opsSecond.empty()) {
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opLast : opsSecond) {
+                        // Exclude artificial transformations from the hub
+                        // to the target CRS
+                        if (!opLast->hasBallparkTransformation()) {
+                            try {
+                                res.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {opFirst, opLast},
+                                            !allowEmptyIntersection));
+                            } catch (
+                                const InvalidOperationEmptyIntersection &) {
+                            }
+                        }
+                    }
+                }
+                if (!res.empty()) {
+                    return res;
+                }
+            }
+        }
+
         return createOperations(boundSrc->baseCRS(), targetCRS, context);
     }
 

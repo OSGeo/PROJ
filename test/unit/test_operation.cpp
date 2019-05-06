@@ -5903,6 +5903,35 @@ TEST(operation, boundCRS_with_basecrs_with_extent_to_geogCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, ETRS89_3D_to_proj_string_with_geoidgrids_nadgrids) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // ETRS89 3D
+    auto src = authFactory->createCoordinateReferenceSystem("4937");
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 "
+        "+k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel "
+        "+nadgrids=rdtrans2008.gsb +geoidgrids=naptrans2008.gtx +units=m "
+        "+type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        src, NN_NO_CHECK(dst), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +inv +proj=vgridshift +grids=naptrans2008.gtx "
+              "+multiplier=1 "
+              "+step +inv +proj=hgridshift +grids=rdtrans2008.gsb "
+              "+step +proj=sterea +lat_0=52.1561605555556 "
+              "+lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 "
+              "+y_0=463000 +ellps=bessel");
+}
+
+// ---------------------------------------------------------------------------
+
 static VerticalCRSNNPtr createVerticalCRS() {
     PropertyMap propertiesVDatum;
     propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")
