@@ -427,7 +427,8 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_INTERNAL void setOmitProjLongLatIfPossible(bool omit);
     PROJ_INTERNAL bool omitProjLongLatIfPossible() const;
 
-    PROJ_INTERNAL void setOmitZUnitConversion(bool omit);
+    PROJ_INTERNAL void pushOmitZUnitConversion();
+    PROJ_INTERNAL void popOmitZUnitConversion();
     PROJ_INTERNAL bool omitZUnitConversion() const;
 
     PROJ_INTERNAL void setDropEarlyBindingsTerms(bool drop);

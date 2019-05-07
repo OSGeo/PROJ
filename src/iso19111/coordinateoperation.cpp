@@ -6958,11 +6958,11 @@ TransformationNNPtr Transformation::createNTv2(
 static TransformationNNPtr _createGravityRelatedHeightToGeographic3D(
     const util::PropertyMap &properties, bool inverse,
     const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
-    const std::string &filename,
+    const crs::CRSPtr &interpolationCRSIn, const std::string &filename,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
 
     return Transformation::create(
-        properties, sourceCRSIn, targetCRSIn, nullptr,
+        properties, sourceCRSIn, targetCRSIn, interpolationCRSIn,
         util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY,
             inverse ? INVERSE_OF + PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D
@@ -6981,17 +6981,20 @@ static TransformationNNPtr _createGravityRelatedHeightToGeographic3D(
  * At minimum the name should be defined.
  * @param sourceCRSIn Source CRS.
  * @param targetCRSIn Target CRS.
+ * @param interpolationCRSIn Interpolation CRS. (might be null)
  * @param filename GRID filename.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
  */
 TransformationNNPtr Transformation::createGravityRelatedHeightToGeographic3D(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
-    const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+    const crs::CRSNNPtr &targetCRSIn, const crs::CRSPtr &interpolationCRSIn,
+    const std::string &filename,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
 
     return _createGravityRelatedHeightToGeographic3D(
-        properties, false, sourceCRSIn, targetCRSIn, filename, accuracies);
+        properties, false, sourceCRSIn, targetCRSIn, interpolationCRSIn,
+        filename, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -7302,8 +7305,20 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     auto targetCRS = op->targetCRS();
     std::string name;
     if (!forwardName.empty()) {
-        if (starts_with(forwardName, INVERSE_OF)) {
-            name = forwardName.substr(INVERSE_OF.size());
+        if (starts_with(forwardName, INVERSE_OF) ||
+            forwardName.find(" + ") != std::string::npos) {
+            auto tokens = split(forwardName, " + ");
+            for (size_t i = tokens.size(); i > 0;) {
+                i--;
+                if (!name.empty()) {
+                    name += " + ";
+                }
+                if (starts_with(tokens[i], INVERSE_OF)) {
+                    name += tokens[i].substr(INVERSE_OF.size());
+                } else {
+                    name += INVERSE_OF + tokens[i];
+                }
+            }
         } else if (!sourceCRS || !targetCRS ||
                    forwardName != buildOpName(opType, sourceCRS, targetCRS)) {
             name = INVERSE_OF + forwardName;
@@ -8195,13 +8210,14 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
                 return createGravityRelatedHeightToGeographic3D(
                            createPropertiesForInverse(self.as_nullable().get(),
                                                       true, false),
-                           targetCRS(), sourceCRS(), projFilename,
-                           coordinateOperationAccuracies())
+                           targetCRS(), sourceCRS(), interpolationCRS(),
+                           projFilename, coordinateOperationAccuracies())
                     ->inverseAsTransformation();
             } else {
                 return createGravityRelatedHeightToGeographic3D(
                     createSimilarPropertiesTransformation(self), sourceCRS(),
-                    targetCRS(), projFilename, coordinateOperationAccuracies());
+                    targetCRS(), interpolationCRS(), projFilename,
+                    coordinateOperationAccuracies());
             }
         }
     }
@@ -10972,19 +10988,19 @@ struct MyPROJStringExportableHorizVertical final
         // cppcheck-suppress functionStatic
         _exportToPROJString(io::PROJStringFormatter *formatter) const override {
 
-        formatter->setOmitZUnitConversion(true);
+        formatter->pushOmitZUnitConversion();
         horizTransform->_exportToPROJString(formatter);
 
         formatter->startInversion();
         geogDst->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
-        formatter->setOmitZUnitConversion(false);
+        formatter->popOmitZUnitConversion();
 
         verticalTransform->_exportToPROJString(formatter);
 
-        formatter->setOmitZUnitConversion(true);
+        formatter->pushOmitZUnitConversion();
         geogDst->addAngularUnitConvertAndAxisSwap(formatter);
-        formatter->setOmitZUnitConversion(false);
+        formatter->popOmitZUnitConversion();
     }
 };
 
@@ -11016,7 +11032,7 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
         // cppcheck-suppress functionStatic
         _exportToPROJString(io::PROJStringFormatter *formatter) const override {
 
-        formatter->setOmitZUnitConversion(true);
+        formatter->pushOmitZUnitConversion();
 
         opSrcCRSToGeogCRS->_exportToPROJString(formatter);
 
@@ -11024,17 +11040,17 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
         interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
 
-        formatter->setOmitZUnitConversion(false);
+        formatter->popOmitZUnitConversion();
 
         verticalTransform->_exportToPROJString(formatter);
 
-        formatter->setOmitZUnitConversion(true);
+        formatter->pushOmitZUnitConversion();
 
         interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(formatter);
 
         opGeogCRStoDstCRS->_exportToPROJString(formatter);
 
-        formatter->setOmitZUnitConversion(false);
+        formatter->popOmitZUnitConversion();
     }
 };
 
@@ -12135,6 +12151,37 @@ CoordinateOperationFactory::Private::createOperations(
             }
         }
 
+        auto vertCRSOfBaseOfBoundSrc =
+            dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get());
+        if (vertCRSOfBaseOfBoundSrc && hubSrcGeog &&
+            hubSrcGeog->coordinateSystem()->axisList().size() == 3 &&
+            geogDst->coordinateSystem()->axisList().size() == 3) {
+            auto opsFirst = createOperations(sourceCRS, hubSrc, context);
+            auto opsSecond = createOperations(hubSrc, targetCRS, context);
+            if (!opsFirst.empty() && !opsSecond.empty()) {
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opLast : opsSecond) {
+                        // Exclude artificial transformations from the hub
+                        // to the target CRS
+                        if (!opLast->hasBallparkTransformation()) {
+                            try {
+                                res.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {opFirst, opLast},
+                                            !allowEmptyIntersection));
+                            } catch (
+                                const InvalidOperationEmptyIntersection &) {
+                            }
+                        }
+                    }
+                }
+                if (!res.empty()) {
+                    return res;
+                }
+            }
+        }
+
         return createOperations(boundSrc->baseCRS(), targetCRS, context);
     }
 
@@ -12349,7 +12396,8 @@ CoordinateOperationFactory::Private::createOperations(
         const auto &componentsSrc = compoundSrc->componentReferenceSystems();
         if (!componentsSrc.empty()) {
             std::vector<CoordinateOperationNNPtr> horizTransforms;
-            if (componentsSrc[0]->extractGeographicCRS()) {
+            auto srcGeogCRS = componentsSrc[0]->extractGeographicCRS();
+            if (srcGeogCRS) {
                 horizTransforms =
                     createOperations(componentsSrc[0], targetCRS, context);
             }
@@ -12363,11 +12411,61 @@ CoordinateOperationFactory::Private::createOperations(
                 for (const auto &horizTransform : horizTransforms) {
                     for (const auto &verticalTransform : verticalTransforms) {
 
-                        auto op = createHorizVerticalPROJBased(
-                            sourceCRS, targetCRS, horizTransform,
-                            verticalTransform);
+                        crs::GeographicCRSPtr interpolationGeogCRS;
+                        auto transformationVerticalTransform =
+                            dynamic_cast<const Transformation *>(
+                                verticalTransform.get());
+                        if (transformationVerticalTransform) {
+                            auto interpTransformCRS =
+                                transformationVerticalTransform
+                                    ->interpolationCRS();
+                            if (interpTransformCRS) {
+                                auto nn_interpTransformCRS =
+                                    NN_NO_CHECK(interpTransformCRS);
+                                if (dynamic_cast<const crs::GeographicCRS *>(
+                                        nn_interpTransformCRS.get())) {
+                                    interpolationGeogCRS =
+                                        util::nn_dynamic_pointer_cast<
+                                            crs::GeographicCRS>(
+                                            nn_interpTransformCRS);
+                                }
+                            }
+                        }
+                        bool done = false;
+                        if (interpolationGeogCRS &&
+                            (interpolationGeogCRS->_isEquivalentTo(
+                                 srcGeogCRS.get(),
+                                 util::IComparable::Criterion::EQUIVALENT) ||
+                             interpolationGeogCRS->is2DPartOf3D(
+                                 NN_NO_CHECK(srcGeogCRS.get())))) {
+                            auto srcToInterp = createOperations(
+                                componentsSrc[0],
+                                NN_NO_CHECK(interpolationGeogCRS), context);
+                            auto interpToCompoundHoriz = createOperations(
+                                NN_NO_CHECK(interpolationGeogCRS),
+                                componentsSrc[0], context);
+                            if (!srcToInterp.empty() &&
+                                !interpToCompoundHoriz.empty()) {
+                                auto op = createHorizVerticalHorizPROJBased(
+                                    sourceCRS, componentsSrc[0],
+                                    srcToInterp.front(), verticalTransform,
+                                    interpToCompoundHoriz.front(),
+                                    interpolationGeogCRS);
+                                done = true;
+                                res.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {op, horizTransform},
+                                            !allowEmptyIntersection));
+                            }
+                        }
+                        if (!done) {
+                            auto op = createHorizVerticalPROJBased(
+                                sourceCRS, targetCRS, horizTransform,
+                                verticalTransform);
 
-                        res.emplace_back(op);
+                            res.emplace_back(op);
+                        }
                     }
                 }
                 return res;

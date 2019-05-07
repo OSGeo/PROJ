@@ -64,7 +64,7 @@ proj.db: $(DATAPATH)/sql/*.sql
 	 for x in $(SQL_ORDERED_LIST); do \
 		export SQL_EXPANDED_LIST="$${SQL_EXPANDED_LIST} $(DATAPATH)/$$x"; \
 	 done; \
-	 if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" ; then \
+	 if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" ; then \
 	    cat $${SQL_EXPANDED_LIST} | md5sum | diff - "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" > /dev/null \
 	    && (echo "Reusing cached proj.db"; cp "$(PROJ_DB_CACHE_DIR)/proj.db" proj.db); \
 	 fi; \
@@ -84,7 +84,7 @@ proj.db: $(DATAPATH)/sql/*.sql
 		$(RM) proj.db; \
 		exit 1; \
 	 else \
-	   if test "x$(PROJ_DB_CACHE_DIR)" != "x" ; then \
+	   if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" ; then \
 		mkdir -p "$(PROJ_DB_CACHE_DIR)"; \
 		cat $${SQL_EXPANDED_LIST} | md5sum > "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5"; \
 		cp proj.db "$(PROJ_DB_CACHE_DIR)"; \

@@ -3818,7 +3818,7 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                     Transformation::createGravityRelatedHeightToGeographic3D(
                         PropertyMap().set(IdentifiedObject::NAME_KEY,
                                           transformationName),
-                        crs, GeographicCRS::EPSG_4979,
+                        crs, GeographicCRS::EPSG_4979, nullptr,
                         stripQuotes(extensionChildren[1]),
                         std::vector<PositionalAccuracyNNPtr>());
                 return nn_static_pointer_cast<CRS>(BoundCRS::create(
@@ -4922,7 +4922,7 @@ struct PROJStringFormatter::Private {
     };
     std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
     bool omitProjLongLatIfPossible_ = false;
-    bool omitZUnitConversion_ = false;
+    std::vector<bool> omitZUnitConversion_{false};
     DatabaseContextPtr dbContext_{};
     bool useApproxTMerc_ = false;
     bool addNoDefs_ = true;
@@ -5939,15 +5939,21 @@ bool PROJStringFormatter::omitProjLongLatIfPossible() const {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::setOmitZUnitConversion(bool omit) {
-    assert(d->omitZUnitConversion_ ^ omit);
-    d->omitZUnitConversion_ = omit;
+void PROJStringFormatter::pushOmitZUnitConversion() {
+    d->omitZUnitConversion_.push_back(true);
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::popOmitZUnitConversion() {
+    assert(d->omitZUnitConversion_.size() > 1);
+    d->omitZUnitConversion_.pop_back();
 }
 
 // ---------------------------------------------------------------------------
 
 bool PROJStringFormatter::omitZUnitConversion() const {
-    return d->omitZUnitConversion_;
+    return d->omitZUnitConversion_.back();
 }
 
 // ---------------------------------------------------------------------------
@@ -6995,7 +7001,7 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
             Transformation::createGravityRelatedHeightToGeographic3D(
                 PropertyMap().set(IdentifiedObject::NAME_KEY,
                                   "unknown to WGS84 ellipsoidal height"),
-                crs, GeographicCRS::EPSG_4979, geoidgrids,
+                crs, GeographicCRS::EPSG_4979, nullptr, geoidgrids,
                 std::vector<PositionalAccuracyNNPtr>());
         auto boundvcrs =
             BoundCRS::create(vcrs, GeographicCRS::EPSG_4979, transformation);
