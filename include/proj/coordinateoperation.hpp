@@ -1476,7 +1476,8 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_DLL static TransformationNNPtr
     createGravityRelatedHeightToGeographic3D(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
-        const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+        const crs::CRSNNPtr &targetCRSIn, const crs::CRSPtr &interpolationCRSIn,
+        const std::string &filename,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_DLL static TransformationNNPtr createVERTCON(

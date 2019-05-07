@@ -19,6 +19,25 @@ DELETE FROM "supersession" WHERE superseded_table_name = 'grid_transformation' A
                                  replacement_code = '8885' AND
                                  source = 'EPSG';
 
+-- ('EPSG','7001','ETRS89 to NAP height (1)') lacks an interpolationCRS with Amersfoort / EPSG:4289
+-- See https://salsa.debian.org/debian-gis-team/proj-rdnap/blob/debian/2008-8/Use%20of%20RDTRANS2008%20and%20NAPTRANS2008.pdf
+-- "The naptrans2008 VDatum-grid is referenced to the Bessel-1841 ellipsoid"
+CREATE TABLE dummy(foo);
+CREATE TRIGGER check_grid_transformation_epsg_7001
+BEFORE INSERT ON dummy
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'grid_transformation EPSG:7001 entry is not ETRS89 to NAP height (1)')
+        WHERE NOT EXISTS(SELECT 1 FROM grid_transformation WHERE auth_name = 'EPSG' AND code = '7001' AND name = 'ETRS89 to NAP height (1)');
+    SELECT RAISE(ABORT, 'grid_transformation EPSG:7001 entry has already an interpolationCRS')
+        WHERE EXISTS(SELECT 1 FROM grid_transformation WHERE auth_name = 'EPSG' AND code = '7001' AND interpolation_crs_auth_name IS NOT NULL);
+END;
+INSERT INTO dummy DEFAULT VALUES;
+DROP TRIGGER check_grid_transformation_epsg_7001;
+DROP TABLE dummy;
+UPDATE grid_transformation SET interpolation_crs_auth_name = 'EPSG',
+                               interpolation_crs_code = '4289'
+                           WHERE auth_name = 'EPSG' AND code = '7001';
+
 -- Define the allowed authorities, and their precedence, when researching a
 -- coordinate operation
 
