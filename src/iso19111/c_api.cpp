@@ -30,6 +30,7 @@
 #define FROM_PROJ_CPP
 #endif
 
+#include <algorithm>
 #include <cassert>
 #include <cstdarg>
 #include <cstring>
@@ -151,6 +152,7 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
     }
     auto pj = pj_new();
     if (pj) {
+        pj->ctx = ctx;
         pj->descr = "ISO-19111 object";
         pj->iso_obj = objIn;
     }
@@ -6793,6 +6795,56 @@ int proj_cs_get_axis_info(PJ_CONTEXT *ctx, const PJ *cs, int index,
  * nullptr in case of error
  */
 PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
+
+    if (!obj->alternativeCoordinateOperations.empty()) {
+        try {
+            auto pjNew = pj_new();
+            pjNew->ctx = ctx;
+            for (const auto &alt : obj->alternativeCoordinateOperations) {
+                auto co = dynamic_cast<const CoordinateOperation *>(
+                    alt.pj->iso_obj.get());
+                if (co) {
+                    double minxSrc = alt.minxSrc;
+                    double minySrc = alt.minySrc;
+                    double maxxSrc = alt.maxxSrc;
+                    double maxySrc = alt.maxySrc;
+                    double minxDst = alt.minxDst;
+                    double minyDst = alt.minyDst;
+                    double maxxDst = alt.maxxDst;
+                    double maxyDst = alt.maxyDst;
+
+                    auto l_sourceCRS = co->sourceCRS();
+                    auto l_targetCRS = co->targetCRS();
+                    if (l_sourceCRS && l_targetCRS) {
+                        const bool swapSource =
+                            l_sourceCRS
+                                ->mustAxisOrderBeSwitchedForVisualization();
+                        if (swapSource) {
+                            std::swap(minxSrc, minySrc);
+                            std::swap(maxxSrc, maxySrc);
+                        }
+                        const bool swapTarget =
+                            l_targetCRS
+                                ->mustAxisOrderBeSwitchedForVisualization();
+                        if (swapTarget) {
+                            std::swap(minxDst, minyDst);
+                            std::swap(maxxDst, maxyDst);
+                        }
+                    }
+                    pjNew->alternativeCoordinateOperations.emplace_back(
+                        minxSrc, minySrc, maxxSrc, maxySrc, minxDst, minyDst,
+                        maxxDst, maxyDst,
+                        pj_obj_create(ctx, co->normalizeForVisualization()),
+                        co->nameStr());
+                }
+            }
+            return pjNew;
+        } catch (const std::exception &e) {
+            proj_log_debug(ctx, __FUNCTION__, e.what());
+            return nullptr;
+        }
+    }
+
     auto co = dynamic_cast<const CoordinateOperation *>(obj->iso_obj.get());
     if (!co) {
         proj_log_error(ctx, __FUNCTION__, "Object is not a CoordinateOperation "
