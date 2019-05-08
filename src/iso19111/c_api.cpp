@@ -35,6 +35,7 @@
 #include <cstdarg>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <new>
 #include <utility>
 #include <vector>
@@ -6796,9 +6797,12 @@ int proj_cs_get_axis_info(PJ_CONTEXT *ctx, const PJ *cs, int index,
  */
 PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
 
+    SANITIZE_CTX(ctx);
     if (!obj->alternativeCoordinateOperations.empty()) {
         try {
-            auto pjNew = pj_new();
+            auto pjNew = std::unique_ptr<PJ>(pj_new());
+            if (!pjNew)
+                return nullptr;
             pjNew->ctx = ctx;
             for (const auto &alt : obj->alternativeCoordinateOperations) {
                 auto co = dynamic_cast<const CoordinateOperation *>(
@@ -6838,7 +6842,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                         co->nameStr());
                 }
             }
-            return pjNew;
+            return pjNew.release();
         } catch (const std::exception &e) {
             proj_log_debug(ctx, __FUNCTION__, e.what());
             return nullptr;
