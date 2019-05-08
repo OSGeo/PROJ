@@ -3247,4 +3247,69 @@ TEST_F(CApi, proj_normalize_for_visualization) {
               "+step +proj=utm +zone=31 +ellps=WGS84");
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_normalize_for_visualization_with_alternatives) {
+
+    auto P = proj_create_crs_to_crs(m_ctxt, "EPSG:4326", "EPSG:3003", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper keeper_Pnormalized(Pnormalized);
+    ASSERT_NE(Pnormalized, nullptr);
+
+    {
+        PJ_COORD c;
+        // Approximately Roma
+        c.lpz.lam = 12.5;
+        c.lpz.phi = 42;
+        c.lpz.z = 0;
+        c = proj_trans(Pnormalized, PJ_FWD, c);
+        EXPECT_NEAR(c.xy.x, 1789912.46264783037, 1e-8);
+        EXPECT_NEAR(c.xy.y, 4655716.25402576849, 1e-8);
+        auto projstr = proj_pj_info(Pnormalized).definition;
+        ASSERT_NE(projstr, nullptr);
+        EXPECT_EQ(std::string(projstr),
+                  "proj=pipeline step proj=unitconvert xy_in=deg xy_out=rad "
+                  "step proj=push v_3 step proj=cart ellps=WGS84 "
+                  "step inv proj=helmert x=-104.1 y=-49.1 z=-9.9 rx=0.971 "
+                  "ry=-2.917 rz=0.714 s=-11.68 convention=position_vector "
+                  "step inv proj=cart ellps=intl step proj=pop v_3 "
+                  "step proj=tmerc lat_0=0 lon_0=9 k=0.9996 x_0=1500000 "
+                  "y_0=0 ellps=intl");
+    }
+
+    {
+        PJ_COORD c;
+        // Approximately Roma
+        c.xyz.x = 1789912.46264783037;
+        c.xyz.y = 4655716.25402576849;
+        c.xyz.z = 0;
+        c = proj_trans(Pnormalized, PJ_INV, c);
+        EXPECT_NEAR(c.lp.lam, 12.5, 1e-8);
+        EXPECT_NEAR(c.lp.phi, 42, 1e-8);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_normalize_for_visualization_with_alternatives_reverse) {
+
+    auto P = proj_create_crs_to_crs(m_ctxt, "EPSG:3003", "EPSG:4326", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper keeper_Pnormalized(Pnormalized);
+    ASSERT_NE(Pnormalized, nullptr);
+
+    PJ_COORD c;
+    // Approximately Roma
+    c.xyz.x = 1789912.46264783037;
+    c.xyz.y = 4655716.25402576849;
+    c.xyz.z = 0;
+    c = proj_trans(Pnormalized, PJ_FWD, c);
+    EXPECT_NEAR(c.lp.lam, 12.5, 1e-8);
+    EXPECT_NEAR(c.lp.phi, 42, 1e-8);
+}
+
 } // namespace
