@@ -836,3 +836,20 @@ INSERT INTO grid_alternatives(original_grid_name,
                               1, -- direct download
                               0, -- non-freely licensed. See https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/master/debian/copyright
                               NULL);
+
+-- Belgium
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('bd72lb72_etrs89lb08.gsb',
+                              'bd72lb72_etrs89lb08.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
