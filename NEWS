@@ -14,7 +14,7 @@
 
  o Update internal version of googletest to v1.8.1 (#1361)
 
- o Database update: EPSG v9.6.1, IGNF v3.0.3, ESRI 10.7.0
+ o Database update: EPSG v9.6.2 (#1462), IGNF v3.0.3, ESRI 10.7.0
    and add operation_version column (#1368)
 
  o Add proj_normalize_for_visualization() that attempts to apply axis
