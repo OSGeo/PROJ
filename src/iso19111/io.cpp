@@ -6899,6 +6899,7 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
          getNumericValue(getParamValue(step, "lon_0")) != 0.0)) {
         props.set("EXTENSION_PROJ4", projString_);
     }
+    props.set("IMPLICIT_CS", true);
 
     return GeographicCRS::create(props, datum, cs);
 }
@@ -7388,6 +7389,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     if (hasUnusedParameters(step)) {
         props.set("EXTENSION_PROJ4", projString_);
     }
+
+    props.set("IMPLICIT_CS", true);
 
     CRSNNPtr crs = ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
 

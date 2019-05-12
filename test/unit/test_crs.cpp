@@ -1498,6 +1498,19 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 0U);
     }
+    {
+        // Test identification from PROJ string
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=longlat +datum=WGS84 +type=crs");
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1U);
+        ASSERT_TRUE(!res.front().first->identifiers().empty());
+        EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "4326");
+        EXPECT_EQ(res.front().second, 70);
+    }
 }
 
 // ---------------------------------------------------------------------------
