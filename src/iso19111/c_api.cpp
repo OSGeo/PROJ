@@ -1777,7 +1777,7 @@ PJ *proj_get_target_crs(PJ_CONTEXT *ctx, const PJ *obj) {
 /** \brief Identify the CRS with reference CRSs.
  *
  * The candidate CRSs are either hard-coded, or looked in the database when
- * authorityFactory is not null.
+ * it is available.
  *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match. The list is sorted by decreasing
