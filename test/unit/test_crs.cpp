@@ -1984,13 +1984,35 @@ TEST(crs, projectedCRS_identify_no_db) {
 TEST(crs, projectedCRS_identify_db) {
     auto dbContext = DatabaseContext::create();
     auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto factoryIGNF = AuthorityFactory::create(dbContext, "IGNF");
+    auto factoryAnonymous = AuthorityFactory::create(dbContext, std::string());
     {
         // Identify by existing code
-        auto res =
-            factoryEPSG->createProjectedCRS("2172")->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1U);
-        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
-        EXPECT_EQ(res.front().second, 100);
+        auto crs = factoryEPSG->createProjectedCRS("2172");
+        {
+            auto res = crs->identify(factoryEPSG);
+            ASSERT_EQ(res.size(), 1U);
+            EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+            EXPECT_EQ(res.front().second, 100);
+        }
+        {
+            auto res = crs->identify(factoryAnonymous);
+            ASSERT_EQ(res.size(), 1U);
+        }
+        {
+            auto res = crs->identify(factoryIGNF);
+            ASSERT_EQ(res.size(), 0U);
+        }
+    }
+    {
+        // Identify by existing code
+        auto crs = factoryIGNF->createProjectedCRS("ETRS89UTM28");
+        {
+            auto res = crs->identify(factoryEPSG);
+            ASSERT_EQ(res.size(), 1U);
+            EXPECT_EQ(res.front().first->getEPSGCode(), 25828);
+            EXPECT_EQ(res.front().second, 70);
+        }
     }
     {
         // Non-existing code

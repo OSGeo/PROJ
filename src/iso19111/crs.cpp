@@ -1387,6 +1387,36 @@ GeodeticCRSNNPtr GeodeticCRS::createEPSG_4978() {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+static bool hasCodeCompatibleOfAuthorityFactory(
+    const common::IdentifiedObject *obj,
+    const io::AuthorityFactoryPtr &authorityFactory) {
+    const auto &ids = obj->identifiers();
+    if (!ids.empty() && authorityFactory->getAuthority().empty()) {
+        return true;
+    }
+    for (const auto &id : ids) {
+        if (*(id->codeSpace()) == authorityFactory->getAuthority()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool hasCodeCompatibleOfAuthorityFactory(
+    const metadata::IdentifierNNPtr &id,
+    const io::AuthorityFactoryPtr &authorityFactory) {
+    if (authorityFactory->getAuthority().empty()) {
+        return true;
+    }
+    return *(id->codeSpace()) == authorityFactory->getAuthority();
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Identify the CRS with reference CRSs.
  *
  * The candidate CRSs are either hard-coded, or looked in the database when
@@ -1530,19 +1560,22 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     searchByEllipsoid();
                 }
             }
-        } else if (!identifiers().empty()) {
+        } else if (hasCodeCompatibleOfAuthorityFactory(this,
+                                                       authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createGeodeticCRS(id->code());
-                    bool match = _isEquivalentTo(crs.get(), crsCriterion);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createGeodeticCRS(id->code());
+                        bool match = _isEquivalentTo(crs.get(), crsCriterion);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else {
@@ -2299,20 +2332,23 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const bool unsignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createVerticalCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createVerticalCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
@@ -3100,21 +3136,24 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
 
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createProjectedCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::
-                                       EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createProjectedCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::
+                                EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
@@ -3189,8 +3228,8 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         // Sort results
         res.sort(lambdaSort);
 
-        if (identifiers().empty() && !foundEquivalentName &&
-            (res.empty() || res.front().second < 50)) {
+        if (!hasCodeCompatibleOfAuthorityFactory(this, authorityFactory) &&
+            !foundEquivalentName && (res.empty() || res.front().second < 50)) {
             std::set<std::pair<std::string, std::string>> alreadyKnown;
             for (const auto &pair : res) {
                 const auto &ids = pair.first->identifiers();
@@ -3448,20 +3487,23 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
 
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createCompoundCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createCompoundCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
