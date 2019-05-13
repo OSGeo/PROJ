@@ -1650,6 +1650,38 @@ TEST_F(CApi, proj_identify) {
         ObjListKeeper keeper_res(res);
         EXPECT_EQ(res, nullptr);
     }
+    {
+        auto obj2 = proj_create(
+            m_ctxt, "+proj=longlat +datum=WGS84 +no_defs +type=crs");
+        ObjectKeeper keeper2(obj2);
+        ASSERT_NE(obj2, nullptr);
+        int *confidence = nullptr;
+        auto res = proj_identify(m_ctxt, obj2, nullptr, nullptr, &confidence);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_list_get_count(res), 4);
+        proj_int_list_destroy(confidence);
+    }
+    {
+        auto obj2 = proj_create_from_database(m_ctxt, "IGNF", "ETRS89UTM28",
+                                              PJ_CATEGORY_CRS, false, nullptr);
+        ObjectKeeper keeper2(obj2);
+        ASSERT_NE(obj2, nullptr);
+        int *confidence = nullptr;
+        auto res = proj_identify(m_ctxt, obj2, "EPSG", nullptr, &confidence);
+        ObjListKeeper keeper_res(res);
+        EXPECT_EQ(proj_list_get_count(res), 1);
+        auto gotCRS = proj_list_get(m_ctxt, res, 0);
+        ASSERT_NE(gotCRS, nullptr);
+        ObjectKeeper keeper_gotCRS(gotCRS);
+        auto auth = proj_get_id_auth_name(gotCRS, 0);
+        ASSERT_TRUE(auth != nullptr);
+        EXPECT_EQ(auth, std::string("EPSG"));
+        auto code = proj_get_id_code(gotCRS, 0);
+        ASSERT_TRUE(code != nullptr);
+        EXPECT_EQ(code, std::string("25828"));
+        EXPECT_EQ(confidence[0], 70);
+        proj_int_list_destroy(confidence);
+    }
 }
 
 // ---------------------------------------------------------------------------
