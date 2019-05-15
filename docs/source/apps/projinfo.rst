@@ -26,13 +26,17 @@ Synopsis
     |    [--main-db-path path] [--aux-db-path path]*
     |    [--identify]
     |    [--c-ify] [--single-line]
-    |    {object_definition} | (-s {srs_def} -t {srs_def})
+    |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
     |
 
-    where {object_definition} or {object_definition} is a PROJ string, a
+    where {object_definition} is a PROJ string, a
     WKT string, an object name or a AUTHORITY:CODE
     (where AUTHORITY is the name of a CRS authority and CODE the code of a CRS
     found in the proj.db database).
+
+    {object_reference} is a filename preceded with the '@' character.  The
+    file referenced by the {object_reference} must contain a valid
+    {object_definition}.
 
 Description
 ***********
