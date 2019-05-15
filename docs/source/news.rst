@@ -3,6 +3,72 @@
 News
 ###############################################################################
 
+6.1.0 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*May 15th 2019*
+
+Updates
+-------
+
+* Include custom ellipsoid definitions from QGIS (`#1137 <https://github.com/OSGeo/proj.4/issues/1337>`_)
+
+* Add ``-k ellipsoid`` option to projinfo (`#1338 <https://github.com/OSGeo/proj.4/issues/1338>`_)
+
+* Make cs2cs support 4D coordinates (`#1355 <https://github.com/OSGeo/proj.4/issues/1355>`_)
+
+* WKT2 parser: update to OGC 18-010r6 (`#1360 <https://github.com/OSGeo/proj.4/issues/1360>`_ `#1366 <https://github.com/OSGeo/proj.4/issues/1366>`_))
+
+* Update internal version of googletest to v1.8.1 (`#1361 <https://github.com/OSGeo/proj.4/issues/1361>`_)
+
+* Database update: EPSG v9.6.2 (`#1462 <https://github.com/OSGeo/proj.4/issues/1462>`_), IGNF v3.0.3, ESRI 10.7.0
+  and add operation_version column (`#1368 <https://github.com/OSGeo/proj.4/issues/1368>`_)
+
+* Add :c:func:`proj_normalize_for_visualization` that attempts to apply axis
+  ordering as used by most GIS applications and PROJ <6 (`#1387 <https://github.com/OSGeo/proj.4/issues/1387>`_)
+
+* Added noop operation (`#1391 <https://github.com/OSGeo/proj.4/issues/1391>`_)
+
+* Paths set by user take priority over :envvar:`PROJ_LIB` for search paths (`#1398 <https://github.com/OSGeo/proj.4/issues/1398>`_)
+
+* Reduced database size (`#1438 <https://github.com/OSGeo/proj.4/issues/1438>`_)
+
+* add support for compoundCRS and concatenatedOperation named from
+  their components (`#1441 <https://github.com/OSGeo/proj.4/issues/1441>`_)
+
+Bug fixes
+---------
+
+* Have :program:`gie` return non-zero code when file can't be opened (`#1312 <https://github.com/OSGeo/proj.4/issues/1312>`_)
+
+* CMake cross-compilation fix (`#1316 <https://github.com/OSGeo/proj.4/issues/1316>`_)
+
+* Use 1st eccentricity instead of 2nd eccentricity in Molodensky (`#1324 <https://github.com/OSGeo/proj.4/issues/1324>`_)
+
+* Make sure to include grids when doing Geocentric to CompoundCRS with
+  nadgrids+geoidgrids transformations (`#1326 <https://github.com/OSGeo/proj.4/issues/1326>`_)
+
+* Handle coordinates outside of bbox better (`#1333 <https://github.com/OSGeo/proj.4/issues/1333>`_)
+
+* Enable system error messages in command line automatically in builds (`#1336 <https://github.com/OSGeo/proj.4/issues/1336>`_)
+
+* Make sure to install projinfo man page with CMake (`#1347 <https://github.com/OSGeo/proj.4/issues/1347>`_)
+
+* Add data dir to pkg-config file proj.pc (`#1348 <https://github.com/OSGeo/proj.4/issues/1348>`_)
+
+* Fix GCC 9 warning about useless ``std::move()`` (`#1352 <https://github.com/OSGeo/proj.4/issues/1352>`_)
+
+* Grid related fixes (`#1369 <https://github.com/OSGeo/proj.4/issues/1369>`_)
+
+* Make sure that ISO19111 C++ code sets pj_errno on errors (`#1405 <https://github.com/OSGeo/proj.4/issues/1405>`_)
+
+* vgridshift: handle longitude wrap-around for grids with 360deg
+  longitude extent (`#1429 <https://github.com/OSGeo/proj.4/issues/1429>`_)
+
+* :program:`proj`/:program:`cs2cs`: validate value of ``-f`` parameter to avoid potential crashes (`#1434 <https://github.com/OSGeo/proj.4/issues/1434>`_)
+
+* Many division by zero and similar bug fixes found by OSS Fuzz.
+
+
 6.0.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *March 1st 2019*
