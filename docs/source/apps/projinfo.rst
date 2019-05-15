@@ -26,7 +26,7 @@ Synopsis
     |    [--main-db-path path] [--aux-db-path path]*
     |    [--identify]
     |    [--c-ify] [--single-line]
-    |    {object_definition} | (-s {srs_def} -t {srs_def})
+    |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
     |
 
     where {object_definition} or {srs_def} is
@@ -40,6 +40,10 @@ Synopsis
       syntax "EPSG:2393+5717"),
     - a OGC URN combining references for concatenated operations
       (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
+
+    {object_reference} is a filename preceded by the '@' character.  The
+    file referenced by the {object_reference} must contain a valid
+    {object_definition}.
 
 Description
 ***********
