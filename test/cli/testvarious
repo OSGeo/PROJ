@@ -4,7 +4,6 @@
 #
 #
 TEST_CLI_DIR=`dirname $0`
-DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
 usage()
@@ -24,7 +23,7 @@ if test ! -x ${EXE}; then
 fi
 
 if test -z "${PROJ_LIB}"; then
-    export PROJ_LIB=$DATA_DIR
+    export PROJ_LIB="`dirname $0`/../../data"
 fi
 
 # Would be great to have a universale way of selecting a locale with
@@ -954,10 +953,33 @@ $EXE EPSG:32631 EPSG:4326 -E >> ${OUT} <<EOF
 EOF
 
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test EPSG:4896 to EPSG:7930" >> ${OUT}
+# Here we test that 4D coordinates are handled by cs2cs. Due to backwards
+# compatibility, the t-component is not written to STDOUT as part of the
+# coordinate data, but rather as part of the string that follows the xyz
+# components. This is only seen by users when the -E option is used. Which
+# means that this test also experience that behaviour.
+$EXE -f %.4f EPSG:4896 EPSG:7930 -E >> ${OUT} <<EOF
+3496737.2679    743254.4507  5264462.9620 2019.0
+3496737.2679    743254.4507  5264462.9620 2029.0
+EOF
+
+
+echo  "##############################################################" >> ${OUT}
+echo  "Test ITRF2000 to ITRF1993" >> ${OUT}
+# Here we test that HUGE_VAL is passed as the time value if not explicitly
+# specified
+$EXE -f %.7f ITRF2000 ITRF1993 -E >> ${OUT} <<EOF
+59.4967 -117.61748 329.396
+59.4967 -117.61748 329.396 1988
+EOF
+
+
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${TEST_CLI_DIR}/${OUT}.dist
+diff -u -b ${OUT} ${TEST_CLI_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURRED"

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -291,6 +291,21 @@ std::vector<std::string> split(const std::string &str, char separator) {
     while ((newPos = str.find(separator, lastPos)) != std::string::npos) {
         res.push_back(str.substr(lastPos, newPos - lastPos));
         lastPos = newPos + 1;
+    }
+    res.push_back(str.substr(lastPos));
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> split(const std::string &str,
+                               const std::string &separator) {
+    std::vector<std::string> res;
+    size_t lastPos = 0;
+    size_t newPos = 0;
+    while ((newPos = str.find(separator, lastPos)) != std::string::npos) {
+        res.push_back(str.substr(lastPos, newPos - lastPos));
+        lastPos = newPos + separator.size();
     }
     res.push_back(str.substr(lastPos));
     return res;

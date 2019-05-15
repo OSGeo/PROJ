@@ -279,7 +279,7 @@ JNIEXPORT jcharArray JNICALL Java_org_proj4_PJ_getAxisDirections
 {
     PJ *pj = getPJ(env, object);
     if (pj) {
-        int length = strlen(pj->axis);
+        int length = static_cast<int>(strlen(pj->axis));
         jcharArray array = env->NewCharArray(length);
         if (array) {
             jchar* axis = env->GetCharArrayElements(array, nullptr);

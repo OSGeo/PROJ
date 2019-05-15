@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -195,8 +195,7 @@ class PROJ_GCC_DLL WKTFormatter {
         WKT2_2018_SIMPLIFIED,
 
         /** WKT1 as traditionally output by GDAL, deriving from OGC 01-009.
-            A notable departuPROJ_GCC_DLLre from WKT1_GDAL with respect to OGC
-           01-009 is
+            A notable departure from WKT1_GDAL with respect to OGC 01-009 is
             that in WKT1_GDAL, the unit of the PRIMEM value is always degrees.
            */
         WKT1_GDAL,
@@ -262,6 +261,13 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL void popOutputId();
     PROJ_INTERNAL bool outputId() const;
 
+    PROJ_INTERNAL void pushHasId(bool hasId);
+    PROJ_INTERNAL void popHasId();
+
+    PROJ_INTERNAL void pushDisableUsage();
+    PROJ_INTERNAL void popDisableUsage();
+    PROJ_INTERNAL bool outputUsage() const;
+
     PROJ_INTERNAL void
     pushAxisLinearUnit(const common::UnitOfMeasureNNPtr &unit);
     PROJ_INTERNAL void popAxisLinearUnit();
@@ -303,6 +309,8 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL bool primeMeridianOrParameterUnitOmittedIfSameAsAxis() const;
     PROJ_INTERNAL bool primeMeridianInDegree() const;
     PROJ_INTERNAL bool outputCSUnitOnlyOnceIfSame() const;
+    PROJ_INTERNAL bool idOnTopLevelOnly() const;
+    PROJ_INTERNAL bool topLevelHasId() const;
 
     /** WKT version. */
     enum class Version {
@@ -419,7 +427,8 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_INTERNAL void setOmitProjLongLatIfPossible(bool omit);
     PROJ_INTERNAL bool omitProjLongLatIfPossible() const;
 
-    PROJ_INTERNAL void setOmitZUnitConversion(bool omit);
+    PROJ_INTERNAL void pushOmitZUnitConversion();
+    PROJ_INTERNAL void popOmitZUnitConversion();
     PROJ_INTERNAL bool omitZUnitConversion() const;
 
     PROJ_INTERNAL void setDropEarlyBindingsTerms(bool drop);
@@ -891,31 +900,35 @@ class PROJ_GCC_DLL AuthorityFactory {
     /** CRS information */
     struct CRSInfo {
         /** Authority name */
-        std::string authName{};
+        std::string authName;
         /** Code */
-        std::string code{};
+        std::string code;
         /** Name */
-        std::string name{};
+        std::string name;
         /** Type */
-        ObjectType type{ObjectType::CRS};
+        ObjectType type;
         /** Whether the object is deprecated */
-        bool deprecated{};
+        bool deprecated;
         /** Whereas the west_lon_degree, south_lat_degree, east_lon_degree and
-        * north_lat_degree fields are valid. */
-        bool bbox_valid{};
+         * north_lat_degree fields are valid. */
+        bool bbox_valid;
         /** Western-most longitude of the area of use, in degrees. */
-        double west_lon_degree{};
+        double west_lon_degree;
         /** Southern-most latitude of the area of use, in degrees. */
-        double south_lat_degree{};
+        double south_lat_degree;
         /** Eastern-most longitude of the area of use, in degrees. */
-        double east_lon_degree{};
+        double east_lon_degree;
         /** Northern-most latitude of the area of use, in degrees. */
-        double north_lat_degree{};
+        double north_lat_degree;
         /** Name of the area of use. */
-        std::string areaName{};
+        std::string areaName;
         /** Name of the projection method for a projected CRS. Might be empty
          * even for projected CRS in some cases. */
-        std::string projectionMethodName{};
+        std::string projectionMethodName;
+
+        //! @cond Doxygen_Suppress
+        CRSInfo();
+        //! @endcond
     };
 
     PROJ_DLL std::list<CRSInfo> getCRSInfoList() const;
@@ -981,15 +994,15 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_INTERNAL std::list<crs::CompoundCRSNNPtr>
     createCompoundCRSFromExisting(const crs::CompoundCRSNNPtr &crs) const;
+
+    PROJ_INTERNAL crs::CRSNNPtr
+    createCoordinateReferenceSystem(const std::string &code,
+                                    bool allowCompound) const;
     //! @endcond
 
   protected:
     PROJ_INTERNAL AuthorityFactory(const DatabaseContextNNPtr &context,
                                    const std::string &authorityName);
-
-    PROJ_INTERNAL crs::CRSNNPtr
-    createCoordinateReferenceSystem(const std::string &code,
-                                    bool allowCompound) const;
 
     PROJ_INTERNAL crs::GeodeticCRSNNPtr
     createGeodeticCRS(const std::string &code, bool geographicOnly) const;

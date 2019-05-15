@@ -21,17 +21,17 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY lagrng_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double v, c;
 
-    if (fabs(fabs(lp.phi) - M_HALFPI) < TOL) {
+    const double sin_phi = sin(lp.phi);
+    if (fabs(fabs(sin_phi) - 1) < TOL) {
         xy.x = 0;
         xy.y = lp.phi < 0 ? -2. : 2.;
     } else {
-        lp.phi = sin(lp.phi);
-        v = Q->a1 * pow((1. + lp.phi)/(1. - lp.phi), Q->hrw);
+        v = Q->a1 * pow((1. + sin_phi)/(1. - sin_phi), Q->hrw);
         lp.lam *= Q->rw;
         c = 0.5 * (v + 1./v) + cos(lp.lam);
         if (c < TOL) {
@@ -45,7 +45,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP lagrng_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double c, x2, y2p, y2m;
@@ -70,7 +70,7 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 
 PJ *PROJECTION(lagrng) {
-    double phi1;
+    double sin_phi1;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
@@ -85,16 +85,16 @@ PJ *PROJECTION(lagrng) {
     Q->hw = 0.5 * Q->w;
     Q->rw = 1. / Q->w;
     Q->hrw = 0.5 * Q->rw;
-    phi1 = sin(pj_param(P->ctx, P->params, "rlat_1").f);
-    if (fabs(fabs(phi1) - 1.) < TOL)
+    sin_phi1 = sin(pj_param(P->ctx, P->params, "rlat_1").f);
+    if (fabs(fabs(sin_phi1) - 1.) < TOL)
         return pj_default_destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
 
-    Q->a1 = pow((1. - phi1)/(1. + phi1), Q->hrw);
+    Q->a1 = pow((1. - sin_phi1)/(1. + sin_phi1), Q->hrw);
     Q->a2 = Q->a1 * Q->a1;
 
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = lagrng_s_inverse;
+    P->fwd = lagrng_s_forward;
 
     return P;
 }

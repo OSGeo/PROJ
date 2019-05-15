@@ -3,7 +3,6 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "proj_internal.h"
 
 PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph";
 
@@ -33,7 +32,7 @@ static PJ_XY forward_error(PJ *P, PJ_LP lp, PJ_XY xy) {
     return xy;
 }
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY ortho_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi;
@@ -67,7 +66,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP ortho_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  rh, cosc, sinc;
@@ -134,8 +133,8 @@ PJ *PROJECTION(ortho) {
         Q->cosph0 = cos(P->phi0);
     } else
         Q->mode = EQUIT;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = ortho_s_inverse;
+    P->fwd = ortho_s_forward;
     P->es = 0.;
 
     return P;

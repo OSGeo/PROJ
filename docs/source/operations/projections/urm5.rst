@@ -14,12 +14,14 @@ Urmaev V
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the projection.
-
+Required parameters
+--------------------------------------------------------------------------------
 .. option:: +n=<value>
 
     Set the :math:`n` constant. Value between 0 and 1.
 
+Optional parameters
+--------------------------------------------------------------------------------
 .. option:: +q=<value>
 
     Set the :math:`q` constant.

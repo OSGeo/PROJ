@@ -1,0 +1,30 @@
+# Cirrus CI configuration
+
+task:
+  name: FreeBSD
+  freebsd_instance:
+    matrix:
+      image: freebsd-12-0-release-amd64
+#      image: freebsd-11-2-release-amd64
+#      image: freebsd-10-4-release-amd64
+
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+    MAKE_FLAGS: -j 2
+
+  cache:
+    folder: $HOME/.ccache
+
+  pkginstall_script:
+    - pkg install -y autoconf automake libtool pkgconf sqlite3 wget unzip ccache gmake
+  download_grid_script:
+    - wget http://download.osgeo.org/proj/proj-datumgrid-1.8.zip
+    - (cd data && unzip -o ../proj-datumgrid-1.8.zip)
+  configure_script:
+    - ./autogen.sh
+    - CC="ccache cc" CXX="ccache c++" ./configure --disable-static
+  compile_script:
+    - gmake $(MAKE_FLAGS)
+  test_script:
+    - gmake check $(MAKE_FLAGS)
+

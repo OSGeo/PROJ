@@ -12,55 +12,56 @@
 #    SQLITE3_LIBRARY
 
 
-# FIND_PATH and FIND_LIBRARY normally search standard locations
+# find_path and find_library normally search standard locations
 # before the specified paths. To search non-standard paths first,
 # FIND_* is invoked first with specified paths and NO_DEFAULT_PATH
 # and then again with no specified paths to search the default
 # locations. When an earlier FIND_* succeeds, subsequent FIND_*s
-# searching for the same item do nothing. 
+# searching for the same item do nothing.
 
 # try to use framework on mac
 # want clean framework path, not unix compatibility path
-IF (APPLE)
-  IF (CMAKE_FIND_FRAMEWORK MATCHES "FIRST"
+if(APPLE)
+  if(CMAKE_FIND_FRAMEWORK MATCHES "FIRST"
       OR CMAKE_FRAMEWORK_PATH MATCHES "ONLY"
       OR NOT CMAKE_FIND_FRAMEWORK)
-    SET (CMAKE_FIND_FRAMEWORK_save ${CMAKE_FIND_FRAMEWORK} CACHE STRING "" FORCE)
-    SET (CMAKE_FIND_FRAMEWORK "ONLY" CACHE STRING "" FORCE)
-    #FIND_PATH(SQLITE3_INCLUDE_DIR SQLite3/sqlite3.h)
-    FIND_LIBRARY(SQLITE3_LIBRARY SQLite3)
-    IF (SQLITE3_LIBRARY)
-      # FIND_PATH doesn't add "Headers" for a framework
-      SET (SQLITE3_INCLUDE_DIR ${SQLITE3_LIBRARY}/Headers CACHE PATH "Path to a file.")
-    ENDIF (SQLITE3_LIBRARY)
-    SET (CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_save} CACHE STRING "" FORCE)
-  ENDIF ()
-ENDIF (APPLE)
+    set(CMAKE_FIND_FRAMEWORK_save ${CMAKE_FIND_FRAMEWORK} CACHE STRING "" FORCE)
+    set(CMAKE_FIND_FRAMEWORK "ONLY" CACHE STRING "" FORCE)
+    #find_path(SQLITE3_INCLUDE_DIR SQLite3/sqlite3.h)
+    find_library(SQLITE3_LIBRARY SQLite3)
+    if(SQLITE3_LIBRARY)
+      # find_path doesn't add "Headers" for a framework
+      set(SQLITE3_INCLUDE_DIR ${SQLITE3_LIBRARY}/Headers
+        CACHE PATH "Path to a file.")
+    endif()
+    set(CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_save} CACHE STRING "" FORCE)
+  endif()
+endif()
 
-FIND_PATH(SQLITE3_INCLUDE_DIR sqlite3.h
+find_path(SQLITE3_INCLUDE_DIR sqlite3.h
   "$ENV{LIB_DIR}/include"
   "$ENV{LIB_DIR}/include/sqlite"
   "$ENV{INCLUDE}"
 )
 
-FIND_LIBRARY(SQLITE3_LIBRARY NAMES sqlite3_i sqlite3 PATHS
+find_library(SQLITE3_LIBRARY NAMES sqlite3_i sqlite3 PATHS
   "$ENV{LIB_DIR}/lib"
   "$ENV{LIB}/lib"
-  )
+)
 
-IF (SQLITE3_INCLUDE_DIR AND SQLITE3_LIBRARY)
-   SET(SQLITE3_FOUND TRUE)
-ENDIF (SQLITE3_INCLUDE_DIR AND SQLITE3_LIBRARY)
+if(SQLITE3_INCLUDE_DIR AND SQLITE3_LIBRARY)
+  set(SQLITE3_FOUND TRUE)
+endif()
 
-IF (SQLITE3_FOUND)
-   IF (NOT SQLITE3_FIND_QUIETLY)
-      MESSAGE(STATUS "Found Sqlite3: ${SQLITE3_LIBRARY}")
-   ENDIF (NOT SQLITE3_FIND_QUIETLY)
+if(SQLITE3_FOUND)
+  if(NOT SQLITE3_FIND_QUIETLY)
+    message(STATUS "Found Sqlite3: ${SQLITE3_LIBRARY}")
+  endif()
 
-ELSE (SQLITE3_FOUND)
+else()
 
-   IF (SQLITE3_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR "Could not find Sqlite3")
-   ENDIF (SQLITE3_FIND_REQUIRED)
+  if(SQLITE3_FIND_REQUIRED)
+    message(FATAL_ERROR "Could not find Sqlite3")
+  endif()
 
-ENDIF (SQLITE3_FOUND)
+endif()

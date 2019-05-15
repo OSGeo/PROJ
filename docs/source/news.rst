@@ -3,6 +3,137 @@
 News
 ###############################################################################
 
+6.0.0 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*March 1st 2019*
+
+
+PROJ 6 has undergone extensive changes to increase its functional scope from a
+cartographic projection engine with so-called "early-binding" geodetic datum
+transformation capabilities to a more complete library supporting coordinate
+transformations and coordinate reference systems.
+
+As a foundation for other enhancements, PROJ now includes a C++ implementation
+of the modelisation propopsed by the ISO-19111:2019 standard / OGC Abstract
+Specification Topic 2: "Referencing By Coordinates", for geodetic reference
+frames (datums), coordinate reference systems and coordinate operations.
+Construction and query of those geodetic objects is available through a new C++
+API, and also accessible for the most part from bindings in the C API.
+
+Those geodetic objects can be imported and exported from and into the OGC
+Well-Known Text format (WKT) in its different variants: ESRI WKT, GDAL WKT 1,
+WKT2:2015 (ISO 19162:2015) and WKT2:2018 (ISO 19162:2018). Import and export of
+CRS objects from and into PROJ strings is also supported. This functionality
+was previously available in the GDAL software library (except WKT2 support
+which is a new feature), and is now an integral part of PROJ.
+
+A unified database of geodetic objects, coordinate reference systems and their
+metadata, and coordinate operations between those CRS is now available in a
+SQLite3 database file, proj.db. This includes definitions imported from the
+IOGP EPSG dataset (v9.6.0 release), the IGNF (French national mapping agency)
+geodetic registry and the ESRI projection engine database. PROJ is now the
+reference software in the "OSGeo C stack" for this CRS and coordinate operation
+database, whereas previously this functionality was spread over PROJ, GDAL and
+libgeotiff, and used CSV or other adhoc text-based formats.
+
+Late-binding coordinate operation capabilities, that takes  metadata such as
+area of use and accuracy into account, has been added. This can avoid in a
+number of situations the past requirement of using WGS84 as a pivot system,
+which could cause unneeded accuracy loss, or was not doable at all sometimes
+when transformation to WGS84 was not available. Those late-binding capabilities
+are now used by the proj_create_crs_to_crs() function and the cs2cs utility.
+
+A new command line utility, projinfo, has been added to query information about
+a geodetic object of the database, import and export geodetic objects from/into
+WKT and PROJ strings, and display coordinate operations available between two
+CRSs.
+
+UPDATES
+-------
+
+* Removed projects.h as a public interface (`#835 <https://github.com/OSGeo/proj.4/issues/835>`_)
+
+* Deprecated the proj_api.h interface. The header file is still available
+  but will be removed with the next major version release of PROJ. It is
+  now required to define :c:macro:`ACCEPT_USE_OF_DEPRECATED_PROJ_API_H`
+  before the interface can be used (`#836 <https://github.com/OSGeo/proj.4/issues/836>`_)
+
+* Removed support for the nmake build system (`#838 <https://github.com/OSGeo/proj.4/issues/838>`_)
+
+* Removed support for the ``proj_def.dat`` defaults file (`#201 <https://github.com/OSGeo/proj.4/issues/201>`_)
+
+* C++11 required for building PROJ (`#1203 <https://github.com/OSGeo/proj.4/issues/1203>`_)
+
+* Added build dependency on SQLite 3.7 (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
+
+* Added :program:`projinfo` command line application (`#1189 <https://github.com/OSGeo/proj.4/issues/1189>`_)
+
+* Added many functions to ``proj.h`` for handling ISO19111 functionality (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
+
+* Added C++ API exposing ISO19111 functionality (`#1175 <https://github.com/OSGeo/proj.4/issues/1175>`_)
+
+* Updated :program:`cs2cs` to use late-binding features (`#1182 <https://github.com/OSGeo/proj.4/issues/1182>`_)
+
+* Removed the ``nad2bin`` application. Now available in the
+  `proj-datumgrid <https://github.com/OSGeo/proj-datumgrid>`_
+  git repository (`#1236 <https://github.com/OSGeo/proj.4/issues/1236>`_)
+
+* Removed support for Chebyshev polynomials in :program:`proj`
+  (`#1226 <https://github.com/OSGeo/proj.4/issues/1226>`_)
+
+* Removed :c:func:`proj_geocentric_latitude` from `proj.h` API
+  (`#1170 <https://github.com/OSGeo/proj.4/issues/1170>`_)
+
+* Changed behaviour of :program:`proj`: Now only allow initialization of
+  projections (`#1162 <https://github.com/OSGeo/proj.4/issues/1162>`_)
+
+* Changed behaviour of :ref:`tmerc <tmerc>`: Now defaults to the Extended
+  Transverse Mercator algorithm (``etmerc``). Old implementation available
+  by adding ``+approx``
+  (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
+
+* Chaged behaviour: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
+
+* Allow multiple directories in :envvar:`PROJ_LIB` environment variable (`#1281 <https://github.com/OSGeo/proj.4/issues/1281>`_)
+
+* Added :ref:`Lambert Conic Conformal (2SP Michigan) <lcc>` projection (`#1142 <https://github.com/OSGeo/proj.4/issues/1142>`_)
+
+* Added :ref:`Bertin1953 <bertin1953>` projection (`#1133 <https://github.com/OSGeo/proj.4/issues/1133>`_)
+
+* Added :ref:`Tobler-Mercator <tobmerc>` projection (`#1153 <https://github.com/OSGeo/proj.4/issues/1153>`_)
+
+* Added :ref:`Molodensky-Badekas <molobadekas>` transform (`#1160 <https://github.com/OSGeo/proj.4/issues/1160>`_)
+
+* Added :ref:`push <push>` and :ref:`pop <pop>` coordinate operations (`#1250 <https://github.com/OSGeo/proj.4/issues/1250>`_)
+
+* Removed ``+t_obs`` parameter from helmert and deformation (`#1264 <https://github.com/OSGeo/proj.4/issues/1264>`_)
+
+* Added :option:`+dt` parameter to deformation as replacement for
+  removed ``+t_obs`` (`#1264 <https://github.com/OSGeo/proj.4/issues/1264>`_)
+
+BUG FIXES
+---------
+
+* Read :option:`+towgs84` values correctly on locales not using dot as comma separator (`#1136 <https://github.com/OSGeo/proj.4/issues/1136>`_)
+
+* Fixed file offset for reading of shift values in NTv1 files (`#1144 <https://github.com/OSGeo/proj.4/issues/1144>`_)
+
+* Avoid problems with :c:macro:`PTHREAD_MUTEX_RECURSIVE` when using CMake (`#1158 <https://github.com/OSGeo/proj.4/issues/1158>`_)
+
+* Avoid raising errors when setting ellipsoid flattening to zero (`#1191 <https://github.com/OSGeo/proj.4/issues/1191>`_)
+
+* Fixed lower square calculations in :ref:`rHealpix <rhealpix>` projection (`#1206 <https://github.com/OSGeo/proj.4/issues/1206>`_)
+
+* Allow :ref:`Molodensky <molodensky>` transform parameters to be zero (`#1194 <https://github.com/OSGeo/proj.4/issues/1194>`_)
+
+* Fixed wrong parameter in ``ITRF2000`` init file (`#1240 <https://github.com/OSGeo/proj.4/issues/1240>`_)
+
+* Fixed use of grid paths including spaces (`#1152 <https://github.com/OSGeo/proj.4/issues/1152>`_)
+
+* :ref:`Robinson <robin>`: fix wrong values for forward path for latitudes >= 87.5,
+  and fix inaccurate inverse method (`#1172 <https://github.com/OSGeo/proj.4/issues/1172>`_)
+
+
 PROJ 5.2.0
 ++++++++++++++++++++++++++++++++++++++++
 *September 15th 2018*

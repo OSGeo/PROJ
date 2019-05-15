@@ -25,16 +25,20 @@ Albers Equal Area
    :align: center
    :alt:   Albers Equal Area
 
-   proj-string: ``+proj=aea``
+   proj-string: ``+proj=aea +lat_1=29.5 +lat_2=42.5``
 
 Options
 ################################################################################
 
-.. note:: All options are optional for the Albers Equal Area projection.
+Required
+--------------------------------------------------------------------------------
 
 .. include:: ../options/lat_1.rst
 
 .. include:: ../options/lat_2.rst
+
+Optional
+--------------------------------------------------------------------------------
 
 .. include:: ../options/lon_0.rst
 

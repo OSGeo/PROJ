@@ -56,6 +56,7 @@ install-data-local:
           fi; \
 	done
 
+# head -c1 not handled on Solaris
 proj.db: $(DATAPATH)/sql/*.sql
 	@echo "Make proj.db"
 	$(RM) proj.db
@@ -63,18 +64,33 @@ proj.db: $(DATAPATH)/sql/*.sql
 	 for x in $(SQL_ORDERED_LIST); do \
 		export SQL_EXPANDED_LIST="$${SQL_EXPANDED_LIST} $(DATAPATH)/$$x"; \
 	 done; \
-	 cat $${SQL_EXPANDED_LIST} | sqlite3 proj.db; \
+	 if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" ; then \
+	    cat $${SQL_EXPANDED_LIST} | md5sum | diff - "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" > /dev/null \
+	    && (echo "Reusing cached proj.db"; cp "$(PROJ_DB_CACHE_DIR)/proj.db" proj.db); \
+	 fi; \
+	 if test ! -f proj.db ; then \
+	   cat $${SQL_EXPANDED_LIST} | sqlite3 proj.db; \
+	 fi; \
 	 if [ $$? -ne 0 ] ; then \
 		echo "Build of proj.db failed"; \
 		$(RM) proj.db; \
 		exit 1; \
 	fi; \
+	echo "" | head -c1; \
+        if [ $$? -eq 0 ] ; then \
+         echo "Running foreign_key_check"; \
 	 if [[ $$(echo "pragma foreign_key_check;" | sqlite3 proj.db | head -c1 | wc -c) -ne 0 ]]; then \
 		echo "Foreign key check failed"; \
 		$(RM) proj.db; \
 		exit 1; \
-	 fi
-
+	 else \
+	   if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" ; then \
+		mkdir -p "$(PROJ_DB_CACHE_DIR)"; \
+		cat $${SQL_EXPANDED_LIST} | md5sum > "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5"; \
+		cp proj.db "$(PROJ_DB_CACHE_DIR)"; \
+	   fi \
+	 fi \
+	fi
 
 # For out-of-tree builds, link all file of the source data dir to the generated data
 check-local:
@@ -83,3 +99,6 @@ check-local:
 			ln -sf $$x .; \
 		done \
 	fi
+
+clean-local:
+	$(RM) proj.db

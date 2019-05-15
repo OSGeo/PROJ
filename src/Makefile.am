@@ -8,7 +8,7 @@ check_PROGRAMS = geodtest
 
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@ -I$(top_srcdir)/include @SQLITE3_CFLAGS@
-AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@ -DPROJ_COMPILATION
+AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@
 
 include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesic.h \
 	org_proj4_PJ.h proj_symbol_rename.h
@@ -16,11 +16,11 @@ include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesi
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	bin_geod.cmake bin_proj.cmake bin_projinfo.cmake \
 	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake tests/geodtest.cpp \
-	wkt1_grammar.y wkt2_grammar.y apps/emess.h
+	wkt1_grammar.y wkt2_grammar.y apps/emess.h apps/utils.h
 
-proj_SOURCES = apps/proj.cpp apps/emess.cpp
+proj_SOURCES = apps/proj.cpp apps/emess.cpp apps/utils.cpp
 projinfo_SOURCES = apps/projinfo.cpp
-cs2cs_SOURCES = apps/cs2cs.cpp apps/emess.cpp
+cs2cs_SOURCES = apps/cs2cs.cpp apps/emess.cpp apps/utils.cpp
 cct_SOURCES = apps/cct.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
 geod_SOURCES = apps/geod.cpp apps/geod_set.cpp apps/geod_interface.cpp apps/geod_interface.h apps/emess.cpp
 
@@ -42,7 +42,7 @@ geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 15:0:0
+libproj_la_LDFLAGS = -no-undefined -version-info 16:0:1
 libproj_la_LIBADD = @SQLITE3_LIBS@
 
 libproj_la_SOURCES = \
@@ -173,6 +173,7 @@ libproj_la_SOURCES = \
 	conversions/cart.cpp \
 	conversions/geoc.cpp \
 	conversions/geocent.cpp \
+	conversions/noop.cpp \
 	conversions/unitconvert.cpp \
 	\
 	transformations/affine.cpp \

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -453,7 +453,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                 auto transf =
                     util::nn_dynamic_pointer_cast<operation::Transformation>(
                         op);
-                if (transf && !starts_with(transf->nameStr(), "Null geo")) {
+                if (transf && !starts_with(transf->nameStr(), "Ballpark geo")) {
                     try {
                         transf->getTOWGS84Parameters();
                     } catch (const std::exception &) {
@@ -486,7 +486,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                                     operation::Transformation>(subops[1]);
                                 if (transf &&
                                     !starts_with(transf->nameStr(),
-                                                 "Null geo")) {
+                                                 "Ballpark geo")) {
                                     try {
                                         transf->getTOWGS84Parameters();
                                     } catch (const std::exception &) {
@@ -585,6 +585,104 @@ CRSNNPtr CRS::alterId(const std::string &authName,
         .set(metadata::Identifier::CODE_KEY, code);
     crs->setProperties(props);
     return crs;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+static bool isAxisListNorthEast(
+    const std::vector<cs::CoordinateSystemAxisNNPtr> &axisList) {
+    const auto &dir0 = axisList[0]->direction();
+    const auto &dir1 = axisList[1]->direction();
+    return (&dir0 == &cs::AxisDirection::NORTH &&
+            &dir1 == &cs::AxisDirection::EAST);
+}
+// ---------------------------------------------------------------------------
+
+bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
+
+    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        const auto &comps = compoundCRS->componentReferenceSystems();
+        if (!comps.empty()) {
+            return comps[0]->mustAxisOrderBeSwitchedForVisualization();
+        }
+    }
+
+    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        return isAxisListNorthEast(geogCRS->coordinateSystem()->axisList());
+    }
+
+    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        return isAxisListNorthEast(projCRS->coordinateSystem()->axisList());
+    }
+
+    return false;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+CRSNNPtr CRS::normalizeForVisualization() const {
+    auto props = util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY,
+        nameStr() + " (with axis order normalized for visualization)");
+
+    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        const auto &comps = compoundCRS->componentReferenceSystems();
+        if (!comps.empty()) {
+            std::vector<CRSNNPtr> newComps;
+            newComps.emplace_back(comps[0]->normalizeForVisualization());
+            for (size_t i = 1; i < comps.size(); i++) {
+                newComps.emplace_back(comps[i]);
+            }
+            return util::nn_static_pointer_cast<CRS>(
+                CompoundCRS::create(props, newComps));
+        }
+    }
+
+    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        const auto &axisList = geogCRS->coordinateSystem()->axisList();
+        if (isAxisListNorthEast(axisList)) {
+            auto cs = axisList.size() == 2
+                          ? cs::EllipsoidalCS::create(util::PropertyMap(),
+                                                      axisList[1], axisList[0])
+                          : cs::EllipsoidalCS::create(util::PropertyMap(),
+                                                      axisList[1], axisList[0],
+                                                      axisList[2]);
+            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
+                props, geogCRS->datum(), geogCRS->datumEnsemble(), cs));
+        }
+    }
+
+    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        const auto &axisList = projCRS->coordinateSystem()->axisList();
+        if (isAxisListNorthEast(axisList)) {
+            auto cs =
+                axisList.size() == 2
+                    ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0])
+                    : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0], axisList[2]);
+            return util::nn_static_pointer_cast<CRS>(
+                ProjectedCRS::create(props, projCRS->baseCRS(),
+                                     projCRS->derivingConversionRef(), cs));
+        }
+    }
+
+    return NN_NO_CHECK(
+        std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
 
 //! @endcond
@@ -1289,6 +1387,36 @@ GeodeticCRSNNPtr GeodeticCRS::createEPSG_4978() {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+static bool hasCodeCompatibleOfAuthorityFactory(
+    const common::IdentifiedObject *obj,
+    const io::AuthorityFactoryPtr &authorityFactory) {
+    const auto &ids = obj->identifiers();
+    if (!ids.empty() && authorityFactory->getAuthority().empty()) {
+        return true;
+    }
+    for (const auto &id : ids) {
+        if (*(id->codeSpace()) == authorityFactory->getAuthority()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool hasCodeCompatibleOfAuthorityFactory(
+    const metadata::IdentifierNNPtr &id,
+    const io::AuthorityFactoryPtr &authorityFactory) {
+    if (authorityFactory->getAuthority().empty()) {
+        return true;
+    }
+    return *(id->codeSpace()) == authorityFactory->getAuthority();
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Identify the CRS with reference CRSs.
  *
  * The candidate CRSs are either hard-coded, or looked in the database when
@@ -1432,19 +1560,22 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     searchByEllipsoid();
                 }
             }
-        } else if (!identifiers().empty()) {
+        } else if (hasCodeCompatibleOfAuthorityFactory(this,
+                                                       authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createGeodeticCRS(id->code());
-                    bool match = _isEquivalentTo(crs.get(), crsCriterion);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createGeodeticCRS(id->code());
+                        bool match = _isEquivalentTo(crs.get(), crsCriterion);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else {
@@ -1892,9 +2023,7 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     if (order[0] && order[1] && (order[0] != one || order[1] != two)) {
         formatter->addStep("axisswap");
         char orderStr[10];
-        strcpy(orderStr, order[0]);
-        strcat(orderStr, ",");
-        strcat(orderStr, order[1]);
+        sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
         formatter->addParam("order", orderStr);
     }
 }
@@ -2096,7 +2225,6 @@ void VerticalCRS::addLinearUnitConvert(
     auto &axisList = coordinateSystem()->axisList();
 
     if (!axisList.empty()) {
-        auto projUnit = axisList[0]->unit().exportToPROJString();
         if (axisList[0]->unit().conversionToSI() != 1.0) {
             formatter->addStep("unitconvert");
             formatter->addParam("z_in", "m");
@@ -2204,20 +2332,23 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const bool unsignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createVerticalCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createVerticalCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
@@ -2422,16 +2553,21 @@ void DerivedCRS::setDerivingConversionCRS() {
 
 // ---------------------------------------------------------------------------
 
-void DerivedCRS::baseExportToWKT(io::WKTFormatter *&formatter,
+void DerivedCRS::baseExportToWKT(io::WKTFormatter *formatter,
                                  const std::string &keyword,
                                  const std::string &baseKeyword) const {
     formatter->startNode(keyword, !identifiers().empty());
     formatter->addQuotedString(nameStr());
 
     const auto &l_baseCRS = d->baseCRS_;
-    formatter->startNode(baseKeyword, !l_baseCRS->identifiers().empty());
+    formatter->startNode(baseKeyword, formatter->use2018Keywords() &&
+                                          !l_baseCRS->identifiers().empty());
     formatter->addQuotedString(l_baseCRS->nameStr());
     l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
+    if (formatter->use2018Keywords() &&
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
+        l_baseCRS->formatID(formatter);
+    }
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
@@ -2659,7 +2795,7 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
              dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                 ? io::WKTConstants::BASEGEOGCRS
                 : io::WKTConstants::BASEGEODCRS,
-            !l_baseCRS->identifiers().empty());
+            formatter->use2018Keywords() && !l_baseCRS->identifiers().empty());
         formatter->addQuotedString(l_baseCRS->nameStr());
         l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
         // insert ellipsoidal cs unit when the units of the map
@@ -2670,6 +2806,10 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             geodeticCRSAxisList[0]->unit()._exportToWKT(formatter);
         }
         l_baseCRS->primeMeridian()->_exportToWKT(formatter);
+        if (formatter->use2018Keywords() &&
+            !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
+            l_baseCRS->formatID(formatter);
+        }
         formatter->endNode();
     } else {
         const auto oldAxisOutputRule = formatter->outputAxis();
@@ -2843,9 +2983,7 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
             if (order[0] && order[1]) {
                 formatter->addStep("axisswap");
                 char orderStr[10];
-                strcpy(orderStr, order[0]);
-                strcat(orderStr, ",");
-                strcat(orderStr, order[1]);
+                sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
                 formatter->addParam("order", orderStr);
             }
         } else {
@@ -2998,21 +3136,24 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
 
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createProjectedCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::
-                                       EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createProjectedCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::
+                                EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
@@ -3087,8 +3228,8 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         // Sort results
         res.sort(lambdaSort);
 
-        if (identifiers().empty() && !foundEquivalentName &&
-            (res.empty() || res.front().second < 50)) {
+        if (!hasCodeCompatibleOfAuthorityFactory(this, authorityFactory) &&
+            !foundEquivalentName && (res.empty() || res.front().second < 50)) {
             std::set<std::pair<std::string, std::string>> alreadyKnown;
             for (const auto &pair : res) {
                 const auto &ids = pair.first->identifiers();
@@ -3346,20 +3487,23 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
 
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createCompoundCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createCompoundCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
@@ -3855,7 +3999,7 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 for (const auto &op : ops) {
                     std::string opTransfPROJString;
                     bool opTransfPROJStringValid = false;
-                    if (op->nameStr().find("Null geographic") == 0) {
+                    if (op->nameStr().find("Ballpark geographic") == 0) {
                         if (isTOWGS84Compatible()) {
                             auto params =
                                 transformation()->getTOWGS84Parameters();
@@ -4849,7 +4993,7 @@ DerivedCRSTemplate<DerivedCRSTraits>::create(
 
 // ---------------------------------------------------------------------------
 
-static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *&formatter,
+static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *formatter,
                                                const std::string &crsName,
                                                bool wkt2_2018_only) {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;

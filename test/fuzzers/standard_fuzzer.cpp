@@ -64,6 +64,14 @@ int LLVMFuzzerInitialize(int* /*argc*/, char*** argv)
 
 int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
 {
+    if( len > 1000 )
+    {
+#ifdef STANDALONE
+        fprintf(stderr, "Input too large\n");
+#endif
+        return 0;
+    }
+
     /* We expect the blob to be 3 lines: */
     /* source proj string\ndestination proj string\nx y */
     char* buf_dup = (char*)malloc(len+1);

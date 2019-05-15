@@ -12,7 +12,7 @@ PROJ_HEAD(boggs, "Boggs Eumorphic") "\n\tPCyl, no inv, Sph";
 # define FYC	0.49931
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY boggs_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
 	double theta, th1, c;
 	int i;
@@ -39,6 +39,6 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 
 PJ *PROJECTION(boggs) {
     P->es = 0.;
-    P->fwd = s_forward;
+    P->fwd = boggs_s_forward;
     return P;
 }

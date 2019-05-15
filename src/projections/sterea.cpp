@@ -44,7 +44,7 @@ PROJ_HEAD(sterea, "Oblique Stereographic Alternative") "\n\tAzimuthal, Sph&Ell";
 
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY sterea_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosc, sinc, cosl, k;
@@ -53,14 +53,19 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     sinc = sin(lp.phi);
     cosc = cos(lp.phi);
     cosl = cos(lp.lam);
-    k = P->k0 * Q->R2 / (1. + Q->sinc0 * sinc + Q->cosc0 * cosc * cosl);
+    const double denom = 1. + Q->sinc0 * sinc + Q->cosc0 * cosc * cosl;
+    if( denom == 0.0 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return proj_coord_error().xy;
+    }
+    k = P->k0 * Q->R2 / denom;
     xy.x = k * cosc * sin(lp.lam);
     xy.y = k * (Q->cosc0 * sinc - Q->sinc0 * cosc * cosl);
     return xy;
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP sterea_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double rho, c, sinc, cosc;
@@ -109,8 +114,8 @@ PJ *PROJECTION(sterea) {
     Q->cosc0 = cos (Q->phic0);
     Q->R2 = 2. * R;
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = sterea_e_inverse;
+    P->fwd = sterea_e_forward;
     P->destructor = destructor;
 
     return P;

@@ -16,7 +16,7 @@ Synopsis
 ********
 
     | **projinfo**
-    |    [-o formats] [-k crs|operation] [--summary] [-q]
+    |    [-o formats] [-k crs|operation|ellipsoid] [--summary] [-q]
     |    [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]
     |    [--spatial-test contains|intersects]
     |    [--crs-extent-use none|both|intersection|smallest]
@@ -29,12 +29,19 @@ Synopsis
     |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
     |
 
-    where {object_definition} is a PROJ string, a
-    WKT string, an object name or a AUTHORITY:CODE
-    (where AUTHORITY is the name of a CRS authority and CODE the code of a CRS
-    found in the proj.db database).
+    where {object_definition} or {srs_def} is
 
-    {object_reference} is a filename preceded with the '@' character.  The
+    - a proj-string,
+    - a WKT string,
+    - an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+      "urn:ogc:def:coordinateOperation:EPSG::1671"),
+    - a OGC URN combining references for compound coordinate reference systems
+      (e.g "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717" or custom abbreviated
+      syntax "EPSG:2393+5717"),
+    - a OGC URN combining references for concatenated operations
+      (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
+
+    {object_reference} is a filename preceded by the '@' character.  The
     file referenced by the {object_reference} must contain a valid
     {object_definition}.
 
@@ -62,16 +69,16 @@ The following control parameters can appear in any order:
 
     Except ``all`` and ``default``, other formats can be preceded by ``-`` to disable them.
 
-.. option:: -k crs|operation
+.. option:: -k crs|operation|ellipsoid
 
     When used to query a single object with a AUTHORITY:CODE, determines the (k)ind of the object
-    in case there are CRS or coordinate operations with the same CODE.
+    in case there are CRS, coordinate operations or ellipsoids with the same CODE.
     The default is crs.
 
 .. option:: --summary
 
     When listing coordinate operations available between 2 CRS, return the
-    result in a summary format, mentionning only the name of the coordinate
+    result in a summary format, mentioning only the name of the coordinate
     operation, its accuracy and its area of use.
 
     .. note:: only used for coordinate operation computation
@@ -107,8 +114,8 @@ The following control parameters can appear in any order:
 .. option:: --spatial-test contains|intersects
 
     Specify how the area of use of coordinate operations found in the database
-    are compared to the area of use specfied explicitly with :option:`--area` or :option:`--bbox`,
-    or derivedi implictly from the area of use of the source and target CRS.
+    are compared to the area of use specified explicitly with :option:`--area` or :option:`--bbox`,
+    or derived implicitly from the area of use of the source and target CRS.
     By default, projinfo will only keep coordinate operations whose are of use
     is strictly within the area of interest (``contains`` strategy).
     If using the ``intersects`` strategy, the spatial test is relaxed, and any
@@ -194,6 +201,16 @@ The following control parameters can appear in any order:
     structure that is identical to the main database, but can be partly filled
     and their entries can refer to entries of the main database.
     The option may be repeated to specify several auxiliary databases.
+
+.. option:: --identify
+
+    When used with an object definition, this queries the PROJ database to find
+    known objects, typically CRS, that are close or identical to the object.
+    Each candidate object is associated with an approximate likelihood percentage.
+    This is useful when used with a WKT string that lacks a EPSG identifier,
+    such as ESRI WKT1. This might also be used with PROJ strings.
+    For example, `+proj=utm +zone=31 +datum=WGS84 +type=crs` will be identified
+    with a likelihood of 70% to EPSG:32631
 
 .. option:: --c-ify
 

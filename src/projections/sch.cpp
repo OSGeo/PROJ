@@ -55,7 +55,7 @@ struct pj_opaque {
 
 PROJ_HEAD(sch, "Spherical Cross-track Height") "\n\tMisc\n\tplat_0= plon_0= phdg_0= [h_0=]";
 
-static PJ_LPZ inverse3d(PJ_XYZ xyz, PJ *P) {
+static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
     PJ_LPZ lpz = {0.0, 0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double temp[3];
@@ -93,7 +93,7 @@ static PJ_LPZ inverse3d(PJ_XYZ xyz, PJ *P) {
     return lpz;
 }
 
-static PJ_XYZ forward3d(PJ_LPZ lpz, PJ *P) {
+static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
     PJ_XYZ xyz = {0.0, 0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double temp[3];
@@ -187,8 +187,8 @@ static PJ *setup(PJ *P) { /* general initialization */
     Q->xyzoff[1] = pxyz[1] - (Q->rcurv) * clt * slo;
     Q->xyzoff[2] = pxyz[2] - (Q->rcurv) * slt;
 
-    P->fwd3d = forward3d;
-    P->inv3d = inverse3d;
+    P->fwd3d = sch_forward3d;
+    P->inv3d = sch_inverse3d;
     return P;
 }
 
@@ -215,7 +215,7 @@ PJ *PROJECTION(sch) {
         return pj_default_destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
     }
 
-    /* Check if peg latitude is defined */
+    /* Check if peg heading is defined */
     if (pj_param(P->ctx, P->params, "tphdg_0").i)
         Q->phdg = pj_param(P->ctx, P->params, "rphdg_0").f;
     else {

@@ -2291,7 +2291,7 @@ INSERT INTO "area" VALUES('EPSG','3311','Africa - South Sudan and Sudan onshore'
 INSERT INTO "area" VALUES('EPSG','3312','Suriname - onshore','Suriname - onshore.',1.83,6.06,-58.08,-53.95,0);
 INSERT INTO "area" VALUES('EPSG','3313','Sweden - onshore','Sweden - onshore.',55.28,69.07,10.93,24.17,0);
 INSERT INTO "area" VALUES('EPSG','3314','Syria - onshore','Syria - onshore.',32.31,37.3,35.61,42.38,0);
-INSERT INTO "area" VALUES('EPSG','3315','Taiwan - onshore','Taiwan, Republic of China - onshore - Taiwan Island, Penghu (Pescadores) Islands.',21.87,25.34,119.25,122.06,0);
+INSERT INTO "area" VALUES('EPSG','3315','Taiwan - onshore - mainland and Penghu','Taiwan, Republic of China - onshore - Taiwan Island, Penghu (Pescadores) Islands.',21.87,25.34,119.25,122.06,0);
 INSERT INTO "area" VALUES('EPSG','3316','Tanzania - onshore','Tanzania - onshore.',-11.75,-0.99,29.34,40.48,0);
 INSERT INTO "area" VALUES('EPSG','3317','Thailand - onshore','Thailand - onshore.',5.63,20.46,97.34,105.64,0);
 INSERT INTO "area" VALUES('EPSG','3318','East Timor - onshore','Timor-Leste (East Timor) - onshore.',-9.5,-8.08,124.03,127.36,0);
@@ -2567,7 +2567,7 @@ INSERT INTO "area" VALUES('EPSG','3587','Europe - 25.5°E to 28.5°E onshore and
 INSERT INTO "area" VALUES('EPSG','3588','Europe - 28.5°E to 31.5°E onshore and S-42(58) by country','Bulgaria and Romania - onshore east of 28°30''E.',43.34,45.44,28.5,29.74,0);
 INSERT INTO "area" VALUES('EPSG','3589','Pakistan - Gambat','Pakistan - Gambat.',25.88,27.67,68.24,69.3,0);
 INSERT INTO "area" VALUES('EPSG','3590','Nigeria - 4°N to 5°N, 6°E to 8°E','Nigeria - 4°N to 5°N and 6°E to 8°E.',3.99,5.01,5.99,8.01,0);
-INSERT INTO "area" VALUES('EPSG','3591','Taiwan - 118°E to 120°E onshore','Taiwan, Republic of China - onshore between 118°E and 120°E - Penghu (Pescadores) Islands.',23.12,23.82,119.25,119.78,0);
+INSERT INTO "area" VALUES('EPSG','3591','Taiwan - onshore - Penghu','Taiwan, Republic of China - onshore - Penghu (Pescadores) Islands.',23.12,23.82,119.25,119.78,0);
 INSERT INTO "area" VALUES('EPSG','3592','Antarctica - Darwin Glacier region','Antarctica - Darwin Glacier region.',-81.0,-76.0,145.0,169.0,0);
 INSERT INTO "area" VALUES('EPSG','3593','New Zealand - offshore','New Zealand - offshore.',-55.95,-25.88,160.6,-171.2,0);
 INSERT INTO "area" VALUES('EPSG','3594','Europe - EVRF2007','Europe - onshore - Andorra; Austria; Belgium; Bosnia and Herzegovina; Bulgaria; Croatia; Czech Republic; Denmark; Estonia; Finland; France - mainland; Germany; Gibraltar, Hungary; Italy - mainland and Sicily; Latvia; Liechtenstein; Lithuania; Luxembourg; Netherlands; Norway; Poland; Portugal; Romania; San Marino; Slovakia; Slovenia; Spain - mainland; Sweden; Switzerland; United Kingdom (UK) - Great Britain mainland; Vatican City State.',35.95,71.21,-9.56,31.59,0);
@@ -2958,7 +2958,7 @@ INSERT INTO "area" VALUES('EPSG','3978','Indonesia - 96°E to 102°E, N hemisphe
 INSERT INTO "area" VALUES('EPSG','3979','Indonesia - 102°E to 108°E, N hemisphere onshore','Indonesia - onshore north of equator and between 102°E and 108°E.',0.0,4.11,102.0,108.0,0);
 INSERT INTO "area" VALUES('EPSG','3980','Indonesia - 108°E to 114°E, N hemisphere onshore','Indonesia - onshore north of equator and between 108°E and 114°E.',0.0,4.25,108.0,114.0,0);
 INSERT INTO "area" VALUES('EPSG','3981','Indonesia - 114°E to 120°E, N hemisphere onshore','Indonesia - onshore north of equator and between 114°E and 120°E.',0.0,4.37,114.0,120.0,0);
-INSERT INTO "area" VALUES('EPSG','3982','Taiwan - 120°E to 122°E onshore','Taiwan, Republic of China - onshore between 120°E and 122°E - Taiwan Island.',21.87,25.34,119.99,122.06,0);
+INSERT INTO "area" VALUES('EPSG','3982','Taiwan - onshore - mainland','Taiwan, Republic of China - onshore - Taiwan Island.',21.87,25.34,119.99,122.06,0);
 INSERT INTO "area" VALUES('EPSG','3983','Indonesia - 120°E to 126°E, N hemisphere onshore','Indonesia - onshore north of equator and between 120°E and 126°E.',0.0,3.84,120.0,125.71,0);
 INSERT INTO "area" VALUES('EPSG','3984','Indonesia - 126°E to 132°E, N hemisphere onshore','Indonesia - onshore north of equator and between 126°E and 132°E.',0.0,4.59,126.55,131.0,0);
 INSERT INTO "area" VALUES('EPSG','3985','Indonesia - 96°E to 102°E, S hemisphere onshore','Indonesia - onshore south of equator and between 96°E and 102°E.',-3.57,0.0,98.24,102.0,0);
@@ -3505,4 +3505,6 @@ INSERT INTO "area" VALUES('EPSG','4525','Pacific - Guam and NMI - onshore','Guam
 INSERT INTO "area" VALUES('EPSG','4526','Saudi Arabia - 36°E to 42°E','Saudi Arabia - onshore and offshore - between 36°E and 42°E.',16.29,32.16,36.0,42.0,0);
 INSERT INTO "area" VALUES('EPSG','4527','Saudi Arabia - 42°E to 48°E','Saudi Arabia - onshore and offshore - between of 42°E and 48°E.',15.61,31.15,41.99,48.0,0);
 INSERT INTO "area" VALUES('EPSG','4528','Saudi Arabia - 48°E to 54°E','Saudi Arabia - onshore and offshore - between 48°E and 54°E.',17.43,28.94,48.0,54.01,0);
+INSERT INTO "area" VALUES('EPSG','4531','Costa Rica - offshore Caribbean','Costa Rica - offshore - Caribbean sea.',9.6,11.77,-83.6,-81.43,0);
+INSERT INTO "area" VALUES('EPSG','4532','Costa Rica - offshore Pacific','Costa Rica - offshore Pacific ocean and onshore Coco Island.',2.15,11.11,-90.45,-82.92,0);
 INSERT INTO "area" VALUES('EPSG','4540','Africa - South Africa, Lesotho and Eswatini.','Eswatini (Swaziland); Lesotho; South Africa - onshore and offshore.',-50.32,-22.13,13.33,42.85,0);

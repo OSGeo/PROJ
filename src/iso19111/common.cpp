@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -641,7 +641,7 @@ const std::string &IdentifiedObject::remarks() PROJ_PURE_DEFN {
 
 /** \brief Return whether the object is deprecated.
  *
- * \remark Extension of \ref ISO_19111_2018
+ * \remark Extension of \ref ISO_19111_2019
  */
 bool IdentifiedObject::isDeprecated() PROJ_PURE_DEFN { return d->isDeprecated; }
 
@@ -1073,7 +1073,7 @@ void ObjectUsage::setProperties(
 
 void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    if (isWKT2 && formatter->outputId()) {
+    if (isWKT2 && formatter->outputUsage()) {
         auto l_domains = domains();
         if (!l_domains.empty()) {
             if (formatter->use2018Keywords()) {

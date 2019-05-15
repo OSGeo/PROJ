@@ -22,7 +22,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY mod_ster_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double sinlon, coslon, esphi, chi, schi, cchi, s;
@@ -35,7 +35,12 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
         pow((1. - esphi) / (1. + esphi), P->e * .5)) - M_HALFPI;
     schi = sin(chi);
     cchi = cos(chi);
-    s = 2. / (1. + Q->schio * schi + Q->cchio * cchi * coslon);
+    const double denom = 1. + Q->schio * schi + Q->cchio * cchi * coslon;
+    if( denom == 0 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
+    s = 2. / denom;
     p.r = s * cchi * sinlon;
     p.i = s * (Q->cchio * schi - Q->schio * cchi * coslon);
     p = pj_zpoly1(p, Q->zcoeff, Q->n);
@@ -46,7 +51,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP mod_ster_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int nn;
@@ -72,7 +77,6 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         z = 2. * atan(.5 * rh);
         sinz = sin(z);
         cosz = cos(z);
-        lp.lam = P->lam0;
         if (fabs(rh) <= EPSLN) {
             /* if we end up here input coordinates were (0,0).
              * pj_inv() adds P->lam0 to lp.lam, this way we are
@@ -115,8 +119,8 @@ static PJ *setup(PJ *P) { /* general initialization */
         chio = P->phi0;
     Q->schio = sin(chio);
     Q->cchio = cos(chio);
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = mod_ster_e_inverse;
+    P->fwd = mod_ster_e_forward;
 
     return P;
 }

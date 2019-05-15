@@ -16,7 +16,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY labrd_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double V1, V2, ps, sinps, cosps, sinps2, cosps2;
@@ -49,7 +49,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP labrd_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     /* t = 0.0 optimization is to avoid a false positive cppcheck warning */
@@ -130,8 +130,8 @@ PJ *PROJECTION(labrd) {
     Q->Cc = 3. * (Q->Ca * Q->Ca - Q->Cb * Q->Cb);
     Q->Cd = 6. * Q->Ca * Q->Cb;
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = labrd_e_inverse;
+    P->fwd = labrd_e_forward;
 
     return P;
 }

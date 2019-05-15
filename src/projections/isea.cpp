@@ -10,11 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <limits>
+
 #define PJ_LIB__
-#include "proj_internal.h"
-#include "proj_math.h"
 #include "proj.h"
 #include "proj_internal.h"
+#include "proj_math.h"
 
 #define DEG36 0.62831853071795864768
 #define DEG72 1.25663706143591729537
@@ -89,6 +90,9 @@ static void hexbin2(double width, double x, double y, long *i, long *j) {
     y = y - x / 2.0; /* adjustment for rotated X */
 
     /* adjust for actual hexwidth */
+    if( width == 0 ) {
+        throw "Division by zero";
+    }
     x /= width;
     y /= width;
 
@@ -100,6 +104,10 @@ static void hexbin2(double width, double x, double y, long *i, long *j) {
     iy = lround(ry);
     rz = floor(z + 0.5);
     iz = lround(rz);
+    if( fabs((double)ix + iy) > std::numeric_limits<int>::max() ||
+        fabs((double)ix + iy + iz) > std::numeric_limits<int>::max() ) {
+        throw "Integer overflow";
+    }
 
     s = ix + iy + iz;
 
@@ -764,11 +772,18 @@ static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
     }
     /* todo might want to do this as an iterated loop */
     if (g->aperture >0) {
-        sidelength = lround(pow(g->aperture, g->resolution / 2.0));
+        double sidelengthDouble = pow(g->aperture, g->resolution / 2.0);
+        if( fabs(sidelengthDouble) > std::numeric_limits<int>::max() ) {
+            throw "Integer overflow";
+        }
+        sidelength = lround(sidelengthDouble);
     } else {
         sidelength = g->resolution;
     }
 
+    if( sidelength == 0 ) {
+        throw "Division by zero";
+    }
     hexwidth = 1.0 / sidelength;
 
     v = *pt;
@@ -847,7 +862,7 @@ static long isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
         return g->serial;
     }
     /* hexes in a quad */
-    hexes = lround(pow(g->aperture, g->resolution));
+    hexes = lround(pow(static_cast<double>(g->aperture), static_cast<double>(g->resolution)));
     if (quad == 11) {
         g->serial = 1 + 10 * hexes + 1;
         return g->serial;
@@ -883,6 +898,10 @@ static int isea_hex(struct isea_dgg *g, int tri,
 
     quad = isea_ptdi(g, tri, pt, &v);
 
+    if( v.x < (INT_MIN >> 4) || v.x > (INT_MAX >> 4) )
+    {
+        throw "Invalid shift";
+    }
     hex->x = ((int)v.x << 4) + quad;
     hex->y = v.y;
 
@@ -995,7 +1014,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY isea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     struct isea_pt out;
@@ -1004,7 +1023,12 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     in.lon = lp.lam;
     in.lat = lp.phi;
 
-    out = isea_forward(&Q->dgg, &in);
+    try {
+        out = isea_forward(&Q->dgg, &in);
+    } catch( const char* ) {
+        proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+        return proj_coord_error().xy;
+    }
 
     xy.x = out.x;
     xy.y = out.y;
@@ -1021,7 +1045,7 @@ PJ *PROJECTION(isea) {
     P->opaque = Q;
 
 
-    P->fwd = s_forward;
+    P->fwd = isea_s_forward;
     isea_grid_init(&Q->dgg);
 
     Q->dgg.output = ISEA_PLANE;
@@ -1049,14 +1073,6 @@ PJ *PROJECTION(isea) {
 
     if (pj_param(P->ctx,P->params, "tlat_0").i) {
         Q->dgg.o_lat = pj_param(P->ctx,P->params, "rlat_0").f;
-    }
-
-    if (pj_param(P->ctx,P->params, "taperture").i) {
-        Q->dgg.aperture = pj_param(P->ctx,P->params, "iaperture").i;
-    }
-
-    if (pj_param(P->ctx,P->params, "tresolution").i) {
-        Q->dgg.resolution = pj_param(P->ctx,P->params, "iresolution").i;
     }
 
     opt = pj_param(P->ctx,P->params, "smode").s;

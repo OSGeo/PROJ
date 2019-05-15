@@ -33,13 +33,8 @@
 #include <string.h>
 
 #include "proj.h"
-#include "proj_internal.h"
-
-/* Windows nmake build doesn't have a proj_config.h, but HAVE_LOCALECONV */
-/* is defined in the compilation line */
-#ifndef HAVE_LOCALECONV
 #include "proj_config.h"
-#endif
+#include "proj_internal.h"
 
 #define PJ_STRTOD_WORK_BUFFER_SIZE 64
 

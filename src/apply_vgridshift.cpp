@@ -28,23 +28,23 @@
 
 #define PJ_LIB__
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "proj_math.h"
 #include "proj_internal.h"
-#include "proj_internal.h"
 
-static int is_nodata(float value)
+static int is_nodata(float value, double vmultiplier)
 {
     /* nodata?  */
     /* GTX official nodata value if  -88.88880f, but some grids also */
     /* use other  big values for nodata (e.g naptrans2008.gtx has */
     /* nodata values like -2147479936), so test them too */
-    return value > 1000 || value < -1000 || value == -88.88880f;
+    return value * vmultiplier > 1000 || value * vmultiplier < -1000 || value == -88.88880f;
 }
 
-static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
+static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
     int  itable = 0;
     double value = HUGE_VAL;
     double grid_x, grid_y;
@@ -63,9 +63,19 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ
 
         ct = gi->ct;
 
-        /* skip tables that don't match our point at all.  */
-        if( ct->ll.phi > input.phi || ct->ll.lam > input.lam
-            || ct->ll.phi + (ct->lim.phi-1) * ct->del.phi < input.phi
+        /* skip tables that don't match our point at all (latitude check).  */
+        if( ct->ll.phi > input.phi
+            || ct->ll.phi + (ct->lim.phi-1) * ct->del.phi < input.phi )
+            continue;
+
+        bool fullWorldLongExtent = false;
+        if( fabs(ct->lim.lam * ct->del.lam - 2 * M_PI) < 1e-10 )
+        {
+            fullWorldLongExtent = true;
+        }
+
+        /* skip tables that don't match our point at all (longitude check).  */
+        else if( ct->ll.lam > input.lam
             || ct->ll.lam + (ct->lim.lam-1) * ct->del.lam < input.lam )
             continue;
 
@@ -78,8 +88,17 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ
             {
                 struct CTABLE *ct1 = child->ct;
 
-                if( ct1->ll.phi > input.phi || ct1->ll.lam > input.lam
-                  || ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi < input.phi
+                fullWorldLongExtent = false;
+
+                if( ct1->ll.phi > input.phi
+                  || ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi < input.phi)
+                    continue;
+
+                if( fabs(ct1->lim.lam * ct1->del.lam - 2 * M_PI) < 1e-10 )
+                {
+                    fullWorldLongExtent = true;
+                }
+                else if( ct1->ll.lam > input.lam
                   || ct1->ll.lam+(ct1->lim.lam-1)*ct1->del.lam < input.lam)
                     continue;
 
@@ -98,24 +117,41 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ
         }
 
         /* load the grid shift info if we don't have it. */
-        if( ct->cvs == nullptr && !pj_gridinfo_load( pj_get_ctx(defn), gi ) )
+        if( ct->cvs == nullptr )
         {
-            pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-            return PJD_ERR_FAILED_TO_LOAD_GRID;
+            if( !pj_gridinfo_load( pj_get_ctx(defn), gi ) || ct->cvs == nullptr )
+            {
+                pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+                return PJD_ERR_FAILED_TO_LOAD_GRID;
+            }
         }
 
 
         /* Interpolation a location within the grid */
         grid_x = (input.lam - ct->ll.lam) / ct->del.lam;
+        if( fullWorldLongExtent ) {
+            // The first fmod goes to ]-lim, lim[ range
+            // So we add lim again to be in ]0, 2*lim[ and fmod again
+            grid_x = fmod(
+                fmod(grid_x + ct->lim.lam, ct->lim.lam) + ct->lim.lam,
+                ct->lim.lam);
+        }
         grid_y = (input.phi - ct->ll.phi) / ct->del.phi;
         grid_ix = lround(floor(grid_x));
+        assert(grid_ix >= 0 && grid_ix < ct->lim.lam);
         grid_iy = lround(floor(grid_y));
+        assert(grid_iy >= 0 && grid_iy < ct->lim.phi);
         grid_x -= grid_ix;
         grid_y -= grid_iy;
 
         grid_ix2 = grid_ix + 1;
-        if( grid_ix2 >= ct->lim.lam )
-            grid_ix2 = ct->lim.lam - 1;
+        if( grid_ix2 >= ct->lim.lam ) {
+            if( fullWorldLongExtent ) {
+              grid_ix2 = 0;
+            } else {
+              grid_ix2 = ct->lim.lam - 1;
+            }
+        }
         grid_iy2 = grid_iy + 1;
         if( grid_iy2 >= ct->lim.phi )
             grid_iy2 = ct->lim.phi - 1;
@@ -129,28 +165,28 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ
             double total_weight = 0.0;
             int n_weights = 0;
             value = 0.0f;
-            if( !is_nodata(value_a) )
+            if( !is_nodata(value_a, vmultiplier) )
             {
                 double weight = (1.0-grid_x) * (1.0-grid_y);
                 value += value_a * weight;
                 total_weight += weight;
                 n_weights ++;
             }
-            if( !is_nodata(value_b) )
+            if( !is_nodata(value_b, vmultiplier) )
             {
                 double weight = (grid_x) * (1.0-grid_y);
                 value += value_b * weight;
                 total_weight += weight;
                 n_weights ++;
             }
-            if( !is_nodata(value_c) )
+            if( !is_nodata(value_c, vmultiplier) )
             {
                 double weight = (1.0-grid_x) * (grid_y);
                 value += value_c * weight;
                 total_weight += weight;
                 n_weights ++;
             }
-            if( !is_nodata(value_d) )
+            if( !is_nodata(value_d, vmultiplier) )
             {
                 double weight = (grid_x) * (grid_y);
                 value += value_d * weight;
@@ -165,7 +201,7 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, int *gridlist_count_p, PJ
 
     }
 
-    return value;
+    return value * vmultiplier;
 }
 
 /************************************************************************/
@@ -218,7 +254,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
         input.phi = y[io];
         input.lam = x[io];
 
-        value = read_vgrid_value(defn, input, gridlist_count_p, tables, &ct);
+        value = read_vgrid_value(defn, input, 1.0, gridlist_count_p, tables, &ct);
 
         if( inverse )
             z[io] -= value;
@@ -310,7 +346,7 @@ int proj_vgrid_init(PJ* P, const char *grids) {
 }
 
 /***********************************************/
-double proj_vgrid_value(PJ *P, PJ_LP lp){
+double proj_vgrid_value(PJ *P, PJ_LP lp, double vmultiplier){
 /***********************************************
 
   Read grid value at position lp in grids loaded
@@ -324,7 +360,7 @@ double proj_vgrid_value(PJ *P, PJ_LP lp){
     double value;
     memset(&used_grid, 0, sizeof(struct CTABLE));
 
-    value = read_vgrid_value(P, lp, &(P->vgridlist_geoid_count), P->vgridlist_geoid, &used_grid);
+    value = read_vgrid_value(P, lp, vmultiplier, &(P->vgridlist_geoid_count), P->vgridlist_geoid, &used_grid);
     proj_log_trace(P, "proj_vgrid_value: (%f, %f) = %f", lp.lam*RAD_TO_DEG, lp.phi*RAD_TO_DEG, value);
 
     return value;

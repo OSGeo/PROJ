@@ -54,7 +54,7 @@ static double lc(projCtx ctx, double b,double c,double a) {
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY chamb_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double sinphi, cosphi, a;
@@ -135,7 +135,7 @@ PJ *PROJECTION(chamb) {
     Q->p.x = Q->c[2].p.x = Q->c[0].p.x + Q->c[2].v.r * cos(Q->beta_0);
 
     P->es = 0.;
-    P->fwd = s_forward;
+    P->fwd = chamb_s_forward;
 
     return P;
 }

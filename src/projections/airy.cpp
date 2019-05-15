@@ -58,7 +58,7 @@ struct pj_opaque {
 # define EPS 1.e-10
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY airy_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  sinlam, coslam, cosphi, sinphi, t, s, Krho, cosz;
@@ -79,6 +79,10 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
         }
         if (fabs(s = 1. - cosz) > EPS) {
             t = 0.5 * (1. + cosz);
+            if(t == 0) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                return xy;
+            }
             Krho = -log(t)/s - Q->Cb / t;
         } else
             Krho = 0.5 - Q->Cb;
@@ -147,7 +151,7 @@ PJ *PROJECTION(airy) {
             Q->cosph0 = cos(P->phi0);
         }
     }
-    P->fwd = s_forward;
+    P->fwd = airy_s_forward;
     P->es = 0.;
     return P;
 }

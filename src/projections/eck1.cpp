@@ -9,7 +9,7 @@ PROJ_HEAD(eck1, "Eckert I") "\n\tPCyl, Sph";
 #define RP  0.31830988618379067154
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY eck1_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     (void) P;
 
@@ -20,7 +20,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP eck1_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     (void) P;
 
@@ -34,8 +34,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(eck1) {
     P->es = 0.0;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = eck1_s_inverse;
+    P->fwd = eck1_s_forward;
 
     return P
 ;

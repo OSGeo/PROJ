@@ -16,7 +16,7 @@ struct pj_opaque {
 
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY wink1_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
 	xy.x = .5 * lp.lam * (static_cast<struct pj_opaque*>(P->opaque)->cosphi1 + cos(lp.phi));
 	xy.y = lp.phi;
@@ -24,7 +24,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP wink1_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
 	lp.phi = xy.y;
 	lp.lam = 2. * xy.x / (static_cast<struct pj_opaque*>(P->opaque)->cosphi1 + cos(lp.phi));
@@ -40,8 +40,8 @@ PJ *PROJECTION(wink1) {
 
 	static_cast<struct pj_opaque*>(P->opaque)->cosphi1 = cos (pj_param(P->ctx, P->params, "rlat_ts").f);
 	P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = wink1_s_inverse;
+    P->fwd = wink1_s_forward;
 
     return P;
 }

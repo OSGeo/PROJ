@@ -29,9 +29,17 @@ paragraph for more details.
 
 .. c:function:: PJ* proj_create(PJ_CONTEXT *ctx, const char *definition)
 
-    Create a transformation object, or a CRS object, from a proj-string,
-    a WKT string, or object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
-    "urn:ogc:def:coordinateOperation:EPSG::1671").
+    Create a transformation object, or a CRS object, from:
+
+    - a proj-string,
+    - a WKT string,
+    - an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+      "urn:ogc:def:coordinateOperation:EPSG::1671"),
+    - a OGC URN combining references for compound coordinate reference systems
+      (e.g "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717" or custom abbreviated
+      syntax "EPSG:2393+5717"),
+    - a OGC URN combining references for concatenated operations
+      (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
 
     Example call:
 
@@ -110,7 +118,8 @@ paragraph for more details.
 
         - the name of a CRS as found in the PROJ database, e.g "WGS84", "NAD27", etc.
 
-        - more generally any string accepted by :c:func:`proj_create`
+        - more generally any string accepted by :c:func:`proj_create` representing
+          a CRS
 
     An "area of use" can be specified in area. When it is supplied, the more
     accurate transformation between two given systems can be chosen.
@@ -143,6 +152,25 @@ paragraph for more details.
     :param `area`: Descriptor of the desired area for the transformation.
     :type `area`: PJ_AREA
     :returns: :c:type:`PJ*`
+
+.. c:function:: PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj)
+
+    .. versionadded:: 6.1.0
+
+    Returns a PJ* object whose axis order is the one expected for
+    visualization purposes.
+
+    The input object must be a coordinate operation, that has been created with
+    proj_create_crs_to_crs().
+    If the axis order of its source or target CRS is northing,easting, then an
+    axis swap operation will be inserted.
+
+    The returned :c:type:`PJ`-pointer should be deallocated with :c:func:`proj_destroy`.
+
+    :param PJ_CONTEXT* ctx: Threading context.
+    :param `obj`: Object of type CoordinateOperation
+    :returns: :c:type:`PJ*`
+
 
 .. c:function:: PJ* proj_destroy(PJ *P)
 
@@ -221,10 +249,16 @@ Coordinate transformation
         3. of length one, i.e. a constant, which will be treated as a fully
            populated array of that constant value
 
+    .. note:: Even though he coordinate components are named :c:data:`x`, :c:data:`y`,
+              :c:data:`z` and :c:data:`t`, axis ordering of the to and from CRS
+              is respected. Transformations exhibit the same behaviour
+              as if they were gathered in a :c:type:`PJ_COORD` struct.
+
+
     The strides, :c:data:`sx`, :c:data:`sy`, :c:data:`sz`, :c:data:`st`,
     represent the step length, in bytes, between
     consecutive elements of the corresponding array. This makes it possible for
-    :c:func:`proj_transform` to handle transformation of a large class of application
+    :c:func:`proj_trans_generic` to handle transformation of a large class of application
     specific data structures, without necessarily understanding the data structure
     format, as in:
 
@@ -250,21 +284,22 @@ Coordinate transformation
             0, 0                          /*  and the time is the constant 0.00 s */
         );
 
-    This is similar to the inner workings of the deprecated pj_transform function, but the
-    stride functionality has been generalized to work for any size of basic unit,
-    not just a fixed number of doubles.
+    This is similar to the inner workings of the deprecated :c:func:`pj_transform`
+    function, but the stride functionality has been generalized to work for any
+    size of basic unit, not just a fixed number of doubles.
 
     In most cases, the stride will be identical for x, y, z, and t, since they will
-    typically be either individual arrays (stride = sizeof(double)), or strided
-    views into an array of application specific data structures (stride = sizeof (...)).
+    typically be either individual arrays (``stride = sizeof(double)``), or strided
+    views into an array of application specific data structures (``stride = sizeof (...)``).
 
     But in order to support cases where :c:data:`x`, :c:data:`y`, :c:data:`z`,
     and :c:data:`t` come from heterogeneous sources, individual strides,
     :c:data:`sx`, :c:data:`sy`, :c:data:`sz`, :c:data:`st`, are used.
 
-    .. note:: Since :c:func:`proj_transform` does its work *in place*, this means that even the
-              supposedly constants (i.e. length 1 arrays) will return from the call in altered
-              state. Hence, remember to reinitialize between repeated calls.
+    .. note:: Since :c:func:`proj_trans_generic` does its work *in place*,
+              this means that even the supposedly constants (i.e. length 1 arrays)
+              will return from the call in altered state. Hence, remember to
+              reinitialize between repeated calls.
 
     :param PJ* P: Transformation object
     :param `direction`: Transformation direction
@@ -631,23 +666,23 @@ Various
 
 .. c:function:: int proj_angular_input (PJ *P, enum PJ_DIRECTION dir)
 
-    Check if a operation expects angular input.
+    Check if a operation expects input in radians or not.
 
     :param `P`: Transformation object
     :type `P`: const PJ*
     :param `direction`: Starting direction of transformation
     :type `direction`: PJ_DIRECTION
-    :returns: :c:type:`int` 1 if angular input is expected, otherwise 0
+    :returns: :c:type:`int` 1 if input units is expected in radians, otherwise 0
 
 .. c:function:: int proj_angular_output (PJ *P, enum PJ_DIRECTION dir)
 
-    Check if an operation returns angular output.
+    Check if an operation returns output in radians or not.
 
     :param `P`: Transformation object
     :type `P`: const PJ*
     :param `direction`: Starting direction of transformation
     :type `direction`: PJ_DIRECTION
-    :returns: :c:type:`int` 1 if angular output is returned, otherwise 0
+    :returns: :c:type:`int` 1 if output units is expected in radians, otherwise 0
 
 C API for ISO-19111 functionality
 +++++++++++++++++++++++++++++++++

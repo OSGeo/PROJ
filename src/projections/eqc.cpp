@@ -16,7 +16,7 @@ PROJ_HEAD(eqc, "Equidistant Cylindrical (Plate Carree)")
     "\n\tCyl, Sph\n\tlat_ts=[, lat_0=0]";
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY eqc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -27,7 +27,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP eqc_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -46,8 +46,8 @@ PJ *PROJECTION(eqc) {
 
     if ((Q->rc = cos(pj_param(P->ctx, P->params, "rlat_ts").f)) <= 0.)
         return pj_default_destructor (P, PJD_ERR_LAT_TS_LARGER_THAN_90);
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = eqc_s_inverse;
+    P->fwd = eqc_s_forward;
     P->es = 0.;
 
     return P;

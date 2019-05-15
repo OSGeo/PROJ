@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -109,8 +109,9 @@ using InverseCoordinateOperationNNPtr = util::nn<InverseCoordinateOperationPtr>;
  */
 class InverseCoordinateOperation : virtual public CoordinateOperation {
   public:
-    InverseCoordinateOperation(const CoordinateOperationNNPtr &forwardOperation,
-                               bool wktSupportsInversion);
+    InverseCoordinateOperation(
+        const CoordinateOperationNNPtr &forwardOperationIn,
+        bool wktSupportsInversion);
 
     ~InverseCoordinateOperation() override;
 
@@ -123,6 +124,10 @@ class InverseCoordinateOperation : virtual public CoordinateOperation {
                         util::IComparable::Criterion::STRICT) const override;
 
     CoordinateOperationNNPtr inverse() const override;
+
+    const CoordinateOperationNNPtr &forwardOperation() const {
+        return forwardOperation_;
+    }
 
   protected:
     CoordinateOperationNNPtr forwardOperation_;
@@ -174,6 +179,8 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
 #endif
 
     static CoordinateOperationNNPtr create(const ConversionNNPtr &forward);
+
+    CoordinateOperationNNPtr _shallowClone() const override;
 };
 
 // ---------------------------------------------------------------------------
@@ -204,6 +211,8 @@ class InverseTransformation : public Transformation,
         return InverseCoordinateOperation::inverse();
     }
 
+    TransformationNNPtr inverseAsTransformation() const;
+
 #ifdef _MSC_VER
     // To avoid a warning C4250:
     // 'osgeo::proj::operation::InverseTransformation': inherits
@@ -216,6 +225,8 @@ class InverseTransformation : public Transformation,
 #endif
 
     static TransformationNNPtr create(const TransformationNNPtr &forward);
+
+    CoordinateOperationNNPtr _shallowClone() const override;
 };
 
 // ---------------------------------------------------------------------------
@@ -246,16 +257,20 @@ class PROJBasedOperation : public SingleOperation {
     create(const util::PropertyMap &properties,
            const io::IPROJStringExportableNNPtr &projExportable, bool inverse,
            const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-           const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+           const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies,
+           bool hasRoughTransformation);
 
     std::set<GridDescription>
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const override;
 
   protected:
-    PROJBasedOperation(const OperationMethodNNPtr &methodIn);
+    PROJBasedOperation(const PROJBasedOperation &) = default;
+    explicit PROJBasedOperation(const OperationMethodNNPtr &methodIn);
 
     void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    CoordinateOperationNNPtr _shallowClone() const override;
 
     INLINED_MAKE_SHARED
 

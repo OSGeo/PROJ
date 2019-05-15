@@ -117,7 +117,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 #include "proj_internal.h"
 #include "proj_math.h"
 #include "proj_strtod.h"
-#include "proj_internal.h"
 
 #include "optargpm.h"
 
@@ -148,7 +147,7 @@ static ffio *ffio_destroy (ffio *G);
 static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
 
 static const char *gie_tags[] = {
-    "<gie>", "operation", "use_proj4_init_rules",
+    "<gie>", "operation", "crs_src", "crs_dst", "use_proj4_init_rules",
     "accept", "expect", "roundtrip", "banner", "verbose",
     "direction", "tolerance", "ignore", "require_grid", "echo", "skip", "</gie>"
 };
@@ -175,6 +174,8 @@ static const char *err_const_from_errno (int err);
 
 typedef struct {
     char operation[MAX_OPERATION+1];
+    char crs_dst[MAX_OPERATION+1];
+    char crs_src[MAX_OPERATION+1];
     PJ *P;
     PJ_COORD a, b, c, e;
     PJ_DIRECTION dir;
@@ -247,6 +248,7 @@ int main (int argc, char **argv) {
     T.ignore = 5555; /* Error code that will not be issued by proj_create() */
     T.use_proj4_init_rules = FALSE;
 
+    /* coverity[tainted_data] */
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (nullptr==o)
         return 0;
@@ -298,6 +300,20 @@ int main (int argc, char **argv) {
         fprintf (stderr, "%s: No memory\n", o->progname);
         free (o);
         return 1;
+    }
+
+    for (i = 0; i < o->fargc; i++ ) {
+        FILE* f = fopen (o->fargv[i], "rt");
+        if (f == nullptr) {
+            fprintf (
+                T.fout,
+                "%sCannot open specified input file '%s' - bye!\n",
+                delim,
+                o->fargv[i]
+            );
+            return 1;
+        }
+        fclose(f);
     }
 
     for (i = 0;  i < o->fargc;  i++)
@@ -370,8 +386,6 @@ static int another_failing_roundtrip (void) {
 }
 
 static int process_file (const char *fname) {
-    FILE *f;
-
     F->lineno = F->next_lineno = F->level = 0;
     T.op_ok = T.total_ok = 0;
     T.op_ko = T.total_ko = 0;
@@ -383,15 +397,8 @@ static int process_file (const char *fname) {
         return 0;
     }
 
-    f = fopen (fname, "rt");
-    if (nullptr==f) {
-        if (T.verbosity > 0) {
-            fprintf (T.fout, "%sCannot open spec'd input file '%s' - bye!\n", delim, fname);
-            return 2;
-        }
-        errmsg (2, "Cannot open spec'd input file '%s' - bye!\n", fname);
-    }
-    F->f = f;
+    /* We have already tested in main that the file exists */
+    F->f = fopen (fname, "rt");
 
     if (T.verbosity > 0)
         fprintf (T.fout, "%sReading file '%s'\n", delim, fname);
@@ -405,7 +412,7 @@ static int process_file (const char *fname) {
         }
     }
 
-    fclose (f);
+    fclose (F->f);
     F->lineno = F->next_lineno = 0;
 
     T.grand_ok   += T.total_ok;
@@ -598,6 +605,65 @@ either a conversion or a transformation)
 
     /* Checking that proj_create succeeds is first done at "expect" time, */
     /* since we want to support "expect"ing specific error codes */
+
+    return 0;
+}
+
+static int crs_to_crs_operation() {
+    T.op_id++;
+    T.operation_lineno = F->lineno;
+
+    if (T.verbosity > 1) {
+        char buffer[80];
+        finish_previous_operation (F->args);
+        snprintf(buffer, 80, "%-36.36s -> %-36.36s", T.crs_src, T.crs_dst);
+        banner (buffer);
+    }
+
+    T.op_ok = 0;
+    T.op_ko = 0;
+    T.op_skip = 0;
+    T.skip_test = 0;
+
+    direction ("forward");
+    tolerance ("0.5 mm");
+    ignore ("pjd_err_dont_skip");
+
+    proj_errno_reset (T.P);
+
+    if (T.P)
+        proj_destroy (T.P);
+    proj_errno_reset (nullptr);
+    proj_context_use_proj4_init_rules(nullptr, T.use_proj4_init_rules);
+
+
+    T.P = proj_create_crs_to_crs(nullptr, T.crs_src, T.crs_dst, nullptr);
+
+    strcpy(T.crs_src, "");
+    strcpy(T.crs_dst, "");
+    return 0;
+}
+
+static int crs_src(const char *args) {
+    strncpy (&(T.crs_src[0]), F->args, MAX_OPERATION);
+    T.crs_src[MAX_OPERATION] = '\0';
+    (void) args;
+
+    if (strcmp(T.crs_src, "") != 0 && strcmp(T.crs_dst, "") != 0) {
+        crs_to_crs_operation();
+    }
+
+    return 0;
+}
+
+static int crs_dst(const char *args) {
+    strncpy (&(T.crs_dst[0]), F->args, MAX_OPERATION);
+    T.crs_dst[MAX_OPERATION] = '\0';
+    (void) args;
+
+    if (strcmp(T.crs_src, "") != 0 && strcmp(T.crs_dst, "") != 0) {
+        crs_to_crs_operation();
+    }
 
     return 0;
 }
@@ -939,7 +1005,8 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     else
         d = proj_xyz_dist (co, ce);
 
-    if (d > T.tolerance)
+    // Test written like that to handle NaN
+    if (!(d <= T.tolerance))
         return expect_message (d, args);
     succs++;
 
@@ -995,6 +1062,8 @@ static int dispatch (const char *cmnd, const char *args) {
     if (T.skip)
         return SKIP;
     if  (0==strcmp (cmnd, "operation")) return  operation ((char *) args);
+    if  (0==strcmp (cmnd, "crs_src"))   return  crs_src   (args);
+    if  (0==strcmp (cmnd, "crs_dst"))   return  crs_dst   (args);
     if (T.skip_test)
     {
         if  (0==strcmp (cmnd, "expect"))    return  another_skip();
@@ -1028,7 +1097,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_no_colon_in_init_string"  ,  -3},
     {"pjd_err_proj_not_named"           ,  -4},
     {"pjd_err_unknown_projection_id"    ,  -5},
-    {"pjd_err_eccentricity_is_one"      ,  -6},
+    {"pjd_err_invalid_eccentricity"      ,  -6},
     {"pjd_err_unknown_unit_id"          ,  -7},
     {"pjd_err_invalid_boolean_param"    ,  -8},
     {"pjd_err_unknown_ellp_param"       ,  -9},
@@ -1052,7 +1121,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_w_or_m_zero_or_less"      ,  -27},
     {"pjd_err_lsat_not_in_range"        ,  -28},
     {"pjd_err_path_not_in_range"        ,  -29},
-    {"pjd_err_h_less_than_zero"         ,  -30},
+    {"pjd_err_invalid_h"                ,  -30},
     {"pjd_err_k_less_than_zero"         ,  -31},
     {"pjd_err_lat_1_or_2_zero_or_90"    ,  -32},
     {"pjd_err_lat_0_or_alpha_eq_90"     ,  -33},
@@ -1083,6 +1152,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_invalid_arg"              ,  -58},
     {"pjd_err_inconsistent_unit"        ,  -59},
     {"pjd_err_mutually_exclusive_args"  ,  -60},
+    {"pjd_err_generic_error"            ,  -61},
     {"pjd_err_dont_skip"                ,  5555},
     {"pjd_err_unknown"                  ,  9999},
     {"pjd_err_enomem"                   ,  ENOMEM},

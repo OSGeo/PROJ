@@ -203,7 +203,7 @@ PJ_COORD PROJ_DLL pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD co
 /* Grid functionality */
 int             proj_vgrid_init(PJ *P, const char *grids);
 int             proj_hgrid_init(PJ *P, const char *grids);
-double          proj_vgrid_value(PJ *P, PJ_LP lp);
+double          proj_vgrid_value(PJ *P, PJ_LP lp, double vmultiplier);
 PJ_LP           proj_hgrid_value(PJ *P, PJ_LP lp);
 PJ_LP           proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction);
 
@@ -624,7 +624,7 @@ struct FACTORS {
 #define PJD_ERR_NO_COLON_IN_INIT_STRING  -3
 #define PJD_ERR_PROJ_NOT_NAMED           -4
 #define PJD_ERR_UNKNOWN_PROJECTION_ID    -5
-#define PJD_ERR_ECCENTRICITY_IS_ONE      -6
+#define PJD_ERR_INVALID_ECCENTRICITY     -6
 #define PJD_ERR_UNKNOWN_UNIT_ID          -7
 #define PJD_ERR_INVALID_BOOLEAN_PARAM    -8
 #define PJD_ERR_UNKNOWN_ELLP_PARAM       -9
@@ -648,7 +648,7 @@ struct FACTORS {
 #define PJD_ERR_W_OR_M_ZERO_OR_LESS     -27
 #define PJD_ERR_LSAT_NOT_IN_RANGE       -28
 #define PJD_ERR_PATH_NOT_IN_RANGE       -29
-#define PJD_ERR_H_LESS_THAN_ZERO        -30
+#define PJD_ERR_INVALID_H               -30
 #define PJD_ERR_K_LESS_THAN_ZERO        -31
 #define PJD_ERR_LAT_1_OR_2_ZERO_OR_90   -32
 #define PJD_ERR_LAT_0_OR_ALPHA_EQ_90    -33
@@ -679,6 +679,7 @@ struct FACTORS {
 #define PJD_ERR_INVALID_ARG             -58
 #define PJD_ERR_INCONSISTENT_UNIT       -59
 #define PJD_ERR_MUTUALLY_EXCLUSIVE_ARGS -60
+#define PJD_ERR_GENERIC_ERROR           -61
 /* NOTE: Remember to update src/strerrno.cpp, src/apps/gie.cpp and transient_error in */
 /* src/transform.cpp when adding new value */
 
@@ -897,12 +898,6 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
 int pj_gc_apply_gridshift( PJ *defn, int inverse,
                            long point_count, int point_offset,
                            double *x, double *y, double *z );
-
-PJ_GRIDINFO *pj_gc_findgrid( projCtx_t *ctx,
-                             PJ_GridCatalog *catalog, int after,
-                             PJ_LP location, double date,
-                             PJ_Region *optional_region,
-                             double *grid_date );
 
 double pj_gc_parsedate( projCtx_t *, const char * );
 

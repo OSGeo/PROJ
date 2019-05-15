@@ -51,10 +51,10 @@ cursor = conn.cursor()
 all_sql = []
 
 # TODO: update this !
-version = 'ArcMap 10.6.1 / ArcGISPro 2.2'
+version = 'ArcMap 10.7.0'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.VERSION', '%s');""" % (version))
-date = '2018-09-19'
+date = '2019-03-25'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.DATE', '%s');""" % (date))
 
@@ -246,8 +246,9 @@ def import_spheroid():
                 description = row[idx_description]
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                map_spheroid_esri_name_to_auth_code[esri_name] = [
-                    'ESRI', latestWkid]
+                if esri_name not in map_spheroid_esri_name_to_auth_code:
+                    map_spheroid_esri_name_to_auth_code[esri_name] = [
+                        'ESRI', code]
 
                 if abs(float(a) - 6375000) > 0.01 * 6375000:
                     pos = esri_name.find('_19')
@@ -267,7 +268,7 @@ def import_spheroid():
                     body_code = 'EARTH'
 
                 sql = """INSERT INTO ellipsoid VALUES('ESRI','%s','%s','%s','%s','%s',%s,'EPSG','9001',%s,NULL,%d);""" % (
-                    latestWkid, esri_name, description, body_auth, body_code, a, rf, deprecated)
+                    code, esri_name, description, body_auth, body_code, a, rf, deprecated)
                 all_sql.append(sql)
 
 ########################
@@ -341,10 +342,11 @@ def import_prime_meridian():
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                map_pm_esri_name_to_auth_code[esri_name] = ['ESRI', latestWkid]
+                if esri_name not in map_pm_esri_name_to_auth_code:
+                    map_pm_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
                 sql = """INSERT INTO "prime_meridian" VALUES('ESRI','%s','%s',%s,'EPSG','9110',%d);""" % (
-                    latestWkid, esri_name, value, deprecated)
+                    code, esri_name, value, deprecated)
                 all_sql.append(sql)
 
 
@@ -411,7 +413,7 @@ def import_datum():
                 assert authority.upper() == 'ESRI', row
 
                 map_datum_esri_name_to_auth_code[esri_name] = [
-                    'ESRI', latestWkid]
+                    'ESRI', code]
 
                 wkt = row[idx_wkt]
                 pos = wkt.find('SPHEROID["')
@@ -429,7 +431,7 @@ def import_datum():
                 description = row[idx_description]
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                map_datum_esri_to_parameters[latestWkid] = {
+                map_datum_esri_to_parameters[code] = {
                     'esri_name': esri_name,
                     'description': description,
                     'ellps_auth_name': ellps_auth_name,
@@ -568,6 +570,7 @@ def import_geogcs():
                         assert map_datum_esri_to_parameters[datum_code]['pm_auth_name'] == pm_auth_name, (
                             row, map_datum_esri_to_parameters[datum_code]['pm_auth_name'], pm_auth_name)
                         if map_datum_esri_to_parameters[datum_code]['pm_code'] != pm_code:
+                            p = map_datum_esri_to_parameters[datum_code]
 
                             # Case of GCS_Voirol_Unifie_1960 and GCS_Voirol_Unifie_1960_Paris which use the same
                             # datum D_Voirol_Unifie_1960 but with different prime meridian
@@ -585,7 +588,6 @@ def import_geogcs():
                                 'ellps_code': p['ellps_code'],
                                 'deprecated': p['deprecated']
                             }
-                            p = map_datum_esri_to_parameters[datum_code]
 
                             sql = """INSERT INTO "geodetic_datum" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s','%s',%d);""" % (
                                 datum_code, p['esri_name'], p['description'], p['ellps_auth_name'], p['ellps_code'], pm_auth_name, pm_code, area_auth_name, area_code, p['deprecated'])
@@ -603,11 +605,11 @@ def import_geogcs():
                     code, esri_name, cs_code, datum_auth_name, datum_code, area_auth_name, area_code, deprecated)
                 all_sql.append(sql)
 
-                if deprecated and code != latestWkid:
+                if deprecated and code != latestWkid and code not in ('4305', '4812'): # Voirol 1960 no longer in EPSG
                     cursor.execute(
                         "SELECT name FROM geodetic_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                     src_row = cursor.fetchone()
-                    assert src_row
+                    assert src_row, (code, latestWkid)
 
                     sql = """INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','%s','geodetic_crs','EPSG','%s','ESRI');""" % (
                         code, latestWkid)
@@ -615,9 +617,122 @@ def import_geogcs():
 
 ########################
 
+def parse_wkt(s, level):
+    if s[0] == '"':
+        return s
+    pos = s.find('[')
+    if pos < 0:
+        return s
+    return { s[0:pos] : parse_wkt_array(s[pos+1:-1], level + 1) }
+
+def parse_wkt_array(s, level = 0):
+    ar = []
+    in_string = False
+    cur_token = ''
+    indent_level = 0
+    for c in s:
+        if in_string:
+            if c == '"':
+                in_string = False
+            cur_token += c
+        elif c == '"':
+            cur_token += c
+            in_string = True
+        elif c == '[':
+            cur_token += c
+            indent_level += 1
+        elif c == ']':
+            cur_token += c
+            indent_level -= 1
+            assert indent_level >= 0
+        elif indent_level == 0 and  c == ',':
+            ar.append(parse_wkt(cur_token, level + 1))
+            cur_token = ''
+        else:
+            cur_token += c
+    assert indent_level == 0
+    if cur_token:
+        ar.append(parse_wkt(cur_token, level + 1))
+
+    if level == 0:
+        d = {}
+        for elt in ar:
+            assert type(elt) == type({})
+            assert len(elt) == 1
+            if 'PROJECTION' in elt:
+                assert len(elt['PROJECTION']) == 1, elt['PROJECTION']
+                assert 'PROJECTION' not in d
+                name = elt['PROJECTION'][0]
+                assert name[0] == '"' and name[-1] == '"', name
+                name = name[1:-1]
+                d['PROJECTION'] = name
+            elif 'PARAMETER' in elt:
+                assert len(elt['PARAMETER']) == 2, elt['PARAMETER']
+                name = elt['PARAMETER'][0]
+                assert name[0] == '"' and name[-1] == '"', name
+                name = name[1:-1]
+                assert name not in d
+                d[name] = elt['PARAMETER'][1]
+            elif 'UNIT' in elt:
+                assert len(elt['UNIT']) == 2, elt['UNIT']
+                name = elt['UNIT'][0]
+                assert name[0] == '"' and name[-1] == '"', name
+                name = name[1:-1]
+                assert 'UNIT_NAME' not in d
+                d['UNIT_NAME'] = name
+                d['UNIT_VALUE'] = elt['UNIT'][1]
+            else:
+                assert True
+        return d
+    else:
+        return ar
+
+########################
+
+def get_cs(parsed_conv_wkt):
+
+    UNIT_NAME = parsed_conv_wkt['UNIT_NAME']
+    UNIT_VALUE = parsed_conv_wkt['UNIT_VALUE']
+
+    if UNIT_NAME == 'Meter':
+        uom_code = '9001'
+        cs_auth_name = 'EPSG'
+        cs_code = '4400'
+        assert UNIT_VALUE == '1.0', UNIT_VALUE
+    elif UNIT_NAME == 'Foot':
+        uom_code = '9002'
+        cs_auth_name = 'ESRI'
+        cs_code = UNIT_NAME
+        assert UNIT_VALUE == '0.3048', UNIT_VALUE
+    elif UNIT_NAME == 'Foot_US':
+        uom_code = '9003'
+        cs_auth_name = 'ESRI'
+        cs_code = UNIT_NAME
+        assert UNIT_VALUE == '0.3048006096012192', UNIT_VALUE
+    elif UNIT_NAME == 'Yard_Indian_1937':
+        uom_code = '9085'
+        cs_auth_name = 'ESRI'
+        cs_code = UNIT_NAME
+        assert UNIT_VALUE == '0.91439523', UNIT_VALUE
+    else:
+        assert False, UNIT_NAME
+
+    if cs_auth_name == 'ESRI' and cs_code not in set_esri_cs_code:
+        sql = """INSERT INTO "coordinate_system" VALUES('ESRI','%s','Cartesian',2);""" % cs_code
+        all_sql.append(sql)
+        sql = """INSERT INTO "axis" VALUES('ESRI','%d','Easting','E','east','ESRI','%s',1,'EPSG','%s');""" % (2 * len(set_esri_cs_code) + 1, cs_code, uom_code)
+        all_sql.append(sql)
+        sql = """INSERT INTO "axis" VALUES('ESRI','%d','Northing','N','north','ESRI','%s',2,'EPSG','%s');""" % (2 * len(set_esri_cs_code) + 2, cs_code, uom_code)
+        all_sql.append(sql)
+        set_esri_cs_code.add(cs_code)
+
+    return cs_auth_name, cs_code, uom_code
+
+########################
 
 map_projcs_esri_name_to_auth_code = {}
-
+set_esri_cs_code = set()
+map_conversion_sql_to_code = {}
 
 def import_projcs():
     with open(os.path.join(path_to_csv, 'pe_list_projcs.csv'), 'rt') as csvfile:
@@ -705,6 +820,10 @@ def import_projcs():
                 end_pos += pos
                 geogcs_name = wkt[pos:end_pos]
 
+                pos = wkt.find('PROJECTION[')
+                assert pos >= 0
+                parsed_conv_wkt = parse_wkt_array(wkt[pos:-1])
+
                 assert geogcs_name in map_geogcs_esri_name_to_auth_code, (
                     geogcs_name, row)
                 geogcs_auth_name, geogcs_code = map_geogcs_esri_name_to_auth_code[geogcs_name]
@@ -716,9 +835,152 @@ def import_projcs():
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,NULL,NULL,'%s','%s',NULL,NULL,'%s','%s','%s',%d);""" % (
-                    code, esri_name, geogcs_auth_name, geogcs_code, area_auth_name, area_code, escape_literal(wkt), deprecated)
-                all_sql.append(sql)
+                method = parsed_conv_wkt['PROJECTION']
+
+                if 'UNIT["Degree",' in wkt:
+                    ang_uom_code = '9102'
+                elif 'UNIT["Grad",' in wkt:
+                    ang_uom_code = '9105'
+                else:
+                    assert False, wkt
+
+                if method in ('Transverse_Mercator', 'Gauss_Kruger'):
+                    assert len(parsed_conv_wkt) == 1 + 5 + 2
+                    False_Easting = parsed_conv_wkt['False_Easting']
+                    False_Northing = parsed_conv_wkt['False_Northing']
+                    Central_Meridian = parsed_conv_wkt['Central_Meridian']
+                    Scale_Factor = parsed_conv_wkt['Scale_Factor']
+                    Latitude_Of_Origin = parsed_conv_wkt['Latitude_Of_Origin']
+
+                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+
+                    conv_name = 'unnamed'
+                    if method == 'Gauss_Kruger' and 'GK_' not in esri_name and 'Gauss' not in esri_name:
+                        conv_name = esri_name + " (Gauss Kruger)"
+
+                    cursor.execute(
+                        """SELECT code FROM conversion WHERE auth_name = 'EPSG' AND
+                        method_code = '9807' AND
+                        param1_code = '8801' AND param1_value = ? AND param1_uom_code = ? AND
+                        param2_code = '8802' AND param2_value = ? AND param2_uom_code = ? AND
+                        param3_code = '8805' AND param3_value = ? AND param3_uom_code = '9201' AND
+                        param4_code = '8806' AND param4_value = ? AND param4_uom_code = ? AND
+                        param5_code = '8807' AND param5_value = ? AND param5_uom_code = ?""", (Latitude_Of_Origin, ang_uom_code, Central_Meridian, ang_uom_code, Scale_Factor, False_Easting, uom_code, False_Northing, uom_code))
+                    src_row = cursor.fetchone()
+                    if conv_name == 'unnamed' and src_row:
+                        conv_auth_name = 'EPSG'
+                        conv_code = src_row[0]
+                    else:
+                        conv_auth_name = 'ESRI'
+                        conv_code = code
+
+                        sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s','EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','%s','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                            code, conv_name, area_auth_name, area_code, Latitude_Of_Origin, ang_uom_code, Central_Meridian, ang_uom_code, Scale_Factor, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+
+                        sql_extract = sql[sql.find('NULL,NULL'):]
+                        if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
+                            all_sql.append(sql)
+                            map_conversion_sql_to_code[sql_extract] = conv_code
+                        else:
+                            conv_code = map_conversion_sql_to_code[sql_extract]
+
+                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s','%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
+                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, area_auth_name, area_code, deprecated)
+                    all_sql.append(sql)
+
+                elif method == 'Hotine_Oblique_Mercator_Azimuth_Natural_Origin':
+                    assert len(parsed_conv_wkt) == 1 + 6 + 2
+                    False_Easting = parsed_conv_wkt['False_Easting']
+                    False_Northing = parsed_conv_wkt['False_Northing']
+                    Scale_Factor = parsed_conv_wkt['Scale_Factor']
+                    Azimuth = parsed_conv_wkt['Azimuth']
+                    Longitude_Of_Center = parsed_conv_wkt['Longitude_Of_Center']
+                    Latitude_Of_Center = parsed_conv_wkt['Latitude_Of_Center']
+
+                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+
+                    conv_name = 'unnamed'
+                    conv_auth_name = 'ESRI'
+                    conv_code = code
+
+                    sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s','EPSG','9812','Hotine Oblique Mercator (variant A)','EPSG','8811','Latitude of projection centre',%s,'EPSG','%s','EPSG','8812','Longitude of projection centre',%s,'EPSG','%s','EPSG','8813','Azimuth of initial line',%s,'EPSG','%s','EPSG','8814','Angle from Rectified to Skew Grid',%s,'EPSG','%s','EPSG','8815','Scale factor on initial line',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',%d);""" % (
+                        code, conv_name, area_auth_name, area_code, Latitude_Of_Center, ang_uom_code, Longitude_Of_Center, ang_uom_code, Azimuth, ang_uom_code, Azimuth, ang_uom_code, Scale_Factor, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+
+                    sql_extract = sql[sql.find('NULL,NULL'):]
+                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
+                        all_sql.append(sql)
+                        map_conversion_sql_to_code[sql_extract] = conv_code
+                    else:
+                        conv_code = map_conversion_sql_to_code[sql_extract]
+
+                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s','%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
+                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, area_auth_name, area_code, deprecated)
+                    all_sql.append(sql)
+
+                elif method == 'Lambert_Conformal_Conic' and 'Standard_Parallel_2' in parsed_conv_wkt:
+                    assert len(parsed_conv_wkt) == 1 + 6 + 2
+                    False_Easting = parsed_conv_wkt['False_Easting']
+                    False_Northing = parsed_conv_wkt['False_Northing']
+                    Central_Meridian = parsed_conv_wkt['Central_Meridian']
+                    Standard_Parallel_1 = parsed_conv_wkt['Standard_Parallel_1']
+                    Standard_Parallel_2 = parsed_conv_wkt['Standard_Parallel_2']
+                    Latitude_Of_Origin = parsed_conv_wkt['Latitude_Of_Origin']
+
+                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+
+                    conv_name = 'unnamed'
+                    conv_auth_name = 'ESRI'
+                    conv_code = code
+
+                    sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s','EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',%s,'EPSG','%s','EPSG','8822','Longitude of false origin',%s,'EPSG','%s','EPSG','8823','Latitude of 1st standard parallel',%s,'EPSG','%s','EPSG','8824','Latitude of 2nd standard parallel',%s,'EPSG','%s','EPSG','8826','Easting at false origin',%s,'EPSG','%s','EPSG','8827','Northing at false origin',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        code, conv_name, area_auth_name, area_code, Latitude_Of_Origin, ang_uom_code, Central_Meridian, ang_uom_code, Standard_Parallel_1, ang_uom_code, Standard_Parallel_2, ang_uom_code, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+
+                    sql_extract = sql[sql.find('NULL,NULL'):]
+                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
+                        all_sql.append(sql)
+                        map_conversion_sql_to_code[sql_extract] = conv_code
+                    else:
+                        conv_code = map_conversion_sql_to_code[sql_extract]
+
+                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s','%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
+                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, area_auth_name, area_code, deprecated)
+                    all_sql.append(sql)
+
+                elif method == 'Lambert_Conformal_Conic' and 'Scale_Factor' in parsed_conv_wkt:
+                    assert len(parsed_conv_wkt) == 1 + 6 + 2
+                    False_Easting = parsed_conv_wkt['False_Easting']
+                    False_Northing = parsed_conv_wkt['False_Northing']
+                    Central_Meridian = parsed_conv_wkt['Central_Meridian']
+                    Standard_Parallel_1 = parsed_conv_wkt['Standard_Parallel_1']
+                    Scale_Factor = parsed_conv_wkt['Scale_Factor']
+                    Latitude_Of_Origin = parsed_conv_wkt['Latitude_Of_Origin']
+                    assert Standard_Parallel_1 == Latitude_Of_Origin
+
+                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+
+                    conv_name = 'unnamed'
+                    conv_auth_name = 'ESRI'
+                    conv_code = code
+
+                    sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s','EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',%s,'EPSG','%s','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        code, conv_name, area_auth_name, area_code, Latitude_Of_Origin, ang_uom_code, Central_Meridian, ang_uom_code, Scale_Factor, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+
+                    sql_extract = sql[sql.find('NULL,NULL'):]
+                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
+                        all_sql.append(sql)
+                        map_conversion_sql_to_code[sql_extract] = conv_code
+                    else:
+                        conv_code = map_conversion_sql_to_code[sql_extract]
+
+                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s','%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
+                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, area_auth_name, area_code, deprecated)
+                    all_sql.append(sql)
+
+                else:
+
+                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,NULL,NULL,'%s','%s',NULL,NULL,'%s','%s','%s',%d);""" % (
+                        code, esri_name, geogcs_auth_name, geogcs_code, area_auth_name, area_code, escape_literal(wkt), deprecated)
+                    all_sql.append(sql)
 
                 if deprecated and code != latestWkid:
                     mapDeprecatedToNonDeprecated[code] = latestWkid
@@ -1210,7 +1472,7 @@ def import_geogtran():
                         method_code = '9606'
                         method_name = 'Position Vector transformation (geog2D domain)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, rx, ry, rz, s, deprecated)
                     all_sql.append(sql)
 
@@ -1232,7 +1494,7 @@ def import_geogtran():
                     method_code = '9636'
                     method_name = 'Molodensky-Badekas (CF geog2D domain)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%s,%s,%s,'EPSG','9001',%d);""" % (
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%s,%s,%s,'EPSG','9001',NULL,%d);""" % (
                         wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, rx, ry, rz, s, px, py, pz, deprecated)
                     all_sql.append(sql)
 
@@ -1245,7 +1507,7 @@ def import_geogtran():
                     method_code = '9603'
                     method_name = 'Geocentric translations (geog2D domain)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, deprecated)
                     all_sql.append(sql)
 
@@ -1260,7 +1522,7 @@ def import_geogtran():
                     lat_offset = get_parameter(wkt, 'Latitude_Offset')
                     assert wkt.count('PARAMETER[') == 2
 
-                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','9619','Geographic2D offsets','%s','%s','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','9619','Geographic2D offsets','%s','%s','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, lat_offset, long_offset, deprecated)
                     all_sql.append(sql)
 
@@ -1269,7 +1531,7 @@ def import_geogtran():
                     lat_offset = '0'
                     assert wkt.count('PARAMETER[') == 0
 
-                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','9619','Geographic2D offsets','%s','%s','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','9619','Geographic2D offsets','%s','%s','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, lat_offset, long_offset, deprecated)
                     all_sql.append(sql)
 
@@ -1299,7 +1561,7 @@ def import_geogtran():
                         print('A grid_transformation (%s, using grid %s) is already known for the equivalent of %s (%s:%s --> %s:%s) for area %s, which uses grid %s. Skipping it' % (src_row[0], src_row[1], esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, row[idx_areaname], filename))
                         continue
 
-                    sql = """INSERT INTO "grid_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','9615','NTv2','%s','%s','%s','%s','%s','%s',%s,'EPSG','8656','Latitude and longitude difference file','%s',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                    sql = """INSERT INTO "grid_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','9615','NTv2','%s','%s','%s','%s','%s','%s',%s,'EPSG','8656','Latitude and longitude difference file','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, filename, deprecated)
                     all_sql.append(sql)
 

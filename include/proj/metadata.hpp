@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -357,7 +357,7 @@ using IdentifierNNPtr = util::nn<IdentifierPtr>;
 
 /** \brief Value uniquely identifying an object within a namespace.
  *
- * \remark Implements Identifier as described in \ref ISO_19111_2018 but which
+ * \remark Implements Identifier as described in \ref ISO_19111_2019 but which
  * originates from \ref ISO_19115
  */
 class PROJ_GCC_DLL Identifier : public util::BaseObject,

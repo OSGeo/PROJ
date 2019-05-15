@@ -134,7 +134,7 @@ def fill_conversion(proj_db_cursor):
     trigger_sql = """
 CREATE TRIGGER conversion_method_check_insert_trigger
 BEFORE INSERT ON conversion
-FOR EACH ROW BEGIN
+BEGIN
 """
 
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, area_of_use_code, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH'")
@@ -229,11 +229,19 @@ def fill_projected_crs(proj_db_cursor):
 def fill_compound_crs(proj_db_cursor):
     #proj_db_cursor.execute(
     #    "INSERT INTO crs SELECT ?, coord_ref_sys_code, coord_ref_sys_kind FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound')", (EPSG_AUTHORITY,))
-    proj_db_cursor.execute("INSERT INTO compound_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, NULL, ?, cmpd_horizcrs_code, ?, cmpd_vertcrs_code, ?, area_of_use_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+
+    proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, NULL, ?, cmpd_horizcrs_code, ?, cmpd_vertcrs_code, ?, area_of_use_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound') AND cmpd_horizcrs_code NOT IN (SELECT coord_ref_sys_code FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind = 'engineering')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+    for auth_name, code, name, description, scope, horiz_auth_name, horiz_code, vert_auth_name, vert_code, area_of_use_auth_name, area_of_use_code, deprecated in proj_db_cursor.fetchall():
+        try:
+            proj_db_cursor.execute("INSERT INTO compound_crs VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (auth_name, code, name, description, scope, horiz_auth_name, horiz_code, vert_auth_name, vert_code, area_of_use_auth_name, area_of_use_code, deprecated))
+        except sqlite3.IntegrityError as e:
+            print(e)
+            print(auth_name, code, name, description, scope, horiz_auth_name, horiz_code, vert_auth_name, vert_code, area_of_use_auth_name, area_of_use_code, deprecated)
+            raise
 
 def fill_helmert_transformation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 9603, 9606, 9607, 9636) ")
-    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 9603, 9606, 9607, 9636) ")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 15
         param_auth_name = [None for i in range(max_n_params)]
@@ -326,16 +334,17 @@ def fill_helmert_transformation(proj_db_cursor):
                param_value[13], EPSG_AUTHORITY if param_uom_code[13] else None, param_uom_code[13],
                param_value[14], EPSG_AUTHORITY if param_uom_code[14] else None, param_uom_code[14],
                px, py, pz, EPSG_AUTHORITY if px else None, pivot_uom_code,
+               coord_tfm_version,
                deprecated
                )
 
         #proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'helmert_transformation')", (EPSG_AUTHORITY, code))
         proj_db_cursor.execute('INSERT INTO helmert_transformation VALUES (' +
-            '?,?,?, ?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?, ?)', arg)
+            '?,?,?, ?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?, ?,?)', arg)
 
 def fill_grid_transformation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND (coord_op_method_name LIKE 'Geographic3D to%' OR coord_op_method_name LIKE 'Geog3D to%' OR coord_op_method_name LIKE 'Point motion by grid%' OR coord_op_method_name LIKE 'Vertical Offset by Grid Interpolation%' OR coord_op_method_name IN ('NADCON', 'NTv1', 'NTv2', 'VERTCON'))")
-    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND (coord_op_method_name LIKE 'Geographic3D to%' OR coord_op_method_name LIKE 'Geog3D to%' OR coord_op_method_name LIKE 'Point motion by grid%' OR coord_op_method_name LIKE 'Vertical Offset by Grid Interpolation%' OR coord_op_method_name IN ('NADCON', 'NTv1', 'NTv2', 'VERTCON'))")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 2
         param_auth_name = [None for i in range(max_n_params)]
@@ -393,12 +402,13 @@ def fill_grid_transformation(proj_db_cursor):
                EPSG_AUTHORITY, param_code[0], param_name[0], param_value[0],
                grid2_param_auth_name, grid2_param_code, grid2_param_name, grid2_value,
                interpolation_crs_auth_name, interpolation_crs_code,
+               coord_tfm_version,
                deprecated
                )
 
         #proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'grid_transformation')", (EPSG_AUTHORITY, code))
         proj_db_cursor.execute('INSERT INTO grid_transformation VALUES (' +
-            '?,?,?, ?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?, ?,?,?,?, ?,?, ?)', arg)
+            '?,?,?, ?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?, ?,?,?,?, ?,?, ?,?)', arg)
 
 def fill_other_transformation(proj_db_cursor):
     # 9601: Longitude rotation
@@ -407,8 +417,8 @@ def fill_other_transformation(proj_db_cursor):
     # 9619: Geographic2D offsets
     # 9624: Affine Parametric Transformation
     # 9660: Geographic3D offsets
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660)")
-    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660)")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7
         param_auth_name = [None for i in range(max_n_params)]
@@ -451,16 +461,17 @@ def fill_other_transformation(proj_db_cursor):
                param_uom_auth_name[5], param_uom_code[5], param_auth_name[6],
                param_code[6], param_name[6], param_value[6],
                param_uom_auth_name[6], param_uom_code[6],
+               coord_tfm_version,
                deprecated)
 
         #proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'other_transformation')", (EPSG_AUTHORITY, code))
         proj_db_cursor.execute('INSERT INTO other_transformation VALUES (' +
             '?,?,?, ?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ' +
-            '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?)', arg)
+            '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?)', arg)
 
 def fill_concatenated_operation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'concatenated operation'")
-    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'concatenated operation'")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 3
         step_code = [None for i in range(max_n_params)]
@@ -485,6 +496,7 @@ def fill_concatenated_operation(proj_db_cursor):
                EPSG_AUTHORITY, step_code[0],
                EPSG_AUTHORITY, step_code[1],
                EPSG_AUTHORITY if step_code[2] else None, step_code[2],
+               coord_tfm_version,
                deprecated
                )
 
@@ -502,7 +514,7 @@ def fill_concatenated_operation(proj_db_cursor):
         if step1_exists and step2_exists and step3_exists:
             #proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'concatenated_operation')", (EPSG_AUTHORITY, code))
             proj_db_cursor.execute('INSERT INTO concatenated_operation VALUES (' +
-            '?,?,?, ?,?, ?,?, ?,?, ?,?, ?, ?,?, ?,?, ?,?, ?)', arg)
+            '?,?,?, ?,?, ?,?, ?,?, ?,?, ?, ?,?, ?,?, ?,?, ?,?)', arg)
 
 def fill_alias(proj_db_cursor):
     proj_db_cursor.execute("SELECT object_code, alias FROM epsg.epsg_alias WHERE object_table_name = 'epsg_datum'")
@@ -586,7 +598,164 @@ proj_db_cursor = proj_db_conn.cursor()
 proj_db_cursor.execute('PRAGMA foreign_keys = 1;')
 
 ingest_sqlite_dump(proj_db_cursor, os.path.join(sql_dir_name, 'proj_db_table_defs.sql'))
+
+# A bit messy, but to avoid churn in our existing .sql files, we temporarily
+# recreate the original conversion and helmert_transformation tables
+# instead of the view in the true database.
+
+proj_db_cursor.execute("""DROP VIEW conversion;""")
+proj_db_cursor.execute("""DROP TABLE conversion_table;""")
+proj_db_cursor.execute("""CREATE TABLE conversion(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
+
+    description TEXT,
+    scope TEXT,
+
+    area_of_use_auth_name TEXT NOT NULL,
+    area_of_use_code TEXT NOT NULL,
+
+    method_auth_name TEXT CHECK (method_auth_name IS NULL OR length(method_auth_name) >= 1),
+    method_code TEXT CHECK (method_code IS NULL OR length(method_code) >= 1),
+    method_name TEXT,
+
+    param1_auth_name TEXT,
+    param1_code TEXT,
+    param1_name TEXT,
+    param1_value FLOAT,
+    param1_uom_auth_name TEXT,
+    param1_uom_code TEXT,
+
+    param2_auth_name TEXT,
+    param2_code TEXT,
+    param2_name TEXT,
+    param2_value FLOAT,
+    param2_uom_auth_name TEXT,
+    param2_uom_code TEXT,
+
+    param3_auth_name TEXT,
+    param3_code TEXT,
+    param3_name TEXT,
+    param3_value FLOAT,
+    param3_uom_auth_name TEXT,
+    param3_uom_code TEXT,
+
+    param4_auth_name TEXT,
+    param4_code TEXT,
+    param4_name TEXT,
+    param4_value FLOAT,
+    param4_uom_auth_name TEXT,
+    param4_uom_code TEXT,
+
+    param5_auth_name TEXT,
+    param5_code TEXT,
+    param5_name TEXT,
+    param5_value FLOAT,
+    param5_uom_auth_name TEXT,
+    param5_uom_code TEXT,
+
+    param6_auth_name TEXT,
+    param6_code TEXT,
+    param6_name TEXT,
+    param6_value FLOAT,
+    param6_uom_auth_name TEXT,
+    param6_uom_code TEXT,
+
+    param7_auth_name TEXT,
+    param7_code TEXT,
+    param7_name TEXT,
+    param7_value FLOAT,
+    param7_uom_auth_name TEXT,
+    param7_uom_code TEXT,
+
+    deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
+
+    CONSTRAINT pk_conversion PRIMARY KEY (auth_name, code)
+);""")
+
+proj_db_cursor.execute("""DROP VIEW helmert_transformation;""")
+proj_db_cursor.execute("""DROP TABLE helmert_transformation_table;""")
+proj_db_cursor.execute("""CREATE TABLE helmert_transformation(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    name TEXT NOT NULL CHECK (length(name) >= 2),
+
+    description TEXT,
+    scope TEXT,
+
+    method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
+    method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
+    method_name NOT NULL CHECK (length(method_name) >= 2),
+
+    source_crs_auth_name TEXT NOT NULL,
+    source_crs_code TEXT NOT NULL,
+    target_crs_auth_name TEXT NOT NULL,
+    target_crs_code TEXT NOT NULL,
+
+    area_of_use_auth_name TEXT NOT NULL,
+    area_of_use_code TEXT NOT NULL,
+
+    accuracy FLOAT CHECK (accuracy >= 0),
+
+    tx FLOAT NOT NULL,
+    ty FLOAT NOT NULL,
+    tz FLOAT NOT NULL,
+    translation_uom_auth_name TEXT NOT NULL,
+    translation_uom_code TEXT NOT NULL,
+    rx FLOAT,
+    ry FLOAT,
+    rz FLOAT,
+    rotation_uom_auth_name TEXT,
+    rotation_uom_code TEXT,
+    scale_difference FLOAT,
+    scale_difference_uom_auth_name TEXT,
+    scale_difference_uom_code TEXT,
+    rate_tx FLOAT,
+    rate_ty FLOAT,
+    rate_tz FLOAT,
+    rate_translation_uom_auth_name TEXT,
+    rate_translation_uom_code TEXT,
+    rate_rx FLOAT,
+    rate_ry FLOAT,
+    rate_rz FLOAT,
+    rate_rotation_uom_auth_name TEXT,
+    rate_rotation_uom_code TEXT,
+    rate_scale_difference FLOAT,
+    rate_scale_difference_uom_auth_name TEXT,
+    rate_scale_difference_uom_code TEXT,
+    epoch FLOAT,
+    epoch_uom_auth_name TEXT,
+    epoch_uom_code TEXT,
+    px FLOAT, -- Pivot / evaluation point for Molodensky-Badekas
+    py FLOAT,
+    pz FLOAT,
+    pivot_uom_auth_name TEXT,
+    pivot_uom_code TEXT,
+
+    operation_version TEXT, -- normally mandatory in OGC Topic 2 but optional here
+
+    deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
+
+    CONSTRAINT pk_helmert_transformation PRIMARY KEY (auth_name, code)
+);""")
+
+proj_db_cursor.execute("SELECT name, sql FROM sqlite_master WHERE type = 'table' AND name = 'projected_crs'")
+for (name, sql) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("DROP TABLE " + name)
+    proj_db_cursor.execute(sql.replace('conversion_table', 'conversion'))
+
+proj_db_cursor.execute("SELECT name, sql FROM sqlite_master WHERE type = 'view'")
+for (name, sql) in proj_db_cursor.fetchall():
+    if 'conversion_table' in sql:
+        proj_db_cursor.execute("DROP VIEW " + name)
+        proj_db_cursor.execute(sql.replace('conversion_table', 'conversion'))
+    elif 'helmert_transformation_table' in sql:
+        proj_db_cursor.execute("DROP VIEW " + name)
+        proj_db_cursor.execute(sql.replace('helmert_transformation_table', 'helmert_transformation'))
+
 proj_db_cursor.execute("ATTACH DATABASE '%s' AS epsg;" % epsg_tmp_db_filename)
+
 
 fill_unit_of_measure(proj_db_cursor)
 fill_ellipsoid(proj_db_cursor)
@@ -635,7 +804,7 @@ for line in proj_db_conn.iterdump():
             f = open(os.path.join(sql_dir_name, table_name) + '.sql', 'wb')
             f.write("--- This file has been generated by scripts/build_db.py. DO NOT EDIT !\n\n".encode('UTF-8'))
             files[table_name] = f
-        f.write((line + '\n').encode('UTF-8'))
+        f.write((line + '\n').replace('BEFORE INSERT ON conversion', 'INSTEAD OF INSERT ON conversion').encode('UTF-8'))
 #f = files['coordinate_operation']
 #for row in non_imported_operations:
 #    f.write(("--- Non imported: " + str(row) + '\n').encode('UTF-8'))

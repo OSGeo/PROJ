@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -31,6 +31,7 @@
 #endif
 
 #include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -57,6 +58,7 @@ using namespace NS_PROJ::crs;
 using namespace NS_PROJ::datum;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
+using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
 
 NS_PROJ_START
@@ -215,7 +217,7 @@ DEFINE_WKT_CONSTANT(ANGLEUNIT);
 DEFINE_WKT_CONSTANT(SCALEUNIT);
 DEFINE_WKT_CONSTANT(TIMEUNIT);
 DEFINE_WKT_CONSTANT(ELLIPSOID);
-DEFINE_WKT_CONSTANT(CS);
+const std::string WKTConstants::CS_(createAndAddToConstantList("CS"));
 DEFINE_WKT_CONSTANT(ID);
 DEFINE_WKT_CONSTANT(PROJCRS);
 DEFINE_WKT_CONSTANT(BASEGEODCRS);
@@ -271,6 +273,7 @@ DEFINE_WKT_CONSTANT(BASEVERTCRS);
 DEFINE_WKT_CONSTANT(BASEENGCRS);
 DEFINE_WKT_CONSTANT(BASEPARAMCRS);
 DEFINE_WKT_CONSTANT(BASETIMECRS);
+DEFINE_WKT_CONSTANT(VERSION);
 
 DEFINE_WKT_CONSTANT(GEODETICCRS);
 DEFINE_WKT_CONSTANT(GEODETICDATUM);
@@ -638,6 +641,15 @@ const GeographicCRSNNPtr
 /** \brief EPSG:4979 / "WGS 84" 3D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4979(GeographicCRS::createEPSG_4979());
+
+// ---------------------------------------------------------------------------
+
+/** \brief Key to set the operation version of a operation::CoordinateOperation
+ *
+ * The value is to be provided as a string.
+ */
+const std::string
+    operation::CoordinateOperation::OPERATION_VERSION_KEY("operationVersion");
 
 // ---------------------------------------------------------------------------
 

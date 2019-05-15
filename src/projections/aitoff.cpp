@@ -58,11 +58,11 @@ PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";
 
 
 #if 0
-FORWARD(s_forward); /* spheroid */
+FORWARD(aitoff_s_forward); /* spheroid */
 #endif
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY aitoff_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double c, d;
@@ -100,7 +100,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 *
 ************************************************************************************/
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int iter, MAXITER = 10, round = 0, MAXROUND = 20;
@@ -116,15 +116,20 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
             sl = sin(lp.lam * 0.5); cl = cos(lp.lam * 0.5);
             sp = sin(lp.phi); cp = cos(lp.phi);
             D = cp * cl;
-                C = 1. - D * D;
-            D = acos(D) / pow(C, 1.5);
-                f1 = 2. * D * C * cp * sl;
-                f2 = D * C * sp;
-                f1p = 2.* (sl * cl * sp * cp / C - D * sp * sl);
-                f1l = cp * cp * sl * sl / C + D * cp * cl * sp * sp;
-                f2p = sp * sp * cl / C + D * sl * sl * cp;
-                f2l = 0.5 * (sp * cp * sl / C - D * sp * cp * cp * sl * cl);
-                if (Q->mode == WINKEL_TRIPEL) {
+            C = 1. - D * D;
+            const double denom = pow(C, 1.5);
+            if( denom == 0 ) {
+                proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+                return lp;
+            }
+            D = acos(D) / denom;
+            f1 = 2. * D * C * cp * sl;
+            f2 = D * C * sp;
+            f1p = 2.* (sl * cl * sp * cp / C - D * sp * sl);
+            f1l = cp * cp * sl * sl / C + D * cp * cl * sp * sp;
+            f2p = sp * sp * cl / C + D * sl * sl * cp;
+            f2l = 0.5 * (sp * cp * sl / C - D * sp * cp * cp * sl * cl);
+            if (Q->mode == WINKEL_TRIPEL) {
                 f1 = 0.5 * (f1 + lp.lam * Q->cosphi1);
                 f2 = 0.5 * (f2 + lp.phi);
                 f1p *= 0.5;
@@ -156,18 +161,18 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     } while (((fabs(xy.x-x) > EPSILON) || (fabs(xy.y-y) > EPSILON)) && (round++ < MAXROUND));
 
     if (iter == MAXITER && round == MAXROUND)
-        {
-            pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
-            /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
-        }
+    {
+        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
+    }
 
     return lp;
 }
 
 
 static PJ *setup(PJ *P) {
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = aitoff_s_inverse;
+    P->fwd = aitoff_s_forward;
     P->es = 0.;
     return P;
 }

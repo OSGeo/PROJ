@@ -81,7 +81,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_strtod.h"
-#include "proj_internal.h"
 #include "optargpm.h"
 
 
@@ -228,6 +227,7 @@ int main(int argc, char **argv) {
 
     fout = stdout;
 
+    /* coverity[tainted_data] */
     o = opt_parse (argc, argv, "hvI", "cdozts", longflags, longkeys);
     if (nullptr==o)
         return 0;
@@ -368,6 +368,7 @@ int main(int argc, char **argv) {
             point.lpzt.phi = proj_torad (point.lpzt.phi);
         }
         err = proj_errno_reset (P);
+        /* coverity[returned_value] */
         point = proj_trans (P, direction, point);
 
         if (HUGE_VAL==point.xyzt.x) {

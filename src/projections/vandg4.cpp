@@ -10,7 +10,7 @@ PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv";
 #define TOL 1e-10
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY vandg4_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     double x1, t, bt, ct, ft, bt2, ct2, dt, dt2;
     (void) P;
@@ -50,7 +50,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 
 PJ *PROJECTION(vandg4) {
     P->es = 0.;
-    P->fwd = s_forward;
+    P->fwd = vandg4_s_forward;
 
     return P;
 }

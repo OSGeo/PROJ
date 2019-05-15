@@ -34,7 +34,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "proj_internal.h"
 #include "proj.h"
 #include "proj_internal.h"
 
@@ -59,7 +58,10 @@ int pj_apply_gridshift( projCtx ctx, const char *nadgrids, int inverse,
     gridlist = pj_gridlist_from_nadgrids( ctx, nadgrids, &grid_count );
 
     if( gridlist == nullptr || grid_count == 0 )
+    {
+        pj_dalloc( gridlist );
         return ctx->last_errno;
+    }
 
     ret = pj_apply_gridshift_3( ctx, gridlist, grid_count, inverse,
                                 point_count, point_offset, x, y, z );

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -154,7 +154,7 @@ const util::optional<std::string> &Datum::anchorDefinition() const {
 
 /** \brief Return the date on which the datum definition was published.
  *
- * \note Departure from \ref ISO_19111_2018 : we return a DateTime instead of
+ * \note Departure from \ref ISO_19111_2019 : we return a DateTime instead of
  * a Citation::Date.
  *
  * @return the publication date, or empty.
@@ -783,7 +783,7 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
                 if (::fabs(b - b_iter) < 1e-10 * b_iter) {
                     projEllpsName = proj_ellps[i].id;
                     ellpsName = proj_ellps[i].name;
-                    if (ellpsName.find("GRS 1980") == 0) {
+                    if (starts_with(ellpsName, "GRS 1980")) {
                         ellpsName = "GRS 1980";
                     }
                     return true;
@@ -794,7 +794,7 @@ bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
                 if (::fabs(rf - rf_iter) < 1e-10 * rf_iter) {
                     projEllpsName = proj_ellps[i].id;
                     ellpsName = proj_ellps[i].name;
-                    if (ellpsName.find("GRS 1980") == 0) {
+                    if (starts_with(ellpsName, "GRS 1980")) {
                         ellpsName = "GRS 1980";
                     }
                     return true;
@@ -1010,7 +1010,7 @@ GeodeticReferenceFrame::primeMeridian() PROJ_PURE_DEFN {
 
 /** \brief Return the Ellipsoid associated with a GeodeticReferenceFrame.
  *
- * \note The \ref ISO_19111_2018 modelling allows (but discourages) a
+ * \note The \ref ISO_19111_2019 modelling allows (but discourages) a
  * GeodeticReferenceFrame
  * to not be associated with a Ellipsoid in the case where it is used by a
  * geocentric crs::GeodeticCRS. We have made the choice of making the ellipsoid
@@ -1223,7 +1223,7 @@ DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
 
 /** \brief Return the name of the deformation model.
  *
- * @note This is an extension to the \ref ISO_19111_2018 modeling, to
+ * @note This is an extension to the \ref ISO_19111_2019 modeling, to
  * hold the content of the DYNAMIC.MODEL WKT2 node.
  *
  * @return the name of the deformation model.
@@ -1660,7 +1660,7 @@ DynamicVerticalReferenceFrame::frameReferenceEpoch() const {
 
 /** \brief Return the name of the deformation model.
  *
- * @note This is an extension to the \ref ISO_19111_2018 modeling, to
+ * @note This is an extension to the \ref ISO_19111_2019 modeling, to
  * hold the content of the DYNAMIC.MODEL WKT2 node.
  *
  * @return the name of the deformation model.

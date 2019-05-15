@@ -41,7 +41,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY igh_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int z;
@@ -74,10 +74,10 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP igh_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    const double y90 = Q->dy0 + sqrt(2); /* lt=90 corresponds to y=y0+sqrt(2) */
+    const double y90 = Q->dy0 + sqrt(2.0); /* lt=90 corresponds to y=y0+sqrt(2) */
 
     int z = 0;
     if (xy.y > y90+EPSLN || xy.y < -y90+EPSLN) /* 0 */
@@ -219,8 +219,8 @@ PJ *PROJECTION(igh) {
     SETUP(11, moll,   d20, -Q->dy0,   d20);
     SETUP(12, moll,  d140, -Q->dy0,  d140);
 
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = igh_s_inverse;
+    P->fwd = igh_s_forward;
     P->destructor = destructor;
     P->es = 0.;
 

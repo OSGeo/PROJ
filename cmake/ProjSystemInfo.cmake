@@ -56,34 +56,45 @@ if(WIN32)
     if(MSVC_VERSION GREATER 1900 AND MSVC_VERSION LESS 1920) # CMake 3.8+
       set(PROJ_COMPILER_NAME "msvc-14.1") #Visual Studio 2017
     endif()
-  endif(MSVC)
-  
+  endif()
+
   if(MINGW)
     set(PROJ_COMPILER_NAME "mingw-${GCC_VERSION}")
-  endif( MINGW )
-  
+  endif()
+
+  if(CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    set(PROJ_COMPILER_NAME "intel-win")
+  endif()
+
   if(CMAKE_GENERATOR MATCHES "Win64")
     set(PROJ_PLATFORM_NAME "x64")
   else()
     set(PROJ_PLATFORM_NAME "win32")
   endif()
-endif(WIN32)
+endif()  # WIN32
 
 if(UNIX)
-  set(PROJ_COMPILER_NAME "gcc-${GCC_VERSION}")
+  if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    set(PROJ_COMPILER_NAME "gcc-${GCC_VERSION}")
+  elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+    set(PROJ_COMPILER_NAME "intel-linux")
+  endif()
+
   if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
     set(PROJ_PLATFORM_NAME "x64")
   else()
     set(PROJ_PLATFORM_NAME "x86")
   endif()
-endif(UNIX)
-
-if(NOT PROJ_COMPILER_NAME)
-  colormsg(_RED_ "WARNING:")
-  colormsg(RED "Could not determine compiler toolset name to set PROJ_COMPILER_NAME variable.")
 endif()
 
 if(NOT PROJ_COMPILER_NAME)
   colormsg(_RED_ "WARNING:")
-  colormsg(RED "Could not determine platform name to set PROJ_COMPILER_NAME variable.")
+  colormsg(RED "Could not determine compiler toolset name to set \
+PROJ_COMPILER_NAME variable.")
+endif()
+
+if(NOT PROJ_COMPILER_NAME)
+  colormsg(_RED_ "WARNING:")
+  colormsg(RED "Could not determine platform name to set \
+PROJ_COMPILER_NAME variable.")
 endif()

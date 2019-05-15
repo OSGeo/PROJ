@@ -19,8 +19,8 @@ the [GitHub Flow](https://guides.github.com/introduction/flow/) is an advantage.
 
 ## Help a fellow PROJ.4 user
 The main forum for support for PROJ.4 is the mailing list. You can subscribe to
-the mailing list [here](http://lists.maptools.org/mailman/listinfo/proj) and read
-the archive [here](http://lists.maptools.org/pipermail/proj/).
+the mailing list [here](http://lists.osgeo.org/mailman/listinfo/proj) and read
+the archive [here](http://lists.osgeo.org/pipermail/proj/).
 
 If you have questions about the usage of PROJ.4 the mailing list is also the place to go.
 Please *do not* use the GitHub issue tracker as a support forum. Your question is much

@@ -153,7 +153,7 @@ extern "C" {
 
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 6
-#define PROJ_VERSION_MINOR 0
+#define PROJ_VERSION_MINOR 1
 #define PROJ_VERSION_PATCH 0
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
@@ -356,6 +356,7 @@ int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_leg
 PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
 PJ PROJ_DLL *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area);
+PJ PROJ_DLL *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj);
 PJ PROJ_DLL *proj_destroy (PJ *P);
 
 
@@ -999,7 +1000,10 @@ int PROJ_DLL proj_coordoperation_get_method_info(PJ_CONTEXT *ctx,
                                                  const char **out_method_auth_name,
                                                  const char **out_method_code);
 
-int PROJ_DLL proj_coordoperation_is_instanciable(PJ_CONTEXT *ctx,
+int PROJ_DLL proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
+                                                 const PJ *coordoperation);
+
+int PROJ_DLL proj_coordoperation_has_ballpark_transformation(PJ_CONTEXT *ctx,
                                                  const PJ *coordoperation);
 
 int PROJ_DLL proj_coordoperation_get_param_count(PJ_CONTEXT *ctx,

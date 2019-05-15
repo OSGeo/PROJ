@@ -77,7 +77,8 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation] [--summary] [-q]"
+        << "usage: projinfo [-o formats] [-k crs|operation|ellipsoid] "
+           "[--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
            "[--bbox west_long,south_lat,east_long,north_lat]) "
@@ -136,11 +137,12 @@ static std::string c_ify_string(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
-static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
-                                   const std::string &user_string,
-                                   bool kindIsCRS, const std::string &context,
-                                   bool buildBoundCRSToWGS84, CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
-                                   bool quiet) {
+static BaseObjectNNPtr buildObject(
+    DatabaseContextPtr dbContext, const std::string &user_string,
+    const std::string &kind, const std::string &context,
+    bool buildBoundCRSToWGS84,
+    CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
+    bool quiet) {
     BaseObjectPtr obj;
 
     std::string l_user_string(user_string);
@@ -174,9 +176,12 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
 
     try {
         auto tokens = split(l_user_string, ':');
-        if (!kindIsCRS && tokens.size() == 2) {
+        if (kind == "operation" && tokens.size() == 2) {
             auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
                        tokens[1];
+            obj = createFromUserInput(urn, dbContext).as_nullable();
+        } else if (kind == "ellipsoid" && tokens.size() == 2) {
+            auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
             // Convenience to be able to use C escaped strings...
@@ -213,7 +218,8 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
     if (buildBoundCRSToWGS84) {
         auto crs = std::dynamic_pointer_cast<CRS>(obj);
         if (crs) {
-            obj = crs->createBoundCRSToWGS84IfPossible(dbContext, allowUseIntermediateCRS)
+            obj = crs->createBoundCRSToWGS84IfPossible(dbContext,
+                                                       allowUseIntermediateCRS)
                       .as_nullable();
         }
     }
@@ -223,8 +229,10 @@ static BaseObjectNNPtr buildObject(DatabaseContextPtr dbContext,
 
 // ---------------------------------------------------------------------------
 
-static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
-                         CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS, const OutputOptions &outputOpt) {
+static void outputObject(
+    DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
+    CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
+    const OutputOptions &outputOpt) {
 
     auto identified = dynamic_cast<const IdentifiedObject *>(obj.get());
     if (!outputOpt.quiet && identified && identified->isDeprecated()) {
@@ -260,7 +268,7 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 }
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
                 if (!outputOpt.quiet) {
-                    if( crs ) {
+                    if (crs) {
                         std::cout << "PROJ.4 string:" << std::endl;
                     } else {
                         std::cout << "PROJ string:" << std::endl;
@@ -271,8 +279,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 if (crs) {
                     objToExport =
                         nn_dynamic_pointer_cast<IPROJStringExportable>(
-                            crs->createBoundCRSToWGS84IfPossible(dbContext,
-                                                                 allowUseIntermediateCRS));
+                            crs->createBoundCRSToWGS84IfPossible(
+                                dbContext, allowUseIntermediateCRS));
                 }
                 if (!objToExport) {
                     objToExport = projStringExportable;
@@ -411,8 +419,8 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
                 std::shared_ptr<IWKTExportable> objToExport;
                 if (crs) {
                     objToExport = nn_dynamic_pointer_cast<IWKTExportable>(
-                        crs->createBoundCRSToWGS84IfPossible(dbContext,
-                                                             allowUseIntermediateCRS));
+                        crs->createBoundCRSToWGS84IfPossible(
+                            dbContext, allowUseIntermediateCRS));
                 }
                 if (!objToExport) {
                     objToExport = wktExportable;
@@ -461,11 +469,42 @@ static void outputObject(DatabaseContextPtr dbContext, BaseObjectNNPtr obj,
             }
         }
     }
+
+    auto op = dynamic_cast<CoordinateOperation *>(obj.get());
+    if (op && dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
+        try {
+            auto setGrids = op->gridsNeeded(dbContext);
+            bool firstWarning = true;
+            for (const auto &grid : setGrids) {
+                if (!grid.available) {
+                    if (firstWarning) {
+                        std::cout << std::endl;
+                        firstWarning = false;
+                    }
+                    std::cout << "Grid " << grid.shortName
+                              << " needed but not found on the system.";
+                    if (!grid.packageName.empty()) {
+                        std::cout << " Can be obtained from the "
+                                  << grid.packageName << " package";
+                        if (!grid.url.empty()) {
+                            std::cout << " at " << grid.url;
+                        }
+                    } else if (!grid.url.empty()) {
+                        std::cout << " Can be obtained at " << grid.url;
+                    }
+                    std::cout << std::endl;
+                }
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Error in gridsNeeded(): " << e.what() << std::endl;
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
 
-static void outputOperationSummary(const CoordinateOperationNNPtr &op) {
+static void outputOperationSummary(const CoordinateOperationNNPtr &op,
+                                   const DatabaseContextPtr &dbContext) {
     auto ids = op->identifiers();
     if (!ids.empty()) {
         std::cout << *(ids[0]->codeSpace()) << ":" << ids[0]->code();
@@ -505,6 +544,22 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op) {
         std::cout << "unknown domain of validity";
     }
 
+    if (op->hasBallparkTransformation()) {
+        std::cout << ", has ballpark transformation";
+    }
+
+    if (dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
+        try {
+            auto setGrids = op->gridsNeeded(dbContext);
+            for (const auto &grid : setGrids) {
+                if (!grid.available) {
+                    std::cout << ", at least one grid missing";
+                    break;
+                }
+            }
+        } catch (const std::exception &) {
+        }
+    }
     std::cout << std::endl;
 }
 
@@ -514,26 +569,25 @@ static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
     CoordinateOperationContext::SpatialCriterion spatialCriterion,
+    bool spatialCriterionExplicitlySpecified,
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse,
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
     bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
-    auto sourceObj = buildObject(dbContext, sourceCRSStr, true, "source CRS",
-                                 false,
-                                 CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                                 outputOpt.quiet);
+    auto sourceObj = buildObject(
+        dbContext, sourceCRSStr, "crs", "source CRS", false,
+        CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
 
-    auto targetObj = buildObject(dbContext, targetCRSStr, true, "target CRS",
-                                 false,
-                                 CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                                 outputOpt.quiet);
+    auto targetObj = buildObject(
+        dbContext, targetCRSStr, "crs", "target CRS", false,
+        CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -541,6 +595,7 @@ static void outputOperations(
     }
 
     std::vector<CoordinateOperationNNPtr> list;
+    size_t spatialCriterionPartialIntersectionResultCount = 0;
     try {
         auto authFactory =
             dbContext
@@ -558,6 +613,21 @@ static void outputOperations(
         ctxt->setDiscardSuperseded(!showSuperseded);
         list = CoordinateOperationFactory::create()->createOperations(
             NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), ctxt);
+        if (!spatialCriterionExplicitlySpecified &&
+            spatialCriterion == CoordinateOperationContext::SpatialCriterion::
+                                    STRICT_CONTAINMENT) {
+            try {
+                ctxt->setSpatialCriterion(
+                    CoordinateOperationContext::SpatialCriterion::
+                        PARTIAL_INTERSECTION);
+                spatialCriterionPartialIntersectionResultCount =
+                    CoordinateOperationFactory::create()
+                        ->createOperations(NN_NO_CHECK(sourceCRS),
+                                           NN_NO_CHECK(targetCRS), ctxt)
+                        .size();
+            } catch (const std::exception &) {
+            }
+        }
     } catch (const std::exception &e) {
         std::cerr << "createOperations() failed with: " << e.what()
                   << std::endl;
@@ -567,28 +637,31 @@ static void outputOperations(
         outputObject(dbContext, list[0], allowUseIntermediateCRS, outputOpt);
         return;
     }
+    std::cout << "Candidate operations found: " << list.size() << std::endl;
+    if (spatialCriterionPartialIntersectionResultCount > list.size()) {
+        std::cout << "Note: using '--spatial-test intersects' would bring "
+                     "more results ("
+                  << spatialCriterionPartialIntersectionResultCount << ")"
+                  << std::endl;
+    }
     if (summary) {
-        std::cout << "Candidate operations found: " << list.size() << std::endl;
         for (const auto &op : list) {
-            outputOperationSummary(op);
+            outputOperationSummary(op, dbContext);
         }
     } else {
         bool first = true;
         for (size_t i = 0; i < list.size(); ++i) {
             const auto &op = list[i];
-            if (list.size() > 1) {
-                if (!first) {
-                    std::cout << std::endl;
-                }
-                first = false;
-                std::cout << "-------------------------------------"
-                          << std::endl;
-                std::cout << "Operation n"
-                             "\xC2\xB0"
-                          << (i + 1) << ":" << std::endl
-                          << std::endl;
+            if (!first) {
+                std::cout << std::endl;
             }
-            outputOperationSummary(op);
+            first = false;
+            std::cout << "-------------------------------------" << std::endl;
+            std::cout << "Operation n"
+                         "\xC2\xB0"
+                      << (i + 1) << ":" << std::endl
+                      << std::endl;
+            outputOperationSummary(op, dbContext);
             std::cout << std::endl;
             outputObject(dbContext, op, allowUseIntermediateCRS, outputOpt);
         }
@@ -610,10 +683,11 @@ int main(int argc, char **argv) {
     std::string targetCRSStr;
     bool outputSwithSpecified = false;
     OutputOptions outputOpt;
-    bool kindIsCRS = true;
+    std::string objectKind;
     bool summary = false;
     ExtentPtr bboxFilter = nullptr;
     std::string area;
+    bool spatialCriterionExplicitlySpecified = false;
     CoordinateOperationContext::SpatialCriterion spatialCriterion =
         CoordinateOperationContext::SpatialCriterion::STRICT_CONTAINMENT;
     CoordinateOperationContext::SourceTargetCRSExtentUse crsExtentUse =
@@ -622,7 +696,8 @@ int main(int argc, char **argv) {
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse =
         CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS =
-    CoordinateOperationContext::IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
+        CoordinateOperationContext::IntermediateCRSUse::
+            IF_NO_DIRECT_TRANSFORMATION;
     std::vector<std::pair<std::string, std::string>> pivots;
     bool usePROJGridAlternatives = true;
     std::string mainDBPath;
@@ -736,9 +811,11 @@ int main(int argc, char **argv) {
             i++;
             std::string kind(argv[i]);
             if (ci_equal(kind, "crs") || ci_equal(kind, "srs")) {
-                kindIsCRS = true;
+                objectKind = "crs";
             } else if (ci_equal(kind, "operation")) {
-                kindIsCRS = false;
+                objectKind = "operation";
+            } else if (ci_equal(kind, "ellipsoid")) {
+                objectKind = "ellipsoid";
             } else {
                 std::cerr << "Unrecognized value for option -k: " << kind
                           << std::endl;
@@ -768,6 +845,7 @@ int main(int argc, char **argv) {
         } else if (arg == "--spatial-test" && i + 1 < argc) {
             i++;
             std::string value(argv[i]);
+            spatialCriterionExplicitlySpecified = true;
             if (ci_equal(value, "contains")) {
                 spatialCriterion = CoordinateOperationContext::
                     SpatialCriterion::STRICT_CONTAINMENT;
@@ -822,9 +900,10 @@ int main(int argc, char **argv) {
             if (ci_equal(std::string(value), "always")) {
                 allowUseIntermediateCRS =
                     CoordinateOperationContext::IntermediateCRSUse::ALWAYS;
-            } else if (ci_equal(std::string(value), "if_no_direct_transformation")) {
-                allowUseIntermediateCRS =
-                    CoordinateOperationContext::IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
+            } else if (ci_equal(std::string(value),
+                                "if_no_direct_transformation")) {
+                allowUseIntermediateCRS = CoordinateOperationContext::
+                    IntermediateCRSUse::IF_NO_DIRECT_TRANSFORMATION;
             } else if (ci_equal(std::string(value), "never")) {
                 allowUseIntermediateCRS =
                     CoordinateOperationContext::IntermediateCRSUse::NEVER;
@@ -918,77 +997,86 @@ int main(int argc, char **argv) {
     }
 
     if (outputOpt.quiet &&
-        (outputOpt.PROJ5 + outputOpt.WKT2_2018 +
-         outputOpt.WKT2_2015 + outputOpt.WKT1_GDAL) != 1) {
+        (outputOpt.PROJ5 + outputOpt.WKT2_2018 + outputOpt.WKT2_2015 +
+         outputOpt.WKT1_GDAL) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();
     }
 
     if (!user_string.empty()) {
-        auto obj(buildObject(dbContext, user_string, kindIsCRS, "input string",
-                             buildBoundCRSToWGS84, allowUseIntermediateCRS,
-                             outputOpt.quiet));
-        if (guessDialect) {
-            auto dialect = WKTParser().guessDialect(user_string);
-            std::cout << "Guessed WKT dialect: ";
-            if (dialect == WKTParser::WKTGuessedDialect::WKT2_2018) {
-                std::cout << "WKT2_2018";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT2_2015) {
-                std::cout << "WKT2_2015";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_GDAL) {
-                std::cout << "WKT1_GDAL";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_ESRI) {
-                std::cout << "WKT1_ESRI";
-            } else {
-                std::cout << "Not WKT / unknown";
+        try {
+            auto obj(buildObject(dbContext, user_string, objectKind,
+                                 "input string", buildBoundCRSToWGS84,
+                                 allowUseIntermediateCRS, outputOpt.quiet));
+            if (guessDialect) {
+                auto dialect = WKTParser().guessDialect(user_string);
+                std::cout << "Guessed WKT dialect: ";
+                if (dialect == WKTParser::WKTGuessedDialect::WKT2_2018) {
+                    std::cout << "WKT2_2018";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT2_2015) {
+                    std::cout << "WKT2_2015";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_GDAL) {
+                    std::cout << "WKT1_GDAL";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_ESRI) {
+                    std::cout << "WKT1_ESRI";
+                } else {
+                    std::cout << "Not WKT / unknown";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
-        }
-        outputObject(dbContext, obj, allowUseIntermediateCRS, outputOpt);
-        if (identify) {
-            auto crs = dynamic_cast<CRS *>(obj.get());
-            if (crs) {
-                try {
-                    auto res = crs->identify(
-                        dbContext
-                            ? AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                       authority)
-                                  .as_nullable()
-                            : nullptr);
-                    std::cout << std::endl;
-                    std::cout << "Identification match count: " << res.size()
-                              << std::endl;
-                    for (const auto &pair : res) {
-                        const auto &identifiedCRS = pair.first;
-                        const auto &ids = identifiedCRS->identifiers();
-                        if (!ids.empty()) {
-                            std::cout << *ids[0]->codeSpace() << ":"
-                                      << ids[0]->code() << ": " << pair.second
-                                      << " %" << std::endl;
-                        } else {
-                            auto boundCRS =
-                                dynamic_cast<BoundCRS *>(identifiedCRS.get());
-                            if (boundCRS &&
-                                !boundCRS->baseCRS()->identifiers().empty()) {
-                                const auto &idsBase =
-                                    boundCRS->baseCRS()->identifiers();
-                                std::cout << "BoundCRS of "
-                                          << *idsBase[0]->codeSpace() << ":"
-                                          << idsBase[0]->code() << ": "
+            outputObject(dbContext, obj, allowUseIntermediateCRS, outputOpt);
+            if (identify) {
+                auto crs = dynamic_cast<CRS *>(obj.get());
+                if (crs) {
+                    try {
+                        auto res = crs->identify(
+                            dbContext
+                                ? AuthorityFactory::create(
+                                      NN_NO_CHECK(dbContext), authority)
+                                      .as_nullable()
+                                : nullptr);
+                        std::cout << std::endl;
+                        std::cout
+                            << "Identification match count: " << res.size()
+                            << std::endl;
+                        for (const auto &pair : res) {
+                            const auto &identifiedCRS = pair.first;
+                            const auto &ids = identifiedCRS->identifiers();
+                            if (!ids.empty()) {
+                                std::cout << *ids[0]->codeSpace() << ":"
+                                          << ids[0]->code() << ": "
                                           << pair.second << " %" << std::endl;
                             } else {
-                                std::cout
-                                    << "un-identifier CRS: " << pair.second
-                                    << " %" << std::endl;
+                                auto boundCRS = dynamic_cast<BoundCRS *>(
+                                    identifiedCRS.get());
+                                if (boundCRS &&
+                                    !boundCRS->baseCRS()
+                                         ->identifiers()
+                                         .empty()) {
+                                    const auto &idsBase =
+                                        boundCRS->baseCRS()->identifiers();
+                                    std::cout << "BoundCRS of "
+                                              << *idsBase[0]->codeSpace() << ":"
+                                              << idsBase[0]->code() << ": "
+                                              << pair.second << " %"
+                                              << std::endl;
+                                } else {
+                                    std::cout
+                                        << "un-identifier CRS: " << pair.second
+                                        << " %" << std::endl;
+                                }
                             }
                         }
+                    } catch (const std::exception &e) {
+                        std::cerr << "Identification failed: " << e.what()
+                                  << std::endl;
                     }
-                } catch (const std::exception &e) {
-                    std::cerr << "Identification failed: " << e.what()
-                              << std::endl;
                 }
             }
+        } catch (const std::exception &e) {
+            std::cerr << "buildObject failed: " << e.what() << std::endl;
+            std::exit(1);
         }
     } else {
 
@@ -1053,10 +1141,18 @@ int main(int argc, char **argv) {
             }
         }
 
-        outputOperations(
-            dbContext, sourceCRSStr, targetCRSStr, bboxFilter, spatialCriterion,
-            crsExtentUse, gridAvailabilityUse, allowUseIntermediateCRS, pivots, authority,
-            usePROJGridAlternatives, showSuperseded, outputOpt, summary);
+        try {
+            outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
+                             spatialCriterion,
+                             spatialCriterionExplicitlySpecified, crsExtentUse,
+                             gridAvailabilityUse, allowUseIntermediateCRS,
+                             pivots, authority, usePROJGridAlternatives,
+                             showSuperseded, outputOpt, summary);
+        } catch (const std::exception &e) {
+            std::cerr << "outputOperations() failed with: " << e.what()
+                      << std::endl;
+            std::exit(1);
+        }
     }
 
     return 0;

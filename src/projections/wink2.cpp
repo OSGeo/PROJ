@@ -18,7 +18,7 @@ struct pj_opaque {
 #define LOOP_TOL    1e-7
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY wink2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
 	double k, V;
 	int i;
@@ -51,7 +51,7 @@ PJ *PROJECTION(wink2) {
 	static_cast<struct pj_opaque*>(P->opaque)->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f);
 	P->es  = 0.;
     P->inv = nullptr;
-    P->fwd = s_forward;
+    P->fwd = wink2_s_forward;
 
     return P;
 }

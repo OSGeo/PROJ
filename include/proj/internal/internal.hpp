@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -53,7 +53,7 @@
 #if ((defined(__clang__) &&                                                    \
       (__clang_major__ > 3 ||                                                  \
        (__clang_major__ == 3 && __clang_minor__ >= 7))) ||                     \
-     __GNUC__ >= 7)
+     (__GNUC__ >= 7 && !__INTEL_COMPILER))
 /** Macro for fallthrough in a switch case construct */
 #define PROJ_FALLTHROUGH [[clang::fallthrough]];
 #else
@@ -139,6 +139,9 @@ std::string toupper(const std::string &osStr);
 
 PROJ_FOR_TEST std::vector<std::string> split(const std::string &osStr,
                                              char separator);
+
+PROJ_FOR_TEST std::vector<std::string> split(const std::string &osStr,
+                                             const std::string &separator);
 
 bool ci_equal(const char *a, const char *b) noexcept;
 

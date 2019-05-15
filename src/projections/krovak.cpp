@@ -103,7 +103,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forward */
+static PJ_XY krovak_e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forward */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     PJ_XY xy = {0.0,0.0};
 
@@ -115,7 +115,14 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forwar
     deltav = -lp.lam * Q->alpha;
 
     s = asin(cos(Q->ad) * sin(u) + sin(Q->ad) * cos(u) * cos(deltav));
-    d = asin(cos(u) * sin(deltav) / cos(s));
+    const double cos_s =  cos(s);
+    if( cos_s < 1e-12 )
+    {
+        xy.x = 0;
+        xy.y = 0;
+        return xy;
+    }
+    d = asin(cos(u) * sin(deltav) / cos_s);
 
     eps = Q->n * d;
     rho = Q->rho0 * pow(tan(S0 / 2. + M_PI_4) , Q->n) / pow(tan(s / 2. + M_PI_4) , Q->n);
@@ -130,7 +137,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {                /* Ellipsoidal, forwar
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal, inverse */
+static PJ_LP krovak_e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal, inverse */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     PJ_LP lp = {0.0,0.0};
 
@@ -148,7 +155,12 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal, invers
     eps = atan2(xy.y, xy.x);
 
     d = eps / sin(S0);
-    s = 2. * (atan(  pow(Q->rho0 / rho, 1. / Q->n) * tan(S0 / 2. + M_PI_4)) - M_PI_4);
+    if( rho == 0.0 ) {
+        s = M_PI_2;
+    }
+    else {
+        s = 2. * (atan(  pow(Q->rho0 / rho, 1. / Q->n) * tan(S0 / 2. + M_PI_4)) - M_PI_4);
+    }
 
     u = asin(cos(Q->ad) * sin(s) - sin(Q->ad) * cos(s) * cos(d));
     deltav = asin(cos(s) * sin(d) / cos(u));
@@ -210,14 +222,18 @@ PJ *PROJECTION(krovak) {
     Q->alpha = sqrt(1. + (P->es * pow(cos(P->phi0), 4)) / (1. - P->es));
     u0 = asin(sin(P->phi0) / Q->alpha);
     g = pow( (1. + P->e * sin(P->phi0)) / (1. - P->e * sin(P->phi0)) , Q->alpha * P->e / 2. );
-    Q->k = tan( u0 / 2. + M_PI_4) / pow  (tan(P->phi0 / 2. + M_PI_4) , Q->alpha) * g;
+    double tan_half_phi0_plus_pi_4 = tan(P->phi0 / 2. + M_PI_4);
+    if( tan_half_phi0_plus_pi_4 == 0.0 ) {
+        return pj_default_destructor(P, PJD_ERR_INVALID_ARG);
+    }
+    Q->k = tan( u0 / 2. + M_PI_4) / pow  (tan_half_phi0_plus_pi_4 , Q->alpha) * g;
     n0 = sqrt(1. - P->es) / (1. - P->es * pow(sin(P->phi0), 2));
     Q->n = sin(S0);
     Q->rho0 = P->k0 * n0 / tan(S0);
     Q->ad = M_PI_2 - UQ;
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = krovak_e_inverse;
+    P->fwd = krovak_e_forward;
 
     return P;
 }

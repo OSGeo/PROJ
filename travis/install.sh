@@ -2,11 +2,23 @@
 
 set -e
 
+UNAME="$(uname)" || UNAME=""
+if test "${UNAME}" = "Linux" ; then
+    NPROC=$(nproc);
+elif test "${UNAME}" = "Darwin" ; then
+    NPROC=$(sysctl -n hw.ncpu);
+fi
+if test "x${NPROC}" = "x"; then
+    NPROC=2;
+fi
+echo "NPROC=${NPROC}"
+
 # Download grid files
-wget http://download.osgeo.org/proj/proj-datumgrid-1.7.zip
+wget http://download.osgeo.org/proj/proj-datumgrid-1.8.zip
 
 # prepare build files
 ./autogen.sh
+TOP_DIR=$PWD
 
 # autoconf build
 mkdir build_autoconf
@@ -23,11 +35,19 @@ cd $TAR_DIRECTORY
 mkdir build_autoconf
 cd build_autoconf
 if [ -f /usr/lib/jvm/java-7-openjdk-amd64/include/jni.h ]; then
-    CXXFLAGS="-I/usr/lib/jvm/java-7-openjdk-amd64/include -I/usr/lib/jvm/java-7-openjdk-amd64/include/linux" ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all --with-jni
+    CXXFLAGS="-I/usr/lib/jvm/java-7-openjdk-amd64/include -I/usr/lib/jvm/java-7-openjdk-amd64/include/linux $CXXFLAGS" ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all --with-jni
 else
     ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 fi
-make -j3
+
+make -j${NPROC}
+
+if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
+    echo "Checking exported symbols..."
+    ${TOP_DIR}/scripts/dump_exported_symbols.sh src/.libs/libproj.so > /tmp/got_symbols.txt
+    diff -u ${TOP_DIR}/scripts/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
+fi
+
 make check
 make install
 find /tmp/proj_autoconf_install_from_dist_all
@@ -37,7 +57,7 @@ cd ..
 mkdir build_cmake
 cd build_cmake
 cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
-make -j3
+VERBOSE=1 make -j${NPROC}
 make install
 # The cmake build is not able to generate the null file, so copy it at hand
 cp /tmp/proj_autoconf_install_from_dist_all/share/proj/null /tmp/proj_cmake_install/share/proj
@@ -49,13 +69,13 @@ cd ..
 cd ../..
 
 # Install grid files
-(cd data && unzip -o ../proj-datumgrid-1.7.zip)
+(cd data && unzip -o ../proj-datumgrid-1.8.zip)
 
 # autoconf build with grids
 mkdir build_autoconf_grids
 cd build_autoconf_grids
 ../configure --prefix=/tmp/proj_autoconf_install_grids
-make -j3
+make -j${NPROC}
 make check
 (cd src && make multistresstest && make test228)
 PROJ_LIB=../data src/multistresstest
@@ -74,7 +94,7 @@ if [ "$BUILD_NAME" != "linux_clang" ]; then
 else
     ./configure
 fi
-make -j3
+make -j${NPROC}
 make check
 
 # Rerun tests without grids not included in proj-datumgrid

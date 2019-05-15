@@ -56,7 +56,6 @@ grid-values in units of mm/year in ENU-space.
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "proj_internal.h"
 
 PROJ_HEAD(deformation, "Kinematic grid shift");
 
@@ -92,7 +91,7 @@ static PJ_XYZ get_grid_shift(PJ* P, PJ_XYZ cartesian) {
 
     /* look up correction values in grids */
     shift.lp    = proj_hgrid_value(P, geodetic.lp);
-    shift.enu.u = proj_vgrid_value(P, geodetic.lp);
+    shift.enu.u = proj_vgrid_value(P, geodetic.lp, 1.0);
 
     if (proj_errno(P) == PJD_ERR_GRID_AREA)
         proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",

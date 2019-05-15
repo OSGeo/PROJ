@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  ISO19111:2018 implementation
+ * Purpose:  ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -63,15 +63,15 @@ namespace operation {
 
 /** \brief Grid description */
 struct GridDescription {
-    std::string shortName{};   /**< Grid short filename */
-    std::string fullName{};    /**< Grid full path name (if found) */
-    std::string packageName{}; /**< Package name (or empty) */
-    std::string url{}; /**< Grid URL (if packageName is empty), or package
-                            URL (or empty) */
-    bool directDownload = false; /**< Whether url can be fetched directly. */
-    bool openLicense =
-        false; /**< Whether the grid is released with an open license. */
-    bool available = false; /**< Whether GRID is available. */
+    std::string shortName;   /**< Grid short filename */
+    std::string fullName;    /**< Grid full path name (if found) */
+    std::string packageName; /**< Package name (or empty) */
+    std::string url;         /**< Grid URL (if packageName is empty), or package
+                                    URL (or empty) */
+    bool directDownload;     /**< Whether url can be fetched directly. */
+    /** Whether the grid is released with an open license. */
+    bool openLicense;
+    bool available; /**< Whether GRID is available. */
 
     //! @cond Doxygen_Suppress
     bool operator<(const GridDescription &other) const {
@@ -113,7 +113,7 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  * (some) entirely different parameter values are needed, a different coordinate
  * operation shall be defined.
  *
- * \remark Implements CoordinateOperation from \ref ISO_19111_2018
+ * \remark Implements CoordinateOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
                                          public io::IPROJStringExportable {
@@ -146,7 +146,19 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     gridsNeeded(const io::DatabaseContextPtr &databaseContext) const = 0;
 
     PROJ_DLL bool
-    isPROJInstanciable(const io::DatabaseContextPtr &databaseContext) const;
+    isPROJInstantiable(const io::DatabaseContextPtr &databaseContext) const;
+
+    PROJ_DLL bool hasBallparkTransformation() const;
+
+    PROJ_DLL static const std::string OPERATION_VERSION_KEY;
+
+    PROJ_DLL CoordinateOperationNNPtr normalizeForVisualization() const;
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_FOR_TEST CoordinateOperationNNPtr
+        shallowClone() const;
+    //! @endcond
 
   protected:
     PROJ_INTERNAL CoordinateOperation();
@@ -167,6 +179,13 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_INTERNAL
     void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+    PROJ_INTERNAL void setHasBallparkTransformation(bool b);
+
+    PROJ_INTERNAL void
+    setProperties(const util::PropertyMap
+                      &properties); // throw(InvalidValueTypeException)
+
+    PROJ_INTERNAL virtual CoordinateOperationNNPtr _shallowClone() const = 0;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -178,7 +197,7 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
 /** \brief Abstract class modelling a parameter value (OperationParameter)
  * or group of parameters.
  *
- * \remark Implements GeneralOperationParameter from \ref ISO_19111_2018
+ * \remark Implements GeneralOperationParameter from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL GeneralOperationParameter : public common::IdentifiedObject {
   public:
@@ -222,7 +241,7 @@ using OperationParameterNNPtr = util::nn<OperationParameterPtr>;
  * Most parameter values are numeric, but other types of parameter values are
  * possible.
  *
- * \remark Implements OperationParameter from \ref ISO_19111_2018
+ * \remark Implements OperationParameter from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL OperationParameter final : public GeneralOperationParameter {
   public:
@@ -268,7 +287,7 @@ struct MethodMapping;
 /** \brief Abstract class modelling a parameter value (OperationParameterValue)
  * or group of parameter values.
  *
- * \remark Implements GeneralParameterValue from \ref ISO_19111_2018
+ * \remark Implements GeneralParameterValue from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
                                            public io::IWKTExportable,
@@ -322,7 +341,7 @@ using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
  * Most parameter values are numeric, but other types of parameter values are
  * possible.
  *
- * \remark Implements ParameterValue from \ref ISO_19111_2018
+ * \remark Implements ParameterValue from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ParameterValue final : public util::BaseObject,
                                           public io::IWKTExportable,
@@ -397,7 +416,7 @@ using OperationParameterValueNNPtr = util::nn<OperationParameterValuePtr>;
  *
  * This combines a OperationParameter with the corresponding ParameterValue.
  *
- * \remark Implements OperationParameterValue from \ref ISO_19111_2018
+ * \remark Implements OperationParameterValue from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL OperationParameterValue final
     : public GeneralParameterValue {
@@ -460,7 +479,7 @@ using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
  * For a projection method, this contains the name of the projection method
  * and the name of the projection parameters.
  *
- * \remark Implements OperationMethod from \ref ISO_19111_2018
+ * \remark Implements OperationMethod from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
   public:
@@ -531,7 +550,7 @@ using SingleOperationNNPtr = util::nn<SingleOperationPtr>;
 /** \brief A single (not concatenated) coordinate operation
  * (CoordinateOperation)
  *
- * \remark Implements SingleOperation from \ref ISO_19111_2018
+ * \remark Implements SingleOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
   public:
@@ -630,7 +649,7 @@ using ConversionNNPtr = util::nn<ConversionPtr>;
  * associations, but through associations from crs::DerivedCRS to
  * crs::SingleCRS.
  *
- * \remark Implements Conversion from \ref ISO_19111_2018
+ * \remark Implements Conversion from \ref ISO_19111_2019
  */
 
 /*!
@@ -1317,6 +1336,8 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     PROJ_FRIEND(crs::ProjectedCRS);
     PROJ_INTERNAL bool addWKTExtensionNode(io::WKTFormatter *formatter) const;
 
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     Conversion &operator=(const Conversion &other) = delete;
@@ -1350,7 +1371,7 @@ using TransformationNNPtr = util::nn<TransformationPtr>;
  * coordinates are referenced to different datums (reference frames) will be a
  * coordinate transformation.
  *
- * \remark Implements Transformation from \ref ISO_19111_2018
+ * \remark Implements Transformation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL Transformation : public SingleOperation {
   public:
@@ -1455,7 +1476,8 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_DLL static TransformationNNPtr
     createGravityRelatedHeightToGeographic3D(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
-        const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+        const crs::CRSNNPtr &targetCRSIn, const crs::CRSPtr &interpolationCRSIn,
+        const std::string &filename,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_DLL static TransformationNNPtr createVERTCON(
@@ -1493,6 +1515,11 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_DLL TransformationNNPtr substitutePROJAlternativeGridNames(
         io::DatabaseContextNNPtr databaseContext) const;
 
+    PROJ_DLL static TransformationNNPtr createChangeVerticalUnit(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const common::Scale &factor,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL const std::string &
@@ -1527,6 +1554,8 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
 
     PROJ_INTERNAL TransformationNNPtr inverseAsTransformation() const;
 
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };
@@ -1545,7 +1574,7 @@ using PointMotionOperationNNPtr = util::nn<PointMotionOperationPtr>;
  *
  * The motion is due to tectonic plate movement or deformation.
  *
- * \remark Implements PointMotionOperation from \ref ISO_19111_2018
+ * \remark Implements PointMotionOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL PointMotionOperation : public SingleOperation {
   public:
@@ -1574,7 +1603,7 @@ using ConcatenatedOperationNNPtr = util::nn<ConcatenatedOperationPtr>;
  * the source coordinate reference system of step n+1 shall be the same as
  * the target coordinate reference system of step n.
  *
- * \remark Implements ConcatenatedOperation from \ref ISO_19111_2018
+ * \remark Implements ConcatenatedOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
   public:
@@ -1618,11 +1647,14 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
     //! @endcond
 
   protected:
+    PROJ_INTERNAL ConcatenatedOperation(const ConcatenatedOperation &other);
     PROJ_INTERNAL explicit ConcatenatedOperation(
         const std::vector<CoordinateOperationNNPtr> &operationsIn);
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
 
     INLINED_MAKE_SHARED
 

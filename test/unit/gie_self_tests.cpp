@@ -421,9 +421,11 @@ TEST(gie, info_functions) {
     /* check a few key characteristics of the Mercator projection */
     EXPECT_NEAR(factors.angular_distortion, 0.0, 1e-7)
         << factors.angular_distortion; /* angular distortion should be 0 */
+
+    /* Meridian/parallel angle should be 90 deg */
     EXPECT_NEAR(factors.meridian_parallel_angle, M_PI_2, 1e-7)
-        << factors.meridian_parallel_angle; /* Meridian/parallel angle should be
-                                               90 deg */
+        << factors.meridian_parallel_angle;
+
     EXPECT_EQ(factors.meridian_convergence,
               0.0); /* meridian convergence should be 0 */
 
@@ -701,13 +703,16 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     EXPECT_NEAR(c.xy.x, 44.999701238, 1e-9);
     EXPECT_NEAR(c.xy.y, 24.998474948, 1e-9);
     EXPECT_EQ(std::string(proj_pj_info(P).definition),
-              "proj=pipeline step proj=push v_3 step proj=axisswap order=2,1 "
-              "step proj=unitconvert xy_in=deg xy_out=rad step proj=cart "
+              "proj=pipeline step proj=axisswap order=2,1 "
+              "step proj=unitconvert xy_in=deg xy_out=rad "
+              "step proj=push v_3 "
+              "step proj=cart "
               "ellps=krass step proj=helmert x=2.3287 y=-147.0425 z=-92.0802 "
               "rx=0.3092483 ry=-0.32482185 rz=-0.49729934 s=5.68906266 "
-              "convention=coordinate_frame step inv proj=cart ellps=GRS80 step "
-              "proj=unitconvert xy_in=rad xy_out=deg step proj=axisswap "
-              "order=2,1 step proj=pop v_3");
+              "convention=coordinate_frame step inv proj=cart ellps=GRS80 "
+              "step proj=pop v_3 "
+              "step proj=unitconvert xy_in=rad xy_out=deg step proj=axisswap "
+              "order=2,1");
 
     c = proj_trans(P, PJ_INV, c);
     EXPECT_NEAR(c.xy.x, 45, 1e-8);
@@ -730,12 +735,38 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     EXPECT_NEAR(c.xy.x, 51.999714150, 1e-9);
     EXPECT_NEAR(c.xy.y, 19.998187811, 1e-9);
     EXPECT_EQ(std::string(proj_pj_info(P).definition),
-              "proj=pipeline step proj=push v_3 step proj=axisswap order=2,1 "
-              "step proj=unitconvert xy_in=deg xy_out=rad step proj=cart "
+              "proj=pipeline step proj=axisswap order=2,1 "
+              "step proj=unitconvert xy_in=deg xy_out=rad "
+              "step proj=push v_3 "
+              "step proj=cart "
               "ellps=krass step proj=helmert x=33.4 y=-146.6 z=-76.3 rx=-0.359 "
               "ry=-0.053 rz=0.844 s=-0.84 convention=position_vector step inv "
-              "proj=cart ellps=GRS80 step proj=unitconvert xy_in=rad "
-              "xy_out=deg step proj=axisswap order=2,1 step proj=pop v_3");
+              "proj=cart ellps=GRS80 step proj=pop v_3 "
+              "step proj=unitconvert xy_in=rad "
+              "xy_out=deg step proj=axisswap order=2,1");
+
+    proj_destroy(P);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(gie, proj_create_crs_to_crs_outside_area_of_use) {
+
+    // See https://github.com/OSGeo/proj.4/issues/1329
+    auto P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4275", "EPSG:4807",
+                                    nullptr);
+    ASSERT_TRUE(P != nullptr);
+    PJ_COORD c;
+
+    EXPECT_EQ(P->fwd, nullptr);
+
+    // Test point outside area of use of both candidate coordinate operations
+    c.xyz.x = 58; // Lat in deg
+    c.xyz.y = 5;  // Long in deg
+    c.xyz.z = 0;
+    c = proj_trans(P, PJ_FWD, c);
+    EXPECT_NEAR(c.xy.x, 64.44444444444444, 1e-9); // Lat in grad
+    EXPECT_NEAR(c.xy.y, 2.958634259259258, 1e-9); // Long in grad
 
     proj_destroy(P);
 }

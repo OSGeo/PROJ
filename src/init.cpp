@@ -40,7 +40,6 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
-#include "proj_internal.h"
 
 
 /**************************************************************************************/
@@ -673,14 +672,14 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
             if (PJD_ERR_MAJOR_AXIS_NOT_GIVEN==proj_errno (PIN))
                 proj_errno_reset (PIN);
             PIN->f = 1.0/298.257223563;
-            PIN->a_orig  = PIN->a  = 6378137.0;
-            PIN->es_orig = PIN->es = PIN->f*(2-PIN->f);
+            PIN->a  = 6378137.0;
+            PIN->es = PIN->f*(2-PIN->f);
         }
     }
     PIN->a_orig = PIN->a;
     PIN->es_orig = PIN->es;
     if (pj_calc_ellipsoid_params (PIN, PIN->a, PIN->es))
-        return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
+        return pj_default_destructor (PIN, PJD_ERR_INVALID_ECCENTRICITY);
 
     /* Now that we have ellipse information check for WGS84 datum */
     if( PIN->datum_type == PJD_3PARAM
@@ -737,6 +736,8 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
 
     /* Central latitude */
     PIN->phi0 = pj_param(ctx, start, "rlat_0").f;
+    if( fabs(PIN->phi0) > M_HALFPI )
+        return pj_default_destructor (PIN, PJD_ERR_LAT_LARGER_THAN_90);
 
     /* False easting and northing */
     PIN->x0 = pj_param(ctx, start, "dx_0").f;

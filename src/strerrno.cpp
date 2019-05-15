@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "proj.h"
+#include "proj_config.h"
 #include "proj_internal.h"
 
 static const char * const
@@ -14,7 +15,7 @@ pj_err_list[] = {
     "no colon in init= string",                                        /*  -3 */
     "projection not named",                                            /*  -4 */
     "unknown projection id",                                           /*  -5 */
-    "effective eccentricity = 1.",                                     /*  -6 */
+    "effective eccentricity < 0 or >= 1.",                             /*  -6 */
     "unknown unit conversion id",                                      /*  -7 */
     "invalid boolean param argument",                                  /*  -8 */
     "unknown elliptical parameter name",                               /*  -9 */
@@ -30,7 +31,7 @@ pj_err_list[] = {
     "acos/asin: |arg| >1.+1e-14",                                      /* -19 */
     "tolerance condition error",                                       /* -20 */
     "conic lat_1 = -lat_2",                                            /* -21 */
-    "lat_1 >= 90",                                                     /* -22 */
+    "lat_0, lat_1 or lat_2 >= 90",                                     /* -22 */
     "lat_1 = 0",                                                       /* -23 */
     "lat_ts >= 90",                                                    /* -24 */
     "no distance between control points",                              /* -25 */
@@ -38,10 +39,10 @@ pj_err_list[] = {
     "W <= 0 or M <= 0",                                                /* -27 */
     "lsat not in 1-5 range",                                           /* -28 */
     "path not in range",                                               /* -29 */
-    "h <= 0",                                                          /* -30 */
+    "h <= 0 or h > 1e10 * a",                                          /* -30 */
     "k <= 0",                                                          /* -31 */
-    "lat_0 = 0 or 90 or alpha = 90",                                   /* -32 */
-    "lat_1=lat_2 or lat_1=0 or lat_2=90",                              /* -33 */
+    "lat_1=lat_2 or lat_1=0 or lat_2=90",                              /* -32 */
+    "lat_0 = 0 or 90 or alpha = 90",                                   /* -33 */
     "elliptical usage required",                                       /* -34 */
     "invalid UTM zone number",                                         /* -35 */
     "", /* no longer used */                                           /* -36 */
@@ -69,6 +70,7 @@ pj_err_list[] = {
     "argument not numerical or out of range",                          /* -58 */
     "inconsistent unit type between input and output",                 /* -59 */
     "arguments are mutually exclusive",                                /* -60 */
+    "generic error of unknown origin",                                 /* -61 */
 
     /* When adding error messages, remember to update ID defines in
        projects.h, and transient_error array in pj_transform                  */

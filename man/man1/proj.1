@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJ" "1" "Feb 14, 2019" "6.0.0" "PROJ.4"
+.TH "PROJ" "1" "May 06, 2019" "6.1.0" "PROJ.4"
 .SH NAME
 proj \- Cartographic projection filter
 .
@@ -33,9 +33,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
-\fBproj\fP [ \fB\-beEfiIlmorsStTvVwW\fP ] [ args ] ] [ \fI+args\fP ] file[s]
+\fBproj\fP [\fB\-beEfiIlmorsStTvVwW\fP] [args]] [\fI+opt[=arg]\fP …] file …
 .sp
-\fBinvproj\fP [ \fB\-beEfiIlmorsStTvVwW\fP ] [ args ] ] [ \fI+args\fP ] file[s]
+\fBinvproj\fP [\fB\-beEfiIlmorsStTvVwW\fP] [args]] [\fI+opt[=arg]\fP …] file …
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
@@ -197,7 +197,7 @@ This option causes an expanded annotated listing of the characteristics of
 the projected point. \fI\%\-v\fP is implied with this option.
 .UNINDENT
 .sp
-The \fI+args\fP run\-line arguments are associated with cartographic parameters.
+The \fI+opt\fP run\-line arguments are associated with cartographic parameters.
 Additional projection control parameters may be contained in two auxiliary
 control files: the first is optionally referenced with the
 \fI+init=file:id\fP and the second is always processed after the name of the
@@ -216,7 +216,7 @@ portions of the input line are appended to the output line.
 Input geographic data (longitude and latitude) must be in DMS format and input
 cartesian data must be in units consistent with the ellipsoid major axis or
 sphere radius units. Output geographic coordinates will be in DMS (if the
-\fB\-w\fP switch is not employed) and precise to 0.001" with trailing, zero\-valued
+\fB\-w\fP switch is not employed) and precise to 0.001” with trailing, zero\-valued
 minute\-second fields deleted.
 .SH EXAMPLE
 .sp

@@ -38,7 +38,7 @@ PROJ_HEAD(tpers, "Tilted perspective") "\n\tAzi, Sph\n\ttilt= azi= h=";
 # define EPS10 1.e-10
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY nsper_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  coslam, cosphi, sinphi;
@@ -93,10 +93,10 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP nsper_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double  rh, cosz, sinz;
+    double  rh;
 
     if (Q->tilt) {
         double bm, bq, yt;
@@ -108,16 +108,18 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
         xy.y = bq * Q->cg - bm * Q->sg;
     }
     rh = hypot(xy.x, xy.y);
-    if ((sinz = 1. - rh * rh * Q->pfact) < 0.) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-        return lp;
-    }
-    sinz = (Q->p - sqrt(sinz)) / (Q->pn1 / rh + rh / Q->pn1);
-    cosz = sqrt(1. - sinz * sinz);
     if (fabs(rh) <= EPS10) {
         lp.lam = 0.;
         lp.phi = P->phi0;
     } else {
+        double cosz, sinz;
+        sinz = 1. - rh * rh * Q->pfact;
+        if (sinz < 0.) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
+        sinz = (Q->p - sqrt(sinz)) / (Q->pn1 / rh + rh / Q->pn1);
+        cosz = sqrt(1. - sinz * sinz);
         switch (Q->mode) {
         case OBLIQ:
             lp.phi = asin(cosz * Q->sinph0 + xy.y * sinz * Q->cosph0 / rh);
@@ -146,8 +148,7 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 static PJ *setup(PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    if ((Q->height = pj_param(P->ctx, P->params, "dh").f) <= 0.)
-        return pj_default_destructor(P, PJD_ERR_H_LESS_THAN_ZERO);
+    Q->height = pj_param(P->ctx, P->params, "dh").f;
 
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
@@ -159,12 +160,14 @@ static PJ *setup(PJ *P) {
         Q->cosph0 = cos(P->phi0);
     }
     Q->pn1 = Q->height / P->a; /* normalize by radius */
+    if ( Q->pn1 <= 0 || Q->pn1 > 1e10 )
+        return pj_default_destructor (P, PJD_ERR_INVALID_H);
     Q->p = 1. + Q->pn1;
     Q->rp = 1. / Q->p;
     Q->h = 1. / Q->pn1;
     Q->pfact = (Q->p + 1.) * Q->h;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = nsper_s_inverse;
+    P->fwd = nsper_s_forward;
     P->es = 0.;
 
     return P;

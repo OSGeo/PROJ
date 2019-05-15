@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "GEOD" "1" "Feb 14, 2019" "6.0.0" "PROJ.4"
+.TH "GEOD" "1" "May 06, 2019" "6.1.0" "PROJ.4"
 .SH NAME
 geod \- Geodesic computations
 .
@@ -33,9 +33,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
-\fBgeod\fP \fI+ellps=<ellipse>\fP [ \fB\-afFIlptwW\fP [ args ] ] [ \fI+args\fP ] file[s]
+\fBgeod\fP \fI+ellps=<ellipse>\fP [\fB\-afFIlptwW\fP [args]] [\fI+opt[=arg]\fP …] file …
 .sp
-\fBinvgeod\fP \fI+ellps=<ellipse>\fP [ \fB\-afFIlptwW\fP [ args ] ] [ \fI+args\fP ] file[s]
+\fBinvgeod\fP \fI+ellps=<ellipse>\fP [\fB\-afFIlptwW\fP [args]] [\fI+opt[=arg]\fP …] file …
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
@@ -116,7 +116,7 @@ This option causes the azimuthal values to be output as unsigned DMS
 numbers between 0 and 360 degrees. Also note \fI\%\-f\fP\&.
 .UNINDENT
 .sp
-The \fI+args\fP command\-line options are associated with geodetic
+The \fI+opt\fP command\-line options are associated with geodetic
 parameters for specifying the ellipsoidal or sphere to use.
 controls. The options are processed in left to right order
 from the command line. Reentry of an option is ignored with
@@ -143,12 +143,12 @@ azimuthal data must be in decimal degrees or DMS format and
 input distance data must be in units consistent with the ellipsoid
 major axis or sphere radius units. The latitude must lie
 in the range [\-90d,90d]. Output geographic coordinates will be
-in DMS (if the \fI\%\-f\fP switch is not employed) to 0.001" with trailing,
+in DMS (if the \fI\%\-f\fP switch is not employed) to 0.001” with trailing,
 zero\-valued minute\-second fields deleted. Output distance
 data will be in the same units as the ellipsoid or sphere
 radius.
 .sp
-The Earth\(aqs ellipsoidal figure may be selected in the same manner
+The Earth’s ellipsoidal figure may be selected in the same manner
 as program \fBproj\fP by using \fI+ellps=\fP, \fI+a=\fP, \fI+es=\fP, etc.
 .sp
 \fBgeod\fP may also be used to determine intermediate points along
@@ -201,7 +201,7 @@ where the first two values are the azimuth from Boston to Portland,
 the back azimuth from Portland to Boston followed by the distance.
 .sp
 An example of forward geodesic use is to use the Boston location
-and determine Portland\(aqs location by azimuth and distance:
+and determine Portland’s location by azimuth and distance:
 .INDENT 0.0
 .INDENT 3.5
 .sp
