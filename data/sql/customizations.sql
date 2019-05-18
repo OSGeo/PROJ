@@ -7,18 +7,6 @@ INSERT INTO "other_transformation" VALUES('PROJ','CRS84_TO_EPSG_4326','OGC:CRS84
 -- alias of EPSG:3857
 INSERT INTO "projected_crs" VALUES('EPSG','900913','Google Maps Global Mercator',NULL,NULL,'EPSG','4499','EPSG','4326','EPSG','3856','EPSG','3544',NULL,1);
 
--- Remove supression entry of EPSG:8371 ("RGF93 to NGF IGN69 height (2)", using RAF09.mnt) by
--- EPSG:8885 ("RGF93 to NGF IGN69 height (3)", using RAF18.tac), since
--- we have only RAF09.mnt in proj-datumgrid-europe
--- Our code to remove superseded operations should probably take into account grid availability
-DELETE FROM "supersession" WHERE superseded_table_name = 'grid_transformation' AND
-                                 superseded_auth_name = 'EPSG' AND
-                                 superseded_code = '8371' AND
-                                 replacement_table_name = 'grid_transformation' AND
-                                 replacement_auth_name = 'EPSG' AND
-                                 replacement_code = '8885' AND
-                                 source = 'EPSG';
-
 -- ('EPSG','7001','ETRS89 to NAP height (1)') lacks an interpolationCRS with Amersfoort / EPSG:4289
 -- See https://salsa.debian.org/debian-gis-team/proj-rdnap/blob/debian/2008-8/Use%20of%20RDTRANS2008%20and%20NAPTRANS2008.pdf
 -- "The naptrans2008 VDatum-grid is referenced to the Bessel-1841 ellipsoid"
