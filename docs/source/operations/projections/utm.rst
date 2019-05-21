@@ -62,6 +62,10 @@ Required
 
     Select which UTM zone to use. Can be a value between 1-60.
 
+
+Optional
+-------------------------------------------------------------------------------
+
 .. option:: +south
 
     Add this flag when using the UTM on the southern hemisphere.
@@ -71,9 +75,6 @@ Required
     .. versionadded:: 6.0.0
 
     Use faster, less accurate algorithm for the Transverse Mercator.
-
-Optional
--------------------------------------------------------------------------------
 
 .. include:: ../options/ellps.rst
 
