@@ -9575,6 +9575,11 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
 CoordinateOperationNNPtr ConcatenatedOperation::_shallowClone() const {
     auto op =
         ConcatenatedOperation::nn_make_shared<ConcatenatedOperation>(*this);
+    std::vector<CoordinateOperationNNPtr> ops;
+    for (const auto &subOp : d->operations_) {
+        ops.emplace_back(subOp->shallowClone());
+    }
+    op->d->operations_ = ops;
     op->assignSelf(op);
     op->setCRSs(this, false);
     return util::nn_static_pointer_cast<CoordinateOperation>(op);
@@ -9976,6 +9981,9 @@ struct CoordinateOperationFactory::Private {
     static ConversionNNPtr
     createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
                                const crs::CRSNNPtr &targetCRS);
+
+    static void setCRSs(CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
+                        const crs::CRSNNPtr &targetCRS);
 };
 //! @endcond
 
@@ -10870,6 +10878,31 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
                     context->getDiscardSuperseded(),
                     context->getIntermediateCRS());
                 if (!res.empty()) {
+
+                    // If doing GeogCRS --> GeogCRS, only use GeogCRS as
+                    // intermediate CRS
+                    // Avoid weird behaviour when doing NAD83 -> NAD83(2011)
+                    // that would go through NAVD88 otherwise.
+                    if (context->getIntermediateCRS().empty() &&
+                        dynamic_cast<const crs::GeographicCRS *>(
+                            sourceCRS.get()) &&
+                        dynamic_cast<const crs::GeographicCRS *>(
+                            targetCRS.get())) {
+                        std::vector<CoordinateOperationNNPtr> res2;
+                        for (const auto &op : res) {
+                            auto concatOp =
+                                dynamic_cast<ConcatenatedOperation *>(op.get());
+                            if (concatOp &&
+                                dynamic_cast<const crs::GeographicCRS *>(
+                                    concatOp->operations()
+                                        .front()
+                                        ->targetCRS()
+                                        .get())) {
+                                res2.emplace_back(op);
+                            }
+                        }
+                        res = std::move(res2);
+                    }
                     return res;
                 }
             }
@@ -11512,6 +11545,37 @@ static std::string objectAsStr(const common::IdentifiedObject *obj) {
 
 // ---------------------------------------------------------------------------
 
+void CoordinateOperationFactory::Private::setCRSs(
+    CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
+    const crs::CRSNNPtr &targetCRS) {
+    co->setCRSs(sourceCRS, targetCRS, nullptr);
+    auto concat = dynamic_cast<ConcatenatedOperation *>(co);
+    if (concat) {
+        auto first = concat->operations().front().get();
+        auto &firstTarget(first->targetCRS());
+        if (firstTarget) {
+            setCRSs(first, sourceCRS, NN_NO_CHECK(firstTarget));
+            auto invCO = dynamic_cast<InverseCoordinateOperation *>(first);
+            if (invCO) {
+                setCRSs(invCO->forwardOperation().get(),
+                        NN_NO_CHECK(firstTarget), sourceCRS);
+            }
+        }
+        auto last = concat->operations().back().get();
+        auto &lastSource(last->sourceCRS());
+        if (lastSource) {
+            setCRSs(last, NN_NO_CHECK(lastSource), targetCRS);
+            auto invCO = dynamic_cast<InverseCoordinateOperation *>(last);
+            if (invCO) {
+                setCRSs(invCO->forwardOperation().get(), targetCRS,
+                        NN_NO_CHECK(lastSource));
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
     const crs::CRSNNPtr &targetCRS, const crs::GeodeticCRS *geodSrc,
@@ -11604,18 +11668,18 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
             }
             if (isNullFirst) {
                 auto oldTarget(NN_CHECK_ASSERT(opSecondCloned->targetCRS()));
-                opSecondCloned->setCRSs(sourceCRS, oldTarget, nullptr);
+                setCRSs(opSecondCloned.get(), sourceCRS, oldTarget);
                 if (invCOForward) {
-                    invCOForward->setCRSs(oldTarget, sourceCRS, nullptr);
+                    setCRSs(invCOForward, oldTarget, sourceCRS);
                 }
             } else {
                 subOps.emplace_back(opFirst);
             }
             if (isNullThird) {
                 auto oldSource(NN_CHECK_ASSERT(opSecondCloned->sourceCRS()));
-                opSecondCloned->setCRSs(oldSource, targetCRS, nullptr);
+                setCRSs(opSecondCloned.get(), oldSource, targetCRS);
                 if (invCOForward) {
-                    invCOForward->setCRSs(targetCRS, oldSource, nullptr);
+                    setCRSs(invCOForward, targetCRS, oldSource);
                 }
                 subOps.emplace_back(opSecondCloned);
             } else {
