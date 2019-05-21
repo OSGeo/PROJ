@@ -6902,6 +6902,29 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, NAD83_to_projeted_CRS_based_on_NAD83_2011) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // NAD83
+        authFactory->createCoordinateReferenceSystem("4269"),
+        // NAD83(2011) / California Albers
+        authFactory->createCoordinateReferenceSystem("6414"), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(), "Ballpark geographic offset from NAD83 to "
+                                  "NAD83(2011) + California Albers");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=aea +lat_0=0 +lon_0=-120 +lat_1=34 "
+              "+lat_2=40.5 +x_0=0 +y_0=-4000000 +ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, isPROJInstantiable) {
 
     {
