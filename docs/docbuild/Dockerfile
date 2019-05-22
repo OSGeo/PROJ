@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-dev python3-pip g++ doxygen dvipng latexmk \
     cmake libjpeg8-dev zlib1g-dev texlive-latex-base \
-    texlive-latex-extra git \
+    texlive-latex-extra git latex-cjk-all texlive-lang-all \
     graphviz python3-matplotlib
 
 RUN pip3 install Sphinx breathe \
