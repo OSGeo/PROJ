@@ -4759,6 +4759,38 @@ TEST(operation, geogCRS_to_geogCRS_3D) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_3D_lat_long_non_metre_to_geogCRS_longlat) {
+
+    auto wkt = "GEOGCRS[\"my CRS\",\n"
+               "    DATUM[\"World Geodetic System 1984\",\n"
+               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563],\n"
+               "        ID[\"EPSG\",6326]],\n"
+               "    CS[ellipsoidal,3],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"ellipsoidal height\",up,\n"
+               "            LENGTHUNIT[\"my_vunit\",0.3]]]";
+    auto srcCRS_obj = WKTParser().createFromWKT(wkt);
+    auto srcCRS = nn_dynamic_pointer_cast<CRS>(srcCRS_obj);
+    ASSERT_TRUE(srcCRS != nullptr);
+
+    auto dstCRS_obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +datum=WGS84 +type=crs");
+    auto dstCRS = nn_dynamic_pointer_cast<CRS>(dstCRS_obj);
+    ASSERT_TRUE(dstCRS != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(srcCRS), NN_CHECK_ASSERT(dstCRS));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +z_in=0.3 +z_out=m");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_without_id_to_geogCRS_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
