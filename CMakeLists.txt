@@ -102,7 +102,6 @@ set(PROJ_BUILD_VERSION "16.0.1")
 ################################################################################
 # Build features and variants
 ################################################################################
-include(ProjSystemInfo)
 include(ProjConfig)
 include(ProjMac)
 include(policies)
@@ -169,9 +168,6 @@ int main(int argc, char* argv[]) {
     add_definitions(-DHAVE_PTHREAD_MUTEX_RECURSIVE=1)
   endif()
 endif()
-
-boost_report_value(PROJ_PLATFORM_NAME)
-boost_report_value(PROJ_COMPILER_NAME)
 
 # Set a default build type for single-configuration cmake generators if
 # no build type is set.
