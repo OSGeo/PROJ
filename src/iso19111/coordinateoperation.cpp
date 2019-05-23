@@ -11302,12 +11302,38 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
         geogSrc->datum()->_isEquivalentTo(
             geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT);
 
+    // Do the CRS differ by their axis order ?
+    bool axisReversal2D = false;
+    bool axisReversal3D = false;
+    if (!srcCS->_isEquivalentTo(dstCS.get(),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+        auto srcOrder = srcCS->axisOrder();
+        auto dstOrder = dstCS->axisOrder();
+        if (((srcOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST ||
+              srcOrder == cs::EllipsoidalCS::AxisOrder::
+                              LAT_NORTH_LONG_EAST_HEIGHT_UP) &&
+             (dstOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH ||
+              dstOrder == cs::EllipsoidalCS::AxisOrder::
+                              LONG_EAST_LAT_NORTH_HEIGHT_UP)) ||
+            ((srcOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH ||
+              srcOrder == cs::EllipsoidalCS::AxisOrder::
+                              LONG_EAST_LAT_NORTH_HEIGHT_UP) &&
+             (dstOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST ||
+              dstOrder == cs::EllipsoidalCS::AxisOrder::
+                              LAT_NORTH_LONG_EAST_HEIGHT_UP))) {
+            if (srcAxisList.size() == 3 || dstAxisList.size() == 3)
+                axisReversal3D = true;
+            else
+                axisReversal2D = true;
+        }
+    }
+
     // Do they differ by vertical units ?
     if (vconvSrc != vconvDst &&
         geogSrc->ellipsoid()->_isEquivalentTo(
             geogDst->ellipsoid().get(),
             util::IComparable::Criterion::EQUIVALENT)) {
-        if (offset_pm.value() == 0) {
+        if (offset_pm.value() == 0 && !axisReversal2D && !axisReversal3D) {
             // If only by vertical units, use a Change of Vertical
             // Unit
             // transformation
@@ -11329,33 +11355,11 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     }
 
     // Do the CRS differ only by their axis order ?
-    if (sameDatum &&
-        !srcCS->_isEquivalentTo(dstCS.get(),
-                                util::IComparable::Criterion::EQUIVALENT)) {
-        auto srcOrder = srcCS->axisOrder();
-        auto dstOrder = dstCS->axisOrder();
-        if ((srcOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST &&
-             dstOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH) ||
-            (srcOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH &&
-             dstOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST)) {
-            auto conv = Conversion::createAxisOrderReversal(false);
-            conv->setCRSs(sourceCRS, targetCRS, nullptr);
-            res.emplace_back(conv);
-            return res;
-        }
-        if ((srcOrder ==
-                 cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP &&
-             dstOrder ==
-                 cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP) ||
-            (srcOrder ==
-                 cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP &&
-             dstOrder ==
-                 cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP)) {
-            auto conv = Conversion::createAxisOrderReversal(true);
-            conv->setCRSs(sourceCRS, targetCRS, nullptr);
-            res.emplace_back(conv);
-            return res;
-        }
+    if (sameDatum && (axisReversal2D || axisReversal3D)) {
+        auto conv = Conversion::createAxisOrderReversal(axisReversal3D);
+        conv->setCRSs(sourceCRS, targetCRS, nullptr);
+        res.emplace_back(conv);
+        return res;
     }
 
     std::vector<CoordinateOperationNNPtr> steps;
