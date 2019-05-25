@@ -85,8 +85,6 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_linear) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createUnitOfMeasure("-1"),
                  NoSuchAuthorityCodeException);
-    EXPECT_TRUE(nn_dynamic_pointer_cast<UnitOfMeasure>(
-                    factory->createObject("9001")) != nullptr);
     auto uom = factory->createUnitOfMeasure("9001");
     EXPECT_EQ(uom->name(), "metre");
     EXPECT_EQ(uom->type(), UnitOfMeasure::Type::LINEAR);

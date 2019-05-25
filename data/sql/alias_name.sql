@@ -328,7 +328,6 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1026','TWD97','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6236','Hu Tzu Shan','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6316','Dealul Piscului 1933','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1107','Cais da Figueirinha - Angra do Heroísmo','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1141','ITRF2008 (2005.0)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5202','Bora Bora 2001','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5124','Fahud HD','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5132','DNN','EPSG');
@@ -390,7 +389,6 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1175','MSL 1971','EPSG'
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1176','St. Helena Tritan 2011','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1193','NAD83(CSRS)v2','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1187','ISN2016','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1191','ITRF2014 (2010.0)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1190','ISH2004','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1190','Landshæðarkerfi Islands 2004','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6156','Systém Jednotnej trigonometrickej siete katastrálnej','EPSG');
