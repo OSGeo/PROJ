@@ -118,6 +118,11 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1214','Serbian Spatial Reference Sys
 INSERT INTO "geodetic_datum" VALUES('EPSG','1218','MOMRA Terrestrial Reference Frame 2000',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1206',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1223','Reseau Geodesique de Wallis et Futuna 1996',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1255',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1225','CR-SIRGAS',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1074',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1244','IGS97',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1262',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1245','IGS00',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1262',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1246','IGb00',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1262',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1247','IGS05',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1262',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1248','IGb08',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1262',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,NULL,'EPSG','7001','EPSG','8901','EPSG','1263',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,NULL,'EPSG','7002','EPSG','8901','EPSG','1263',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6003','Not specified (based on Australian National Spheroid)',NULL,NULL,'EPSG','7003','EPSG','8901','EPSG','1263',0);
