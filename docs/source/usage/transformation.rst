@@ -187,7 +187,7 @@ to WGS84 with the ``+towgs84`` parameter.
     cs2cs +proj=latlong +ellps=GRS80 +towgs84=-199.87,74.79,246.62
         +to +proj=latlong +datum=WGS84
     20 35
-    20d0'5.467"E    35d0'9.575"N 8.570
+    20d0'5.467"E    35d0'9.575"N 0.000
 
 The EPSG database provides this example for transforming from WGS72 to WGS84
 using an approximated 7 parameter transformation.
@@ -197,7 +197,7 @@ using an approximated 7 parameter transformation.
     cs2cs +proj=latlong +ellps=WGS72 +towgs84=0,0,4.5,0,0,0.554,0.219 \
         +to +proj=latlong +datum=WGS84
     4 55
-    4d0'0.554"E     55d0'0.09"N 3.223
+    4d0'0.554"E     55d0'0.09"N 0.000
 
 
 Grid Based Datum Adjustments
