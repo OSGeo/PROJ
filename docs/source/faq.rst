@@ -156,3 +156,19 @@ of the Well-Known Text output:
             AREA["World"],
             BBOX[-90,-180,90,180]],
         ID["EPSG",4326]]
+
+Why am I getting the error "Cannot find proj.db"?
+--------------------------------------------------------------------------------
+The file :ref:`proj.db<proj-db>` must be readable for the library to properly
+function.  Like other :doc:`resource files<../resource_files>`,
+it is located using a set of search
+paths.  In most cases, the following paths are checked in order:
+
+    - A path provided by the environment variable PROJ_LIB.
+    - A path built into proj as its resource installation directory
+      (typically ../share/proj relative to the proj library).
+    - The current directory.
+
+Note that if you're using conda, activating an environment sets PROJ_LIB
+to a resource directory located in that environment.
+

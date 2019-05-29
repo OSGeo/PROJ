@@ -14,6 +14,15 @@ In addition to the bundled init-files the PROJ.4 project also distribute a numbe
 of packages containing transformation grids and additional init-files not included
 in the main PROJ package.
 
+.. _proj-db:
+
+proj.db
+-------------------------------------------------------------------------------
+
+A proj installation includes a SQLite database of transformation information
+that must be accessible for the library to work properly.  The library will
+print an error if the database can't be found.
+
 External resources
 -------------------------------------------------------------------------------
 
@@ -36,7 +45,7 @@ At the moment three regional resource file packages are distributed:
 
 * `Europe <https://github.com/OSGeo/proj-datumgrid/tree/master/europe#proj-datumgrid-europe>`_
 * `Oceania <https://github.com/OSGeo/proj-datumgrid/tree/master/oceania#proj-datumgrid-oceania>`_
-* `North America <https://github.com/OSGeo/proj-datumgrid/tree/master/north-america#proj-datumgrid-north-america>`_ 
+* `North America <https://github.com/OSGeo/proj-datumgrid/tree/master/north-america#proj-datumgrid-north-america>`_
 
 Click the links to jump to the relevant README files for each package. Details
 on the content of the packages maintained there.
