@@ -191,7 +191,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         else if (strchr(dir_chars,*name)
                 || (*name == '.' && strchr(dir_chars,name[1])) 
                 || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
-                || (name[1] == ':' && strchr(dir_chars,name[2])) )
+                || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2])) )
             sysname = name;
 
         /* or try to use application provided file finder */
