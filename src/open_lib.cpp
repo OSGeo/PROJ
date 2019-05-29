@@ -288,7 +288,7 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
  *  as a short filename.
  * 
  * @param ctx context.
- * @param short_filename short filename (e.g. egm96_15.gtx)
+ * @param short_filename short filename (e.g. egm96_15.gtx). Must not be NULL.
  * @param out_full_filename output buffer, of size out_full_filename_size, that
  *                          will receive the full filename on success.
  *                          Will be zero-terminated.
