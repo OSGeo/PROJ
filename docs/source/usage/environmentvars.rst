@@ -37,15 +37,16 @@ done by setting the variable with no content::
     character.
 
     PROJ is hardcoded to look for resource files
-    in other locations as well, amongst those are the users home directory,
-    ``/usr/share/proj`` and the current folder.
+    in other locations as well, amongst those are the
+    installation directory (usually ``share/proj`` under the PROJ
+    installation root) and the current folder.
 
-    You can also set the location of the resource files using 
+    You can also set the location of the resource files using
     :func:`proj_context_set_search_paths` in the `proj.h` API header.
 
 .. versionchanged:: 6.1.0
 
-    Starting with PROJ version 6.1.0, the paths set by 
+    Starting with PROJ version 6.1.0, the paths set by
     :func:`proj_context_set_search_paths` will have priority over the
     :envvar:`PROJ_LIB` to allow for mutliple versions of PROJ
     resource files on your system without conflicting.
