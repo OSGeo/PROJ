@@ -626,6 +626,65 @@ int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Get information for a grid from a database lookup.
+ *
+ * @param ctx Context, or NULL for default context.
+ * @param grid_name Grid name (must not be NULL)
+ * @param out_full_name Pointer to a string value to store the grid full
+ * filename. or NULL
+ * @param out_package_name Pointer to a string value to store the package name
+ * where
+ * the grid might be found. or NULL
+ * @param out_url Pointer to a string value to store the grid URL or the
+ * package URL where the grid might be found. or NULL
+ * @param out_direct_download Pointer to a int (boolean) value to store whether
+ * *out_url can be downloaded directly. or NULL
+ * @param out_open_license Pointer to a int (boolean) value to store whether
+ * the grid is released with an open license. or NULL
+ * @param out_available Pointer to a int (boolean) value to store whether the
+ * grid is available at runtime. or NULL
+ * @return TRUE in case of success.
+ */
+int PROJ_DLL proj_grid_get_info_from_database(
+    PJ_CONTEXT *ctx, const char *grid_name, const char **out_full_name,
+    const char **out_package_name, const char **out_url,
+    int *out_direct_download, int *out_open_license, int *out_available) {
+    assert(grid_name);
+    SANITIZE_CTX(ctx);
+    try {
+        auto db_context = getDBcontext(ctx);
+        bool direct_download;
+        bool open_license;
+        bool available;
+        if (!db_context->lookForGridInfo(
+                grid_name, ctx->cpp_context->lastGridFullName_,
+                ctx->cpp_context->lastGridPackageName_,
+                ctx->cpp_context->lastGridUrl_, direct_download, open_license,
+                available))
+            return false;
+
+        if (out_full_name)
+            *out_full_name = ctx->cpp_context->lastGridFullName_.c_str();
+        if (out_package_name)
+            *out_package_name = ctx->cpp_context->lastGridPackageName_.c_str();
+        if (out_url)
+            *out_url = ctx->cpp_context->lastGridUrl_.c_str();
+        if (out_direct_download)
+            *out_direct_download = direct_download ? 1 : 0;
+        if (out_open_license)
+            *out_open_license = open_license ? 1 : 0;
+        if (out_available)
+            *out_available = available ? 1 : 0;
+
+        return true;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return GeodeticCRS that use the specified datum.
  *
  * @param ctx Context, or NULL for default context.

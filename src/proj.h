@@ -787,6 +787,15 @@ int PROJ_DLL proj_uom_get_info_from_database(PJ_CONTEXT *ctx,
                                double *out_conv_factor,
                                const char **out_category);
 
+int PROJ_DLL proj_grid_get_info_from_database(PJ_CONTEXT *ctx,
+                               const char *grid_name,
+                               const char **out_full_name,
+                               const char **out_package_name,
+                               const char **out_url,
+                               int *out_direct_download,
+                               int *out_open_license,
+                               int *out_available);
+
 PJ PROJ_DLL *proj_clone(PJ_CONTEXT *ctx, const PJ *obj);
 
 PJ_OBJ_LIST PROJ_DLL *proj_create_from_name(PJ_CONTEXT *ctx,
