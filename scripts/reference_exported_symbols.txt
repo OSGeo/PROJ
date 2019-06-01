@@ -915,6 +915,7 @@ proj_get_prime_meridian
 proj_get_source_crs
 proj_get_target_crs
 proj_get_type
+proj_grid_get_info_from_database
 proj_grid_info
 proj_identify
 proj_info

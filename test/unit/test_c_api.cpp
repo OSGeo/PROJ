@@ -3011,6 +3011,37 @@ TEST_F(CApi, proj_uom_get_info_from_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_grid_get_info_from_database) {
+    {
+        EXPECT_FALSE(proj_grid_get_info_from_database(m_ctxt, "xxx", nullptr,
+                                                      nullptr, nullptr, nullptr,
+                                                      nullptr, nullptr));
+    }
+    {
+        EXPECT_TRUE(proj_grid_get_info_from_database(
+            m_ctxt, "GDA94_GDA2020_conformal.gsb", nullptr, nullptr, nullptr,
+            nullptr, nullptr, nullptr));
+    }
+    {
+        const char *name = nullptr;
+        const char *package_name = nullptr;
+        const char *url = nullptr;
+        int direct_download = 0;
+        int open_license = 0;
+        int available = 0;
+        EXPECT_TRUE(proj_grid_get_info_from_database(
+            m_ctxt, "GDA94_GDA2020_conformal.gsb", &name, &package_name, &url,
+            &direct_download, &open_license, &available));
+        ASSERT_NE(name, nullptr);
+        ASSERT_NE(package_name, nullptr);
+        ASSERT_NE(url, nullptr);
+        EXPECT_EQ(direct_download, 1);
+        EXPECT_EQ(open_license, 1);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_create_cartesian_2D_cs) {
     {
         auto cs = proj_create_cartesian_2D_cs(

@@ -168,6 +168,9 @@ NS_PROJ_END
 struct projCppContext {
     NS_PROJ::io::DatabaseContextNNPtr databaseContext;
     std::string lastUOMName_{};
+    std::string lastGridFullName_{};
+    std::string lastGridPackageName_{};
+    std::string lastGridUrl_{};
 
     explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
                             const char *const *auxDbPaths = nullptr)
