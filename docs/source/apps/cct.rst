@@ -190,4 +190,4 @@ Hence, in honour of *cct* (the geodesist) this is :program:`cct` (the program).
     Home page
     *********
 
-    https://proj4.org/
+    https://proj.org/

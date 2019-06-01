@@ -12,7 +12,7 @@ This includes cartographic projections as well as geodetic transformations.
 
 For more information on the PROJ.4 project please see the web page at:
 
-https://proj4.org/
+https://proj.org/
 
 The PROJ.4 mailing list can be found at:
 
