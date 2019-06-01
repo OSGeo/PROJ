@@ -35,7 +35,7 @@ set(PACKAGE_BUGREPORT "https://github.com/OSGeo/proj.4/issues")
 set(PACKAGE_NAME "PROJ")
 set(PACKAGE_STRING "PROJ ${${PROJECT_INTERN_NAME}_VERSION}")
 set(PACKAGE_TARNAME "proj")
-set(PACKAGE_URL "https://proj4.org")
+set(PACKAGE_URL "https://proj.org")
 set(PACKAGE_VERSION "${${PROJECT_INTERN_NAME}_VERSION}")
 
 # check if a second proj_config.h exists (created by ./configure)

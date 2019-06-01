@@ -21,7 +21,7 @@ git config user.name "proj.4 deploybot"
 # A few files we must manually create
 echo "_site" > .gitignore
 touch .nojekyll
-echo "proj4.org" > CNAME
+echo "proj.org" > CNAME
 
 git add -A
 git commit -m "update with results of commit https://github.com/OSGeo/proj.4/commit/$TRAVIS_COMMIT"

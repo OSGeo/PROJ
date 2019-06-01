@@ -229,4 +229,4 @@ data will appear as three lines of::
     Home page
     *********
 
-    https://proj4.org/
+    https://proj.org/
