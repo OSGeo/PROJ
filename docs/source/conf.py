@@ -54,7 +54,7 @@ master_doc = 'index'
 # General information about the project.
 
 # Keep legacy project name
-project = 'PROJ.4'
+project = 'PROJ'
 
 # See CITATION file
 title = 'PROJ coordinate transformation software library'
