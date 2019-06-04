@@ -10,11 +10,11 @@ PROJ is a generic coordinate transformation software, that transforms
 coordinates from one coordinate reference system (CRS) to another.
 This includes cartographic projections as well as geodetic transformations.
 
-For more information on the PROJ.4 project please see the web page at:
+For more information on the PROJ project please see the web page at:
 
 https://proj.org/
 
-The PROJ.4 mailing list can be found at:
+The PROJ mailing list can be found at:
 
 https://lists.osgeo.org/mailman/listinfo/proj/
 
