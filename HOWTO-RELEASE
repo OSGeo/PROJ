@@ -198,7 +198,7 @@ git push --tags
 -------------------------------------------------------------------------------
 
 When the new tag is pushed upstream GitHub picks up that a new release has been
-issued. Update the new release on https://github.com/OSGeo/proj.4/releases with
+issued. Update the new release on https://github.com/OSGeo/PROJ/releases with
 the release notes from `NEWS` and add the prepared source distribution archives
 to the release (otherwise GitHub will just package the entire repository - we
 don't want that).

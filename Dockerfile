@@ -1,5 +1,5 @@
 ##
-# osgeo/proj.4
+# OSGeo/PROJ
 
 FROM ubuntu:18.04 as builder
 
@@ -15,8 +15,8 @@ RUN apt-get update -y \
             git make cmake wget unzip libtool automake \
             zlib1g-dev libsqlite3-dev pkg-config sqlite3
 
-RUN git clone https://github.com/OSGeo/proj.4.git \
-    && cd proj.4 \
+RUN git clone https://github.com/OSGeo/PROJ.git \
+    && cd PROJ \
     && ./autogen.sh \
     && ./configure --prefix=/usr \
     && make \
