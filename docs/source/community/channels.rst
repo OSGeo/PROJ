@@ -26,7 +26,7 @@ and feature requests. We are happy to take contributions in any form, either
 as code, bug reports, documentation or feature requests. See :ref:`contributing`
 for more info on how you can help improve PROJ.
 
-The PROJ GitHub page can be found at https://github.com/OSGeo/proj.4
+The PROJ GitHub page can be found at https://github.com/OSGeo/PROJ
 
 .. note::
 

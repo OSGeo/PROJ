@@ -66,7 +66,7 @@ Below is a list of grids distributed under a free and open license.
 Switzerland
 ................................................................................
 
-Background in ticket `#145 <https://github.com/OSGeo/proj.4/issues/145>`__
+Background in ticket `#145 <https://github.com/OSGeo/PROJ/issues/145>`__
 
 We basically have two shift grids available. An official here:
 
