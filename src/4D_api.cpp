@@ -1367,9 +1367,9 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
     }
     assert(buf);
 
-    /* Only append a semicolon if something's already there */
+    /* Only append a delimiter if something's already there */
     if (0 != buflen)
-        strcat (buf, ";");
+        strcat (buf, delim);
     strcat (buf, app);
     return buf;
 }

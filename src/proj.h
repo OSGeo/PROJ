@@ -277,7 +277,8 @@ struct PJ_INFO {
     const char  *version;           /* Full version number                  */
     const char  *searchpath;        /* Paths where init and grid files are  */
                                     /* looked for. Paths are separated by   */
-                                    /* semi-colons.                         */
+                                    /* semi-colons on Windows, and colons   */
+                                    /* on non-Windows platforms.            */
     const char * const *paths;
     size_t path_count;
 };
