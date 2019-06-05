@@ -8906,6 +8906,7 @@ TEST(io, createFromUserInput) {
     EXPECT_THROW(createFromUserInput("UTM zone 31", dbContext),
                  ParsingException);
     EXPECT_NO_THROW(createFromUserInput("WGS84 UTM zone 31N", dbContext));
+    EXPECT_NO_THROW(createFromUserInput("ID74", dbContext));
 }
 
 // ---------------------------------------------------------------------------
@@ -8950,6 +8951,8 @@ TEST(io, guessDialect) {
               WKTParser::WKTGuessedDialect::WKT2_2015);
 
     EXPECT_EQ(WKTParser().guessDialect("foo"),
+              WKTParser::WKTGuessedDialect::NOT_WKT);
+    EXPECT_EQ(WKTParser().guessDialect("ID74"),
               WKTParser::WKTGuessedDialect::NOT_WKT);
 }
 
