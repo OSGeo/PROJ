@@ -31,7 +31,7 @@ check_function_exists(strerror HAVE_STRERROR)
 check_library_exists(m ceil "" HAVE_LIBM)
 
 set(PACKAGE "proj")
-set(PACKAGE_BUGREPORT "https://github.com/OSGeo/proj.4/issues")
+set(PACKAGE_BUGREPORT "https://github.com/OSGeo/PROJ/issues")
 set(PACKAGE_NAME "PROJ")
 set(PACKAGE_STRING "PROJ ${${PROJECT_INTERN_NAME}_VERSION}")
 set(PACKAGE_TARNAME "proj")
