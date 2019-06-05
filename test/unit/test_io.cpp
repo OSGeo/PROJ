@@ -8874,6 +8874,91 @@ TEST(io, createFromUserInput) {
         EXPECT_EQ(crs->nameStr(),
                   "KKJ / Finland Uniform Coordinate System + N60 height");
     }
+
+    {
+        auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::4979,"
+                                       "cs:PROJ::ENh,"
+                                       "coordinateOperation:EPSG::16031",
+                                       dbContext);
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "UTM zone 31N / WGS 84 (3D)");
+        EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 4979);
+        EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
+    }
+
+    EXPECT_THROW(createFromUserInput(
+                     "urn:ogc:def:crs,crs:EPSG::4979,"
+                     "cs:PROJ::ENh,"
+                     "coordinateOperation:EPSG::1024", // not a conversion
+                     dbContext),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:crs,crs:,"
+                                     "cs:PROJ::ENh,"
+                                     "coordinateOperation:EPSG::16031",
+                                     dbContext),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:crs,crs:EPSG::4979,"
+                                     "cs:,"
+                                     "coordinateOperation:EPSG::16031",
+                                     dbContext),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:crs,crs:EPSG::4979,"
+                                     "cs:PROJ::ENh,"
+                                     "coordinateOperation:",
+                                     dbContext),
+                 ParsingException);
+
+    {
+        // Completely non-sensical from a geodesic point of view...
+        auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::4978,"
+                                       "cs:EPSG::6500,"
+                                       "coordinateOperation:EPSG::16031",
+                                       dbContext);
+        auto crs = nn_dynamic_pointer_cast<DerivedGeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 4978);
+        EXPECT_EQ(crs->coordinateSystem()->getEPSGCode(), 6500);
+        EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
+    }
+    {
+        // Completely non-sensical from a geodesic point of view...
+        auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::4979,"
+                                       "cs:EPSG::6423,"
+                                       "coordinateOperation:EPSG::16031",
+                                       dbContext);
+        auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 4979);
+        EXPECT_EQ(crs->coordinateSystem()->getEPSGCode(), 6423);
+        EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
+    }
+    {
+        // Completely non-sensical from a geodesic point of view...
+        auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::32631,"
+                                       "cs:EPSG::4400,"
+                                       "coordinateOperation:EPSG::16031",
+                                       dbContext);
+        auto crs = nn_dynamic_pointer_cast<DerivedProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 32631);
+        EXPECT_EQ(crs->coordinateSystem()->getEPSGCode(), 4400);
+        EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
+    }
+    {
+        // Completely non-sensical from a geodesic point of view...
+        auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::3855,"
+                                       "cs:EPSG::6499,"
+                                       "coordinateOperation:EPSG::16031",
+                                       dbContext);
+        auto crs = nn_dynamic_pointer_cast<DerivedVerticalCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 3855);
+        EXPECT_EQ(crs->coordinateSystem()->getEPSGCode(), 6499);
+        EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
+    }
+
     {
         auto obj = createFromUserInput("urn:ogc:def:coordinateOperation,"
                                        "coordinateOperation:EPSG::3895,"

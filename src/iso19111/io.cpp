@@ -4449,13 +4449,118 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         }
     }
 
-    // OGC 07-092r2: para 7.5.2
-    // URN combined references for compound coordinate reference systems
     if (starts_with(text, "urn:ogc:def:crs,")) {
         if (!dbContext) {
             throw ParsingException("no database context specified");
         }
         auto tokensComma = split(text, ',');
+        if (tokensComma.size() == 4 && starts_with(tokensComma[1], "crs:") &&
+            starts_with(tokensComma[2], "cs:") &&
+            starts_with(tokensComma[3], "coordinateOperation:")) {
+            // OGC 07-092r2: para 7.5.4
+            // URN combined references for projected or derived CRSs
+            const auto &crsPart = tokensComma[1];
+            const auto tokensCRS = split(crsPart, ':');
+            if (tokensCRS.size() != 4) {
+                throw ParsingException(
+                    concat("invalid crs component: ", crsPart));
+            }
+            auto factoryCRS =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokensCRS[1]);
+            auto baseCRS =
+                factoryCRS->createCoordinateReferenceSystem(tokensCRS[3], true);
+
+            const auto &csPart = tokensComma[2];
+            auto tokensCS = split(csPart, ':');
+            if (tokensCS.size() != 4) {
+                throw ParsingException(
+                    concat("invalid cs component: ", csPart));
+            }
+            auto factoryCS =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokensCS[1]);
+            auto cs = factoryCS->createCoordinateSystem(tokensCS[3]);
+
+            const auto &opPart = tokensComma[3];
+            auto tokensOp = split(opPart, ':');
+            if (tokensOp.size() != 4) {
+                throw ParsingException(
+                    concat("invalid coordinateOperation component: ", opPart));
+            }
+            auto factoryOp =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokensOp[1]);
+            auto op = factoryOp->createCoordinateOperation(tokensOp[3], true);
+
+            if (dynamic_cast<GeographicCRS *>(baseCRS.get()) &&
+                dynamic_cast<Conversion *>(op.get()) &&
+                dynamic_cast<CartesianCS *>(cs.get())) {
+                auto geogCRS = NN_NO_CHECK(
+                    util::nn_dynamic_pointer_cast<GeographicCRS>(baseCRS));
+                auto name = op->nameStr() + " / " + baseCRS->nameStr();
+                if (geogCRS->coordinateSystem()->axisList().size() == 3 &&
+                    baseCRS->nameStr().find("3D") == std::string::npos) {
+                    name += " (3D)";
+                }
+                return ProjectedCRS::create(
+                    util::PropertyMap().set(IdentifiedObject::NAME_KEY, name),
+                    geogCRS,
+                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
+                    NN_NO_CHECK(
+                        util::nn_dynamic_pointer_cast<CartesianCS>(cs)));
+            } else if (dynamic_cast<GeodeticCRS *>(baseCRS.get()) &&
+                       !dynamic_cast<GeographicCRS *>(baseCRS.get()) &&
+                       dynamic_cast<Conversion *>(op.get()) &&
+                       dynamic_cast<CartesianCS *>(cs.get())) {
+                return DerivedGeodeticCRS::create(
+                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                            op->nameStr() + " / " +
+                                                baseCRS->nameStr()),
+                    NN_NO_CHECK(
+                        util::nn_dynamic_pointer_cast<GeodeticCRS>(baseCRS)),
+                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
+                    NN_NO_CHECK(
+                        util::nn_dynamic_pointer_cast<CartesianCS>(cs)));
+            } else if (dynamic_cast<GeographicCRS *>(baseCRS.get()) &&
+                       dynamic_cast<Conversion *>(op.get()) &&
+                       dynamic_cast<EllipsoidalCS *>(cs.get())) {
+                return DerivedGeographicCRS::create(
+                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                            op->nameStr() + " / " +
+                                                baseCRS->nameStr()),
+                    NN_NO_CHECK(
+                        util::nn_dynamic_pointer_cast<GeodeticCRS>(baseCRS)),
+                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
+                    NN_NO_CHECK(
+                        util::nn_dynamic_pointer_cast<EllipsoidalCS>(cs)));
+            } else if (dynamic_cast<ProjectedCRS *>(baseCRS.get()) &&
+                       dynamic_cast<Conversion *>(op.get())) {
+                return DerivedProjectedCRS::create(
+                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                            op->nameStr() + " / " +
+                                                baseCRS->nameStr()),
+                    NN_NO_CHECK(
+                        util::nn_dynamic_pointer_cast<ProjectedCRS>(baseCRS)),
+                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
+                    cs);
+            } else if (dynamic_cast<VerticalCRS *>(baseCRS.get()) &&
+                       dynamic_cast<Conversion *>(op.get()) &&
+                       dynamic_cast<VerticalCS *>(cs.get())) {
+                return DerivedVerticalCRS::create(
+                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                            op->nameStr() + " / " +
+                                                baseCRS->nameStr()),
+                    NN_NO_CHECK(
+                        util::nn_dynamic_pointer_cast<VerticalCRS>(baseCRS)),
+                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
+                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<VerticalCS>(cs)));
+            } else {
+                throw ParsingException("unsupported combination of baseCRS, CS "
+                                       "and coordinateOperation for a "
+                                       "DerivedCRS");
+            }
+        }
+
+        // OGC 07-092r2: para 7.5.2
+        // URN combined references for compound coordinate reference systems
         std::vector<CRSNNPtr> components;
         std::string name;
         for (size_t i = 1; i < tokensComma.size(); i++) {
@@ -4622,6 +4727,11 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  *      e.g. "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717"
  *      We also accept a custom abbreviated syntax EPSG:2393+5717
  * </li>
+ * <li> OGC URN combining references for references for projected or derived
+ * CRSs
+ *      e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)"
+ *      "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
+ * </li>
  * <li> OGC URN combining references for concatenated operations
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
@@ -4664,6 +4774,11 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li> OGC URN combining references for compound coordinate reference systems
  *      e.g. "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717"
  *      We also accept a custom abbreviated syntax EPSG:2393+5717
+ * </li>
+ * <li> OGC URN combining references for references for projected or derived
+ * CRSs
+ *      e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)"
+ *      "urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031"
  * </li>
  * <li> OGC URN combining references for concatenated operations
  *      e.g.
