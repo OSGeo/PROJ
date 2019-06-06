@@ -4377,12 +4377,20 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
 
     if (!ci_starts_with(text, "step proj=") &&
         !ci_starts_with(text, "step +proj=")) {
-        for (const auto &wktConstants : WKTConstants::constants()) {
-            if (ci_starts_with(text, wktConstants)) {
-                return WKTParser()
-                    .attachDatabaseContext(dbContext)
-                    .setStrict(false)
-                    .createFromWKT(text);
+        for (const auto &wktConstant : WKTConstants::constants()) {
+            if (ci_starts_with(text, wktConstant)) {
+                for (auto wkt = text.c_str() + wktConstant.size(); *wkt != '\0';
+                     ++wkt) {
+                    if (isspace(static_cast<unsigned char>(*wkt)))
+                        continue;
+                    if (*wkt == '[') {
+                        return WKTParser()
+                            .attachDatabaseContext(dbContext)
+                            .setStrict(false)
+                            .createFromWKT(text);
+                    }
+                    break;
+                }
             }
         }
     }
@@ -4778,9 +4786,17 @@ WKTParser::guessDialect(const std::string &wkt) noexcept {
         }
     }
 
-    for (const auto &wktConstants : WKTConstants::constants()) {
-        if (ci_starts_with(wkt, wktConstants)) {
-            return WKTGuessedDialect::WKT2_2015;
+    for (const auto &wktConstant : WKTConstants::constants()) {
+        if (ci_starts_with(wkt, wktConstant)) {
+            for (auto wktPtr = wkt.c_str() + wktConstant.size();
+                 *wktPtr != '\0'; ++wktPtr) {
+                if (isspace(static_cast<unsigned char>(*wktPtr)))
+                    continue;
+                if (*wktPtr == '[') {
+                    return WKTGuessedDialect::WKT2_2015;
+                }
+                break;
+            }
         }
     }
 
