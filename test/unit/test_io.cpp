@@ -1018,7 +1018,7 @@ TEST(wkt_parse, wkt1_projected) {
                "    PARAMETER[\"false_northing\",0],\n"
                "    UNIT[\"metre\",1,\n"
                "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
-               "    AXIS[\"(E)\",EAST],\n"
+               "    AXIS[\"(E)\",East],\n" // should normally be uppercase
                "    AXIS[\"(N)\",NORTH],\n"
                "    AUTHORITY[\"EPSG\",\"32631\"]]";
     auto obj = WKTParser()
