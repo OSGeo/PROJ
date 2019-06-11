@@ -564,7 +564,14 @@ GridDescription::~GridDescription() = default;
 
 GridDescription::GridDescription(const GridDescription &) = default;
 
-GridDescription::GridDescription(GridDescription &&) noexcept = default;
+GridDescription::GridDescription(GridDescription &&other) noexcept
+    : shortName(std::move(other.shortName)),
+      fullName(std::move(other.fullName)),
+      packageName(std::move(other.packageName)),
+      url(std::move(other.url)),
+      directDownload(other.directDownload),
+      openLicense(other.openLicense),
+      available(other.available) {}
 
 //! @endcond
 
