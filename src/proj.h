@@ -277,7 +277,8 @@ struct PJ_INFO {
     const char  *version;           /* Full version number                  */
     const char  *searchpath;        /* Paths where init and grid files are  */
                                     /* looked for. Paths are separated by   */
-                                    /* semi-colons.                         */
+                                    /* semi-colons on Windows, and colons   */
+                                    /* on non-Windows platforms.            */
     const char * const *paths;
     size_t path_count;
 };
@@ -786,6 +787,15 @@ int PROJ_DLL proj_uom_get_info_from_database(PJ_CONTEXT *ctx,
                                const char **out_name,
                                double *out_conv_factor,
                                const char **out_category);
+
+int PROJ_DLL proj_grid_get_info_from_database(PJ_CONTEXT *ctx,
+                               const char *grid_name,
+                               const char **out_full_name,
+                               const char **out_package_name,
+                               const char **out_url,
+                               int *out_direct_download,
+                               int *out_open_license,
+                               int *out_available);
 
 PJ PROJ_DLL *proj_clone(PJ_CONTEXT *ctx, const PJ *obj);
 

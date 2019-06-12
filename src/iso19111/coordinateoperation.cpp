@@ -564,7 +564,14 @@ GridDescription::~GridDescription() = default;
 
 GridDescription::GridDescription(const GridDescription &) = default;
 
-GridDescription::GridDescription(GridDescription &&) noexcept = default;
+GridDescription::GridDescription(GridDescription &&other) noexcept
+    : shortName(std::move(other.shortName)),
+      fullName(std::move(other.fullName)),
+      packageName(std::move(other.packageName)),
+      url(std::move(other.url)),
+      directDownload(other.directDownload),
+      openLicense(other.openLicense),
+      available(other.available) {}
 
 //! @endcond
 
@@ -2700,7 +2707,7 @@ createParams(const common::Measure &m1, const common::Measure &m2,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a [Universal Transverse Mercator]
- *(https://proj4.org/operations/projections/utm.html) conversion.
+ *(https://proj.org/operations/projections/utm.html) conversion.
  *
  * UTM is a family of conversions, of EPSG codes from 16001 to 16060 for the
  * northern hemisphere, and 17001 to 17060 for the southern hemisphere,
@@ -2729,7 +2736,7 @@ ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Transverse Mercator]
- *(https://proj4.org/operations/projections/tmerc.html) projection method.
+ *(https://proj.org/operations/projections/tmerc.html) projection method.
  *
  * This method is defined as [EPSG:9807]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9807)
@@ -2756,7 +2763,7 @@ ConversionNNPtr Conversion::createTransverseMercator(
 
 /** \brief Instantiate a conversion based on the [Gauss Schreiber Transverse
  *Mercator]
- *(https://proj4.org/operations/projections/gstmerc.html) projection method.
+ *(https://proj.org/operations/projections/gstmerc.html) projection method.
  *
  * This method is also known as Gauss-Laborde Reunion.
  *
@@ -2785,7 +2792,7 @@ ConversionNNPtr Conversion::createGaussSchreiberTransverseMercator(
 
 /** \brief Instantiate a conversion based on the [Transverse Mercator South
  *Orientated]
- *(https://proj4.org/operations/projections/tmerc.html) projection method.
+ *(https://proj.org/operations/projections/tmerc.html) projection method.
  *
  * This method is defined as [EPSG:9808]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9808)
@@ -2812,7 +2819,7 @@ ConversionNNPtr Conversion::createTransverseMercatorSouthOriented(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the  [Two Point Equidistant]
- *(https://proj4.org/operations/projections/tpeqd.html) projection method.
+ *(https://proj.org/operations/projections/tpeqd.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -2870,7 +2877,7 @@ ConversionNNPtr Conversion::createTunisiaMappingGrid(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Albers Conic Equal Area]
- *(https://proj4.org/operations/projections/aea.html) projection method.
+ *(https://proj.org/operations/projections/aea.html) projection method.
  *
  * This method is defined as [EPSG:9822]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9822)
@@ -2905,7 +2912,7 @@ Conversion::createAlbersEqualArea(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Lambert Conic Conformal 1SP]
- *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *(https://proj.org/operations/projections/lcc.html) projection method.
  *
  * This method is defined as [EPSG:9801]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9801)
@@ -2931,7 +2938,7 @@ ConversionNNPtr Conversion::createLambertConicConformal_1SP(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Lambert Conic Conformal (2SP)]
- *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *(https://proj.org/operations/projections/lcc.html) projection method.
  *
  * This method is defined as [EPSG:9802]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9802)
@@ -2967,7 +2974,7 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP(
 
 /** \brief Instantiate a conversion based on the [Lambert Conic Conformal (2SP
  *Michigan)]
- *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *(https://proj.org/operations/projections/lcc.html) projection method.
  *
  * This method is defined as [EPSG:1051]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1051)
@@ -3004,7 +3011,7 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP_Michigan(
 
 /** \brief Instantiate a conversion based on the [Lambert Conic Conformal (2SP
  *Belgium)]
- *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *(https://proj.org/operations/projections/lcc.html) projection method.
  *
  * This method is defined as [EPSG:9803]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9803)
@@ -3045,7 +3052,7 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP_Belgium(
 
 /** \brief Instantiate a conversion based on the [Modified Azimuthal
  *Equidistant]
- *(https://proj4.org/operations/projections/aeqd.html) projection method.
+ *(https://proj.org/operations/projections/aeqd.html) projection method.
  *
  * This method is defined as [EPSG:9832]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9832)
@@ -3070,7 +3077,7 @@ ConversionNNPtr Conversion::createAzimuthalEquidistant(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Guam Projection]
- *(https://proj4.org/operations/projections/aeqd.html) projection method.
+ *(https://proj.org/operations/projections/aeqd.html) projection method.
  *
  * This method is defined as [EPSG:9831]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9831)
@@ -3096,7 +3103,7 @@ ConversionNNPtr Conversion::createGuamProjection(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Bonne]
- *(https://proj4.org/operations/projections/bonne.html) projection method.
+ *(https://proj.org/operations/projections/bonne.html) projection method.
  *
  * This method is defined as [EPSG:9827]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9827)
@@ -3124,7 +3131,7 @@ ConversionNNPtr Conversion::createBonne(const util::PropertyMap &properties,
 
 /** \brief Instantiate a conversion based on the [Lambert Cylindrical Equal Area
  *(Spherical)]
- *(https://proj4.org/operations/projections/cea.html) projection method.
+ *(https://proj.org/operations/projections/cea.html) projection method.
  *
  * This method is defined as [EPSG:9834]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9834)
@@ -3155,7 +3162,7 @@ ConversionNNPtr Conversion::createLambertCylindricalEqualAreaSpherical(
 
 /** \brief Instantiate a conversion based on the [Lambert Cylindrical Equal Area
  *(ellipsoidal form)]
- *(https://proj4.org/operations/projections/cea.html) projection method.
+ *(https://proj.org/operations/projections/cea.html) projection method.
  *
  * This method is defined as [EPSG:9835]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9835)
@@ -3181,7 +3188,7 @@ ConversionNNPtr Conversion::createLambertCylindricalEqualArea(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Cassini-Soldner]
- * (https://proj4.org/operations/projections/cass.html) projection method.
+ * (https://proj.org/operations/projections/cass.html) projection method.
  *
  * This method is defined as [EPSG:9806]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9806)
@@ -3206,7 +3213,7 @@ ConversionNNPtr Conversion::createCassiniSoldner(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Equidistant Conic]
- *(https://proj4.org/operations/projections/eqdc.html) projection method.
+ *(https://proj.org/operations/projections/eqdc.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3238,7 +3245,7 @@ ConversionNNPtr Conversion::createEquidistantConic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert I]
- * (https://proj4.org/operations/projections/eck1.html) projection method.
+ * (https://proj.org/operations/projections/eck1.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3260,7 +3267,7 @@ ConversionNNPtr Conversion::createEckertI(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert II]
- * (https://proj4.org/operations/projections/eck2.html) projection method.
+ * (https://proj.org/operations/projections/eck2.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3281,7 +3288,7 @@ ConversionNNPtr Conversion::createEckertII(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert III]
- * (https://proj4.org/operations/projections/eck3.html) projection method.
+ * (https://proj.org/operations/projections/eck3.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3302,7 +3309,7 @@ ConversionNNPtr Conversion::createEckertIII(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert IV]
- * (https://proj4.org/operations/projections/eck4.html) projection method.
+ * (https://proj.org/operations/projections/eck4.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3323,7 +3330,7 @@ ConversionNNPtr Conversion::createEckertIV(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert V]
- * (https://proj4.org/operations/projections/eck5.html) projection method.
+ * (https://proj.org/operations/projections/eck5.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3345,7 +3352,7 @@ ConversionNNPtr Conversion::createEckertV(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert VI]
- * (https://proj4.org/operations/projections/eck6.html) projection method.
+ * (https://proj.org/operations/projections/eck6.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3366,7 +3373,7 @@ ConversionNNPtr Conversion::createEckertVI(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Equidistant Cylindrical]
- *(https://proj4.org/operations/projections/eqc.html) projection method.
+ *(https://proj.org/operations/projections/eqc.html) projection method.
  *
  * This is also known as the Equirectangular method, and in the particular case
  * where the latitude of first parallel is 0.
@@ -3400,7 +3407,7 @@ ConversionNNPtr Conversion::createEquidistantCylindrical(
 
 /** \brief Instantiate a conversion based on the [Equidistant Cylindrical
  *(Spherical)]
- *(https://proj4.org/operations/projections/eqc.html) projection method.
+ *(https://proj.org/operations/projections/eqc.html) projection method.
  *
  * This is also known as the Equirectangular method, and in the particular case
  * where the latitude of first parallel is 0.
@@ -3434,7 +3441,7 @@ ConversionNNPtr Conversion::createEquidistantCylindricalSpherical(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Gall (Stereographic)]
- * (https://proj4.org/operations/projections/gall.html) projection method.
+ * (https://proj.org/operations/projections/gall.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3456,7 +3463,7 @@ ConversionNNPtr Conversion::createGall(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Goode Homolosine]
- * (https://proj4.org/operations/projections/goode.html) projection method.
+ * (https://proj.org/operations/projections/goode.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3477,7 +3484,7 @@ ConversionNNPtr Conversion::createGoodeHomolosine(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Interrupted Goode Homolosine]
- * (https://proj4.org/operations/projections/igh.html) projection method.
+ * (https://proj.org/operations/projections/igh.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3503,7 +3510,7 @@ ConversionNNPtr Conversion::createInterruptedGoodeHomolosine(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Geostationary Satellite View]
- * (https://proj4.org/operations/projections/geos.html) projection method,
+ * (https://proj.org/operations/projections/geos.html) projection method,
  * with the sweep angle axis of the viewing instrument being x
  *
  * There is no equivalent in EPSG.
@@ -3528,7 +3535,7 @@ ConversionNNPtr Conversion::createGeostationarySatelliteSweepX(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Geostationary Satellite View]
- * (https://proj4.org/operations/projections/geos.html) projection method,
+ * (https://proj.org/operations/projections/geos.html) projection method,
  * with the sweep angle axis of the viewing instrument being y.
  *
  * There is no equivalent in EPSG.
@@ -3553,7 +3560,7 @@ ConversionNNPtr Conversion::createGeostationarySatelliteSweepY(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Gnomonic]
- *(https://proj4.org/operations/projections/gnom.html) projection method.
+ *(https://proj.org/operations/projections/gnom.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3578,7 +3585,7 @@ ConversionNNPtr Conversion::createGnomonic(
 
 /** \brief Instantiate a conversion based on the [Hotine Oblique Mercator
  *(Variant A)]
- *(https://proj4.org/operations/projections/omerc.html) projection method
+ *(https://proj.org/operations/projections/omerc.html) projection method
  *
  * This is the variant with the no_uoff parameter, which corresponds to
  * GDAL &gt;=2.3 Hotine_Oblique_Mercator projection.
@@ -3593,7 +3600,7 @@ ConversionNNPtr Conversion::createGnomonic(
  * \note In the case where azimuthInitialLine = angleFromRectifiedToSkrewGrid =
  *90deg,
  * this maps to the  [Swiss Oblique Mercator]
- *(https://proj4.org/operations/projections/somerc.html) formulas.
+ *(https://proj.org/operations/projections/somerc.html) formulas.
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -3626,7 +3633,7 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorVariantA(
 
 /** \brief Instantiate a conversion based on the [Hotine Oblique Mercator
  *(Variant B)]
- *(https://proj4.org/operations/projections/omerc.html) projection method
+ *(https://proj.org/operations/projections/omerc.html) projection method
  *
  * This is the variant without the no_uoff parameter, which corresponds to
  * GDAL &gt;=2.3 Hotine_Oblique_Mercator_Azimuth_Center projection.
@@ -3639,7 +3646,7 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorVariantA(
  * \note In the case where azimuthInitialLine = angleFromRectifiedToSkrewGrid =
  *90deg,
  * this maps to the  [Swiss Oblique Mercator]
- *(https://proj4.org/operations/projections/somerc.html) formulas.
+ *(https://proj.org/operations/projections/somerc.html) formulas.
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -3672,7 +3679,7 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorVariantB(
 
 /** \brief Instantiate a conversion based on the [Hotine Oblique Mercator Two
  *Point Natural Origin]
- *(https://proj4.org/operations/projections/omerc.html) projection method.
+ *(https://proj.org/operations/projections/omerc.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3713,7 +3720,7 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Laborde Oblique Mercator]
- *(https://proj4.org/operations/projections/labrd.html) projection method.
+ *(https://proj.org/operations/projections/labrd.html) projection method.
  *
  * This method is defined as [EPSG:9813]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9813)
@@ -3744,7 +3751,7 @@ ConversionNNPtr Conversion::createLabordeObliqueMercator(
 
 /** \brief Instantiate a conversion based on the [International Map of the World
  *Polyconic]
- *(https://proj4.org/operations/projections/imw_p.html) projection method.
+ *(https://proj.org/operations/projections/imw_p.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3775,7 +3782,7 @@ ConversionNNPtr Conversion::createInternationalMapWorldPolyconic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Krovak (north oriented)]
- *(https://proj4.org/operations/projections/krovak.html) projection method.
+ *(https://proj.org/operations/projections/krovak.html) projection method.
  *
  * This method is defined as [EPSG:1041]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1041)
@@ -3825,7 +3832,7 @@ ConversionNNPtr Conversion::createKrovakNorthOriented(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Krovak]
- *(https://proj4.org/operations/projections/krovak.html) projection method.
+ *(https://proj.org/operations/projections/krovak.html) projection method.
  *
  * This method is defined as [EPSG:9819]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9819)
@@ -3877,7 +3884,7 @@ Conversion::createKrovak(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Lambert Azimuthal Equal Area]
- *(https://proj4.org/operations/projections/laea.html) projection method.
+ *(https://proj.org/operations/projections/laea.html) projection method.
  *
  * This method is defined as [EPSG:9820]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9820)
@@ -3902,7 +3909,7 @@ ConversionNNPtr Conversion::createLambertAzimuthalEqualArea(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Miller Cylindrical]
- *(https://proj4.org/operations/projections/mill.html) projection method.
+ *(https://proj.org/operations/projections/mill.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3923,7 +3930,7 @@ ConversionNNPtr Conversion::createMillerCylindrical(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Mercator]
- *(https://proj4.org/operations/projections/merc.html) projection method.
+ *(https://proj.org/operations/projections/merc.html) projection method.
  *
  * This is the variant, also known as Mercator (1SP), defined with the scale
  * factor. Note that latitude of natural origin (centerLat) is a parameter,
@@ -3953,7 +3960,7 @@ ConversionNNPtr Conversion::createMercatorVariantA(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Mercator]
- *(https://proj4.org/operations/projections/merc.html) projection method.
+ *(https://proj.org/operations/projections/merc.html) projection method.
  *
  * This is the variant, also known as Mercator (2SP), defined with the latitude
  * of the first standard parallel (the second standard parallel is implicitly
@@ -3983,7 +3990,7 @@ ConversionNNPtr Conversion::createMercatorVariantB(
 
 /** \brief Instantiate a conversion based on the [Popular Visualisation Pseudo
  *Mercator]
- *(https://proj4.org/operations/projections/webmerc.html) projection method.
+ *(https://proj.org/operations/projections/webmerc.html) projection method.
  *
  * Also known as WebMercator. Mostly/only used for Projected CRS EPSG:3857
  * (WGS 84 / Pseudo-Mercator)
@@ -4011,7 +4018,7 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Mollweide]
- * (https://proj4.org/operations/projections/moll.html) projection method.
+ * (https://proj.org/operations/projections/moll.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4032,7 +4039,7 @@ ConversionNNPtr Conversion::createMollweide(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [New Zealand Map Grid]
- * (https://proj4.org/operations/projections/nzmg.html) projection method.
+ * (https://proj.org/operations/projections/nzmg.html) projection method.
  *
  * This method is defined as [EPSG:9811]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9811)
@@ -4058,7 +4065,7 @@ ConversionNNPtr Conversion::createNewZealandMappingGrid(
 
 /** \brief Instantiate a conversion based on the [Oblique Stereographic
  *(Alternative)]
- *(https://proj4.org/operations/projections/sterea.html) projection method.
+ *(https://proj.org/operations/projections/sterea.html) projection method.
  *
  * This method is defined as [EPSG:9809]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9809)
@@ -4084,7 +4091,7 @@ ConversionNNPtr Conversion::createObliqueStereographic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Orthographic]
- *(https://proj4.org/operations/projections/ortho.html) projection method.
+ *(https://proj.org/operations/projections/ortho.html) projection method.
  *
  * This method is defined as [EPSG:9840]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9840)
@@ -4111,7 +4118,7 @@ ConversionNNPtr Conversion::createOrthographic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [American Polyconic]
- *(https://proj4.org/operations/projections/poly.html) projection method.
+ *(https://proj.org/operations/projections/poly.html) projection method.
  *
  * This method is defined as [EPSG:9818]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9818)
@@ -4137,7 +4144,7 @@ ConversionNNPtr Conversion::createAmericanPolyconic(
 
 /** \brief Instantiate a conversion based on the [Polar Stereographic (Variant
  *A)]
- *(https://proj4.org/operations/projections/stere.html) projection method.
+ *(https://proj.org/operations/projections/stere.html) projection method.
  *
  * This method is defined as [EPSG:9810]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9810)
@@ -4166,7 +4173,7 @@ ConversionNNPtr Conversion::createPolarStereographicVariantA(
 
 /** \brief Instantiate a conversion based on the [Polar Stereographic (Variant
  *B)]
- *(https://proj4.org/operations/projections/stere.html) projection method.
+ *(https://proj.org/operations/projections/stere.html) projection method.
  *
  * This method is defined as [EPSG:9829]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9829)
@@ -4195,7 +4202,7 @@ ConversionNNPtr Conversion::createPolarStereographicVariantB(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Robinson]
- * (https://proj4.org/operations/projections/robin.html) projection method.
+ * (https://proj.org/operations/projections/robin.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4216,7 +4223,7 @@ ConversionNNPtr Conversion::createRobinson(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Sinusoidal]
- * (https://proj4.org/operations/projections/sinu.html) projection method.
+ * (https://proj.org/operations/projections/sinu.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4237,7 +4244,7 @@ ConversionNNPtr Conversion::createSinusoidal(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Stereographic]
- *(https://proj4.org/operations/projections/stere.html) projection method.
+ *(https://proj.org/operations/projections/stere.html) projection method.
  *
  * There is no equivalent in EPSG. This method implements the original "Oblique
  * Stereographic" method described in "Snyder's Map Projections - A Working
@@ -4266,7 +4273,7 @@ ConversionNNPtr Conversion::createStereographic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Van der Grinten]
- * (https://proj4.org/operations/projections/vandg.html) projection method.
+ * (https://proj.org/operations/projections/vandg.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4287,7 +4294,7 @@ ConversionNNPtr Conversion::createVanDerGrinten(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner I]
- * (https://proj4.org/operations/projections/wag1.html) projection method.
+ * (https://proj.org/operations/projections/wag1.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4309,7 +4316,7 @@ ConversionNNPtr Conversion::createWagnerI(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner II]
- * (https://proj4.org/operations/projections/wag2.html) projection method.
+ * (https://proj.org/operations/projections/wag2.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4330,7 +4337,7 @@ ConversionNNPtr Conversion::createWagnerII(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner III]
- * (https://proj4.org/operations/projections/wag3.html) projection method.
+ * (https://proj.org/operations/projections/wag3.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4354,7 +4361,7 @@ ConversionNNPtr Conversion::createWagnerIII(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner IV]
- * (https://proj4.org/operations/projections/wag4.html) projection method.
+ * (https://proj.org/operations/projections/wag4.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4375,7 +4382,7 @@ ConversionNNPtr Conversion::createWagnerIV(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner V]
- * (https://proj4.org/operations/projections/wag5.html) projection method.
+ * (https://proj.org/operations/projections/wag5.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4397,7 +4404,7 @@ ConversionNNPtr Conversion::createWagnerV(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner VI]
- * (https://proj4.org/operations/projections/wag6.html) projection method.
+ * (https://proj.org/operations/projections/wag6.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4418,7 +4425,7 @@ ConversionNNPtr Conversion::createWagnerVI(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner VII]
- * (https://proj4.org/operations/projections/wag7.html) projection method.
+ * (https://proj.org/operations/projections/wag7.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4440,7 +4447,7 @@ ConversionNNPtr Conversion::createWagnerVII(
 
 /** \brief Instantiate a conversion based on the [Quadrilateralized Spherical
  *Cube]
- *(https://proj4.org/operations/projections/qsc.html) projection method.
+ *(https://proj.org/operations/projections/qsc.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4464,7 +4471,7 @@ ConversionNNPtr Conversion::createQuadrilateralizedSphericalCube(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Spherical Cross-Track Height]
- *(https://proj4.org/operations/projections/sch.html) projection method.
+ *(https://proj.org/operations/projections/sch.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4489,7 +4496,7 @@ ConversionNNPtr Conversion::createSphericalCrossTrackHeight(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Equal Earth]
- * (https://proj4.org/operations/projections/eqearth.html) projection method.
+ * (https://proj.org/operations/projections/eqearth.html) projection method.
  *
  * This method is defined as [EPSG:1078]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1078)
@@ -5886,7 +5893,7 @@ void Conversion::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 /** \brief Return whether a conversion is a [Universal Transverse Mercator]
- * (https://proj4.org/operations/projections/utm.html) conversion.
+ * (https://proj.org/operations/projections/utm.html) conversion.
  *
  * @param[out] zone UTM zone number between 1 and 60.
  * @param[out] north true for UTM northern hemisphere, false for UTM southern

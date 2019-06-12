@@ -1367,9 +1367,9 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
     }
     assert(buf);
 
-    /* Only append a semicolon if something's already there */
+    /* Only append a delimiter if something's already there */
     if (0 != buflen)
-        strcat (buf, ";");
+        strcat (buf, delim);
     strcat (buf, app);
     return buf;
 }
@@ -1403,16 +1403,17 @@ PJ_INFO proj_info (void) {
     info.release    = pj_get_release ();
 
     /* build search path string */
-    const char* envPROJ_LIB = getenv ("PROJ_LIB");
-    buf = path_append (buf, envPROJ_LIB, &buf_size);
-#ifdef PROJ_LIB
-    if( envPROJ_LIB == nullptr ) {
-        buf = path_append (buf, PROJ_LIB, &buf_size);
-    }
-#endif
     auto ctx = pj_get_default_ctx();
-    if( ctx ) {
-        for( const auto& path: ctx->search_paths ) {
+    if (!ctx || ctx->search_paths.empty()) {
+        const char *envPROJ_LIB = getenv("PROJ_LIB");
+        buf = path_append(buf, envPROJ_LIB, &buf_size);
+#ifdef PROJ_LIB
+        if (envPROJ_LIB == nullptr) {
+            buf = path_append(buf, PROJ_LIB, &buf_size);
+        }
+#endif
+    } else {
+        for (const auto &path : ctx->search_paths) {
             buf = path_append(buf, path.c_str(), &buf_size);
         }
     }

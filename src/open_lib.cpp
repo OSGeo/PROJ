@@ -191,7 +191,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         else if (strchr(dir_chars,*name)
                 || (*name == '.' && strchr(dir_chars,name[1])) 
                 || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
-                || (name[1] == ':' && strchr(dir_chars,name[2])) )
+                || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2])) )
             sysname = name;
 
         /* or try to use application provided file finder */
@@ -288,7 +288,7 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
  *  as a short filename.
  * 
  * @param ctx context.
- * @param short_filename short filename (e.g. egm96_15.gtx)
+ * @param short_filename short filename (e.g. egm96_15.gtx). Must not be NULL.
  * @param out_full_filename output buffer, of size out_full_filename_size, that
  *                          will receive the full filename on success.
  *                          Will be zero-terminated.
