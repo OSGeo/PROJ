@@ -201,9 +201,6 @@ pj_lib_dir() {
 static PAFile
 pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                char* out_full_filename, size_t out_full_filename_size) {
-
-    std::string s = pj_lib_dir();
-
     try {
         std::string fname;
         const char *sysname = nullptr;
