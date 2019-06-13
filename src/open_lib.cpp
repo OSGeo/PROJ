@@ -45,8 +45,6 @@
 #include <dlfcn.h>
 #endif
 
-#include <iostream>
-
 #include "proj/internal/internal.hpp"
 
 #include "proj_internal.h"
@@ -273,7 +271,6 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             }
         /* or hardcoded path */
         } else if ((sysname = proj_lib_name) != nullptr) {
-            std::cerr << "Found proj_lib_name!\n";
             fname = sysname;
             fname += DIR_CHAR;
             fname += name;
