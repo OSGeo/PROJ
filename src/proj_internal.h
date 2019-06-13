@@ -169,8 +169,12 @@ typedef long pj_int32;
 /* directory delimiter for DOS support */
 #ifdef WIN32
 #define DIR_CHAR '\\'
+#define DIR_CHARS "/\\"
+#define DIR_SEPARATOR ';'
 #else
 #define DIR_CHAR '/'
+#define DIR_CHARS "/"
+#define DIR_SEPARATOR ';'
 #endif
 
 enum pj_io_units {

@@ -41,6 +41,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef WIN32
+#include <dlfcn.h>
+#endif
+
+#include <iostream>
+
 #include "proj/internal/internal.hpp"
 
 #include "proj_internal.h"
@@ -70,22 +76,22 @@ void pj_set_finder( const char *(*new_finder)(const char *) )
 /************************************************************************/
 
 /** \brief Assign a file finder callback to a context.
- * 
+ *
  * This callback will be used whenever PROJ must open one of its resource files
  * (proj.db database, grids, etc...)
- * 
+ *
  * The callback will be called with the context currently in use at the moment
  * where it is used (not necessarily the one provided during this call), and
  * with the provided user_data (which may be NULL).
  * The user_data must remain valid during the whole lifetime of the context.
- * 
+ *
  * A finder set on the default context will be inherited by contexts created
  * later.
- * 
+ *
  * @param ctx PROJ context, or NULL for the default context.
  * @param finder Finder callback. May be NULL
  * @param user_data User data provided to the finder callback. May be NULL.
- * 
+ *
  * @since PROJ 6.0
  */
 void proj_context_set_file_finder(PJ_CONTEXT *ctx, proj_file_finder finder,
@@ -105,17 +111,17 @@ void proj_context_set_file_finder(PJ_CONTEXT *ctx, proj_file_finder finder,
 
 
 /** \brief Sets search paths.
- * 
+ *
  * Those search paths will be used whenever PROJ must open one of its resource files
  * (proj.db database, grids, etc...)
  *
  * If set on the default context, they will be inherited by contexts created
  * later.
- * 
+ *
  * @param ctx PROJ context, or NULL for the default context.
  * @param count_paths Number of paths. 0 if paths == NULL.
  * @param paths Paths. May be NULL.
- * 
+ *
  * @since PROJ 6.0
  */
 void proj_context_set_search_paths(PJ_CONTEXT *ctx,
@@ -151,6 +157,45 @@ void pj_set_searchpath ( int count, const char **path )
     proj_context_set_search_paths( nullptr, count, const_cast<const char* const*>(path) );
 }
 
+
+/************************************************************************/
+/*                            pj_lib_dir()                              */
+/************************************************************************/
+
+namespace
+{
+
+std::string
+pj_lib_dir() {
+    std::string s;
+#ifdef WIN32
+    HMODULE hm = NULL;
+
+    if (GetModuleHandleEx(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        (LPCSTR)&pj_lib_dir, &hm))
+    {
+        wchar_t path[MAX_PATH];
+        DWORD cnt = GetModuleFileName(hm, path, sizeof(path));
+        if (cnt > 0 && cnt < MAX_PATH)
+            s = path;
+    }
+#else
+    Dl_info info;
+    if (dladdr((const void *)pj_lib_dir, &info))
+        s = info.dli_fname;
+#endif
+    if (s.size())
+    {
+        auto pos = s.find_last_of(DIR_CHARS);
+        if (pos != std::string::npos)
+            s = s.substr(0, pos + 1) + ".." + DIR_CHAR + "share";
+    }
+    return s;
+}
+
+}  // unnamed namespace
 /************************************************************************/
 /*                          pj_open_lib_ex()                            */
 /************************************************************************/
@@ -158,17 +203,13 @@ void pj_set_searchpath ( int count, const char **path )
 static PAFile
 pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                char* out_full_filename, size_t out_full_filename_size) {
+
+    std::string s = pj_lib_dir();
+
     try {
         std::string fname;
         const char *sysname = nullptr;
         PAFile fid = nullptr;
-#ifdef WIN32
-        static const char dir_chars[] = "/\\";
-        const char dirSeparator = ';';
-#else
-        static const char dir_chars[] = "/";
-        const char dirSeparator = ':';
-#endif
 
         if( ctx == nullptr ) {
             ctx = pj_get_default_ctx();
@@ -178,7 +219,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             out_full_filename[0] = '\0';
 
         /* check if ~/name */
-        if (*name == '~' && strchr(dir_chars,name[1]) )
+        if (*name == '~' && strchr(DIR_CHARS,name[1]) )
             if ((sysname = getenv("HOME")) != nullptr) {
                 fname = sysname;
                 fname += DIR_CHAR;
@@ -188,10 +229,10 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                 return nullptr;
 
         /* or fixed path: /name, ./name or ../name */
-        else if (strchr(dir_chars,*name)
-                || (*name == '.' && strchr(dir_chars,name[1])) 
-                || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
-                || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2])) )
+        else if (strchr(DIR_CHARS,*name)
+                || (*name == '.' && strchr(DIR_CHARS,name[1]))
+                || (!strncmp(name, "..", 2) && strchr(DIR_CHARS,name[2]))
+                || (name[0] != '\0' && name[1] == ':' && strchr(DIR_CHARS,name[2])) )
             sysname = name;
 
         /* or try to use application provided file finder */
@@ -219,7 +260,8 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         }
         /* if is environment PROJ_LIB defined */
         else if ((sysname = getenv("PROJ_LIB")) != nullptr) {
-            auto paths = NS_PROJ::internal::split(std::string(sysname), dirSeparator);
+            auto paths = NS_PROJ::internal::split(std::string(sysname),
+                DIR_SEPARATOR);
             for( const auto& path: paths ) {
                 fname = path;
                 fname += DIR_CHAR;
@@ -231,13 +273,23 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             }
         /* or hardcoded path */
         } else if ((sysname = proj_lib_name) != nullptr) {
+            std::cerr << "Found proj_lib_name!\n";
             fname = sysname;
             fname += DIR_CHAR;
             fname += name;
             sysname = fname.c_str();
-        /* just try it bare bones */
+        /* Look in the ../share directory relative to the lib directory
+           or use the provided name directly. */
         } else {
-            sysname = name;
+            fname = pj_lib_dir();
+            if (!fname.empty())
+            {
+                fname += DIR_CHAR;
+                fname += name;
+                sysname = fname.c_str();
+            }
+            else
+                sysname = name;
         }
 
         assert(sysname); // to make Coverity Scan happy
@@ -254,7 +306,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         if( ctx->last_errno == 0 && errno != 0 )
             pj_ctx_set_errno( ctx, errno );
 
-        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
+        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
                 "pj_open_lib(%s): call fopen(%s) - %s",
                 name, sysname,
                 fid == nullptr ? "failed" : "succeeded" );
@@ -263,13 +315,14 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     }
     catch( const std::exception& ) {
 
-        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
+        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
                 "pj_open_lib(%s): out of memory",
                 name );
 
         return nullptr;
     }
 }
+
 
 /************************************************************************/
 /*                            pj_open_lib()                             */
@@ -286,7 +339,7 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
 
 /** Returns the full filename corresponding to a proj resource file specified
  *  as a short filename.
- * 
+ *
  * @param ctx context.
  * @param short_filename short filename (e.g. egm96_15.gtx). Must not be NULL.
  * @param out_full_filename output buffer, of size out_full_filename_size, that
