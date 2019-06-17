@@ -12,7 +12,7 @@ EXE=$1
 
 usage()
 {
-    echo "Usage: ${0} <path to 'proj' program>" 
+    echo "Usage: ${0} <path to 'proj' program>"
     echo
     exit 1
 }
@@ -26,8 +26,9 @@ if test ! -x ${EXE}; then
     exit 1
 fi
 
-if test -z "${PROJ_LIB}"; then
-    export PROJ_LIB="`dirname $0`/../../data"
+INIT_DIR=${PROJ_LIB}
+if test -z "${INIT_DIR}"; then
+    INIT_DIR="`dirname $0`/../../share"
 fi
 
 echo "============================================"
@@ -35,7 +36,7 @@ echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
 OUT=proj_out83
-INIT_FILE=${PROJ_LIB}/nad83
+INIT_FILE=${INIT_DIR}/nad83
 #
 echo "doing tests into file ${OUT}, please wait"
 #

@@ -16,7 +16,7 @@ EXE=$1
 
 usage()
 {
-    echo "Usage: ${0} <path to 'cs2cs' program>" 
+    echo "Usage: ${0} <path to 'cs2cs' program>"
     echo
     exit 1
 }
@@ -28,10 +28,6 @@ fi
 if test ! -x ${EXE}; then
     echo "*** ERROR: Can not find '${EXE}' program!"
     exit 1
-fi
-
-if test -z "${PROJ_LIB}"; then
-    export PROJ_LIB="`dirname $0`/../../data"
 fi
 
 echo "============================================"

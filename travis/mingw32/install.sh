@@ -32,7 +32,7 @@ test/unit/test_cpp_api.exe
 cd ..
 # Now with grids
 wget http://download.osgeo.org/proj/proj-datumgrid-1.5.zip
-cd data
+cd share
 unzip -o ../proj-datumgrid-1.5.zip
 cd ..
 # autoconf build with grids
@@ -47,6 +47,6 @@ cd src
 make multistresstest.exe
 make test228.exe
 cd ..
-PROJ_LIB=../data src/multistresstest.exe -num_iterations 100000
+src/multistresstest.exe -num_iterations 100000
 cd ..
 

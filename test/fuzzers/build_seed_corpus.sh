@@ -9,4 +9,4 @@ fi
 
 SRC_DIR=$(dirname $0)/../..
 
-cp -r $SRC_DIR/data/* $OUT
+cp -r $SRC_DIR/share/* $OUT

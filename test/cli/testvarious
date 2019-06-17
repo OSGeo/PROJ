@@ -22,10 +22,6 @@ if test ! -x ${EXE}; then
     exit 1
 fi
 
-if test -z "${PROJ_LIB}"; then
-    export PROJ_LIB="`dirname $0`/../../data"
-fi
-
 # Would be great to have a universale way of selecting a locale with
 # a decimal separator that is not '.'
 if command locale >/dev/null 2>/dev/null; then

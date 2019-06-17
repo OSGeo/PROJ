@@ -1,4 +1,4 @@
-DATAPATH = $(top_srcdir)/data
+DATAPATH = $(top_srcdir)/share
 
 pkgdata_DATA = GL27 nad.lst nad27 nad83 world other.extra \
 		CH null \

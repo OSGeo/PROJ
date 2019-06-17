@@ -78,7 +78,7 @@ cd build_autoconf_grids
 make -j${NPROC}
 make check
 (cd src && make multistresstest && make test228)
-PROJ_LIB=../data src/multistresstest
+src/multistresstest
 make install
 find /tmp/proj_autoconf_install_grids
 cd ..

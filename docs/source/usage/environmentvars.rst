@@ -4,8 +4,7 @@
 Environment variables
 ================================================================================
 
-PROJ can be controlled by setting environment variables. Most users will
-have a use for the :envvar:`PROJ_LIB`.
+PROJ can be controlled by setting environment variables.
 
 On UNIX systems environment variables can be set for a shell-session with::
 
@@ -37,9 +36,10 @@ done by setting the variable with no content::
     character.
 
     PROJ is hardcoded to look for resource files
-    in other locations as well, amongst those are the
+    in other locations as well, among those are the
     installation directory (usually ``share/proj`` under the PROJ
-    installation root) and the current folder.
+    installation root), the directory ../share relative to the location
+    of the loaded PROJ library and the current folder.
 
     You can also set the location of the resource files using
     :func:`proj_context_set_search_paths` in the `proj.h` API header.

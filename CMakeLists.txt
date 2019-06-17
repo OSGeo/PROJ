@@ -220,7 +220,7 @@ set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}"
 include_directories(${PROJ4_SOURCE_DIR}/src)
 
 message(STATUS "")
-add_subdirectory(data)
+add_subdirectory(share)
 add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(man)

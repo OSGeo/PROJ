@@ -214,6 +214,9 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             out_full_filename[0] = '\0';
 
         /* check if ~/name */
+        // NOTE - This seems wrong as we're appending the entire name
+        //   (including the '~') to build the sysname.  Perhaps this case
+        //   should vanish.  It can't handle ~user/filename anyway.
         if (*name == '~' && strchr(DIR_CHARS,name[1]) )
             if ((sysname = getenv("HOME")) != nullptr) {
                 fname = sysname;
@@ -224,6 +227,9 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                 return nullptr;
 
         /* or fixed path: /name, ./name or ../name */
+        // NOTE - Not sure why this can't be handled in the case where we
+        //   just try to open the file directly.  The difference is subtle
+        //   (we stop checking other methods) and seems confusing.
         else if (strchr(DIR_CHARS,*name)
                 || (*name == '.' && strchr(DIR_CHARS,name[1]))
                 || (!strncmp(name, "..", 2) && strchr(DIR_CHARS,name[2]))
@@ -231,7 +237,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             sysname = name;
 
         /* or try to use application provided file finder */
-        else if( ctx->file_finder != nullptr && (sysname = ctx->file_finder( ctx, name, ctx->file_finder_user_data )) != nullptr )
+        else if( ctx->file_finder != nullptr &&(sysname = ctx->file_finder( ctx, name, ctx->file_finder_user_data )) != nullptr )
             ;
 
         else if( ctx->file_finder_legacy != nullptr && (sysname = ctx->file_finder_legacy( name )) != nullptr )
@@ -266,27 +272,45 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                 if( fid )
                     break;
             }
-        /* or hardcoded path */
-        } else if ((sysname = proj_lib_name) != nullptr) {
-            fname = sysname;
-            fname += DIR_CHAR;
-            fname += name;
-            sysname = fname.c_str();
-        /* Look in the ../share directory relative to the lib directory
-           or use the provided name directly. */
-        } else {
-            fname = pj_lib_dir();
-            if (!fname.empty())
-            {
+        }
+        // If we get here, we've either successfully opened a file or
+        // tried a method where a failure is final.
+        // Here we try in turn:
+        //  - opening from the install path
+        //  - opening from the path relative to the proj shared object
+        //  - opening from the current working directory
+        else {
+            /* or hardcoded path */
+            if ((sysname = proj_lib_name) != nullptr) {
+                fname = sysname;
                 fname += DIR_CHAR;
                 fname += name;
                 sysname = fname.c_str();
+                fid = pj_ctx_fopen(ctx, sysname, mode);
             }
-            else
+            if (!fid)
+            {
+            /* Look in the ../share directory relative to the lib directory
+               or use the provided name directly. */
+                fname = pj_lib_dir();
+                if (!fname.empty())
+                {
+                    fname += DIR_CHAR;
+                    fname += name;
+                    sysname = fname.c_str();
+                }
+                fid = pj_ctx_fopen(ctx, sysname, mode);
+            }
+            if (!fid)
+            {
                 sysname = name;
+                fid = pj_ctx_fopen(ctx, sysname, mode);
+            }
         }
 
         assert(sysname); // to make Coverity Scan happy
+        // If we failed to open a file, we try again here, which is strange,
+        // but this entire sequence could be improved.
         if ( fid != nullptr || (fid = pj_ctx_fopen(ctx, sysname, mode)) != nullptr)
         {
             if( out_full_filename != nullptr && out_full_filename_size > 0 )
