@@ -273,8 +273,6 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                     break;
             }
         }
-        // If we get here, we've either successfully opened a file or
-        // tried a method where a failure is final.
         // Here we try in turn:
         //  - opening from the install path
         //  - opening from the path relative to the proj shared object
