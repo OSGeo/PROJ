@@ -1,5 +1,5 @@
-SUBDIRS	=	include src man data jniwrap cmake
-DIST_SUBDIRS = include src man data jniwrap cmake test
+SUBDIRS	=	include src man share jniwrap cmake
+DIST_SUBDIRS = include src man share jniwrap cmake test
 
 EXTRA_DIST = CMakeLists.txt CITATION README.md
 
