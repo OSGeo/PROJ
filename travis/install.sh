@@ -14,7 +14,7 @@ fi
 echo "NPROC=${NPROC}"
 
 # Download grid files
-wget http://download.osgeo.org/proj/proj-datumgrid-1.8.zip
+wget https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
 
 # prepare build files
 ./autogen.sh

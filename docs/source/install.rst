@@ -67,11 +67,11 @@ including proj.
 For those who are more inclined to the command line, steps 2--10 above can be
 accomplished by executing the following command::
 
-   C:\temp\osgeo4w-setup-x86-64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P proj
+   C:\temp\osgeo4w-setup-x86-64.exe -q -k -r -A -s https://download.osgeo.org/osgeo4w/ -a x86_64 -P proj
 
 .. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/
-.. _`32 bit`: http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86.exe
-.. _`64 bit`: http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe
+.. _`32 bit`: https://download.osgeo.org/osgeo4w/osgeo4w-setup-x86.exe
+.. _`64 bit`: https://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe
 
 Linux
 --------------------------------------------------------------------------------

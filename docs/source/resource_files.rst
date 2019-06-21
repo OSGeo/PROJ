@@ -170,7 +170,7 @@ As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift off
 This was confirmed against the `NGS HPGN calculator
 <http://www.ngs.noaa.gov/cgi-bin/nadcon2.prl>`__.
 
-The grids are available at http://download.osgeo.org/proj/hpgn_ntv2.zip
+The grids are available at https://download.osgeo.org/proj/hpgn_ntv2.zip
 
 HTDP
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
