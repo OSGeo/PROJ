@@ -31,7 +31,7 @@ find /tmp/proj_autoconf_install
 test/unit/test_cpp_api.exe
 cd ..
 # Now with grids
-wget http://download.osgeo.org/proj/proj-datumgrid-1.5.zip
+wget https://download.osgeo.org/proj/proj-datumgrid-1.5.zip
 cd data
 unzip -o ../proj-datumgrid-1.5.zip
 cd ..

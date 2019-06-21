@@ -242,7 +242,7 @@ Some tests from PJ_vgridshift.c
 operation  proj=vgridshift  grids=egm96_15.gtx  ellps=GRS80
 -------------------------------------------------------------------------------
 Appears there is a difference between the egm96_15.gtx distributed by OSGeo4W,
-and the one from http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
+and the one from https://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
 N(12.5, 55.5) = -36.021305084228515625  (download.osgeo.org)
 N(12.5, 55.5) = -35.880001068115234000  (OSGeo4W)
 This is annoying, but must be handled elsewhere. We jump through the hoop by
