@@ -1,3 +1,59 @@
+6.1.1 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Update EPSG registry to version 9.6.3 (1485)
+
+
+ Bug Fixes
+ ---------
+
+ o Take the passed authority into account when identifying
+   objects (#1466)
+
+ o Avoid exception when transforming from NAD83 to projected
+   CRS using NAD83(2011) (#1477)
+
+ o Avoid off-by-one reading of name argument if name of resource
+   file has length 1 (#1489)
+
+ o Do not include PROJ_LIB in proj_info().searchpath when context
+   search path is set (#1498)
+
+ o Use  correct delimeter for the current platform when parsing
+   PROJ_LIB (#1497)
+
+ o Do not confuse 'ID74' CRS with WKT2 ID[] node (#1506)
+
+ o WKT1 importer: do case insensitive comparison for axis
+   direction (#1509)
+
+ o Avoid compile errors on GCC 4.9.3 (#1512)
+
+ o Make sure that pipelines including +proj=ob_tran can be
+   created (#1526)
+
+
+ THANKS TO
+ ------------
+
+ Version 6.1.1 is made possible by the following contributors:
+
+
+ Alan D. Snow
+ Paul Menzel
+ Mateusz Łoskot
+ Bas Couwenberg
+ Peter Limkilde Svendsen
+ Mike Taves
+ Howard Butler
+ Nyall Dawson
+ Andrew Bell
+ Kristian Evers
+ Even Rouault
+
 6.1.0 Release Notes
 -------------------
 
