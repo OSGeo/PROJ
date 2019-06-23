@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJINFO" "1" "May 06, 2019" "6.1.0" "PROJ.4"
+.TH "PROJINFO" "1" "Jun 23, 2019" "6.1.1" "PROJ"
 .SH NAME
 projinfo \- Geodetic object and coordinate operation queries
 .
@@ -36,17 +36,17 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .nf
 \fBprojinfo\fP
 .in +2
-[\-o formats] [\-k crs|operation|ellipsoid] [–summary] [\-q]
-[[–area name_or_code] | [–bbox west_long,south_lat,east_long,north_lat]]
-[–spatial\-test contains|intersects]
-[–crs\-extent\-use none|both|intersection|smallest]
-[–grid\-check none|discard_missing|sort] [–show\-superseded]
-[–pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
-[–boundcrs\-to\-wgs84]
-[–main\-db\-path path] [–aux\-db\-path path]*
-[–identify]
-[–c\-ify] [–single\-line]
-{object_definition} | (\-s {srs_def} \-t {srs_def})
+[\-o formats] [\-k crs|operation|ellipsoid] [\-\-summary] [\-q]
+[[\-\-area name_or_code] | [\-\-bbox west_long,south_lat,east_long,north_lat]]
+[\-\-spatial\-test contains|intersects]
+[\-\-crs\-extent\-use none|both|intersection|smallest]
+[\-\-grid\-check none|discard_missing|sort] [\-\-show\-superseded]
+[\-\-pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
+[\-\-boundcrs\-to\-wgs84]
+[\-\-main\-db\-path path] [\-\-aux\-db\-path path]*
+[\-\-identify]
+[\-\-c\-ify] [\-\-single\-line]
+{object_definition} | {object_reference} | (\-s {srs_def} \-t {srs_def})
 
 .in -2
 .fi
@@ -59,16 +59,25 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like “EPSG:4326”, “urn:ogc:def:crs:EPSG::4326”,
-“urn:ogc:def:coordinateOperation:EPSG::1671”),
+an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+"urn:ogc:def:coordinateOperation:EPSG::1671"),
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
-(e.g “\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP” or custom abbreviated
-syntax “EPSG:2393+5717”),
+(e.g "\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP" or custom abbreviated
+syntax "EPSG:2393+5717"),
+.IP \(bu 2
+a OGC URN combining references for references for projected or derived CRSs
+e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
+"\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP"
+(\fIadded in 6.2\fP)
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. “\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP”)
+(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
 .UNINDENT
+.sp
+{object_reference} is a filename preceded by the \(aq@\(aq character.  The
+file referenced by the {object_reference} must contain a valid
+{object_definition}.
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
@@ -125,7 +134,7 @@ potentially compatible of being piped in other utilities.
 .B \-\-area name_or_code
 Specify an area of interest to restrict the results when researching
 coordinate operations between 2 CRS. The area of interest can be specified either
-as a name (e.g “Denmark \- onshore”) or a AUTHORITY:CODE (EPSG:3237)
+as a name (e.g "Denmark \- onshore") or a AUTHORITY:CODE (EPSG:3237)
 This option is exclusive of \fI\%\-\-bbox\fP\&.
 .sp
 \fBNOTE:\fP
@@ -424,11 +433,11 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
 \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBproj(1)\fP
 .SH BUGS
 .sp
-A list of know bugs can be found at \fI\%https://github.com/OSGeo/proj.4/issues\fP
+A list of know bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp
-\fI\%https://proj4.org/\fP
+\fI\%https://proj.org/\fP
 .SH AUTHOR
 Even Rouault
 .SH COPYRIGHT
