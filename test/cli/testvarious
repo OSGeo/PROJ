@@ -975,6 +975,16 @@ $EXE -f %.7f ITRF2000 ITRF1993 -E >> ${OUT} <<EOF
 59.4967 -117.61748 329.396 1988
 EOF
 
+echo "##############################################################" >> ${OUT}
+echo "Check ob_tran with o_proj=longlat (#1525)" >> ${OUT}
+$EXE -f %.7f +proj=longlat +ellps=GRS80 +to +proj=ob_tran +o_proj=longlat +lon_0=10 +o_lat_p=90 +ellps=GRS80 -E >>${OUT} <<EOF
+-122 46
+EOF
+echo "Test inverse handling" >> ${OUT}
+$EXE -f %.7f -I +proj=longlat +ellps=GRS80 +to +proj=ob_tran +o_proj=longlat +lon_0=10 +o_lat_p=90 +ellps=GRS80 -E >>${OUT} <<EOF
+-122 46
+EOF
+
 
 # Done!
 # do 'diff' with distribution results
