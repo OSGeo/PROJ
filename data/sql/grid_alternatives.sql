@@ -853,3 +853,35 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
+
+-- Switzerland
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CHENyx06a.gsb',
+                              'CHENyx06a.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CHENyx06_ETRS.gsb',
+                              'CHENyx06_ETRS.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
