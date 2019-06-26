@@ -10233,7 +10233,8 @@ struct FilterResults {
         // results
         // ...
         removeSyntheticNullTransforms();
-        removeUninterestingOps();
+        if (context->getDiscardSuperseded())
+          removeUninterestingOps();
         removeDuplicateOps();
         removeSyntheticNullTransforms();
         return *this;
