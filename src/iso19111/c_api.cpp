@@ -6533,11 +6533,11 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
  */
 void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
-    bool discard) {
+    int discard) {
     SANITIZE_CTX(ctx);
     assert(factory_ctx);
     try {        
-        factory_ctx->operationContext->setDiscardSuperseded(discard);
+        factory_ctx->operationContext->setDiscardSuperseded(discard != 0);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
