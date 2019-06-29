@@ -826,6 +826,10 @@ const char PROJ_DLL* proj_get_id_auth_name(const PJ *obj, int index);
 
 const char PROJ_DLL* proj_get_id_code(const PJ *obj, int index);
 
+const char PROJ_DLL* proj_get_remarks(const PJ *obj);
+
+const char PROJ_DLL* proj_get_scope(const PJ *obj);
+
 int PROJ_DLL proj_get_area_of_use(PJ_CONTEXT *ctx,
                                       const PJ *obj,
                                       double* out_west_lon_degree,

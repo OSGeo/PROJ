@@ -1222,6 +1222,13 @@ struct AuthorityFactory::Private {
                                        const std::string &area_of_use_auth_name,
                                        const std::string &area_of_use_code);
 
+    util::PropertyMap createProperties(const std::string &code,
+                                       const std::string &name, bool deprecated,
+                                       const std::string &remarks,
+                                       const std::string &scope,
+                                       const std::string &area_of_use_auth_name,
+                                       const std::string &area_of_use_code);
+
     SQLResultSet run(const std::string &sql,
                      const ListOfParams &parameters = ListOfParams());
 
@@ -1303,6 +1310,26 @@ util::PropertyMap AuthorityFactory::Private::createProperties(
                                 : createFactory(area_of_use_auth_name)
                                       ->createExtent(area_of_use_code)
                                       .as_nullable());
+}
+
+// ---------------------------------------------------------------------------
+
+util::PropertyMap AuthorityFactory::Private::createProperties(
+    const std::string &code, const std::string &name, bool deprecated,
+    const std::string &remarks, const std::string &scope,
+    const std::string &area_of_use_auth_name,
+    const std::string &area_of_use_code) {
+    auto props = createProperties(code, name, deprecated,
+                                  area_of_use_auth_name.empty()
+                                      ? nullptr
+                                      : createFactory(area_of_use_auth_name)
+                                            ->createExtent(area_of_use_code)
+                                            .as_nullable());
+    if (!remarks.empty())
+        props.set(common::IdentifiedObject::REMARKS_KEY, remarks);
+    if (!scope.empty())
+        props.set(common::ObjectUsage::SCOPE_KEY, scope);
+    return props;
 }
 
 // ---------------------------------------------------------------------------
@@ -2604,7 +2631,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
     if (type == "helmert_transformation") {
 
         auto res = d->runWithCodeParam(
-            "SELECT name, method_auth_name, method_code, method_name, "
+            "SELECT name, description, scope, "
+            "method_auth_name, method_code, method_name, "
             "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
             "target_crs_code, area_of_use_auth_name, area_of_use_code, "
             "accuracy, tx, ty, tz, translation_uom_auth_name, "
@@ -2629,6 +2657,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &row = res.front();
             size_t idx = 0;
             const auto &name = row[idx++];
+            const auto &description = row[idx++];
+            const auto &scope = row[idx++];
             const auto &method_auth_name = row[idx++];
             const auto &method_code = row[idx++];
             const auto &method_name = row[idx++];
@@ -2817,7 +2847,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             }
 
             auto props =
-                d->createProperties(code, name, deprecated,
+                d->createProperties(code, name, deprecated, description, scope,
                                     area_of_use_auth_name, area_of_use_code);
             if (!operation_version.empty()) {
                 props.set(operation::CoordinateOperation::OPERATION_VERSION_KEY,
@@ -2846,7 +2876,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 
     if (type == "grid_transformation") {
         auto res = d->runWithCodeParam(
-            "SELECT name, method_auth_name, method_code, method_name, "
+            "SELECT name, description, scope, "
+            "method_auth_name, method_code, method_name, "
             "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
             "target_crs_code, area_of_use_auth_name, area_of_use_code, "
             "accuracy, grid_param_auth_name, grid_param_code, grid_param_name, "
@@ -2866,6 +2897,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &row = res.front();
             size_t idx = 0;
             const auto &name = row[idx++];
+            const auto &description = row[idx++];
+            const auto &scope = row[idx++];
             const auto &method_auth_name = row[idx++];
             const auto &method_code = row[idx++];
             const auto &method_name = row[idx++];
@@ -2930,7 +2963,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             }
 
             auto props =
-                d->createProperties(code, name, deprecated,
+                d->createProperties(code, name, deprecated, description, scope,
                                     area_of_use_auth_name, area_of_use_code);
             if (!operation_version.empty()) {
                 props.set(operation::CoordinateOperation::OPERATION_VERSION_KEY,
@@ -2964,7 +2997,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
         std::ostringstream buffer;
         buffer.imbue(std::locale::classic());
         buffer
-            << "SELECT name, method_auth_name, method_code, method_name, "
+            << "SELECT name, description, scope, "
+               "method_auth_name, method_code, method_name, "
                "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
                "target_crs_code, area_of_use_auth_name, area_of_use_code, "
                "accuracy";
@@ -2990,6 +3024,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &row = res.front();
             size_t idx = 0;
             const auto &name = row[idx++];
+            const auto &description = row[idx++];
+            const auto &scope = row[idx++];
             const auto &method_auth_name = row[idx++];
             const auto &method_code = row[idx++];
             const auto &method_name = row[idx++];
@@ -3044,7 +3080,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     ->createCoordinateReferenceSystem(target_crs_code);
 
             auto props =
-                d->createProperties(code, name, deprecated,
+                d->createProperties(code, name, deprecated, description, scope,
                                     area_of_use_auth_name, area_of_use_code);
             if (!operation_version.empty()) {
                 props.set(operation::CoordinateOperation::OPERATION_VERSION_KEY,
@@ -3099,7 +3135,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 
     if (allowConcatenated && type == "concatenated_operation") {
         auto res = d->runWithCodeParam(
-            "SELECT name, source_crs_auth_name, source_crs_code, "
+            "SELECT name, description, scope, "
+            "source_crs_auth_name, source_crs_code, "
             "target_crs_auth_name, target_crs_code, "
             "area_of_use_auth_name, area_of_use_code, accuracy, "
             "step1_auth_name, step1_code, step2_auth_name, step2_code, "
@@ -3115,6 +3152,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &row = res.front();
             size_t idx = 0;
             const auto &name = row[idx++];
+            const auto &description = row[idx++];
+            const auto &scope = row[idx++];
             const auto &source_crs_auth_name = row[idx++];
             const auto &source_crs_code = row[idx++];
             const auto &target_crs_auth_name = row[idx++];
@@ -3160,7 +3199,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 operations);
 
             auto props =
-                d->createProperties(code, name, deprecated,
+                d->createProperties(code, name, deprecated, description, scope,
                                     area_of_use_auth_name, area_of_use_code);
             if (!operation_version.empty()) {
                 props.set(operation::CoordinateOperation::OPERATION_VERSION_KEY,

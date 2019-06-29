@@ -1085,9 +1085,28 @@ const char *proj_get_name(const PJ *obj) {
     if (!desc.has_value()) {
         return nullptr;
     }
-    // The object will still be alived after the function call.
+    // The object will still be alive after the function call.
     // cppcheck-suppress stlcstr
     return desc->c_str();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Get the remarks of an object.
+ *
+ * The lifetime of the returned string is the same as the input obj parameter.
+ *
+ * @param obj Object (must not be NULL)
+ * @return a string, or NULL in case of error.
+ */
+const char *proj_get_remarks(const PJ *obj) {
+    assert(obj);
+    if (!obj->iso_obj) {
+        return nullptr;
+    }
+    // The object will still be alive after the function call.
+    // cppcheck-suppress stlcstr
+    return obj->iso_obj->remarks().c_str();
 }
 
 // ---------------------------------------------------------------------------
@@ -1113,7 +1132,7 @@ const char *proj_get_id_auth_name(const PJ *obj, int index) {
     if (!codeSpace.has_value()) {
         return nullptr;
     }
-    // The object will still be alived after the function call.
+    // The object will still be alive after the function call.
     // cppcheck-suppress stlcstr
     return codeSpace->c_str();
 }
@@ -1295,7 +1314,42 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Get the scope of an object.
+ *
+ * In case of multiple usages, this will be the one of first usage.
+ *
+ * The lifetime of the returned string is the same as the input obj parameter.
+ *
+ * @param obj Object (must not be NULL)
+ * @return a string, or NULL in case of error or missing scope.
+ */
+const char *proj_get_scope(const PJ *obj) {
+    assert(obj);
+    if (!obj->iso_obj) {
+        return nullptr;
+    }
+    auto objectUsage = dynamic_cast<const ObjectUsage *>(obj->iso_obj.get());
+    if (!objectUsage) {
+        return nullptr;
+    }
+    const auto &domains = objectUsage->domains();
+    if (domains.empty()) {
+        return nullptr;
+    }
+    const auto &scope = domains[0]->scope();
+    if (!scope.has_value()) {
+        return nullptr;
+    }
+    // The object will still be alive after the function call.
+    // cppcheck-suppress stlcstr
+    return scope->c_str();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the area of use of an object.
+ *
+ * In case of multiple usages, this will be the one of first usage.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param obj Object (must not be NULL)

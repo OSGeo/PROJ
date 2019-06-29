@@ -912,6 +912,8 @@ proj_get_id_code
 proj_get_name
 proj_get_non_deprecated
 proj_get_prime_meridian
+proj_get_remarks
+proj_get_scope
 proj_get_source_crs
 proj_get_target_crs
 proj_get_type

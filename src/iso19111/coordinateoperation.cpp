@@ -7342,6 +7342,11 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
         map.set(common::IdentifiedObject::NAME_KEY, name);
     }
 
+    const std::string &remarks = op->remarks();
+    if (!remarks.empty()) {
+        map.set(common::IdentifiedObject::REMARKS_KEY, remarks);
+    }
+
     addModifiedIdentifier(map, op, true, derivedFrom);
 
     return map;

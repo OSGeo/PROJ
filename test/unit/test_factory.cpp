@@ -807,10 +807,14 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
         "        ID[\"EPSG\",1047]],\n"
         "    OPERATIONACCURACY[0.03],\n"
         "    USAGE[\n"
-        "        SCOPE[\"unknown\"],\n"
+        "        SCOPE[\"Geodesy. RMS residuals 5mm north, 8mm east and 28mm "
+        "vertical, maximum residuals 10mm north, 13mm east and 51mm "
+        "vertical.\"],\n"
         "        AREA[\"Australia - onshore and EEZ\"],\n"
         "        BBOX[-47.2,109.23,-8.88,163.2]],\n"
-        "    ID[\"EPSG\",6276]]";
+        "    ID[\"EPSG\",6276],\n"
+        "    REMARK[\"Scale difference in ppb and scale difference rate in "
+        "ppb/yr where 1/billion = 1E-9 or nm/m.\"]]";
 
     EXPECT_EQ(
         op->exportToWKT(
@@ -911,10 +915,13 @@ TEST(
         "file\",\"RGNC1991_NEA74Noumea.gsb\"],\n"
         "    OPERATIONACCURACY[0.05],\n"
         "    USAGE[\n"
-        "        SCOPE[\"unknown\"],\n"
+        "        SCOPE[\"Accuracy 5-10cm.\"],\n"
         "        AREA[\"New Caledonia - Grande Terre - Noumea\"],\n"
         "        BBOX[-22.37,166.35,-22.19,166.54]],\n"
-        "    ID[\"EPSG\",1295]]";
+        "    ID[\"EPSG\",1295],\n"
+        "    REMARK[\"Emulation using NTv2 method of tfm NEA74 Noumea to "
+        "RGNC91-93 (3) (code 15943). Note reversal of sign of parameter values "
+        "in grid file.\"]]";
     EXPECT_EQ(
         op->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
@@ -984,7 +991,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
         "        ID[\"EPSG\",8602]],\n"
         "    OPERATIONACCURACY[0.0],\n"
         "    USAGE[\n"
-        "        SCOPE[\"unknown\"],\n"
+        "        SCOPE[\"Change of prime meridian.\"],\n"
         "        AREA[\"Europe - Czechoslovakia\"],\n"
         "        BBOX[47.73,12.09,51.06,22.56]],\n"
         "    ID[\"EPSG\",1884]]";
