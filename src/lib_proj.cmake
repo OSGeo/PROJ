@@ -363,10 +363,12 @@ add_library(
   ${ALL_LIBPROJ_HEADERS}
   ${PROJ_RESOURCES}
 )
+if(NOT MSVC)
 target_compile_options(${PROJ_CORE_TARGET}
   PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
   PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
 )
+endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to stop the
 # compiler from ignoring parentheses in expressions like (a + b) + c and from
