@@ -27,7 +27,7 @@ Bug Fixes
   search path is set (`#1498 <https://github.com/OSGeo/PROJ/issues/1498>`_)
 
 * Use correct delimeter for the current platform when parsing
-  PROJ_LIB (`#1497<https://github.com/OSGeo/PROJ/issues/1497>`_)
+  PROJ_LIB (`#1497 <https://github.com/OSGeo/PROJ/issues/1497>`_)
 
 * Do not confuse 'ID74' CRS with WKT2 ID[] node (`#1506 <https://github.com/OSGeo/PROJ/issues/1506>`_)
 
