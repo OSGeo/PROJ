@@ -762,6 +762,8 @@ proj_as_proj_string
 proj_assign_context
 proj_as_wkt
 proj_clone
+proj_concatoperation_get_step
+proj_concatoperation_get_step_count
 proj_context_create
 proj_context_delete_cpp_context(projCppContext*)
 proj_context_destroy

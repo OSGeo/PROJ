@@ -1064,6 +1064,13 @@ int PROJ_DLL proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
                                                     int value_count,
                                                     int emit_error_if_incompatible);
 
+int PROJ_DLL proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
+                                                 const PJ *concatoperation);
+
+PJ PROJ_DLL *proj_concatoperation_get_step(PJ_CONTEXT *ctx,
+                                           const PJ *concatoperation,
+                                           int i_step);
+
 /**@}*/
 
 #ifdef __cplusplus
