@@ -2,6 +2,43 @@
 
 News
 ###############################################################################
+6.1.1 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*July 1st 2019*
+
+Updates
+-------
+
+* Update EPSG registry to version 9.6.3 (`#1485 <https://github.com/OSGeo/PROJ/issues/1485>`_)
+
+Bug Fixes
+---------
+
+* Take the passed authority into account when identifying
+  objects (`#1466 <https://github.com/OSGeo/PROJ/issues/1466>`_)
+
+* Avoid exception when transforming from NAD83 to projected
+  CRS using NAD83(2011) (`#1477 <https://github.com/OSGeo/PROJ/issues/1477>`_)
+
+* Avoid off-by-one reading of name argument if name of resource
+  file has length 1 (`#11489 <https://github.com/OSGeo/PROJ/issues/1489>`_)
+
+* Do not include :envvar:`PROJ_LIB` in ``proj_info().searchpath`` when context
+  search path is set (`#1498 <https://github.com/OSGeo/PROJ/issues/1498>`_)
+
+* Use correct delimeter for the current platform when parsing
+  PROJ_LIB (`#1497<https://github.com/OSGeo/PROJ/issues/1497>`_)
+
+* Do not confuse 'ID74' CRS with WKT2 ID[] node (`#1506 <https://github.com/OSGeo/PROJ/issues/1506>`_)
+
+* WKT1 importer: do case insensitive comparison for axis
+  direction (`#1509 <https://github.com/OSGeo/PROJ/issues/1509>`_)
+
+* Avoid compile errors on GCC 4.9.3 (`#1512 <https://github.com/OSGeo/PROJ/issues/1512>`_)
+
+* Make sure that pipelines including ``+proj=ob_tran`` can be
+  created (`#1526 <https://github.com/OSGeo/PROJ/issues/1526>`_)
+
 
 6.1.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
