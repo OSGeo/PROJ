@@ -220,8 +220,6 @@ Make some noise on Twitter and other relevant social media.
 3.1 Update version numbers
 -------------------------------------------------------------------------------
 
-*Skip this step if you are preparing a patch release.*
-
 PROJ uses [semantic versioning](http://semver.org/). Depending on the changes
 in the release will be either a major, minor or patch release. Update the
 version numbers in the files.
@@ -235,4 +233,5 @@ version numbers in the files.
   - doc/source/conf.py:   Update version number
 
 
-*Commit changes to master branch.*
+*Commit changes. Either to master or maintenance branch depending on the nature
+of the release.*
