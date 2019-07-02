@@ -101,6 +101,33 @@ If you are building from the git repository you have to first run
 
 which will generate a configure script that can be used as described above.
 
+### Build the '.deb' Debian package
+With `Dockerfile.deb-packager`, you can build a Debian package for PROJ. You can
+configure the version by changing the `PROJ_VERSION` argument (default is
+`6.1.0`). You can also change which version of Debian is used to build the
+package (default is `stretch`).
+```
+docker build \
+	--build-arg PROJ_VERSION="6.0.0" \
+	--build-arg DEBIAN_VERSION="buster" \
+	--tag proj:6.1.0 \
+	--file Dockerfile.deb-packager \
+	.
+```
+
+Once built, you can extract the package from the image by running the image and
+copy the file out. In one terminal, run the container with
+
+```
+docker run --name proj --interactive --tty proj:6.1.0
+```
+
+Then from another terminal, you can use the following command to extract the
+file in your current directory.
+```
+docker cp proj:/deb/proj_6.1.0_x86-64.deb ./
+```
+
 ### Distribution files and format
 
 Sources are distributed in one or more files.  The principle elements

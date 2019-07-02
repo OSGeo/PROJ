@@ -1,0 +1,11 @@
+Package: proj
+Package-Type: deb
+Version: {PROJ_VERSION}
+Maintainer: Jean SIMARD <woshilapin@tuziwo.info>
+Description: Cartographic Projections and Coordinate Transformations Library
+Section: utils
+Priority: optional
+Installed-Size: {INSTALLED_SIZE}
+Architecture: amd64
+Bugs: https://github.com/OSGeo/PROJ/issues
+Homepage: https://proj.org

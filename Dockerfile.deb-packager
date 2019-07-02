@@ -1,0 +1,37 @@
+ARG DEBIAN_VERSION="stretch"
+FROM debian:${DEBIAN_VERSION}-slim
+ARG PROJ_VERSION="6.1.0"
+RUN apt update && apt install -y wget build-essential pkg-config sqlite3 libsqlite3-dev libssl-dev clang
+
+# Download and unzip PROJ
+WORKDIR /tmp
+RUN wget https://github.com/OSGeo/PROJ/releases/download/${PROJ_VERSION}/proj-${PROJ_VERSION}.tar.gz
+RUN tar -xzvf proj-${PROJ_VERSION}.tar.gz
+
+# Compile PROJ and install in /usr
+WORKDIR proj-${PROJ_VERSION}
+RUN ./configure --prefix=/usr
+RUN make
+RUN touch /tmp/timestamp
+RUN make install
+
+# Prepare the folder for building the .deb package
+ENV DEB_NAME "proj_${PROJ_VERSION}_amd64"
+ENV DEB_PATH "/tmp/${DEB_NAME}"
+WORKDIR ${DEB_PATH}
+RUN find /usr ! -type d -cnewer /tmp/timestamp | while read FILE; \
+	do \
+		mkdir -p "${DEB_PATH}$( dirname "${FILE}" )"; \
+		cp "${FILE}" "${DEB_PATH}${FILE}" ; \
+	done
+RUN mkdir DEBIAN/
+RUN echo "2.0\n" > debian-binary
+COPY DEBIAN/control.template DEBIAN/control
+RUN sed --in-place "s/{PROJ_VERSION}/${PROJ_VERSION}/" DEBIAN/control
+RUN sed --in-place "s/{INSTALLED_SIZE}/$( du --summarize --bytes --exclude DEBIAN ${DEB_PATH} | cut --field=1 )/" DEBIAN/control
+RUN find . -type f ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > DEBIAN/md5sums
+
+# Build the .deb package
+WORKDIR /
+RUN mkdir /deb/
+RUN dpkg --build ${DEB_PATH} /deb/${DEB_NAME}.deb
