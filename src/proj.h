@@ -826,6 +826,10 @@ const char PROJ_DLL* proj_get_id_auth_name(const PJ *obj, int index);
 
 const char PROJ_DLL* proj_get_id_code(const PJ *obj, int index);
 
+const char PROJ_DLL* proj_get_remarks(const PJ *obj);
+
+const char PROJ_DLL* proj_get_scope(const PJ *obj);
+
 int PROJ_DLL proj_get_area_of_use(PJ_CONTEXT *ctx,
                                       const PJ *obj,
                                       double* out_west_lon_degree,
@@ -1059,6 +1063,13 @@ int PROJ_DLL proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
                                                     double *out_values,
                                                     int value_count,
                                                     int emit_error_if_incompatible);
+
+int PROJ_DLL proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
+                                                 const PJ *concatoperation);
+
+PJ PROJ_DLL *proj_concatoperation_get_step(PJ_CONTEXT *ctx,
+                                           const PJ *concatoperation,
+                                           int i_step);
 
 /**@}*/
 

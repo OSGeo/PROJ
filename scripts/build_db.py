@@ -240,8 +240,8 @@ def fill_compound_crs(proj_db_cursor):
             raise
 
 def fill_helmert_transformation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 9603, 9606, 9607, 9636) ")
-    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, coord_op_scope, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (1031, 1032, 1033, 1034, 1035, 1037, 1038, 1039, 1053, 1054, 1055, 1056, 1057, 1058, 1061, 1062, 1063, 1065, 1066, 9603, 9606, 9607, 9636) ")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated, scope, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 15
         param_auth_name = [None for i in range(max_n_params)]
@@ -320,7 +320,7 @@ def fill_helmert_transformation(proj_db_cursor):
             assert param_uom_code[10] == param_uom_code[12]
 
         arg = (EPSG_AUTHORITY, code, name,
-               None, None, # description + scope
+               remarks, scope,
                EPSG_AUTHORITY, method_code, method_name,
                EPSG_AUTHORITY, source_crs_code,
                EPSG_AUTHORITY, target_crs_code,
@@ -343,8 +343,8 @@ def fill_helmert_transformation(proj_db_cursor):
             '?,?,?, ?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?, ?,?)', arg)
 
 def fill_grid_transformation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND (coord_op_method_name LIKE 'Geographic3D to%' OR coord_op_method_name LIKE 'Geog3D to%' OR coord_op_method_name LIKE 'Point motion by grid%' OR coord_op_method_name LIKE 'Vertical Offset by Grid Interpolation%' OR coord_op_method_name IN ('NADCON', 'NTv1', 'NTv2', 'VERTCON'))")
-    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, coord_op_scope, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND (coord_op_method_name LIKE 'Geographic3D to%' OR coord_op_method_name LIKE 'Geog3D to%' OR coord_op_method_name LIKE 'Point motion by grid%' OR coord_op_method_name LIKE 'Vertical Offset by Grid Interpolation%' OR coord_op_method_name IN ('NADCON', 'NTv1', 'NTv2', 'VERTCON'))")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated, scope, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 2
         param_auth_name = [None for i in range(max_n_params)]
@@ -393,7 +393,7 @@ def fill_grid_transformation(proj_db_cursor):
 
 
         arg = (EPSG_AUTHORITY, code, name,
-               None, None, # description + scope
+               remarks, scope,
                EPSG_AUTHORITY, method_code, method_name,
                EPSG_AUTHORITY, source_crs_code,
                EPSG_AUTHORITY, target_crs_code,
@@ -417,8 +417,8 @@ def fill_other_transformation(proj_db_cursor):
     # 9619: Geographic2D offsets
     # 9624: Affine Parametric Transformation
     # 9660: Geographic3D offsets
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660)")
-    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, coord_op_scope, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660)")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated, scope, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7
         param_auth_name = [None for i in range(max_n_params)]
@@ -441,7 +441,7 @@ def fill_other_transformation(proj_db_cursor):
             expected_order += 1
 
         arg = (EPSG_AUTHORITY, code, name,
-               None, None, # description + scope
+               remarks, scope,
                EPSG_AUTHORITY, method_code, method_name,
                EPSG_AUTHORITY, source_crs_code,
                EPSG_AUTHORITY, target_crs_code,
@@ -470,8 +470,8 @@ def fill_other_transformation(proj_db_cursor):
             '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?)', arg)
 
 def fill_concatenated_operation(proj_db_cursor):
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'concatenated operation'")
-    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, coord_op_scope, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'concatenated operation'")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated, scope, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 3
         step_code = [None for i in range(max_n_params)]
@@ -488,7 +488,7 @@ def fill_concatenated_operation(proj_db_cursor):
         assert n_params in (2, 3), (code, n_params)
 
         arg = (EPSG_AUTHORITY, code, name,
-               None, None, # description + scope
+               remarks, scope,
                EPSG_AUTHORITY, source_crs_code,
                EPSG_AUTHORITY, target_crs_code,
                EPSG_AUTHORITY, area_of_use_code,

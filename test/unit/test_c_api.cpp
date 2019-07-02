@@ -3375,4 +3375,118 @@ TEST_F(CApi, proj_normalize_for_visualization_with_alternatives_reverse) {
     EXPECT_NEAR(c.lp.phi, 42, 1e-8);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_remarks) {
+    auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
+                                        PJ_CATEGORY_COORDINATE_OPERATION, false,
+                                        nullptr);
+    ObjectKeeper keeper(co);
+    ASSERT_NE(co, nullptr);
+
+    auto remarks = proj_get_remarks(co);
+    ASSERT_NE(remarks, nullptr);
+    EXPECT_EQ(
+        remarks,
+        std::string("Scale difference in ppb where 1/billion = 1E-9. "
+                    "Derivation excluded Cocos, Christmas and Macquarie "
+                    "Islands but is applied there. See codes 8444-46 for "
+                    "equivalents using NTv2 method. See code 8447 for "
+                    "alternative including distortion model for Aus only."));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_scope) {
+    {
+        auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
+                                            PJ_CATEGORY_COORDINATE_OPERATION,
+                                            false, nullptr);
+        ObjectKeeper keeper(co);
+        ASSERT_NE(co, nullptr);
+
+        auto scope = proj_get_scope(co);
+        ASSERT_NE(scope, nullptr);
+        EXPECT_EQ(scope,
+                  std::string("Conformal transformation of GDA94 coordinates "
+                              "that have been derived through GNSS CORS."));
+    }
+    {
+        auto P = proj_create(m_ctxt, "+proj=noop");
+        ObjectKeeper keeper(P);
+        ASSERT_NE(P, nullptr);
+        auto scope = proj_get_scope(P);
+        ASSERT_EQ(scope, nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_concatoperation_get_step) {
+    // Test on a non concatenated operation
+    {
+        auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
+                                            PJ_CATEGORY_COORDINATE_OPERATION,
+                                            false, nullptr);
+        ObjectKeeper keeper(co);
+        ASSERT_NE(co, nullptr);
+        ASSERT_NE(proj_get_type(co), PJ_TYPE_CONCATENATED_OPERATION);
+
+        ASSERT_EQ(proj_concatoperation_get_step_count(m_ctxt, co), 0);
+        ASSERT_EQ(proj_concatoperation_get_step(m_ctxt, co, 0), nullptr);
+    }
+    // Test on a concatenated operation
+    {
+        auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+        ASSERT_NE(ctxt, nullptr);
+        ContextKeeper keeper_ctxt(ctxt);
+
+        // GDA94 / MGA zone 56
+        auto source_crs = proj_create_from_database(
+            m_ctxt, "EPSG", "28356", PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(source_crs, nullptr);
+        ObjectKeeper keeper_source_crs(source_crs);
+
+        // GDA2020 / MGA zone 56
+        auto target_crs = proj_create_from_database(
+            m_ctxt, "EPSG", "7856", PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(target_crs, nullptr);
+        ObjectKeeper keeper_target_crs(target_crs);
+
+        proj_operation_factory_context_set_spatial_criterion(
+            m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+        proj_operation_factory_context_set_grid_availability_use(
+            m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+        auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+        ASSERT_NE(res, nullptr);
+        ObjListKeeper keeper_res(res);
+
+        ASSERT_GT(proj_list_get_count(res), 0);
+
+        auto op = proj_list_get(m_ctxt, res, 0);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper_op(op);
+
+        ASSERT_EQ(proj_get_type(op), PJ_TYPE_CONCATENATED_OPERATION);
+        ASSERT_EQ(proj_concatoperation_get_step_count(m_ctxt, op), 3);
+
+        EXPECT_EQ(proj_concatoperation_get_step(m_ctxt, op, -1), nullptr);
+        EXPECT_EQ(proj_concatoperation_get_step(m_ctxt, op, 3), nullptr);
+
+        auto step = proj_concatoperation_get_step(m_ctxt, op, 1);
+        ASSERT_NE(step, nullptr);
+        ObjectKeeper keeper_step(step);
+
+        const char* scope = proj_get_scope(step);
+        EXPECT_NE(scope, nullptr);
+        EXPECT_NE(std::string(scope), std::string());
+
+        const char* remarks = proj_get_remarks(step);
+        EXPECT_NE(remarks, nullptr);
+        EXPECT_NE(std::string(remarks), std::string());
+    }
+}
+
 } // namespace

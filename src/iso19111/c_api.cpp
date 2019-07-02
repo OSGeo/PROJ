@@ -1085,9 +1085,28 @@ const char *proj_get_name(const PJ *obj) {
     if (!desc.has_value()) {
         return nullptr;
     }
-    // The object will still be alived after the function call.
+    // The object will still be alive after the function call.
     // cppcheck-suppress stlcstr
     return desc->c_str();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Get the remarks of an object.
+ *
+ * The lifetime of the returned string is the same as the input obj parameter.
+ *
+ * @param obj Object (must not be NULL)
+ * @return a string, or NULL in case of error.
+ */
+const char *proj_get_remarks(const PJ *obj) {
+    assert(obj);
+    if (!obj->iso_obj) {
+        return nullptr;
+    }
+    // The object will still be alive after the function call.
+    // cppcheck-suppress stlcstr
+    return obj->iso_obj->remarks().c_str();
 }
 
 // ---------------------------------------------------------------------------
@@ -1113,7 +1132,7 @@ const char *proj_get_id_auth_name(const PJ *obj, int index) {
     if (!codeSpace.has_value()) {
         return nullptr;
     }
-    // The object will still be alived after the function call.
+    // The object will still be alive after the function call.
     // cppcheck-suppress stlcstr
     return codeSpace->c_str();
 }
@@ -1295,7 +1314,42 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Get the scope of an object.
+ *
+ * In case of multiple usages, this will be the one of first usage.
+ *
+ * The lifetime of the returned string is the same as the input obj parameter.
+ *
+ * @param obj Object (must not be NULL)
+ * @return a string, or NULL in case of error or missing scope.
+ */
+const char *proj_get_scope(const PJ *obj) {
+    assert(obj);
+    if (!obj->iso_obj) {
+        return nullptr;
+    }
+    auto objectUsage = dynamic_cast<const ObjectUsage *>(obj->iso_obj.get());
+    if (!objectUsage) {
+        return nullptr;
+    }
+    const auto &domains = objectUsage->domains();
+    if (domains.empty()) {
+        return nullptr;
+    }
+    const auto &scope = domains[0]->scope();
+    if (!scope.has_value()) {
+        return nullptr;
+    }
+    // The object will still be alive after the function call.
+    // cppcheck-suppress stlcstr
+    return scope->c_str();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the area of use of an object.
+ *
+ * In case of multiple usages, this will be the one of first usage.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param obj Object (must not be NULL)
@@ -6921,4 +6975,63 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
         proj_log_debug(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the number of steps of a concatenated operation.
+ *
+ * The input object must be a concatenated operation.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param concatoperation Concatenated operation (must not be NULL)
+ * @return the number of steps, or 0 in case of error.
+ */
+int proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
+                                        const PJ *concatoperation) {
+    SANITIZE_CTX(ctx);
+    assert(concatoperation);
+    auto l_co = dynamic_cast<const ConcatenatedOperation *>(
+        concatoperation->iso_obj.get());
+    if (!l_co) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a ConcatenatedOperation");
+        return false;
+    }
+    return static_cast<int>(l_co->operations().size());
+}
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a step of a concatenated operation.
+ *
+ * The input object must be a concatenated operation.
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param concatoperation Concatenated operation (must not be NULL)
+ * @param i_step Index of the step to extract. Between 0 and
+ *               proj_concatoperation_get_step_count()-1
+ * @return Object that must be unreferenced with proj_destroy(), or NULL
+ * in case of error.
+ */
+PJ *proj_concatoperation_get_step(PJ_CONTEXT *ctx, const PJ *concatoperation,
+                                  int i_step) {
+    SANITIZE_CTX(ctx);
+    assert(concatoperation);
+    auto l_co = dynamic_cast<const ConcatenatedOperation *>(
+        concatoperation->iso_obj.get());
+    if (!l_co) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a ConcatenatedOperation");
+        return nullptr;
+    }
+    const auto &steps = l_co->operations();
+    if (i_step < 0 || static_cast<size_t>(i_step) >= steps.size()) {
+        proj_log_error(ctx, __FUNCTION__, "Invalid step index");
+        return nullptr;
+    }
+    return pj_obj_create(ctx, steps[i_step]);
 }
