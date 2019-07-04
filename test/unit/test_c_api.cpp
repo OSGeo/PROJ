@@ -1352,6 +1352,72 @@ TEST_F(CApi, proj_create_operations) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_create_operations_discard_superseded) {
+  auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+  ASSERT_NE(ctxt, nullptr);
+  ContextKeeper keeper_ctxt(ctxt);
+
+  auto source_crs = proj_create_from_database(
+    m_ctxt, "EPSG", "4203", PJ_CATEGORY_CRS, false, nullptr); // AGD84
+  ASSERT_NE(source_crs, nullptr);
+  ObjectKeeper keeper_source_crs(source_crs);
+
+  auto target_crs = proj_create_from_database(
+    m_ctxt, "EPSG", "4326", PJ_CATEGORY_CRS, false, nullptr); // WGS84
+  ASSERT_NE(target_crs, nullptr);
+  ObjectKeeper keeper_target_crs(target_crs);
+
+  proj_operation_factory_context_set_spatial_criterion(
+    m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+  proj_operation_factory_context_set_grid_availability_use(
+    m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+  proj_operation_factory_context_set_discard_superseded(
+    m_ctxt, ctxt, true);
+
+  auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+  ASSERT_NE(res, nullptr);
+  ObjListKeeper keeper_res(res);
+
+  EXPECT_EQ(proj_list_get_count(res), 2);
+  }
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_operations_dont_discard_superseded) {
+  auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+  ASSERT_NE(ctxt, nullptr);
+  ContextKeeper keeper_ctxt(ctxt);
+
+  auto source_crs = proj_create_from_database(
+    m_ctxt, "EPSG", "4203", PJ_CATEGORY_CRS, false, nullptr); // AGD84
+  ASSERT_NE(source_crs, nullptr);
+  ObjectKeeper keeper_source_crs(source_crs);
+
+  auto target_crs = proj_create_from_database(
+    m_ctxt, "EPSG", "4326", PJ_CATEGORY_CRS, false, nullptr); // WGS84
+  ASSERT_NE(target_crs, nullptr);
+  ObjectKeeper keeper_target_crs(target_crs);
+
+  proj_operation_factory_context_set_spatial_criterion(
+    m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+  proj_operation_factory_context_set_grid_availability_use(
+    m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+  proj_operation_factory_context_set_discard_superseded(
+    m_ctxt, ctxt, false);
+
+  auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+  ASSERT_NE(res, nullptr);
+  ObjListKeeper keeper_res(res);
+
+  EXPECT_EQ(proj_list_get_count(res), 5);
+  }
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_create_operations_with_pivot) {
 
     auto source_crs = proj_create_from_database(
