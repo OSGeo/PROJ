@@ -3479,11 +3479,11 @@ TEST_F(CApi, proj_concatoperation_get_step) {
         ASSERT_NE(step, nullptr);
         ObjectKeeper keeper_step(step);
 
-        const char* scope = proj_get_scope(step);
+        const char *scope = proj_get_scope(step);
         EXPECT_NE(scope, nullptr);
         EXPECT_NE(std::string(scope), std::string());
 
-        const char* remarks = proj_get_remarks(step);
+        const char *remarks = proj_get_remarks(step);
         EXPECT_NE(remarks, nullptr);
         EXPECT_NE(std::string(remarks), std::string());
     }
