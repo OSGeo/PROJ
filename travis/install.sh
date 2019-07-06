@@ -51,6 +51,12 @@ fi
 make check
 make install
 find /tmp/proj_autoconf_install_from_dist_all
+
+/tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:32631 -o JSON -q > out.json
+cat out.json
+echo "Validating JSON"
+jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/crsjson.schema.json && echo "Valid !"
+
 cd ..
 
 # cmake build from generated tarball
