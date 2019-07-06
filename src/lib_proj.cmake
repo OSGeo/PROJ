@@ -285,6 +285,7 @@ set(SRC_LIBPROJ_CORE
   wkt_parser.cpp
   wkt_parser.hpp
   zpoly1.cpp
+  proj_json_streaming_writer.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
@@ -293,6 +294,7 @@ set(HEADERS_LIBPROJ
   proj.h
   proj_experimental.h
   proj_constants.h
+  proj_json_streaming_writer.hpp
   geodesic.h
 )
 

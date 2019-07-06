@@ -236,6 +236,54 @@ void UnitOfMeasure::_exportToWKT(
     }
     formatter->endNode();
 }
+
+// ---------------------------------------------------------------------------
+
+void UnitOfMeasure::_exportToJSON(
+    JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    PROJ::CPLJSonStreamingWriter::ObjectContext objContext(writer);
+    writer.AddObjKey("type");
+    const auto l_type = type();
+    if (l_type == Type::LINEAR) {
+        writer.Add("LinearUnit");
+    } else if (l_type == Type::ANGULAR) {
+        writer.Add("AngularUnit");
+    } else if (l_type == Type::SCALE) {
+        writer.Add("ScaleUnit");
+    } else if (l_type == Type::TIME) {
+        writer.Add("TimeUnit");
+    } else if (l_type == Type::PARAMETRIC) {
+        writer.Add("ParametericUnit");
+    } else {
+        writer.Add("Unit");
+    }
+
+    writer.AddObjKey("name");
+    const auto &l_name = name();
+    writer.Add(l_name);
+
+    const auto &factor = conversionToSI();
+    writer.AddObjKey("conversion_factor");
+    writer.Add(factor, 15);
+
+    const auto &l_codeSpace = codeSpace();
+    if (!l_codeSpace.empty() && formatter->outputId()) {
+        writer.AddObjKey("id");
+        PROJ::CPLJSonStreamingWriter::ObjectContext idContext(writer);
+        writer.AddObjKey("authority");
+        writer.Add(l_codeSpace);
+        writer.AddObjKey("code");
+        const auto &l_code = code();
+        try {
+            writer.Add(std::stoi(l_code));
+        } catch (const std::exception &) {
+            writer.Add(l_code);
+        }
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -810,6 +858,23 @@ void IdentifiedObject::formatRemarks(WKTFormatter *formatter) const {
         formatter->startNode(WKTConstants::REMARK, false);
         formatter->addQuotedString(remarks());
         formatter->endNode();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void IdentifiedObject::formatID(JSONFormatter *formatter) const {
+    const auto &ids(identifiers());
+    auto &writer = formatter->writer();
+    if (ids.size() == 1) {
+        writer.AddObjKey("id");
+        ids.front()->_exportToJSON(formatter);
+    } else if (!ids.empty()) {
+        writer.AddObjKey("ids");
+        PROJ::CPLJSonStreamingWriter::ArrayContext arrayContext(writer);
+        for (const auto &id : ids) {
+            id->_exportToJSON(formatter);
+        }
     }
 }
 

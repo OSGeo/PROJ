@@ -11,7 +11,7 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@
 
 include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesic.h \
-	org_proj4_PJ.h proj_symbol_rename.h
+	org_proj4_PJ.h proj_symbol_rename.h proj_json_streaming_writer.hpp
 
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	bin_geod.cmake bin_proj.cmake bin_projinfo.cmake \
@@ -208,7 +208,9 @@ libproj_la_SOURCES = \
 	wkt1_parser.h wkt1_parser.cpp \
 	wkt1_generated_parser.h wkt1_generated_parser.c \
 	wkt2_parser.h wkt2_parser.cpp \
-	wkt2_generated_parser.h wkt2_generated_parser.c
+	wkt2_generated_parser.h wkt2_generated_parser.c \
+	\
+	proj_json_streaming_writer.cpp
 
 
 # The sed hack is to please MSVC

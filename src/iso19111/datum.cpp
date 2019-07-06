@@ -348,6 +348,41 @@ void PrimeMeridian::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void PrimeMeridian::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    PROJ::CPLJSonStreamingWriter::ObjectContext objectContext(writer);
+
+    writer.AddObjKey("type");
+    writer.Add("PrimeMeridian");
+
+    writer.AddObjKey("name");
+    std::string l_name =
+        name()->description().has_value() ? nameStr() : "Greenwich";
+    writer.Add(l_name);
+
+    const auto &l_long = longitude();
+    writer.AddObjKey("longitude");
+    {
+        PROJ::CPLJSonStreamingWriter::ObjectContext longitudeContext(writer);
+        writer.AddObjKey("value");
+        writer.Add(l_long.value(), 15);
+
+        const auto &unit = l_long.unit();
+        writer.AddObjKey("unit");
+        unit._exportToJSON(formatter);
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::string
 PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
     const double valRad = angle.getSIValue();

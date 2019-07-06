@@ -38,6 +38,7 @@
 
 #include "proj.h"
 
+#include "proj_json_streaming_writer.hpp"
 #include "util.hpp"
 
 NS_PROJ_START
@@ -451,6 +452,77 @@ class PROJ_GCC_DLL PROJStringFormatter {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class JSONFormatter;
+/** JSONFormatter unique pointer. */
+using JSONFormatterPtr = std::unique_ptr<JSONFormatter>;
+/** Non-null JSONFormatter unique pointer. */
+using JSONFormatterNNPtr = util::nn<JSONFormatterPtr>;
+
+/** \brief Formatter to JSON strings.
+ *
+ * An instance of this class can only be used by a single
+ * thread at a time.
+ */
+class PROJ_GCC_DLL JSONFormatter {
+  public:
+    PROJ_DLL static JSONFormatterNNPtr
+    create(DatabaseContextPtr dbContext = nullptr);
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~JSONFormatter();
+    //! @endcond
+
+    PROJ_DLL JSONFormatter &setMultiLine(bool multiLine) noexcept;
+    PROJ_DLL JSONFormatter &setIndentationWidth(int width) noexcept;
+
+    PROJ_DLL const std::string &toString() const;
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL PROJ::CPLJSonStreamingWriter &
+        writer() const;
+
+    // cppcheck-suppress functionStatic
+    PROJ_INTERNAL bool outputId() const;
+
+    //! @endcond
+
+  protected:
+    //! @cond Doxygen_Suppress
+    PROJ_INTERNAL explicit JSONFormatter();
+    JSONFormatter(const JSONFormatter &other) = delete;
+
+    INLINED_MAKE_UNIQUE
+    //! @endcond
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Interface for an object that can be exported to JSON. */
+class PROJ_GCC_DLL IJSONExportable {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL virtual ~IJSONExportable();
+    //! @endcond
+
+    /** Builds a JSON representation. May throw a FormattingException */
+    PROJ_DLL std::string
+    exportToJSON(JSONFormatter *formatter) const; // throw(FormattingException)
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL virtual void
+        _exportToJSON(
+            JSONFormatter *formatter) const = 0; // throw(FormattingException)
+    //! @endcond
 };
 
 // ---------------------------------------------------------------------------

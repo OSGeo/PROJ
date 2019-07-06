@@ -361,7 +361,8 @@ using IdentifierNNPtr = util::nn<IdentifierPtr>;
  * originates from \ref ISO_19115
  */
 class PROJ_GCC_DLL Identifier : public util::BaseObject,
-                                public io::IWKTExportable {
+                                public io::IWKTExportable,
+                                public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL Identifier(const Identifier &other);
@@ -399,6 +400,9 @@ class PROJ_GCC_DLL Identifier : public util::BaseObject,
         canonicalizeName(const std::string &str);
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     //! @endcond

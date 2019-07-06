@@ -205,6 +205,34 @@ TEST(datum, prime_meridian_to_PROJString) {
 
 // ---------------------------------------------------------------------------
 
+TEST(datum, prime_meridian_to_JSON) {
+
+    EXPECT_EQ(
+        PrimeMeridian::GREENWICH->exportToJSON(JSONFormatter::create().get()),
+        "{\n"
+        "  \"type\": \"PrimeMeridian\",\n"
+        "  \"name\": \"Greenwich\",\n"
+        "  \"longitude\": {\n"
+        "    \"value\": 0,\n"
+        "    \"unit\": {\n"
+        "      \"type\": \"AngularUnit\",\n"
+        "      \"name\": \"degree\",\n"
+        "      \"conversion_factor\": 0.0174532925199433,\n"
+        "      \"id\": {\n"
+        "        \"authority\": \"EPSG\",\n"
+        "        \"code\": 9122\n"
+        "      }\n"
+        "    }\n"
+        "  },\n"
+        "  \"id\": {\n"
+        "    \"authority\": \"EPSG\",\n"
+        "    \"code\": 8901\n"
+        "  }\n"
+        "}");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(datum, datum_with_ANCHOR) {
     auto datum = GeodeticReferenceFrame::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS_1984 with anchor"),

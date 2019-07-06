@@ -104,6 +104,9 @@ class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
                                     const std::string &unitType = std::string())
         const; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(
+        io::JSONFormatter *formatter) const; // throw(io::FormattingException)
+
     PROJ_INTERNAL std::string exportToPROJString() const;
 
     PROJ_INTERNAL bool
@@ -328,6 +331,8 @@ class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
         void
         formatID(io::WKTFormatter *formatter) const;
     PROJ_INTERNAL void formatRemarks(io::WKTFormatter *formatter) const;
+
+    PROJ_INTERNAL void formatID(io::JSONFormatter *formatter) const;
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,

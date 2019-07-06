@@ -171,7 +171,8 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
  * \remark Implements PrimeMeridian from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
-                                         public io::IPROJStringExportable {
+                                         public io::IPROJStringExportable,
+                                         public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PrimeMeridian() override;
@@ -196,6 +197,9 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
             const override; // throw(FormattingException)
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     PROJ_INTERNAL bool

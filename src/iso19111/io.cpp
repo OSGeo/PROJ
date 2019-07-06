@@ -60,6 +60,7 @@
 
 #include "proj_constants.h"
 
+#include "proj_json_streaming_writer.hpp"
 #include "wkt1_parser.h"
 #include "wkt2_parser.h"
 
@@ -8015,6 +8016,92 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     return operation::SingleOperation::createPROJBased(props, projString,
                                                        nullptr, nullptr, {});
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct JSONFormatter::Private {
+    PROJ::CPLJSonStreamingWriter writer_{nullptr, nullptr};
+    DatabaseContextPtr dbContext_{};
+    std::string result_{};
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Constructs a new formatter.
+ *
+ * A formatter can be used only once (its internal state is mutated)
+ *
+ * @return new formatter.
+ */
+JSONFormatterNNPtr JSONFormatter::create( // cppcheck-suppress passedByValue
+    DatabaseContextPtr dbContext) {
+    auto ret = NN_NO_CHECK(JSONFormatter::make_unique<JSONFormatter>());
+    ret->d->dbContext_ = dbContext;
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Whether to use multi line output or not. */
+JSONFormatter &JSONFormatter::setMultiLine(bool multiLine) noexcept {
+    d->writer_.SetPrettyFormatting(multiLine);
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set number of spaces for each indentation level (defaults to 4).
+ */
+JSONFormatter &JSONFormatter::setIndentationWidth(int width) noexcept {
+    d->writer_.SetIndentationSize(width);
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+JSONFormatter::JSONFormatter() : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+JSONFormatter::~JSONFormatter() = default;
+
+// ---------------------------------------------------------------------------
+
+PROJ::CPLJSonStreamingWriter &JSONFormatter::writer() const {
+    return d->writer_;
+}
+
+// ---------------------------------------------------------------------------
+
+bool JSONFormatter::outputId() const { return true; }
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the serialized JSON.
+ */
+const std::string &JSONFormatter::toString() const {
+    return d->writer_.GetString();
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+IJSONExportable::~IJSONExportable() = default;
+
+// ---------------------------------------------------------------------------
+
+std::string IJSONExportable::exportToJSON(JSONFormatter *formatter) const {
+    _exportToJSON(formatter);
+    return formatter->toString();
+}
+
+//! @endcond
 
 } // namespace io
 NS_PROJ_END
