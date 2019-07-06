@@ -135,6 +135,80 @@ WKT1_ESRI:
 GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]
 
 
+JSON:
+{
+  "type": "GeographicCRS",
+  "name": "WGS 84",
+  "datum": {
+    "type": "GeodeticReferenceFrame",
+    "name": "World Geodetic System 1984",
+    "ellipsoid": {
+      "type": "Ellipsoid",
+      "name": "WGS 84",
+      "semi_major_axis": {
+        "value": 6378137,
+        "unit": {
+          "type": "LinearUnit",
+          "name": "metre",
+          "conversion_factor": 1
+        }
+      },
+      "inverse_flattening": 298.257223563
+    },
+    "prime_meridian": {
+      "type": "PrimeMeridian",
+      "name": "Greenwich",
+      "longitude": {
+        "value": 0,
+        "unit": {
+          "type": "AngularUnit",
+          "name": "degree",
+          "conversion_factor": 0.0174532925199433
+        }
+      }
+    }
+  },
+  "coordinate_system": {
+    "type": "CoordinateSystem",
+    "subtype": "ellipsoidal",
+    "axis": [
+      {
+        "type": "Axis",
+        "name": "Geodetic latitude",
+        "abbreviation": "Lat",
+        "direction": "north",
+        "unit": {
+          "type": "AngularUnit",
+          "name": "degree",
+          "conversion_factor": 0.0174532925199433
+        }
+      },
+      {
+        "type": "Axis",
+        "name": "Geodetic longitude",
+        "abbreviation": "Lon",
+        "direction": "east",
+        "unit": {
+          "type": "AngularUnit",
+          "name": "degree",
+          "conversion_factor": 0.0174532925199433
+        }
+      }
+    ]
+  },
+  "area": "World",
+  "bbox": {
+    "south_latitude": -90,
+    "west_longitude": -180,
+    "north_latitude": 90,
+    "east_longitude": 180
+  },
+  "id": {
+    "authority": "EPSG",
+    "code": 4326
+  }
+}
+
 Testing projinfo -s EPSG:4326 -t EPSG:32631
 Candidate operations found: 1
 -------------------------------------

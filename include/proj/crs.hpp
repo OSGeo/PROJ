@@ -211,7 +211,8 @@ using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
  * \remark Implements GeodeticCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
-                                 public io::IPROJStringExportable {
+                                 public io::IPROJStringExportable,
+                                 public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeodeticCRS() override;
@@ -271,6 +272,9 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
         const override; // throw(io::FormattingException)
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)
 
     PROJ_INTERNAL bool
@@ -351,6 +355,9 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
             io::PROJStringFormatter *formatter) const;
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)
 
     PROJ_DLL bool
@@ -546,7 +553,8 @@ using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
  * \remark Implements ProjectedCRS from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
-                                        public io::IPROJStringExportable {
+                                        public io::IPROJStringExportable,
+                                        public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ProjectedCRS() override;
@@ -572,6 +580,9 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_FOR_TEST ProjectedCRSNNPtr alterParametersLinearUnit(
         const common::UnitOfMeasure &unit, bool convertToNewUnit) const;
@@ -965,6 +976,9 @@ class PROJ_GCC_DLL DerivedGeodeticCRS final : public GeodeticCRS,
     //! @cond Doxygen_Suppress
     void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
                         //! @endcond
 
   protected:
@@ -1034,6 +1048,9 @@ class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS,
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
                         //! @endcond
 
   protected:

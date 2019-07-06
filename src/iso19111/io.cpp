@@ -8021,9 +8021,20 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
 
 //! @cond Doxygen_Suppress
 struct JSONFormatter::Private {
-    PROJ::CPLJSonStreamingWriter writer_{nullptr, nullptr};
+    CPLJSonStreamingWriter writer_{nullptr, nullptr};
     DatabaseContextPtr dbContext_{};
+
+    std::vector<bool> stackHasId_{false};
+    std::vector<bool> outputIdStack_{true};
+    bool allowIDInImmediateChild_ = false;
+
     std::string result_{};
+
+    // cppcheck-suppress functionStatic
+    void pushOutputId(bool outputIdIn) { outputIdStack_.push_back(outputIdIn); }
+
+    // cppcheck-suppress functionStatic
+    void popOutputId() { outputIdStack_.pop_back(); }
 };
 //! @endcond
 
@@ -8071,13 +8082,55 @@ JSONFormatter::~JSONFormatter() = default;
 
 // ---------------------------------------------------------------------------
 
-PROJ::CPLJSonStreamingWriter &JSONFormatter::writer() const {
-    return d->writer_;
+CPLJSonStreamingWriter &JSONFormatter::writer() const { return d->writer_; }
+
+// ---------------------------------------------------------------------------
+
+bool JSONFormatter::outputId() const { return d->outputIdStack_.back(); }
+
+// ---------------------------------------------------------------------------
+
+bool JSONFormatter::outputUsage() const {
+    return outputId() && d->outputIdStack_.size() == 2;
 }
 
 // ---------------------------------------------------------------------------
 
-bool JSONFormatter::outputId() const { return true; }
+void JSONFormatter::setAllowIDInImmediateChild() {
+    d->allowIDInImmediateChild_ = true;
+}
+
+// ---------------------------------------------------------------------------
+
+JSONFormatter::ObjectContext::ObjectContext(JSONFormatter &formatter,
+                                            const char *objectType, bool hasId)
+    : m_formatter(formatter) {
+    m_formatter.d->writer_.StartObj();
+    if (objectType) {
+        m_formatter.d->writer_.AddObjKey("type");
+        m_formatter.d->writer_.Add(objectType);
+    }
+    // All intermediate nodes shouldn't have ID if a parent has an ID
+    // unless explicitly enabled.
+    if (m_formatter.d->allowIDInImmediateChild_) {
+        m_formatter.d->pushOutputId(m_formatter.d->outputIdStack_[0]);
+        m_formatter.d->allowIDInImmediateChild_ = false;
+    } else {
+        m_formatter.d->pushOutputId(m_formatter.d->outputIdStack_[0] &&
+                                    !m_formatter.d->stackHasId_.back());
+    }
+
+    m_formatter.d->stackHasId_.push_back(hasId ||
+                                         m_formatter.d->stackHasId_.back());
+}
+
+// ---------------------------------------------------------------------------
+
+JSONFormatter::ObjectContext::~ObjectContext() {
+    m_formatter.d->writer_.EndObj();
+    m_formatter.d->stackHasId_.pop_back();
+    m_formatter.d->popOutputId();
+}
 
 //! @endcond
 

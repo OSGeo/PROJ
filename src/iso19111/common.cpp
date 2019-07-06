@@ -243,7 +243,9 @@ void UnitOfMeasure::_exportToJSON(
     JSONFormatter *formatter) const // throw(FormattingException)
 {
     auto &writer = formatter->writer();
-    PROJ::CPLJSonStreamingWriter::ObjectContext objContext(writer);
+    const auto &l_codeSpace = codeSpace();
+    auto objContext(
+        formatter->MakeObjectContext(nullptr, !l_codeSpace.empty()));
     writer.AddObjKey("type");
     const auto l_type = type();
     if (l_type == Type::LINEAR) {
@@ -268,10 +270,9 @@ void UnitOfMeasure::_exportToJSON(
     writer.AddObjKey("conversion_factor");
     writer.Add(factor, 15);
 
-    const auto &l_codeSpace = codeSpace();
     if (!l_codeSpace.empty() && formatter->outputId()) {
         writer.AddObjKey("id");
-        PROJ::CPLJSonStreamingWriter::ObjectContext idContext(writer);
+        auto idContext(formatter->MakeObjectContext(nullptr, false));
         writer.AddObjKey("authority");
         writer.Add(l_codeSpace);
         writer.AddObjKey("code");
@@ -871,10 +872,20 @@ void IdentifiedObject::formatID(JSONFormatter *formatter) const {
         ids.front()->_exportToJSON(formatter);
     } else if (!ids.empty()) {
         writer.AddObjKey("ids");
-        PROJ::CPLJSonStreamingWriter::ArrayContext arrayContext(writer);
+        auto arrayContext(writer.MakeArrayContext());
         for (const auto &id : ids) {
             id->_exportToJSON(formatter);
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void IdentifiedObject::formatRemarks(JSONFormatter *formatter) const {
+    if (!remarks().empty()) {
+        auto &writer = formatter->writer();
+        writer.AddObjKey("remarks");
+        writer.Add(remarks());
     }
 }
 
@@ -1031,6 +1042,46 @@ void ObjectDomain::_exportToWKT(WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void ObjectDomain::_exportToJSON(JSONFormatter *formatter) const {
+    auto &writer = formatter->writer();
+    if (d->scope_.has_value()) {
+        writer.AddObjKey("scope");
+        writer.Add(*(d->scope_));
+    }
+    if (d->domainOfValidity_) {
+        if (d->domainOfValidity_->description().has_value()) {
+            writer.AddObjKey("area");
+            writer.Add(*(d->domainOfValidity_->description()));
+        }
+        if (d->domainOfValidity_->geographicElements().size() == 1) {
+            const auto bbox = dynamic_cast<const GeographicBoundingBox *>(
+                d->domainOfValidity_->geographicElements()[0].get());
+            if (bbox) {
+                writer.AddObjKey("bbox");
+                auto bboxContext(writer.MakeObjectContext());
+                writer.AddObjKey("south_latitude");
+                writer.Add(bbox->southBoundLatitude(), 15);
+                writer.AddObjKey("west_longitude");
+                writer.Add(bbox->westBoundLongitude(), 15);
+                writer.AddObjKey("north_latitude");
+                writer.Add(bbox->northBoundLatitude(), 15);
+                writer.AddObjKey("east_longitude");
+                writer.Add(bbox->eastBoundLongitude(), 15);
+            }
+        }
+        if (d->domainOfValidity_->verticalElements().size() == 1) {
+            // TODO
+        }
+        if (d->domainOfValidity_->temporalElements().size() == 1) {
+            // TODO
+        }
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 bool ObjectDomain::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1158,6 +1209,31 @@ void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
     if (isWKT2) {
         formatRemarks(formatter);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+void ObjectUsage::baseExportToJSON(JSONFormatter *formatter) const {
+
+    auto &writer = formatter->writer();
+    if (formatter->outputUsage()) {
+        const auto &l_domains = domains();
+        if (l_domains.size() == 1) {
+            l_domains[0]->_exportToJSON(formatter);
+        } else if (!l_domains.empty()) {
+            writer.AddObjKey("usages");
+            auto arrayContext(writer.MakeArrayContext(false));
+            for (const auto &domain : l_domains) {
+                auto objContext(writer.MakeObjectContext());
+                domain->_exportToJSON(formatter);
+            }
+        }
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+    formatRemarks(formatter);
 }
 
 // ---------------------------------------------------------------------------

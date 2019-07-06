@@ -483,11 +483,30 @@ class PROJ_GCC_DLL JSONFormatter {
     PROJ_PRIVATE :
 
         //! @cond Doxygen_Suppress
-        PROJ_INTERNAL PROJ::CPLJSonStreamingWriter &
+        PROJ_INTERNAL CPLJSonStreamingWriter &
         writer() const;
+
+    struct ObjectContext {
+        JSONFormatter &m_formatter;
+
+        ObjectContext(const ObjectContext &) = delete;
+        ObjectContext(ObjectContext &&) = default;
+
+        explicit ObjectContext(JSONFormatter &formatter, const char *objectType,
+                               bool hasId);
+        ~ObjectContext();
+    };
+    PROJ_INTERNAL inline ObjectContext MakeObjectContext(const char *objectType,
+                                                         bool hasId) {
+        return ObjectContext(*this, objectType, hasId);
+    }
+
+    PROJ_INTERNAL void setAllowIDInImmediateChild();
 
     // cppcheck-suppress functionStatic
     PROJ_INTERNAL bool outputId() const;
+
+    PROJ_INTERNAL bool outputUsage() const;
 
     //! @endcond
 

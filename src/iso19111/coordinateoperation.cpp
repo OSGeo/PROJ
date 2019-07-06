@@ -991,6 +991,24 @@ void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void OperationMethod::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext("OperationMethod",
+                                                    !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    writer.Add(nameStr());
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 bool OperationMethod::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1162,6 +1180,35 @@ void OperationParameterValue::_exportToWKT(io::WKTFormatter *formatter,
         parameter()->formatID(formatter);
     }
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void OperationParameterValue::_exportToJSON(
+    io::JSONFormatter *formatter) const {
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext(
+        "ParameterValue", !parameter()->identifiers().empty()));
+
+    writer.AddObjKey("name");
+    writer.Add(parameter()->nameStr());
+
+    const auto &l_value(parameterValue());
+    if (l_value->type() == ParameterValue::Type::MEASURE) {
+        writer.AddObjKey("value");
+        writer.Add(l_value->value().value(), 15);
+        writer.AddObjKey("unit");
+        l_value->value().unit()._exportToJSON(formatter);
+    } else if (l_value->type() == ParameterValue::Type::FILENAME) {
+        writer.AddObjKey("value");
+        writer.Add(l_value->valueFile());
+    }
+
+    if (formatter->outputId()) {
+        parameter()->formatID(formatter);
+    }
 }
 //! @endcond
 
@@ -5405,6 +5452,44 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->leave();
     }
 }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void Conversion::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("Conversion", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("method");
+    formatter->setAllowIDInImmediateChild();
+    method()->_exportToJSON(formatter);
+
+    writer.AddObjKey("parameters");
+    {
+        auto parametersContext(writer.MakeArrayContext(false));
+        for (const auto &genOpParamvalue : parameterValues()) {
+            formatter->setAllowIDInImmediateChild();
+            genOpParamvalue->_exportToJSON(formatter);
+        }
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------

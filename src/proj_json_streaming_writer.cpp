@@ -56,8 +56,7 @@ static std::string CPLSPrintf(const char* fmt, ...)
     return res;
 }
 
-namespace PROJ
-{
+NS_PROJ_START
 
 CPLJSonStreamingWriter::CPLJSonStreamingWriter(
                     SerializationFuncType pfnSerializationFunc,
@@ -292,6 +291,6 @@ void CPLJSonStreamingWriter::AddNull()
     Print("null");
 }
 
-} // namespace PROJ
+NS_PROJ_END
 
 /*! @endcond */

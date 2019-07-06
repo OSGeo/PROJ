@@ -93,6 +93,9 @@ struct Datum::Private {
 
     // cppcheck-suppress functionStatic
     void exportAnchorDefinition(io::WKTFormatter *formatter) const;
+
+    // cppcheck-suppress functionStatic
+    void exportAnchorDefinition(io::JSONFormatter *formatter) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -102,6 +105,17 @@ void Datum::Private::exportAnchorDefinition(io::WKTFormatter *formatter) const {
         formatter->startNode(io::WKTConstants::ANCHOR, false);
         formatter->addQuotedString(*anchorDefinition);
         formatter->endNode();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void Datum::Private::exportAnchorDefinition(
+    io::JSONFormatter *formatter) const {
+    if (anchorDefinition) {
+        auto &writer = formatter->writer();
+        writer.AddObjKey("anchor");
+        writer.Add(*anchorDefinition);
     }
 }
 
@@ -352,10 +366,8 @@ void PrimeMeridian::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(FormattingException)
 {
     auto &writer = formatter->writer();
-    PROJ::CPLJSonStreamingWriter::ObjectContext objectContext(writer);
-
-    writer.AddObjKey("type");
-    writer.Add("PrimeMeridian");
+    auto objectContext(
+        formatter->MakeObjectContext("PrimeMeridian", !identifiers().empty()));
 
     writer.AddObjKey("name");
     std::string l_name =
@@ -365,7 +377,7 @@ void PrimeMeridian::_exportToJSON(
     const auto &l_long = longitude();
     writer.AddObjKey("longitude");
     {
-        PROJ::CPLJSonStreamingWriter::ObjectContext longitudeContext(writer);
+        auto longitudeContext(formatter->MakeObjectContext(nullptr, false));
         writer.AddObjKey("value");
         writer.Add(l_long.value(), 15);
 
@@ -803,6 +815,60 @@ void Ellipsoid::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void Ellipsoid::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("Ellipsoid", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    const auto &semiMajor = semiMajorAxis();
+    const auto &semiMajorUnit = semiMajor.unit();
+    writer.AddObjKey(isSphere() ? "radius" : "semi_major_axis");
+    {
+        auto objContext(formatter->MakeObjectContext(nullptr, false));
+        writer.AddObjKey("value");
+        writer.Add(semiMajor.value(), 15);
+
+        writer.AddObjKey("unit");
+        semiMajorUnit._exportToJSON(formatter);
+    }
+
+    if (!isSphere()) {
+        const auto &l_inverseFlattening = inverseFlattening();
+        if (l_inverseFlattening.has_value()) {
+            writer.AddObjKey("inverse_flattening");
+            writer.Add(l_inverseFlattening->getSIValue(), 15);
+        } else {
+            writer.AddObjKey("semi_minor_axis");
+            {
+                auto objContext(formatter->MakeObjectContext(nullptr, false));
+                writer.AddObjKey("value");
+                writer.Add(semiMinorAxis()->value(), 15);
+
+                writer.AddObjKey("unit");
+                semiMinorAxis()->unit()._exportToJSON(formatter);
+            }
+        }
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
                                           std::string &ellpsName) const {
     const double a = semiMajorAxis().getSIValue();
@@ -1182,6 +1248,36 @@ void GeodeticReferenceFrame::_exportToWKT(
     }
     // the PRIMEM is exported as a child of the CRS
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void GeodeticReferenceFrame::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto objectContext(formatter->MakeObjectContext("GeodeticReferenceFrame",
+                                                    !identifiers().empty()));
+    auto &writer = formatter->writer();
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    Datum::getPrivate()->exportAnchorDefinition(formatter);
+
+    writer.AddObjKey("ellipsoid");
+    ellipsoid()->_exportToJSON(formatter);
+
+    writer.AddObjKey("prime_meridian");
+    primeMeridian()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 

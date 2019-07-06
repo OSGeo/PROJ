@@ -67,6 +67,7 @@ osgeo::proj::common::ObjectDomain::~ObjectDomain()
 osgeo::proj::common::ObjectDomain::ObjectDomain(osgeo::proj::common::ObjectDomain const&)
 osgeo::proj::common::ObjectDomain::ObjectDomain(osgeo::proj::util::optional<std::string> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&)
 osgeo::proj::common::ObjectDomain::scope() const
+osgeo::proj::common::ObjectUsage::baseExportToJSON(osgeo::proj::io::JSONFormatter*) const
 osgeo::proj::common::ObjectUsage::baseExportToWKT(osgeo::proj::io::WKTFormatter*) const
 osgeo::proj::common::ObjectUsage::domains() const
 osgeo::proj::common::ObjectUsage::_isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion) const
@@ -339,6 +340,8 @@ osgeo::proj::io::IWKTExportable::exportToWKT(osgeo::proj::io::WKTFormatter*) con
 osgeo::proj::io::IWKTExportable::~IWKTExportable()
 osgeo::proj::io::JSONFormatter::create(std::shared_ptr<osgeo::proj::io::DatabaseContext>)
 osgeo::proj::io::JSONFormatter::~JSONFormatter()
+osgeo::proj::io::JSONFormatter::ObjectContext::~ObjectContext()
+osgeo::proj::io::JSONFormatter::ObjectContext::ObjectContext(osgeo::proj::io::JSONFormatter&, char const*, bool)
 osgeo::proj::io::JSONFormatter::setIndentationWidth(int)
 osgeo::proj::io::JSONFormatter::setMultiLine(bool)
 osgeo::proj::io::JSONFormatter::toString() const

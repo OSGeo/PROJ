@@ -291,6 +291,7 @@ struct MethodMapping;
  */
 class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
                                            public io::IWKTExportable,
+                                           public io::IJSONExportable,
                                            public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
@@ -298,6 +299,9 @@ class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override = 0; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override = 0; // throw(FormattingException)
 
     PROJ_INTERNAL bool _isEquivalentTo(
         const util::IComparable *other,
@@ -442,6 +446,9 @@ class PROJ_GCC_DLL OperationParameterValue final
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
@@ -481,7 +488,8 @@ using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
  *
  * \remark Implements OperationMethod from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
+class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject,
+                                     public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationMethod() override;
@@ -506,6 +514,9 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
@@ -838,7 +849,8 @@ EPSG:8833
 
 */
 
-class PROJ_GCC_DLL Conversion : public SingleOperation {
+class PROJ_GCC_DLL Conversion : public SingleOperation,
+                                public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Conversion() override;
@@ -1314,6 +1326,9 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         PROJ_INTERNAL void
         _exportToPROJString(io::PROJStringFormatter *formatter)
             const override; // throw(FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL const char *getESRIMethodName() const;
 

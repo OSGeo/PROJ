@@ -36,8 +36,8 @@
 
 #define CPL_DLL
 
-namespace PROJ
-{
+#include "proj/util.hpp"
+NS_PROJ_START
 
 typedef std::int64_t GIntBig;
 typedef std::uint64_t GUInt64;
@@ -102,10 +102,15 @@ public:
     struct CPL_DLL ObjectContext
     {
         CPLJSonStreamingWriter& m_serializer;
-        explicit ObjectContext(CPLJSonStreamingWriter& serializer):
+
+        ObjectContext(const ObjectContext &) = delete;
+        ObjectContext(ObjectContext&&) = default;
+
+        explicit inline ObjectContext(CPLJSonStreamingWriter& serializer):
             m_serializer(serializer) { m_serializer.StartObj(); }
         ~ObjectContext() { m_serializer.EndObj(); }
     };
+    inline ObjectContext MakeObjectContext() { return ObjectContext(*this); }
 
     void StartArray();
     void EndArray();
@@ -115,7 +120,10 @@ public:
         bool m_bForceSingleLine;
         bool m_bNewLineEnabledBackup;
 
-        ArrayContext(CPLJSonStreamingWriter& serializer,
+        ArrayContext(const ArrayContext &) = delete;
+        ArrayContext(ArrayContext&&) = default;
+
+        inline explicit ArrayContext(CPLJSonStreamingWriter& serializer,
                      bool bForceSingleLine = false):
             m_serializer(serializer),
             m_bForceSingleLine(bForceSingleLine),
@@ -133,12 +141,14 @@ public:
                 m_serializer.SetNewline(m_bNewLineEnabledBackup);
         }
     };
+    inline ArrayContext MakeArrayContext(bool bForceSingleLine = false)
+        { return ArrayContext(*this, bForceSingleLine); }
 
     bool GetNewLine() const { return m_bNewLineEnabled; }
     void SetNewline(bool bEnabled) { m_bNewLineEnabled = bEnabled; }
 };
 
-} // namespace PROJ
+NS_PROJ_END
 
 /*! @endcond */
 

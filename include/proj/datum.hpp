@@ -247,7 +247,8 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
  * \remark Implements Ellipsoid from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
-                                     public io::IPROJStringExportable {
+                                     public io::IPROJStringExportable,
+                                     public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Ellipsoid() override;
@@ -303,6 +304,9 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
         PROJ_INTERNAL void
         _exportToWKT(io::WKTFormatter *formatter)
             const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(io::FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
@@ -375,7 +379,8 @@ using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
  *
  * \remark Implements GeodeticReferenceFrame from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
+class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum,
+                                            public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeodeticReferenceFrame() override;
@@ -402,6 +407,9 @@ class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
