@@ -94,6 +94,7 @@ The updated Java interface will be dependent on
 Java 11 is chosen because it is a long time support release that will be
 supported at least until late 2022.
 
+
 Documentation
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -136,6 +137,12 @@ with the Continuous Integration setup.
 
 The new code will be placed in a subfolder in the repository called ``java/``.
 The existing ``jniwrap/`` folder will be removed.
+
+The Java interface will only make use of the public API, either
+using the C API available in ``proj..h`` and ``proj_experimental.h`` or the
+C++ API found in ``include\proj``. No internal header files will be used. If
+necessary, functions that are currently only available internally will be
+lifted to the public API.
 
 Adoption status
 -------------------------------------------------------------------------------
