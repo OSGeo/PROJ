@@ -7,7 +7,7 @@ PROJ RFC 4: PROJ Java Native Interface overhaul
 :Author: Kristian Evers, Martin Desruisseaux
 :Contact: kreve@sdfe.dk, martin.desruisseaux@geomatys.com
 :Status: Draft
-:Last Updated: 2019-07-08
+:Last Updated: 2019-07-16
 
 Summary
 -------------------------------------------------------------------------------
@@ -20,20 +20,31 @@ is based on GeoAPI and includes the new PROJ functionality described in RFC3.
 Background
 -------------------------------------------------------------------------------
 
-The PROJ Java Native Interface exposes the `proj_api.h` API which was
-deprecated with PROJ 6 and is scheduled for removal in PROJ 7. Consequently the
-PROJ JNI bindings should be either removed or updated. Java bindings has been
-included in PROJ since version 4.4.9 (dated October 30, 2004) so it is a
-reasonable expectation from users that the JNI bindings are available in the
-future as well.
+The PROJ Java Native Interface exposes the ``proj_api.h`` API which was deprecated
+with PROJ 6 and is scheduled for removal in PROJ 7. Java bindings has been
+included in PROJ since version 4.4.9 (dated October 30, 2004). The JNI bindings
+has not been given much attention for many years. They have been maintained
+sporadically leaving the code in less than ideal shape. Currently the JNI
+bindings target Java 8 which reached end of life in January 2019 (for the free
+version).
 
-The JNI bindings has not been given much attention for many years. They have
-been maintained sporadically leaving the code in less than ideal shape.
-Currently the JNI bindings target Java 8 which reached end of life in January
-2019 (for the free version).
+With the above in mind, it is clear that action is needed. Either the Java
+interface is removed altogether in PROJ 7 or it is updated to use modern tools
+and based on the new ISO191111 compatible PROJ API. This RFC proposes the latter.
+Updating the Java bindings is considered the best option because
 
-With the above in mind, it is clear that an update to the PROJ Java interface
-is needed.
+1. PROJ has included Java bindings for 15 years, hence it is reasonable that
+   users expect them to be there in the future as well
+2. The Java interface will act as a demonstration of how to map another language
+   to the PROJ API
+3. The PROJ Java bindings will act as a reference implementation of GeoAPI 4
+   which will expose PROJ to a larger audience and in turn increase the chances of
+   contributions from the wider community
+
+Unfortunately this also increases the maintenance burden on an area of PROJ
+that historically has not been well-maintained and it adds several (optional) dependencies to the project. While this is not to be taken lightly, the authors
+of this RFC assess that the benefits outweigh the drawbacks.
+
 
 Solution
 -------------------------------------------------------------------------------
