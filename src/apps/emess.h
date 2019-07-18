@@ -13,11 +13,6 @@ struct EMESS {
 /* for emess procedure */
 struct EMESS emess_dat = { nullptr, nullptr, 0 };
 
-#ifdef sun /* Archaic SunOs 4.1.1, etc. */
-extern char *sys_errlist[];
-#define strerror(n) (sys_errlist[n])
-#endif
-
 #else	/* for for calling procedures */
 
 extern struct EMESS emess_dat;
