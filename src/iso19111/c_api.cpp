@@ -6578,6 +6578,28 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set whether transformations that are superseded (but not deprecated)
+ * should be discarded.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
+ * @param discard superseded crs or not
+ */
+void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    int discard) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {        
+        factory_ctx->operationContext->setDiscardSuperseded(discard != 0);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+}
+
+
+// ---------------------------------------------------------------------------
+
 /** \brief Find a list of CoordinateOperation from source_crs to target_crs.
  *
  * The operations are sorted with the most relevant ones first: by

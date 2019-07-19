@@ -941,6 +941,11 @@ void PROJ_DLL proj_operation_factory_context_set_allowed_intermediate_crs(
     PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
     const char* const *list_of_auth_name_codes);
 
+void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
+    PJ_CONTEXT *ctx,
+    PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    int discard);
+
 /* ------------------------------------------------------------------------- */
 
 
