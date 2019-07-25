@@ -210,8 +210,9 @@ INSERT INTO "vertical_crs" VALUES('EPSG','8378','EPSG example wellbore local ver
 INSERT INTO "vertical_crs" VALUES('EPSG','8434','Macao height',NULL,NULL,'EPSG','6499','EPSG','1210','EPSG','1147',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8675','N43 height',NULL,NULL,'EPSG','6499','EPSG','1213','EPSG','4522',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8690','SVS2010 height',NULL,NULL,'EPSG','6499','EPSG','1215','EPSG','3307',0);
-INSERT INTO "vertical_crs" VALUES('EPSG','8691','SRB_VRS12 height',NULL,NULL,'EPSG','6499','EPSG','1216','EPSG','3534',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','8691','SRB_VRS12 height',NULL,NULL,'EPSG','6499','EPSG','1216','EPSG','4543',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8841','MVGC height',NULL,NULL,'EPSG','6499','EPSG','1219','EPSG','3303',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8897','EPSG example wellbore local vertical CRS (ft)',NULL,NULL,'EPSG','1050','EPSG','1205','EPSG','4393',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8904','TWVD 2001 height',NULL,NULL,'EPSG','6499','EPSG','1224','EPSG','3982',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8911','DACR52 height',NULL,NULL,'EPSG','6499','EPSG','1226','EPSG','3232',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9130','IGN 2008 LD height',NULL,NULL,'EPSG','6499','EPSG','1250','EPSG','2893',0);
