@@ -74,10 +74,11 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1205','EPSG example wellbore vertica
 INSERT INTO "vertical_datum" VALUES('EPSG','1210','Macao Height Datum',NULL,NULL,'EPSG','1147',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1213','Helsinki 1943',NULL,NULL,'EPSG','4522',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1215','Slovenian Vertical System 2010',NULL,NULL,'EPSG','3307',0);
-INSERT INTO "vertical_datum" VALUES('EPSG','1216','Serbian Vertical Reference System 2012',NULL,NULL,'EPSG','3534',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1216','Serbian Vertical Reference System 2012',NULL,NULL,'EPSG','4543',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1219','MOMRA Vertical Geodetic Control',NULL,NULL,'EPSG','3303',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1224','Taiwan Vertical Datum 2001',NULL,NULL,'EPSG','3982',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1226','Datum Altimetrico de Costa Rica 1952',NULL,NULL,'EPSG','3232',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1250','IGN 2008 LD',NULL,NULL,'EPSG','2893',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,'EPSG','1262',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,NULL,'EPSG','2792',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5102','National Geodetic Vertical Datum 1929',NULL,NULL,'EPSG','1323',0);
