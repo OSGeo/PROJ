@@ -164,5 +164,6 @@ add_subdirectory(nad)
 add_subdirectory(src)
 add_subdirectory(man)
 add_subdirectory(cmake)
-add_subdirectory(test)
-
+if(PROJ_TESTS)
+  add_subdirectory(test)
+endif(PROJ_TESTS)
