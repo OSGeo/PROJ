@@ -12,7 +12,7 @@
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
 # For historic reasons, the CMake PROJECT-NAME is PROJ4
-project(PROJ4 LANGUAGES C CXX)
+project(PROJ4 C CXX)
 set(PROJECT_INTERN_NAME PROJ)
 
 if (NOT CMAKE_VERSION VERSION_LESS 3.1)
@@ -164,5 +164,6 @@ add_subdirectory(nad)
 add_subdirectory(src)
 add_subdirectory(man)
 add_subdirectory(cmake)
-add_subdirectory(test)
-
+if(PROJ_TESTS)
+  add_subdirectory(test)
+endif(PROJ_TESTS)
