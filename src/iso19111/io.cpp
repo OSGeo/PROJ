@@ -8027,6 +8027,7 @@ struct JSONFormatter::Private {
     std::vector<bool> stackHasId_{false};
     std::vector<bool> outputIdStack_{true};
     bool allowIDInImmediateChild_ = false;
+    bool omitTypeInImmediateChild_ = false;
 
     std::string result_{};
 
@@ -8102,14 +8103,21 @@ void JSONFormatter::setAllowIDInImmediateChild() {
 
 // ---------------------------------------------------------------------------
 
+void JSONFormatter::setOmitTypeInImmediateChild() {
+    d->omitTypeInImmediateChild_ = true;
+}
+
+// ---------------------------------------------------------------------------
+
 JSONFormatter::ObjectContext::ObjectContext(JSONFormatter &formatter,
                                             const char *objectType, bool hasId)
     : m_formatter(formatter) {
     m_formatter.d->writer_.StartObj();
-    if (objectType) {
+    if (objectType && !m_formatter.d->omitTypeInImmediateChild_) {
         m_formatter.d->writer_.AddObjKey("type");
         m_formatter.d->writer_.Add(objectType);
     }
+    m_formatter.d->omitTypeInImmediateChild_ = false;
     // All intermediate nodes shouldn't have ID if a parent has an ID
     // unless explicitly enabled.
     if (m_formatter.d->allowIDInImmediateChild_) {

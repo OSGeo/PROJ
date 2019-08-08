@@ -111,8 +111,8 @@
           "properties": {
             "type": { "type": "string", "enum": ["Ellipsoid"] },
             "name": { "type": "string" },
-            "semi_major_axis": { "$ref": "#/definitions/value_and_unit" },
-            "semi_minor_axis": { "$ref": "#/definitions/value_and_unit" },
+            "semi_major_axis": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
+            "semi_minor_axis": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
             "id": { "$ref": "#/definitions/id" }
           },
           "required" : [ "name", "semi_major_axis", "semi_minor_axis" ],
@@ -122,7 +122,7 @@
           "properties": {
             "type": { "type": "string", "enum": ["Ellipsoid"] },
             "name": { "type": "string" },
-            "semi_major_axis": { "$ref": "#/definitions/value_and_unit" },
+            "semi_major_axis": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
             "inverse_flattening": { "type": "number" },
             "id": { "$ref": "#/definitions/id" }
           },
@@ -133,7 +133,7 @@
           "properties": {
             "type": { "type": "string", "enum": ["Ellipsoid"] },
             "name": { "type": "string" },
-            "radius": { "$ref": "#/definitions/value_and_unit" },
+            "radius": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
             "id": { "$ref": "#/definitions/id" }
           },
           "required" : [ "name", "radius" ],
@@ -255,17 +255,25 @@
     },
 
     "unit": {
-      "type": "object",
-      "properties": {
-        "type": { "type": "string",
-                  "enum": ["LinearUnit", "AngularUnit", "ScaleUnit",
-                           "TimeUnit", "ParametricUnit", "Unit"] },
-        "name": { "type": "string" },
-        "conversion_factor": { "type": "number" },
-        "id": { "$ref": "#/definitions/id" }
-       },
-       "required" : [ "type", "name" ],
-       "additionalProperties": false
+      "oneOf": [
+      {
+        "type": "string",
+        "enum": ["metre", "degree", "unity"]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string",
+                    "enum": ["LinearUnit", "AngularUnit", "ScaleUnit",
+                             "TimeUnit", "ParametricUnit", "Unit"] },
+          "name": { "type": "string" },
+          "conversion_factor": { "type": "number" },
+          "id": { "$ref": "#/definitions/id" }
+         },
+         "required" : [ "type", "name" ],
+         "additionalProperties": false
+      }
+      ]
     },
 
     "usages": {
@@ -288,6 +296,13 @@
       },
       "required" : [ "value", "unit" ],
       "additionalProperties": false
+    },
+
+    "value_in_metre_or_value_and_unit": {
+      "oneOf": [
+        { "type": "number" },
+        { "$ref": "#/definitions/value_and_unit" }
+      ]
     }
 
   }

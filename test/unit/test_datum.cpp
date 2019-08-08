@@ -212,19 +212,30 @@ TEST(datum, prime_meridian_to_JSON) {
         "{\n"
         "  \"type\": \"PrimeMeridian\",\n"
         "  \"name\": \"Greenwich\",\n"
-        "  \"longitude\": {\n"
-        "    \"value\": 0,\n"
-        "    \"unit\": {\n"
-        "      \"type\": \"AngularUnit\",\n"
-        "      \"name\": \"degree\",\n"
-        "      \"conversion_factor\": 0.0174532925199433\n"
-        "    }\n"
-        "  },\n"
+        "  \"longitude\": 0,\n"
         "  \"id\": {\n"
         "    \"authority\": \"EPSG\",\n"
         "    \"code\": 8901\n"
         "  }\n"
         "}");
+
+    EXPECT_EQ(PrimeMeridian::PARIS->exportToJSON(JSONFormatter::create().get()),
+              "{\n"
+              "  \"type\": \"PrimeMeridian\",\n"
+              "  \"name\": \"Paris\",\n"
+              "  \"longitude\": {\n"
+              "    \"value\": 2.5969213,\n"
+              "    \"unit\": {\n"
+              "      \"type\": \"AngularUnit\",\n"
+              "      \"name\": \"grad\",\n"
+              "      \"conversion_factor\": 0.015707963267949\n"
+              "    }\n"
+              "  },\n"
+              "  \"id\": {\n"
+              "    \"authority\": \"EPSG\",\n"
+              "    \"code\": 8903\n"
+              "  }\n"
+              "}");
 }
 
 // ---------------------------------------------------------------------------

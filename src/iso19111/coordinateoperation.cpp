@@ -1200,7 +1200,14 @@ void OperationParameterValue::_exportToJSON(
         writer.AddObjKey("value");
         writer.Add(l_value->value().value(), 15);
         writer.AddObjKey("unit");
-        l_value->value().unit()._exportToJSON(formatter);
+        const auto &l_unit(l_value->value().unit());
+        if (l_unit == common::UnitOfMeasure::METRE ||
+            l_unit == common::UnitOfMeasure::DEGREE ||
+            l_unit == common::UnitOfMeasure::SCALE_UNITY) {
+            writer.Add(l_unit.name());
+        } else {
+            l_unit._exportToJSON(formatter);
+        }
     } else if (l_value->type() == ParameterValue::Type::FILENAME) {
         writer.AddObjKey("value");
         writer.Add(l_value->valueFile());
@@ -5473,6 +5480,7 @@ void Conversion::_exportToJSON(
     }
 
     writer.AddObjKey("method");
+    formatter->setOmitTypeInImmediateChild();
     formatter->setAllowIDInImmediateChild();
     method()->_exportToJSON(formatter);
 
@@ -5481,6 +5489,7 @@ void Conversion::_exportToJSON(
         auto parametersContext(writer.MakeArrayContext(false));
         for (const auto &genOpParamvalue : parameterValues()) {
             formatter->setAllowIDInImmediateChild();
+            formatter->setOmitTypeInImmediateChild();
             genOpParamvalue->_exportToJSON(formatter);
         }
     }

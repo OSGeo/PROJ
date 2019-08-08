@@ -503,6 +503,8 @@ class PROJ_GCC_DLL JSONFormatter {
 
     PROJ_INTERNAL void setAllowIDInImmediateChild();
 
+    PROJ_INTERNAL void setOmitTypeInImmediateChild();
+
     // cppcheck-suppress functionStatic
     PROJ_INTERNAL bool outputId() const;
 

@@ -376,12 +376,13 @@ void PrimeMeridian::_exportToJSON(
 
     const auto &l_long = longitude();
     writer.AddObjKey("longitude");
-    {
+    const auto &unit = l_long.unit();
+    if (unit == common::UnitOfMeasure::DEGREE) {
+        writer.Add(l_long.value(), 15);
+    } else {
         auto longitudeContext(formatter->MakeObjectContext(nullptr, false));
         writer.AddObjKey("value");
         writer.Add(l_long.value(), 15);
-
-        const auto &unit = l_long.unit();
         writer.AddObjKey("unit");
         unit._exportToJSON(formatter);
     }
@@ -834,7 +835,9 @@ void Ellipsoid::_exportToJSON(
     const auto &semiMajor = semiMajorAxis();
     const auto &semiMajorUnit = semiMajor.unit();
     writer.AddObjKey(isSphere() ? "radius" : "semi_major_axis");
-    {
+    if (semiMajorUnit == common::UnitOfMeasure::METRE) {
+        writer.Add(semiMajor.value(), 15);
+    } else {
         auto objContext(formatter->MakeObjectContext(nullptr, false));
         writer.AddObjKey("value");
         writer.Add(semiMajor.value(), 15);
@@ -850,13 +853,17 @@ void Ellipsoid::_exportToJSON(
             writer.Add(l_inverseFlattening->getSIValue(), 15);
         } else {
             writer.AddObjKey("semi_minor_axis");
-            {
+            const auto &l_semiMinorAxis(semiMinorAxis());
+            const auto &semiMinorAxisUnit(l_semiMinorAxis->unit());
+            if (semiMinorAxisUnit == common::UnitOfMeasure::METRE) {
+                writer.Add(l_semiMinorAxis->value(), 15);
+            } else {
                 auto objContext(formatter->MakeObjectContext(nullptr, false));
                 writer.AddObjKey("value");
-                writer.Add(semiMinorAxis()->value(), 15);
+                writer.Add(l_semiMinorAxis->value(), 15);
 
                 writer.AddObjKey("unit");
-                semiMinorAxis()->unit()._exportToJSON(formatter);
+                semiMinorAxisUnit._exportToJSON(formatter);
             }
         }
     }
@@ -1272,10 +1279,15 @@ void GeodeticReferenceFrame::_exportToJSON(
     Datum::getPrivate()->exportAnchorDefinition(formatter);
 
     writer.AddObjKey("ellipsoid");
+    formatter->setOmitTypeInImmediateChild();
     ellipsoid()->_exportToJSON(formatter);
 
-    writer.AddObjKey("prime_meridian");
-    primeMeridian()->_exportToJSON(formatter);
+    const auto &l_primeMeridian(primeMeridian());
+    if (l_primeMeridian->nameStr() != "Greenwich") {
+        writer.AddObjKey("prime_meridian");
+        formatter->setOmitTypeInImmediateChild();
+        primeMeridian()->_exportToJSON(formatter);
+    }
 
     ObjectUsage::baseExportToJSON(formatter);
 }

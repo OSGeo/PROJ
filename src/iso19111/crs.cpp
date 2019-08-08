@@ -1366,6 +1366,7 @@ void GeodeticCRS::_exportToJSON(
     }
 
     writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
     coordinateSystem()->_exportToJSON(formatter);
 
     ObjectUsage::baseExportToJSON(formatter);
@@ -2116,6 +2117,7 @@ void GeographicCRS::_exportToJSON(
     }
 
     writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
     coordinateSystem()->_exportToJSON(formatter);
 
     ObjectUsage::baseExportToJSON(formatter);
@@ -2940,12 +2942,15 @@ void ProjectedCRS::_exportToJSON(
 
     writer.AddObjKey("base_crs");
     formatter->setAllowIDInImmediateChild();
+    formatter->setOmitTypeInImmediateChild();
     baseCRS()->_exportToJSON(formatter);
 
     writer.AddObjKey("conversion");
+    formatter->setOmitTypeInImmediateChild();
     derivingConversionRef()->_exportToJSON(formatter);
 
     writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
     coordinateSystem()->_exportToJSON(formatter);
 
     ObjectUsage::baseExportToJSON(formatter);
@@ -4316,6 +4321,7 @@ void DerivedGeodeticCRS::_exportToJSON(
     derivingConversionRef()->_exportToJSON(formatter);
 
     writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
     coordinateSystem()->_exportToJSON(formatter);
 
     ObjectUsage::baseExportToJSON(formatter);
@@ -4485,6 +4491,7 @@ void DerivedGeographicCRS::_exportToJSON(
     derivingConversionRef()->_exportToJSON(formatter);
 
     writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
     coordinateSystem()->_exportToJSON(formatter);
 
     ObjectUsage::baseExportToJSON(formatter);

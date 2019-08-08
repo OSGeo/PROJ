@@ -410,7 +410,13 @@ void CoordinateSystemAxis::_exportToJSON(
     writer.Add(direction().toString());
 
     writer.AddObjKey("unit");
-    unit()._exportToJSON(formatter);
+    const auto &l_unit(unit());
+    if (l_unit == common::UnitOfMeasure::METRE ||
+        l_unit == common::UnitOfMeasure::DEGREE) {
+        writer.Add(l_unit.name());
+    } else {
+        l_unit._exportToJSON(formatter);
+    }
 
     if (formatter->outputId()) {
         formatID(formatter);
@@ -577,6 +583,7 @@ void CoordinateSystem::_exportToJSON(
     auto axisContext(writer.MakeArrayContext(false));
     const auto &l_axisList = axisList();
     for (auto &axis : l_axisList) {
+        formatter->setOmitTypeInImmediateChild();
         axis->_exportToJSON(formatter);
     }
 
