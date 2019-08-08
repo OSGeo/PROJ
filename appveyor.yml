@@ -10,8 +10,8 @@ environment:
   matrix:
 
 # VS 2015
-  - VS_VERSION: Visual Studio 14
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+#  - VS_VERSION: Visual Studio 14
+#    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
 # VS 2017
   - VS_VERSION: Visual Studio 15
