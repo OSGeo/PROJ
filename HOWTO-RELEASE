@@ -235,3 +235,11 @@ version numbers in the files.
 
 *Commit changes. Either to master or maintenance branch depending on the nature
 of the release.*
+
+3.2 Disable website deployment when releasing a new non-bugfix version
+-------------------------------------------------------------------------------
+
+If the previous active version was, let's say, 6.1 and the new version is, let's say, 6.2,
+then checkout 6.1 branch, and in travis/after_success.sh, remove the code
+that causes commits to 6.1 to cause a website refresh, that is remove the
+code under `if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "6.1"; then`.
