@@ -482,8 +482,11 @@ static void outputObject(
                 if (!outputOpt.quiet) {
                     std::cout << "PROJJSON:" << std::endl;
                 }
-                auto jsonString(JSONExportable->exportToJSON(
-                    JSONFormatter::create(dbContext).get()));
+                auto formatter(JSONFormatter::create(dbContext));
+                if (outputOpt.singleLine) {
+                    formatter->setMultiLine(false);
+                }
+                auto jsonString(JSONExportable->exportToJSON(formatter.get()));
                 if (outputOpt.c_ify) {
                     jsonString = c_ify_string(jsonString);
                 }
