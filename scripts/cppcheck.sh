@@ -34,7 +34,7 @@ done
 
 ret_code=0
 
-grep -v "unmatchedSuppression" ${LOG_FILE} | grep -v "nn.hpp" | grep -v "wkt1_generated_parser" | grep -v "wkt2_generated_parser" > ${LOG_FILE}.tmp
+grep -v "unmatchedSuppression" ${LOG_FILE} | grep -v "nn.hpp" | grep -v "nlohmann/json.hpp" | grep -v "wkt1_generated_parser" | grep -v "wkt2_generated_parser" > ${LOG_FILE}.tmp
 mv ${LOG_FILE}.tmp ${LOG_FILE}
 
 if grep "null pointer" ${LOG_FILE} ; then

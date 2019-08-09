@@ -482,10 +482,12 @@ static void outputObject(
                 if (!outputOpt.quiet) {
                     std::cout << "PROJJSON:" << std::endl;
                 }
-
-                std::cout << JSONExportable->exportToJSON(
-                                 JSONFormatter::create(dbContext).get())
-                          << std::endl;
+                auto jsonString(JSONExportable->exportToJSON(
+                    JSONFormatter::create(dbContext).get()));
+                if (outputOpt.c_ify) {
+                    jsonString = c_ify_string(jsonString);
+                }
+                std::cout << jsonString << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJJSON: " << e.what()
                           << std::endl;

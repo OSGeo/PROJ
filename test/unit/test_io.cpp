@@ -9132,3 +9132,483 @@ TEST(wkt_export, invalid_angular_unit) {
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         FormattingException);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_ellipsoid_flattened_sphere) {
+    auto json = "{\n"
+                "  \"type\": \"Ellipsoid\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"semi_major_axis\": 6378137,\n"
+                "  \"inverse_flattening\": 298.257223563,\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": 7030\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
+    ASSERT_TRUE(ellps != nullptr);
+    EXPECT_EQ(ellps->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_ellipsoid_major_minor_custom_unit) {
+    auto json = "{\n"
+                "  \"type\": \"Ellipsoid\",\n"
+                "  \"name\": \"foo\",\n"
+                "  \"semi_major_axis\": 6378137,\n"
+                "  \"semi_minor_axis\": {\n"
+                "    \"value\": 6370000,\n"
+                "    \"unit\": {\n"
+                "      \"type\": \"LinearUnit\",\n"
+                "      \"name\": \"my_unit\",\n"
+                "      \"conversion_factor\": 2\n"
+                "    }\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
+    ASSERT_TRUE(ellps != nullptr);
+    EXPECT_EQ(ellps->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_ellipsoid_sphere) {
+    auto json = "{\n"
+                "  \"type\": \"Ellipsoid\",\n"
+                "  \"name\": \"Sphere\",\n"
+                "  \"radius\": 6371000,\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": 7035\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
+    ASSERT_TRUE(ellps != nullptr);
+    EXPECT_EQ(ellps->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_ellipsoid_errors) {
+    EXPECT_THROW(createFromUserInput("{", nullptr), ParsingException);
+    EXPECT_THROW(createFromUserInput("{}", nullptr), ParsingException);
+    EXPECT_THROW(createFromUserInput("{ \"type\": \"Ellipsoid\" }", nullptr),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput(
+                     "{ \"type\": \"Ellipsoid\", \"name\": \"foo\" }", nullptr),
+                 ParsingException);
+    EXPECT_THROW(
+        createFromUserInput(
+            "{ \"type\": \"Ellipsoid\", \"name\": \"foo\", \"radius\": null }",
+            nullptr),
+        ParsingException);
+    EXPECT_THROW(createFromUserInput("{ \"type\": \"Ellipsoid\", \"name\": "
+                                     "\"foo\", \"semi_major_axis\": 1 }",
+                                     nullptr),
+                 ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_prime_meridian) {
+    auto json = "{\n"
+                "  \"type\": \"PrimeMeridian\",\n"
+                "  \"name\": \"Paris\",\n"
+                "  \"longitude\": {\n"
+                "    \"value\": 2.5969213,\n"
+                "    \"unit\": {\n"
+                "      \"type\": \"AngularUnit\",\n"
+                "      \"name\": \"grad\",\n"
+                "      \"conversion_factor\": 0.0157079632679489\n"
+                "    }\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto pm = nn_dynamic_pointer_cast<PrimeMeridian>(obj);
+    ASSERT_TRUE(pm != nullptr);
+    EXPECT_EQ(pm->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_prime_meridian_errors) {
+    EXPECT_THROW(createFromUserInput("{ \"type\": \"PrimeMeridian\", \"name\": "
+                                     "\"foo\" }",
+                                     nullptr),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput("{ \"type\": \"PrimeMeridian\", \"name\": "
+                                     "\"foo\", \"longitude\": null }",
+                                     nullptr),
+                 ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export,
+     json_import_geodetic_reference_frame_with_implicit_prime_meridian) {
+    auto json = "{\n"
+                "  \"type\": \"GeodeticReferenceFrame\",\n"
+                "  \"name\": \"World Geodetic System 1984\",\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"semi_major_axis\": 6378137,\n"
+                "    \"inverse_flattening\": 298.257223563\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gdr = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(gdr != nullptr);
+    EXPECT_EQ(gdr->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export,
+     json_import_geodetic_reference_frame_with_explicit_prime_meridian) {
+    auto json = "{\n"
+                "  \"type\": \"GeodeticReferenceFrame\",\n"
+                "  \"name\": \"Nouvelle Triangulation Francaise (Paris)\",\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"Clarke 1880 (IGN)\",\n"
+                "    \"semi_major_axis\": 6378249.2,\n"
+                "    \"semi_minor_axis\": 6356515\n"
+                "  },\n"
+                "  \"prime_meridian\": {\n"
+                "    \"name\": \"Paris\",\n"
+                "    \"longitude\": {\n"
+                "      \"value\": 2.5969213,\n"
+                "      \"unit\": {\n"
+                "        \"type\": \"AngularUnit\",\n"
+                "        \"name\": \"grad\",\n"
+                "        \"conversion_factor\": 0.0157079632679489\n"
+                "      }\n"
+                "    }\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gdr = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(gdr != nullptr);
+    EXPECT_EQ(gdr->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_geodetic_reference_frame_errors) {
+    EXPECT_THROW(
+        createFromUserInput(
+            "{ \"type\": \"GeodeticReferenceFrame\", \"name\": \"foo\" }",
+            nullptr),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_several_usages) {
+    auto json = "{\n"
+                "  \"type\": \"GeodeticReferenceFrame\",\n"
+                "  \"name\": \"World Geodetic System 1984\",\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"semi_major_axis\": 6378137,\n"
+                "    \"inverse_flattening\": 298.257223563\n"
+                "  },\n"
+                "  \"usages\": [\n"
+                "    {\n"
+                "      \"area\": \"World\",\n"
+                "      \"bbox\": {\n"
+                "        \"south_latitude\": -90,\n"
+                "        \"west_longitude\": -180,\n"
+                "        \"north_latitude\": 90,\n"
+                "        \"east_longitude\": 180\n"
+                "      }\n"
+                "    },\n"
+                "    {\n"
+                "      \"scope\": \"my_scope\",\n"
+                "      \"area\": \"my_area\"\n"
+                "    }\n"
+                "  ]\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gdr = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(gdr != nullptr);
+    EXPECT_EQ(gdr->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_geographic_crs) {
+    auto json = "{\n"
+                "  \"type\": \"GeographicCRS\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"datum\": {\n"
+                "    \"type\": \"GeodeticReferenceFrame\",\n"
+                "    \"name\": \"World Geodetic System 1984\",\n"
+                "    \"ellipsoid\": {\n"
+                "      \"name\": \"WGS 84\",\n"
+                "      \"semi_major_axis\": 6378137,\n"
+                "      \"inverse_flattening\": 298.257223563\n"
+                "    }\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"ellipsoidal\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Geodetic latitude\",\n"
+                "        \"abbreviation\": \"Lat\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geodetic longitude\",\n"
+                "        \"abbreviation\": \"Lon\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"area\": \"World\",\n"
+                "  \"bbox\": {\n"
+                "    \"south_latitude\": -90,\n"
+                "    \"west_longitude\": -180,\n"
+                "    \"north_latitude\": 90,\n"
+                "    \"east_longitude\": 180\n"
+                "  },\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": 4326\n"
+                "  },\n"
+                "  \"remarks\": \"my_remarks\"\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(gcrs != nullptr);
+    EXPECT_EQ(gcrs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_geographic_crs_errors) {
+    EXPECT_THROW(
+        createFromUserInput(
+            "{ \"type\": \"GeographicCRS\", \"name\": \"foo\" }", nullptr),
+        ParsingException);
+    EXPECT_THROW(
+        createFromUserInput("{\n"
+                            "  \"type\": \"GeographicCRS\",\n"
+                            "  \"name\": \"WGS 84\",\n"
+                            "  \"datum\": {\n"
+                            "    \"type\": \"GeodeticReferenceFrame\",\n"
+                            "    \"name\": \"World Geodetic System 1984\",\n"
+                            "    \"ellipsoid\": {\n"
+                            "      \"name\": \"WGS 84\",\n"
+                            "      \"semi_major_axis\": 6378137,\n"
+                            "      \"inverse_flattening\": 298.257223563\n"
+                            "    }\n"
+                            "  }\n"
+                            "}",
+                            nullptr),
+        ParsingException);
+    EXPECT_THROW(
+        createFromUserInput("{\n"
+                            "  \"type\": \"GeographicCRS\",\n"
+                            "  \"name\": \"WGS 84\",\n"
+                            "  \"datum\": {\n"
+                            "    \"type\": \"GeodeticReferenceFrame\",\n"
+                            "    \"name\": \"World Geodetic System 1984\",\n"
+                            "    \"ellipsoid\": {\n"
+                            "      \"name\": \"WGS 84\",\n"
+                            "      \"semi_major_axis\": 6378137,\n"
+                            "      \"inverse_flattening\": 298.257223563\n"
+                            "    }\n"
+                            "  },\n"
+                            "  \"coordinate_system\": {\n"
+                            "    \"subtype\": \"Cartesian\",\n"
+                            "    \"axis\": [\n"
+                            "      {\n"
+                            "        \"name\": \"Easting\",\n"
+                            "        \"abbreviation\": \"E\",\n"
+                            "        \"direction\": \"east\",\n"
+                            "        \"unit\": \"metre\"\n"
+                            "      },\n"
+                            "      {\n"
+                            "        \"name\": \"Northing\",\n"
+                            "        \"abbreviation\": \"N\",\n"
+                            "        \"direction\": \"north\",\n"
+                            "        \"unit\": \"metre\"\n"
+                            "      }\n"
+                            "    ]\n"
+                            "  }\n"
+                            "}",
+                            nullptr),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_geocentric_crs) {
+    auto json = "{\n"
+                "  \"type\": \"GeodeticCRS\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"datum\": {\n"
+                "    \"type\": \"GeodeticReferenceFrame\",\n"
+                "    \"name\": \"World Geodetic System 1984\",\n"
+                "    \"ellipsoid\": {\n"
+                "      \"name\": \"WGS 84\",\n"
+                "      \"semi_major_axis\": 6378137,\n"
+                "      \"inverse_flattening\": 298.257223563\n"
+                "    }\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"Cartesian\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Geocentric X\",\n"
+                "        \"abbreviation\": \"X\",\n"
+                "        \"direction\": \"geocentricX\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geocentric Y\",\n"
+                "        \"abbreviation\": \"Y\",\n"
+                "        \"direction\": \"geocentricY\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geocentric Z\",\n"
+                "        \"abbreviation\": \"Z\",\n"
+                "        \"direction\": \"geocentricZ\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gdcrs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(gdcrs != nullptr);
+    EXPECT_EQ(gdcrs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_export, json_import_projected_crs) {
+    auto json = "{\n"
+                "  \"type\": \"ProjectedCRS\",\n"
+                "  \"name\": \"WGS 84 / UTM zone 31N\",\n"
+                "  \"base_crs\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"datum\": {\n"
+                "      \"type\": \"GeodeticReferenceFrame\",\n"
+                "      \"name\": \"World Geodetic System 1984\",\n"
+                "      \"ellipsoid\": {\n"
+                "        \"name\": \"WGS 84\",\n"
+                "        \"semi_major_axis\": 6378137,\n"
+                "        \"inverse_flattening\": 298.257223563\n"
+                "      }\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"ellipsoidal\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"Geodetic latitude\",\n"
+                "          \"abbreviation\": \"Lat\",\n"
+                "          \"direction\": \"north\",\n"
+                "          \"unit\": \"degree\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Geodetic longitude\",\n"
+                "          \"abbreviation\": \"Lon\",\n"
+                "          \"direction\": \"east\",\n"
+                "          \"unit\": \"degree\"\n"
+                "        }\n"
+                "      ]\n"
+                "    },\n"
+                "    \"id\": {\n"
+                "      \"authority\": \"EPSG\",\n"
+                "      \"code\": 4326\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"UTM zone 31N\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"Transverse Mercator\",\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 9807\n"
+                "      }\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"Latitude of natural origin\",\n"
+                "        \"value\": 0,\n"
+                "        \"unit\": \"degree\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8801\n"
+                "        }\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Longitude of natural origin\",\n"
+                "        \"value\": 3,\n"
+                "        \"unit\": \"degree\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8802\n"
+                "        }\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Scale factor at natural origin\",\n"
+                "        \"value\": 0.9996,\n"
+                "        \"unit\": \"unity\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8805\n"
+                "        }\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"False easting\",\n"
+                "        \"value\": 500000,\n"
+                "        \"unit\": \"metre\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8806\n"
+                "        }\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"False northing\",\n"
+                "        \"value\": 0,\n"
+                "        \"unit\": \"metre\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8807\n"
+                "        }\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"Cartesian\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Easting\",\n"
+                "        \"abbreviation\": \"E\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Northing\",\n"
+                "        \"abbreviation\": \"N\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto pcrs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(pcrs != nullptr);
+    EXPECT_EQ(pcrs->exportToJSON((JSONFormatter::create().get())), json);
+}

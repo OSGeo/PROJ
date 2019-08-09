@@ -58,6 +58,8 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
+#include "proj/internal/include_nlohmann_json.hpp"
+
 #include "proj_constants.h"
 
 #include "proj_json_streaming_writer.hpp"
@@ -79,6 +81,8 @@ using namespace NS_PROJ::internal;
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
+
+using json = nlohmann::json;
 
 //! @cond Doxygen_Suppress
 static const std::string emptyString{};
@@ -4372,10 +4376,581 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+class JSONParser {
+    DatabaseContextPtr dbContext_{};
+
+    static std::string getString(const json &j, const char *key);
+    static json getObject(const json &j, const char *key);
+    static json getArray(const json &j, const char *key);
+    static double getNumber(const json &j, const char *key);
+    static UnitOfMeasure getUnit(const json &j, const char *key);
+    static std::string getName(const json &j);
+    static std::string getType(const json &j);
+    static Length getLength(const json &j, const char *key);
+    static Measure getMeasure(const json &j);
+
+    ObjectDomainPtr buildObjectDomain(const json &j);
+    PropertyMap buildProperties(const json &j);
+
+    GeographicCRSNNPtr buildGeographicCRS(const json &j);
+    GeodeticCRSNNPtr buildGeodeticCRS(const json &j);
+    ProjectedCRSNNPtr buildProjectedCRS(const json &j);
+    ConversionNNPtr buildConversion(const json &j);
+    GeodeticReferenceFrameNNPtr buildGeodeticReferenceFrame(const json &j);
+    EllipsoidNNPtr buildEllipsoid(const json &j);
+    PrimeMeridianNNPtr buildPrimeMeridian(const json &j);
+    CoordinateSystemNNPtr buildCS(const json &j);
+    CoordinateSystemAxisNNPtr buildAxis(const json &j);
+
+  public:
+    JSONParser() = default;
+
+    JSONParser &attachDatabaseContext(const DatabaseContextPtr &dbContext) {
+        dbContext_ = dbContext;
+        return *this;
+    }
+
+    BaseObjectNNPtr create(const json &j);
+};
+
+// ---------------------------------------------------------------------------
+
+std::string JSONParser::getString(const json &j, const char *key) {
+    if (!j.contains(key)) {
+        throw ParsingException(std::string("Missing \"") + key + "\" key");
+    }
+    auto v = j[key];
+    if (!v.is_string()) {
+        throw ParsingException(std::string("The value of \"") + key +
+                               "\" should be a string");
+    }
+    return v.get<std::string>();
+}
+
+// ---------------------------------------------------------------------------
+
+json JSONParser::getObject(const json &j, const char *key) {
+    if (!j.contains(key)) {
+        throw ParsingException(std::string("Missing \"") + key + "\" key");
+    }
+    auto v = j[key];
+    if (!v.is_object()) {
+        throw ParsingException(std::string("The value of \"") + key +
+                               "\" should be a object");
+    }
+    return v.get<json>();
+}
+
+// ---------------------------------------------------------------------------
+
+json JSONParser::getArray(const json &j, const char *key) {
+    if (!j.contains(key)) {
+        throw ParsingException(std::string("Missing \"") + key + "\" key");
+    }
+    auto v = j[key];
+    if (!v.is_array()) {
+        throw ParsingException(std::string("The value of \"") + key +
+                               "\" should be a array");
+    }
+    return v.get<json>();
+}
+
+// ---------------------------------------------------------------------------
+
+double JSONParser::getNumber(const json &j, const char *key) {
+    if (!j.contains(key)) {
+        throw ParsingException(std::string("Missing \"") + key + "\" key");
+    }
+    auto v = j[key];
+    if (!v.is_number()) {
+        throw ParsingException(std::string("The value of \"") + key +
+                               "\" should be a number");
+    }
+    return v.get<double>();
+}
+
+// ---------------------------------------------------------------------------
+
+UnitOfMeasure JSONParser::getUnit(const json &j, const char *key) {
+    if (!j.contains(key)) {
+        throw ParsingException(std::string("Missing \"") + key + "\" key");
+    }
+    auto v = j[key];
+    if (v.is_string()) {
+        auto vStr = v.get<std::string>();
+        for (const auto &unit : {UnitOfMeasure::METRE, UnitOfMeasure::DEGREE,
+                                 UnitOfMeasure::SCALE_UNITY}) {
+            if (vStr == unit.name())
+                return unit;
+        }
+        throw ParsingException("Unknown unit name: " + vStr);
+    }
+    if (!v.is_object()) {
+        throw ParsingException(std::string("The value of \"") + key +
+                               "\" should be a string or an object");
+    }
+    auto typeStr = getType(v);
+    UnitOfMeasure::Type type = UnitOfMeasure::Type::UNKNOWN;
+    if (typeStr == "LinearUnit") {
+        type = UnitOfMeasure::Type::LINEAR;
+    } else if (typeStr == "AngularUnit") {
+        type = UnitOfMeasure::Type::ANGULAR;
+    } else if (typeStr == "ScaleUnit") {
+        type = UnitOfMeasure::Type::SCALE;
+    } else if (typeStr == "TimeUnit") {
+        type = UnitOfMeasure::Type::TIME;
+    } else if (typeStr == "ParametericUnit") {
+        type = UnitOfMeasure::Type::PARAMETRIC;
+    } else if (typeStr == "Unit") {
+        type = UnitOfMeasure::Type::UNKNOWN;
+    } else {
+        throw ParsingException("Unsupported value of \"type\"");
+    }
+    auto nameStr = getName(v);
+    auto convFactor = getNumber(v, "conversion_factor");
+    std::string authorityStr;
+    std::string codeStr;
+    if (v.contains("authority") && v.contains("code")) {
+        authorityStr = getString(v, "authority");
+        auto code = v["code"];
+        if (code.is_string()) {
+            codeStr = code.get<std::string>();
+        } else if (code.is_number_integer()) {
+            codeStr = internal::toString(code.get<int>());
+        } else {
+            throw ParsingException("Unexpected type for value of \"code\"");
+        }
+    }
+    return UnitOfMeasure(nameStr, convFactor, type, authorityStr, codeStr);
+}
+
+// ---------------------------------------------------------------------------
+
+std::string JSONParser::getName(const json &j) { return getString(j, "name"); }
+
+// ---------------------------------------------------------------------------
+
+std::string JSONParser::getType(const json &j) { return getString(j, "type"); }
+
+// ---------------------------------------------------------------------------
+
+Length JSONParser::getLength(const json &j, const char *key) {
+    if (!j.contains(key)) {
+        throw ParsingException(std::string("Missing \"") + key + "\" key");
+    }
+    auto v = j[key];
+    if (v.is_number()) {
+        return Length(v.get<double>(), UnitOfMeasure::METRE);
+    }
+    if (v.is_object()) {
+        return Length(getMeasure(v));
+    }
+    throw ParsingException(std::string("The value of \"") + key +
+                           "\" should be a number or an object");
+}
+
+// ---------------------------------------------------------------------------
+
+Measure JSONParser::getMeasure(const json &j) {
+    return Measure(getNumber(j, "value"), getUnit(j, "unit"));
+}
+
+// ---------------------------------------------------------------------------
+
+ObjectDomainPtr JSONParser::buildObjectDomain(const json &j) {
+    optional<std::string> scope;
+    if (j.contains("scope")) {
+        scope = getString(j, "scope");
+    }
+    std::string area;
+    if (j.contains("area")) {
+        area = getString(j, "area");
+    }
+    std::vector<GeographicExtentNNPtr> geogExtent;
+    if (j.contains("bbox")) {
+        auto bbox = getObject(j, "bbox");
+        double south = getNumber(bbox, "south_latitude");
+        double west = getNumber(bbox, "west_longitude");
+        double north = getNumber(bbox, "north_latitude");
+        double east = getNumber(bbox, "east_longitude");
+        geogExtent.emplace_back(
+            GeographicBoundingBox::create(west, south, east, north));
+    }
+    if (scope.has_value() || !area.empty() || !geogExtent.empty()) {
+        util::optional<std::string> description;
+        if (!area.empty())
+            description = area;
+        ExtentPtr extent;
+        if (description.has_value() || !geogExtent.empty()) {
+            extent =
+                Extent::create(description, geogExtent, {}, {}).as_nullable();
+        }
+        return ObjectDomain::create(scope, extent).as_nullable();
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+PropertyMap JSONParser::buildProperties(const json &j) {
+    PropertyMap map;
+    map.set(IdentifiedObject::NAME_KEY, getName(j));
+
+    if (j.contains("id")) {
+        auto id = getObject(j, "id");
+        map.set(metadata::Identifier::CODESPACE_KEY,
+                getString(id, "authority"));
+        if (!id.contains("code")) {
+            throw ParsingException("Missing \"code\" key");
+        }
+        auto code = id["code"];
+        if (code.is_string()) {
+            map.set(metadata::Identifier::CODE_KEY, code.get<std::string>());
+        } else if (code.is_number_integer()) {
+            map.set(metadata::Identifier::CODE_KEY, code.get<int>());
+        } else {
+            throw ParsingException("Unexpected type for value of \"code\"");
+        }
+    }
+
+    if (j.contains("remarks")) {
+        map.set(IdentifiedObject::REMARKS_KEY, getString(j, "remarks"));
+    }
+
+    if (j.contains("usages")) {
+        ArrayOfBaseObjectNNPtr array = ArrayOfBaseObject::create();
+        auto usages = j["usages"];
+        if (!usages.is_array()) {
+            throw ParsingException("Unexpected type for value of \"usages\"");
+        }
+        for (const auto &usage : usages) {
+            if (!usage.is_object()) {
+                throw ParsingException(
+                    "Unexpected type for value of \"usages\" child");
+            }
+            auto objectDomain = buildObjectDomain(usage);
+            if (!objectDomain) {
+                throw ParsingException("missing children in \"usages\" child");
+            }
+            array->add(NN_NO_CHECK(objectDomain));
+        }
+        if (!array->empty()) {
+            map.set(ObjectUsage::OBJECT_DOMAIN_KEY, array);
+        }
+    } else {
+        auto objectDomain = buildObjectDomain(j);
+        if (objectDomain) {
+            map.set(ObjectUsage::OBJECT_DOMAIN_KEY, NN_NO_CHECK(objectDomain));
+        }
+    }
+
+    return map;
+}
+
+// ---------------------------------------------------------------------------
+
+BaseObjectNNPtr JSONParser::create(const json &j)
+
+{
+    if (j.type() != json::value_t::object) {
+        throw ParsingException("JSON object expected");
+    }
+    auto type = getString(j, "type");
+    if (type == "GeographicCRS") {
+        return buildGeographicCRS(j);
+    }
+    if (type == "GeodeticCRS") {
+        return buildGeodeticCRS(j);
+    }
+    if (type == "ProjectedCRS") {
+        return buildProjectedCRS(j);
+    }
+    if (type == "GeodeticReferenceFrame") {
+        return buildGeodeticReferenceFrame(j);
+    }
+    if (type == "Ellipsoid") {
+        return buildEllipsoid(j);
+    }
+    if (type == "PrimeMeridian") {
+        return buildPrimeMeridian(j);
+    }
+    if (type == "CoordinateSystem") {
+        return buildCS(j);
+    }
+    throw ParsingException("Unsupported value of \"type\"");
+}
+
+// ---------------------------------------------------------------------------
+
+GeographicCRSNNPtr JSONParser::buildGeographicCRS(const json &j) {
+    auto datumJ = getObject(j, "datum");
+    if (getType(datumJ) != "GeodeticReferenceFrame") {
+        throw ParsingException("Unsupported type for datum.");
+    }
+    auto datum = buildGeodeticReferenceFrame(datumJ);
+    DatumEnsemblePtr datumEnsemble;
+    auto csJ = getObject(j, "coordinate_system");
+    auto ellipsoidalCS =
+        util::nn_dynamic_pointer_cast<EllipsoidalCS>(buildCS(csJ));
+    if (!ellipsoidalCS) {
+        throw ParsingException("expected an ellipsoidal CS");
+    }
+    return GeographicCRS::create(buildProperties(j), datum, datumEnsemble,
+                                 NN_NO_CHECK(ellipsoidalCS));
+}
+
+// ---------------------------------------------------------------------------
+
+GeodeticCRSNNPtr JSONParser::buildGeodeticCRS(const json &j) {
+    auto datumJ = getObject(j, "datum");
+    if (getType(datumJ) != "GeodeticReferenceFrame") {
+        throw ParsingException("Unsupported type for datum.");
+    }
+    auto datum = buildGeodeticReferenceFrame(datumJ);
+    DatumEnsemblePtr datumEnsemble;
+    auto csJ = getObject(j, "coordinate_system");
+    auto cs = buildCS(csJ);
+    auto props = buildProperties(j);
+    auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
+    if (cartesianCS) {
+        if (cartesianCS->axisList().size() != 3) {
+            throw ParsingException(
+                "Cartesian CS for a GeodeticCRS should have 3 axis");
+        }
+        try {
+            return GeodeticCRS::create(props, datum, datumEnsemble,
+                                       NN_NO_CHECK(cartesianCS));
+        } catch (const util::Exception &e) {
+            throw ParsingException(std::string("buildGeodeticCRS: ") +
+                                   e.what());
+        }
+    }
+
+    auto sphericalCS = nn_dynamic_pointer_cast<SphericalCS>(cs);
+    if (sphericalCS) {
+        try {
+            return GeodeticCRS::create(props, datum, datumEnsemble,
+                                       NN_NO_CHECK(sphericalCS));
+        } catch (const util::Exception &e) {
+            throw ParsingException(std::string("buildGeodeticCRS: ") +
+                                   e.what());
+        }
+    }
+    throw ParsingException("expected a Cartesian or spherical CS");
+}
+
+// ---------------------------------------------------------------------------
+
+ProjectedCRSNNPtr JSONParser::buildProjectedCRS(const json &j) {
+    auto baseCRS = buildGeographicCRS(getObject(j, "base_crs"));
+    auto csJ = getObject(j, "coordinate_system");
+    auto cartesianCS = util::nn_dynamic_pointer_cast<CartesianCS>(buildCS(csJ));
+    if (!cartesianCS) {
+        throw ParsingException("expected a Cartesian CS");
+    }
+    auto conv = buildConversion(getObject(j, "conversion"));
+    return ProjectedCRS::create(buildProperties(j), baseCRS, conv,
+                                NN_NO_CHECK(cartesianCS));
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr JSONParser::buildConversion(const json &j) {
+    auto methodJ = getObject(j, "method");
+    auto convProps = buildProperties(j);
+    auto methodProps = buildProperties(methodJ);
+    if (!j.contains("parameters")) {
+        return Conversion::create(convProps, methodProps, {}, {});
+    }
+
+    auto parametersJ = getArray(j, "parameters");
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    for (const auto &param : parametersJ) {
+        if (!param.is_object()) {
+            throw ParsingException(
+                "Unexpected type for a \"parameters\" child");
+        }
+        parameters.emplace_back(
+            OperationParameter::create(buildProperties(param)));
+        values.emplace_back(ParameterValue::create(getMeasure(param)));
+    }
+    return Conversion::create(convProps, methodProps, parameters, values);
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
+    auto dirString = getString(j, "direction");
+    auto abbreviation = getString(j, "abbreviation");
+    auto unit = getUnit(j, "unit");
+    auto direction = AxisDirection::valueOf(dirString);
+    if (!direction) {
+        throw ParsingException(concat("unhandled axis direction: ", dirString));
+    }
+    return CoordinateSystemAxis::create(buildProperties(j), abbreviation,
+                                        *direction, unit,
+                                        nullptr /* meridian */);
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
+    auto subtype = getString(j, "subtype");
+    if (!j.contains("axis")) {
+        throw ParsingException("Missing \"axis\" key");
+    }
+    auto jAxisList = j["axis"];
+    if (!jAxisList.is_array()) {
+        throw ParsingException("Unexpected type for value of \"axis\"");
+    }
+    std::vector<CoordinateSystemAxisNNPtr> axisList;
+    for (const auto &axis : jAxisList) {
+        if (!axis.is_object()) {
+            throw ParsingException(
+                "Unexpected type for value of a \"axis\" member");
+        }
+        axisList.emplace_back(buildAxis(axis));
+    }
+    const PropertyMap &csMap = emptyPropertyMap;
+    if (subtype == "ellipsoidal") {
+        if (axisList.size() == 2) {
+            return EllipsoidalCS::create(csMap, axisList[0], axisList[1]);
+        }
+        if (axisList.size() == 3) {
+            return EllipsoidalCS::create(csMap, axisList[0], axisList[1],
+                                         axisList[2]);
+        }
+        throw ParsingException("Expected 2 or 3 axis");
+    }
+    if (subtype == "Cartesian") {
+        if (axisList.size() == 2) {
+            return CartesianCS::create(csMap, axisList[0], axisList[1]);
+        }
+        if (axisList.size() == 3) {
+            return CartesianCS::create(csMap, axisList[0], axisList[1],
+                                       axisList[2]);
+        }
+        throw ParsingException("Expected 2 or 3 axis");
+    }
+    if (subtype == "vertical") {
+        if (axisList.size() == 1) {
+            return VerticalCS::create(csMap, axisList[0]);
+        }
+        throw ParsingException("Expected 1 axis");
+    }
+    if (subtype == "spherical") {
+        if (axisList.size() == 3) {
+            return SphericalCS::create(csMap, axisList[0], axisList[1],
+                                       axisList[2]);
+        }
+        throw ParsingException("Expected 3 axis");
+    }
+    if (subtype == "ordinal") {
+        return OrdinalCS::create(csMap, axisList);
+    }
+    if (subtype == "parametric") {
+        if (axisList.size() == 1) {
+            return ParametricCS::create(csMap, axisList[0]);
+        }
+        throw ParsingException("Expected 1 axis");
+    }
+    if (subtype == "TemporalDateTime") {
+        if (axisList.size() == 1) {
+            return DateTimeTemporalCS::create(csMap, axisList[0]);
+        }
+        throw ParsingException("Expected 1 axis");
+    }
+    if (subtype == "TemporalCount") {
+        if (axisList.size() == 1) {
+            return TemporalCountCS::create(csMap, axisList[0]);
+        }
+        throw ParsingException("Expected 1 axis");
+    }
+    if (subtype == "TemporalMeasure") {
+        if (axisList.size() == 1) {
+            return TemporalMeasureCS::create(csMap, axisList[0]);
+        }
+        throw ParsingException("Expected 1 axis");
+    }
+    throw ParsingException("Unhandled value for subtype");
+}
+
+// ---------------------------------------------------------------------------
+
+GeodeticReferenceFrameNNPtr
+JSONParser::buildGeodeticReferenceFrame(const json &j) {
+    auto ellipsoidJ = getObject(j, "ellipsoid");
+    auto pm = j.contains("prime_meridian")
+                  ? buildPrimeMeridian(getObject(j, "prime_meridian"))
+                  : PrimeMeridian::GREENWICH;
+    return GeodeticReferenceFrame::create(
+        buildProperties(j), buildEllipsoid(ellipsoidJ),
+        optional<std::string>() /* anchor */, pm);
+}
+
+// ---------------------------------------------------------------------------
+
+PrimeMeridianNNPtr JSONParser::buildPrimeMeridian(const json &j) {
+    if (!j.contains("longitude")) {
+        throw ParsingException("Missing \"longitude\" key");
+    }
+    auto longitude = j["longitude"];
+    if (longitude.is_number()) {
+        return PrimeMeridian::create(
+            buildProperties(j),
+            Angle(longitude.get<double>(), UnitOfMeasure::DEGREE));
+    } else if (longitude.is_object()) {
+        return PrimeMeridian::create(buildProperties(j),
+                                     Angle(getMeasure(longitude)));
+    }
+    throw ParsingException("Unexpected type for value of \"longitude\"");
+}
+
+// ---------------------------------------------------------------------------
+
+EllipsoidNNPtr JSONParser::buildEllipsoid(const json &j) {
+    if (j.contains("semi_major_axis")) {
+        auto semiMajorAxis = getLength(j, "semi_major_axis");
+        const auto celestialBody(
+            Ellipsoid::guessBodyName(dbContext_, semiMajorAxis.getSIValue()));
+        if (j.contains("semi_minor_axis")) {
+            return Ellipsoid::createTwoAxis(buildProperties(j), semiMajorAxis,
+                                            getLength(j, "semi_minor_axis"),
+                                            celestialBody);
+        } else if (j.contains("inverse_flattening")) {
+            return Ellipsoid::createFlattenedSphere(
+                buildProperties(j), semiMajorAxis,
+                Scale(getNumber(j, "inverse_flattening")), celestialBody);
+        } else {
+            throw ParsingException(
+                "Missing semi_minor_axis or inverse_flattening");
+        }
+    } else if (j.contains("radius")) {
+        auto radius = getLength(j, "radius");
+        const auto celestialBody(
+            Ellipsoid::guessBodyName(dbContext_, radius.getSIValue()));
+        return Ellipsoid::createSphere(buildProperties(j), radius,
+                                       celestialBody);
+    }
+    throw ParsingException("Missing semi_major_axis or radius");
+}
+
+// ---------------------------------------------------------------------------
+
 static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            const DatabaseContextPtr &dbContext,
                                            bool usePROJ4InitRules,
                                            PJ_CONTEXT *ctx) {
+    if (!text.empty() && text[0] == '{') {
+        json j;
+        try {
+            j = json::parse(text);
+        } catch (const std::exception &e) {
+            throw ParsingException(e.what());
+        }
+        return JSONParser().attachDatabaseContext(dbContext).create(j);
+    }
 
     if (!ci_starts_with(text, "step proj=") &&
         !ci_starts_with(text, "step +proj=")) {
@@ -4748,6 +5323,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
+ * <li>PROJJSON string</li>
  * </ul>
  *
  * @param text One of the above mentioned text format
@@ -4796,6 +5372,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
+ * <li>PROJJSON string</li>
  * </ul>
  *
  * @param text One of the above mentioned text format
