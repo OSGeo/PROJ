@@ -768,6 +768,7 @@ proj_angular_output
 proj_area_create
 proj_area_destroy
 proj_area_set_bbox
+proj_as_projjson
 proj_as_proj_string
 proj_assign_context
 proj_as_wkt

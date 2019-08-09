@@ -3489,4 +3489,56 @@ TEST_F(CApi, proj_concatoperation_get_step) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_as_projjson) {
+    auto obj = proj_create(
+        m_ctxt,
+        Ellipsoid::WGS84->exportToJSON(JSONFormatter::create().get()).c_str());
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    {
+        auto projjson = proj_as_projjson(m_ctxt, obj, nullptr);
+        ASSERT_NE(projjson, nullptr);
+        EXPECT_EQ(std::string(projjson),
+                  "{\n"
+                  "  \"type\": \"Ellipsoid\",\n"
+                  "  \"name\": \"WGS 84\",\n"
+                  "  \"semi_major_axis\": 6378137,\n"
+                  "  \"inverse_flattening\": 298.257223563,\n"
+                  "  \"id\": {\n"
+                  "    \"authority\": \"EPSG\",\n"
+                  "    \"code\": 7030\n"
+                  "  }\n"
+                  "}");
+    }
+    {
+        const char *const options[] = {"INDENTATION_WIDTH=4", nullptr};
+        auto projjson = proj_as_projjson(m_ctxt, obj, options);
+        ASSERT_NE(projjson, nullptr);
+        EXPECT_EQ(std::string(projjson),
+                  "{\n"
+                  "    \"type\": \"Ellipsoid\",\n"
+                  "    \"name\": \"WGS 84\",\n"
+                  "    \"semi_major_axis\": 6378137,\n"
+                  "    \"inverse_flattening\": 298.257223563,\n"
+                  "    \"id\": {\n"
+                  "        \"authority\": \"EPSG\",\n"
+                  "        \"code\": 7030\n"
+                  "    }\n"
+                  "}");
+    }
+    {
+        const char *const options[] = {"MULTILINE=NO", nullptr};
+        auto projjson = proj_as_projjson(m_ctxt, obj, options);
+        ASSERT_NE(projjson, nullptr);
+        EXPECT_EQ(std::string(projjson),
+                  "{\"type\":\"Ellipsoid\",\"name\":\"WGS 84\","
+                  "\"semi_major_axis\":6378137,"
+                  "\"inverse_flattening\":298.257223563,"
+                  "\"id\":{\"authority\":\"EPSG\",\"code\":7030}}");
+    }
+}
+
 } // namespace
