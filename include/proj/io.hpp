@@ -505,6 +505,9 @@ class PROJ_GCC_DLL JSONFormatter {
 
     PROJ_INTERNAL void setOmitTypeInImmediateChild();
 
+    PROJ_INTERNAL void setAbridgedTransformation(bool abriged);
+    PROJ_INTERNAL bool abridgedTransformation() const;
+
     // cppcheck-suppress functionStatic
     PROJ_INTERNAL bool outputId() const;
 

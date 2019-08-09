@@ -4390,17 +4390,24 @@ class JSONParser {
     static Measure getMeasure(const json &j);
 
     ObjectDomainPtr buildObjectDomain(const json &j);
-    PropertyMap buildProperties(const json &j);
+    PropertyMap buildProperties(const json &j, bool removeInverseOf = false);
 
     GeographicCRSNNPtr buildGeographicCRS(const json &j);
     GeodeticCRSNNPtr buildGeodeticCRS(const json &j);
     ProjectedCRSNNPtr buildProjectedCRS(const json &j);
     ConversionNNPtr buildConversion(const json &j);
     GeodeticReferenceFrameNNPtr buildGeodeticReferenceFrame(const json &j);
+    VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(const json &j);
     EllipsoidNNPtr buildEllipsoid(const json &j);
     PrimeMeridianNNPtr buildPrimeMeridian(const json &j);
     CoordinateSystemNNPtr buildCS(const json &j);
     CoordinateSystemAxisNNPtr buildAxis(const json &j);
+    VerticalCRSNNPtr buildVerticalCRS(const json &j);
+    CRSNNPtr buildCRS(const json &j);
+    CompoundCRSNNPtr buildCompoundCRS(const json &j);
+    BoundCRSNNPtr buildBoundCRS(const json &j);
+    TransformationNNPtr buildTransformation(const json &j);
+    ConcatenatedOperationNNPtr buildConcatenatedOperation(const json &j);
 
   public:
     JSONParser() = default;
@@ -4592,14 +4599,23 @@ ObjectDomainPtr JSONParser::buildObjectDomain(const json &j) {
 
 // ---------------------------------------------------------------------------
 
-PropertyMap JSONParser::buildProperties(const json &j) {
+PropertyMap JSONParser::buildProperties(const json &j, bool removeInverseOf) {
     PropertyMap map;
-    map.set(IdentifiedObject::NAME_KEY, getName(j));
+    std::string name(getName(j));
+    if (removeInverseOf && starts_with(name, "Inverse of ")) {
+        name = name.substr(strlen("Inverse of "));
+    }
+    map.set(IdentifiedObject::NAME_KEY, name);
 
     if (j.contains("id")) {
         auto id = getObject(j, "id");
-        map.set(metadata::Identifier::CODESPACE_KEY,
-                getString(id, "authority"));
+        auto codeSpace(getString(id, "authority"));
+        if (removeInverseOf && starts_with(codeSpace, "INVERSE(") &&
+            codeSpace.back() == ')') {
+            codeSpace = codeSpace.substr(strlen("INVERSE("));
+            codeSpace.resize(codeSpace.size() - 1);
+        }
+        map.set(metadata::Identifier::CODESPACE_KEY, codeSpace);
         if (!id.contains("code")) {
             throw ParsingException("Missing \"code\" key");
         }
@@ -4652,7 +4668,7 @@ PropertyMap JSONParser::buildProperties(const json &j) {
 BaseObjectNNPtr JSONParser::create(const json &j)
 
 {
-    if (j.type() != json::value_t::object) {
+    if (!j.is_object()) {
         throw ParsingException("JSON object expected");
     }
     auto type = getString(j, "type");
@@ -4665,8 +4681,20 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     if (type == "ProjectedCRS") {
         return buildProjectedCRS(j);
     }
+    if (type == "VerticalCRS") {
+        return buildVerticalCRS(j);
+    }
+    if (type == "CompoundCRS") {
+        return buildCompoundCRS(j);
+    }
+    if (type == "BoundCRS") {
+        return buildBoundCRS(j);
+    }
     if (type == "GeodeticReferenceFrame") {
         return buildGeodeticReferenceFrame(j);
+    }
+    if (type == "VerticalReferenceFrame") {
+        return buildVerticalReferenceFrame(j);
     }
     if (type == "Ellipsoid") {
         return buildEllipsoid(j);
@@ -4676,6 +4704,15 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     }
     if (type == "CoordinateSystem") {
         return buildCS(j);
+    }
+    if (type == "Conversion") {
+        return buildConversion(j);
+    }
+    if (type == "Transformation") {
+        return buildTransformation(j);
+    }
+    if (type == "ConcatenatedOperation") {
+        return buildConcatenatedOperation(j);
     }
     throw ParsingException("Unsupported value of \"type\"");
 }
@@ -4755,6 +4792,48 @@ ProjectedCRSNNPtr JSONParser::buildProjectedCRS(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+VerticalCRSNNPtr JSONParser::buildVerticalCRS(const json &j) {
+    auto datumJ = getObject(j, "datum");
+    if (getType(datumJ) != "VerticalReferenceFrame") {
+        throw ParsingException("Unsupported type for datum.");
+    }
+    auto datum = buildVerticalReferenceFrame(datumJ);
+    auto csJ = getObject(j, "coordinate_system");
+    auto verticalCS = util::nn_dynamic_pointer_cast<VerticalCS>(buildCS(csJ));
+    if (!verticalCS) {
+        throw ParsingException("expected a vertical CS");
+    }
+    return VerticalCRS::create(buildProperties(j), datum,
+                               NN_NO_CHECK(verticalCS));
+}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr JSONParser::buildCRS(const json &j) {
+    auto crs = util::nn_dynamic_pointer_cast<CRS>(create(j));
+    if (crs) {
+        return NN_NO_CHECK(crs);
+    }
+    throw ParsingException("Object is not a CRS");
+}
+
+// ---------------------------------------------------------------------------
+
+CompoundCRSNNPtr JSONParser::buildCompoundCRS(const json &j) {
+    auto componentsJ = getArray(j, "components");
+    std::vector<CRSNNPtr> components;
+    for (const auto &componentJ : componentsJ) {
+        if (!componentJ.is_object()) {
+            throw ParsingException(
+                "Unexpected type for a \"components\" child");
+        }
+        components.push_back(buildCRS(componentJ));
+    }
+    return CompoundCRS::create(buildProperties(j), components);
+}
+
+// ---------------------------------------------------------------------------
+
 ConversionNNPtr JSONParser::buildConversion(const json &j) {
     auto methodJ = getObject(j, "method");
     auto convProps = buildProperties(j);
@@ -4775,7 +4854,148 @@ ConversionNNPtr JSONParser::buildConversion(const json &j) {
             OperationParameter::create(buildProperties(param)));
         values.emplace_back(ParameterValue::create(getMeasure(param)));
     }
+
+    std::string convName;
+    std::string methodName;
+    if (convProps.getStringValue(IdentifiedObject::NAME_KEY, convName) &&
+        methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
+        starts_with(convName, "Inverse of ") &&
+        starts_with(methodName, "Inverse of ")) {
+
+        auto invConvProps = buildProperties(j, true);
+        auto invMethodProps = buildProperties(methodJ, true);
+        return NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
+            Conversion::create(invConvProps, invMethodProps, parameters, values)
+                ->inverse()));
+    }
     return Conversion::create(convProps, methodProps, parameters, values);
+}
+
+// ---------------------------------------------------------------------------
+
+BoundCRSNNPtr JSONParser::buildBoundCRS(const json &j) {
+
+    auto sourceCRS = buildCRS(getObject(j, "source_crs"));
+    auto targetCRS = buildCRS(getObject(j, "target_crs"));
+    auto transformationJ = getObject(j, "transformation");
+    auto methodJ = getObject(transformationJ, "method");
+    auto parametersJ = getArray(transformationJ, "parameters");
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    for (const auto &param : parametersJ) {
+        if (!param.is_object()) {
+            throw ParsingException(
+                "Unexpected type for a \"parameters\" child");
+        }
+        parameters.emplace_back(
+            OperationParameter::create(buildProperties(param)));
+        if (param.contains("value")) {
+            auto v = param["value"];
+            if (v.is_string()) {
+                values.emplace_back(
+                    ParameterValue::createFilename(v.get<std::string>()));
+                continue;
+            }
+        }
+        values.emplace_back(ParameterValue::create(getMeasure(param)));
+    }
+
+    CRSPtr sourceTransformationCRS;
+    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
+        sourceTransformationCRS = sourceCRS->extractGeographicCRS();
+        if (!sourceTransformationCRS) {
+            sourceTransformationCRS =
+                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS.as_nullable());
+            if (!sourceTransformationCRS) {
+                throw ParsingException(
+                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
+            }
+        }
+    } else {
+        sourceTransformationCRS = sourceCRS;
+    }
+
+    auto transformation = Transformation::create(
+        buildProperties(transformationJ), NN_NO_CHECK(sourceTransformationCRS),
+        targetCRS, nullptr, buildProperties(methodJ), parameters, values,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    return BoundCRS::create(sourceCRS, targetCRS, transformation);
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr JSONParser::buildTransformation(const json &j) {
+
+    auto sourceCRS = buildCRS(getObject(j, "source_crs"));
+    auto targetCRS = buildCRS(getObject(j, "target_crs"));
+    auto methodJ = getObject(j, "method");
+    auto parametersJ = getArray(j, "parameters");
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    for (const auto &param : parametersJ) {
+        if (!param.is_object()) {
+            throw ParsingException(
+                "Unexpected type for a \"parameters\" child");
+        }
+        parameters.emplace_back(
+            OperationParameter::create(buildProperties(param)));
+        if (param.contains("value")) {
+            auto v = param["value"];
+            if (v.is_string()) {
+                values.emplace_back(
+                    ParameterValue::createFilename(v.get<std::string>()));
+                continue;
+            }
+        }
+        values.emplace_back(ParameterValue::create(getMeasure(param)));
+    }
+    CRSPtr interpolationCRS;
+    if (j.contains("interpolation_crs")) {
+        interpolationCRS =
+            buildCRS(getObject(j, "interpolation_crs")).as_nullable();
+    }
+    std::vector<PositionalAccuracyNNPtr> accuracies;
+    if (j.contains("accuracy")) {
+        accuracies.push_back(
+            PositionalAccuracy::create(getString(j, "accuracy")));
+    }
+
+    return Transformation::create(buildProperties(j), sourceCRS, targetCRS,
+                                  interpolationCRS, buildProperties(methodJ),
+                                  parameters, values, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+ConcatenatedOperationNNPtr
+JSONParser::buildConcatenatedOperation(const json &j) {
+
+    auto sourceCRS = buildCRS(getObject(j, "source_crs"));
+    auto targetCRS = buildCRS(getObject(j, "target_crs"));
+    auto stepsJ = getArray(j, "steps");
+    std::vector<CoordinateOperationNNPtr> operations;
+    for (const auto &stepJ : stepsJ) {
+        if (!stepJ.is_object()) {
+            throw ParsingException("Unexpected type for a \"steps\" child");
+        }
+        auto op = nn_dynamic_pointer_cast<CoordinateOperation>(create(stepJ));
+        if (!op) {
+            throw ParsingException("Invalid content in a \"steps\" child");
+        }
+        operations.emplace_back(NN_NO_CHECK(op));
+    }
+
+    ConcatenatedOperation::fixStepsDirection(sourceCRS, targetCRS, operations);
+
+    try {
+        return ConcatenatedOperation::create(
+            buildProperties(j), operations,
+            std::vector<PositionalAccuracyNNPtr>());
+    } catch (const InvalidOperation &e) {
+        throw ParsingException(
+            std::string("Cannot build concatenated operation: ") + e.what());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -4884,9 +5104,23 @@ JSONParser::buildGeodeticReferenceFrame(const json &j) {
     auto pm = j.contains("prime_meridian")
                   ? buildPrimeMeridian(getObject(j, "prime_meridian"))
                   : PrimeMeridian::GREENWICH;
+    optional<std::string> anchor;
+    if (j.contains("anchor")) {
+        anchor = getString(j, "anchor");
+    }
     return GeodeticReferenceFrame::create(
-        buildProperties(j), buildEllipsoid(ellipsoidJ),
-        optional<std::string>() /* anchor */, pm);
+        buildProperties(j), buildEllipsoid(ellipsoidJ), anchor, pm);
+}
+
+// ---------------------------------------------------------------------------
+
+VerticalReferenceFrameNNPtr
+JSONParser::buildVerticalReferenceFrame(const json &j) {
+    optional<std::string> anchor;
+    if (j.contains("anchor")) {
+        anchor = getString(j, "anchor");
+    }
+    return VerticalReferenceFrame::create(buildProperties(j), anchor);
 }
 
 // ---------------------------------------------------------------------------
@@ -8605,6 +8839,7 @@ struct JSONFormatter::Private {
     std::vector<bool> outputIdStack_{true};
     bool allowIDInImmediateChild_ = false;
     bool omitTypeInImmediateChild_ = false;
+    bool abridgedTransformation_ = false;
 
     std::string result_{};
 
@@ -8715,6 +8950,18 @@ JSONFormatter::ObjectContext::~ObjectContext() {
     m_formatter.d->writer_.EndObj();
     m_formatter.d->stackHasId_.pop_back();
     m_formatter.d->popOutputId();
+}
+
+// ---------------------------------------------------------------------------
+
+void JSONFormatter::setAbridgedTransformation(bool outputIn) {
+    d->abridgedTransformation_ = outputIn;
+}
+
+// ---------------------------------------------------------------------------
+
+bool JSONFormatter::abridgedTransformation() const {
+    return d->abridgedTransformation_;
 }
 
 //! @endcond

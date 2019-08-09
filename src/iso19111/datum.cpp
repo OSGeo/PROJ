@@ -1726,6 +1726,30 @@ void VerticalReferenceFrame::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void VerticalReferenceFrame::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto objectContext(formatter->MakeObjectContext("VerticalReferenceFrame",
+                                                    !identifiers().empty()));
+    auto &writer = formatter->writer();
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    Datum::getPrivate()->exportAnchorDefinition(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 bool VerticalReferenceFrame::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1989,6 +2013,32 @@ void TemporalDatum::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void TemporalDatum::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto objectContext(
+        formatter->MakeObjectContext("TemporalDatum", !identifiers().empty()));
+    auto &writer = formatter->writer();
+
+    writer.AddObjKey("name");
+    writer.Add(nameStr());
+
+    writer.AddObjKey("calendar");
+    writer.Add(calendar());
+
+    const auto &timeOriginStr = temporalOrigin().toString();
+    if (!timeOriginStr.empty()) {
+        writer.AddObjKey("time_origin");
+        writer.Add(timeOriginStr);
+    }
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 bool TemporalDatum::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -2062,6 +2112,25 @@ void EngineeringDatum::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void EngineeringDatum::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto objectContext(formatter->MakeObjectContext("EngineeringDatum",
+                                                    !identifiers().empty()));
+    auto &writer = formatter->writer();
+
+    writer.AddObjKey("name");
+    writer.Add(nameStr());
+
+    Datum::getPrivate()->exportAnchorDefinition(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 bool EngineeringDatum::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -2122,6 +2191,25 @@ void ParametricDatum::_exportToWKT(
     formatter->addQuotedString(nameStr());
     Datum::getPrivate()->exportAnchorDefinition(formatter);
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void ParametricDatum::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto objectContext(formatter->MakeObjectContext("ParametricDatum",
+                                                    !identifiers().empty()));
+    auto &writer = formatter->writer();
+
+    writer.AddObjKey("name");
+    writer.Add(nameStr());
+
+    Datum::getPrivate()->exportAnchorDefinition(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 

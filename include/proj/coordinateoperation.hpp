@@ -116,7 +116,8 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  * \remark Implements CoordinateOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
-                                         public io::IPROJStringExportable {
+                                         public io::IPROJStringExportable,
+                                         public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateOperation() override;
@@ -849,8 +850,7 @@ EPSG:8833
 
 */
 
-class PROJ_GCC_DLL Conversion : public SingleOperation,
-                                public io::IJSONExportable {
+class PROJ_GCC_DLL Conversion : public SingleOperation {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Conversion() override;
@@ -1550,6 +1550,9 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL TransformationNNPtr shallowClone() const;
 
     //! @endcond
@@ -1654,6 +1657,9 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL static void
     fixStepsDirection(const crs::CRSNNPtr &concatOpSourceCRS,

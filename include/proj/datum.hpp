@@ -61,7 +61,8 @@ namespace datum {
  *
  * \remark Implements Datum from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL Datum : public common::ObjectUsage {
+class PROJ_GCC_DLL Datum : public common::ObjectUsage,
+                           public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Datum() override;
@@ -379,8 +380,7 @@ using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
  *
  * \remark Implements GeodeticReferenceFrame from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum,
-                                            public io::IJSONExportable {
+class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~GeodeticReferenceFrame() override;
@@ -566,7 +566,11 @@ class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-                        //! @endcond
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
+    //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -680,6 +684,9 @@ class PROJ_GCC_DLL TemporalDatum final : public Datum {
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
@@ -728,6 +735,9 @@ class PROJ_GCC_DLL EngineeringDatum final : public Datum {
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
@@ -771,6 +781,9 @@ class PROJ_GCC_DLL ParametricDatum final : public Datum {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,

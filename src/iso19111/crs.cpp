@@ -2265,6 +2265,7 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 void VerticalCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
@@ -2284,6 +2285,36 @@ void VerticalCRS::_exportToPROJString(
         }
     }
 }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void VerticalCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("VerticalCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("datum");
+    datum()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -2646,6 +2677,38 @@ void DerivedCRS::baseExportToWKT(io::WKTFormatter *formatter,
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void DerivedCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext(className(), !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("base_crs");
+    baseCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("conversion");
+    derivingConversionRef()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -3514,6 +3577,36 @@ void CompoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void CompoundCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("CompoundCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("components");
+    {
+        auto componentsContext(writer.MakeArrayContext(false));
+        for (const auto &crs : componentReferenceSystems()) {
+            crs->_exportToJSON(formatter);
+        }
+    }
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 void CompoundCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
@@ -4004,6 +4097,30 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void BoundCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("BoundCRS", !identifiers().empty()));
+
+    writer.AddObjKey("source_crs");
+    d->baseCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("target_crs");
+    d->hubCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("transformation");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAbridgedTransformation(true);
+    d->transformation()->_exportToJSON(formatter);
+    formatter->setAbridgedTransformation(false);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 void BoundCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
@@ -4298,38 +4415,6 @@ void DerivedGeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
-void DerivedGeodeticCRS::_exportToJSON(
-    io::JSONFormatter *formatter) const // throw(io::FormattingException)
-{
-    auto &writer = formatter->writer();
-    auto objectContext(formatter->MakeObjectContext("DerivedGeodeticCRS",
-                                                    !identifiers().empty()));
-
-    writer.AddObjKey("name");
-    auto l_name = nameStr();
-    if (l_name.empty()) {
-        writer.Add("unnamed");
-    } else {
-        writer.Add(l_name);
-    }
-
-    writer.AddObjKey("base_crs");
-    baseCRS()->_exportToJSON(formatter);
-
-    writer.AddObjKey("conversion");
-    derivingConversionRef()->_exportToJSON(formatter);
-
-    writer.AddObjKey("coordinate_system");
-    formatter->setOmitTypeInImmediateChild();
-    coordinateSystem()->_exportToJSON(formatter);
-
-    ObjectUsage::baseExportToJSON(formatter);
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
 void DerivedGeodeticCRS::_exportToPROJString(
     io::PROJStringFormatter *) const // throw(io::FormattingException)
 {
@@ -4463,38 +4548,6 @@ void DerivedGeographicCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     coordinateSystem()->_exportToWKT(formatter);
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-void DerivedGeographicCRS::_exportToJSON(
-    io::JSONFormatter *formatter) const // throw(io::FormattingException)
-{
-    auto &writer = formatter->writer();
-    auto objectContext(formatter->MakeObjectContext("DerivedGeographicCRS",
-                                                    !identifiers().empty()));
-
-    writer.AddObjKey("name");
-    auto l_name = nameStr();
-    if (l_name.empty()) {
-        writer.Add("unnamed");
-    } else {
-        writer.Add(l_name);
-    }
-
-    writer.AddObjKey("base_crs");
-    baseCRS()->_exportToJSON(formatter);
-
-    writer.AddObjKey("conversion");
-    derivingConversionRef()->_exportToJSON(formatter);
-
-    writer.AddObjKey("coordinate_system");
-    formatter->setOmitTypeInImmediateChild();
-    coordinateSystem()->_exportToJSON(formatter);
-
-    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 
@@ -4756,6 +4809,35 @@ void TemporalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void TemporalCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("TemporalCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("datum");
+    datum()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 bool TemporalCRS::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -4864,6 +4946,35 @@ void EngineeringCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void EngineeringCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("EngineeringCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("datum");
+    datum()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 bool EngineeringCRS::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -4961,6 +5072,35 @@ void ParametricCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     coordinateSystem()->_exportToWKT(formatter);
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void ParametricCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("ParametricCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("datum");
+    datum()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 
@@ -5156,6 +5296,13 @@ DerivedCRSTemplate<DerivedCRSTraits>::create(
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
     return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+template <class DerivedCRSTraits>
+const char *DerivedCRSTemplate<DerivedCRSTraits>::className() const {
+    return DerivedCRSTraits::CRSName().c_str();
 }
 
 // ---------------------------------------------------------------------------

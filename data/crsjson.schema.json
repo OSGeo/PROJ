@@ -8,10 +8,27 @@
     { "$ref": "#/definitions/datum" },
     { "$ref": "#/definitions/ellipsoid" },
     { "$ref": "#/definitions/prime_meridian" },
-    { "$ref": "#/definitions/conversion" }
+    { "$ref": "#/definitions/single_operation" },
+    { "$ref": "#/definitions/concatenated_operation" }
   ],
 
   "definitions": {
+
+    "abridged_transformation": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["AbridgedTransformation"] },
+        "name": { "type": "string" },
+        "method": { "$ref": "#/definitions/method" },
+        "parameters": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/parameter_value" }
+        },
+        "id": { "$ref": "#/definitions/id" }
+      },
+      "required" : [ "name", "method", "parameters" ],
+      "additionalProperties": false
+    },
 
     "axis": {
       "type": "object",
@@ -40,6 +57,62 @@
       "additionalProperties": false
     },
 
+    "bound_crs": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["BoundCRS"] },
+        "source_crs": { "$ref": "#/definitions/crs" },
+        "target_crs": { "$ref": "#/definitions/crs" },
+        "transformation": { "$ref": "#/definitions/abridged_transformation" }
+     },
+     "required" : [ "source_crs", "target_crs", "transformation" ],
+     "additionalProperties": false
+    },
+
+    "compound_crs": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["CompoundCRS"] },
+        "name": { "type": "string" },
+        "components":  {
+           "type": "array",
+            "items": { "$ref": "#/definitions/crs" }
+        },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name", "components" ],
+      "additionalProperties": false
+    },
+
+    "concatenated_operation": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["ConcatenatedOperation"] },
+        "name": { "type": "string" },
+        "source_crs": { "$ref": "#/definitions/crs" },
+        "target_crs": { "$ref": "#/definitions/crs" },
+        "steps":  {
+           "type": "array",
+            "items": { "$ref": "#/definitions/single_operation" }
+        },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name", "source_crs", "target_crs", "steps" ],
+      "additionalProperties": false
+    },
+
     "conversion": {
       "type": "object",
       "properties": {
@@ -52,7 +125,7 @@
         },
         "id": { "$ref": "#/definitions/id" }
       },
-      "required" : [ "name", "method", "parameters" ],
+      "required" : [ "name", "method" ],
       "additionalProperties": false
     },
 
@@ -75,12 +148,24 @@
     "crs": {
       "oneOf": [
         { "$ref": "#/definitions/geodetic_crs" },
-        { "$ref": "#/definitions/derived_crs" }
+        { "$ref": "#/definitions/derived_crs" },
+        { "$ref": "#/definitions/vertical_crs" },
+        { "$ref": "#/definitions/compound_crs" },
+        { "$ref": "#/definitions/bound_crs" },
+        { "$ref": "#/definitions/engineering_crs" },
+        { "$ref": "#/definitions/parametric_crs" },
+        { "$ref": "#/definitions/temporal_crs" }
       ]
     },
 
     "datum": {
-      "oneOf": [ { "$ref": "#/definitions/geodetic_reference_frame" } ]
+      "oneOf": [
+        { "$ref": "#/definitions/geodetic_reference_frame" },
+        { "$ref": "#/definitions/vertical_reference_frame" },
+        { "$ref": "#/definitions/temporal_datum" },
+        { "$ref": "#/definitions/parametric_datum" },
+        { "$ref": "#/definitions/engineering_datum" }
+      ]
     },
 
     "derived_crs": {
@@ -88,12 +173,19 @@
       "allOf": [{ "$ref": "#/definitions/object_usage" }],
       "properties": {
         "type": { "type": "string",
-                  "enum": ["ProjectedCRS", "DerivedGeodeticCRS",
-                           "DerivedGeographicCRS"] },
+                  "enum": ["ProjectedCRS",
+                           "DerivedGeodeticCRS",
+                           "DerivedGeographicCRS",
+                           "DerivedProjectedCRS",
+                           "DerivedVerticalCRS",
+                           "DerivedTemporalCRS",
+                           "DerivedParametricCRS",
+                           "DerivedEngineeringCRS"] },
         "name": { "type": "string" },
         "base_crs": { "$ref": "#/definitions/crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "scope": {},
         "area": {},
         "bbox": {},
         "usages": {},
@@ -142,14 +234,52 @@
       ]
     },
 
+    "engineering_crs": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["EngineeringCRS"] },
+        "name": { "type": "string" },
+        "datum": { "$ref": "#/definitions/engineering_datum" },
+        "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name", "datum" ],
+      "additionalProperties": false
+    },
+
+    "engineering_datum": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["EngineeringDatum"] },
+        "name": { "type": "string" },
+        "anchor": { "type": "string" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name" ],
+      "additionalProperties": false
+    },
+
     "geodetic_crs": {
       "type": "object",
       "allOf": [{ "$ref": "#/definitions/object_usage" }],
       "properties": {
         "type": { "type": "string", "enum": ["GeodeticCRS", "GeographicCRS"] },
         "name": { "type": "string" },
-        "datum": { "$ref": "#/definitions/datum" },
+        "datum": { "$ref": "#/definitions/geodetic_reference_frame" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "scope": {},
         "area": {},
         "bbox": {},
         "usages": {},
@@ -169,6 +299,7 @@
         "anchor": { "type": "string" },
         "ellipsoid": { "$ref": "#/definitions/ellipsoid" },
         "prime_meridian": { "$ref": "#/definitions/prime_meridian" },
+        "scope": {},
         "area": {},
         "bbox": {},
         "usages": {},
@@ -207,6 +338,7 @@
       {
         "type": "object",
         "properties": {
+            "scope": { "type": "string" },
             "area": { "type": "string" },
             "bbox": { "$ref": "#/definitions/bbox" },
             "remarks": { "type": "string" },
@@ -242,6 +374,43 @@
       "additionalProperties": false
     },
 
+    "parametric_crs": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["ParametricCRS"] },
+        "name": { "type": "string" },
+        "datum": { "$ref": "#/definitions/parametric_datum" },
+        "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name", "datum" ],
+      "additionalProperties": false
+    },
+
+    "parametric_datum": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["ParametricDatum"] },
+        "name": { "type": "string" },
+        "anchor": { "type": "string" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name" ],
+      "additionalProperties": false
+    },
+
     "prime_meridian": {
       "type": "object",
       "properties": {
@@ -251,6 +420,77 @@
         "id": { "$ref": "#/definitions/id" }
       },
       "required" : [ "name" ],
+      "additionalProperties": false
+    },
+
+    "single_operation": {
+      "oneOf": [
+        { "$ref": "#/definitions/conversion" },
+        { "$ref": "#/definitions/transformation" }
+      ]
+    },
+
+    "temporal_crs": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["TemporalCRS"] },
+        "name": { "type": "string" },
+        "datum": { "$ref": "#/definitions/temporal_datum" },
+        "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name", "datum" ],
+      "additionalProperties": false
+    },
+
+    "temporal_datum": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["TemporalDatum"] },
+        "name": { "type": "string" },
+        "calendar": { "type": "string" },
+        "time_origin": { "type": "string" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name", "calendar" ],
+      "additionalProperties": false
+    },
+
+    "transformation": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["Transformation"] },
+        "name": { "type": "string" },
+        "source_crs": { "$ref": "#/definitions/crs" },
+        "target_crs": { "$ref": "#/definitions/crs" },
+        "interpolation_crs": { "$ref": "#/definitions/crs" },
+        "method": { "$ref": "#/definitions/method" },
+        "parameters": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/parameter_value" }
+        },
+        "accuracy": { "type": "string" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name", "source_crs", "target_crs", "method", "parameters" ],
       "additionalProperties": false
     },
 
@@ -281,6 +521,7 @@
         "items": {
           "type": "object",
           "properties": {
+            "scope": { "type": "string" },
             "area": { "type": "string" },
             "bbox": { "$ref": "#/definitions/bbox" }
            },
@@ -303,6 +544,43 @@
         { "type": "number" },
         { "$ref": "#/definitions/value_and_unit" }
       ]
+    },
+
+    "vertical_crs": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["VerticalCRS"] },
+        "name": { "type": "string" },
+        "datum": { "$ref": "#/definitions/vertical_reference_frame" },
+        "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name", "datum" ],
+      "additionalProperties": false
+    },
+
+    "vertical_reference_frame": {
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["VerticalReferenceFrame"] },
+        "name": { "type": "string" },
+        "anchor": { "type": "string" },
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}
+      },
+      "required" : [ "name" ],
+      "additionalProperties": false
     }
 
   }
