@@ -4396,8 +4396,13 @@ class JSONParser {
     GeodeticCRSNNPtr buildGeodeticCRS(const json &j);
     ProjectedCRSNNPtr buildProjectedCRS(const json &j);
     ConversionNNPtr buildConversion(const json &j);
+    DatumEnsembleNNPtr buildDatumEnsemble(const json &j);
     GeodeticReferenceFrameNNPtr buildGeodeticReferenceFrame(const json &j);
     VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(const json &j);
+    DynamicGeodeticReferenceFrameNNPtr
+    buildDynamicGeodeticReferenceFrame(const json &j);
+    DynamicVerticalReferenceFrameNNPtr
+    buildDynamicVerticalReferenceFrame(const json &j);
     EllipsoidNNPtr buildEllipsoid(const json &j);
     PrimeMeridianNNPtr buildPrimeMeridian(const json &j);
     CoordinateSystemNNPtr buildCS(const json &j);
@@ -4690,11 +4695,20 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     if (type == "BoundCRS") {
         return buildBoundCRS(j);
     }
+    if (type == "DatumEnsemble") {
+        return buildDatumEnsemble(j);
+    }
     if (type == "GeodeticReferenceFrame") {
         return buildGeodeticReferenceFrame(j);
     }
     if (type == "VerticalReferenceFrame") {
         return buildVerticalReferenceFrame(j);
+    }
+    if (type == "DynamicGeodeticReferenceFrame") {
+        return buildDynamicGeodeticReferenceFrame(j);
+    }
+    if (type == "DynamicVerticalReferenceFrame") {
+        return buildDynamicVerticalReferenceFrame(j);
     }
     if (type == "Ellipsoid") {
         return buildEllipsoid(j);
@@ -4720,12 +4734,20 @@ BaseObjectNNPtr JSONParser::create(const json &j)
 // ---------------------------------------------------------------------------
 
 GeographicCRSNNPtr JSONParser::buildGeographicCRS(const json &j) {
-    auto datumJ = getObject(j, "datum");
-    if (getType(datumJ) != "GeodeticReferenceFrame") {
-        throw ParsingException("Unsupported type for datum.");
-    }
-    auto datum = buildGeodeticReferenceFrame(datumJ);
+    GeodeticReferenceFramePtr datum;
     DatumEnsemblePtr datumEnsemble;
+    if (j.contains("datum")) {
+        auto datumJ = getObject(j, "datum");
+        datum = util::nn_dynamic_pointer_cast<GeodeticReferenceFrame>(
+            create(datumJ));
+        if (!datum) {
+            throw ParsingException("datum of wrong type");
+        }
+
+    } else {
+        datumEnsemble =
+            buildDatumEnsemble(getObject(j, "datum_ensemble")).as_nullable();
+    }
     auto csJ = getObject(j, "coordinate_system");
     auto ellipsoidalCS =
         util::nn_dynamic_pointer_cast<EllipsoidalCS>(buildCS(csJ));
@@ -4793,17 +4815,25 @@ ProjectedCRSNNPtr JSONParser::buildProjectedCRS(const json &j) {
 // ---------------------------------------------------------------------------
 
 VerticalCRSNNPtr JSONParser::buildVerticalCRS(const json &j) {
-    auto datumJ = getObject(j, "datum");
-    if (getType(datumJ) != "VerticalReferenceFrame") {
-        throw ParsingException("Unsupported type for datum.");
+    VerticalReferenceFramePtr datum;
+    DatumEnsemblePtr datumEnsemble;
+    if (j.contains("datum")) {
+        auto datumJ = getObject(j, "datum");
+        datum = util::nn_dynamic_pointer_cast<VerticalReferenceFrame>(
+            create(datumJ));
+        if (!datum) {
+            throw ParsingException("datum of wrong type");
+        }
+    } else {
+        datumEnsemble =
+            buildDatumEnsemble(getObject(j, "datum_ensemble")).as_nullable();
     }
-    auto datum = buildVerticalReferenceFrame(datumJ);
     auto csJ = getObject(j, "coordinate_system");
     auto verticalCS = util::nn_dynamic_pointer_cast<VerticalCS>(buildCS(csJ));
     if (!verticalCS) {
         throw ParsingException("expected a vertical CS");
     }
-    return VerticalCRS::create(buildProperties(j), datum,
+    return VerticalCRS::create(buildProperties(j), datum, datumEnsemble,
                                NN_NO_CHECK(verticalCS));
 }
 
@@ -5098,6 +5128,70 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+DatumEnsembleNNPtr JSONParser::buildDatumEnsemble(const json &j) {
+    auto membersJ = getArray(j, "members");
+    std::vector<DatumNNPtr> datums;
+    const bool hasEllipsoid(j.contains("ellipsoid"));
+    for (const auto &memberJ : membersJ) {
+        if (!memberJ.is_object()) {
+            throw ParsingException(
+                "Unexpected type for value of a \"members\" member");
+        }
+        auto datumName(getName(memberJ));
+        if (dbContext_ && memberJ.contains("id")) {
+            auto id = getObject(memberJ, "id");
+            auto authority = getString(id, "authority");
+            auto authFactory =
+                AuthorityFactory::create(NN_NO_CHECK(dbContext_), authority);
+            auto code = id["code"];
+            std::string codeStr;
+            if (code.is_string()) {
+                codeStr = code.get<std::string>();
+            } else if (code.is_number_integer()) {
+                codeStr = internal::toString(code.get<int>());
+            } else {
+                throw ParsingException("Unexpected type for value of \"code\"");
+            }
+            try {
+                datums.push_back(authFactory->createDatum(codeStr));
+            } catch (const std::exception &) {
+                throw ParsingException("No Datum of code " + codeStr);
+            }
+            continue;
+        } else if (dbContext_) {
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto list = authFactory->createObjectsFromName(
+                datumName, {AuthorityFactory::ObjectType::DATUM},
+                false /* approximate=false*/);
+            if (!list.empty()) {
+                auto datum = util::nn_dynamic_pointer_cast<Datum>(list.front());
+                if (!datum)
+                    throw ParsingException(
+                        "DatumEnsemble member is not a datum");
+                datums.push_back(NN_NO_CHECK(datum));
+                continue;
+            }
+        }
+
+        // Fallback if no db match
+        if (hasEllipsoid) {
+            datums.emplace_back(GeodeticReferenceFrame::create(
+                buildProperties(memberJ),
+                buildEllipsoid(getObject(j, "ellipsoid")),
+                optional<std::string>(), PrimeMeridian::GREENWICH));
+        } else {
+            datums.emplace_back(
+                VerticalReferenceFrame::create(buildProperties(memberJ)));
+        }
+    }
+    return DatumEnsemble::create(
+        buildProperties(j), datums,
+        PositionalAccuracy::create(getString(j, "accuracy")));
+}
+
+// ---------------------------------------------------------------------------
+
 GeodeticReferenceFrameNNPtr
 JSONParser::buildGeodeticReferenceFrame(const json &j) {
     auto ellipsoidJ = getObject(j, "ellipsoid");
@@ -5114,6 +5208,29 @@ JSONParser::buildGeodeticReferenceFrame(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+DynamicGeodeticReferenceFrameNNPtr
+JSONParser::buildDynamicGeodeticReferenceFrame(const json &j) {
+    auto ellipsoidJ = getObject(j, "ellipsoid");
+    auto pm = j.contains("prime_meridian")
+                  ? buildPrimeMeridian(getObject(j, "prime_meridian"))
+                  : PrimeMeridian::GREENWICH;
+    optional<std::string> anchor;
+    if (j.contains("anchor")) {
+        anchor = getString(j, "anchor");
+    }
+    Measure frameReferenceEpoch(getNumber(j, "frame_reference_epoch"),
+                                UnitOfMeasure::YEAR);
+    optional<std::string> deformationModel;
+    if (j.contains("deformation_model")) {
+        deformationModel = getString(j, "deformation_model");
+    }
+    return DynamicGeodeticReferenceFrame::create(
+        buildProperties(j), buildEllipsoid(ellipsoidJ), anchor, pm,
+        frameReferenceEpoch, deformationModel);
+}
+
+// ---------------------------------------------------------------------------
+
 VerticalReferenceFrameNNPtr
 JSONParser::buildVerticalReferenceFrame(const json &j) {
     optional<std::string> anchor;
@@ -5121,6 +5238,25 @@ JSONParser::buildVerticalReferenceFrame(const json &j) {
         anchor = getString(j, "anchor");
     }
     return VerticalReferenceFrame::create(buildProperties(j), anchor);
+}
+
+// ---------------------------------------------------------------------------
+
+DynamicVerticalReferenceFrameNNPtr
+JSONParser::buildDynamicVerticalReferenceFrame(const json &j) {
+    optional<std::string> anchor;
+    if (j.contains("anchor")) {
+        anchor = getString(j, "anchor");
+    }
+    Measure frameReferenceEpoch(getNumber(j, "frame_reference_epoch"),
+                                UnitOfMeasure::YEAR);
+    optional<std::string> deformationModel;
+    if (j.contains("deformation_model")) {
+        deformationModel = getString(j, "deformation_model");
+    }
+    return DynamicVerticalReferenceFrame::create(
+        buildProperties(j), anchor, util::optional<RealizationMethod>(),
+        frameReferenceEpoch, deformationModel);
 }
 
 // ---------------------------------------------------------------------------

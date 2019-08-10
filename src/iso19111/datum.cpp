@@ -1264,8 +1264,11 @@ void GeodeticReferenceFrame::_exportToWKT(
 void GeodeticReferenceFrame::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(FormattingException)
 {
-    auto objectContext(formatter->MakeObjectContext("GeodeticReferenceFrame",
-                                                    !identifiers().empty()));
+    auto dynamicGRF = dynamic_cast<const DynamicGeodeticReferenceFrame *>(this);
+
+    auto objectContext(formatter->MakeObjectContext(
+        dynamicGRF ? "DynamicGeodeticReferenceFrame" : "GeodeticReferenceFrame",
+        !identifiers().empty()));
     auto &writer = formatter->writer();
 
     writer.AddObjKey("name");
@@ -1277,6 +1280,17 @@ void GeodeticReferenceFrame::_exportToJSON(
     }
 
     Datum::getPrivate()->exportAnchorDefinition(formatter);
+
+    if (dynamicGRF) {
+        writer.AddObjKey("frame_reference_epoch");
+        writer.Add(dynamicGRF->frameReferenceEpoch().value());
+
+        const auto &deformationModel = dynamicGRF->deformationModelName();
+        if (deformationModel.has_value()) {
+            writer.AddObjKey("deformation_model");
+            writer.Add(*deformationModel);
+        }
+    }
 
     writer.AddObjKey("ellipsoid");
     formatter->setOmitTypeInImmediateChild();
@@ -1422,7 +1436,7 @@ void DynamicGeodeticReferenceFrame::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instantiate a DyanmicGeodeticReferenceFrame
+/** \brief Instantiate a DynamicGeodeticReferenceFrame
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1431,7 +1445,7 @@ void DynamicGeodeticReferenceFrame::_exportToWKT(
  * @param primeMeridian the PrimeMeridian.
  * @param frameReferenceEpochIn the frame reference epoch.
  * @param deformationModelNameIn deformation model name, or empty
- * @return new DyanmicGeodeticReferenceFrame.
+ * @return new DynamicGeodeticReferenceFrame.
  */
 DynamicGeodeticReferenceFrameNNPtr DynamicGeodeticReferenceFrame::create(
     const util::PropertyMap &properties, const EllipsoidNNPtr &ellipsoid,
@@ -1557,6 +1571,56 @@ void DatumEnsemble::_exportToWKT(
     formatter->add(positionalAccuracy()->value());
     formatter->endNode();
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void DatumEnsemble::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto objectContext(
+        formatter->MakeObjectContext("DatumEnsemble", !identifiers().empty()));
+    auto &writer = formatter->writer();
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    auto l_datums = datums();
+    writer.AddObjKey("members");
+    {
+        auto membersContext(writer.MakeArrayContext(false));
+        for (const auto &datum : l_datums) {
+            auto memberContext(writer.MakeObjectContext());
+            writer.AddObjKey("name");
+            const auto &l_datum_name = datum->nameStr();
+            if (!l_datum_name.empty()) {
+                writer.Add(l_datum_name);
+            } else {
+                writer.Add("unnamed");
+            }
+            datum->formatID(formatter);
+        }
+    }
+
+    auto grfFirst = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
+        l_datums[0].as_nullable());
+    if (grfFirst) {
+        writer.AddObjKey("ellipsoid");
+        formatter->setOmitTypeInImmediateChild();
+        grfFirst->ellipsoid()->_exportToJSON(formatter);
+    }
+
+    writer.AddObjKey("accuracy");
+    writer.Add(positionalAccuracy()->value());
+
+    formatID(formatter);
 }
 //! @endcond
 
@@ -1729,8 +1793,11 @@ void VerticalReferenceFrame::_exportToWKT(
 void VerticalReferenceFrame::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(FormattingException)
 {
-    auto objectContext(formatter->MakeObjectContext("VerticalReferenceFrame",
-                                                    !identifiers().empty()));
+    auto dynamicGRF = dynamic_cast<const DynamicVerticalReferenceFrame *>(this);
+
+    auto objectContext(formatter->MakeObjectContext(
+        dynamicGRF ? "DynamicVerticalReferenceFrame" : "VerticalReferenceFrame",
+        !identifiers().empty()));
     auto &writer = formatter->writer();
 
     writer.AddObjKey("name");
@@ -1742,6 +1809,17 @@ void VerticalReferenceFrame::_exportToJSON(
     }
 
     Datum::getPrivate()->exportAnchorDefinition(formatter);
+
+    if (dynamicGRF) {
+        writer.AddObjKey("frame_reference_epoch");
+        writer.Add(dynamicGRF->frameReferenceEpoch().value());
+
+        const auto &deformationModel = dynamicGRF->deformationModelName();
+        if (deformationModel.has_value()) {
+            writer.AddObjKey("deformation_model");
+            writer.Add(*deformationModel);
+        }
+    }
 
     ObjectUsage::baseExportToJSON(formatter);
 }
@@ -1882,7 +1960,7 @@ void DynamicVerticalReferenceFrame::_exportToWKT(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instantiate a DyanmicVerticalReferenceFrame
+/** \brief Instantiate a DynamicVerticalReferenceFrame
  *
  * @param properties See \ref general_properties.
  * At minimum the name should be defined.
@@ -1890,7 +1968,7 @@ void DynamicVerticalReferenceFrame::_exportToWKT(
  * @param realizationMethodIn the realization method, or empty.
  * @param frameReferenceEpochIn the frame reference epoch.
  * @param deformationModelNameIn deformation model name, or empty
- * @return new DyanmicVerticalReferenceFrame.
+ * @return new DynamicVerticalReferenceFrame.
  */
 DynamicVerticalReferenceFrameNNPtr DynamicVerticalReferenceFrame::create(
     const util::PropertyMap &properties,

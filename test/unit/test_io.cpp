@@ -9135,7 +9135,7 @@ TEST(wkt_export, invalid_angular_unit) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_ellipsoid_flattened_sphere) {
+TEST(json_import, ellipsoid_flattened_sphere) {
     auto json = "{\n"
                 "  \"type\": \"Ellipsoid\",\n"
                 "  \"name\": \"WGS 84\",\n"
@@ -9154,7 +9154,7 @@ TEST(wkt_export, json_import_ellipsoid_flattened_sphere) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_ellipsoid_major_minor_custom_unit) {
+TEST(json_import, ellipsoid_major_minor_custom_unit) {
     auto json = "{\n"
                 "  \"type\": \"Ellipsoid\",\n"
                 "  \"name\": \"foo\",\n"
@@ -9176,7 +9176,7 @@ TEST(wkt_export, json_import_ellipsoid_major_minor_custom_unit) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_ellipsoid_sphere) {
+TEST(json_import, ellipsoid_sphere) {
     auto json = "{\n"
                 "  \"type\": \"Ellipsoid\",\n"
                 "  \"name\": \"Sphere\",\n"
@@ -9194,7 +9194,7 @@ TEST(wkt_export, json_import_ellipsoid_sphere) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_ellipsoid_errors) {
+TEST(json_import, ellipsoid_errors) {
     EXPECT_THROW(createFromUserInput("{", nullptr), ParsingException);
     EXPECT_THROW(createFromUserInput("{}", nullptr), ParsingException);
     EXPECT_THROW(createFromUserInput("{ \"type\": \"Ellipsoid\" }", nullptr),
@@ -9215,7 +9215,7 @@ TEST(wkt_export, json_import_ellipsoid_errors) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_prime_meridian) {
+TEST(json_import, prime_meridian) {
     auto json = "{\n"
                 "  \"type\": \"PrimeMeridian\",\n"
                 "  \"name\": \"Paris\",\n"
@@ -9236,7 +9236,7 @@ TEST(wkt_export, json_import_prime_meridian) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_prime_meridian_errors) {
+TEST(json_import, prime_meridian_errors) {
     EXPECT_THROW(createFromUserInput("{ \"type\": \"PrimeMeridian\", \"name\": "
                                      "\"foo\" }",
                                      nullptr),
@@ -9249,8 +9249,7 @@ TEST(wkt_export, json_import_prime_meridian_errors) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export,
-     json_import_geodetic_reference_frame_with_implicit_prime_meridian) {
+TEST(json_import, geodetic_reference_frame_with_implicit_prime_meridian) {
     auto json = "{\n"
                 "  \"type\": \"GeodeticReferenceFrame\",\n"
                 "  \"name\": \"World Geodetic System 1984\",\n"
@@ -9261,15 +9260,14 @@ TEST(wkt_export,
                 "  }\n"
                 "}";
     auto obj = createFromUserInput(json, nullptr);
-    auto gdr = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
-    ASSERT_TRUE(gdr != nullptr);
-    EXPECT_EQ(gdr->exportToJSON((JSONFormatter::create().get())), json);
+    auto grf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(grf != nullptr);
+    EXPECT_EQ(grf->exportToJSON((JSONFormatter::create().get())), json);
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export,
-     json_import_geodetic_reference_frame_with_explicit_prime_meridian) {
+TEST(json_import, geodetic_reference_frame_with_explicit_prime_meridian) {
     auto json = "{\n"
                 "  \"type\": \"GeodeticReferenceFrame\",\n"
                 "  \"name\": \"Nouvelle Triangulation Francaise (Paris)\",\n"
@@ -9291,14 +9289,35 @@ TEST(wkt_export,
                 "  }\n"
                 "}";
     auto obj = createFromUserInput(json, nullptr);
-    auto gdr = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
-    ASSERT_TRUE(gdr != nullptr);
-    EXPECT_EQ(gdr->exportToJSON((JSONFormatter::create().get())), json);
+    auto grf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(grf != nullptr);
+    EXPECT_EQ(grf->exportToJSON((JSONFormatter::create().get())), json);
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_geodetic_reference_frame_errors) {
+TEST(json_import,
+     dynamic_geodetic_reference_frame_with_implicit_prime_meridian) {
+    auto json = "{\n"
+                "  \"type\": \"DynamicGeodeticReferenceFrame\",\n"
+                "  \"name\": \"World Geodetic System 1984\",\n"
+                "  \"frame_reference_epoch\": 1,\n"
+                "  \"deformation_model\": \"foo\",\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"semi_major_axis\": 6378137,\n"
+                "    \"inverse_flattening\": 298.257223563\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto dgrf = nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(dgrf != nullptr);
+    EXPECT_EQ(dgrf->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, geodetic_reference_frame_errors) {
     EXPECT_THROW(
         createFromUserInput(
             "{ \"type\": \"GeodeticReferenceFrame\", \"name\": \"foo\" }",
@@ -9308,7 +9327,22 @@ TEST(wkt_export, json_import_geodetic_reference_frame_errors) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_several_usages) {
+TEST(json_import, dynamic_vertical_reference_frame) {
+    auto json = "{\n"
+                "  \"type\": \"DynamicVerticalReferenceFrame\",\n"
+                "  \"name\": \"bar\",\n"
+                "  \"frame_reference_epoch\": 1,\n"
+                "  \"deformation_model\": \"foo\"\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto dvrf = nn_dynamic_pointer_cast<DynamicVerticalReferenceFrame>(obj);
+    ASSERT_TRUE(dvrf != nullptr);
+    EXPECT_EQ(dvrf->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, several_usages) {
     auto json = "{\n"
                 "  \"type\": \"GeodeticReferenceFrame\",\n"
                 "  \"name\": \"World Geodetic System 1984\",\n"
@@ -9341,7 +9375,7 @@ TEST(wkt_export, json_import_several_usages) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_geographic_crs) {
+TEST(json_import, geographic_crs) {
     auto json = "{\n"
                 "  \"type\": \"GeographicCRS\",\n"
                 "  \"name\": \"WGS 84\",\n"
@@ -9392,7 +9426,7 @@ TEST(wkt_export, json_import_geographic_crs) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_geographic_crs_errors) {
+TEST(json_import, geographic_crs_errors) {
     EXPECT_THROW(
         createFromUserInput(
             "{ \"type\": \"GeographicCRS\", \"name\": \"foo\" }", nullptr),
@@ -9450,7 +9484,7 @@ TEST(wkt_export, json_import_geographic_crs_errors) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_geocentric_crs) {
+TEST(json_import, geocentric_crs) {
     auto json = "{\n"
                 "  \"type\": \"GeodeticCRS\",\n"
                 "  \"name\": \"WGS 84\",\n"
@@ -9495,7 +9529,7 @@ TEST(wkt_export, json_import_geocentric_crs) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_projected_crs) {
+TEST(json_import, projected_crs) {
     auto json = "{\n"
                 "  \"type\": \"ProjectedCRS\",\n"
                 "  \"name\": \"WGS 84 / UTM zone 31N\",\n"
@@ -9615,7 +9649,7 @@ TEST(wkt_export, json_import_projected_crs) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_compound_crs) {
+TEST(json_import, compound_crs) {
     auto json = "{\n"
                 "  \"type\": \"CompoundCRS\",\n"
                 "  \"name\": \"WGS 84 + EGM2008 height\",\n"
@@ -9687,7 +9721,7 @@ TEST(wkt_export, json_import_compound_crs) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_bound_crs) {
+TEST(json_import, bound_crs) {
     auto json =
         "{\n"
         "  \"type\": \"BoundCRS\",\n"
@@ -9788,7 +9822,7 @@ TEST(wkt_export, json_import_bound_crs) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_transformation) {
+TEST(json_import, transformation) {
     auto json = "{\n"
                 "  \"type\": \"Transformation\",\n"
                 "  \"name\": \"GDA94 to GDA2020 (1)\",\n"
@@ -9975,7 +10009,7 @@ TEST(wkt_export, json_import_transformation) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_export, json_import_concatenated_operation) {
+TEST(json_import, concatenated_operation) {
     auto json =
         "{\n"
         "  \"type\": \"ConcatenatedOperation\",\n"
@@ -10401,4 +10435,184 @@ TEST(wkt_export, json_import_concatenated_operation) {
     auto concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(obj);
     ASSERT_TRUE(concat != nullptr);
     EXPECT_EQ(concat->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, geographic_crs_with_datum_ensemble) {
+    auto json = "{\n"
+                "  \"type\": \"GeographicCRS\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"datum_ensemble\": {\n"
+                "    \"name\": \"WGS 84 ensemble\",\n"
+                "    \"members\": [\n"
+                "      {\n"
+                "        \"name\": \"World Geodetic System 1984 (Transit)\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"World Geodetic System 1984 (G730)\"\n"
+                "      }\n"
+                "    ],\n"
+                "    \"ellipsoid\": {\n"
+                "      \"name\": \"WGS 84\",\n"
+                "      \"semi_major_axis\": 6378137,\n"
+                "      \"inverse_flattening\": 298.257223563\n"
+                "    },\n"
+                "    \"accuracy\": \"2\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"ellipsoidal\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Latitude\",\n"
+                "        \"abbreviation\": \"lat\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Longitude\",\n"
+                "        \"abbreviation\": \"lon\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+
+    auto expected_json =
+        "{\n"
+        "  \"type\": \"GeographicCRS\",\n"
+        "  \"name\": \"WGS 84\",\n"
+        "  \"datum_ensemble\": {\n"
+        "    \"name\": \"WGS 84 ensemble\",\n"
+        "    \"members\": [\n"
+        "      {\n"
+        "        \"name\": \"World Geodetic System 1984 (Transit)\",\n"
+        "        \"id\": {\n"
+        "          \"authority\": \"EPSG\",\n"
+        "          \"code\": 1166\n"
+        "        }\n"
+        "      },\n"
+        "      {\n"
+        "        \"name\": \"World Geodetic System 1984 (G730)\",\n"
+        "        \"id\": {\n"
+        "          \"authority\": \"EPSG\",\n"
+        "          \"code\": 1152\n"
+        "        }\n"
+        "      }\n"
+        "    ],\n"
+        "    \"ellipsoid\": {\n"
+        "      \"name\": \"WGS 84\",\n"
+        "      \"semi_major_axis\": 6378137,\n"
+        "      \"inverse_flattening\": 298.257223563,\n"
+        "      \"id\": {\n"
+        "        \"authority\": \"EPSG\",\n"
+        "        \"code\": 7030\n"
+        "      }\n"
+        "    },\n"
+        "    \"accuracy\": \"2\"\n"
+        "  },\n"
+        "  \"coordinate_system\": {\n"
+        "    \"subtype\": \"ellipsoidal\",\n"
+        "    \"axis\": [\n"
+        "      {\n"
+        "        \"name\": \"Latitude\",\n"
+        "        \"abbreviation\": \"lat\",\n"
+        "        \"direction\": \"north\",\n"
+        "        \"unit\": \"degree\"\n"
+        "      },\n"
+        "      {\n"
+        "        \"name\": \"Longitude\",\n"
+        "        \"abbreviation\": \"lon\",\n"
+        "        \"direction\": \"east\",\n"
+        "        \"unit\": \"degree\"\n"
+        "      }\n"
+        "    ]\n"
+        "  }\n"
+        "}";
+
+    {
+        // No database
+        auto obj = createFromUserInput(json, nullptr);
+        auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(gcrs != nullptr);
+        EXPECT_EQ(gcrs->exportToJSON((JSONFormatter::create().get())), json);
+    }
+    {
+        auto obj = createFromUserInput(json, DatabaseContext::create());
+        auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(gcrs != nullptr);
+        EXPECT_EQ(gcrs->exportToJSON((JSONFormatter::create().get())),
+                  expected_json);
+    }
+    {
+        auto obj =
+            createFromUserInput(expected_json, DatabaseContext::create());
+        auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(gcrs != nullptr);
+        EXPECT_EQ(gcrs->exportToJSON((JSONFormatter::create().get())),
+                  expected_json);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, datum_ensemble_without_ellipsoid) {
+    auto json = "{\n"
+                "  \"type\": \"DatumEnsemble\",\n"
+                "  \"name\": \"ensemble\",\n"
+                "  \"members\": [\n"
+                "    {\n"
+                "      \"name\": \"member1\"\n"
+                "    },\n"
+                "    {\n"
+                "      \"name\": \"member2\"\n"
+                "    }\n"
+                "  ],\n"
+                "  \"accuracy\": \"2\"\n"
+                "}";
+
+    // No database
+    auto obj = createFromUserInput(json, nullptr);
+    auto ensemble = nn_dynamic_pointer_cast<DatumEnsemble>(obj);
+    ASSERT_TRUE(ensemble != nullptr);
+    EXPECT_EQ(ensemble->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, vertical_crs_with_datum_ensemble) {
+    auto json = "{\n"
+                "  \"type\": \"VerticalCRS\",\n"
+                "  \"name\": \"foo\",\n"
+                "  \"datum_ensemble\": {\n"
+                "    \"name\": \"ensemble\",\n"
+                "    \"members\": [\n"
+                "      {\n"
+                "        \"name\": \"member1\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"member2\"\n"
+                "      }\n"
+                "    ],\n"
+                "    \"accuracy\": \"2\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"vertical\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Gravity-related height\",\n"
+                "        \"abbreviation\": \"H\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+
+    // No database
+    auto obj = createFromUserInput(json, nullptr);
+    auto vcrs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(vcrs != nullptr);
+    EXPECT_EQ(vcrs->exportToJSON((JSONFormatter::create().get())), json);
 }

@@ -1362,7 +1362,9 @@ void GeodeticCRS::_exportToJSON(
         writer.AddObjKey("datum");
         l_datum->_exportToJSON(formatter);
     } else {
-        // TODO DatumEnsemble
+        writer.AddObjKey("datum_ensemble");
+        formatter->setOmitTypeInImmediateChild();
+        datumEnsemble()->_exportToJSON(formatter);
     }
 
     writer.AddObjKey("coordinate_system");
@@ -2113,7 +2115,9 @@ void GeographicCRS::_exportToJSON(
         writer.AddObjKey("datum");
         l_datum->_exportToJSON(formatter);
     } else {
-        // TODO DatumEnsemble
+        writer.AddObjKey("datum_ensemble");
+        formatter->setOmitTypeInImmediateChild();
+        datumEnsemble()->_exportToJSON(formatter);
     }
 
     writer.AddObjKey("coordinate_system");
@@ -2305,8 +2309,15 @@ void VerticalCRS::_exportToJSON(
         writer.Add(l_name);
     }
 
-    writer.AddObjKey("datum");
-    datum()->_exportToJSON(formatter);
+    const auto &l_datum(datum());
+    if (l_datum) {
+        writer.AddObjKey("datum");
+        l_datum->_exportToJSON(formatter);
+    } else {
+        writer.AddObjKey("datum_ensemble");
+        formatter->setOmitTypeInImmediateChild();
+        datumEnsemble()->_exportToJSON(formatter);
+    }
 
     writer.AddObjKey("coordinate_system");
     formatter->setOmitTypeInImmediateChild();
