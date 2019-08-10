@@ -257,7 +257,7 @@ void UnitOfMeasure::_exportToJSON(
     } else if (l_type == Type::TIME) {
         writer.Add("TimeUnit");
     } else if (l_type == Type::PARAMETRIC) {
-        writer.Add("ParametericUnit");
+        writer.Add("ParametricUnit");
     } else {
         writer.Add("Unit");
     }

@@ -2711,6 +2711,7 @@ void DerivedCRS::_exportToJSON(
     baseCRS()->_exportToJSON(formatter);
 
     writer.AddObjKey("conversion");
+    formatter->setOmitTypeInImmediateChild();
     derivingConversionRef()->_exportToJSON(formatter);
 
     writer.AddObjKey("coordinate_system");
@@ -4837,6 +4838,7 @@ void TemporalCRS::_exportToJSON(
     }
 
     writer.AddObjKey("datum");
+    formatter->setOmitTypeInImmediateChild();
     datum()->_exportToJSON(formatter);
 
     writer.AddObjKey("coordinate_system");
@@ -4974,6 +4976,7 @@ void EngineeringCRS::_exportToJSON(
     }
 
     writer.AddObjKey("datum");
+    formatter->setOmitTypeInImmediateChild();
     datum()->_exportToJSON(formatter);
 
     writer.AddObjKey("coordinate_system");
@@ -5105,6 +5108,7 @@ void ParametricCRS::_exportToJSON(
     }
 
     writer.AddObjKey("datum");
+    formatter->setOmitTypeInImmediateChild();
     datum()->_exportToJSON(formatter);
 
     writer.AddObjKey("coordinate_system");

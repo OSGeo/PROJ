@@ -4414,6 +4414,61 @@ class JSONParser {
     TransformationNNPtr buildTransformation(const json &j);
     ConcatenatedOperationNNPtr buildConcatenatedOperation(const json &j);
 
+    static util::optional<std::string> getAnchor(const json &j) {
+        util::optional<std::string> anchor;
+        if (j.contains("anchor")) {
+            anchor = getString(j, "anchor");
+        }
+        return anchor;
+    }
+
+    EngineeringDatumNNPtr buildEngineeringDatum(const json &j) {
+        return EngineeringDatum::create(buildProperties(j), getAnchor(j));
+    }
+
+    ParametricDatumNNPtr buildParametricDatum(const json &j) {
+        return ParametricDatum::create(buildProperties(j), getAnchor(j));
+    }
+
+    TemporalDatumNNPtr buildTemporalDatum(const json &j) {
+        auto calendar = getString(j, "calendar");
+        auto origin = DateTime::create(j.contains("time_origin")
+                                           ? getString(j, "time_origin")
+                                           : std::string());
+        return TemporalDatum::create(buildProperties(j), origin, calendar);
+    }
+
+    template <class TargetCRS, class DatumBuilderType,
+              class CS = CoordinateSystem>
+    util::nn<std::shared_ptr<TargetCRS>> buildCRS(const json &j,
+                                                  DatumBuilderType f) {
+        auto datum = (this->*f)(getObject(j, "datum"));
+        auto cs = buildCS(getObject(j, "coordinate_system"));
+        auto csCast = util::nn_dynamic_pointer_cast<CS>(cs);
+        if (!csCast) {
+            throw ParsingException("coordinate_system not of expected type");
+        }
+        return TargetCRS::create(buildProperties(j), datum,
+                                 NN_NO_CHECK(csCast));
+    }
+
+    template <class TargetCRS, class BaseCRS, class CS = CoordinateSystem>
+    util::nn<std::shared_ptr<TargetCRS>> buildDerivedCRS(const json &j) {
+        auto baseCRSObj = create(getObject(j, "base_crs"));
+        auto baseCRS = util::nn_dynamic_pointer_cast<BaseCRS>(baseCRSObj);
+        if (!baseCRS) {
+            throw ParsingException("base_crs not of expected type");
+        }
+        auto cs = buildCS(getObject(j, "coordinate_system"));
+        auto csCast = util::nn_dynamic_pointer_cast<CS>(cs);
+        if (!csCast) {
+            throw ParsingException("coordinate_system not of expected type");
+        }
+        auto conv = buildConversion(getObject(j, "conversion"));
+        return TargetCRS::create(buildProperties(j), NN_NO_CHECK(baseCRS), conv,
+                                 NN_NO_CHECK(csCast));
+    }
+
   public:
     JSONParser() = default;
 
@@ -4511,7 +4566,7 @@ UnitOfMeasure JSONParser::getUnit(const json &j, const char *key) {
         type = UnitOfMeasure::Type::SCALE;
     } else if (typeStr == "TimeUnit") {
         type = UnitOfMeasure::Type::TIME;
-    } else if (typeStr == "ParametericUnit") {
+    } else if (typeStr == "ParametricUnit") {
         type = UnitOfMeasure::Type::PARAMETRIC;
     } else if (typeStr == "Unit") {
         type = UnitOfMeasure::Type::UNKNOWN;
@@ -4695,6 +4750,58 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     if (type == "BoundCRS") {
         return buildBoundCRS(j);
     }
+    if (type == "EngineeringCRS") {
+        return buildCRS<EngineeringCRS>(j, &JSONParser::buildEngineeringDatum);
+    }
+    if (type == "ParametricCRS") {
+        return buildCRS<ParametricCRS,
+                        decltype(&JSONParser::buildParametricDatum),
+                        ParametricCS>(j, &JSONParser::buildParametricDatum);
+    }
+    if (type == "TemporalCRS") {
+        return buildCRS<TemporalCRS, decltype(&JSONParser::buildTemporalDatum),
+                        TemporalCS>(j, &JSONParser::buildTemporalDatum);
+    }
+    if (type == "DerivedGeodeticCRS") {
+        auto baseCRSObj = create(getObject(j, "base_crs"));
+        auto baseCRS = util::nn_dynamic_pointer_cast<GeodeticCRS>(baseCRSObj);
+        if (!baseCRS) {
+            throw ParsingException("base_crs not of expected type");
+        }
+        auto cs = buildCS(getObject(j, "coordinate_system"));
+        auto conv = buildConversion(getObject(j, "conversion"));
+        auto csCartesian = util::nn_dynamic_pointer_cast<CartesianCS>(cs);
+        if (csCartesian)
+            return DerivedGeodeticCRS::create(buildProperties(j),
+                                              NN_NO_CHECK(baseCRS), conv,
+                                              NN_NO_CHECK(csCartesian));
+        auto csSpherical = util::nn_dynamic_pointer_cast<SphericalCS>(cs);
+        if (csSpherical)
+            return DerivedGeodeticCRS::create(buildProperties(j),
+                                              NN_NO_CHECK(baseCRS), conv,
+                                              NN_NO_CHECK(csSpherical));
+        throw ParsingException("coordinate_system not of expected type");
+    }
+    if (type == "DerivedGeographicCRS") {
+        return buildDerivedCRS<DerivedGeographicCRS, GeodeticCRS,
+                               EllipsoidalCS>(j);
+    }
+    if (type == "DerivedProjectedCRS") {
+        return buildDerivedCRS<DerivedProjectedCRS, ProjectedCRS>(j);
+    }
+    if (type == "DerivedVerticalCRS") {
+        return buildDerivedCRS<DerivedVerticalCRS, VerticalCRS, VerticalCS>(j);
+    }
+    if (type == "DerivedEngineeringCRS") {
+        return buildDerivedCRS<DerivedEngineeringCRS, EngineeringCRS>(j);
+    }
+    if (type == "DerivedParametricCRS") {
+        return buildDerivedCRS<DerivedParametricCRS, ParametricCRS,
+                               ParametricCS>(j);
+    }
+    if (type == "DerivedTemporalCRS") {
+        return buildDerivedCRS<DerivedTemporalCRS, TemporalCRS, TemporalCS>(j);
+    }
     if (type == "DatumEnsemble") {
         return buildDatumEnsemble(j);
     }
@@ -4709,6 +4816,15 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     }
     if (type == "DynamicVerticalReferenceFrame") {
         return buildDynamicVerticalReferenceFrame(j);
+    }
+    if (type == "EngineeringDatum") {
+        return buildEngineeringDatum(j);
+    }
+    if (type == "ParametricDatum") {
+        return buildParametricDatum(j);
+    }
+    if (type == "TemporalDatum") {
+        return buildTemporalDatum(j);
     }
     if (type == "Ellipsoid") {
         return buildEllipsoid(j);
@@ -5033,7 +5149,9 @@ JSONParser::buildConcatenatedOperation(const json &j) {
 CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
     auto dirString = getString(j, "direction");
     auto abbreviation = getString(j, "abbreviation");
-    auto unit = getUnit(j, "unit");
+    auto unit = j.contains("unit") ? getUnit(j, "unit")
+                                   : UnitOfMeasure(std::string(), 1.0,
+                                                   UnitOfMeasure::Type::NONE);
     auto direction = AxisDirection::valueOf(dirString);
     if (!direction) {
         throw ParsingException(concat("unhandled axis direction: ", dirString));
@@ -5198,12 +5316,8 @@ JSONParser::buildGeodeticReferenceFrame(const json &j) {
     auto pm = j.contains("prime_meridian")
                   ? buildPrimeMeridian(getObject(j, "prime_meridian"))
                   : PrimeMeridian::GREENWICH;
-    optional<std::string> anchor;
-    if (j.contains("anchor")) {
-        anchor = getString(j, "anchor");
-    }
     return GeodeticReferenceFrame::create(
-        buildProperties(j), buildEllipsoid(ellipsoidJ), anchor, pm);
+        buildProperties(j), buildEllipsoid(ellipsoidJ), getAnchor(j), pm);
 }
 
 // ---------------------------------------------------------------------------
@@ -5214,10 +5328,6 @@ JSONParser::buildDynamicGeodeticReferenceFrame(const json &j) {
     auto pm = j.contains("prime_meridian")
                   ? buildPrimeMeridian(getObject(j, "prime_meridian"))
                   : PrimeMeridian::GREENWICH;
-    optional<std::string> anchor;
-    if (j.contains("anchor")) {
-        anchor = getString(j, "anchor");
-    }
     Measure frameReferenceEpoch(getNumber(j, "frame_reference_epoch"),
                                 UnitOfMeasure::YEAR);
     optional<std::string> deformationModel;
@@ -5225,7 +5335,7 @@ JSONParser::buildDynamicGeodeticReferenceFrame(const json &j) {
         deformationModel = getString(j, "deformation_model");
     }
     return DynamicGeodeticReferenceFrame::create(
-        buildProperties(j), buildEllipsoid(ellipsoidJ), anchor, pm,
+        buildProperties(j), buildEllipsoid(ellipsoidJ), getAnchor(j), pm,
         frameReferenceEpoch, deformationModel);
 }
 
@@ -5233,21 +5343,13 @@ JSONParser::buildDynamicGeodeticReferenceFrame(const json &j) {
 
 VerticalReferenceFrameNNPtr
 JSONParser::buildVerticalReferenceFrame(const json &j) {
-    optional<std::string> anchor;
-    if (j.contains("anchor")) {
-        anchor = getString(j, "anchor");
-    }
-    return VerticalReferenceFrame::create(buildProperties(j), anchor);
+    return VerticalReferenceFrame::create(buildProperties(j), getAnchor(j));
 }
 
 // ---------------------------------------------------------------------------
 
 DynamicVerticalReferenceFrameNNPtr
 JSONParser::buildDynamicVerticalReferenceFrame(const json &j) {
-    optional<std::string> anchor;
-    if (j.contains("anchor")) {
-        anchor = getString(j, "anchor");
-    }
     Measure frameReferenceEpoch(getNumber(j, "frame_reference_epoch"),
                                 UnitOfMeasure::YEAR);
     optional<std::string> deformationModel;
@@ -5255,7 +5357,7 @@ JSONParser::buildDynamicVerticalReferenceFrame(const json &j) {
         deformationModel = getString(j, "deformation_model");
     }
     return DynamicVerticalReferenceFrame::create(
-        buildProperties(j), anchor, util::optional<RealizationMethod>(),
+        buildProperties(j), getAnchor(j), util::optional<RealizationMethod>(),
         frameReferenceEpoch, deformationModel);
 }
 

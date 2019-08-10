@@ -409,12 +409,13 @@ void CoordinateSystemAxis::_exportToJSON(
     writer.AddObjKey("direction");
     writer.Add(direction().toString());
 
-    writer.AddObjKey("unit");
     const auto &l_unit(unit());
     if (l_unit == common::UnitOfMeasure::METRE ||
         l_unit == common::UnitOfMeasure::DEGREE) {
+        writer.AddObjKey("unit");
         writer.Add(l_unit.name());
-    } else {
+    } else if (l_unit.type() != common::UnitOfMeasure::Type::NONE) {
+        writer.AddObjKey("unit");
         l_unit._exportToJSON(formatter);
     }
 

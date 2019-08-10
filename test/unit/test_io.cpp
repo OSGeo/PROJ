@@ -10581,6 +10581,41 @@ TEST(json_import, datum_ensemble_without_ellipsoid) {
 
 // ---------------------------------------------------------------------------
 
+TEST(json_import, vertical_crs) {
+    auto json = "{\n"
+                "  \"type\": \"VerticalCRS\",\n"
+                "  \"name\": \"EGM2008 height\",\n"
+                "  \"datum\": {\n"
+                "    \"type\": \"VerticalReferenceFrame\",\n"
+                "    \"name\": \"EGM2008 geoid\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"vertical\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Gravity-related height\",\n"
+                "        \"abbreviation\": \"H\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+
+    auto datum = crs->datum();
+    auto datum_json = datum->exportToJSON((JSONFormatter::create().get()));
+    auto datum_obj = createFromUserInput(datum_json, nullptr);
+    auto datum_got = nn_dynamic_pointer_cast<VerticalReferenceFrame>(datum_obj);
+    ASSERT_TRUE(datum_got != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(json_import, vertical_crs_with_datum_ensemble) {
     auto json = "{\n"
                 "  \"type\": \"VerticalCRS\",\n"
@@ -10615,4 +10650,676 @@ TEST(json_import, vertical_crs_with_datum_ensemble) {
     auto vcrs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
     ASSERT_TRUE(vcrs != nullptr);
     EXPECT_EQ(vcrs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, parametric_crs) {
+    auto json = "{\n"
+                "  \"type\": \"ParametricCRS\",\n"
+                "  \"name\": \"WMO standard atmosphere layer 0\",\n"
+                "  \"datum\": {\n"
+                "    \"name\": \"Mean Sea Level\",\n"
+                "    \"anchor\": \"1013.25 hPa at 15°C\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"parametric\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Pressure\",\n"
+                "        \"abbreviation\": \"hPa\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": {\n"
+                "          \"type\": \"ParametricUnit\",\n"
+                "          \"name\": \"HectoPascal\",\n"
+                "          \"conversion_factor\": 100\n"
+                "        }\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<ParametricCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+
+    auto datum = crs->datum();
+    auto datum_json = datum->exportToJSON((JSONFormatter::create().get()));
+    auto datum_obj = createFromUserInput(datum_json, nullptr);
+    auto datum_got = nn_dynamic_pointer_cast<ParametricDatum>(datum_obj);
+    ASSERT_TRUE(datum_got != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, engineering_crs) {
+    auto json = "{\n"
+                "  \"type\": \"EngineeringCRS\",\n"
+                "  \"name\": \"Engineering CRS\",\n"
+                "  \"datum\": {\n"
+                "    \"name\": \"Engineering datum\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"Cartesian\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Easting\",\n"
+                "        \"abbreviation\": \"E\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Northing\",\n"
+                "        \"abbreviation\": \"N\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+
+    auto datum = crs->datum();
+    auto datum_json = datum->exportToJSON((JSONFormatter::create().get()));
+    auto datum_obj = createFromUserInput(datum_json, nullptr);
+    auto datum_got = nn_dynamic_pointer_cast<EngineeringDatum>(datum_obj);
+    ASSERT_TRUE(datum_got != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, temporal_crs) {
+    auto json = "{\n"
+                "  \"type\": \"TemporalCRS\",\n"
+                "  \"name\": \"Temporal CRS\",\n"
+                "  \"datum\": {\n"
+                "    \"name\": \"Gregorian calendar\",\n"
+                "    \"calendar\": \"proleptic Gregorian\",\n"
+                "    \"time_origin\": \"0000-01-01\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"TemporalDateTime\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Time\",\n"
+                "        \"abbreviation\": \"T\",\n"
+                "        \"direction\": \"future\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<TemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+
+    auto datum = crs->datum();
+    auto datum_json = datum->exportToJSON((JSONFormatter::create().get()));
+    auto datum_obj = createFromUserInput(datum_json, nullptr);
+    auto datum_got = nn_dynamic_pointer_cast<TemporalDatum>(datum_obj);
+    ASSERT_TRUE(datum_got != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, derived_geodetic_crs) {
+    auto json = "{\n"
+                "  \"type\": \"DerivedGeodeticCRS\",\n"
+                "  \"name\": \"Derived geodetic CRS\",\n"
+                "  \"base_crs\": {\n"
+                "    \"type\": \"GeographicCRS\",\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"datum\": {\n"
+                "      \"type\": \"GeodeticReferenceFrame\",\n"
+                "      \"name\": \"World Geodetic System 1984\",\n"
+                "      \"ellipsoid\": {\n"
+                "        \"name\": \"WGS 84\",\n"
+                "        \"semi_major_axis\": 6378137,\n"
+                "        \"inverse_flattening\": 298.257223563\n"
+                "      }\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"ellipsoidal\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"Latitude\",\n"
+                "          \"abbreviation\": \"lat\",\n"
+                "          \"direction\": \"north\",\n"
+                "          \"unit\": \"degree\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Longitude\",\n"
+                "          \"abbreviation\": \"lon\",\n"
+                "          \"direction\": \"east\",\n"
+                "          \"unit\": \"degree\"\n"
+                "        }\n"
+                "      ]\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"Some conversion\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"Some method\"\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"foo\",\n"
+                "        \"value\": 1,\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"Cartesian\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Geocentric X\",\n"
+                "        \"abbreviation\": \"X\",\n"
+                "        \"direction\": \"geocentricX\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geocentric Y\",\n"
+                "        \"abbreviation\": \"Y\",\n"
+                "        \"direction\": \"geocentricY\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geocentric Z\",\n"
+                "        \"abbreviation\": \"Z\",\n"
+                "        \"direction\": \"geocentricZ\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, derived_geographic_crs) {
+    auto json = "{\n"
+                "  \"type\": \"DerivedGeographicCRS\",\n"
+                "  \"name\": \"WMO Atlantic Pole\",\n"
+                "  \"base_crs\": {\n"
+                "    \"type\": \"GeographicCRS\",\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"datum\": {\n"
+                "      \"type\": \"GeodeticReferenceFrame\",\n"
+                "      \"name\": \"World Geodetic System 1984\",\n"
+                "      \"ellipsoid\": {\n"
+                "        \"name\": \"WGS 84\",\n"
+                "        \"semi_major_axis\": 6378137,\n"
+                "        \"inverse_flattening\": 298.257223563\n"
+                "      }\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"ellipsoidal\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"Latitude\",\n"
+                "          \"abbreviation\": \"lat\",\n"
+                "          \"direction\": \"north\",\n"
+                "          \"unit\": \"degree\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Longitude\",\n"
+                "          \"abbreviation\": \"lon\",\n"
+                "          \"direction\": \"east\",\n"
+                "          \"unit\": \"degree\"\n"
+                "        }\n"
+                "      ]\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"Atlantic pole\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"Pole rotation\"\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"Latitude of rotated pole\",\n"
+                "        \"value\": 52,\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Longitude of rotated pole\",\n"
+                "        \"value\": -30,\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Axis rotation\",\n"
+                "        \"value\": -25,\n"
+                "        \"unit\": \"degree\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"ellipsoidal\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Latitude\",\n"
+                "        \"abbreviation\": \"lat\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Longitude\",\n"
+                "        \"abbreviation\": \"lon\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, derived_projected_crs) {
+    auto json = "{\n"
+                "  \"type\": \"DerivedProjectedCRS\",\n"
+                "  \"name\": \"derived projectedCRS\",\n"
+                "  \"base_crs\": {\n"
+                "    \"type\": \"ProjectedCRS\",\n"
+                "    \"name\": \"WGS 84 / UTM zone 31N\",\n"
+                "    \"base_crs\": {\n"
+                "      \"name\": \"WGS 84\",\n"
+                "      \"datum\": {\n"
+                "        \"type\": \"GeodeticReferenceFrame\",\n"
+                "        \"name\": \"World Geodetic System 1984\",\n"
+                "        \"ellipsoid\": {\n"
+                "          \"name\": \"WGS 84\",\n"
+                "          \"semi_major_axis\": 6378137,\n"
+                "          \"inverse_flattening\": 298.257223563\n"
+                "        }\n"
+                "      },\n"
+                "      \"coordinate_system\": {\n"
+                "        \"subtype\": \"ellipsoidal\",\n"
+                "        \"axis\": [\n"
+                "          {\n"
+                "            \"name\": \"Latitude\",\n"
+                "            \"abbreviation\": \"lat\",\n"
+                "            \"direction\": \"north\",\n"
+                "            \"unit\": \"degree\"\n"
+                "          },\n"
+                "          {\n"
+                "            \"name\": \"Longitude\",\n"
+                "            \"abbreviation\": \"lon\",\n"
+                "            \"direction\": \"east\",\n"
+                "            \"unit\": \"degree\"\n"
+                "          }\n"
+                "        ]\n"
+                "      }\n"
+                "    },\n"
+                "    \"conversion\": {\n"
+                "      \"name\": \"UTM zone 31N\",\n"
+                "      \"method\": {\n"
+                "        \"name\": \"Transverse Mercator\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 9807\n"
+                "        }\n"
+                "      },\n"
+                "      \"parameters\": [\n"
+                "        {\n"
+                "          \"name\": \"Latitude of natural origin\",\n"
+                "          \"value\": 0,\n"
+                "          \"unit\": \"degree\",\n"
+                "          \"id\": {\n"
+                "            \"authority\": \"EPSG\",\n"
+                "            \"code\": 8801\n"
+                "          }\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Longitude of natural origin\",\n"
+                "          \"value\": 3,\n"
+                "          \"unit\": \"degree\",\n"
+                "          \"id\": {\n"
+                "            \"authority\": \"EPSG\",\n"
+                "            \"code\": 8802\n"
+                "          }\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Scale factor at natural origin\",\n"
+                "          \"value\": 0.9996,\n"
+                "          \"unit\": \"unity\",\n"
+                "          \"id\": {\n"
+                "            \"authority\": \"EPSG\",\n"
+                "            \"code\": 8805\n"
+                "          }\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"False easting\",\n"
+                "          \"value\": 500000,\n"
+                "          \"unit\": \"metre\",\n"
+                "          \"id\": {\n"
+                "            \"authority\": \"EPSG\",\n"
+                "            \"code\": 8806\n"
+                "          }\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"False northing\",\n"
+                "          \"value\": 0,\n"
+                "          \"unit\": \"metre\",\n"
+                "          \"id\": {\n"
+                "            \"authority\": \"EPSG\",\n"
+                "            \"code\": 8807\n"
+                "          }\n"
+                "        }\n"
+                "      ]\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"Cartesian\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"Easting\",\n"
+                "          \"abbreviation\": \"E\",\n"
+                "          \"direction\": \"east\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Northing\",\n"
+                "          \"abbreviation\": \"N\",\n"
+                "          \"direction\": \"north\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        }\n"
+                "      ]\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"unnamed\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"PROJ unimplemented\"\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"foo\",\n"
+                "        \"value\": 1,\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"Cartesian\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Easting\",\n"
+                "        \"abbreviation\": \"E\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Northing\",\n"
+                "        \"abbreviation\": \"N\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<DerivedProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, derived_vertical_crs) {
+    auto json = "{\n"
+                "  \"type\": \"DerivedVerticalCRS\",\n"
+                "  \"name\": \"Derived vertCRS\",\n"
+                "  \"base_crs\": {\n"
+                "    \"type\": \"VerticalCRS\",\n"
+                "    \"name\": \"ODN height\",\n"
+                "    \"datum\": {\n"
+                "      \"type\": \"VerticalReferenceFrame\",\n"
+                "      \"name\": \"Ordnance Datum Newlyn\"\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"vertical\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"Gravity-related height\",\n"
+                "          \"abbreviation\": \"H\",\n"
+                "          \"direction\": \"up\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        }\n"
+                "      ]\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"unnamed\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"PROJ unimplemented\"\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"foo\",\n"
+                "        \"value\": 1,\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"vertical\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Gravity-related height\",\n"
+                "        \"abbreviation\": \"H\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<DerivedVerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, derived_engineering_crs) {
+    auto json = "{\n"
+                "  \"type\": \"DerivedEngineeringCRS\",\n"
+                "  \"name\": \"Derived EngineeringCRS\",\n"
+                "  \"base_crs\": {\n"
+                "    \"type\": \"EngineeringCRS\",\n"
+                "    \"name\": \"Engineering CRS\",\n"
+                "    \"datum\": {\n"
+                "      \"name\": \"Engineering datum\"\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"Cartesian\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"Easting\",\n"
+                "          \"abbreviation\": \"E\",\n"
+                "          \"direction\": \"east\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Northing\",\n"
+                "          \"abbreviation\": \"N\",\n"
+                "          \"direction\": \"north\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        }\n"
+                "      ]\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"unnamed\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"PROJ unimplemented\"\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"foo\",\n"
+                "        \"value\": 1,\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"Cartesian\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Easting\",\n"
+                "        \"abbreviation\": \"E\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Northing\",\n"
+                "        \"abbreviation\": \"N\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<DerivedEngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, derived_parametric_crs) {
+    auto json = "{\n"
+                "  \"type\": \"DerivedParametricCRS\",\n"
+                "  \"name\": \"Derived ParametricCRS\",\n"
+                "  \"base_crs\": {\n"
+                "    \"type\": \"ParametricCRS\",\n"
+                "    \"name\": \"Parametric CRS\",\n"
+                "    \"datum\": {\n"
+                "      \"name\": \"Parametric datum\"\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"parametric\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"unknown parametric\",\n"
+                "          \"abbreviation\": \"\",\n"
+                "          \"direction\": \"unspecified\",\n"
+                "          \"unit\": {\n"
+                "            \"type\": \"ParametricUnit\",\n"
+                "            \"name\": \"unknown\",\n"
+                "            \"conversion_factor\": 1\n"
+                "          }\n"
+                "        }\n"
+                "      ]\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"unnamed\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"PROJ unimplemented\"\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"foo\",\n"
+                "        \"value\": 1,\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"parametric\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Pressure\",\n"
+                "        \"abbreviation\": \"hPa\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": {\n"
+                "          \"type\": \"ParametricUnit\",\n"
+                "          \"name\": \"HectoPascal\",\n"
+                "          \"conversion_factor\": 100\n"
+                "        }\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<DerivedParametricCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, derived_temporal_crs) {
+    auto json = "{\n"
+                "  \"type\": \"DerivedTemporalCRS\",\n"
+                "  \"name\": \"Derived TemporalCRS\",\n"
+                "  \"base_crs\": {\n"
+                "    \"type\": \"TemporalCRS\",\n"
+                "    \"name\": \"Temporal CRS\",\n"
+                "    \"datum\": {\n"
+                "      \"name\": \"Gregorian calendar\",\n"
+                "      \"calendar\": \"proleptic Gregorian\",\n"
+                "      \"time_origin\": \"0000-01-01\"\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"TemporalDateTime\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"unknown temporal\",\n"
+                "          \"abbreviation\": \"\",\n"
+                "          \"direction\": \"future\",\n"
+                "          \"unit\": {\n"
+                "            \"type\": \"TimeUnit\",\n"
+                "            \"name\": \"unknown\",\n"
+                "            \"conversion_factor\": 1\n"
+                "          }\n"
+                "        }\n"
+                "      ]\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"unnamed\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"PROJ unimplemented\"\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"foo\",\n"
+                "        \"value\": 1,\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"TemporalDateTime\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Time\",\n"
+                "        \"abbreviation\": \"T\",\n"
+                "        \"direction\": \"future\"\n"
+                "      }\n"
+                "    ]\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto crs = nn_dynamic_pointer_cast<DerivedTemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
 }
