@@ -4389,6 +4389,7 @@ class JSONParser {
     static Length getLength(const json &j, const char *key);
     static Measure getMeasure(const json &j);
 
+    IdentifierNNPtr buildId(const json &j, bool removeInverseOf);
     ObjectDomainPtr buildObjectDomain(const json &j);
     PropertyMap buildProperties(const json &j, bool removeInverseOf = false);
 
@@ -4659,6 +4660,34 @@ ObjectDomainPtr JSONParser::buildObjectDomain(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+IdentifierNNPtr JSONParser::buildId(const json &j, bool removeInverseOf) {
+
+    PropertyMap propertiesId;
+    auto codeSpace(getString(j, "authority"));
+    if (removeInverseOf && starts_with(codeSpace, "INVERSE(") &&
+        codeSpace.back() == ')') {
+        codeSpace = codeSpace.substr(strlen("INVERSE("));
+        codeSpace.resize(codeSpace.size() - 1);
+    }
+    propertiesId.set(metadata::Identifier::CODESPACE_KEY, codeSpace);
+    propertiesId.set(metadata::Identifier::AUTHORITY_KEY, codeSpace);
+    if (!j.contains("code")) {
+        throw ParsingException("Missing \"code\" key");
+    }
+    std::string code;
+    auto codeJ = j["code"];
+    if (codeJ.is_string()) {
+        code = codeJ.get<std::string>();
+    } else if (codeJ.is_number_integer()) {
+        code = internal::toString(codeJ.get<int>());
+    } else {
+        throw ParsingException("Unexpected type for value of \"code\"");
+    }
+    return Identifier::create(code, propertiesId);
+}
+
+// ---------------------------------------------------------------------------
+
 PropertyMap JSONParser::buildProperties(const json &j, bool removeInverseOf) {
     PropertyMap map;
     std::string name(getName(j));
@@ -4667,26 +4696,22 @@ PropertyMap JSONParser::buildProperties(const json &j, bool removeInverseOf) {
     }
     map.set(IdentifiedObject::NAME_KEY, name);
 
-    if (j.contains("id")) {
-        auto id = getObject(j, "id");
-        auto codeSpace(getString(id, "authority"));
-        if (removeInverseOf && starts_with(codeSpace, "INVERSE(") &&
-            codeSpace.back() == ')') {
-            codeSpace = codeSpace.substr(strlen("INVERSE("));
-            codeSpace.resize(codeSpace.size() - 1);
+    if (j.contains("ids")) {
+        auto idsJ = getArray(j, "ids");
+        auto identifiers = ArrayOfBaseObject::create();
+        for (const auto &idJ : idsJ) {
+            if (!idJ.is_object()) {
+                throw ParsingException(
+                    "Unexpected type for value of \"ids\" child");
+            }
+            identifiers->add(buildId(idJ, removeInverseOf));
         }
-        map.set(metadata::Identifier::CODESPACE_KEY, codeSpace);
-        if (!id.contains("code")) {
-            throw ParsingException("Missing \"code\" key");
-        }
-        auto code = id["code"];
-        if (code.is_string()) {
-            map.set(metadata::Identifier::CODE_KEY, code.get<std::string>());
-        } else if (code.is_number_integer()) {
-            map.set(metadata::Identifier::CODE_KEY, code.get<int>());
-        } else {
-            throw ParsingException("Unexpected type for value of \"code\"");
-        }
+        map.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
+    } else if (j.contains("id")) {
+        auto idJ = getObject(j, "id");
+        auto identifiers = ArrayOfBaseObject::create();
+        identifiers->add(buildId(idJ, removeInverseOf));
+        map.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
     }
 
     if (j.contains("remarks")) {

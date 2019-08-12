@@ -11323,3 +11323,28 @@ TEST(json_import, derived_temporal_crs) {
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, multiple_ids) {
+    auto json = "{\n"
+                "  \"type\": \"Ellipsoid\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"semi_major_axis\": 6378137,\n"
+                "  \"inverse_flattening\": 298.257223563,\n"
+                "  \"ids\": [\n"
+                "    {\n"
+                "      \"authority\": \"EPSG\",\n"
+                "      \"code\": 4326\n"
+                "    },\n"
+                "    {\n"
+                "      \"authority\": \"FOO\",\n"
+                "      \"code\": \"BAR\"\n"
+                "    }\n"
+                "  ]\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
+    ASSERT_TRUE(ellps != nullptr);
+    EXPECT_EQ(ellps->exportToJSON((JSONFormatter::create().get())), json);
+}

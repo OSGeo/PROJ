@@ -25,9 +25,13 @@
             "type": "array",
             "items": { "$ref": "#/definitions/parameter_value" }
         },
-        "id": { "$ref": "#/definitions/id" }
+        "id": { "$ref": "#/definitions/id" },
+        "ids": { "$ref": "#/definitions/ids" }
       },
       "required" : [ "name", "method", "parameters" ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+      ],
       "additionalProperties": false
     },
 
@@ -79,9 +83,13 @@
                                  "past",
                                  "unspecified" ] },
         "unit": { "$ref": "#/definitions/unit" },
-        "id": { "$ref": "#/definitions/id" }
+        "id": { "$ref": "#/definitions/id" },
+        "ids": { "$ref": "#/definitions/ids" }
       },
       "required" : [ "name", "abbreviation", "direction" ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+      ],
       "additionalProperties": false
     },
 
@@ -125,7 +133,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "components" ],
       "additionalProperties": false
@@ -148,7 +156,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "source_crs", "target_crs", "steps" ],
       "additionalProperties": false
@@ -164,9 +172,13 @@
             "type": "array",
             "items": { "$ref": "#/definitions/parameter_value" }
         },
-        "id": { "$ref": "#/definitions/id" }
+        "id": { "$ref": "#/definitions/id" },
+        "ids": { "$ref": "#/definitions/ids" }
       },
       "required" : [ "name", "method" ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+      ],
       "additionalProperties": false
     },
 
@@ -189,9 +201,13 @@
             "type": "array",
             "items": { "$ref": "#/definitions/axis" }
         },
-        "id": { "$ref": "#/definitions/id" }
+        "id": { "$ref": "#/definitions/id" },
+        "ids": { "$ref": "#/definitions/ids" }
       },
       "required" : [ "subtype", "axis" ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+      ],
       "additionalProperties": false
     },
 
@@ -237,17 +253,25 @@
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
-                    "id": { "$ref": "#/definitions/id" }
+                    "id": { "$ref": "#/definitions/id" },
+                    "ids": { "$ref": "#/definitions/ids" }
                 },
                 "required" : [ "name" ],
+                "allOf": [
+                    { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+                ],
                 "additionalProperties": false
             }
         },
         "ellipsoid": { "$ref": "#/definitions/ellipsoid" },
         "accuracy": { "type": "string" },
-        "id": { "$ref": "#/definitions/id" }
+        "id": { "$ref": "#/definitions/id" },
+        "ids": { "$ref": "#/definitions/ids" }
       },
       "required" : [ "name", "members", "accuracy" ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+      ],
       "additionalProperties": false
     },
 
@@ -266,7 +290,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
      },
      "required" : [ "name", "base_crs", "conversion", "coordinate_system" ],
      "additionalProperties": false
@@ -288,7 +312,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
      },
      "required" : [ "name", "base_crs", "conversion", "coordinate_system" ],
      "additionalProperties": false
@@ -309,7 +333,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
      },
      "required" : [ "name", "base_crs", "conversion", "coordinate_system" ],
      "additionalProperties": false
@@ -330,7 +354,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
      },
      "required" : [ "name", "base_crs", "conversion", "coordinate_system" ],
      "additionalProperties": false
@@ -351,7 +375,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
      },
      "required" : [ "name", "base_crs", "conversion", "coordinate_system" ],
      "additionalProperties": false
@@ -372,7 +396,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
      },
      "required" : [ "name", "base_crs", "conversion", "coordinate_system" ],
      "additionalProperties": false
@@ -394,7 +418,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "ellipsoid", "frame_reference_epoch" ],
       "additionalProperties": false
@@ -414,7 +438,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "frame_reference_epoch" ],
       "additionalProperties": false
@@ -429,7 +453,8 @@
             "name": { "type": "string" },
             "semi_major_axis": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
             "semi_minor_axis": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
-            "id": { "$ref": "#/definitions/id" }
+            "id": { "$ref": "#/definitions/id" },
+            "ids": { "$ref": "#/definitions/ids" }
           },
           "required" : [ "name", "semi_major_axis", "semi_minor_axis" ],
           "additionalProperties": false
@@ -440,7 +465,8 @@
             "name": { "type": "string" },
             "semi_major_axis": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
             "inverse_flattening": { "type": "number" },
-            "id": { "$ref": "#/definitions/id" }
+            "id": { "$ref": "#/definitions/id" },
+           "ids": { "$ref": "#/definitions/ids" }
           },
           "required" : [ "name", "semi_major_axis", "inverse_flattening" ],
           "additionalProperties": false
@@ -450,11 +476,15 @@
             "type": { "type": "string", "enum": ["Ellipsoid"] },
             "name": { "type": "string" },
             "radius": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
-            "id": { "$ref": "#/definitions/id" }
+            "id": { "$ref": "#/definitions/id" },
+            "ids": { "$ref": "#/definitions/ids" }
           },
           "required" : [ "name", "radius" ],
          "additionalProperties": false
         }
+      ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
       ]
     },
 
@@ -471,7 +501,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "datum" ],
       "additionalProperties": false
@@ -489,7 +519,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name" ],
       "additionalProperties": false
@@ -513,7 +543,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name" ],
       "description": "One and only one of datum and datum_ensemble must be provided",
@@ -538,7 +568,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "ellipsoid" ],
       "additionalProperties": false
@@ -556,15 +586,31 @@
       "additionalProperties": false
     },
 
+    "ids": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/id" }
+    },
+
     "method": {
       "type": "object",
       "properties": {
         "type": { "type": "string", "enum": ["OperationMethod"]},
         "name": { "type": "string" },
-        "id": { "$ref": "#/definitions/id" }
+        "id": { "$ref": "#/definitions/id" },
+        "ids": { "$ref": "#/definitions/ids" }
       },
       "required" : [ "name" ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+      ],
       "additionalProperties": false
+    },
+
+    "id_ids_mutually_exclusive": {
+        "not": {
+            "type": "object",
+            "required": [ "id", "ids" ]
+        }
     },
 
     "one_and_only_one_of_datum_or_datum_ensemble": {
@@ -593,16 +639,24 @@
             "area": { "type": "string" },
             "bbox": { "$ref": "#/definitions/bbox" },
             "remarks": { "type": "string" },
-            "id": { "$ref": "#/definitions/id" }
-        }
+            "id": { "$ref": "#/definitions/id" },
+            "ids": { "$ref": "#/definitions/ids" }
+        },
+        "allOf": [
+            { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+        ]
       },
       {
         "type": "object",
         "properties": {
             "usages": { "$ref": "#/definitions/usages" },
             "remarks": { "type": "string" },
-            "id": { "$ref": "#/definitions/id" }
-        }
+            "id": { "$ref": "#/definitions/id" },
+            "ids": { "$ref": "#/definitions/ids" }
+        },
+        "allOf": [
+            { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+        ]
       }
       ]
     },
@@ -619,9 +673,13 @@
            ]
         },
         "unit": { "$ref": "#/definitions/unit" },
-        "id": { "$ref": "#/definitions/id" }
+        "id": { "$ref": "#/definitions/id" },
+        "ids": { "$ref": "#/definitions/ids" }
       },
       "required" : [ "name", "value" ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+      ],
       "additionalProperties": false
     },
 
@@ -638,7 +696,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "datum" ],
       "additionalProperties": false
@@ -656,7 +714,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name" ],
       "additionalProperties": false
@@ -668,9 +726,13 @@
         "type": { "type": "string", "enum": ["PrimeMeridian"] },
         "name": { "type": "string" },
         "longitude": { "$ref": "#/definitions/value_and_unit" },
-        "id": { "$ref": "#/definitions/id" }
+        "id": { "$ref": "#/definitions/id" },
+        "ids": { "$ref": "#/definitions/ids" }
       },
       "required" : [ "name" ],
+      "allOf": [
+        { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+      ],
       "additionalProperties": false
     },
 
@@ -696,7 +758,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
      },
      "required" : [ "name", "base_crs", "conversion", "coordinate_system" ],
      "additionalProperties": false
@@ -715,7 +777,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "datum" ],
       "additionalProperties": false
@@ -734,7 +796,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "calendar" ],
       "additionalProperties": false
@@ -760,7 +822,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name", "source_crs", "target_crs", "method", "parameters" ],
       "additionalProperties": false
@@ -780,9 +842,13 @@
                              "TimeUnit", "ParametricUnit", "Unit"] },
           "name": { "type": "string" },
           "conversion_factor": { "type": "number" },
-          "id": { "$ref": "#/definitions/id" }
+          "id": { "$ref": "#/definitions/id" },
+          "ids": { "$ref": "#/definitions/ids" }
          },
          "required" : [ "type", "name" ],
+         "allOf": [
+            { "$ref": "#/definitions/id_ids_mutually_exclusive" }
+          ],
          "additionalProperties": false
       }
       ]
@@ -836,7 +902,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name"],
       "description": "One and only one of datum and datum_ensemble must be provided",
@@ -859,7 +925,7 @@
         "bbox": {},
         "usages": {},
         "remarks": {},
-        "id": {}
+        "id": {}, "ids": {}
       },
       "required" : [ "name" ],
       "additionalProperties": false
