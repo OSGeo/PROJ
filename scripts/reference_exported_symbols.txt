@@ -344,6 +344,7 @@ osgeo::proj::io::JSONFormatter::ObjectContext::~ObjectContext()
 osgeo::proj::io::JSONFormatter::ObjectContext::ObjectContext(osgeo::proj::io::JSONFormatter&, char const*, bool)
 osgeo::proj::io::JSONFormatter::setIndentationWidth(int)
 osgeo::proj::io::JSONFormatter::setMultiLine(bool)
+osgeo::proj::io::JSONFormatter::setSchema(std::string const&)
 osgeo::proj::io::JSONFormatter::toString() const
 osgeo::proj::io::NoSuchAuthorityCodeException::getAuthorityCode() const
 osgeo::proj::io::NoSuchAuthorityCodeException::getAuthority() const

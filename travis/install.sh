@@ -55,24 +55,24 @@ find /tmp/proj_autoconf_install_from_dist_all
 /tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:32631 -o PROJJSON -q > out.json
 cat out.json
 echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/crsjson.schema.json && echo "Valid !"
+jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
 
 /tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:4326+3855 -o PROJJSON -q > out.json
 cat out.json
 echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/crsjson.schema.json && echo "Valid !"
+jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
 
 /tmp/proj_autoconf_install_from_dist_all/bin/projinfo "+proj=longlat +ellps=GRS80 +nadgrids=@foo +type=crs" -o PROJJSON -q > out.json
 cat out.json
 echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/crsjson.schema.json && echo "Valid !"
+jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
 /tmp/proj_autoconf_install_from_dist_all/bin/projinfo @out.json -o PROJJSON -q > out2.json
 diff -u out.json out2.json
 
 /tmp/proj_autoconf_install_from_dist_all/bin/projinfo -s EPSG:3111 -t GDA2020 -o PROJJSON -o PROJJSON -q > out.json
 cat out.json
 echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/crsjson.schema.json && echo "Valid !"
+jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
 /tmp/proj_autoconf_install_from_dist_all/bin/projinfo @out.json -o PROJJSON -q > out2.json
 diff -u out.json out2.json
 

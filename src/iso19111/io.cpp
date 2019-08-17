@@ -86,6 +86,10 @@ using json = nlohmann::json;
 
 //! @cond Doxygen_Suppress
 static const std::string emptyString{};
+
+// If changing that value, change it in data/projjson.schema.json as well
+#define PROJJSON_CURRENT_VERSION                                               \
+    "https://proj.org/schemas/v0.1/projjson.schema.json"
 //! @endcond
 
 #if 0
@@ -9103,6 +9107,7 @@ struct JSONFormatter::Private {
     bool allowIDInImmediateChild_ = false;
     bool omitTypeInImmediateChild_ = false;
     bool abridgedTransformation_ = false;
+    std::string schema_ = PROJJSON_CURRENT_VERSION;
 
     std::string result_{};
 
@@ -9148,6 +9153,17 @@ JSONFormatter &JSONFormatter::setIndentationWidth(int width) noexcept {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set the value of the "$schema" key in the top level object.
+ *
+ * If set to empty string, it will not be written.
+ */
+JSONFormatter &JSONFormatter::setSchema(const std::string &schema) noexcept {
+    d->schema_ = schema;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 JSONFormatter::JSONFormatter() : d(internal::make_unique<Private>()) {}
@@ -9188,6 +9204,11 @@ JSONFormatter::ObjectContext::ObjectContext(JSONFormatter &formatter,
                                             const char *objectType, bool hasId)
     : m_formatter(formatter) {
     m_formatter.d->writer_.StartObj();
+    if (m_formatter.d->outputIdStack_.size() == 1 &&
+        !m_formatter.d->schema_.empty()) {
+        m_formatter.d->writer_.AddObjKey("$schema");
+        m_formatter.d->writer_.Add(m_formatter.d->schema_);
+    }
     if (objectType && !m_formatter.d->omitTypeInImmediateChild_) {
         m_formatter.d->writer_.AddObjKey("type");
         m_formatter.d->writer_.Add(objectType);

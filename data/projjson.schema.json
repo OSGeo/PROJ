@@ -1,7 +1,8 @@
 {
-  "$id": "https://proj.org/crsjson.schema.json",
+  "$id": "https://proj.org/schemas/v0.1/projjson.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "description": "Schema for CRS JSON",
+  "description": "Schema for PROJJSON",
+  "$comment": "This file exists both in data/ and in schemas/vXXX/. Keep both in sync. And if changing the value of $id, change PROJJSON_CURRENT_VERSION accordingly in io.cpp",
 
   "oneOf": [
     { "$ref": "#/definitions/crs" },
@@ -18,6 +19,7 @@
     "abridged_transformation": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["AbridgedTransformation"] },
         "name": { "type": "string" },
         "method": { "$ref": "#/definitions/method" },
@@ -38,6 +40,7 @@
     "axis": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["Axis"] },
         "name": { "type": "string" },
         "abbreviation": { "type": "string" },
@@ -109,6 +112,7 @@
     "bound_crs": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["BoundCRS"] },
         "source_crs": { "$ref": "#/definitions/crs" },
         "target_crs": { "$ref": "#/definitions/crs" },
@@ -128,6 +132,7 @@
            "type": "array",
             "items": { "$ref": "#/definitions/crs" }
         },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -151,6 +156,7 @@
            "type": "array",
             "items": { "$ref": "#/definitions/single_operation" }
         },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -165,6 +171,7 @@
     "conversion": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["Conversion"] },
         "name": { "type": "string" },
         "method": { "$ref": "#/definitions/method" },
@@ -185,6 +192,7 @@
     "coordinate_system": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["CoordinateSystem"] },
         "name": { "type": "string" },
         "subtype": { "type": "string",
@@ -245,6 +253,7 @@
     "datum_ensemble": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["DatumEnsemble"] },
         "name": { "type": "string" },
         "members": {
@@ -285,6 +294,7 @@
         "base_crs": { "$ref": "#/definitions/engineering_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -307,6 +317,7 @@
         "base_crs": { "$ref": "#/definitions/geodetic_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -328,6 +339,7 @@
         "base_crs": { "$ref": "#/definitions/parametric_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -349,6 +361,7 @@
         "base_crs": { "$ref": "#/definitions/projected_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -370,6 +383,7 @@
         "base_crs": { "$ref": "#/definitions/temporal_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -391,6 +405,7 @@
         "base_crs": { "$ref": "#/definitions/vertical_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -413,6 +428,7 @@
         "prime_meridian": {},
         "frame_reference_epoch": { "type": "number" },
         "deformation_model": { "type": "string" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -433,6 +449,7 @@
         "anchor": {},
         "frame_reference_epoch": { "type": "number" },
         "deformation_model": { "type": "string" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -449,6 +466,7 @@
       "oneOf":[
         {
           "properties": {
+            "$schema" : { "type": "string" },
             "type": { "type": "string", "enum": ["Ellipsoid"] },
             "name": { "type": "string" },
             "semi_major_axis": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
@@ -461,6 +479,7 @@
         },
         {
           "properties": {
+            "$schema" : { "type": "string" },
             "type": { "type": "string", "enum": ["Ellipsoid"] },
             "name": { "type": "string" },
             "semi_major_axis": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
@@ -473,6 +492,7 @@
         },
         {
           "properties": {
+            "$schema" : { "type": "string" },
             "type": { "type": "string", "enum": ["Ellipsoid"] },
             "name": { "type": "string" },
             "radius": { "$ref": "#/definitions/value_in_metre_or_value_and_unit" },
@@ -496,6 +516,7 @@
         "name": { "type": "string" },
         "datum": { "$ref": "#/definitions/engineering_datum" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -514,6 +535,7 @@
         "type": { "type": "string", "enum": ["EngineeringDatum"] },
         "name": { "type": "string" },
         "anchor": { "type": "string" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -538,6 +560,7 @@
         },
         "datum_ensemble": { "$ref": "#/definitions/datum_ensemble" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -563,6 +586,7 @@
         "anchor": { "type": "string" },
         "ellipsoid": { "$ref": "#/definitions/ellipsoid" },
         "prime_meridian": { "$ref": "#/definitions/prime_meridian" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -594,6 +618,7 @@
     "method": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["OperationMethod"]},
         "name": { "type": "string" },
         "id": { "$ref": "#/definitions/id" },
@@ -635,6 +660,7 @@
       {
         "type": "object",
         "properties": {
+            "$schema" : { "type": "string" },
             "scope": { "type": "string" },
             "area": { "type": "string" },
             "bbox": { "$ref": "#/definitions/bbox" },
@@ -649,6 +675,7 @@
       {
         "type": "object",
         "properties": {
+            "$schema" : { "type": "string" },
             "usages": { "$ref": "#/definitions/usages" },
             "remarks": { "type": "string" },
             "id": { "$ref": "#/definitions/id" },
@@ -664,6 +691,7 @@
     "parameter_value": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["ParameterValue"] },
         "name": { "type": "string" },
         "value": {
@@ -691,6 +719,7 @@
         "name": { "type": "string" },
         "datum": { "$ref": "#/definitions/parametric_datum" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -709,6 +738,7 @@
         "type": { "type": "string", "enum": ["ParametricDatum"] },
         "name": { "type": "string" },
         "anchor": { "type": "string" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -723,6 +753,7 @@
     "prime_meridian": {
       "type": "object",
       "properties": {
+        "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["PrimeMeridian"] },
         "name": { "type": "string" },
         "longitude": { "$ref": "#/definitions/value_and_unit" },
@@ -753,6 +784,7 @@
         "base_crs": { "$ref": "#/definitions/geodetic_crs" },
         "conversion": { "$ref": "#/definitions/conversion" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -772,6 +804,7 @@
         "name": { "type": "string" },
         "datum": { "$ref": "#/definitions/temporal_datum" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -791,6 +824,7 @@
         "name": { "type": "string" },
         "calendar": { "type": "string" },
         "time_origin": { "type": "string" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -817,6 +851,7 @@
             "items": { "$ref": "#/definitions/parameter_value" }
         },
         "accuracy": { "type": "string" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -897,6 +932,7 @@
         },
         "datum_ensemble": { "$ref": "#/definitions/datum_ensemble" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},
@@ -920,6 +956,7 @@
         "type": { "type": "string", "enum": ["VerticalReferenceFrame"] },
         "name": { "type": "string" },
         "anchor": { "type": "string" },
+        "$schema" : {},
         "scope": {},
         "area": {},
         "bbox": {},

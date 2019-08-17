@@ -207,19 +207,20 @@ TEST(datum, prime_meridian_to_PROJString) {
 
 TEST(datum, prime_meridian_to_JSON) {
 
-    EXPECT_EQ(
-        PrimeMeridian::GREENWICH->exportToJSON(JSONFormatter::create().get()),
-        "{\n"
-        "  \"type\": \"PrimeMeridian\",\n"
-        "  \"name\": \"Greenwich\",\n"
-        "  \"longitude\": 0,\n"
-        "  \"id\": {\n"
-        "    \"authority\": \"EPSG\",\n"
-        "    \"code\": 8901\n"
-        "  }\n"
-        "}");
+    EXPECT_EQ(PrimeMeridian::GREENWICH->exportToJSON(
+                  &(JSONFormatter::create()->setSchema(""))),
+              "{\n"
+              "  \"type\": \"PrimeMeridian\",\n"
+              "  \"name\": \"Greenwich\",\n"
+              "  \"longitude\": 0,\n"
+              "  \"id\": {\n"
+              "    \"authority\": \"EPSG\",\n"
+              "    \"code\": 8901\n"
+              "  }\n"
+              "}");
 
-    EXPECT_EQ(PrimeMeridian::PARIS->exportToJSON(JSONFormatter::create().get()),
+    EXPECT_EQ(PrimeMeridian::PARIS->exportToJSON(
+                  &(JSONFormatter::create()->setSchema(""))),
               "{\n"
               "  \"type\": \"PrimeMeridian\",\n"
               "  \"name\": \"Paris\",\n"

@@ -477,6 +477,7 @@ class PROJ_GCC_DLL JSONFormatter {
 
     PROJ_DLL JSONFormatter &setMultiLine(bool multiLine) noexcept;
     PROJ_DLL JSONFormatter &setIndentationWidth(int width) noexcept;
+    PROJ_DLL JSONFormatter &setSchema(const std::string &schema) noexcept;
 
     PROJ_DLL const std::string &toString() const;
 

@@ -1335,6 +1335,8 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
  * <li>MULTILINE=YES/NO. Defaults to YES</li>
  * <li>INDENTATION_WIDTH=number. Defauls to 2 (when multiline output is
  * on).</li>
+ * <li>SCHEMA=string. URL to PROJJSON schema. Can be set to empty string to
+ * disable it.</li>
  * </ul>
  * @return a string, or NULL in case of error.
  *
@@ -1359,6 +1361,8 @@ const char *proj_as_projjson(PJ_CONTEXT *ctx, const PJ *obj,
                 formatter->setMultiLine(ci_equal(value, "YES"));
             } else if ((value = getOptionValue(*iter, "INDENTATION_WIDTH="))) {
                 formatter->setIndentationWidth(std::atoi(value));
+            } else if ((value = getOptionValue(*iter, "SCHEMA="))) {
+                formatter->setSchema(value);
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;

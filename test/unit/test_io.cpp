@@ -9137,6 +9137,7 @@ TEST(wkt_export, invalid_angular_unit) {
 
 TEST(json_import, ellipsoid_flattened_sphere) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"Ellipsoid\",\n"
                 "  \"name\": \"WGS 84\",\n"
                 "  \"semi_major_axis\": 6378137,\n"
@@ -9149,13 +9150,15 @@ TEST(json_import, ellipsoid_flattened_sphere) {
     auto obj = createFromUserInput(json, nullptr);
     auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
     ASSERT_TRUE(ellps != nullptr);
-    EXPECT_EQ(ellps->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, ellipsoid_major_minor_custom_unit) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"Ellipsoid\",\n"
                 "  \"name\": \"foo\",\n"
                 "  \"semi_major_axis\": 6378137,\n"
@@ -9171,13 +9174,15 @@ TEST(json_import, ellipsoid_major_minor_custom_unit) {
     auto obj = createFromUserInput(json, nullptr);
     auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
     ASSERT_TRUE(ellps != nullptr);
-    EXPECT_EQ(ellps->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, ellipsoid_sphere) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"Ellipsoid\",\n"
                 "  \"name\": \"Sphere\",\n"
                 "  \"radius\": 6371000,\n"
@@ -9189,7 +9194,8 @@ TEST(json_import, ellipsoid_sphere) {
     auto obj = createFromUserInput(json, nullptr);
     auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
     ASSERT_TRUE(ellps != nullptr);
-    EXPECT_EQ(ellps->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
@@ -9217,6 +9223,7 @@ TEST(json_import, ellipsoid_errors) {
 
 TEST(json_import, prime_meridian) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"PrimeMeridian\",\n"
                 "  \"name\": \"Paris\",\n"
                 "  \"longitude\": {\n"
@@ -9231,7 +9238,8 @@ TEST(json_import, prime_meridian) {
     auto obj = createFromUserInput(json, nullptr);
     auto pm = nn_dynamic_pointer_cast<PrimeMeridian>(obj);
     ASSERT_TRUE(pm != nullptr);
-    EXPECT_EQ(pm->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(pm->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
@@ -9251,6 +9259,7 @@ TEST(json_import, prime_meridian_errors) {
 
 TEST(json_import, geodetic_reference_frame_with_implicit_prime_meridian) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"GeodeticReferenceFrame\",\n"
                 "  \"name\": \"World Geodetic System 1984\",\n"
                 "  \"ellipsoid\": {\n"
@@ -9262,13 +9271,15 @@ TEST(json_import, geodetic_reference_frame_with_implicit_prime_meridian) {
     auto obj = createFromUserInput(json, nullptr);
     auto grf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
     ASSERT_TRUE(grf != nullptr);
-    EXPECT_EQ(grf->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(grf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, geodetic_reference_frame_with_explicit_prime_meridian) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"GeodeticReferenceFrame\",\n"
                 "  \"name\": \"Nouvelle Triangulation Francaise (Paris)\",\n"
                 "  \"ellipsoid\": {\n"
@@ -9291,7 +9302,8 @@ TEST(json_import, geodetic_reference_frame_with_explicit_prime_meridian) {
     auto obj = createFromUserInput(json, nullptr);
     auto grf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
     ASSERT_TRUE(grf != nullptr);
-    EXPECT_EQ(grf->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(grf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
@@ -9299,6 +9311,7 @@ TEST(json_import, geodetic_reference_frame_with_explicit_prime_meridian) {
 TEST(json_import,
      dynamic_geodetic_reference_frame_with_implicit_prime_meridian) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DynamicGeodeticReferenceFrame\",\n"
                 "  \"name\": \"World Geodetic System 1984\",\n"
                 "  \"frame_reference_epoch\": 1,\n"
@@ -9312,7 +9325,8 @@ TEST(json_import,
     auto obj = createFromUserInput(json, nullptr);
     auto dgrf = nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(obj);
     ASSERT_TRUE(dgrf != nullptr);
-    EXPECT_EQ(dgrf->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(dgrf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
@@ -9329,6 +9343,7 @@ TEST(json_import, geodetic_reference_frame_errors) {
 
 TEST(json_import, dynamic_vertical_reference_frame) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DynamicVerticalReferenceFrame\",\n"
                 "  \"name\": \"bar\",\n"
                 "  \"frame_reference_epoch\": 1,\n"
@@ -9337,13 +9352,15 @@ TEST(json_import, dynamic_vertical_reference_frame) {
     auto obj = createFromUserInput(json, nullptr);
     auto dvrf = nn_dynamic_pointer_cast<DynamicVerticalReferenceFrame>(obj);
     ASSERT_TRUE(dvrf != nullptr);
-    EXPECT_EQ(dvrf->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(dvrf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, several_usages) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"GeodeticReferenceFrame\",\n"
                 "  \"name\": \"World Geodetic System 1984\",\n"
                 "  \"ellipsoid\": {\n"
@@ -9370,13 +9387,15 @@ TEST(json_import, several_usages) {
     auto obj = createFromUserInput(json, nullptr);
     auto gdr = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
     ASSERT_TRUE(gdr != nullptr);
-    EXPECT_EQ(gdr->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(gdr->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, geographic_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"GeographicCRS\",\n"
                 "  \"name\": \"WGS 84\",\n"
                 "  \"datum\": {\n"
@@ -9421,7 +9440,8 @@ TEST(json_import, geographic_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(gcrs != nullptr);
-    EXPECT_EQ(gcrs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(gcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
@@ -9486,6 +9506,7 @@ TEST(json_import, geographic_crs_errors) {
 
 TEST(json_import, geocentric_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"GeodeticCRS\",\n"
                 "  \"name\": \"WGS 84\",\n"
                 "  \"datum\": {\n"
@@ -9524,13 +9545,15 @@ TEST(json_import, geocentric_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto gdcrs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
     ASSERT_TRUE(gdcrs != nullptr);
-    EXPECT_EQ(gdcrs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(gdcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, projected_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"ProjectedCRS\",\n"
                 "  \"name\": \"WGS 84 / UTM zone 31N\",\n"
                 "  \"base_crs\": {\n"
@@ -9644,13 +9667,15 @@ TEST(json_import, projected_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto pcrs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(pcrs != nullptr);
-    EXPECT_EQ(pcrs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(pcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, compound_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"CompoundCRS\",\n"
                 "  \"name\": \"WGS 84 + EGM2008 height\",\n"
                 "  \"components\": [\n"
@@ -9716,7 +9741,9 @@ TEST(json_import, compound_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto compoundCRS = nn_dynamic_pointer_cast<CompoundCRS>(obj);
     ASSERT_TRUE(compoundCRS != nullptr);
-    EXPECT_EQ(compoundCRS->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(
+        compoundCRS->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+        json);
 }
 
 // ---------------------------------------------------------------------------
@@ -9724,6 +9751,7 @@ TEST(json_import, compound_crs) {
 TEST(json_import, bound_crs) {
     auto json =
         "{\n"
+        "  \"$schema\": \"foo\",\n"
         "  \"type\": \"BoundCRS\",\n"
         "  \"source_crs\": {\n"
         "    \"type\": \"GeographicCRS\",\n"
@@ -9817,13 +9845,16 @@ TEST(json_import, bound_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
     ASSERT_TRUE(boundCRS != nullptr);
-    EXPECT_EQ(boundCRS->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(
+        boundCRS->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+        json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, transformation) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"Transformation\",\n"
                 "  \"name\": \"GDA94 to GDA2020 (1)\",\n"
                 "  \"source_crs\": {\n"
@@ -10004,7 +10035,9 @@ TEST(json_import, transformation) {
     auto obj = createFromUserInput(json, nullptr);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(transf != nullptr);
-    EXPECT_EQ(transf->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(
+        transf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+        json);
 }
 
 // ---------------------------------------------------------------------------
@@ -10012,6 +10045,7 @@ TEST(json_import, transformation) {
 TEST(json_import, concatenated_operation) {
     auto json =
         "{\n"
+        "  \"$schema\": \"foo\",\n"
         "  \"type\": \"ConcatenatedOperation\",\n"
         "  \"name\": \"Inverse of Vicgrid + GDA94 to GDA2020 (1)\",\n"
         "  \"source_crs\": {\n"
@@ -10434,13 +10468,16 @@ TEST(json_import, concatenated_operation) {
     auto obj = createFromUserInput(json, nullptr);
     auto concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(obj);
     ASSERT_TRUE(concat != nullptr);
-    EXPECT_EQ(concat->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(
+        concat->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+        json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, geographic_crs_with_datum_ensemble) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"GeographicCRS\",\n"
                 "  \"name\": \"WGS 84\",\n"
                 "  \"datum_ensemble\": {\n"
@@ -10481,6 +10518,7 @@ TEST(json_import, geographic_crs_with_datum_ensemble) {
 
     auto expected_json =
         "{\n"
+        "  \"$schema\": \"foo\",\n"
         "  \"type\": \"GeographicCRS\",\n"
         "  \"name\": \"WGS 84\",\n"
         "  \"datum_ensemble\": {\n"
@@ -10536,22 +10574,26 @@ TEST(json_import, geographic_crs_with_datum_ensemble) {
         auto obj = createFromUserInput(json, nullptr);
         auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(gcrs != nullptr);
-        EXPECT_EQ(gcrs->exportToJSON((JSONFormatter::create().get())), json);
+        EXPECT_EQ(
+            gcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+            json);
     }
     {
         auto obj = createFromUserInput(json, DatabaseContext::create());
         auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(gcrs != nullptr);
-        EXPECT_EQ(gcrs->exportToJSON((JSONFormatter::create().get())),
-                  expected_json);
+        EXPECT_EQ(
+            gcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+            expected_json);
     }
     {
         auto obj =
             createFromUserInput(expected_json, DatabaseContext::create());
         auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(gcrs != nullptr);
-        EXPECT_EQ(gcrs->exportToJSON((JSONFormatter::create().get())),
-                  expected_json);
+        EXPECT_EQ(
+            gcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+            expected_json);
     }
 }
 
@@ -10559,6 +10601,7 @@ TEST(json_import, geographic_crs_with_datum_ensemble) {
 
 TEST(json_import, datum_ensemble_without_ellipsoid) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DatumEnsemble\",\n"
                 "  \"name\": \"ensemble\",\n"
                 "  \"members\": [\n"
@@ -10576,13 +10619,16 @@ TEST(json_import, datum_ensemble_without_ellipsoid) {
     auto obj = createFromUserInput(json, nullptr);
     auto ensemble = nn_dynamic_pointer_cast<DatumEnsemble>(obj);
     ASSERT_TRUE(ensemble != nullptr);
-    EXPECT_EQ(ensemble->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(
+        ensemble->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+        json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, vertical_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"VerticalCRS\",\n"
                 "  \"name\": \"EGM2008 height\",\n"
                 "  \"datum\": {\n"
@@ -10605,10 +10651,12 @@ TEST(json_import, vertical_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 
     auto datum = crs->datum();
-    auto datum_json = datum->exportToJSON((JSONFormatter::create().get()));
+    auto datum_json =
+        datum->exportToJSON(&(JSONFormatter::create()->setSchema("foo")));
     auto datum_obj = createFromUserInput(datum_json, nullptr);
     auto datum_got = nn_dynamic_pointer_cast<VerticalReferenceFrame>(datum_obj);
     ASSERT_TRUE(datum_got != nullptr);
@@ -10618,6 +10666,7 @@ TEST(json_import, vertical_crs) {
 
 TEST(json_import, vertical_crs_with_datum_ensemble) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"VerticalCRS\",\n"
                 "  \"name\": \"foo\",\n"
                 "  \"datum_ensemble\": {\n"
@@ -10649,13 +10698,15 @@ TEST(json_import, vertical_crs_with_datum_ensemble) {
     auto obj = createFromUserInput(json, nullptr);
     auto vcrs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
     ASSERT_TRUE(vcrs != nullptr);
-    EXPECT_EQ(vcrs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(vcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, parametric_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"ParametricCRS\",\n"
                 "  \"name\": \"WMO standard atmosphere layer 0\",\n"
                 "  \"datum\": {\n"
@@ -10682,10 +10733,12 @@ TEST(json_import, parametric_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<ParametricCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 
     auto datum = crs->datum();
-    auto datum_json = datum->exportToJSON((JSONFormatter::create().get()));
+    auto datum_json =
+        datum->exportToJSON(&(JSONFormatter::create()->setSchema("foo")));
     auto datum_obj = createFromUserInput(datum_json, nullptr);
     auto datum_got = nn_dynamic_pointer_cast<ParametricDatum>(datum_obj);
     ASSERT_TRUE(datum_got != nullptr);
@@ -10695,6 +10748,7 @@ TEST(json_import, parametric_crs) {
 
 TEST(json_import, engineering_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"EngineeringCRS\",\n"
                 "  \"name\": \"Engineering CRS\",\n"
                 "  \"datum\": {\n"
@@ -10722,10 +10776,12 @@ TEST(json_import, engineering_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 
     auto datum = crs->datum();
-    auto datum_json = datum->exportToJSON((JSONFormatter::create().get()));
+    auto datum_json =
+        datum->exportToJSON(&(JSONFormatter::create()->setSchema("foo")));
     auto datum_obj = createFromUserInput(datum_json, nullptr);
     auto datum_got = nn_dynamic_pointer_cast<EngineeringDatum>(datum_obj);
     ASSERT_TRUE(datum_got != nullptr);
@@ -10735,6 +10791,7 @@ TEST(json_import, engineering_crs) {
 
 TEST(json_import, temporal_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"TemporalCRS\",\n"
                 "  \"name\": \"Temporal CRS\",\n"
                 "  \"datum\": {\n"
@@ -10757,10 +10814,12 @@ TEST(json_import, temporal_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<TemporalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 
     auto datum = crs->datum();
-    auto datum_json = datum->exportToJSON((JSONFormatter::create().get()));
+    auto datum_json =
+        datum->exportToJSON(&(JSONFormatter::create()->setSchema("foo")));
     auto datum_obj = createFromUserInput(datum_json, nullptr);
     auto datum_got = nn_dynamic_pointer_cast<TemporalDatum>(datum_obj);
     ASSERT_TRUE(datum_got != nullptr);
@@ -10770,6 +10829,7 @@ TEST(json_import, temporal_crs) {
 
 TEST(json_import, derived_geodetic_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DerivedGeodeticCRS\",\n"
                 "  \"name\": \"Derived geodetic CRS\",\n"
                 "  \"base_crs\": {\n"
@@ -10842,13 +10902,15 @@ TEST(json_import, derived_geodetic_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<DerivedGeodeticCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, derived_geographic_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DerivedGeographicCRS\",\n"
                 "  \"name\": \"WMO Atlantic Pole\",\n"
                 "  \"base_crs\": {\n"
@@ -10925,13 +10987,15 @@ TEST(json_import, derived_geographic_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, derived_projected_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DerivedProjectedCRS\",\n"
                 "  \"name\": \"derived projectedCRS\",\n"
                 "  \"base_crs\": {\n"
@@ -11075,13 +11139,15 @@ TEST(json_import, derived_projected_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<DerivedProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, derived_vertical_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DerivedVerticalCRS\",\n"
                 "  \"name\": \"Derived vertCRS\",\n"
                 "  \"base_crs\": {\n"
@@ -11131,13 +11197,15 @@ TEST(json_import, derived_vertical_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<DerivedVerticalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, derived_engineering_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DerivedEngineeringCRS\",\n"
                 "  \"name\": \"Derived EngineeringCRS\",\n"
                 "  \"base_crs\": {\n"
@@ -11198,13 +11266,15 @@ TEST(json_import, derived_engineering_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<DerivedEngineeringCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, derived_parametric_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DerivedParametricCRS\",\n"
                 "  \"name\": \"Derived ParametricCRS\",\n"
                 "  \"base_crs\": {\n"
@@ -11261,13 +11331,15 @@ TEST(json_import, derived_parametric_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<DerivedParametricCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, derived_temporal_crs) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DerivedTemporalCRS\",\n"
                 "  \"name\": \"Derived TemporalCRS\",\n"
                 "  \"base_crs\": {\n"
@@ -11321,13 +11393,15 @@ TEST(json_import, derived_temporal_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto crs = nn_dynamic_pointer_cast<DerivedTemporalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, multiple_ids) {
     auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"Ellipsoid\",\n"
                 "  \"name\": \"WGS 84\",\n"
                 "  \"semi_major_axis\": 6378137,\n"
@@ -11346,5 +11420,6 @@ TEST(json_import, multiple_ids) {
     auto obj = createFromUserInput(json, nullptr);
     auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
     ASSERT_TRUE(ellps != nullptr);
-    EXPECT_EQ(ellps->exportToJSON((JSONFormatter::create().get())), json);
+    EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }

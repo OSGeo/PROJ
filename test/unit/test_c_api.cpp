@@ -3503,6 +3503,8 @@ TEST_F(CApi, proj_as_projjson) {
         ASSERT_NE(projjson, nullptr);
         EXPECT_EQ(std::string(projjson),
                   "{\n"
+                  "  \"$schema\": "
+                  "\"https://proj.org/schemas/v0.1/projjson.schema.json\",\n"
                   "  \"type\": \"Ellipsoid\",\n"
                   "  \"name\": \"WGS 84\",\n"
                   "  \"semi_major_axis\": 6378137,\n"
@@ -3514,7 +3516,8 @@ TEST_F(CApi, proj_as_projjson) {
                   "}");
     }
     {
-        const char *const options[] = {"INDENTATION_WIDTH=4", nullptr};
+        const char *const options[] = {"INDENTATION_WIDTH=4", "SCHEMA=",
+                                       nullptr};
         auto projjson = proj_as_projjson(m_ctxt, obj, options);
         ASSERT_NE(projjson, nullptr);
         EXPECT_EQ(std::string(projjson),
@@ -3530,7 +3533,7 @@ TEST_F(CApi, proj_as_projjson) {
                   "}");
     }
     {
-        const char *const options[] = {"MULTILINE=NO", nullptr};
+        const char *const options[] = {"MULTILINE=NO", "SCHEMA=", nullptr};
         auto projjson = proj_as_projjson(m_ctxt, obj, options);
         ASSERT_NE(projjson, nullptr);
         EXPECT_EQ(std::string(projjson),
