@@ -5881,11 +5881,14 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  * @throw ParsingException
  */
 BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
-    return createFromUserInput(
-        text, ctx != nullptr && ctx->cpp_context
-                  ? ctx->cpp_context->databaseContext.as_nullable()
-                  : nullptr,
-        false, ctx);
+    DatabaseContextPtr dbContext;
+    try {
+        if (ctx != nullptr && ctx->cpp_context) {
+            dbContext = ctx->cpp_context->getDatabaseContext().as_nullable();
+        }
+    } catch (const std::exception &) {
+    }
+    return createFromUserInput(text, dbContext, false, ctx);
 }
 
 // ---------------------------------------------------------------------------

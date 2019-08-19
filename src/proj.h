@@ -755,6 +755,9 @@ typedef struct PJ_OBJ_LIST PJ_OBJ_LIST;
 
 void PROJ_DLL proj_string_list_destroy(PROJ_STRING_LIST list);
 
+void PROJ_DLL proj_context_set_autoclose_database(PJ_CONTEXT *ctx,
+                                                  int autoclose);
+
 int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
                                             const char *dbPath,
                                             const char *const *auxDbPaths,
