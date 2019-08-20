@@ -328,9 +328,9 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instantiate an object from a WKT string, PROJ string or object code
+/** \brief Instantiate an object from a WKT string, PROJ string, object code
  * (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
- * "urn:ogc:def:coordinateOperation:EPSG::1671").
+ * "urn:ogc:def:coordinateOperation:EPSG::1671") or PROJJSON string.
  *
  * This function calls osgeo::proj::io::createFromUserInput()
  *
@@ -1306,6 +1306,72 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
         }
         obj->lastPROJString = exportable->exportToPROJString(formatter.get());
         return obj->lastPROJString.c_str();
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Get a PROJJSON string representation of an object.
+ *
+ * The returned string is valid while the input obj parameter is valid,
+ * and until a next call to proj_as_proj_string() with the same input
+ * object.
+ *
+ * This function calls
+ * osgeo::proj::io::IJSONExportable::exportToJSON().
+ *
+ * This function may return NULL if the object is not compatible with an
+ * export to the requested type.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param obj Object (must not be NULL)
+ * @param options NULL-terminated list of strings with "KEY=VALUE" format. or
+ * NULL. Currently
+ * supported options are:
+ * <ul>
+ * <li>MULTILINE=YES/NO. Defaults to YES</li>
+ * <li>INDENTATION_WIDTH=number. Defauls to 2 (when multiline output is
+ * on).</li>
+ * <li>SCHEMA=string. URL to PROJJSON schema. Can be set to empty string to
+ * disable it.</li>
+ * </ul>
+ * @return a string, or NULL in case of error.
+ *
+ * @since 6.2
+ */
+const char *proj_as_projjson(PJ_CONTEXT *ctx, const PJ *obj,
+                             const char *const *options) {
+    SANITIZE_CTX(ctx);
+    assert(obj);
+    auto exportable = dynamic_cast<const IJSONExportable *>(obj->iso_obj.get());
+    if (!exportable) {
+        proj_log_error(ctx, __FUNCTION__, "Object type not exportable to JSON");
+        return nullptr;
+    }
+
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+    try {
+        auto formatter = JSONFormatter::create(dbContext);
+        for (auto iter = options; iter && iter[0]; ++iter) {
+            const char *value;
+            if ((value = getOptionValue(*iter, "MULTILINE="))) {
+                formatter->setMultiLine(ci_equal(value, "YES"));
+            } else if ((value = getOptionValue(*iter, "INDENTATION_WIDTH="))) {
+                formatter->setIndentationWidth(std::atoi(value));
+            } else if ((value = getOptionValue(*iter, "SCHEMA="))) {
+                formatter->setSchema(value);
+            } else {
+                std::string msg("Unknown option :");
+                msg += *iter;
+                proj_log_error(ctx, __FUNCTION__, msg.c_str());
+                return nullptr;
+            }
+        }
+        obj->lastJSONString = exportable->exportToJSON(formatter.get());
+        return obj->lastJSONString.c_str();
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;

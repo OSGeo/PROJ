@@ -2,7 +2,8 @@ DATAPATH = $(top_srcdir)/data
 
 pkgdata_DATA = GL27 nad.lst nad27 nad83 world other.extra \
 		CH null \
-		ITRF2000 ITRF2008 ITRF2014 proj.db
+		ITRF2000 ITRF2008 ITRF2014 proj.db \
+		projjson.schema.json
 
 SQL_ORDERED_LIST = sql/begin.sql \
 		sql/proj_db_table_defs.sql \
@@ -40,6 +41,7 @@ EXTRA_DIST = GL27 nad.lst nad27 nad83 \
 		world other.extra \
 		CH \
 		ITRF2000 ITRF2008 ITRF2014 \
+		projjson.schema.json \
 		CMakeLists.txt tests/test_nodata.gtx null \
 		generate_all_sql_in.cmake sql_filelist.cmake \
 		$(SQL_ORDERED_LIST)

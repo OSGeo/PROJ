@@ -991,6 +991,24 @@ void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void OperationMethod::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext("OperationMethod",
+                                                    !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    writer.Add(nameStr());
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 bool OperationMethod::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1162,6 +1180,42 @@ void OperationParameterValue::_exportToWKT(io::WKTFormatter *formatter,
         parameter()->formatID(formatter);
     }
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void OperationParameterValue::_exportToJSON(
+    io::JSONFormatter *formatter) const {
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext(
+        "ParameterValue", !parameter()->identifiers().empty()));
+
+    writer.AddObjKey("name");
+    writer.Add(parameter()->nameStr());
+
+    const auto &l_value(parameterValue());
+    if (l_value->type() == ParameterValue::Type::MEASURE) {
+        writer.AddObjKey("value");
+        writer.Add(l_value->value().value(), 15);
+        writer.AddObjKey("unit");
+        const auto &l_unit(l_value->value().unit());
+        if (l_unit == common::UnitOfMeasure::METRE ||
+            l_unit == common::UnitOfMeasure::DEGREE ||
+            l_unit == common::UnitOfMeasure::SCALE_UNITY) {
+            writer.Add(l_unit.name());
+        } else {
+            l_unit._exportToJSON(formatter);
+        }
+    } else if (l_value->type() == ParameterValue::Type::FILENAME) {
+        writer.AddObjKey("value");
+        writer.Add(l_value->valueFile());
+    }
+
+    if (formatter->outputId()) {
+        parameter()->formatID(formatter);
+    }
 }
 //! @endcond
 
@@ -5410,6 +5464,49 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void Conversion::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("Conversion", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("method");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAllowIDInImmediateChild();
+    method()->_exportToJSON(formatter);
+
+    const auto &l_parameterValues = parameterValues();
+    if (!l_parameterValues.empty()) {
+        writer.AddObjKey("parameters");
+        {
+            auto parametersContext(writer.MakeArrayContext(false));
+            for (const auto &genOpParamvalue : l_parameterValues) {
+                formatter->setAllowIDInImmediateChild();
+                formatter->setOmitTypeInImmediateChild();
+                genOpParamvalue->_exportToJSON(formatter);
+            }
+        }
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 static bool createPROJ4WebMercator(const Conversion *conv,
                                    io::PROJStringFormatter *formatter) {
     const double centralMeridian = conv->parameterValueNumeric(
@@ -7768,6 +7865,76 @@ void Transformation::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void Transformation::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext(
+        formatter->abridgedTransformation() ? "AbridgedTransformation"
+                                            : "Transformation",
+        !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    if (!formatter->abridgedTransformation()) {
+        writer.AddObjKey("source_crs");
+        formatter->setAllowIDInImmediateChild();
+        sourceCRS()->_exportToJSON(formatter);
+
+        writer.AddObjKey("target_crs");
+        formatter->setAllowIDInImmediateChild();
+        targetCRS()->_exportToJSON(formatter);
+
+        const auto &l_interpolationCRS = interpolationCRS();
+        if (l_interpolationCRS) {
+            writer.AddObjKey("interpolation_crs");
+            formatter->setAllowIDInImmediateChild();
+            l_interpolationCRS->_exportToJSON(formatter);
+        }
+    }
+
+    writer.AddObjKey("method");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAllowIDInImmediateChild();
+    method()->_exportToJSON(formatter);
+
+    writer.AddObjKey("parameters");
+    {
+        auto parametersContext(writer.MakeArrayContext(false));
+        for (const auto &genOpParamvalue : parameterValues()) {
+            formatter->setAllowIDInImmediateChild();
+            formatter->setOmitTypeInImmediateChild();
+            genOpParamvalue->_exportToJSON(formatter);
+        }
+    }
+
+    if (!formatter->abridgedTransformation()) {
+        if (!coordinateOperationAccuracies().empty()) {
+            writer.AddObjKey("accuracy");
+            writer.Add(coordinateOperationAccuracies()[0]->value());
+        }
+    }
+
+    if (formatter->abridgedTransformation()) {
+        if (formatter->outputId()) {
+            formatID(formatter);
+        }
+    } else {
+        ObjectUsage::baseExportToJSON(formatter);
+    }
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 static void exportSourceCRSAndTargetCRSToWKT(const CoordinateOperation *co,
                                              io::WKTFormatter *formatter) {
     auto l_sourceCRS = co->sourceCRS();
@@ -9579,6 +9746,46 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
 }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void ConcatenatedOperation::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext("ConcatenatedOperation",
+                                                    !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("source_crs");
+    formatter->setAllowIDInImmediateChild();
+    sourceCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("target_crs");
+    formatter->setAllowIDInImmediateChild();
+    targetCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("steps");
+    {
+        auto parametersContext(writer.MakeArrayContext(false));
+        for (const auto &operation : operations()) {
+            formatter->setAllowIDInImmediateChild();
+            operation->_exportToJSON(formatter);
+        }
+    }
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -13051,6 +13258,53 @@ void PROJBasedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
         paramValue->_exportToWKT(formatter);
     }
     formatter->endNode();
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJBasedOperation::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext(
+        (sourceCRS() && targetCRS()) ? "Transformation" : "Conversion",
+        !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    if (sourceCRS() && targetCRS()) {
+        writer.AddObjKey("source_crs");
+        formatter->setAllowIDInImmediateChild();
+        sourceCRS()->_exportToJSON(formatter);
+
+        writer.AddObjKey("target_crs");
+        formatter->setAllowIDInImmediateChild();
+        targetCRS()->_exportToJSON(formatter);
+    }
+
+    writer.AddObjKey("method");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAllowIDInImmediateChild();
+    method()->_exportToJSON(formatter);
+
+    const auto &l_parameterValues = parameterValues();
+    if (!l_parameterValues.empty()) {
+        writer.AddObjKey("parameters");
+        {
+            auto parametersContext(writer.MakeArrayContext(false));
+            for (const auto &genOpParamvalue : l_parameterValues) {
+                formatter->setAllowIDInImmediateChild();
+                formatter->setOmitTypeInImmediateChild();
+                genOpParamvalue->_exportToJSON(formatter);
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

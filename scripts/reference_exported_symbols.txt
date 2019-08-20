@@ -67,6 +67,7 @@ osgeo::proj::common::ObjectDomain::~ObjectDomain()
 osgeo::proj::common::ObjectDomain::ObjectDomain(osgeo::proj::common::ObjectDomain const&)
 osgeo::proj::common::ObjectDomain::ObjectDomain(osgeo::proj::util::optional<std::string> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&)
 osgeo::proj::common::ObjectDomain::scope() const
+osgeo::proj::common::ObjectUsage::baseExportToJSON(osgeo::proj::io::JSONFormatter*) const
 osgeo::proj::common::ObjectUsage::baseExportToWKT(osgeo::proj::io::WKTFormatter*) const
 osgeo::proj::common::ObjectUsage::domains() const
 osgeo::proj::common::ObjectUsage::_isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion) const
@@ -331,10 +332,20 @@ osgeo::proj::io::FactoryException::FactoryException(osgeo::proj::io::FactoryExce
 osgeo::proj::io::FactoryException::FactoryException(std::string const&)
 osgeo::proj::io::FormattingException::~FormattingException()
 osgeo::proj::io::FormattingException::FormattingException(osgeo::proj::io::FormattingException const&)
+osgeo::proj::io::IJSONExportable::exportToJSON(osgeo::proj::io::JSONFormatter*) const
+osgeo::proj::io::IJSONExportable::~IJSONExportable()
 osgeo::proj::io::IPROJStringExportable::exportToPROJString(osgeo::proj::io::PROJStringFormatter*) const
 osgeo::proj::io::IPROJStringExportable::~IPROJStringExportable()
 osgeo::proj::io::IWKTExportable::exportToWKT(osgeo::proj::io::WKTFormatter*) const
 osgeo::proj::io::IWKTExportable::~IWKTExportable()
+osgeo::proj::io::JSONFormatter::create(std::shared_ptr<osgeo::proj::io::DatabaseContext>)
+osgeo::proj::io::JSONFormatter::~JSONFormatter()
+osgeo::proj::io::JSONFormatter::ObjectContext::~ObjectContext()
+osgeo::proj::io::JSONFormatter::ObjectContext::ObjectContext(osgeo::proj::io::JSONFormatter&, char const*, bool)
+osgeo::proj::io::JSONFormatter::setIndentationWidth(int)
+osgeo::proj::io::JSONFormatter::setMultiLine(bool)
+osgeo::proj::io::JSONFormatter::setSchema(std::string const&)
+osgeo::proj::io::JSONFormatter::toString() const
 osgeo::proj::io::NoSuchAuthorityCodeException::getAuthorityCode() const
 osgeo::proj::io::NoSuchAuthorityCodeException::getAuthority() const
 osgeo::proj::io::NoSuchAuthorityCodeException::~NoSuchAuthorityCodeException()
@@ -758,6 +769,7 @@ proj_angular_output
 proj_area_create
 proj_area_destroy
 proj_area_set_bbox
+proj_as_projjson
 proj_as_proj_string
 proj_assign_context
 proj_as_wkt

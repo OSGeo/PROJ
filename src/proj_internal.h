@@ -517,6 +517,7 @@ struct PJconsts {
     // cached results
     mutable std::string lastWKT{};
     mutable std::string lastPROJString{};
+    mutable std::string lastJSONString{};
     mutable bool gridsNeededAsked = false;
     mutable std::vector<NS_PROJ::operation::GridDescription> gridsNeeded{};
 

@@ -67,6 +67,7 @@ struct OutputOptions {
     bool WKT2_2015_SIMPLIFIED = false;
     bool WKT1_GDAL = false;
     bool WKT1_ESRI = false;
+    bool PROJJSON = false;
     bool c_ify = false;
     bool singleLine = false;
     bool strict = true;
@@ -101,7 +102,7 @@ static void usage() {
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2_2015,WKT2_2018,WKT1_GDAL,"
-                 "WKT1_ESRI"
+                 "WKT1_ESRI,PROJJSON"
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
@@ -467,6 +468,34 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT1_ESRI: " << e.what()
                           << std::endl;
             }
+            alreadyOutputed = true;
+        }
+    }
+
+    auto JSONExportable = nn_dynamic_pointer_cast<IJSONExportable>(obj);
+    if (JSONExportable) {
+        if (outputOpt.PROJJSON) {
+            try {
+                if (alreadyOutputed) {
+                    std::cout << std::endl;
+                }
+                if (!outputOpt.quiet) {
+                    std::cout << "PROJJSON:" << std::endl;
+                }
+                auto formatter(JSONFormatter::create(dbContext));
+                if (outputOpt.singleLine) {
+                    formatter->setMultiLine(false);
+                }
+                auto jsonString(JSONExportable->exportToJSON(formatter.get()));
+                if (outputOpt.c_ify) {
+                    jsonString = c_ify_string(jsonString);
+                }
+                std::cout << jsonString << std::endl;
+            } catch (const std::exception &e) {
+                std::cerr << "Error when exporting to PROJJSON: " << e.what()
+                          << std::endl;
+            }
+            // alreadyOutputed = true;
         }
     }
 
@@ -720,6 +749,7 @@ int main(int argc, char **argv) {
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                     outputOpt.WKT1_ESRI = true;
+                    outputOpt.PROJJSON = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
                     outputOpt.WKT2_2018 = true;
@@ -779,6 +809,10 @@ int main(int argc, char **argv) {
                            ci_equal(format, "-WKT1-ESRI") ||
                            ci_equal(format, "-WKT1:ESRI")) {
                     outputOpt.WKT1_ESRI = false;
+                } else if (ci_equal(format, "PROJJSON")) {
+                    outputOpt.PROJJSON = true;
+                } else if (ci_equal(format, "-PROJJSON")) {
+                    outputOpt.PROJJSON = false;
                 } else {
                     std::cerr << "Unrecognized value for option -o: " << format
                               << std::endl;
@@ -998,7 +1032,7 @@ int main(int argc, char **argv) {
 
     if (outputOpt.quiet &&
         (outputOpt.PROJ5 + outputOpt.WKT2_2018 + outputOpt.WKT2_2015 +
-         outputOpt.WKT1_GDAL) != 1) {
+         outputOpt.WKT1_GDAL + outputOpt.PROJJSON) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();

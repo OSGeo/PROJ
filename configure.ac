@@ -131,9 +131,6 @@ AX_CHECK_COMPILE_FLAG([-Wdeprecated], [CXX_WFLAGS="$CXX_WFLAGS -Wdeprecated"],,[
 AX_CHECK_COMPILE_FLAG([-Wabstract-vbase-init], [CXX_WFLAGS="$CXX_WFLAGS -Wabstract-vbase-init"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 AX_CHECK_COMPILE_FLAG([-Winconsistent-missing-destructor-override], [CXX_WFLAGS="$CXX_WFLAGS -Winconsistent-missing-destructor-override"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
-dnl Forbid use of 'or', 'and', ... alias operators
-AX_CHECK_COMPILE_FLAG([-fno-operator-names], [CXX_WFLAGS="$CXX_WFLAGS -fno-operator-names"],,[$ERROR_ON_UNKNOWN_OPTIONS])
-
 HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT=no
 AX_CHECK_COMPILE_FLAG([-Wzero-as-null-pointer-constant], [CXX_WFLAGS="$CXX_WFLAGS -Wzero-as-null-pointer-constant" HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT=yes NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG="-Wno-zero-as-null-pointer-constant"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 if test "$HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT" = "yes"; then
@@ -344,6 +341,7 @@ dnl Generate files
 dnl ---------------------------------------------------------------------------
 
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
+                 include/proj/internal/nlohmann/Makefile
                  test/Makefile test/cli/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
                  man/Makefile man/man1/Makefile man/man3/Makefile data/Makefile
                  jniwrap/Makefile jniwrap/org.osgeo.proj/Makefile jniwrap/org.osgeo.proj/org/Makefile jniwrap/org.osgeo.proj/org/proj4/Makefile])

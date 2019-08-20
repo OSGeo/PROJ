@@ -311,8 +311,8 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
                                         bool disableAbbrev) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(io::WKTConstants::AXIS, !identifiers().empty());
-    std::string axisName = *(name()->description());
-    std::string abbrev = abbreviation();
+    const std::string &axisName = nameStr();
+    const std::string &abbrev = abbreviation();
     std::string parenthesizedAbbrev = "(" + abbrev + ")";
     std::string dir = direction().toString();
     std::string axisDesignation;
@@ -387,6 +387,41 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
         formatID(formatter);
     }
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void CoordinateSystemAxis::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("Axis", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    writer.Add(nameStr());
+
+    writer.AddObjKey("abbreviation");
+    writer.Add(abbreviation());
+
+    writer.AddObjKey("direction");
+    writer.Add(direction().toString());
+
+    const auto &l_unit(unit());
+    if (l_unit == common::UnitOfMeasure::METRE ||
+        l_unit == common::UnitOfMeasure::DEGREE) {
+        writer.AddObjKey("unit");
+        writer.Add(l_unit.name());
+    } else if (l_unit.type() != common::UnitOfMeasure::Type::NONE) {
+        writer.AddObjKey("unit");
+        l_unit._exportToJSON(formatter);
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
 }
 //! @endcond
 
@@ -530,6 +565,34 @@ void CoordinateSystem::_exportToWKT(
         formatter->endNode();
     }
 }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void CoordinateSystem::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext("CoordinateSystem",
+                                                    !identifiers().empty()));
+
+    writer.AddObjKey("subtype");
+    writer.Add(getWKT2Type(true));
+
+    writer.AddObjKey("axis");
+    auto axisContext(writer.MakeArrayContext(false));
+    const auto &l_axisList = axisList();
+    for (auto &axis : l_axisList) {
+        formatter->setOmitTypeInImmediateChild();
+        axis->_exportToJSON(formatter);
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------

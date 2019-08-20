@@ -135,6 +135,50 @@ WKT1_ESRI:
 GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]
 
 
+PROJJSON:
+{
+  "$schema": "https://proj.org/schemas/v0.1/projjson.schema.json",
+  "type": "GeographicCRS",
+  "name": "WGS 84",
+  "datum": {
+    "type": "GeodeticReferenceFrame",
+    "name": "World Geodetic System 1984",
+    "ellipsoid": {
+      "name": "WGS 84",
+      "semi_major_axis": 6378137,
+      "inverse_flattening": 298.257223563
+    }
+  },
+  "coordinate_system": {
+    "subtype": "ellipsoidal",
+    "axis": [
+      {
+        "name": "Geodetic latitude",
+        "abbreviation": "Lat",
+        "direction": "north",
+        "unit": "degree"
+      },
+      {
+        "name": "Geodetic longitude",
+        "abbreviation": "Lon",
+        "direction": "east",
+        "unit": "degree"
+      }
+    ]
+  },
+  "area": "World",
+  "bbox": {
+    "south_latitude": -90,
+    "west_longitude": -180,
+    "north_latitude": 90,
+    "east_longitude": 180
+  },
+  "id": {
+    "authority": "EPSG",
+    "code": 4326
+  }
+}
+
 Testing projinfo -s EPSG:4326 -t EPSG:32631
 Candidate operations found: 1
 -------------------------------------

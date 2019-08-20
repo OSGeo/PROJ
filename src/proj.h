@@ -847,6 +847,10 @@ const char PROJ_DLL* proj_as_proj_string(PJ_CONTEXT *ctx,
                                              PJ_PROJ_STRING_TYPE type,
                                              const char* const *options);
 
+const char PROJ_DLL* proj_as_projjson(PJ_CONTEXT *ctx,
+                                      const PJ *obj,
+                                      const char* const *options);
+
 PJ PROJ_DLL *proj_get_source_crs(PJ_CONTEXT *ctx,
                                          const PJ *obj);
 

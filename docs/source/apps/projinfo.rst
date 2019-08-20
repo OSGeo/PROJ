@@ -44,6 +44,7 @@ Synopsis
       (*added in 6.2*)
     - a OGC URN combining references for concatenated operations
       (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
+    - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.1/projjson.schema.json (*added in 6.2*)
 
     {object_reference} is a filename preceded by the '@' character.  The
     file referenced by the {object_reference} must contain a valid
@@ -54,7 +55,8 @@ Description
 
 :program:`projinfo` is a program that can query information on a geodetic object,
 coordinate reference system (CRS) or coordinate operation, when the ``-s`` and ``-t``
-options are specified, and display it under different formats (PROJ string, WKT string).
+options are specified, and display it under different formats (PROJ string, WKT string
+or PROJJSON string).
 
 It can also be used to query coordinate operations available between two CRS.
 
@@ -69,7 +71,7 @@ The following control parameters can appear in any order:
 .. option:: -o formats
 
     formats is a comma separated combination of:
-    ``all``, ``default``, ``PROJ``, ``WKT_ALL``, ``WKT2_2015``, ``WKT2_2018``, ``WKT1_GDAL``, ``WKT1_ESRI``.
+    ``all``, ``default``, ``PROJ``, ``WKT_ALL``, ``WKT2_2015``, ``WKT2_2018``, ``WKT1_GDAL``, ``WKT1_ESRI``, ``PROJJSON``.
 
     Except ``all`` and ``default``, other formats can be preceded by ``-`` to disable them.
 
@@ -90,7 +92,7 @@ The following control parameters can appear in any order:
 .. option:: -q
 
     Turn on quiet mode. Quiet mode is only available for queries on single objects,
-    and only one output format is selected. In that mode, only the PROJ or WKT
+    and only one output format is selected. In that mode, only the PROJ, WKT or PROJJSON
     string is displayed, without other introduction output. The output is then
     potentially compatible of being piped in other utilities.
 
@@ -223,7 +225,7 @@ The following control parameters can appear in any order:
 
 .. option:: --single-line
 
-    Output WKT strings on a single line, instead of multiple intended lines by
+    Output WKT or PROJJSON strings on a single line, instead of multiple intended lines by
     default.
 
 Examples
@@ -319,6 +321,59 @@ Output:
             AREA["USA - CONUS including EEZ"],
             BBOX[23.81,-129.17,49.38,-65.69]],
         ID["DERIVED_FROM(EPSG)",1241]]
+
+3. Export an object as a PROJJSON string
+
+.. code-block:: console
+
+      projinfo GDA94 -o PROJJSON -q
+
+Output:
+
+.. code-block:: json
+
+    {
+        "type": "GeographicCRS",
+        "name": "GDA94",
+        "datum": {
+            "type": "GeodeticReferenceFrame",
+            "name": "Geocentric Datum of Australia 1994",
+            "ellipsoid": {
+                "name": "GRS 1980",
+                "semi_major_axis": 6378137,
+                "inverse_flattening": 298.257222101
+            }
+        },
+        "coordinate_system": {
+            "subtype": "ellipsoidal",
+            "axis": [
+            {
+                "name": "Geodetic latitude",
+                "abbreviation": "Lat",
+                "direction": "north",
+                "unit": "degree"
+            },
+            {
+                "name": "Geodetic longitude",
+                "abbreviation": "Lon",
+                "direction": "east",
+                "unit": "degree"
+            }
+            ]
+        },
+        "area": "Australia - GDA",
+        "bbox": {
+            "south_latitude": -60.56,
+            "west_longitude": 93.41,
+            "north_latitude": -8.47,
+            "east_longitude": 173.35
+        },
+        "id": {
+            "authority": "EPSG",
+            "code": 4283
+        }
+    }
+
 
 .. only:: man
 

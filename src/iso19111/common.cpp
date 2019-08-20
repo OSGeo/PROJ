@@ -236,6 +236,55 @@ void UnitOfMeasure::_exportToWKT(
     }
     formatter->endNode();
 }
+
+// ---------------------------------------------------------------------------
+
+void UnitOfMeasure::_exportToJSON(
+    JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    const auto &l_codeSpace = codeSpace();
+    auto objContext(
+        formatter->MakeObjectContext(nullptr, !l_codeSpace.empty()));
+    writer.AddObjKey("type");
+    const auto l_type = type();
+    if (l_type == Type::LINEAR) {
+        writer.Add("LinearUnit");
+    } else if (l_type == Type::ANGULAR) {
+        writer.Add("AngularUnit");
+    } else if (l_type == Type::SCALE) {
+        writer.Add("ScaleUnit");
+    } else if (l_type == Type::TIME) {
+        writer.Add("TimeUnit");
+    } else if (l_type == Type::PARAMETRIC) {
+        writer.Add("ParametricUnit");
+    } else {
+        writer.Add("Unit");
+    }
+
+    writer.AddObjKey("name");
+    const auto &l_name = name();
+    writer.Add(l_name);
+
+    const auto &factor = conversionToSI();
+    writer.AddObjKey("conversion_factor");
+    writer.Add(factor, 15);
+
+    if (!l_codeSpace.empty() && formatter->outputId()) {
+        writer.AddObjKey("id");
+        auto idContext(formatter->MakeObjectContext(nullptr, false));
+        writer.AddObjKey("authority");
+        writer.Add(l_codeSpace);
+        writer.AddObjKey("code");
+        const auto &l_code = code();
+        try {
+            writer.Add(std::stoi(l_code));
+        } catch (const std::exception &) {
+            writer.Add(l_code);
+        }
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -815,6 +864,33 @@ void IdentifiedObject::formatRemarks(WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+void IdentifiedObject::formatID(JSONFormatter *formatter) const {
+    const auto &ids(identifiers());
+    auto &writer = formatter->writer();
+    if (ids.size() == 1) {
+        writer.AddObjKey("id");
+        ids.front()->_exportToJSON(formatter);
+    } else if (!ids.empty()) {
+        writer.AddObjKey("ids");
+        auto arrayContext(writer.MakeArrayContext());
+        for (const auto &id : ids) {
+            id->_exportToJSON(formatter);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void IdentifiedObject::formatRemarks(JSONFormatter *formatter) const {
+    if (!remarks().empty()) {
+        auto &writer = formatter->writer();
+        writer.AddObjKey("remarks");
+        writer.Add(remarks());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 bool IdentifiedObject::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -966,6 +1042,46 @@ void ObjectDomain::_exportToWKT(WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void ObjectDomain::_exportToJSON(JSONFormatter *formatter) const {
+    auto &writer = formatter->writer();
+    if (d->scope_.has_value()) {
+        writer.AddObjKey("scope");
+        writer.Add(*(d->scope_));
+    }
+    if (d->domainOfValidity_) {
+        if (d->domainOfValidity_->description().has_value()) {
+            writer.AddObjKey("area");
+            writer.Add(*(d->domainOfValidity_->description()));
+        }
+        if (d->domainOfValidity_->geographicElements().size() == 1) {
+            const auto bbox = dynamic_cast<const GeographicBoundingBox *>(
+                d->domainOfValidity_->geographicElements()[0].get());
+            if (bbox) {
+                writer.AddObjKey("bbox");
+                auto bboxContext(writer.MakeObjectContext());
+                writer.AddObjKey("south_latitude");
+                writer.Add(bbox->southBoundLatitude(), 15);
+                writer.AddObjKey("west_longitude");
+                writer.Add(bbox->westBoundLongitude(), 15);
+                writer.AddObjKey("north_latitude");
+                writer.Add(bbox->northBoundLatitude(), 15);
+                writer.AddObjKey("east_longitude");
+                writer.Add(bbox->eastBoundLongitude(), 15);
+            }
+        }
+        if (d->domainOfValidity_->verticalElements().size() == 1) {
+            // TODO
+        }
+        if (d->domainOfValidity_->temporalElements().size() == 1) {
+            // TODO
+        }
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 bool ObjectDomain::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -1093,6 +1209,31 @@ void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
     if (isWKT2) {
         formatRemarks(formatter);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+void ObjectUsage::baseExportToJSON(JSONFormatter *formatter) const {
+
+    auto &writer = formatter->writer();
+    if (formatter->outputUsage()) {
+        const auto &l_domains = domains();
+        if (l_domains.size() == 1) {
+            l_domains[0]->_exportToJSON(formatter);
+        } else if (!l_domains.empty()) {
+            writer.AddObjKey("usages");
+            auto arrayContext(writer.MakeArrayContext(false));
+            for (const auto &domain : l_domains) {
+                auto objContext(writer.MakeObjectContext());
+                domain->_exportToJSON(formatter);
+            }
+        }
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+    formatRemarks(formatter);
 }
 
 // ---------------------------------------------------------------------------

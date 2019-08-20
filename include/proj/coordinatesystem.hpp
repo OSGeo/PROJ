@@ -165,8 +165,8 @@ using CoordinateSystemAxisNNPtr = util::nn<CoordinateSystemAxisPtr>;
  *
  * \remark Implements CoordinateSystemAxis from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL CoordinateSystemAxis final
-    : public common::IdentifiedObject {
+class PROJ_GCC_DLL CoordinateSystemAxis final : public common::IdentifiedObject,
+                                                public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystemAxis() override;
@@ -200,6 +200,9 @@ class PROJ_GCC_DLL CoordinateSystemAxis final
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL static std::string normalizeAxisName(const std::string &str);
 
@@ -235,7 +238,8 @@ class PROJ_GCC_DLL CoordinateSystemAxis final
  *
  * \remark Implements CoordinateSystem from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject {
+class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject,
+                                      public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystem() override;
@@ -250,6 +254,9 @@ class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject {
         PROJ_INTERNAL void
         _exportToWKT(io::WKTFormatter *formatter)
             const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL virtual std::string getWKT2Type(bool) const = 0;
 

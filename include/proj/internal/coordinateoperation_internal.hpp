@@ -149,6 +149,10 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
         Conversion::_exportToWKT(formatter);
     }
 
+    void _exportToJSON(io::JSONFormatter *formatter) const override {
+        Conversion::_exportToJSON(formatter);
+    }
+
     void
     _exportToPROJString(io::PROJStringFormatter *formatter) const override {
         InverseCoordinateOperation::_exportToPROJString(formatter);
@@ -198,6 +202,10 @@ class InverseTransformation : public Transformation,
     void
     _exportToPROJString(io::PROJStringFormatter *formatter) const override {
         return InverseCoordinateOperation::_exportToPROJString(formatter);
+    }
+
+    void _exportToJSON(io::JSONFormatter *formatter) const override {
+        Transformation::_exportToJSON(formatter);
     }
 
     bool
@@ -268,6 +276,9 @@ class PROJBasedOperation : public SingleOperation {
     explicit PROJBasedOperation(const OperationMethodNNPtr &methodIn);
 
     void _exportToPROJString(io::PROJStringFormatter *formatter)
+        const override; // throw(FormattingException)
+
+    void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)
 
     CoordinateOperationNNPtr _shallowClone() const override;

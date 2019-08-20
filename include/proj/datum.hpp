@@ -61,7 +61,8 @@ namespace datum {
  *
  * \remark Implements Datum from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL Datum : public common::ObjectUsage {
+class PROJ_GCC_DLL Datum : public common::ObjectUsage,
+                           public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Datum() override;
@@ -117,7 +118,8 @@ using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
  *
  * \remark Implements DatumEnsemble from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject {
+class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject,
+                                         public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DatumEnsemble() override;
@@ -134,6 +136,9 @@ class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject {
 
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(io::FormattingException)
                         //! @endcond
 
@@ -171,7 +176,8 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
  * \remark Implements PrimeMeridian from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
-                                         public io::IPROJStringExportable {
+                                         public io::IPROJStringExportable,
+                                         public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PrimeMeridian() override;
@@ -196,6 +202,9 @@ class PROJ_GCC_DLL PrimeMeridian final : public common::IdentifiedObject,
             const override; // throw(FormattingException)
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(io::FormattingException)
 
     PROJ_INTERNAL bool
@@ -243,7 +252,8 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
  * \remark Implements Ellipsoid from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
-                                     public io::IPROJStringExportable {
+                                     public io::IPROJStringExportable,
+                                     public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Ellipsoid() override;
@@ -299,6 +309,9 @@ class PROJ_GCC_DLL Ellipsoid final : public common::IdentifiedObject,
         PROJ_INTERNAL void
         _exportToWKT(io::WKTFormatter *formatter)
             const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(io::FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
@@ -398,6 +411,9 @@ class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
@@ -554,7 +570,11 @@ class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-                        //! @endcond
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
+    //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -668,6 +688,9 @@ class PROJ_GCC_DLL TemporalDatum final : public Datum {
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
@@ -716,6 +739,9 @@ class PROJ_GCC_DLL EngineeringDatum final : public Datum {
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
@@ -759,6 +785,9 @@ class PROJ_GCC_DLL ParametricDatum final : public Datum {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,

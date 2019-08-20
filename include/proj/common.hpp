@@ -104,6 +104,9 @@ class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
                                     const std::string &unitType = std::string())
         const; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(
+        io::JSONFormatter *formatter) const; // throw(io::FormattingException)
+
     PROJ_INTERNAL std::string exportToPROJString() const;
 
     PROJ_INTERNAL bool
@@ -327,7 +330,12 @@ class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
         //! @cond Doxygen_Suppress
         void
         formatID(io::WKTFormatter *formatter) const;
+
+    PROJ_INTERNAL void formatID(io::JSONFormatter *formatter) const;
+
     PROJ_INTERNAL void formatRemarks(io::WKTFormatter *formatter) const;
+
+    PROJ_INTERNAL void formatRemarks(io::JSONFormatter *formatter) const;
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
@@ -389,6 +397,9 @@ class PROJ_GCC_DLL ObjectDomain : public util::BaseObject,
         _exportToWKT(io::WKTFormatter *formatter)
             const; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(
+        io::JSONFormatter *formatter) const; // throw(FormattingException)
+
     bool
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
@@ -449,6 +460,9 @@ class PROJ_GCC_DLL ObjectUsage : public IdentifiedObject {
 
     void baseExportToWKT(
         io::WKTFormatter *formatter) const; // throw(io::FormattingException)
+
+    void baseExportToJSON(
+        io::JSONFormatter *formatter) const; // throw(io::FormattingException)
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

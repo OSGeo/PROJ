@@ -205,6 +205,42 @@ TEST(datum, prime_meridian_to_PROJString) {
 
 // ---------------------------------------------------------------------------
 
+TEST(datum, prime_meridian_to_JSON) {
+
+    EXPECT_EQ(PrimeMeridian::GREENWICH->exportToJSON(
+                  &(JSONFormatter::create()->setSchema(""))),
+              "{\n"
+              "  \"type\": \"PrimeMeridian\",\n"
+              "  \"name\": \"Greenwich\",\n"
+              "  \"longitude\": 0,\n"
+              "  \"id\": {\n"
+              "    \"authority\": \"EPSG\",\n"
+              "    \"code\": 8901\n"
+              "  }\n"
+              "}");
+
+    EXPECT_EQ(PrimeMeridian::PARIS->exportToJSON(
+                  &(JSONFormatter::create()->setSchema(""))),
+              "{\n"
+              "  \"type\": \"PrimeMeridian\",\n"
+              "  \"name\": \"Paris\",\n"
+              "  \"longitude\": {\n"
+              "    \"value\": 2.5969213,\n"
+              "    \"unit\": {\n"
+              "      \"type\": \"AngularUnit\",\n"
+              "      \"name\": \"grad\",\n"
+              "      \"conversion_factor\": 0.015707963267949\n"
+              "    }\n"
+              "  },\n"
+              "  \"id\": {\n"
+              "    \"authority\": \"EPSG\",\n"
+              "    \"code\": 8903\n"
+              "  }\n"
+              "}");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(datum, datum_with_ANCHOR) {
     auto datum = GeodeticReferenceFrame::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS_1984 with anchor"),
