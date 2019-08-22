@@ -153,6 +153,18 @@ paragraph for more details.
     :type `area`: PJ_AREA
     :returns: :c:type:`PJ*`
 
+.. c:function:: PJ* proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx, PJ *source_crs, PJ *target_crs, PJ_AREA *area, const char* const *options)
+
+    .. versionadded:: 6.2.0
+
+    Create a transformation object that is a pipeline between two known
+    coordinate reference systems.
+
+    This is the same as :c:func:`proj_create_crs_to_crs` except that the source and
+    target CRS are passed as PJ* objects which must of the CRS variety.
+
+    :param `options`: should be set to NULL currently.
+
 .. c:function:: PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj)
 
     .. versionadded:: 6.1.0

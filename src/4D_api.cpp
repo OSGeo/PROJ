@@ -1045,10 +1045,27 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         return nullptr;
     }
 
+    auto ret = proj_create_crs_to_crs_from_pj(ctx, src, dst, area, nullptr);
+    proj_destroy(src);
+    proj_destroy(dst);
+    return ret;
+}
+
+/*****************************************************************************/
+PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, PJ *source_crs, PJ *target_crs, PJ_AREA *area, const char* const *) {
+/******************************************************************************
+    Create a transformation pipeline between two known coordinate reference
+    systems.
+
+    See docs/source/development/reference/functions.rst
+
+******************************************************************************/
+    if( !ctx ) {
+        ctx = pj_get_default_ctx();
+    }
+
     auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
     if( !operation_ctx ) {
-        proj_destroy(src);
-        proj_destroy(dst);
         return nullptr;
     }
 
@@ -1067,12 +1084,10 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
-    auto op_list = proj_create_operations(ctx, src, dst, operation_ctx);
+    auto op_list = proj_create_operations(ctx, source_crs, target_crs, operation_ctx);
 
     if( !op_list ) {
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         return nullptr;
     }
 
@@ -1080,8 +1095,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     if( op_count == 0 ) {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
+
         proj_context_log_debug(ctx, "No operation found matching criteria");
         return nullptr;
     }
@@ -1090,35 +1104,29 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     assert(P);
 
     if( P == nullptr || op_count == 1 || (area && area->bbox_set) ||
-        proj_get_type(src) == PJ_TYPE_GEOCENTRIC_CRS ||
-        proj_get_type(dst) == PJ_TYPE_GEOCENTRIC_CRS ) {
+        proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
+        proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         return P;
     }
 
-    auto pjGeogToSrc = create_operation_to_base_geog_crs(ctx, src);
+    auto pjGeogToSrc = create_operation_to_base_geog_crs(ctx, source_crs);
     if( !pjGeogToSrc )
     {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         proj_context_log_debug(ctx,
             "Cannot create transformation from geographic CRS of source CRS to source CRS");
         proj_destroy(P);
         return nullptr;
     }
 
-    auto pjGeogToDst = create_operation_to_base_geog_crs(ctx, dst);
+    auto pjGeogToDst = create_operation_to_base_geog_crs(ctx, target_crs);
     if( !pjGeogToDst )
     {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         proj_context_log_debug(ctx,
             "Cannot create transformation from geographic CRS of target CRS to target CRS");
         proj_destroy(P);
@@ -1177,8 +1185,6 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         proj_list_destroy(op_list);
 
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         proj_destroy(pjGeogToSrc);
         proj_destroy(pjGeogToDst);
 
@@ -1205,8 +1211,6 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         proj_destroy(pjGeogToSrc);
         proj_destroy(pjGeogToDst);
         proj_destroy(P);
