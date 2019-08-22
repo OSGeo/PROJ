@@ -231,13 +231,19 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
         // with the input coordinate, then goes through again the list, and
         // use the first operation that does not require grids.
         i = 0;
+        NS_PROJ::io::DatabaseContextPtr dbContext;
+        try
+        {
+            if( P->ctx->cpp_context ) {
+                dbContext = P->ctx->cpp_context->getDatabaseContext().as_nullable();
+            }
+        }
+        catch( const std::exception& ) {}
         for( const auto &alt: P->alternativeCoordinateOperations ) {
             auto coordOperation = dynamic_cast<
             NS_PROJ::operation::CoordinateOperation*>(alt.pj->iso_obj.get());
             if( coordOperation ) {
-                if( coordOperation->gridsNeeded(P->ctx->cpp_context ?
-                    P->ctx->cpp_context->databaseContext.as_nullable() :
-                    nullptr).empty() ) {
+                if( coordOperation->gridsNeeded(dbContext).empty() ) {
                     if( P->iCurCoordOp != i ) {
                         std::string msg("Using coordinate operation ");
                         msg += alt.name;

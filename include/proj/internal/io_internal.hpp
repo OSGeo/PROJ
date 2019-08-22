@@ -166,24 +166,46 @@ NS_PROJ_END
 
 /** Auxiliary structure to PJ_CONTEXT storing C++ context stuff. */
 struct projCppContext {
-    NS_PROJ::io::DatabaseContextNNPtr databaseContext;
+  private:
+    NS_PROJ::io::DatabaseContextPtr databaseContext_{};
+    PJ_CONTEXT *ctx_ = nullptr;
+    std::string dbPath_{};
+    std::vector<std::string> auxDbPaths_{};
+    bool autoCloseDb_ = false;
+
+    projCppContext(const projCppContext &) = delete;
+    projCppContext &operator=(const projCppContext &) = delete;
+
+  public:
+    std::string lastDbPath_{};
+    std::string lastDbMetadataItem_{};
     std::string lastUOMName_{};
     std::string lastGridFullName_{};
     std::string lastGridPackageName_{};
     std::string lastGridUrl_{};
 
-    explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
-                            const char *const *auxDbPaths = nullptr)
-        : databaseContext(NS_PROJ::io::DatabaseContext::create(
-              dbPath ? dbPath : std::string(), toVector(auxDbPaths), ctx)) {}
+    static std::vector<std::string> toVector(const char *const *auxDbPaths);
 
-    static std::vector<std::string> toVector(const char *const *auxDbPaths) {
-        std::vector<std::string> res;
-        for (auto iter = auxDbPaths; iter && *iter; ++iter) {
-            res.emplace_back(std::string(*iter));
-        }
-        return res;
+    explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
+                            const std::vector<std::string> &auxDbPaths = {});
+
+    // cppcheck-suppress functionStatic
+    inline const std::string &getDbPath() const { return dbPath_; }
+
+    // cppcheck-suppress functionStatic
+    inline const std::vector<std::string> &getAuxDbPaths() const {
+        return auxDbPaths_;
     }
+
+    void setAutoCloseDb(bool autoClose) { autoCloseDb_ = autoClose; }
+    inline bool getAutoCloseDb() const { return autoCloseDb_; }
+
+    // cppcheck-suppress functionStatic
+    void closeDb();
+
+    void autoCloseDbIfNeeded();
+
+    NS_PROJ::io::DatabaseContextNNPtr getDatabaseContext();
 };
 
 //! @endcond

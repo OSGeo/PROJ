@@ -10446,7 +10446,7 @@ struct FilterResults {
         // ...
         removeSyntheticNullTransforms();
         if (context->getDiscardSuperseded())
-          removeUninterestingOps();
+            removeUninterestingOps();
         removeDuplicateOps();
         removeSyntheticNullTransforms();
         return *this;

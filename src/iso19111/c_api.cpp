@@ -105,19 +105,55 @@ static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
 void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
     delete cppContext;
 }
+// ---------------------------------------------------------------------------
 
-//! @endcond
+projCppContext::projCppContext(PJ_CONTEXT *ctx, const char *dbPath,
+                               const std::vector<std::string> &auxDbPaths)
+    : ctx_(ctx), dbPath_(dbPath ? dbPath : std::string()),
+      auxDbPaths_(auxDbPaths) {}
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
+std::vector<std::string>
+projCppContext::toVector(const char *const *auxDbPaths) {
+    std::vector<std::string> res;
+    for (auto iter = auxDbPaths; iter && *iter; ++iter) {
+        res.emplace_back(std::string(*iter));
+    }
+    return res;
+}
 
-static PROJ_NO_INLINE const DatabaseContextNNPtr &
-getDBcontext(PJ_CONTEXT *ctx) {
+// ---------------------------------------------------------------------------
+
+void projCppContext::closeDb() { databaseContext_ = nullptr; }
+
+// ---------------------------------------------------------------------------
+
+void projCppContext::autoCloseDbIfNeeded() {
+    if (getAutoCloseDb()) {
+        closeDb();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+NS_PROJ::io::DatabaseContextNNPtr projCppContext::getDatabaseContext() {
+    if (databaseContext_) {
+        return NN_NO_CHECK(databaseContext_);
+    }
+    auto dbContext =
+        NS_PROJ::io::DatabaseContext::create(dbPath_, auxDbPaths_, ctx_);
+    databaseContext_ = dbContext;
+    return dbContext;
+}
+
+// ---------------------------------------------------------------------------
+
+static PROJ_NO_INLINE DatabaseContextNNPtr getDBcontext(PJ_CONTEXT *ctx) {
     if (ctx->cpp_context == nullptr) {
         ctx->cpp_context = new projCppContext(ctx);
     }
-    return ctx->cpp_context->databaseContext;
+    return ctx->cpp_context->getDatabaseContext();
 }
 
 // ---------------------------------------------------------------------------
@@ -144,6 +180,9 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
             auto pj = pj_create_internal(ctx, projString.c_str());
             if (pj) {
                 pj->iso_obj = objIn;
+                if (ctx->cpp_context) {
+                    ctx->cpp_context->autoCloseDbIfNeeded();
+                }
                 return pj;
             }
         } catch (const std::exception &) {
@@ -156,6 +195,9 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
         pj->ctx = ctx;
         pj->descr = "ISO-19111 object";
         pj->iso_obj = objIn;
+    }
+    if (ctx->cpp_context) {
+        ctx->cpp_context->autoCloseDbIfNeeded();
     }
     return pj;
 }
@@ -191,6 +233,26 @@ struct PJ_OBJ_LIST {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set if the database must be closed after each C API call where it
+ * has been openeded, and automatically re-openeded when needed.
+ *
+ * The default value is FALSE, that is the database remains open until the
+ * context is destroyed.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param autoclose Boolean parameter
+ * @since 6.2
+ */
+void proj_context_set_autoclose_database(PJ_CONTEXT *ctx, int autoclose) {
+    SANITIZE_CTX(ctx);
+    if (ctx->cpp_context == nullptr) {
+        ctx->cpp_context = new projCppContext(ctx);
+    }
+    ctx->cpp_context->setAutoCloseDb(autoclose != FALSE);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Explicitly point to the main PROJ CRS and coordinate operation
  * definition database ("proj.db"), and potentially auxiliary databases with
  * same structure.
@@ -207,13 +269,29 @@ int proj_context_set_database_path(PJ_CONTEXT *ctx, const char *dbPath,
                                    const char *const *options) {
     SANITIZE_CTX(ctx);
     (void)options;
+    std::string osPrevDbPath;
+    std::vector<std::string> osPrevAuxDbPaths;
+    bool autoCloseDb = false;
+    if (ctx->cpp_context) {
+        osPrevDbPath = ctx->cpp_context->getDbPath();
+        osPrevAuxDbPaths = ctx->cpp_context->getAuxDbPaths();
+        autoCloseDb = ctx->cpp_context->getAutoCloseDb();
+    }
     delete ctx->cpp_context;
     ctx->cpp_context = nullptr;
     try {
-        ctx->cpp_context = new projCppContext(ctx, dbPath, auxDbPaths);
+        ctx->cpp_context = new projCppContext(
+            ctx, dbPath, projCppContext::toVector(auxDbPaths));
+        ctx->cpp_context->setAutoCloseDb(autoCloseDb);
+        ctx->cpp_context->getDatabaseContext();
+        ctx->cpp_context->autoCloseDbIfNeeded();
         return true;
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+        delete ctx->cpp_context;
+        ctx->cpp_context =
+            new projCppContext(ctx, osPrevDbPath.c_str(), osPrevAuxDbPaths);
+        ctx->cpp_context->setAutoCloseDb(autoCloseDb);
         return false;
     }
 }
@@ -231,7 +309,12 @@ int proj_context_set_database_path(PJ_CONTEXT *ctx, const char *dbPath,
 const char *proj_context_get_database_path(PJ_CONTEXT *ctx) {
     SANITIZE_CTX(ctx);
     try {
-        return getDBcontext(ctx)->getPath().c_str();
+        // temporary variable must be used as getDBcontext() might create
+        // ctx->cpp_context
+        auto osPath(getDBcontext(ctx)->getPath());
+        ctx->cpp_context->lastDbPath_ = osPath;
+        ctx->cpp_context->autoCloseDbIfNeeded();
+        return ctx->cpp_context->lastDbPath_.c_str();
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -253,7 +336,12 @@ const char *proj_context_get_database_metadata(PJ_CONTEXT *ctx,
                                                const char *key) {
     SANITIZE_CTX(ctx);
     try {
-        return getDBcontext(ctx)->getMetadata(key);
+        // temporary variable must be used as getDBcontext() might create
+        // ctx->cpp_context
+        auto osVal(getDBcontext(ctx)->getMetadata(key));
+        ctx->cpp_context->lastDbMetadataItem_ = osVal;
+        ctx->cpp_context->autoCloseDbIfNeeded();
+        return ctx->cpp_context->lastDbMetadataItem_.c_str();
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -358,6 +446,9 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    if (ctx->cpp_context) {
+        ctx->cpp_context->autoCloseDbIfNeeded();
     }
     return nullptr;
 }
@@ -487,6 +578,9 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
             proj_log_error(ctx, __FUNCTION__, e.what());
         }
     }
+    if (ctx->cpp_context) {
+        ctx->cpp_context->autoCloseDbIfNeeded();
+    }
     return nullptr;
 }
 
@@ -545,6 +639,7 @@ PJ *proj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return nullptr;
 }
 
@@ -617,10 +712,12 @@ int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
         if (out_category) {
             *out_category = get_unit_category(obj->type());
         }
+        ctx->cpp_context->autoCloseDbIfNeeded();
         return true;
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return false;
 }
 
@@ -660,8 +757,10 @@ int PROJ_DLL proj_grid_get_info_from_database(
                 grid_name, ctx->cpp_context->lastGridFullName_,
                 ctx->cpp_context->lastGridPackageName_,
                 ctx->cpp_context->lastGridUrl_, direct_download, open_license,
-                available))
+                available)) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
             return false;
+        }
 
         if (out_full_name)
             *out_full_name = ctx->cpp_context->lastGridFullName_.c_str();
@@ -676,10 +775,12 @@ int PROJ_DLL proj_grid_get_info_from_database(
         if (out_available)
             *out_available = available ? 1 : 0;
 
+        ctx->cpp_context->autoCloseDbIfNeeded();
         return true;
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return false;
 }
 
@@ -712,10 +813,12 @@ PJ_OBJ_LIST *proj_query_geodetic_crs_from_datum(PJ_CONTEXT *ctx,
         for (const auto &obj : res) {
             objects.push_back(obj);
         }
+        ctx->cpp_context->autoCloseDbIfNeeded();
         return new PJ_OBJ_LIST(std::move(objects));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return nullptr;
 }
 
@@ -872,10 +975,12 @@ PJ_OBJ_LIST *proj_create_from_name(PJ_CONTEXT *ctx, const char *auth_name,
         for (const auto &obj : res) {
             objects.push_back(obj);
         }
+        ctx->cpp_context->autoCloseDbIfNeeded();
         return new PJ_OBJ_LIST(std::move(objects));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return nullptr;
 }
 
@@ -1014,10 +1119,12 @@ PJ_OBJ_LIST *proj_get_non_deprecated(PJ_CONTEXT *ctx, const PJ *obj) {
         for (const auto &resObj : res) {
             objects.push_back(resObj);
         }
+        ctx->cpp_context->autoCloseDbIfNeeded();
         return new PJ_OBJ_LIST(std::move(objects));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return nullptr;
 }
 
@@ -1235,13 +1342,22 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
                 std::string msg("Unknown option :");
                 msg += *iter;
                 proj_log_error(ctx, __FUNCTION__, msg.c_str());
+                if (ctx->cpp_context) {
+                    ctx->cpp_context->autoCloseDbIfNeeded();
+                }
                 return nullptr;
             }
         }
         obj->lastWKT = obj->iso_obj->exportToWKT(formatter.get());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
         return obj->lastWKT.c_str();
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
         return nullptr;
     }
 }
@@ -1305,9 +1421,15 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
             }
         }
         obj->lastPROJString = exportable->exportToPROJString(formatter.get());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
         return obj->lastPROJString.c_str();
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
         return nullptr;
     }
 }
@@ -1669,6 +1791,9 @@ PJ *proj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx, const PJ *crs,
                 std::string msg("Unknown option :");
                 msg += *iter;
                 proj_log_error(ctx, __FUNCTION__, msg.c_str());
+                if (ctx->cpp_context) {
+                    ctx->cpp_context->autoCloseDbIfNeeded();
+                }
                 return nullptr;
             }
         }
@@ -1676,6 +1801,9 @@ PJ *proj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx, const PJ *crs,
                                       dbContext, allowIntermediateCRS));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
         return nullptr;
     }
 }
@@ -2020,12 +2148,14 @@ PJ_OBJ_LIST *proj_identify(PJ_CONTEXT *ctx, const PJ *obj,
                 *out_confidence = confidenceTemp;
                 confidenceTemp = nullptr;
             }
+            ctx->cpp_context->autoCloseDbIfNeeded();
             return ret.release();
         } catch (const std::exception &e) {
             delete[] confidenceTemp;
             proj_log_error(ctx, __FUNCTION__, e.what());
         }
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return nullptr;
 }
 
@@ -2049,10 +2179,13 @@ void proj_int_list_destroy(int *list) { delete[] list; }
 PROJ_STRING_LIST proj_get_authorities_from_database(PJ_CONTEXT *ctx) {
     SANITIZE_CTX(ctx);
     try {
-        return to_string_list(getDBcontext(ctx)->getAuthorities());
+        auto ret = to_string_list(getDBcontext(ctx)->getAuthorities());
+        ctx->cpp_context->autoCloseDbIfNeeded();
+        return ret;
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return nullptr;
 }
 
@@ -2086,12 +2219,15 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
         if (!valid) {
             return nullptr;
         }
-        return to_string_list(
+        auto ret = to_string_list(
             factory->getAuthorityCodes(typeInternal, allow_deprecated != 0));
+        ctx->cpp_context->autoCloseDbIfNeeded();
+        return ret;
 
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return nullptr;
 }
 
@@ -2284,6 +2420,7 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
         ret[i] = nullptr;
         if (out_result_count)
             *out_result_count = i;
+        ctx->cpp_context->autoCloseDbIfNeeded();
         return ret;
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -2294,6 +2431,7 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
         if (out_result_count)
             *out_result_count = 0;
     }
+    ctx->cpp_context->autoCloseDbIfNeeded();
     return nullptr;
 }
 
@@ -2569,6 +2707,9 @@ PJ *proj_create_geographic_crs(PJ_CONTEXT *ctx, const char *crs_name,
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
+    if (ctx->cpp_context) {
+        ctx->cpp_context->autoCloseDbIfNeeded();
+    }
     return nullptr;
 }
 
@@ -2610,6 +2751,9 @@ PJ *proj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx, const char *crs_name,
         return pj_obj_create(ctx, geogCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    if (ctx->cpp_context) {
+        ctx->cpp_context->autoCloseDbIfNeeded();
     }
     return nullptr;
 }
@@ -5905,8 +6049,15 @@ int proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
     }
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        return op->isPROJInstantiable(dbContext) ? 1 : 0;
+        auto ret = op->isPROJInstantiable(dbContext) ? 1 : 0;
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
+        return ret;
     } catch (const std::exception &) {
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
         return 0;
     }
 }
@@ -6214,9 +6365,15 @@ int proj_coordoperation_get_grid_used_count(PJ_CONTEXT *ctx,
                 coordoperation->gridsNeeded.emplace_back(gridDesc);
             }
         }
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
         return static_cast<int>(coordoperation->gridsNeeded.size());
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
         return 0;
     }
 }
@@ -6344,6 +6501,7 @@ proj_create_operation_factory_context(PJ_CONTEXT *ctx, const char *authority) {
                 std::string(authority ? authority : ""));
             auto operationContext =
                 CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+            ctx->cpp_context->autoCloseDbIfNeeded();
             return new PJ_OPERATION_FACTORY_CONTEXT(
                 std::move(operationContext));
         } else {
@@ -6354,6 +6512,9 @@ proj_create_operation_factory_context(PJ_CONTEXT *ctx, const char *authority) {
         }
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    if (ctx->cpp_context) {
+        ctx->cpp_context->autoCloseDbIfNeeded();
     }
     return nullptr;
 }
@@ -6652,17 +6813,15 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
  * @param discard superseded crs or not
  */
 void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
-    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
-    int discard) {
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx, int discard) {
     SANITIZE_CTX(ctx);
     assert(factory_ctx);
-    try {        
+    try {
         factory_ctx->operationContext->setDiscardSuperseded(discard != 0);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
 }
-
 
 // ---------------------------------------------------------------------------
 
