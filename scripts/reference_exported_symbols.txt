@@ -874,6 +874,7 @@ proj_create_conversion_wagner_v
 proj_create_conversion_wagner_vi
 proj_create_conversion_wagner_vii
 proj_create_crs_to_crs
+proj_create_crs_to_crs_from_pj
 proj_create_cs
 proj_create_ellipsoidal_2D_cs
 proj_create_engineering_crs
