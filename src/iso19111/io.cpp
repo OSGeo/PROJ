@@ -5502,7 +5502,10 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         DatabaseContextNNPtr dbContextNNPtr(NN_NO_CHECK(dbContext));
         const auto &authName = tokens[0];
         const auto &code = tokens[1];
-        auto factory = AuthorityFactory::create(dbContextNNPtr, authName);
+        static const std::string epsg_lowercase("epsg");
+        auto factory = AuthorityFactory::create(
+            dbContextNNPtr,
+            authName == epsg_lowercase ? Identifier::EPSG : authName);
         try {
             return factory->createCoordinateReferenceSystem(code);
         } catch (...) {
