@@ -7929,6 +7929,9 @@ TEST(io, projparse_merc_google_mercator) {
     EXPECT_TRUE(wkt.find("METHOD[\"Popular Visualisation Pseudo "
                          "Mercator\",ID[\"EPSG\",1024]") != std::string::npos)
         << wkt;
+    EXPECT_TRUE(wkt.find("DATUM[\"World Geodetic System 1984\"") !=
+                std::string::npos)
+        << wkt;
 }
 
 // ---------------------------------------------------------------------------

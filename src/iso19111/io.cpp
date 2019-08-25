@@ -8350,6 +8350,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     break;
                 }
             }
+            if (getNumericValue(getParamValue(step, "a")) == 6378137) {
+                return createPseudoMercator(PropertyMap().set(
+                    IdentifiedObject::NAME_KEY, "WGS 84 / Pseudo-Mercator"));
+            }
         } else if (hasParamValue(step, "lat_ts")) {
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
         } else {
