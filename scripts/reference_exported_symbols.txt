@@ -773,6 +773,7 @@ proj_as_projjson
 proj_as_proj_string
 proj_assign_context
 proj_as_wkt
+proj_cleanup
 proj_clone
 proj_concatoperation_get_step
 proj_concatoperation_get_step_count

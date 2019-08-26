@@ -458,6 +458,8 @@ double PROJ_DLL proj_todeg (double angle_in_radians);
 double PROJ_DLL proj_dmstor(const char *is, char **rs);
 char PROJ_DLL * proj_rtodms(char *s, double r, int pos, int neg);
 
+void PROJ_DLL proj_cleanup(void);
+
 /*! @endcond */
 
 /* ------------------------------------------------------------------------- */
