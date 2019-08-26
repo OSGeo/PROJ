@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJINFO" "1" "May 06, 2019" "6.1.0" "PROJ.4"
+.TH "PROJINFO" "1" "Aug 26, 2019" "6.2.0" "PROJ"
 .SH NAME
 projinfo \- Geodetic object and coordinate operation queries
 .
@@ -36,17 +36,17 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .nf
 \fBprojinfo\fP
 .in +2
-[\-o formats] [\-k crs|operation|ellipsoid] [–summary] [\-q]
-[[–area name_or_code] | [–bbox west_long,south_lat,east_long,north_lat]]
-[–spatial\-test contains|intersects]
-[–crs\-extent\-use none|both|intersection|smallest]
-[–grid\-check none|discard_missing|sort] [–show\-superseded]
-[–pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
-[–boundcrs\-to\-wgs84]
-[–main\-db\-path path] [–aux\-db\-path path]*
-[–identify]
-[–c\-ify] [–single\-line]
-{object_definition} | (\-s {srs_def} \-t {srs_def})
+[\-o formats] [\-k crs|operation|ellipsoid] [\-\-summary] [\-q]
+[[\-\-area name_or_code] | [\-\-bbox west_long,south_lat,east_long,north_lat]]
+[\-\-spatial\-test contains|intersects]
+[\-\-crs\-extent\-use none|both|intersection|smallest]
+[\-\-grid\-check none|discard_missing|sort] [\-\-show\-superseded]
+[\-\-pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
+[\-\-boundcrs\-to\-wgs84]
+[\-\-main\-db\-path path] [\-\-aux\-db\-path path]*
+[\-\-identify]
+[\-\-c\-ify] [\-\-single\-line]
+{object_definition} | {object_reference} | (\-s {srs_def} \-t {srs_def})
 
 .in -2
 .fi
@@ -59,23 +59,35 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like “EPSG:4326”, “urn:ogc:def:crs:EPSG::4326”,
-“urn:ogc:def:coordinateOperation:EPSG::1671”),
+an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+"urn:ogc:def:coordinateOperation:EPSG::1671"),
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
-(e.g “\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP” or custom abbreviated
-syntax “EPSG:2393+5717”),
+(e.g "\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP" or custom abbreviated
+syntax "EPSG:2393+5717"),
+.IP \(bu 2
+a OGC URN combining references for references for projected or derived CRSs
+e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
+"\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP"
+(\fIadded in 6.2\fP)
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. “\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP”)
+(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
+.IP \(bu 2
+a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.1/projjson.schema.json\fP (\fIadded in 6.2\fP)
 .UNINDENT
+.sp
+{object_reference} is a filename preceded by the \(aq@\(aq character.  The
+file referenced by the {object_reference} must contain a valid
+{object_definition}.
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
 .sp
 \fBprojinfo\fP is a program that can query information on a geodetic object,
 coordinate reference system (CRS) or coordinate operation, when the \fB\-s\fP and \fB\-t\fP
-options are specified, and display it under different formats (PROJ string, WKT string).
+options are specified, and display it under different formats (PROJ string, WKT string
+or PROJJSON string).
 .sp
 It can also be used to query coordinate operations available between two CRS.
 .sp
@@ -87,7 +99,7 @@ The following control parameters can appear in any order:
 .TP
 .B \-o formats
 formats is a comma separated combination of:
-\fBall\fP, \fBdefault\fP, \fBPROJ\fP, \fBWKT_ALL\fP, \fBWKT2_2015\fP, \fBWKT2_2018\fP, \fBWKT1_GDAL\fP, \fBWKT1_ESRI\fP\&.
+\fBall\fP, \fBdefault\fP, \fBPROJ\fP, \fBWKT_ALL\fP, \fBWKT2_2015\fP, \fBWKT2_2018\fP, \fBWKT1_GDAL\fP, \fBWKT1_ESRI\fP, \fBPROJJSON\fP\&.
 .sp
 Except \fBall\fP and \fBdefault\fP, other formats can be preceded by \fB\-\fP to disable them.
 .UNINDENT
@@ -116,7 +128,7 @@ only used for coordinate operation computation
 .TP
 .B \-q
 Turn on quiet mode. Quiet mode is only available for queries on single objects,
-and only one output format is selected. In that mode, only the PROJ or WKT
+and only one output format is selected. In that mode, only the PROJ, WKT or PROJJSON
 string is displayed, without other introduction output. The output is then
 potentially compatible of being piped in other utilities.
 .UNINDENT
@@ -125,7 +137,7 @@ potentially compatible of being piped in other utilities.
 .B \-\-area name_or_code
 Specify an area of interest to restrict the results when researching
 coordinate operations between 2 CRS. The area of interest can be specified either
-as a name (e.g “Denmark \- onshore”) or a AUTHORITY:CODE (EPSG:3237)
+as a name (e.g "Denmark \- onshore") or a AUTHORITY:CODE (EPSG:3237)
 This option is exclusive of \fI\%\-\-bbox\fP\&.
 .sp
 \fBNOTE:\fP
@@ -297,7 +309,7 @@ is easy to put those strings in C/C++ code
 .INDENT 0.0
 .TP
 .B \-\-single\-line
-Output WKT strings on a single line, instead of multiple intended lines by
+Output WKT or PROJJSON strings on a single line, instead of multiple intended lines by
 default.
 .UNINDENT
 .SH EXAMPLES
@@ -419,16 +431,82 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
 .fi
 .UNINDENT
 .UNINDENT
+.INDENT 0.0
+.IP 3. 3
+Export an object as a PROJJSON string
+.UNINDENT
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+projinfo GDA94 \-o PROJJSON \-q
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Output:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+{
+    "type": "GeographicCRS",
+    "name": "GDA94",
+    "datum": {
+        "type": "GeodeticReferenceFrame",
+        "name": "Geocentric Datum of Australia 1994",
+        "ellipsoid": {
+            "name": "GRS 1980",
+            "semi_major_axis": 6378137,
+            "inverse_flattening": 298.257222101
+        }
+    },
+    "coordinate_system": {
+        "subtype": "ellipsoidal",
+        "axis": [
+        {
+            "name": "Geodetic latitude",
+            "abbreviation": "Lat",
+            "direction": "north",
+            "unit": "degree"
+        },
+        {
+            "name": "Geodetic longitude",
+            "abbreviation": "Lon",
+            "direction": "east",
+            "unit": "degree"
+        }
+        ]
+    },
+    "area": "Australia \- GDA",
+    "bbox": {
+        "south_latitude": \-60.56,
+        "west_longitude": 93.41,
+        "north_latitude": \-8.47,
+        "east_longitude": 173.35
+    },
+    "id": {
+        "authority": "EPSG",
+        "code": 4283
+    }
+}
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
 .SH SEE ALSO
 .sp
 \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBproj(1)\fP
 .SH BUGS
 .sp
-A list of know bugs can be found at \fI\%https://github.com/OSGeo/proj.4/issues\fP
+A list of know bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp
-\fI\%https://proj4.org/\fP
+\fI\%https://proj.org/\fP
 .SH AUTHOR
 Even Rouault
 .SH COPYRIGHT
