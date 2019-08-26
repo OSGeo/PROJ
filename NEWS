@@ -1,3 +1,44 @@
+6.2.0 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Introduced PROJJSON, a JSON encoding of WKT2 (#1547)
+
+ o Support CRS instantiation of OGC URN's (#1505)
+
+ o Expose scope and remarks of database objects (#1537)
+
+ o EPSG Database updated to version 9.7.0 (#1558)
+
+ o Added C API function proj_grid_get_info_from_database() (#1494)
+
+ o Added C API function
+   proj_operation_factory_context_set_discard_superseded() (#1534)
+
+ o Added C API function proj_context_set_autoclose_database() (#1566)
+
+ o Added C API function proj_create_crs_to_crs_from_pj() (#1567)
+
+ o Added C API function proj_cleanup() (#1569)
+
+ Bug Fixes
+ ---------
+
+ o Fixed build failure on Solaris systems (#1554)
+
+ THANKS TO
+ ---------
+
+ Version 6.2.0 is made possible by the following contributors:
+
+ GitHub user @edechaux
+ Michael D. Smith
+ Matt Littlemore
+ Kristian Evers
+ Even Rouault
+
 6.1.1 Release Notes
 -------------------
 
