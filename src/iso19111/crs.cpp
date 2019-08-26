@@ -1323,7 +1323,12 @@ void GeodeticCRS::addDatumInfoToPROJString(
                        datum::GeodeticReferenceFrame::EPSG_6269.get(),
                        util::IComparable::Criterion::EQUIVALENT)) {
             datumWritten = true;
-            formatter->addParam("datum", "NAD83");
+            if (formatter->getLegacyCRSToCRSContext()) {
+                // We do not want datum=NAD83 to cause a useless towgs84=0,0,0
+                formatter->addParam("ellps", "GRS80");
+            } else {
+                formatter->addParam("datum", "NAD83");
+            }
         }
     }
     if (!datumWritten) {
@@ -2084,28 +2089,28 @@ void GeographicCRS::_exportToPROJString(
         !formatter->getTOWGS84Parameters().empty() ||
         !formatter->getHDatumExtension().empty()) {
 
+        formatter->addStep("longlat");
         bool done = false;
         if (formatter->getLegacyCRSToCRSContext() &&
             formatter->getHDatumExtension().empty() &&
             formatter->getTOWGS84Parameters().empty()) {
-            done = true;
             const auto &l_datum = datum();
             if (l_datum &&
                 l_datum->_isEquivalentTo(
                     datum::GeodeticReferenceFrame::EPSG_6326.get(),
                     util::IComparable::Criterion::EQUIVALENT)) {
-                formatter->addStep("longlat");
+                done = true;
                 formatter->addParam("ellps", "WGS84");
             } else if (l_datum &&
                        l_datum->_isEquivalentTo(
-                           datum::GeodeticReferenceFrame::EPSG_6267.get(),
+                           datum::GeodeticReferenceFrame::EPSG_6269.get(),
                            util::IComparable::Criterion::EQUIVALENT)) {
-                formatter->addStep("longlat");
-                formatter->addParam("datum", "NAD27");
+                done = true;
+                // We do not want datum=NAD83 to cause a useless towgs84=0,0,0
+                formatter->addParam("ellps", "GRS80");
             }
         }
         if (!done) {
-            formatter->addStep("longlat");
             addDatumInfoToPROJString(formatter);
         }
     }
