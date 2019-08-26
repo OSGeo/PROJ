@@ -696,6 +696,19 @@ Various
     :type `direction`: PJ_DIRECTION
     :returns: :c:type:`int` 1 if output units is expected in radians, otherwise 0
 
+
+Cleanup
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. c:function:: void proj_cleanup()
+
+    .. versionadded:: 6.2.0
+
+    This function frees global resources (grids, cache of +init files). It
+    should be called typically before process termination, and *after* having
+    freed PJ and PJ_CONTEXT objects.
+
+
 C API for ISO-19111 functionality
 +++++++++++++++++++++++++++++++++
 
