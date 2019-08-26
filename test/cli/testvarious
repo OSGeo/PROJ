@@ -985,6 +985,18 @@ $EXE -f %.7f -I +proj=longlat +ellps=GRS80 +to +proj=ob_tran +o_proj=longlat +lo
 -122 46
 EOF
 
+echo "##############################################################" >> ${OUT}
+echo "Check +init=epsg:4326 +over +to +init=epsg:3857 +over" >> ${OUT}
+$EXE -f %.7f +init=epsg:4326 +over +to +init=epsg:3857 +over -E >>${OUT} <<EOF
+-181 49
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Check +proj=longlat +over +datum=WGS84 +to proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +over" >> ${OUT}
+$EXE -f %.7f +proj=longlat +over +datum=WGS84 +to proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +over -E >>${OUT} <<EOF
+-181 49
+EOF
+
 
 # Done!
 # do 'diff' with distribution results

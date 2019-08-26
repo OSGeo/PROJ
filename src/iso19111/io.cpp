@@ -8255,6 +8255,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     }
 
     auto axisType = AxisType::REGULAR;
+    bool bWebMercator = false;
 
     if (step.name == "tmerc" &&
         ((getParamValue(step, "axis") == "wsu" && iAxisSwap < 0) ||
@@ -8337,8 +8338,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 }
             }
             if (getNumericValue(getParamValue(step, "a")) == 6378137) {
-                return createPseudoMercator(PropertyMap().set(
-                    IdentifiedObject::NAME_KEY, "WGS 84 / Pseudo-Mercator"));
+                bWebMercator = true;
             }
         } else if (hasParamValue(step, "lat_ts")) {
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
@@ -8599,7 +8599,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     props.set("IMPLICIT_CS", true);
 
-    CRSNNPtr crs = ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
+    CRSNNPtr crs =
+        bWebMercator
+            ? createPseudoMercator(props.set(IdentifiedObject::NAME_KEY,
+                                             "WGS 84 / Pseudo-Mercator"))
+            : ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
 
     if (!hasParamValue(step, "geoidgrids") &&
         (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter"))) {
