@@ -12064,7 +12064,7 @@ CoordinateOperationFactory::Private::createOperations(
         }
         auto projFormatter = io::PROJStringFormatter::create();
         projFormatter->setCRSExport(true);
-        projFormatter->setDropEarlyBindingsTerms(true);
+        projFormatter->setLegacyCRSToCRSContext(true);
         projFormatter->startInversion();
         sourceProjExportable->_exportToPROJString(projFormatter.get());
         auto geogSrc =

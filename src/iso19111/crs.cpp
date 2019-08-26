@@ -1308,7 +1308,7 @@ void GeodeticCRS::addDatumInfoToPROJString(
     const auto &nadgrids = formatter->getHDatumExtension();
     const auto &l_datum = datum();
     if (formatter->getCRSExport() && l_datum && TOWGS84Params.empty() &&
-        nadgrids.empty() && !formatter->getDropEarlyBindingsTerms()) {
+        nadgrids.empty()) {
         if (l_datum->_isEquivalentTo(
                 datum::GeodeticReferenceFrame::EPSG_6326.get(),
                 util::IComparable::Criterion::EQUIVALENT)) {
@@ -2083,8 +2083,31 @@ void GeographicCRS::_exportToPROJString(
         primeMeridian()->longitude().getSIValue() != 0.0 ||
         !formatter->getTOWGS84Parameters().empty() ||
         !formatter->getHDatumExtension().empty()) {
-        formatter->addStep("longlat");
-        addDatumInfoToPROJString(formatter);
+
+        bool done = false;
+        if (formatter->getLegacyCRSToCRSContext() &&
+            formatter->getHDatumExtension().empty() &&
+            formatter->getTOWGS84Parameters().empty()) {
+            done = true;
+            const auto &l_datum = datum();
+            if (l_datum &&
+                l_datum->_isEquivalentTo(
+                    datum::GeodeticReferenceFrame::EPSG_6326.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                formatter->addStep("longlat");
+                formatter->addParam("ellps", "WGS84");
+            } else if (l_datum &&
+                       l_datum->_isEquivalentTo(
+                           datum::GeodeticReferenceFrame::EPSG_6267.get(),
+                           util::IComparable::Criterion::EQUIVALENT)) {
+                formatter->addStep("longlat");
+                formatter->addParam("datum", "NAD27");
+            }
+        }
+        if (!done) {
+            formatter->addStep("longlat");
+            addDatumInfoToPROJString(formatter);
+        }
     }
     if (!formatter->getCRSExport()) {
         addAngularUnitConvertAndAxisSwap(formatter);
@@ -3132,7 +3155,8 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                 formatter->addParam("units", projUnit);
             }
         }
-    } else if (formatter->getCRSExport()) {
+    } else if (formatter->getCRSExport() &&
+               !formatter->getLegacyCRSToCRSContext()) {
         formatter->addParam("units", "m");
     }
 
@@ -4141,11 +4165,6 @@ void BoundCRS::_exportToPROJString(
     if (!crs_exportable) {
         io::FormattingException::Throw(
             "baseCRS of BoundCRS cannot be exported as a PROJ string");
-    }
-
-    if (formatter->getDropEarlyBindingsTerms()) {
-        crs_exportable->_exportToPROJString(formatter);
-        return;
     }
 
     auto vdatumProj4GridName = getVDatumPROJ4GRIDS();
