@@ -344,7 +344,14 @@ PJ_LP proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction) {
     ct = find_ctable(P->ctx, lp, P->gridlist_count, P->gridlist);
 
     if (ct == nullptr || ct->cvs == nullptr) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+        if( P->gridlist_count == 1 &&
+            strcmp(P->gridlist[0]->gridname, "null") == 0) {
+          // TODO: remove this particular case that is put there just to be
+          // able to handle longitudes outside of -180,180
+          out = lp;
+        } else {
+          pj_ctx_set_errno( P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+        }
         return out;
     }
 

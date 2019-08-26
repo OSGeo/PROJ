@@ -255,3 +255,10 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     delete P;
     return nullptr;
 }
+
+/*****************************************************************************/
+void proj_cleanup() {
+/*****************************************************************************/
+  pj_clear_initcache();
+  pj_deallocate_grids();
+}

@@ -645,7 +645,7 @@ int main(int argc, char **argv) {
 
     proj_destroy(transformation);
 
-    pj_deallocate_grids();
+    proj_cleanup();
 
     exit(0); /* normal completion */
 }

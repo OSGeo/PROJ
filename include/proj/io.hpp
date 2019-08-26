@@ -432,8 +432,8 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_INTERNAL void popOmitZUnitConversion();
     PROJ_INTERNAL bool omitZUnitConversion() const;
 
-    PROJ_INTERNAL void setDropEarlyBindingsTerms(bool drop);
-    PROJ_INTERNAL bool getDropEarlyBindingsTerms() const;
+    PROJ_INTERNAL void setLegacyCRSToCRSContext(bool legacyContext);
+    PROJ_INTERNAL bool getLegacyCRSToCRSContext() const;
 
     PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
 

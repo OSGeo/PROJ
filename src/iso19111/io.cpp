@@ -6145,7 +6145,7 @@ struct PROJStringFormatter::Private {
     bool addNoDefs_ = true;
     bool coordOperationOptimizations_ = false;
     bool crsExport_ = false;
-    bool dropEarlyBindingsTerms_ = false;
+    bool legacyCRSToCRSContext_ = false;
 
     std::string result_{};
 
@@ -6723,7 +6723,7 @@ void PROJStringFormatter::Private::appendToResult(const char *str) {
 static void
 PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                        std::vector<Step::KeyValue> &globalParamValues,
-                       std::string &title, bool dropEarlyBindingsTerms) {
+                       std::string &title) {
     const char *c_str = projString.c_str();
     std::vector<std::string> tokens;
 
@@ -6811,27 +6811,14 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             } else if (word != "step") {
                 const auto pos = word.find('=');
                 auto key = word.substr(0, pos);
-                if (!(dropEarlyBindingsTerms &&
-                      (key == "towgs84" || key == "nadgrids" ||
-                       key == "geoidgrids"))) {
-                    auto pair = (pos != std::string::npos)
-                                    ? Step::KeyValue(key, word.substr(pos + 1))
-                                    : Step::KeyValue(key);
-                    if (dropEarlyBindingsTerms && key == "datum") {
-                        const auto datums = pj_get_datums_ref();
-                        for (int i = 0; datums[i].id != nullptr; i++) {
-                            if (pair.value == datums[i].id) {
-                                pair.key = "ellps";
-                                pair.value = datums[i].ellipse_id;
-                                break;
-                            }
-                        }
-                    }
-                    if (steps.empty()) {
-                        globalParamValues.push_back(pair);
-                    } else {
-                        steps.back().paramValues.push_back(pair);
-                    }
+
+                auto pair = (pos != std::string::npos)
+                                ? Step::KeyValue(key, word.substr(pos + 1))
+                                : Step::KeyValue(key);
+                if (steps.empty()) {
+                    globalParamValues.push_back(pair);
+                } else {
+                    steps.back().paramValues.push_back(pair);
                 }
             }
         }
@@ -6906,8 +6893,7 @@ void PROJStringFormatter::ingestPROJString(
 {
     std::vector<Step> steps;
     std::string title;
-    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title,
-                           d->dropEarlyBindingsTerms_);
+    PROJStringSyntaxParser(str, steps, d->globalParamValues_, title);
     d->steps_.insert(d->steps_.end(), steps.begin(), steps.end());
 }
 
@@ -7175,14 +7161,14 @@ bool PROJStringFormatter::omitZUnitConversion() const {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::setDropEarlyBindingsTerms(bool drop) {
-    d->dropEarlyBindingsTerms_ = drop;
+void PROJStringFormatter::setLegacyCRSToCRSContext(bool legacyContext) {
+    d->legacyCRSToCRSContext_ = legacyContext;
 }
 
 // ---------------------------------------------------------------------------
 
-bool PROJStringFormatter::getDropEarlyBindingsTerms() const {
-    return d->dropEarlyBindingsTerms_;
+bool PROJStringFormatter::getLegacyCRSToCRSContext() const {
+    return d->legacyCRSToCRSContext_;
 }
 
 // ---------------------------------------------------------------------------
@@ -8269,6 +8255,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     }
 
     auto axisType = AxisType::REGULAR;
+    bool bWebMercator = false;
 
     if (step.name == "tmerc" &&
         ((getParamValue(step, "axis") == "wsu" && iAxisSwap < 0) ||
@@ -8351,8 +8338,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 }
             }
             if (getNumericValue(getParamValue(step, "a")) == 6378137) {
-                return createPseudoMercator(PropertyMap().set(
-                    IdentifiedObject::NAME_KEY, "WGS 84 / Pseudo-Mercator"));
+                bWebMercator = true;
             }
         } else if (hasParamValue(step, "lat_ts")) {
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
@@ -8613,7 +8599,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     props.set("IMPLICIT_CS", true);
 
-    CRSNNPtr crs = ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
+    CRSNNPtr crs =
+        bWebMercator
+            ? createPseudoMercator(props.set(IdentifiedObject::NAME_KEY,
+                                             "WGS 84 / Pseudo-Mercator"))
+            : ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
 
     if (!hasParamValue(step, "geoidgrids") &&
         (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter"))) {
@@ -8671,7 +8661,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     d->globalParamValues_.clear();
     d->projString_ = projString;
     PROJStringSyntaxParser(projString, d->steps_, d->globalParamValues_,
-                           d->title_, false);
+                           d->title_);
 
     if (d->steps_.empty()) {
         const auto &vunits = d->getGlobalParamValue("vunits");
