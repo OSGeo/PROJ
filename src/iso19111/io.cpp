@@ -7482,7 +7482,7 @@ static const struct DatumDesc {
 } datumDescs[] = {
     {"GGRS87", "GGRS87", 4121, "Greek Geodetic Reference System 1987", 6121,
      "GRS 1980", 7019, 6378137, 298.257222101},
-    {"postdam", "DHDN", 4314, "Deutsches Hauptdreiecksnetz", 6314,
+    {"potsdam", "DHDN", 4314, "Deutsches Hauptdreiecksnetz", 6314,
      "Bessel 1841", 7004, 6377397.155, 299.1528128},
     {"carthage", "Carthage", 4223, "Carthage", 6223, "Clarke 1880 (IGN)", 7011,
      6378249.2, 293.4660213},
