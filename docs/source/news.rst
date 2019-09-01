@@ -2,6 +2,40 @@
 
 News
 ###############################################################################
+
+6.2.0 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*September 1st 2019*
+
+Updates
+-------
+
+ * Introduced PROJJSON, a JSON encoding of WKT2 (`#1547 <https://github.com/OSGeo/PROJ/issues/15475>`_)
+ * Support CRS instantiation of OGC URN's (`#1505 <https://github.com/OSGeo/PROJ/issues/1505>`_)
+
+ * Expose scope and remarks of database objects (`#1537 <https://github.com/OSGeo/PROJ/issues/1537>`_)
+
+ * EPSG Database updated to version 9.7.0 (`#1558 <https://github.com/OSGeo/PROJ/issues/1558>`_)
+
+ * Added C API function proj_grid_get_info_from_database() (`#1494 <https://github.com/OSGeo/PROJ/issues/1494>`_)
+
+ * Added C API function
+   proj_operation_factory_context_set_discard_superseded() (`#1534 <https://github.com/OSGeo/PROJ/issues/1534>`_)
+
+ * Added C API function proj_context_set_autoclose_database() (`#1566 <https://github.com/OSGeo/PROJ/issues/1566>`_)
+
+ * Added C API function proj_create_crs_to_crs_from_pj() (`#1567 <https://github.com/OSGeo/PROJ/issues/1567>`_)
+
+ * Added C API function proj_cleanup() (`#1569 <https://github.com/OSGeo/PROJ/issues/1569>`_)
+
+
+
+Bug Fixes
+---------
+
+ * Fixed build failure on Solaris systems (`#1554 <https://github.com/OSGeo/PROJ/issues/1554>`_)
+
+
 6.1.1 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *July 1st 2019*
