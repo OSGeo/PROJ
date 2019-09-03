@@ -89,7 +89,8 @@ endfunction()
 
 #
 # Generates output name for given target depending on platform and version.
-# For instance, on Windows, libraries get ABI version suffix proj_X_Y.{dll|lib}.
+# For instance, on Windows, dynamic link libraries get ABI version suffix
+# proj_X_Y.dll.
 #
 
 function(proj_target_output_name TARGET_NAME OUTPUT_NAME)
