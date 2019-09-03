@@ -67,7 +67,7 @@ static PJ_XY bertin1953_s_forward (PJ_LP lp, PJ *P) {
       xy.x *= 1. + d;
     }
     if (xy.y > 0.) {
-      xy.x *= 1. + d / 1.5 * xy.x * xy.x;
+      xy.y *= 1. + d / 1.5 * xy.x * xy.x;
     }
 
     return xy;
