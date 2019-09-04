@@ -360,8 +360,8 @@ PJ_GUESSED_WKT_DIALECT proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
     (void)ctx;
     assert(wkt);
     switch (WKTParser().guessDialect(wkt)) {
-    case WKTParser::WKTGuessedDialect::WKT2_2018:
-        return PJ_GUESSED_WKT2_2018;
+    case WKTParser::WKTGuessedDialect::WKT2_2019:
+        return PJ_GUESSED_WKT2_2019;
     case WKTParser::WKTGuessedDialect::WKT2_2015:
         return PJ_GUESSED_WKT2_2015;
     case WKTParser::WKTGuessedDialect::WKT1_GDAL:
@@ -1308,10 +1308,10 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
             return WKTFormatter::Convention::WKT2_2015;
         case PJ_WKT2_2015_SIMPLIFIED:
             return WKTFormatter::Convention::WKT2_2015_SIMPLIFIED;
-        case PJ_WKT2_2018:
-            return WKTFormatter::Convention::WKT2_2018;
-        case PJ_WKT2_2018_SIMPLIFIED:
-            return WKTFormatter::Convention::WKT2_2018_SIMPLIFIED;
+        case PJ_WKT2_2019:
+            return WKTFormatter::Convention::WKT2_2019;
+        case PJ_WKT2_2019_SIMPLIFIED:
+            return WKTFormatter::Convention::WKT2_2019_SIMPLIFIED;
         case PJ_WKT1_GDAL:
             return WKTFormatter::Convention::WKT1_GDAL;
         case PJ_WKT1_ESRI:

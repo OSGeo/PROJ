@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test ISO19111:2018 implementation
+ * Purpose:  Test ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -651,7 +651,7 @@ TEST(wkt_parse, wkt2_long_GEODETICCRS_EPSG_4326) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt2_2018_GEOGCRS_EPSG_4326) {
+TEST(wkt_parse, wkt2_2019_GEOGCRS_EPSG_4326) {
     auto obj = WKTParser().createFromWKT("GEOGCRS" + contentWKT2_EPSG_4326);
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -660,7 +660,7 @@ TEST(wkt_parse, wkt2_2018_GEOGCRS_EPSG_4326) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt2_2018_long_GEOGRAPHICCRS_EPSG_4326) {
+TEST(wkt_parse, wkt2_2019_long_GEOGRAPHICCRS_EPSG_4326) {
     auto obj =
         WKTParser().createFromWKT("GEOGRAPHICCRS" + contentWKT2_EPSG_4326);
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
@@ -1640,7 +1640,7 @@ TEST(wkt_parse, wkt2_projected) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt2_2018_projected_with_id_in_basegeodcrs) {
+TEST(wkt_parse, wkt2_2019_projected_with_id_in_basegeodcrs) {
     auto wkt = "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
                "    BASEGEOGCRS[\"WGS 84\",\n"
                "        DATUM[\"World Geodetic System 1984\",\n"
@@ -1666,14 +1666,14 @@ TEST(wkt_parse, wkt2_2018_projected_with_id_in_basegeodcrs) {
 
     {
         auto got_wkt = crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
         EXPECT_TRUE(got_wkt.find("ID[\"EPSG\",4326]]") != std::string::npos)
             << got_wkt;
     }
 
     {
         auto got_wkt = crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED)
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019_SIMPLIFIED)
                 .get());
         EXPECT_TRUE(got_wkt.find("ID[\"EPSG\",4326]]") == std::string::npos)
             << got_wkt;
@@ -1682,7 +1682,7 @@ TEST(wkt_parse, wkt2_2018_projected_with_id_in_basegeodcrs) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt2_2018_projected_no_id_but_id_in_basegeodcrs) {
+TEST(wkt_parse, wkt2_2019_projected_no_id_but_id_in_basegeodcrs) {
     auto wkt = "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
                "    BASEGEOGCRS[\"WGS 84\",\n"
                "        DATUM[\"World Geodetic System 1984\",\n"
@@ -1704,14 +1704,14 @@ TEST(wkt_parse, wkt2_2018_projected_no_id_but_id_in_basegeodcrs) {
     ASSERT_TRUE(crs != nullptr);
 
     auto got_wkt = crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     EXPECT_TRUE(got_wkt.find("ID[\"EPSG\",4326]]") != std::string::npos)
         << got_wkt;
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt2_2018_simplified_projected) {
+TEST(wkt_parse, wkt2_2019_simplified_projected) {
     auto wkt = "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
                "    BASEGEOGCRS[\"WGS 84\",\n"
                "        DATUM[\"World Geodetic System 1984\",\n"
@@ -1737,7 +1737,7 @@ TEST(wkt_parse, wkt2_2018_simplified_projected) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt2_2018_projected_3D) {
+TEST(wkt_parse, wkt2_2019_projected_3D) {
     auto wkt =
         "PROJCRS[\"WGS 84 (G1762) / UTM zone 31N 3D\","
         "    BASEGEOGCRS[\"WGS 84\","
@@ -1777,13 +1777,13 @@ TEST(wkt_parse, wkt2_2018_projected_3D) {
         FormattingException);
 
     EXPECT_NO_THROW(crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()));
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt2_2018_projected_utm_3D) {
-    // Example from WKT2:2018
+TEST(wkt_parse, wkt2_2019_projected_utm_3D) {
+    // Example from WKT2:2019
     auto wkt =
         "PROJCRS[\"WGS 84 (G1762) / UTM zone 31N 3D\","
         "    BASEGEOGCRS[\"WGS 84\","
@@ -1822,7 +1822,7 @@ TEST(wkt_parse, wkt2_2018_projected_utm_3D) {
         FormattingException);
 
     EXPECT_NO_THROW(crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -2165,7 +2165,7 @@ TEST(wkt_parse, COMPOUNDCRS_spatio_parametric_2015) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, COMPOUNDCRS_spatio_parametric_2018) {
+TEST(wkt_parse, COMPOUNDCRS_spatio_parametric_2019) {
     auto obj = WKTParser().createFromWKT(
         "COMPOUNDCRS[\"ICAO layer 0\",\n"
         "    GEOGRAPHICCRS[\"WGS 84\",\n"
@@ -2220,7 +2220,7 @@ TEST(wkt_parse, COMPOUNDCRS_spatio_temporal_2015) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, COMPOUNDCRS_spatio_temporal_2018) {
+TEST(wkt_parse, COMPOUNDCRS_spatio_temporal_2019) {
     auto obj = WKTParser().createFromWKT(
         "COMPOUNDCRS[\"2D GPS position with civil time in ISO 8601 format\",\n"
         "    GEOGCRS[\"WGS 84 (G1762)\",\n"
@@ -2361,12 +2361,12 @@ TEST(wkt_parse, COORDINATEOPERATION) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, COORDINATEOPERATION_wkt2018) {
+TEST(wkt_parse, COORDINATEOPERATION_wkt2_2019) {
 
     std::string src_wkt;
     {
         auto formatter =
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
         formatter->setOutputId(false);
         src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter.get());
     }
@@ -2374,7 +2374,7 @@ TEST(wkt_parse, COORDINATEOPERATION_wkt2018) {
     std::string dst_wkt;
     {
         auto formatter =
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
         formatter->setOutputId(false);
         dst_wkt = GeographicCRS::EPSG_4807->exportToWKT(formatter.get());
     }
@@ -2382,7 +2382,7 @@ TEST(wkt_parse, COORDINATEOPERATION_wkt2018) {
     std::string interpolation_wkt;
     {
         auto formatter =
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
         formatter->setOutputId(false);
         interpolation_wkt =
             GeographicCRS::EPSG_4979->exportToWKT(formatter.get());
@@ -2429,7 +2429,7 @@ TEST(wkt_parse, COORDINATEOPERATION_wkt2018) {
 
     {
         auto outWkt = transf->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
         EXPECT_EQ(replaceAll(replaceAll(outWkt, "\n", ""), " ", ""),
                   replaceAll(replaceAll(wkt, "\n", ""), " ", ""));
     }
@@ -2493,7 +2493,7 @@ TEST(wkt_parse, CONCATENATEDOPERATION) {
             PositionalAccuracy::create("0.1")});
 
     auto wkt = concat_in->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
 
     auto obj = WKTParser().createFromWKT(wkt);
     auto concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(obj);
@@ -2636,7 +2636,7 @@ TEST(wkt_parse, CONCATENATEDOPERATION_with_conversion_and_conversion) {
               "+step +proj=utm +zone=32 +ellps=WGS84");
 
     auto outWkt = concat->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     EXPECT_EQ(wkt, outWkt);
 }
 
@@ -2809,7 +2809,7 @@ TEST(wkt_parse,
               "+zone=11 +ellps=WGS84");
 
     auto outWkt = concat->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     EXPECT_EQ(wkt, outWkt);
 }
 
@@ -3348,7 +3348,7 @@ TEST(wkt_parse, DerivedGeographicCRS_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, DerivedGeographicCRS_WKT2_2018) {
+TEST(wkt_parse, DerivedGeographicCRS_WKT2_2019) {
     auto wkt = "GEOGCRS[\"WMO Atlantic Pole\",\n"
                "    BASEGEOGCRS[\"WGS 84\",\n"
                "        DATUM[\"World Geodetic System 1984\",\n"
@@ -3532,7 +3532,7 @@ TEST(wkt_parse, DerivedProjectedCRS_ordinal) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         wkt);
 }
 
@@ -3595,7 +3595,7 @@ TEST(wkt_parse, dateTimeTemporalCRS_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, dateTimeTemporalCRS_WKT2_2018) {
+TEST(wkt_parse, dateTimeTemporalCRS_WKT2_2019) {
     auto wkt = "TIMECRS[\"Temporal CRS\",\n"
                "    TDATUM[\"Gregorian calendar\",\n"
                "        CALENDAR[\"proleptic Gregorian\"],\n"
@@ -3622,7 +3622,7 @@ TEST(wkt_parse, dateTimeTemporalCRS_WKT2_2018) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, temporalCountCRSWithConvFactor_WKT2_2018) {
+TEST(wkt_parse, temporalCountCRSWithConvFactor_WKT2_2019) {
     auto wkt = "TIMECRS[\"GPS milliseconds\",\n"
                "    TDATUM[\"GPS time origin\",\n"
                "        TIMEORIGIN[1980-01-01T00:00:00.0Z]],\n"
@@ -3650,7 +3650,7 @@ TEST(wkt_parse, temporalCountCRSWithConvFactor_WKT2_2018) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2018) {
+TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2019) {
     auto wkt = "TIMECRS[\"Calendar hours from 1979-12-29\",\n"
                "    TDATUM[\"29 December 1979\",\n"
                "        CALENDAR[\"proleptic Gregorian\"],\n"
@@ -3677,7 +3677,7 @@ TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2018) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
+TEST(wkt_parse, temporalMeasureCRSWithoutConvFactor_WKT2_2019) {
     auto wkt = "TIMECRS[\"Decimal Years CE\",\n"
                "    TIMEDATUM[\"Common Era\",\n"
                "        TIMEORIGIN[0000]],\n"
@@ -9017,7 +9017,7 @@ TEST(io, guessDialect) {
                   "        AXIS[\"geodetic latitude (Lat)\",north],\n"
                   "        AXIS[\"geodetic longitude (Lon)\",east],\n"
                   "        UNIT[\"degree\",0.0174532925199433]]"),
-              WKTParser::WKTGuessedDialect::WKT2_2018);
+              WKTParser::WKTGuessedDialect::WKT2_2019);
 
     EXPECT_EQ(
         WKTParser().guessDialect("TIMECRS[\"Temporal CRS\",\n"
@@ -9026,7 +9026,7 @@ TEST(io, guessDialect) {
                                  "        TIMEORIGIN[0000-01-01]],\n"
                                  "    CS[TemporalDateTime,1],\n"
                                  "        AXIS[\"time (T)\",future]]"),
-        WKTParser::WKTGuessedDialect::WKT2_2018);
+        WKTParser::WKTGuessedDialect::WKT2_2019);
 
     EXPECT_EQ(WKTParser().guessDialect(
                   "GEODCRS[\"WGS 84\",\n"

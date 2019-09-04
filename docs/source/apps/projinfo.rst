@@ -71,9 +71,11 @@ The following control parameters can appear in any order:
 .. option:: -o formats
 
     formats is a comma separated combination of:
-    ``all``, ``default``, ``PROJ``, ``WKT_ALL``, ``WKT2_2015``, ``WKT2_2018``, ``WKT1_GDAL``, ``WKT1_ESRI``, ``PROJJSON``.
+    ``all``, ``default``, ``PROJ``, ``WKT_ALL``, ``WKT2:2015``, ``WKT2:2019``, ``WKT1:GDAL``, ``WKT1:ESRI``, ``PROJJSON``.
 
     Except ``all`` and ``default``, other formats can be preceded by ``-`` to disable them.
+
+    .. note:: WKT2_2019 was previously called WKT2_2018.
 
 .. option:: -k crs|operation|ellipsoid
 
@@ -244,7 +246,7 @@ Output:
     PROJ.4 string:
     +proj=longlat +datum=WGS84 +no_defs +type=crs
 
-    WKT2_2018 string:
+    WKT2:2019 string:
     GEOGCRS["WGS 84",
         DATUM["World Geodetic System 1984",
             ELLIPSOID["WGS 84",6378137,298.257223563,
@@ -283,7 +285,7 @@ Output:
     +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=conus \
     +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
-    WKT2_2018 string:
+    WKT2:2019 string:
     COORDINATEOPERATION["NAD27 to NAD83 (1)",
         SOURCECRS[
             GEOGCRS["NAD27",

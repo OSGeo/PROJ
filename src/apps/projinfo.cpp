@@ -61,8 +61,8 @@ namespace { // anonymous namespace
 struct OutputOptions {
     bool quiet = false;
     bool PROJ5 = false;
-    bool WKT2_2018 = false;
-    bool WKT2_2018_SIMPLIFIED = false;
+    bool WKT2_2019 = false;
+    bool WKT2_2019_SIMPLIFIED = false;
     bool WKT2_2015 = false;
     bool WKT2_2015_SIMPLIFIED = false;
     bool WKT1_GDAL = false;
@@ -101,8 +101,8 @@ static void usage() {
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
-                 "all,default,PROJ,WKT_ALL,WKT2_2015,WKT2_2018,WKT1_GDAL,"
-                 "WKT1_ESRI,PROJJSON"
+                 "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
+                 "WKT1:ESRI,PROJJSON"
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
@@ -309,7 +309,7 @@ static void outputObject(
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2015 string:" << std::endl;
+                    std::cout << "WKT2:2015 string:" << std::endl;
                 }
                 auto formatter =
                     WKTFormatter::create(WKTFormatter::Convention::WKT2_2015);
@@ -323,7 +323,7 @@ static void outputObject(
                 }
                 std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT2_2015: " << e.what()
+                std::cerr << "Error when exporting to WKT2:2015: " << e.what()
                           << std::endl;
             }
             alreadyOutputed = true;
@@ -335,7 +335,7 @@ static void outputObject(
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2015_SIMPLIFIED string:" << std::endl;
+                    std::cout << "WKT2:2015_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
                     WKTFormatter::Convention::WKT2_2015_SIMPLIFIED);
@@ -349,22 +349,22 @@ static void outputObject(
                 }
                 std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT2_2015_SIMPLIFIED: "
+                std::cerr << "Error when exporting to WKT2:2015_SIMPLIFIED: "
                           << e.what() << std::endl;
             }
             alreadyOutputed = true;
         }
 
-        if (outputOpt.WKT2_2018) {
+        if (outputOpt.WKT2_2019) {
             try {
                 if (alreadyOutputed) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2018 string:" << std::endl;
+                    std::cout << "WKT2:2019 string:" << std::endl;
                 }
                 auto formatter =
-                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -375,22 +375,22 @@ static void outputObject(
                 }
                 std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT2_2018: " << e.what()
+                std::cerr << "Error when exporting to WKT2:2019: " << e.what()
                           << std::endl;
             }
             alreadyOutputed = true;
         }
 
-        if (outputOpt.WKT2_2018_SIMPLIFIED) {
+        if (outputOpt.WKT2_2019_SIMPLIFIED) {
             try {
                 if (alreadyOutputed) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2018_SIMPLIFIED string:" << std::endl;
+                    std::cout << "WKT2:2019_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
-                    WKTFormatter::Convention::WKT2_2018_SIMPLIFIED);
+                    WKTFormatter::Convention::WKT2_2019_SIMPLIFIED);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -401,7 +401,7 @@ static void outputObject(
                 }
                 std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT2_2018_SIMPLIFIED: "
+                std::cerr << "Error when exporting to WKT2:2019_SIMPLIFIED: "
                           << e.what() << std::endl;
             }
             alreadyOutputed = true;
@@ -413,7 +413,7 @@ static void outputObject(
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT1_GDAL:" << std::endl;
+                    std::cout << "WKT1:GDAL string:" << std::endl;
                 }
 
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
@@ -440,7 +440,7 @@ static void outputObject(
                 std::cout << wkt << std::endl;
                 std::cout << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT1_GDAL: " << e.what()
+                std::cerr << "Error when exporting to WKT1:GDAL: " << e.what()
                           << std::endl;
             }
             alreadyOutputed = true;
@@ -452,7 +452,7 @@ static void outputObject(
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT1_ESRI:" << std::endl;
+                    std::cout << "WKT1:ESRI string:" << std::endl;
                 }
 
                 auto formatter = WKTFormatter::create(
@@ -465,7 +465,7 @@ static void outputObject(
                 std::cout << wkt << std::endl;
                 std::cout << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT1_ESRI: " << e.what()
+                std::cerr << "Error when exporting to WKT1:ESRI: " << e.what()
                           << std::endl;
             }
             alreadyOutputed = true;
@@ -745,14 +745,14 @@ int main(int argc, char **argv) {
             for (auto format : formats) {
                 if (ci_equal(format, "all")) {
                     outputOpt.PROJ5 = true;
-                    outputOpt.WKT2_2018 = true;
+                    outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                     outputOpt.WKT1_ESRI = true;
                     outputOpt.PROJJSON = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
-                    outputOpt.WKT2_2018 = true;
+                    outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = false;
                     outputOpt.WKT1_GDAL = false;
                 } else if (ci_equal(format, "PROJ")) {
@@ -761,26 +761,38 @@ int main(int argc, char **argv) {
                     outputOpt.PROJ5 = false;
                 } else if (ci_equal(format, "WKT_ALL") ||
                            ci_equal(format, "WKT-ALL")) {
-                    outputOpt.WKT2_2018 = true;
+                    outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                 } else if (ci_equal(format, "-WKT_ALL") ||
                            ci_equal(format, "-WKT-ALL")) {
-                    outputOpt.WKT2_2018 = false;
+                    outputOpt.WKT2_2019 = false;
                     outputOpt.WKT2_2015 = false;
                     outputOpt.WKT1_GDAL = false;
-                } else if (ci_equal(format, "WKT2_2018") ||
+                } else if (ci_equal(format, "WKT2_2019") ||
+                           ci_equal(format, "WKT2-2019") ||
+                           ci_equal(format, "WKT2:2019") ||
+                           /* legacy: undocumented */
+                           ci_equal(format, "WKT2_2018") ||
                            ci_equal(format, "WKT2-2018") ||
                            ci_equal(format, "WKT2:2018")) {
-                    outputOpt.WKT2_2018 = true;
-                } else if (ci_equal(format, "WKT2_2018_SIMPLIFIED") ||
+                    outputOpt.WKT2_2019 = true;
+                } else if (ci_equal(format, "WKT2_2019_SIMPLIFIED") ||
+                           ci_equal(format, "WKT2-2019_SIMPLIFIED") ||
+                           ci_equal(format, "WKT2:2019_SIMPLIFIED") ||
+                           /* legacy: undocumented */
+                           ci_equal(format, "WKT2_2018_SIMPLIFIED") ||
                            ci_equal(format, "WKT2-2018_SIMPLIFIED") ||
                            ci_equal(format, "WKT2:2018_SIMPLIFIED")) {
-                    outputOpt.WKT2_2018_SIMPLIFIED = true;
-                } else if (ci_equal(format, "-WKT2_2018") ||
+                    outputOpt.WKT2_2019_SIMPLIFIED = true;
+                } else if (ci_equal(format, "-WKT2_2019") ||
+                           ci_equal(format, "-WKT2-2019") ||
+                           ci_equal(format, "-WKT2:2019") ||
+                           /* legacy: undocumented */
+                           ci_equal(format, "-WKT2_2018") ||
                            ci_equal(format, "-WKT2-2018") ||
                            ci_equal(format, "-WKT2:2018")) {
-                    outputOpt.WKT2_2018 = false;
+                    outputOpt.WKT2_2019 = false;
                 } else if (ci_equal(format, "WKT2_2015") ||
                            ci_equal(format, "WKT2-2015") ||
                            ci_equal(format, "WKT2:2015")) {
@@ -1027,11 +1039,11 @@ int main(int argc, char **argv) {
 
     if (!outputSwithSpecified) {
         outputOpt.PROJ5 = true;
-        outputOpt.WKT2_2018 = true;
+        outputOpt.WKT2_2019 = true;
     }
 
     if (outputOpt.quiet &&
-        (outputOpt.PROJ5 + outputOpt.WKT2_2018 + outputOpt.WKT2_2015 +
+        (outputOpt.PROJ5 + outputOpt.WKT2_2019 + outputOpt.WKT2_2015 +
          outputOpt.WKT1_GDAL + outputOpt.PROJJSON) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
@@ -1046,8 +1058,8 @@ int main(int argc, char **argv) {
             if (guessDialect) {
                 auto dialect = WKTParser().guessDialect(user_string);
                 std::cout << "Guessed WKT dialect: ";
-                if (dialect == WKTParser::WKTGuessedDialect::WKT2_2018) {
-                    std::cout << "WKT2_2018";
+                if (dialect == WKTParser::WKTGuessedDialect::WKT2_2019) {
+                    std::cout << "WKT2_2019";
                 } else if (dialect == WKTParser::WKTGuessedDialect::WKT2_2015) {
                     std::cout << "WKT2_2015";
                 } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_GDAL) {

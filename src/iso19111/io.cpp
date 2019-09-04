@@ -138,7 +138,7 @@ struct WKTFormatter::Private {
         bool forceUNITKeyword_ = false;
         bool outputCSUnitOnlyOnceIfSame_ = false;
         bool primeMeridianInDegree_ = false;
-        bool use2018Keywords_ = false;
+        bool use2019Keywords_ = false;
         bool useESRIDialect_ = false;
         OutputAxisRule outputAxis_ = WKTFormatter::OutputAxisRule::YES;
     };
@@ -299,16 +299,16 @@ WKTFormatter::WKTFormatter(Convention convention)
     : d(internal::make_unique<Private>()) {
     d->params_.convention_ = convention;
     switch (convention) {
-    case Convention::WKT2_2018:
-        d->params_.use2018Keywords_ = true;
+    case Convention::WKT2_2019:
+        d->params_.use2019Keywords_ = true;
         PROJ_FALLTHROUGH
     case Convention::WKT2:
         d->params_.version_ = WKTFormatter::Version::WKT2;
         d->params_.outputAxisOrder_ = true;
         break;
 
-    case Convention::WKT2_2018_SIMPLIFIED:
-        d->params_.use2018Keywords_ = true;
+    case Convention::WKT2_2019_SIMPLIFIED:
+        d->params_.use2019Keywords_ = true;
         PROJ_FALLTHROUGH
     case Convention::WKT2_SIMPLIFIED:
         d->params_.version_ = WKTFormatter::Version::WKT2;
@@ -689,8 +689,8 @@ WKTFormatter::Version WKTFormatter::version() const {
 
 // ---------------------------------------------------------------------------
 
-bool WKTFormatter::use2018Keywords() const {
-    return d->params_.use2018Keywords_;
+bool WKTFormatter::use2019Keywords() const {
+    return d->params_.use2019Keywords_;
 }
 
 // ---------------------------------------------------------------------------
@@ -2569,7 +2569,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
             return SphericalCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
-    } else if (ci_equal(csType, "ordinal")) { // WKT2-2018
+    } else if (ci_equal(csType, "ordinal")) { // WKT2-2019
         return OrdinalCS::create(csMap, axisList);
     } else if (ci_equal(csType, "parametric")) {
         if (axisCount == 1) {
@@ -2582,15 +2582,15 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 axisList[0]); // FIXME: there are 3 possible subtypes of
                               // TemporalCS
         }
-    } else if (ci_equal(csType, "TemporalDateTime")) { // WKT2-2018
+    } else if (ci_equal(csType, "TemporalDateTime")) { // WKT2-2019
         if (axisCount == 1) {
             return DateTimeTemporalCS::create(csMap, axisList[0]);
         }
-    } else if (ci_equal(csType, "TemporalCount")) { // WKT2-2018
+    } else if (ci_equal(csType, "TemporalCount")) { // WKT2-2019
         if (axisCount == 1) {
             return TemporalCountCS::create(csMap, axisList[0]);
         }
-    } else if (ci_equal(csType, "TemporalMeasure")) { // WKT2-2018
+    } else if (ci_equal(csType, "TemporalMeasure")) { // WKT2-2019
         if (axisCount == 1) {
             return TemporalMeasureCS::create(csMap, axisList[0]);
         }
@@ -2729,7 +2729,7 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     } else if (ci_equal(nodeName, WKTConstants::GEOGCRS) ||
                ci_equal(nodeName, WKTConstants::GEOGRAPHICCRS) ||
                ci_equal(nodeName, WKTConstants::BASEGEOGCRS)) {
-        // This is a WKT2-2018 GeographicCRS. An ellipsoidal CS is expected
+        // This is a WKT2-2019 GeographicCRS. An ellipsoidal CS is expected
         throw ParsingException(concat("ellipsoidal CS expected, but found ",
                                       cs->getWKT2Type(true)));
     }
@@ -2795,7 +2795,7 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
                                             derivingConversion,
                                             NN_NO_CHECK(ellipsoidalCS));
     } else if (ci_equal(nodeP->value(), WKTConstants::GEOGCRS)) {
-        // This is a WKT2-2018 GeographicCRS. An ellipsoidal CS is expected
+        // This is a WKT2-2019 GeographicCRS. An ellipsoidal CS is expected
         throw ParsingException(concat("ellipsoidal CS expected, but found ",
                                       cs->getWKT2Type(true)));
     }
@@ -4173,8 +4173,8 @@ WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
 static bool isGeodeticCRS(const std::string &name) {
     return ci_equal(name, WKTConstants::GEODCRS) ||       // WKT2
            ci_equal(name, WKTConstants::GEODETICCRS) ||   // WKT2
-           ci_equal(name, WKTConstants::GEOGCRS) ||       // WKT2 2018
-           ci_equal(name, WKTConstants::GEOGRAPHICCRS) || // WKT2 2018
+           ci_equal(name, WKTConstants::GEOGCRS) ||       // WKT2 2019
+           ci_equal(name, WKTConstants::GEOGRAPHICCRS) || // WKT2 2019
            ci_equal(name, WKTConstants::GEOGCS) ||        // WKT1
            ci_equal(name, WKTConstants::GEOCCS);          // WKT1
 }
@@ -5921,7 +5921,7 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
             d->emitRecoverableWarning(errorMsg);
         }
     } else if (dialect == WKTGuessedDialect::WKT2_2015 ||
-               dialect == WKTGuessedDialect::WKT2_2018) {
+               dialect == WKTGuessedDialect::WKT2_2019) {
         auto errorMsg = pj_wkt2_parse(wkt);
         if (!errorMsg.empty()) {
             d->emitRecoverableWarning(errorMsg);
@@ -5961,7 +5961,7 @@ WKTParser::guessDialect(const std::string &wkt) noexcept {
         }
     }
 
-    const std::string *const wkt2_2018_only_keywords[] = {
+    const std::string *const wkt2_2019_only_keywords[] = {
         &WKTConstants::GEOGCRS,
         // contained in previous one
         // &WKTConstants::BASEGEOGCRS,
@@ -5971,19 +5971,19 @@ WKTParser::guessDialect(const std::string &wkt) noexcept {
         &WKTConstants::DERIVEDPROJCRS, &WKTConstants::BASEPROJCRS,
         &WKTConstants::GEOGRAPHICCRS, &WKTConstants::TRF, &WKTConstants::VRF};
 
-    for (const auto &pointerKeyword : wkt2_2018_only_keywords) {
+    for (const auto &pointerKeyword : wkt2_2019_only_keywords) {
         auto pos = ci_find(wkt, *pointerKeyword);
         if (pos != std::string::npos &&
             wkt[pos + pointerKeyword->size()] == '[') {
-            return WKTGuessedDialect::WKT2_2018;
+            return WKTGuessedDialect::WKT2_2019;
         }
     }
-    static const char *const wkt2_2018_only_substrings[] = {
+    static const char *const wkt2_2019_only_substrings[] = {
         "CS[TemporalDateTime,", "CS[TemporalCount,", "CS[TemporalMeasure,",
     };
-    for (const auto &substrings : wkt2_2018_only_substrings) {
+    for (const auto &substrings : wkt2_2019_only_substrings) {
         if (ci_find(wkt, substrings) != std::string::npos) {
-            return WKTGuessedDialect::WKT2_2018;
+            return WKTGuessedDialect::WKT2_2019;
         }
     }
 

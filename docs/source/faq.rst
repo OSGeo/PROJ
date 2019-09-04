@@ -137,7 +137,7 @@ of the Well-Known Text output:
     PROJ.4 string:
     +proj=longlat +datum=WGS84 +no_defs +type=crs
 
-    WKT2_2018 string:
+    WKT2:2019 string:
     GEOGCRS["WGS 84",
         DATUM["World Geodetic System 1984",
             ELLIPSOID["WGS 84",6378137,298.257223563,

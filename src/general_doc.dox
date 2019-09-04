@@ -102,7 +102,7 @@ definitions, and coordinate operations. This is an implementation of
 
 PROJ implements the two following revisions of the standard:
 
-\subsubsection WKT2_2018 WKT2:2018 / WKT2:2019
+\subsubsection WKT2_2019 WKT2:2019
 
 [OGC 18-010r7, 2019-06-24, WKT2-2019]
 (http://docs.opengeospatial.org/is/18-010r7/18-010r7.html)

@@ -1416,7 +1416,7 @@ void DynamicGeodeticReferenceFrame::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (isWKT2 && formatter->use2018Keywords()) {
+    if (isWKT2 && formatter->use2019Keywords()) {
         formatter->startNode(io::WKTConstants::DYNAMIC, false);
         formatter->startNode(io::WKTConstants::FRAMEEPOCH, false);
         formatter->add(
@@ -1530,9 +1530,9 @@ void DatumEnsemble::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2 || !formatter->use2018Keywords()) {
+    if (!isWKT2 || !formatter->use2019Keywords()) {
         throw io::FormattingException(
-            "DatumEnsemble can only be exported to WKT2:2018");
+            "DatumEnsemble can only be exported to WKT2:2019");
     }
 
     auto l_datums = datums();
@@ -1941,7 +1941,7 @@ void DynamicVerticalReferenceFrame::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (isWKT2 && formatter->use2018Keywords()) {
+    if (isWKT2 && formatter->use2019Keywords()) {
         formatter->startNode(io::WKTConstants::DYNAMIC, false);
         formatter->startNode(io::WKTConstants::FRAMEEPOCH, false);
         formatter->add(
@@ -2067,7 +2067,7 @@ void TemporalDatum::_exportToWKT(
     }
     formatter->startNode(io::WKTConstants::TDATUM, !identifiers().empty());
     formatter->addQuotedString(nameStr());
-    if (formatter->use2018Keywords()) {
+    if (formatter->use2019Keywords()) {
         formatter->startNode(io::WKTConstants::CALENDAR, false);
         formatter->addQuotedString(calendar());
         formatter->endNode();
