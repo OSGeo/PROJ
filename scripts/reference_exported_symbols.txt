@@ -202,6 +202,7 @@ osgeo::proj::cs::DateTimeTemporalCS::create(osgeo::proj::util::PropertyMap const
 osgeo::proj::cs::DateTimeTemporalCS::~DateTimeTemporalCS()
 osgeo::proj::cs::EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(osgeo::proj::common::UnitOfMeasure const&, osgeo::proj::common::UnitOfMeasure const&)
 osgeo::proj::cs::EllipsoidalCS::createLatitudeLongitude(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::EllipsoidalCS::createLongitudeLatitudeEllipsoidalHeight(osgeo::proj::common::UnitOfMeasure const&, osgeo::proj::common::UnitOfMeasure const&)
 osgeo::proj::cs::EllipsoidalCS::createLongitudeLatitude(osgeo::proj::common::UnitOfMeasure const&)
 osgeo::proj::cs::EllipsoidalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
 osgeo::proj::cs::EllipsoidalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
@@ -878,6 +879,7 @@ proj_create_crs_to_crs
 proj_create_crs_to_crs_from_pj
 proj_create_cs
 proj_create_ellipsoidal_2D_cs
+proj_create_ellipsoidal_3D_cs
 proj_create_engineering_crs
 proj_create_from_database
 proj_create_from_name

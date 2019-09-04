@@ -789,6 +789,28 @@ EllipsoidalCS::createLongitudeLatitude(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a EllipsoidalCS with a Longitude (first), Latitude
+ * (second) axis and ellipsoidal height (third) axis.
+ *
+ * @param angularUnit Angular unit of the latitude and longitude axes.
+ * @param linearUnit Linear unit of the ellipsoidal height axis.
+ * @return a new EllipsoidalCS.
+ * @since 7.0
+ */
+EllipsoidalCSNNPtr EllipsoidalCS::createLongitudeLatitudeEllipsoidalHeight(
+    const common::UnitOfMeasure &angularUnit,
+    const common::UnitOfMeasure &linearUnit) {
+    return EllipsoidalCS::create(
+        util::PropertyMap(), CoordinateSystemAxis::createLONG_EAST(angularUnit),
+        CoordinateSystemAxis::createLAT_NORTH(angularUnit),
+        CoordinateSystemAxis::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Ellipsoidal_height),
+            AxisAbbreviation::h, AxisDirection::UP, linearUnit));
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 /** \brief Return the axis order in an enumerated way. */
 EllipsoidalCS::AxisOrder EllipsoidalCS::axisOrder() const {

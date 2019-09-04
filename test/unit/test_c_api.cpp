@@ -3737,4 +3737,159 @@ TEST_F(CApi, proj_create_crs_to_crs_from_pj) {
               "+step +proj=utm +zone=31 +ellps=WGS84");
 }
 
+// ---------------------------------------------------------------------------
+
+static void
+check_axis_is_latitude(PJ_CONTEXT *ctx, PJ *cs, int axis_number,
+                       const char *unit_name = "degree",
+                       double unit_conv_factor = 0.017453292519943295,
+                       const char *auth = "EPSG", const char *code = "9122") {
+
+    const char *name = nullptr;
+    const char *abbrev = nullptr;
+    const char *direction = nullptr;
+    double unitConvFactor = 0.0;
+    const char *unitName = nullptr;
+    const char *unitAuthority = nullptr;
+    const char *unitCode = nullptr;
+
+    EXPECT_TRUE(proj_cs_get_axis_info(ctx, cs, axis_number, &name, &abbrev,
+                                      &direction, &unitConvFactor, &unitName,
+                                      &unitAuthority, &unitCode));
+    ASSERT_NE(name, nullptr);
+    ASSERT_NE(abbrev, nullptr);
+    ASSERT_NE(direction, nullptr);
+    ASSERT_NE(unitName, nullptr);
+    if (auth) {
+        ASSERT_NE(unitAuthority, nullptr);
+        ASSERT_NE(unitCode, nullptr);
+    }
+    EXPECT_EQ(std::string(name), "Latitude");
+    EXPECT_EQ(std::string(abbrev), "lat");
+    EXPECT_EQ(std::string(direction), "north");
+    EXPECT_EQ(unitConvFactor, unit_conv_factor) << unitConvFactor;
+    EXPECT_EQ(std::string(unitName), unit_name);
+    if (auth) {
+        EXPECT_EQ(std::string(unitAuthority), auth);
+        EXPECT_EQ(std::string(unitCode), code);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+check_axis_is_longitude(PJ_CONTEXT *ctx, PJ *cs, int axis_number,
+                        const char *unit_name = "degree",
+                        double unit_conv_factor = 0.017453292519943295,
+                        const char *auth = "EPSG", const char *code = "9122") {
+
+    const char *name = nullptr;
+    const char *abbrev = nullptr;
+    const char *direction = nullptr;
+    double unitConvFactor = 0.0;
+    const char *unitName = nullptr;
+    const char *unitAuthority = nullptr;
+    const char *unitCode = nullptr;
+
+    EXPECT_TRUE(proj_cs_get_axis_info(ctx, cs, axis_number, &name, &abbrev,
+                                      &direction, &unitConvFactor, &unitName,
+                                      &unitAuthority, &unitCode));
+    ASSERT_NE(name, nullptr);
+    ASSERT_NE(abbrev, nullptr);
+    ASSERT_NE(direction, nullptr);
+    ASSERT_NE(unitName, nullptr);
+    if (auth) {
+        ASSERT_NE(unitAuthority, nullptr);
+        ASSERT_NE(unitCode, nullptr);
+    }
+    EXPECT_EQ(std::string(name), "Longitude");
+    EXPECT_EQ(std::string(abbrev), "lon");
+    EXPECT_EQ(std::string(direction), "east");
+    EXPECT_EQ(unitConvFactor, unit_conv_factor) << unitConvFactor;
+    EXPECT_EQ(std::string(unitName), unit_name);
+    if (auth) {
+        EXPECT_EQ(std::string(unitAuthority), auth);
+        EXPECT_EQ(std::string(unitCode), code);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static void check_axis_is_height(PJ_CONTEXT *ctx, PJ *cs, int axis_number,
+                                 const char *unit_name = "metre",
+                                 double unit_conv_factor = 1,
+                                 const char *auth = "EPSG",
+                                 const char *code = "9001") {
+
+    const char *name = nullptr;
+    const char *abbrev = nullptr;
+    const char *direction = nullptr;
+    double unitConvFactor = 0.0;
+    const char *unitName = nullptr;
+    const char *unitAuthority = nullptr;
+    const char *unitCode = nullptr;
+
+    EXPECT_TRUE(proj_cs_get_axis_info(ctx, cs, axis_number, &name, &abbrev,
+                                      &direction, &unitConvFactor, &unitName,
+                                      &unitAuthority, &unitCode));
+    ASSERT_NE(name, nullptr);
+    ASSERT_NE(abbrev, nullptr);
+    ASSERT_NE(direction, nullptr);
+    ASSERT_NE(unitName, nullptr);
+    if (auth) {
+        ASSERT_NE(unitAuthority, nullptr);
+        ASSERT_NE(unitCode, nullptr);
+    }
+    EXPECT_EQ(std::string(name), "Ellipsoidal height");
+    EXPECT_EQ(std::string(abbrev), "h");
+    EXPECT_EQ(std::string(direction), "up");
+    EXPECT_EQ(unitConvFactor, unit_conv_factor) << unitConvFactor;
+    EXPECT_EQ(std::string(unitName), unit_name);
+    if (auth) {
+        EXPECT_EQ(std::string(unitAuthority), auth);
+        EXPECT_EQ(std::string(unitCode), code);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_ellipsoidal_3D_cs) {
+
+    {
+        auto cs = proj_create_ellipsoidal_3D_cs(
+            m_ctxt, PJ_ELLPS3D_LATITUDE_LONGITUDE_HEIGHT, nullptr, 0, nullptr,
+            0);
+        ObjectKeeper keeper_cs(cs);
+        ASSERT_NE(cs, nullptr);
+
+        EXPECT_EQ(proj_cs_get_type(m_ctxt, cs), PJ_CS_TYPE_ELLIPSOIDAL);
+
+        EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+
+        check_axis_is_latitude(m_ctxt, cs, 0);
+
+        check_axis_is_longitude(m_ctxt, cs, 1);
+
+        check_axis_is_height(m_ctxt, cs, 2);
+    }
+
+    {
+        auto cs = proj_create_ellipsoidal_3D_cs(
+            m_ctxt, PJ_ELLPS3D_LONGITUDE_LATITUDE_HEIGHT, "foo", 0.5, "bar",
+            0.6);
+        ObjectKeeper keeper_cs(cs);
+        ASSERT_NE(cs, nullptr);
+
+        EXPECT_EQ(proj_cs_get_type(m_ctxt, cs), PJ_CS_TYPE_ELLIPSOIDAL);
+
+        EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+
+        check_axis_is_longitude(m_ctxt, cs, 0, "foo", 0.5, nullptr, nullptr);
+
+        check_axis_is_latitude(m_ctxt, cs, 1, "foo", 0.5, nullptr, nullptr);
+
+        check_axis_is_height(m_ctxt, cs, 2, "bar", 0.6, nullptr, nullptr);
+    }
+}
+
 } // namespace

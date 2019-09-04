@@ -3763,6 +3763,58 @@ PJ *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a Ellipsoidal 3D
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param type Coordinate system type.
+ * @param horizontal_angular_unit_name Horizontal angular unit name.
+ * @param horizontal_angular_unit_conv_factor Horizontal angular unit conversion
+ * factor to SI.
+ * @param vertical_linear_unit_name Vertical linear unit name.
+ * @param vertical_linear_unit_conv_factor Vertical linear unit conversion
+ * factor to SI.
+ *
+ * @return Object that must be unreferenced with
+ * proj_destroy(), or NULL in case of error.
+ * @since 7.0
+ */
+
+PJ *proj_create_ellipsoidal_3D_cs(PJ_CONTEXT *ctx,
+                                  PJ_ELLIPSOIDAL_CS_3D_TYPE type,
+                                  const char *horizontal_angular_unit_name,
+                                  double horizontal_angular_unit_conv_factor,
+                                  const char *vertical_linear_unit_name,
+                                  double vertical_linear_unit_conv_factor) {
+    try {
+        switch (type) {
+        case PJ_ELLPS3D_LONGITUDE_LATITUDE_HEIGHT:
+            return pj_obj_create(
+                ctx, EllipsoidalCS::createLongitudeLatitudeEllipsoidalHeight(
+                         createAngularUnit(horizontal_angular_unit_name,
+                                           horizontal_angular_unit_conv_factor),
+                         createLinearUnit(vertical_linear_unit_name,
+                                          vertical_linear_unit_conv_factor)));
+
+        case PJ_ELLPS3D_LATITUDE_LONGITUDE_HEIGHT:
+            return pj_obj_create(
+                ctx, EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
+                         createAngularUnit(horizontal_angular_unit_name,
+                                           horizontal_angular_unit_conv_factor),
+                         createLinearUnit(vertical_linear_unit_name,
+                                          vertical_linear_unit_conv_factor)));
+        }
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instantiate a ProjectedCRS
  *
  * The returned object must be unreferenced with proj_destroy() after
