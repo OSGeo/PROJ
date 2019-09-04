@@ -116,7 +116,7 @@ PJ PROJ_DLL *proj_create_cartesian_2D_cs(PJ_CONTEXT *ctx,
                                                  double unit_conv_factor);
 
 
-/** Type of Cartesian 2D coordinate system. */
+/** Type of Ellipsoidal 2D coordinate system. */
 typedef enum
 {
     /* Longitude-Latitude */
