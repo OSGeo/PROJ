@@ -18,6 +18,12 @@ Ruby
 `proj4rb <https://github.com/cfis/proj4rb>`_:
 Bindings for PROJ in ruby
 
+Rust
+=======
+
+`proj <https://github.com/georust/proj>`_:
+Rust bindings for the latest stable version of PROJ
+
 TCL
 ========
 `proj4tcl <http://wiki.tcl.tk/41270>`_:
