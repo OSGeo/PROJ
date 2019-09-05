@@ -358,8 +358,8 @@ PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
 PJ PROJ_DLL *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area);
 PJ PROJ_DLL *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx,
-                                            PJ *source_crs,
-                                            PJ *target_crs,
+                                            const PJ *source_crs,
+                                            const PJ *target_crs,
                                             PJ_AREA *area,
                                             const char* const *options);
 PJ PROJ_DLL *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj);
