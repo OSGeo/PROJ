@@ -352,18 +352,26 @@ class PROJ_GCC_DLL EllipsoidalCS final : public CoordinateSystem {
     create(const util::PropertyMap &properties,
            const CoordinateSystemAxisNNPtr &axis1,
            const CoordinateSystemAxisNNPtr &axis2);
+
     PROJ_DLL static EllipsoidalCSNNPtr
     create(const util::PropertyMap &properties,
            const CoordinateSystemAxisNNPtr &axis1,
            const CoordinateSystemAxisNNPtr &axis2,
            const CoordinateSystemAxisNNPtr &axis3);
+
     PROJ_DLL static EllipsoidalCSNNPtr
     createLatitudeLongitude(const common::UnitOfMeasure &unit);
+
     PROJ_DLL static EllipsoidalCSNNPtr createLatitudeLongitudeEllipsoidalHeight(
         const common::UnitOfMeasure &angularUnit,
         const common::UnitOfMeasure &linearUnit);
+
     PROJ_DLL static EllipsoidalCSNNPtr
     createLongitudeLatitude(const common::UnitOfMeasure &unit);
+
+    PROJ_DLL static EllipsoidalCSNNPtr createLongitudeLatitudeEllipsoidalHeight(
+        const common::UnitOfMeasure &angularUnit,
+        const common::UnitOfMeasure &linearUnit);
 
     //! @cond Doxygen_Suppress
 

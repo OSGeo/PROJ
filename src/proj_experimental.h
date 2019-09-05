@@ -130,6 +130,22 @@ PJ PROJ_DLL *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
                                                    const char* unit_name,
                                                    double unit_conv_factor);
 
+/** Type of Ellipsoidal 3D coordinate system. */
+typedef enum
+{
+    /* Longitude-Latitude-Height(up) */
+    PJ_ELLPS3D_LONGITUDE_LATITUDE_HEIGHT,
+    /* Latitude-Longitude-Height(up) */
+    PJ_ELLPS3D_LATITUDE_LONGITUDE_HEIGHT,
+} PJ_ELLIPSOIDAL_CS_3D_TYPE;
+
+PJ PROJ_DLL *proj_create_ellipsoidal_3D_cs(PJ_CONTEXT *ctx,
+                                           PJ_ELLIPSOIDAL_CS_3D_TYPE type, 
+                                           const char* horizontal_angular_unit_name,
+                                           double horizontal_angular_unit_conv_factor, 
+                                           const char* vertical_linear_unit_name,
+                                           double vertical_linear_unit_conv_factor);
+
 PJ_OBJ_LIST PROJ_DLL *proj_query_geodetic_crs_from_datum(
                                                 PJ_CONTEXT *ctx,
                                                 const char *crs_auth_name,
