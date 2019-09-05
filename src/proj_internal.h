@@ -706,7 +706,7 @@ struct projCtx_t {
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
 
-    std::string curStringInCreateFromPROJString{};
+    int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);
