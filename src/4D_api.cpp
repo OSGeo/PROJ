@@ -946,7 +946,7 @@ static PJ* add_coord_op_to_list(PJ* op,
 }
 
 /*****************************************************************************/
-static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, PJ* crs) {
+static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
 /*****************************************************************************/
     // Create a geographic 2D long-lat degrees CRS that is related to the
     // CRS
@@ -1052,7 +1052,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 }
 
 /*****************************************************************************/
-PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, PJ *source_crs, PJ *target_crs, PJ_AREA *area, const char* const *) {
+PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, const PJ *target_crs, PJ_AREA *area, const char* const *) {
 /******************************************************************************
     Create a transformation pipeline between two known coordinate reference
     systems.
