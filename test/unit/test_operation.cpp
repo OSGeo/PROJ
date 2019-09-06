@@ -4189,7 +4189,7 @@ TEST(operation, geogCRS_to_geogCRS) {
 
 TEST(operation, geogCRS_to_geogCRS_context_default) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
@@ -4248,7 +4248,7 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
 
 TEST(operation, geogCRS_to_geogCRS_context_match_by_name) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
@@ -4275,7 +4275,7 @@ TEST(operation, geogCRS_to_geogCRS_context_match_by_name) {
 
 TEST(operation, geogCRS_to_geogCRS_context_filter_accuracy) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 1.0);
@@ -4305,7 +4305,7 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_accuracy) {
 
 TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     // INSERT INTO "area" VALUES('EPSG','1197','Romania','Romania - onshore and
     // offshore.',43.44,48.27,20.26,31.41,0);
     {
@@ -4348,7 +4348,7 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
 
 TEST(operation, geogCRS_to_geogCRS_context_incompatible_area) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4267"), // NAD27
@@ -4363,7 +4363,7 @@ TEST(operation, geogCRS_to_geogCRS_context_incompatible_area) {
 
 TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
@@ -4427,7 +4427,7 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
 
 TEST(operation, geogCRS_to_geogCRS_context_ntv1_ntv2_ctable2) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
@@ -4461,7 +4461,7 @@ TEST(operation, geogCRS_to_geogCRS_context_ntv1_ntv2_ctable2) {
 
 TEST(operation, vertCRS_to_geogCRS_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
@@ -4559,7 +4559,7 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation) {
 
 TEST(operation, geogCRS_to_geogCRS_longitude_rotation_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4807"), // NTF(Paris)
@@ -4586,7 +4586,7 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation_context) {
 
 TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setAllowUseIntermediateCRS(
         CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
@@ -4605,7 +4605,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
 
     EXPECT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(list[0]) !=
                 nullptr);
-    auto grids = list[0]->gridsNeeded(DatabaseContext::create());
+    auto grids = list[0]->gridsNeeded(SQLiteDatabaseContext::create());
     EXPECT_EQ(grids.size(), 1U);
 }
 
@@ -4613,7 +4613,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
 
 TEST(operation, geogCRS_to_geogCRS_context_same_grid_name) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4314"), // DHDN
@@ -4632,7 +4632,7 @@ TEST(operation, geogCRS_to_geogCRS_context_same_grid_name) {
 
 TEST(operation, geogCRS_to_geogCRS_geographic_offset_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4120"), // NTF(Paris)
@@ -4651,7 +4651,7 @@ TEST(operation, geogCRS_to_geogCRS_geographic_offset_context) {
 
 TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setAllowUseIntermediateCRS(
         CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
@@ -4696,7 +4696,7 @@ TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
 
 TEST(operation, geogCRS_to_geogCRS_init_IGNF_to_init_IGNF_context) {
 
-    auto dbContext = DatabaseContext::create();
+    auto dbContext = SQLiteDatabaseContext::create();
 
     auto sourceCRS_obj = PROJStringParser()
                              .attachDatabaseContext(dbContext)
@@ -4712,7 +4712,7 @@ TEST(operation, geogCRS_to_geogCRS_init_IGNF_to_init_IGNF_context) {
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetCRS_obj);
     ASSERT_TRUE(targetCRS != nullptr);
 
-    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto authFactory = dbContext->createAuthorityFactory(std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS), ctxt);
@@ -4810,7 +4810,7 @@ TEST(operation, geogCRS_3D_lat_long_non_metre_to_geogCRS_longlat) {
 
 TEST(operation, geogCRS_without_id_to_geogCRS_3D_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto src =
         authFactory->createCoordinateReferenceSystem("4289"); // Amersfoort
@@ -4916,7 +4916,7 @@ TEST(operation, geocentricCRS_to_geocentricCRS_noop) {
 
 TEST(operation, geocentricCRS_to_geogCRS_same_datum_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4326"),
@@ -4945,9 +4945,9 @@ TEST(operation, geocentricCRS_to_geogCRS_same_datum_context) {
 TEST(operation, geocentricCRS_to_geogCRS_same_datum_context_all_auth) {
     // This is to check we don't use OGC:CRS84 as a pivot
     auto authFactoryEPSG =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto authFactoryAll =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+        SQLiteDatabaseContext::create()->createAuthorityFactory(std::string());
     auto ctxt =
         CoordinateOperationContext::create(authFactoryAll, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
@@ -4964,7 +4964,7 @@ TEST(operation, geocentricCRS_to_geogCRS_same_datum_context_all_auth) {
 
 TEST(operation, geocentricCRS_to_geocentricCRS_different_datum_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         // ITRF2000 (geocentric)
@@ -4986,7 +4986,7 @@ TEST(operation, geocentricCRS_to_geocentricCRS_different_datum_context) {
 
 TEST(operation, geogCRS_geocentricCRS_same_datum_to_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         // WGS84 geocentric
@@ -5008,7 +5008,7 @@ TEST(operation,
     // Check that when going from geog2D to geog3D of same datum, we don't
     // try to go through a WGS84 pivot...
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("5365"), // CR 05 2D
@@ -5024,7 +5024,7 @@ TEST(operation,
 TEST(operation,
      geogCRS_to_geogCRS_different_datum_though_geocentric_transform_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         // ITRF2000 (geog3D)
@@ -5053,7 +5053,7 @@ TEST(operation,
 
 TEST(operation, geogCRS_to_geocentricCRS_different_datum_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         // ITRF2000 (geog3D)
@@ -5079,7 +5079,7 @@ TEST(operation, geogCRS_to_geocentricCRS_different_datum_context) {
 
 TEST(operation, geocentricCRS_to_geogCRS_different_datum_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         // ITRF2000 (geocentric)
@@ -5104,9 +5104,9 @@ TEST(operation, geocentricCRS_to_geogCRS_different_datum_context) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, esri_projectedCRS_to_geogCRS_with_ITRF_intermediate_context) {
-    auto dbContext = DatabaseContext::create();
-    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
-    auto authFactoryESRI = AuthorityFactory::create(dbContext, "ESRI");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto authFactoryEPSG = dbContext->createAuthorityFactory("EPSG");
+    auto authFactoryESRI = dbContext->createAuthorityFactory("ESRI");
     auto ctxt =
         CoordinateOperationContext::create(authFactoryEPSG, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
@@ -5206,12 +5206,12 @@ TEST(operation, geogCRS_longlat_to_geogCS_latlong) {
 TEST(operation, geogCRS_longlat_to_geogCS_latlong_database) {
 
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+        SQLiteDatabaseContext::create()->createAuthorityFactory(std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
-        AuthorityFactory::create(DatabaseContext::create(), "OGC")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("OGC")
             ->createCoordinateReferenceSystem("CRS84"),
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
     ASSERT_EQ(list.size(), 1U);
@@ -5251,7 +5251,7 @@ TEST(operation, geogCRS_different_from_baseCRS_to_projCRS) {
 TEST(operation,
      geogCRS_different_from_baseCRS_to_projCRS_context_compatible_area) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setAllowUseIntermediateCRS(
         CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
@@ -5301,7 +5301,7 @@ TEST(operation, projCRS_to_geogCRS) {
 
 TEST(operation, projCRS_no_id_to_geogCRS_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto src = authFactory->createCoordinateReferenceSystem(
         "28992"); // Amersfoort / RD New
@@ -5374,7 +5374,7 @@ TEST(operation, projCRS_to_projCRS_different_baseCRS) {
 
 TEST(operation, projCRS_to_projCRS_context_compatible_area) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("32634"), // UTM 34
@@ -5393,7 +5393,7 @@ TEST(operation, projCRS_to_projCRS_context_compatible_area) {
 
 TEST(operation, projCRS_to_projCRS_context_compatible_area_bis) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem(
@@ -5412,7 +5412,7 @@ TEST(operation, projCRS_to_projCRS_context_compatible_area_bis) {
 
 TEST(operation, projCRS_to_projCRS_context_one_incompatible_area) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("32631"), // UTM 31
@@ -5431,7 +5431,7 @@ TEST(operation, projCRS_to_projCRS_context_one_incompatible_area) {
 
 TEST(operation, projCRS_to_projCRS_context_incompatible_areas) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("32631"), // UTM 31
@@ -5447,7 +5447,7 @@ TEST(operation, projCRS_to_projCRS_context_incompatible_areas) {
 
 TEST(operation, projCRS_to_projCRS_context_incompatible_areas_ballpark) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("26711"), // UTM 11 NAD27
@@ -5464,7 +5464,7 @@ TEST(
     operation,
     projCRS_to_projCRS_context_incompatible_areas_crs_extent_use_intersection) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSourceAndTargetCRSExtentUse(
         CoordinateOperationContext::SourceTargetCRSExtentUse::INTERSECTION);
@@ -5481,12 +5481,12 @@ TEST(
 TEST(operation, projCRS_to_projCRS_north_pole_inverted_axis) {
 
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+        SQLiteDatabaseContext::create()->createAuthorityFactory(std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("32661"),
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("5041"),
         ctxt);
     ASSERT_EQ(list.size(), 1U);
@@ -5499,12 +5499,12 @@ TEST(operation, projCRS_to_projCRS_north_pole_inverted_axis) {
 TEST(operation, projCRS_to_projCRS_south_pole_inverted_axis) {
 
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+        SQLiteDatabaseContext::create()->createAuthorityFactory(std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("32761"),
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("5042"),
         ctxt);
     ASSERT_EQ(list.size(), 1U);
@@ -5520,7 +5520,7 @@ TEST(operation, projCRS_to_projCRS_through_geog3D) {
     // inconsistent CRS chaining, due to how we 'hack' a bit some intermediate
     // steps
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("5367"), // CR05 / CRTM05
@@ -5568,7 +5568,7 @@ TEST(operation, boundCRS_of_geogCRS_to_geogCRS_with_area) {
     auto boundCRS = BoundCRS::createFromTOWGS84(
         GeographicCRS::EPSG_4267, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = CoordinateOperationFactory::create()->createOperation(
         boundCRS, authFactory->createCoordinateReferenceSystem("4326"));
     ASSERT_TRUE(op != nullptr);
@@ -5622,7 +5622,7 @@ TEST(operation, createOperation_boundCRS_identified_by_datum) {
               "+ellps=clrk80ign");
 
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+        SQLiteDatabaseContext::create()->createAuthorityFactory(std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest), ctxt);
@@ -5724,7 +5724,7 @@ TEST(operation, boundCRS_of_geogCRS_to_unrelated_geogCRS_context) {
     auto src = BoundCRS::createFromTOWGS84(
         GeographicCRS::EPSG_4807, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     // ETRS89
     auto dst = authFactory->createCoordinateReferenceSystem("4258");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
@@ -5954,7 +5954,7 @@ TEST(operation, boundCRS_with_basecrs_with_extent_to_geogCRS) {
 
 TEST(operation, ETRS89_3D_to_proj_string_with_geoidgrids_nadgrids) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     // ETRS89 3D
     auto src = authFactory->createCoordinateReferenceSystem("4937");
     auto objDst = PROJStringParser().createFromPROJString(
@@ -6031,7 +6031,7 @@ TEST(operation, transformation_height_to_PROJ_string) {
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=vgridshift +grids=egm08_25.gtx +multiplier=1");
 
-    auto grids = transf->gridsNeeded(DatabaseContext::create());
+    auto grids = transf->gridsNeeded(SQLiteDatabaseContext::create());
     ASSERT_EQ(grids.size(), 1U);
     auto gridDesc = *(grids.begin());
     EXPECT_EQ(gridDesc.shortName, "egm08_25.gtx");
@@ -6327,7 +6327,7 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
 
-    auto grids = op->gridsNeeded(DatabaseContext::create());
+    auto grids = op->gridsNeeded(SQLiteDatabaseContext::create());
     EXPECT_EQ(grids.size(), 1U);
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
@@ -6395,7 +6395,7 @@ TEST(operation, geocent_to_compoundCRS) {
 
 TEST(operation, geocent_to_compoundCRS_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     // WGS84 geocentric
     auto src = authFactory->createCoordinateReferenceSystem("4978");
     auto objDst = PROJStringParser().createFromPROJString(
@@ -6533,7 +6533,7 @@ TEST(operation, compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert) {
 
 TEST(operation, compoundCRS_to_compoundCRS_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
@@ -6651,7 +6651,7 @@ TEST(operation, vertCRS_to_vertCRS) {
 
 TEST(operation, vertCRS_to_vertCRS_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
@@ -6707,7 +6707,7 @@ TEST(operation, compoundCRS_to_geogCRS_3D) {
 
 TEST(operation, compoundCRS_to_geogCRS_3D_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     // CompoundCRS to Geog3DCRS, with vertical unit change, but without
     // ellipsoid height <--> vertical height correction
     {
@@ -6765,7 +6765,7 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
 
 TEST(operation, compoundCRS_from_WKT2_to_geogCRS_3D_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto src = authFactory->createCoordinateReferenceSystem(
         "7415"); // Amersfoort / RD New + NAP height
@@ -6794,7 +6794,7 @@ TEST(operation, compoundCRS_from_WKT2_to_geogCRS_3D_context) {
 
 TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
@@ -6896,14 +6896,14 @@ TEST(operation, boundCRS_to_compoundCRS) {
 
 TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+        SQLiteDatabaseContext::create()->createAuthorityFactory(std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setAllowUseIntermediateCRS(
         CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
     auto list = CoordinateOperationFactory::create()->createOperations(
-        AuthorityFactory::create(DatabaseContext::create(), "IGNF")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("IGNF")
             ->createCoordinateReferenceSystem("LAMB1"),
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
     ASSERT_EQ(list.size(), 2U);
@@ -6927,10 +6927,10 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
               "+proj=axisswap +order=2,1");
 
     auto list2 = CoordinateOperationFactory::create()->createOperations(
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
             // NTF (Paris) / Lambert Nord France equivalent to IGNF:LAMB1
             ->createCoordinateReferenceSystem("27561"),
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
     ASSERT_GE(list2.size(), 3U);
@@ -6953,7 +6953,7 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
 
 TEST(operation, NAD83_to_projeted_CRS_based_on_NAD83_2011) {
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
@@ -6981,7 +6981,7 @@ TEST(operation, isPROJInstantiable) {
             PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326,
             1.0, 2.0, 3.0, {});
         EXPECT_TRUE(
-            transformation->isPROJInstantiable(DatabaseContext::create()));
+            transformation->isPROJInstantiable(SQLiteDatabaseContext::create()));
     }
 
     // Missing grid
@@ -6990,7 +6990,7 @@ TEST(operation, isPROJInstantiable) {
             PropertyMap(), GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
             "foo.gsb", std::vector<PositionalAccuracyNNPtr>());
         EXPECT_FALSE(
-            transformation->isPROJInstantiable(DatabaseContext::create()));
+            transformation->isPROJInstantiable(SQLiteDatabaseContext::create()));
     }
 
     // Unsupported method
@@ -7002,7 +7002,7 @@ TEST(operation, isPROJInstantiable) {
             std::vector<GeneralParameterValueNNPtr>{},
             std::vector<PositionalAccuracyNNPtr>{});
         EXPECT_FALSE(
-            transformation->isPROJInstantiable(DatabaseContext::create()));
+            transformation->isPROJInstantiable(SQLiteDatabaseContext::create()));
     }
 }
 
@@ -8208,7 +8208,7 @@ TEST(operation, validateParameters) {
 TEST(operation, normalizeForVisualization) {
 
     auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+        SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
 
     // Source(geographic) must be inverted
     {

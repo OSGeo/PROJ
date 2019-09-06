@@ -155,10 +155,19 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
 
     PROJ_DLL CoordinateOperationNNPtr normalizeForVisualization() const;
 
-    PROJ_PRIVATE :
-        //! @cond Doxygen_Suppress
-        PROJ_FOR_TEST CoordinateOperationNNPtr
-        shallowClone() const;
+  PROJ_PRIVATE :
+    //! @cond Doxygen_Suppress
+    PROJ_FOR_TEST CoordinateOperationNNPtr
+    shallowClone() const;
+
+    PROJ_INTERNAL void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
+                               const crs::CRSNNPtr &targetCRSIn,
+                               const crs::CRSPtr &interpolationCRSIn);
+    PROJ_INTERNAL void setCRSs(const CoordinateOperation *in,
+                               bool inverseSourceTarget);
+    PROJ_INTERNAL void
+    setProperties(const util::PropertyMap
+                  &properties); // throw(InvalidValueTypeException)
     //! @endcond
 
   protected:
@@ -172,19 +181,10 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_INTERNAL void
     setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                            std::weak_ptr<crs::CRS> targetCRSIn);
-    PROJ_INTERNAL void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
-                               const crs::CRSNNPtr &targetCRSIn,
-                               const crs::CRSPtr &interpolationCRSIn);
-    PROJ_INTERNAL void setCRSs(const CoordinateOperation *in,
-                               bool inverseSourceTarget);
     PROJ_INTERNAL
     void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
     PROJ_INTERNAL void setHasBallparkTransformation(bool b);
-
-    PROJ_INTERNAL void
-    setProperties(const util::PropertyMap
-                      &properties); // throw(InvalidValueTypeException)
 
     PROJ_INTERNAL virtual CoordinateOperationNNPtr _shallowClone() const = 0;
 

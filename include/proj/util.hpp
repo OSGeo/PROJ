@@ -175,11 +175,12 @@ namespace util {
 
 //! @cond Doxygen_Suppress
 // Import a few classes from nn.hpp to expose them under our ::util namespace
-// for conveniency.
+// for convenience.
 using ::dropbox::oxygen::i_promise_i_checked_for_null;
 using ::dropbox::oxygen::nn;
 using ::dropbox::oxygen::nn_dynamic_pointer_cast;
 using ::dropbox::oxygen::nn_make_shared;
+using ::dropbox::oxygen::nn_enable_shared_from_this;
 
 // For return statements, to convert from derived type to base type
 using ::dropbox::oxygen::nn_static_pointer_cast;

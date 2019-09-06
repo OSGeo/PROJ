@@ -213,7 +213,7 @@ set(SRC_LIBPROJ_ISO19111
   iso19111/internal.cpp
   iso19111/factory.cpp
   iso19111/c_api.cpp
-)
+        )
 
 set(SRC_LIBPROJ_CORE
   4D_api.cpp

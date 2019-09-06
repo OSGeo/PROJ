@@ -122,7 +122,7 @@ using ListOfParams = std::list<SQLValues>;
 
 // ---------------------------------------------------------------------------
 
-struct DatabaseContext::Private {
+struct SQLiteDatabaseContext::Private {
     Private();
     ~Private();
 
@@ -146,10 +146,10 @@ struct DatabaseContext::Private {
         const std::vector<std::string> &auxiliaryDatabasePaths);
 
     // Mechanism to detect recursion in calls from
-    // AuthorityFactory::createXXX() -> createFromUserInput() ->
-    // AuthorityFactory::createXXX()
+    // SQLiteAuthorityFactory::createXXX() -> createFromUserInput() ->
+    // SQLiteAuthorityFactory::createXXX()
     struct RecursionDetector {
-        explicit RecursionDetector(const DatabaseContextNNPtr &context)
+        explicit RecursionDetector(const SQLiteDatabaseContextNNPtr &context)
             : dbContext_(context) {
             if (dbContext_->getPrivate()->recLevel_ == 2) {
                 // Throw exception before incrementing, since the destructor
@@ -162,7 +162,7 @@ struct DatabaseContext::Private {
         ~RecursionDetector() { --dbContext_->getPrivate()->recLevel_; }
 
       private:
-        DatabaseContextNNPtr dbContext_;
+        SQLiteDatabaseContextNNPtr dbContext_;
     };
 
     std::map<std::string, std::list<SQLRow>> &getMapCanonicalizeGRFName() {
@@ -227,7 +227,7 @@ struct DatabaseContext::Private {
     void cache(const std::string &code, const GridInfoCache &info);
 
   private:
-    friend class DatabaseContext;
+    friend class SQLiteDatabaseContext;
 
     std::string databasePath_{};
     bool close_handle_ = true;
@@ -276,11 +276,11 @@ struct DatabaseContext::Private {
 
 // ---------------------------------------------------------------------------
 
-DatabaseContext::Private::Private() = default;
+SQLiteDatabaseContext::Private::Private() = default;
 
 // ---------------------------------------------------------------------------
 
-DatabaseContext::Private::~Private() {
+SQLiteDatabaseContext::Private::~Private() {
     assert(recLevel_ == 0);
 
     closeDB();
@@ -295,7 +295,7 @@ DatabaseContext::Private::~Private() {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::closeDB() noexcept {
+void SQLiteDatabaseContext::Private::closeDB() noexcept {
 
     if (detach_) {
         // Workaround a bug visible in SQLite 3.8.1 and 3.8.2 that causes
@@ -329,7 +329,7 @@ void DatabaseContext::Private::closeDB() noexcept {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::insertIntoCache(LRUCacheOfObjects &cache,
+void SQLiteDatabaseContext::Private::insertIntoCache(LRUCacheOfObjects &cache,
                                                const std::string &code,
                                                const util::BaseObjectPtr &obj) {
     cache.insert(code, obj);
@@ -337,7 +337,7 @@ void DatabaseContext::Private::insertIntoCache(LRUCacheOfObjects &cache,
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::getFromCache(LRUCacheOfObjects &cache,
+void SQLiteDatabaseContext::Private::getFromCache(LRUCacheOfObjects &cache,
                                             const std::string &code,
                                             util::BaseObjectPtr &obj) {
     cache.tryGet(code, obj);
@@ -345,7 +345,7 @@ void DatabaseContext::Private::getFromCache(LRUCacheOfObjects &cache,
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::Private::getCRSToCRSCoordOpFromCache(
+bool SQLiteDatabaseContext::Private::getCRSToCRSCoordOpFromCache(
     const std::string &code,
     std::vector<operation::CoordinateOperationNNPtr> &list) {
     return cacheCRSToCrsCoordOp_.tryGet(code, list);
@@ -353,7 +353,7 @@ bool DatabaseContext::Private::getCRSToCRSCoordOpFromCache(
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::cache(
+void SQLiteDatabaseContext::Private::cache(
     const std::string &code,
     const std::vector<operation::CoordinateOperationNNPtr> &list) {
     cacheCRSToCrsCoordOp_.insert(code, list);
@@ -361,7 +361,7 @@ void DatabaseContext::Private::cache(
 
 // ---------------------------------------------------------------------------
 
-crs::CRSPtr DatabaseContext::Private::getCRSFromCache(const std::string &code) {
+crs::CRSPtr SQLiteDatabaseContext::Private::getCRSFromCache(const std::string &code) {
     util::BaseObjectPtr obj;
     getFromCache(cacheCRS_, code, obj);
     return std::static_pointer_cast<crs::CRS>(obj);
@@ -369,7 +369,7 @@ crs::CRSPtr DatabaseContext::Private::getCRSFromCache(const std::string &code) {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::cache(const std::string &code,
+void SQLiteDatabaseContext::Private::cache(const std::string &code,
                                      const crs::CRSNNPtr &crs) {
     insertIntoCache(cacheCRS_, code, crs.as_nullable());
 }
@@ -377,7 +377,7 @@ void DatabaseContext::Private::cache(const std::string &code,
 // ---------------------------------------------------------------------------
 
 common::UnitOfMeasurePtr
-DatabaseContext::Private::getUOMFromCache(const std::string &code) {
+SQLiteDatabaseContext::Private::getUOMFromCache(const std::string &code) {
     util::BaseObjectPtr obj;
     getFromCache(cacheUOM_, code, obj);
     return std::static_pointer_cast<common::UnitOfMeasure>(obj);
@@ -385,7 +385,7 @@ DatabaseContext::Private::getUOMFromCache(const std::string &code) {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::cache(const std::string &code,
+void SQLiteDatabaseContext::Private::cache(const std::string &code,
                                      const common::UnitOfMeasureNNPtr &uom) {
     insertIntoCache(cacheUOM_, code, uom.as_nullable());
 }
@@ -393,7 +393,7 @@ void DatabaseContext::Private::cache(const std::string &code,
 // ---------------------------------------------------------------------------
 
 datum::GeodeticReferenceFramePtr
-DatabaseContext::Private::getGeodeticDatumFromCache(const std::string &code) {
+SQLiteDatabaseContext::Private::getGeodeticDatumFromCache(const std::string &code) {
     util::BaseObjectPtr obj;
     getFromCache(cacheGeodeticDatum_, code, obj);
     return std::static_pointer_cast<datum::GeodeticReferenceFrame>(obj);
@@ -401,7 +401,7 @@ DatabaseContext::Private::getGeodeticDatumFromCache(const std::string &code) {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::cache(
+void SQLiteDatabaseContext::Private::cache(
     const std::string &code, const datum::GeodeticReferenceFrameNNPtr &datum) {
     insertIntoCache(cacheGeodeticDatum_, code, datum.as_nullable());
 }
@@ -409,7 +409,7 @@ void DatabaseContext::Private::cache(
 // ---------------------------------------------------------------------------
 
 datum::PrimeMeridianPtr
-DatabaseContext::Private::getPrimeMeridianFromCache(const std::string &code) {
+SQLiteDatabaseContext::Private::getPrimeMeridianFromCache(const std::string &code) {
     util::BaseObjectPtr obj;
     getFromCache(cachePrimeMeridian_, code, obj);
     return std::static_pointer_cast<datum::PrimeMeridian>(obj);
@@ -417,14 +417,14 @@ DatabaseContext::Private::getPrimeMeridianFromCache(const std::string &code) {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::cache(const std::string &code,
+void SQLiteDatabaseContext::Private::cache(const std::string &code,
                                      const datum::PrimeMeridianNNPtr &pm) {
     insertIntoCache(cachePrimeMeridian_, code, pm.as_nullable());
 }
 
 // ---------------------------------------------------------------------------
 
-cs::CoordinateSystemPtr DatabaseContext::Private::getCoordinateSystemFromCache(
+cs::CoordinateSystemPtr SQLiteDatabaseContext::Private::getCoordinateSystemFromCache(
     const std::string &code) {
     util::BaseObjectPtr obj;
     getFromCache(cacheCS_, code, obj);
@@ -433,7 +433,7 @@ cs::CoordinateSystemPtr DatabaseContext::Private::getCoordinateSystemFromCache(
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::cache(const std::string &code,
+void SQLiteDatabaseContext::Private::cache(const std::string &code,
                                      const cs::CoordinateSystemNNPtr &cs) {
     insertIntoCache(cacheCS_, code, cs.as_nullable());
 }
@@ -441,7 +441,7 @@ void DatabaseContext::Private::cache(const std::string &code,
 // ---------------------------------------------------------------------------
 
 metadata::ExtentPtr
-DatabaseContext::Private::getExtentFromCache(const std::string &code) {
+SQLiteDatabaseContext::Private::getExtentFromCache(const std::string &code) {
     util::BaseObjectPtr obj;
     getFromCache(cacheExtent_, code, obj);
     return std::static_pointer_cast<metadata::Extent>(obj);
@@ -449,21 +449,21 @@ DatabaseContext::Private::getExtentFromCache(const std::string &code) {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::cache(const std::string &code,
+void SQLiteDatabaseContext::Private::cache(const std::string &code,
                                      const metadata::ExtentNNPtr &extent) {
     insertIntoCache(cacheExtent_, code, extent.as_nullable());
 }
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::Private::getGridInfoFromCache(const std::string &code,
+bool SQLiteDatabaseContext::Private::getGridInfoFromCache(const std::string &code,
                                                     GridInfoCache &info) {
     return cacheGridInfo_.tryGet(code, info);
 }
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::cache(const std::string &code,
+void SQLiteDatabaseContext::Private::cache(const std::string &code,
                                      const GridInfoCache &info) {
     cacheGridInfo_.insert(code, info);
 }
@@ -530,7 +530,7 @@ static int VFSAccess(sqlite3_vfs *vfs, const char *zName, int flags,
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::Private::createCustomVFS() {
+bool SQLiteDatabaseContext::Private::createCustomVFS() {
 
     sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
     assert(defaultVFS);
@@ -565,7 +565,7 @@ bool DatabaseContext::Private::createCustomVFS() {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::open(const std::string &databasePath,
+void SQLiteDatabaseContext::Private::open(const std::string &databasePath,
                                     PJ_CONTEXT *ctx) {
     setPjCtxt(ctx ? ctx : pj_get_default_ctx());
     std::string path(databasePath);
@@ -601,7 +601,7 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
+void SQLiteDatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
 
     assert(sqlite_handle);
     assert(!sqlite_handle_);
@@ -613,7 +613,7 @@ void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
 
 // ---------------------------------------------------------------------------
 
-std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
+std::vector<std::string> SQLiteDatabaseContext::Private::getDatabaseStructure() {
     const char *sqls[] = {
         "SELECT sql FROM sqlite_master WHERE type = 'table'",
         "SELECT sql FROM sqlite_master WHERE type = 'view'",
@@ -630,7 +630,7 @@ std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::attachExtraDatabases(
+void SQLiteDatabaseContext::Private::attachExtraDatabases(
     const std::vector<std::string> &auxiliaryDatabasePaths) {
     assert(close_handle_);
     assert(sqlite_handle_);
@@ -784,7 +784,7 @@ static void PROJ_SQLITE_intersects_bbox(sqlite3_context *pContext,
 #define SQLITE_DETERMINISTIC 0
 #endif
 
-void DatabaseContext::Private::registerFunctions() {
+void SQLiteDatabaseContext::Private::registerFunctions() {
     sqlite3_create_function(sqlite_handle_, "pseudo_area_from_swne", 4,
                             SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
                             PROJ_SQLITE_pseudo_area_from_swne, nullptr,
@@ -797,7 +797,7 @@ void DatabaseContext::Private::registerFunctions() {
 
 // ---------------------------------------------------------------------------
 
-SQLResultSet DatabaseContext::Private::run(const std::string &sql,
+SQLResultSet SQLiteDatabaseContext::Private::run(const std::string &sql,
                                            const ListOfParams &parameters) {
 
     sqlite3_stmt *stmt = nullptr;
@@ -859,12 +859,12 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-DatabaseContext::~DatabaseContext() = default;
+SQLiteDatabaseContext::~SQLiteDatabaseContext() = default;
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
+SQLiteDatabaseContext::SQLiteDatabaseContext() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -880,10 +880,10 @@ DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
  * @throw FactoryException
  */
 DatabaseContextNNPtr
-DatabaseContext::create(const std::string &databasePath,
+SQLiteDatabaseContext::create(const std::string &databasePath,
                         const std::vector<std::string> &auxiliaryDatabasePaths,
                         PJ_CONTEXT *ctx) {
-    auto dbCtx = DatabaseContext::nn_make_shared<DatabaseContext>();
+    auto dbCtx = SQLiteDatabaseContext::nn_make_shared<SQLiteDatabaseContext>();
     dbCtx->getPrivate()->open(databasePath, ctx);
     if (!auxiliaryDatabasePaths.empty()) {
         dbCtx->getPrivate()->attachExtraDatabases(auxiliaryDatabasePaths);
@@ -895,7 +895,7 @@ DatabaseContext::create(const std::string &databasePath,
 
 /** \brief Return the list of authorities used in the database.
  */
-std::set<std::string> DatabaseContext::getAuthorities() const {
+std::set<std::string> SQLiteDatabaseContext::getAuthorities() const {
     auto res = d->run("SELECT auth_name FROM authority_list");
     std::set<std::string> list;
     for (const auto &row : res) {
@@ -909,7 +909,7 @@ std::set<std::string> DatabaseContext::getAuthorities() const {
 /** \brief Return the list of SQL commands (CREATE TABLE, CREATE TRIGGER,
  * CREATE VIEW) needed to initialize a new database.
  */
-std::vector<std::string> DatabaseContext::getDatabaseStructure() const {
+std::vector<std::string> SQLiteDatabaseContext::getDatabaseStructure() const {
     return d->getDatabaseStructure();
 }
 
@@ -917,7 +917,7 @@ std::vector<std::string> DatabaseContext::getDatabaseStructure() const {
 
 /** \brief Return the path to the database.
  */
-const std::string &DatabaseContext::getPath() const { return d->getPath(); }
+const std::string &SQLiteDatabaseContext::getPath() const { return d->getPath(); }
 
 // ---------------------------------------------------------------------------
 
@@ -925,7 +925,7 @@ const std::string &DatabaseContext::getPath() const { return d->getPath(); }
  *
  * Value remains valid while this is alive and to the next call to getMetadata
  */
-const char *DatabaseContext::getMetadata(const char *key) const {
+const char *SQLiteDatabaseContext::getMetadata(const char *key) const {
     auto res =
         d->run("SELECT value FROM metadata WHERE key = ?", {std::string(key)});
     if (res.empty()) {
@@ -939,21 +939,21 @@ const char *DatabaseContext::getMetadata(const char *key) const {
 
 //! @cond Doxygen_Suppress
 
-DatabaseContextNNPtr DatabaseContext::create(void *sqlite_handle) {
-    auto ctxt = DatabaseContext::nn_make_shared<DatabaseContext>();
+DatabaseContextNNPtr SQLiteDatabaseContext::create(void *sqlite_handle) {
+    auto ctxt = SQLiteDatabaseContext::nn_make_shared<SQLiteDatabaseContext>();
     ctxt->getPrivate()->setHandle(static_cast<sqlite3 *>(sqlite_handle));
     return ctxt;
 }
 
 // ---------------------------------------------------------------------------
 
-void *DatabaseContext::getSqliteHandle() const {
+void *SQLiteDatabaseContext::getSqliteHandle() const {
     return getPrivate()->handle();
 }
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
+bool SQLiteDatabaseContext::lookForGridAlternative(const std::string &officialName,
                                              std::string &projFilename,
                                              std::string &projFormat,
                                              bool &inverse) const {
@@ -973,7 +973,7 @@ bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
+bool SQLiteDatabaseContext::lookForGridInfo(const std::string &projFilename,
                                       std::string &fullFilename,
                                       std::string &packageName,
                                       std::string &url, bool &directDownload,
@@ -1041,7 +1041,7 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::isKnownName(const std::string &name,
+bool SQLiteDatabaseContext::isKnownName(const std::string &name,
                                   const std::string &tableName) const {
     std::string sql("SELECT 1 FROM \"");
     sql += replaceAll(tableName, "\"", "\"\"");
@@ -1060,7 +1060,7 @@ bool DatabaseContext::isKnownName(const std::string &name,
  * @throw FactoryException
  */
 std::string
-DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
+SQLiteDatabaseContext::getAliasFromOfficialName(const std::string &officialName,
                                           const std::string &tableName,
                                           const std::string &source) const {
     std::string sql("SELECT auth_name, code FROM \"");
@@ -1093,7 +1093,7 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
  * @return Text definition (or empty)
  * @throw FactoryException
  */
-std::string DatabaseContext::getTextDefinition(const std::string &tableName,
+std::string SQLiteDatabaseContext::getTextDefinition(const std::string &tableName,
                                                const std::string &authName,
                                                const std::string &code) const {
     std::string sql("SELECT text_definition FROM \"");
@@ -1113,7 +1113,7 @@ std::string DatabaseContext::getTextDefinition(const std::string &tableName,
  *
  * @throw FactoryException
  */
-std::vector<std::string> DatabaseContext::getAllowedAuthorities(
+std::vector<std::string> SQLiteDatabaseContext::getAllowedAuthorities(
     const std::string &sourceAuthName,
     const std::string &targetAuthName) const {
     auto res = d->run(
@@ -1147,7 +1147,7 @@ std::vector<std::string> DatabaseContext::getAllowedAuthorities(
 // ---------------------------------------------------------------------------
 
 std::list<std::pair<std::string, std::string>>
-DatabaseContext::getNonDeprecated(const std::string &tableName,
+SQLiteDatabaseContext::getNonDeprecated(const std::string &tableName,
                                   const std::string &authName,
                                   const std::string &code) const {
     auto sqlRes =
@@ -1176,35 +1176,40 @@ DatabaseContext::getNonDeprecated(const std::string &tableName,
     return res;
 }
 
+AuthorityFactoryNNPtr
+SQLiteDatabaseContext::createAuthorityFactory(const std::string &authorityName) {
+    return SQLiteAuthorityFactory::create(util::nn_static_pointer_cast<SQLiteDatabaseContext>(nn_shared_from_this()), authorityName);
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct AuthorityFactory::Private {
-    Private(const DatabaseContextNNPtr &contextIn,
+struct SQLiteAuthorityFactory::Private {
+    Private(const SQLiteDatabaseContextNNPtr &contextIn,
             const std::string &authorityName)
         : context_(contextIn), authority_(authorityName) {}
 
     inline const std::string &authority() PROJ_PURE_DEFN { return authority_; }
 
-    inline const DatabaseContextNNPtr &context() PROJ_PURE_DEFN {
+    inline const SQLiteDatabaseContextNNPtr &context() PROJ_PURE_DEFN {
         return context_;
     }
 
     // cppcheck-suppress functionStatic
-    void setThis(AuthorityFactoryNNPtr factory) {
+    void setThis(SQLiteAuthorityFactoryNNPtr factory) {
         thisFactory_ = factory.as_nullable();
     }
 
     // cppcheck-suppress functionStatic
-    AuthorityFactoryPtr getSharedFromThis() { return thisFactory_.lock(); }
+    SQLiteAuthorityFactoryPtr getSharedFromThis() { return thisFactory_.lock(); }
 
-    inline AuthorityFactoryNNPtr createFactory(const std::string &auth_name) {
+    inline SQLiteAuthorityFactoryNNPtr createFactory(const std::string &auth_name) {
         if (auth_name == authority_) {
             return NN_NO_CHECK(thisFactory_.lock());
         }
-        return AuthorityFactory::create(context_, auth_name);
+        return util::nn_static_pointer_cast<SQLiteAuthorityFactory>(context_->createAuthorityFactory(auth_name));
     }
 
     bool rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op,
@@ -1242,14 +1247,14 @@ struct AuthorityFactory::Private {
     }
 
   private:
-    DatabaseContextNNPtr context_;
+    SQLiteDatabaseContextNNPtr context_;
     std::string authority_;
-    std::weak_ptr<AuthorityFactory> thisFactory_{};
+    std::weak_ptr<SQLiteAuthorityFactory> thisFactory_{};
 };
 
 // ---------------------------------------------------------------------------
 
-SQLResultSet AuthorityFactory::Private::run(const std::string &sql,
+SQLResultSet SQLiteAuthorityFactory::Private::run(const std::string &sql,
                                             const ListOfParams &parameters) {
     return context()->getPrivate()->run(sql, parameters);
 }
@@ -1257,7 +1262,7 @@ SQLResultSet AuthorityFactory::Private::run(const std::string &sql,
 // ---------------------------------------------------------------------------
 
 SQLResultSet
-AuthorityFactory::Private::runWithCodeParam(const std::string &sql,
+SQLiteAuthorityFactory::Private::runWithCodeParam(const std::string &sql,
                                             const std::string &code) {
     return run(sql, {authority(), code});
 }
@@ -1265,7 +1270,7 @@ AuthorityFactory::Private::runWithCodeParam(const std::string &sql,
 // ---------------------------------------------------------------------------
 
 SQLResultSet
-AuthorityFactory::Private::runWithCodeParam(const char *sql,
+SQLiteAuthorityFactory::Private::runWithCodeParam(const char *sql,
                                             const std::string &code) {
     return runWithCodeParam(std::string(sql), code);
 }
@@ -1273,14 +1278,14 @@ AuthorityFactory::Private::runWithCodeParam(const char *sql,
 // ---------------------------------------------------------------------------
 
 UnitOfMeasure
-AuthorityFactory::Private::createUnitOfMeasure(const std::string &auth_name,
+SQLiteAuthorityFactory::Private::createUnitOfMeasure(const std::string &auth_name,
                                                const std::string &code) {
     return *(createFactory(auth_name)->createUnitOfMeasure(code));
 }
 
 // ---------------------------------------------------------------------------
 
-util::PropertyMap AuthorityFactory::Private::createProperties(
+util::PropertyMap SQLiteAuthorityFactory::Private::createProperties(
     const std::string &code, const std::string &name, bool deprecated,
     const metadata::ExtentPtr &extent) {
     auto props = util::PropertyMap()
@@ -1300,7 +1305,7 @@ util::PropertyMap AuthorityFactory::Private::createProperties(
 
 // ---------------------------------------------------------------------------
 
-util::PropertyMap AuthorityFactory::Private::createProperties(
+util::PropertyMap SQLiteAuthorityFactory::Private::createProperties(
     const std::string &code, const std::string &name, bool deprecated,
     const std::string &area_of_use_auth_name,
     const std::string &area_of_use_code) {
@@ -1314,7 +1319,7 @@ util::PropertyMap AuthorityFactory::Private::createProperties(
 
 // ---------------------------------------------------------------------------
 
-util::PropertyMap AuthorityFactory::Private::createProperties(
+util::PropertyMap SQLiteAuthorityFactory::Private::createProperties(
     const std::string &code, const std::string &name, bool deprecated,
     const std::string &remarks, const std::string &scope,
     const std::string &area_of_use_auth_name,
@@ -1334,10 +1339,10 @@ util::PropertyMap AuthorityFactory::Private::createProperties(
 
 // ---------------------------------------------------------------------------
 
-bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
+bool SQLiteAuthorityFactory::Private::rejectOpDueToMissingGrid(
     const operation::CoordinateOperationNNPtr &op, bool discardIfMissingGrid) {
     if (discardIfMissingGrid) {
-        for (const auto &gridDesc : op->gridsNeeded(context())) {
+        for (const auto &gridDesc : op->gridsNeeded(static_cast<DatabaseContextNNPtr>(context()))) {
             if (!gridDesc.available) {
                 return true;
             }
@@ -1351,12 +1356,12 @@ bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-AuthorityFactory::~AuthorityFactory() = default;
+SQLiteAuthorityFactory::~SQLiteAuthorityFactory() = default;
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
+SQLiteAuthorityFactory::SQLiteAuthorityFactory(const SQLiteDatabaseContextNNPtr &context,
                                    const std::string &authorityName)
     : d(internal::make_unique<Private>(context, authorityName)) {}
 
@@ -1376,10 +1381,10 @@ AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
 // clang-format on
 
 AuthorityFactoryNNPtr
-AuthorityFactory::create(const DatabaseContextNNPtr &context,
+SQLiteAuthorityFactory::create(const SQLiteDatabaseContextNNPtr &context,
                          const std::string &authorityName) {
 
-    auto factory = AuthorityFactory::nn_make_shared<AuthorityFactory>(
+    auto factory = SQLiteAuthorityFactory::nn_make_shared<SQLiteAuthorityFactory>(
         context, authorityName);
     factory->d->setThis(factory);
     return factory;
@@ -1388,14 +1393,14 @@ AuthorityFactory::create(const DatabaseContextNNPtr &context,
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the database context. */
-const DatabaseContextNNPtr &AuthorityFactory::databaseContext() const {
-    return d->context();
+DatabaseContextNNPtr SQLiteAuthorityFactory::databaseContext() const {
+    return static_cast<DatabaseContextNNPtr>(d->context());
 }
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-AuthorityFactory::CRSInfo::CRSInfo()
+SQLiteAuthorityFactory::CRSInfo::CRSInfo()
     : authName{}, code{}, name{}, type{ObjectType::CRS}, deprecated{},
       bbox_valid{}, west_lon_degree{}, south_lat_degree{}, east_lon_degree{},
       north_lat_degree{}, areaName{}, projectionMethodName{} {}
@@ -1422,7 +1427,7 @@ AuthorityFactory::CRSInfo::CRSInfo()
  */
 
 util::BaseObjectNNPtr
-AuthorityFactory::createObject(const std::string &code) const {
+SQLiteAuthorityFactory::createObject(const std::string &code) const {
 
     auto res = d->runWithCodeParam(
         "SELECT table_name FROM object_view WHERE auth_name = ? AND code = ?",
@@ -1519,7 +1524,7 @@ static FactoryException buildFactoryException(const char *type,
  */
 
 metadata::ExtentNNPtr
-AuthorityFactory::createExtent(const std::string &code) const {
+SQLiteAuthorityFactory::createExtent(const std::string &code) const {
     const auto cacheKey(d->authority() + code);
     {
         auto extent = d->context()->d->getExtentFromCache(cacheKey);
@@ -1574,7 +1579,7 @@ AuthorityFactory::createExtent(const std::string &code) const {
  */
 
 UnitOfMeasureNNPtr
-AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
+SQLiteAuthorityFactory::createUnitOfMeasure(const std::string &code) const {
     const auto cacheKey(d->authority() + code);
     {
         auto uom = d->context()->d->getUOMFromCache(cacheKey);
@@ -1675,7 +1680,7 @@ static double normalizeMeasure(const std::string &uom_code,
  */
 
 datum::PrimeMeridianNNPtr
-AuthorityFactory::createPrimeMeridian(const std::string &code) const {
+SQLiteAuthorityFactory::createPrimeMeridian(const std::string &code) const {
     const auto cacheKey(d->authority() + code);
     {
         auto pm = d->context()->d->getPrimeMeridianFromCache(cacheKey);
@@ -1726,7 +1731,7 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
  */
 
 std::string
-AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
+SQLiteAuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
                                                 double tolerance) const {
     auto res =
         d->run("SELECT name, (ABS(semi_major_axis - ?) / semi_major_axis ) "
@@ -1752,7 +1757,7 @@ AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
  */
 
 datum::EllipsoidNNPtr
-AuthorityFactory::createEllipsoid(const std::string &code) const {
+SQLiteAuthorityFactory::createEllipsoid(const std::string &code) const {
     auto res = d->runWithCodeParam(
         "SELECT ellipsoid.name, ellipsoid.semi_major_axis, "
         "ellipsoid.uom_auth_name, ellipsoid.uom_code, "
@@ -1808,7 +1813,7 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
  */
 
 datum::GeodeticReferenceFrameNNPtr
-AuthorityFactory::createGeodeticDatum(const std::string &code) const {
+SQLiteAuthorityFactory::createGeodeticDatum(const std::string &code) const {
     const auto cacheKey(d->authority() + code);
     {
         auto datum = d->context()->d->getGeodeticDatumFromCache(cacheKey);
@@ -1863,7 +1868,7 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
  */
 
 datum::VerticalReferenceFrameNNPtr
-AuthorityFactory::createVerticalDatum(const std::string &code) const {
+SQLiteAuthorityFactory::createVerticalDatum(const std::string &code) const {
     auto res = d->runWithCodeParam(
         "SELECT name, area_of_use_auth_name, area_of_use_code, deprecated FROM "
         "vertical_datum WHERE auth_name = ? AND code = ?",
@@ -1897,7 +1902,7 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
  * @throw FactoryException
  */
 
-datum::DatumNNPtr AuthorityFactory::createDatum(const std::string &code) const {
+datum::DatumNNPtr SQLiteAuthorityFactory::createDatum(const std::string &code) const {
     auto res =
         d->run("SELECT 'geodetic_datum' FROM geodetic_datum WHERE "
                "auth_name = ? AND code = ? "
@@ -1946,7 +1951,7 @@ static cs::MeridianPtr createMeridian(const std::string &val) {
  */
 
 cs::CoordinateSystemNNPtr
-AuthorityFactory::createCoordinateSystem(const std::string &code) const {
+SQLiteAuthorityFactory::createCoordinateSystem(const std::string &code) const {
     const auto cacheKey(d->authority() + code);
     {
         auto cs = d->context()->d->getCoordinateSystemFromCache(cacheKey);
@@ -2061,7 +2066,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
  */
 
 crs::GeodeticCRSNNPtr
-AuthorityFactory::createGeodeticCRS(const std::string &code) const {
+SQLiteAuthorityFactory::createGeodeticCRS(const std::string &code) const {
     return createGeodeticCRS(code, false);
 }
 
@@ -2076,7 +2081,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code) const {
  */
 
 crs::GeographicCRSNNPtr
-AuthorityFactory::createGeographicCRS(const std::string &code) const {
+SQLiteAuthorityFactory::createGeographicCRS(const std::string &code) const {
     return NN_NO_CHECK(util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
         createGeodeticCRS(code, true)));
 }
@@ -2107,7 +2112,7 @@ cloneWithProps(const crs::GeodeticCRSNNPtr &geodCRS,
 // ---------------------------------------------------------------------------
 
 crs::GeodeticCRSNNPtr
-AuthorityFactory::createGeodeticCRS(const std::string &code,
+SQLiteAuthorityFactory::createGeodeticCRS(const std::string &code,
                                     bool geographicOnly) const {
     const auto cacheKey(d->authority() + code);
     auto crs = std::dynamic_pointer_cast<crs::GeodeticCRS>(
@@ -2146,9 +2151,9 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             code, name, deprecated, area_of_use_auth_name, area_of_use_code);
 
         if (!text_definition.empty()) {
-            DatabaseContext::Private::RecursionDetector detector(d->context());
+            SQLiteDatabaseContext::Private::RecursionDetector detector(d->context());
             auto obj = createFromUserInput(
-                pj_add_type_crs_if_needed(text_definition), d->context());
+                pj_add_type_crs_if_needed(text_definition), static_cast<DatabaseContextNNPtr>(d->context()));
             auto geodCRS = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(obj);
             if (geodCRS) {
                 return cloneWithProps(NN_NO_CHECK(geodCRS), props);
@@ -2210,7 +2215,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
  */
 
 crs::VerticalCRSNNPtr
-AuthorityFactory::createVerticalCRS(const std::string &code) const {
+SQLiteAuthorityFactory::createVerticalCRS(const std::string &code) const {
     auto res = d->runWithCodeParam(
         "SELECT name, coordinate_system_auth_name, "
         "coordinate_system_code, datum_auth_name, datum_code, "
@@ -2262,7 +2267,7 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
  */
 
 operation::ConversionNNPtr
-AuthorityFactory::createConversion(const std::string &code) const {
+SQLiteAuthorityFactory::createConversion(const std::string &code) const {
 
     static const char *sql =
         "SELECT name, area_of_use_auth_name, area_of_use_code, "
@@ -2363,7 +2368,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
  */
 
 crs::ProjectedCRSNNPtr
-AuthorityFactory::createProjectedCRS(const std::string &code) const {
+SQLiteAuthorityFactory::createProjectedCRS(const std::string &code) const {
     auto res = d->runWithCodeParam(
         "SELECT name, coordinate_system_auth_name, "
         "coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, "
@@ -2393,9 +2398,9 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
             code, name, deprecated, area_of_use_auth_name, area_of_use_code);
 
         if (!text_definition.empty()) {
-            DatabaseContext::Private::RecursionDetector detector(d->context());
+            SQLiteDatabaseContext::Private::RecursionDetector detector(d->context());
             auto obj = createFromUserInput(
-                pj_add_type_crs_if_needed(text_definition), d->context());
+                pj_add_type_crs_if_needed(text_definition), static_cast<DatabaseContextNNPtr>(d->context()));
             auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(obj.get());
             if (projCRS) {
                 const auto &conv = projCRS->derivingConversionRef();
@@ -2469,7 +2474,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
  */
 
 crs::CompoundCRSNNPtr
-AuthorityFactory::createCompoundCRS(const std::string &code) const {
+SQLiteAuthorityFactory::createCompoundCRS(const std::string &code) const {
     auto res = d->runWithCodeParam(
         "SELECT name, horiz_crs_auth_name, horiz_crs_code, "
         "vertical_crs_auth_name, vertical_crs_code, "
@@ -2516,7 +2521,7 @@ AuthorityFactory::createCompoundCRS(const std::string &code) const {
  * @throw FactoryException
  */
 
-crs::CRSNNPtr AuthorityFactory::createCoordinateReferenceSystem(
+crs::CRSNNPtr SQLiteAuthorityFactory::createCoordinateReferenceSystem(
     const std::string &code) const {
     return createCoordinateReferenceSystem(code, true);
 }
@@ -2524,7 +2529,7 @@ crs::CRSNNPtr AuthorityFactory::createCoordinateReferenceSystem(
 //! @cond Doxygen_Suppress
 
 crs::CRSNNPtr
-AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
+SQLiteAuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                                   bool allowCompound) const {
     const auto cacheKey(d->authority() + code);
     auto crs = d->context()->d->getCRSFromCache(cacheKey);
@@ -2602,13 +2607,13 @@ static operation::ParameterValueNNPtr createAngle(const std::string &value,
  * @throw FactoryException
  */
 
-operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
+operation::CoordinateOperationNNPtr SQLiteAuthorityFactory::createCoordinateOperation(
     const std::string &code, bool usePROJAlternativeGridNames) const {
     return createCoordinateOperation(code, true, usePROJAlternativeGridNames,
                                      std::string());
 }
 
-operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
+operation::CoordinateOperationNNPtr SQLiteAuthorityFactory::createCoordinateOperation(
     const std::string &code, bool allowConcatenated,
     bool usePROJAlternativeGridNames, const std::string &typeIn) const {
     std::string type(typeIn);
@@ -3264,7 +3269,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
  */
 
 std::vector<operation::CoordinateOperationNNPtr>
-AuthorityFactory::createFromCoordinateReferenceSystemCodes(
+SQLiteAuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSCode, const std::string &targetCRSCode) const {
     return createFromCoordinateReferenceSystemCodes(
         d->authority(), sourceCRSCode, d->authority(), targetCRSCode, false,
@@ -3305,7 +3310,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  */
 
 std::vector<operation::CoordinateOperationNNPtr>
-AuthorityFactory::createFromCoordinateReferenceSystemCodes(
+SQLiteAuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
@@ -3511,7 +3516,7 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  */
 
 std::vector<operation::CoordinateOperationNNPtr>
-AuthorityFactory::createFromCRSCodesWithIntermediates(
+SQLiteAuthorityFactory::createFromCRSCodesWithIntermediates(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
@@ -3834,7 +3839,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 /** \brief Returns the authority name associated to this factory.
  * @return name.
  */
-const std::string &AuthorityFactory::getAuthority() PROJ_PURE_DEFN {
+const std::string &SQLiteAuthorityFactory::getAuthority() const {
     return d->authority();
 }
 
@@ -3849,7 +3854,7 @@ const std::string &AuthorityFactory::getAuthority() PROJ_PURE_DEFN {
  * @throw FactoryException
  */
 std::set<std::string>
-AuthorityFactory::getAuthorityCodes(const ObjectType &type,
+SQLiteAuthorityFactory::getAuthorityCodes(const ObjectType &type,
                                     bool allowDeprecated) const {
     std::string sql;
     switch (type) {
@@ -3944,7 +3949,7 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
  * @throw FactoryException
  */
 std::string
-AuthorityFactory::getDescriptionText(const std::string &code) const {
+SQLiteAuthorityFactory::getDescriptionText(const std::string &code) const {
     auto sql = "SELECT name FROM object_view WHERE auth_name = ? AND code = "
                "? ORDER BY table_name";
     auto res = d->runWithCodeParam(sql, code);
@@ -3966,7 +3971,7 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
  *
  * @throw FactoryException
  */
-std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
+std::list<SQLiteAuthorityFactory::CRSInfo> SQLiteAuthorityFactory::getCRSInfoList() const {
     std::string sql = "SELECT c.auth_name, c.code, c.name, c.type, "
                       "c.deprecated, "
                       "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
@@ -4022,25 +4027,25 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         params.emplace_back(d->authority());
     }
     auto sqlRes = d->run(sql, params);
-    std::list<AuthorityFactory::CRSInfo> res;
+    std::list<SQLiteAuthorityFactory::CRSInfo> res;
     for (const auto &row : sqlRes) {
-        AuthorityFactory::CRSInfo info;
+        SQLiteAuthorityFactory::CRSInfo info;
         info.authName = row[0];
         info.code = row[1];
         info.name = row[2];
         const auto &type = row[3];
         if (type == GEOG_2D) {
-            info.type = AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS;
+            info.type = SQLiteAuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS;
         } else if (type == GEOG_3D) {
-            info.type = AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS;
+            info.type = SQLiteAuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS;
         } else if (type == GEOCENTRIC) {
-            info.type = AuthorityFactory::ObjectType::GEOCENTRIC_CRS;
+            info.type = SQLiteAuthorityFactory::ObjectType::GEOCENTRIC_CRS;
         } else if (type == PROJECTED) {
-            info.type = AuthorityFactory::ObjectType::PROJECTED_CRS;
+            info.type = SQLiteAuthorityFactory::ObjectType::PROJECTED_CRS;
         } else if (type == VERTICAL) {
-            info.type = AuthorityFactory::ObjectType::VERTICAL_CRS;
+            info.type = SQLiteAuthorityFactory::ObjectType::VERTICAL_CRS;
         } else if (type == COMPOUND) {
-            info.type = AuthorityFactory::ObjectType::COMPOUND_CRS;
+            info.type = SQLiteAuthorityFactory::ObjectType::COMPOUND_CRS;
         }
         info.deprecated = row[4] == "1";
         if (row[5].empty()) {
@@ -4078,7 +4083,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
  * @return official name (or empty if not found).
  * @throw FactoryException
  */
-std::string AuthorityFactory::getOfficialNameFromAlias(
+std::string SQLiteAuthorityFactory::getOfficialNameFromAlias(
     const std::string &aliasedName, const std::string &tableName,
     const std::string &source, bool tryEquivalentNameSpelling,
     std::string &outTableName, std::string &outAuthName,
@@ -4189,7 +4194,7 @@ static void addToListStringWithOR(std::string &out, const char *in) {
  * @throw FactoryException
  */
 std::list<common::IdentifiedObjectNNPtr>
-AuthorityFactory::createObjectsFromName(
+SQLiteAuthorityFactory::createObjectsFromName(
     const std::string &searchedName,
     const std::vector<ObjectType> &allowedObjectTypes, bool approximateMatch,
     size_t limitResultCount) const {
@@ -4513,7 +4518,7 @@ AuthorityFactory::createObjectsFromName(
  * @throw FactoryException
  */
 std::list<std::pair<std::string, std::string>>
-AuthorityFactory::listAreaOfUseFromName(const std::string &name,
+SQLiteAuthorityFactory::listAreaOfUseFromName(const std::string &name,
                                         bool approximateMatch) const {
     std::string sql(
         "SELECT auth_name, code FROM area WHERE deprecated = 0 AND ");
@@ -4539,7 +4544,7 @@ AuthorityFactory::listAreaOfUseFromName(const std::string &name,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-std::list<datum::EllipsoidNNPtr> AuthorityFactory::createEllipsoidFromExisting(
+std::list<datum::EllipsoidNNPtr> SQLiteAuthorityFactory::createEllipsoidFromExisting(
     const datum::EllipsoidNNPtr &ellipsoid) const {
     std::string sql(
         "SELECT auth_name, code FROM ellipsoid WHERE "
@@ -4564,7 +4569,7 @@ std::list<datum::EllipsoidNNPtr> AuthorityFactory::createEllipsoidFromExisting(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
+std::list<crs::GeodeticCRSNNPtr> SQLiteAuthorityFactory::createGeodeticCRSFromDatum(
     const std::string &datum_auth_name, const std::string &datum_code,
     const std::string &geodetic_crs_type) const {
     std::string sql(
@@ -4594,7 +4599,7 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
 
 //! @cond Doxygen_Suppress
 std::list<crs::GeodeticCRSNNPtr>
-AuthorityFactory::createGeodeticCRSFromEllipsoid(
+SQLiteAuthorityFactory::createGeodeticCRSFromEllipsoid(
     const std::string &ellipsoid_auth_name, const std::string &ellipsoid_code,
     const std::string &geodetic_crs_type) const {
     std::string sql(
@@ -4676,7 +4681,7 @@ static std::string buildSqlLookForAuthNameCode(
 
 //! @cond Doxygen_Suppress
 std::list<crs::ProjectedCRSNNPtr>
-AuthorityFactory::createProjectedCRSFromExisting(
+SQLiteAuthorityFactory::createProjectedCRSFromExisting(
     const crs::ProjectedCRSNNPtr &crs) const {
     std::list<crs::ProjectedCRSNNPtr> res;
 
@@ -4928,7 +4933,7 @@ AuthorityFactory::createProjectedCRSFromExisting(
 // ---------------------------------------------------------------------------
 
 std::list<crs::CompoundCRSNNPtr>
-AuthorityFactory::createCompoundCRSFromExisting(
+SQLiteAuthorityFactory::createCompoundCRSFromExisting(
     const crs::CompoundCRSNNPtr &crs) const {
     std::list<crs::CompoundCRSNNPtr> res;
 

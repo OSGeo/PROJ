@@ -380,7 +380,7 @@ TEST(crs, EPSG_4326_as_WKT1_GDAL_with_axis) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, EPSG_4326_from_db_as_WKT1_GDAL_with_axis) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto crs = factory->createCoordinateReferenceSystem("4326");
     auto wkt = crs->exportToWKT(
         &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
@@ -404,7 +404,7 @@ TEST(crs, EPSG_4326_from_db_as_WKT1_GDAL_with_axis) {
 TEST(crs, EPSG_4326_as_WKT1_ESRI_with_database) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(WKTFormatter::create(
-        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+        WKTFormatter::Convention::WKT1_ESRI, SQLiteDatabaseContext::create()));
     EXPECT_EQ(crs->exportToWKT(f.get()),
               "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_"
               "1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],"
@@ -603,7 +603,7 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
 TEST(crs, EPSG_4807_as_WKT1_ESRI_with_database) {
     auto crs = GeographicCRS::EPSG_4807;
     WKTFormatterNNPtr f(WKTFormatter::create(
-        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+        WKTFormatter::Convention::WKT1_ESRI, SQLiteDatabaseContext::create()));
     EXPECT_EQ(crs->exportToWKT(f.get()),
               "GEOGCS[\"GCS_NTF_Paris\",DATUM[\"D_NTF\",SPHEROID[\"Clarke_1880_"
               "IGN\",6378249.2,293.466021293627]],PRIMEM[\"Paris\",2.33722917],"
@@ -659,7 +659,7 @@ TEST(crs, EPSG_4267) {
 TEST(crs, EPSG_4267_as_WKT1_ESRI_with_database) {
     auto crs = GeographicCRS::EPSG_4267;
     WKTFormatterNNPtr f(WKTFormatter::create(
-        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+        WKTFormatter::Convention::WKT1_ESRI, SQLiteDatabaseContext::create()));
     EXPECT_EQ(crs->exportToWKT(f.get()),
               "GEOGCS[\"GCS_North_American_1927\","
               "DATUM[\"D_North_American_1927\",SPHEROID[\"Clarke_1866\","
@@ -693,8 +693,8 @@ TEST(crs, EPSG_4269) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, EPSG_4268_geogcrs_deprecated_as_WKT1_GDAL) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     auto crs = factory->createCoordinateReferenceSystem("4268");
     WKTFormatterNNPtr f(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
@@ -705,8 +705,8 @@ TEST(crs, EPSG_4268_geogcrs_deprecated_as_WKT1_GDAL) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, EPSG_2008_projcrs_deprecated_as_WKT1_GDAL) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     auto crs = factory->createCoordinateReferenceSystem("2008");
     WKTFormatterNNPtr f(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
@@ -777,7 +777,7 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string_and_WKT1) {
 
     auto wkt1_esri = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                             DatabaseContext::create())
+                             SQLiteDatabaseContext::create())
             .get());
     EXPECT_EQ(
         wkt1_esri,
@@ -926,8 +926,8 @@ TEST(crs, projected_with_parameter_unit_different_than_cs_unit_as_WKT1) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, EPSG_32661_projected_north_pole_north_east) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     auto crs = factory->createCoordinateReferenceSystem("32661");
     auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
     ASSERT_TRUE(proj_crs != nullptr);
@@ -948,8 +948,8 @@ TEST(crs, EPSG_32661_projected_north_pole_north_east) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, EPSG_5041_projected_north_pole_east_north) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     auto crs = factory->createCoordinateReferenceSystem("5041");
     auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
     ASSERT_TRUE(proj_crs != nullptr);
@@ -969,8 +969,8 @@ TEST(crs, EPSG_5041_projected_north_pole_east_north) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, EPSG_32761_projected_south_pole_north_east) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     auto crs = factory->createCoordinateReferenceSystem("32761");
     auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
     ASSERT_TRUE(proj_crs != nullptr);
@@ -990,8 +990,8 @@ TEST(crs, EPSG_32761_projected_south_pole_north_east) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, EPSG_5042_projected_south_pole_east_north) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     auto crs = factory->createCoordinateReferenceSystem("5042");
     auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
     ASSERT_TRUE(proj_crs != nullptr);
@@ -1127,7 +1127,7 @@ TEST(crs, EPSG_4978_as_WKT1_GDAL_with_database) {
     auto crs = GeodeticCRS::EPSG_4978;
     auto wkt = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
-                             DatabaseContext::create())
+                             SQLiteDatabaseContext::create())
             .get());
     EXPECT_EQ(wkt, "GEOCCS[\"WGS 84\",\n"
                    "    DATUM[\"WGS_1984\",\n"
@@ -1255,7 +1255,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
         // WKT1 identification
         auto obj =
             WKTParser()
-                .attachDatabaseContext(DatabaseContext::create())
+                .attachDatabaseContext(SQLiteDatabaseContext::create())
                 .createFromWKT(
                     "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\","
                     "6378137,298.257223563]],PRIMEM[\"Greenwich\",0],"
@@ -1272,8 +1272,8 @@ TEST(crs, geodeticcrs_identify_no_db) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, geodeticcrs_identify_db) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     {
         // No match
         auto res =
@@ -1448,7 +1448,7 @@ TEST(crs, geodeticcrs_identify_db) {
             "+type=crs");
         auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto factoryAll = dbContext->createAuthorityFactory(std::string());
         auto res = crs->identify(factoryAll);
         EXPECT_EQ(res.size(), 5U);
     }
@@ -1472,7 +1472,7 @@ TEST(crs, geodeticcrs_identify_db) {
         auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
 
-        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto allFactory = dbContext->createAuthorityFactory(std::string());
         auto res = crs->identify(allFactory);
         ASSERT_EQ(res.size(), 1U);
         ASSERT_TRUE(!res.front().first->identifiers().empty());
@@ -1777,7 +1777,7 @@ TEST(crs, projectedCRS_as_WKT1_ESRI) {
 
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -1785,8 +1785,8 @@ TEST(crs, projectedCRS_as_WKT1_ESRI) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, projectedCRS_with_ESRI_code_as_WKT1_ESRI) {
-    auto dbContext = DatabaseContext::create();
-    auto crs = AuthorityFactory::create(dbContext, "ESRI")
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto crs = dbContext->createAuthorityFactory("ESRI")
                    ->createProjectedCRS("102113");
 
     // Comes literally from the text_definition column of
@@ -1811,7 +1811,7 @@ TEST(crs, projectedCRS_with_ESRI_code_as_WKT1_ESRI) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, projectedCRS_from_WKT1_ESRI_as_WKT1_ESRI) {
-    auto dbContext = DatabaseContext::create();
+    auto dbContext = SQLiteDatabaseContext::create();
     // Comes literally from the text_definition column of
     // projected_crs table
     auto esri_wkt =
@@ -1855,7 +1855,7 @@ TEST(crs, projectedCRS_as_PROJ_string) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, projectedCRS_Krovak_EPSG_5221_as_PROJ_string) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto crs = factory->createProjectedCRS("5221");
     // 30deg 17' 17.30311'' = 30.28813975277777776
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -1905,7 +1905,7 @@ TEST(crs, projectedCRS_identify_no_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 32601);
         EXPECT_EQ(res.front().second, 70);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
-            AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
                 ->createProjectedCRS("32601")
                 .get(),
             IComparable::Criterion::EQUIVALENT));
@@ -1924,7 +1924,7 @@ TEST(crs, projectedCRS_identify_no_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 32760);
         EXPECT_EQ(res.front().second, 100);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
-            AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
                 ->createProjectedCRS("32760")
                 .get(),
             IComparable::Criterion::EQUIVALENT));
@@ -1942,7 +1942,7 @@ TEST(crs, projectedCRS_identify_no_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 26711);
         EXPECT_EQ(res.front().second, 90);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
-            AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
                 ->createProjectedCRS("26711")
                 .get(),
             IComparable::Criterion::EQUIVALENT));
@@ -1958,7 +1958,7 @@ TEST(crs, projectedCRS_identify_no_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 26911);
         EXPECT_EQ(res.front().second, 70);
         EXPECT_TRUE(res.front().first->isEquivalentTo(
-            AuthorityFactory::create(DatabaseContext::create(), "EPSG")
+            SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG")
                 ->createProjectedCRS("26911")
                 .get(),
             IComparable::Criterion::EQUIVALENT));
@@ -1982,10 +1982,10 @@ TEST(crs, projectedCRS_identify_no_db) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, projectedCRS_identify_db) {
-    auto dbContext = DatabaseContext::create();
-    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
-    auto factoryIGNF = AuthorityFactory::create(dbContext, "IGNF");
-    auto factoryAnonymous = AuthorityFactory::create(dbContext, std::string());
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factoryEPSG = dbContext->createAuthorityFactory("EPSG");
+    auto factoryIGNF = dbContext->createAuthorityFactory("IGNF");
+    auto factoryAnonymous = dbContext->createAuthorityFactory(std::string());
     {
         // Identify by existing code
         auto crs = factoryEPSG->createProjectedCRS("2172");
@@ -2233,7 +2233,7 @@ TEST(crs, projectedCRS_identify_db) {
                     "+type=crs");
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto factoryAll = dbContext->createAuthorityFactory(std::string());
         auto res = crs->identify(factoryAll);
         EXPECT_GE(res.size(), 1U);
         bool found = false;
@@ -2302,7 +2302,7 @@ TEST(crs, mercator_1SP_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2327,7 +2327,7 @@ TEST(crs, Plate_Carree_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2352,7 +2352,7 @@ TEST(crs, Equidistant_Cylindrical_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2382,7 +2382,7 @@ TEST(crs, Hotine_Oblique_Mercator_Azimuth_Natural_Origin_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2412,7 +2412,7 @@ TEST(crs, Rectified_Skew_Orthomorphic_Natural_Origin_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2441,7 +2441,7 @@ TEST(crs, Hotine_Oblique_Mercator_Azimuth_Center_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2471,7 +2471,7 @@ TEST(crs, Rectified_Skew_Orthomorphic_Center_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2498,7 +2498,7 @@ TEST(crs, Gauss_Kruger_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2524,7 +2524,7 @@ TEST(crs, Stereographic_North_Pole_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2550,7 +2550,7 @@ TEST(crs, Stereographic_South_Pole_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2582,7 +2582,7 @@ TEST(crs, Krovak_North_Orientated_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2614,7 +2614,7 @@ TEST(crs, Krovak_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2642,7 +2642,7 @@ TEST(crs, LCC_1SP_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2670,7 +2670,7 @@ TEST(crs, LCC_2SP_as_WKT1_ESRI) {
                     "UNIT[\"Meter\",1.0]]";
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2713,7 +2713,7 @@ TEST(crs, ESRI_WKT1_to_ESRI_WKT1) {
 
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
-                                       DatabaseContext::create())
+                                       SQLiteDatabaseContext::create())
                       .get()),
               expected);
 }
@@ -2958,8 +2958,8 @@ TEST(crs, verticalCRS_as_WKT1_GDAL) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, verticalCRS_identify_db) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     {
         // Identify by existing code
         auto res = factory->createVerticalCRS("7651")->identify(factory);
@@ -3263,8 +3263,8 @@ TEST(crs, compoundCRS_no_name_provided) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, compoundCRS_identify_db) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     {
         // Identify by existing code
         auto res = factory->createCompoundCRS("8769")->identify(factory);
@@ -3698,8 +3698,8 @@ TEST(crs, boundCRS_projectedCRS_to_PROJ_string) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, boundCRS_identify_db) {
-    auto dbContext = DatabaseContext::create();
-    auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factoryEPSG = dbContext->createAuthorityFactory("EPSG");
     {
         auto obj = PROJStringParser()
                        .attachDatabaseContext(dbContext)
@@ -4847,8 +4847,8 @@ TEST(crs, DeriveTemporalCRS_WKT1) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
     {
         auto crs_4326 = factory->createCoordinateReferenceSystem("4326");
         EXPECT_EQ(crs_4326->createBoundCRSToWGS84IfPossible(
@@ -4954,7 +4954,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     }
     {
         auto factoryIGNF =
-            AuthorityFactory::create(DatabaseContext::create(), "IGNF");
+            SQLiteDatabaseContext::create()->createAuthorityFactory("IGNF");
         auto crs = factoryIGNF->createCoordinateReferenceSystem("TERA50STEREO");
         auto bound = crs->createBoundCRSToWGS84IfPossible(
             dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
@@ -4969,7 +4969,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     }
     {
         auto factoryIGNF =
-            AuthorityFactory::create(DatabaseContext::create(), "IGNF");
+            SQLiteDatabaseContext::create()->createAuthorityFactory("IGNF");
         auto crs = factoryIGNF->createCoordinateReferenceSystem("PGP50");
         auto bound = crs->createBoundCRSToWGS84IfPossible(
             dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
@@ -5173,8 +5173,8 @@ TEST(crs, alterParametersLinearUnit) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, getNonDeprecated) {
-    auto dbContext = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto dbContext = SQLiteDatabaseContext::create();
+    auto factory = dbContext->createAuthorityFactory("EPSG");
 
     {
         // No id

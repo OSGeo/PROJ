@@ -628,7 +628,7 @@ static void outputOperations(
     try {
         auto authFactory =
             dbContext
-                ? AuthorityFactory::create(NN_NO_CHECK(dbContext), authority)
+                ? dbContext->createAuthorityFactory(authority)
                       .as_nullable()
                 : nullptr;
         auto ctxt =
@@ -996,7 +996,7 @@ int main(int argc, char **argv) {
     DatabaseContextPtr dbContext;
     try {
         dbContext =
-            DatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
+            SQLiteDatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
     } catch (const std::exception &e) {
         if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty()) {
             std::cerr << "ERROR: Cannot create database connection: "
@@ -1066,8 +1066,7 @@ int main(int argc, char **argv) {
                     try {
                         auto res = crs->identify(
                             dbContext
-                                ? AuthorityFactory::create(
-                                      NN_NO_CHECK(dbContext), authority)
+                                ? dbContext->createAuthorityFactory(authority)
                                       .as_nullable()
                                 : nullptr);
                         std::cout << std::endl;
@@ -1123,19 +1122,17 @@ int main(int argc, char **argv) {
                     if (tokens.size() == 2) {
                         const std::string &areaAuth = tokens[0];
                         const std::string &areaCode = tokens[1];
-                        bboxFilter = AuthorityFactory::create(
-                                         NN_NO_CHECK(dbContext), areaAuth)
+                        bboxFilter = dbContext->createAuthorityFactory(areaAuth)
                                          ->createExtent(areaCode)
                                          .as_nullable();
                     }
                 }
                 if (!bboxFilter) {
-                    auto authFactory = AuthorityFactory::create(
-                        NN_NO_CHECK(dbContext), std::string());
+                    auto authFactory = dbContext->createAuthorityFactory(std::string());
                     auto res = authFactory->listAreaOfUseFromName(area, false);
                     if (res.size() == 1) {
                         bboxFilter =
-                            AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                            dbContext->createAuthorityFactory(
                                                      res.front().first)
                                 ->createExtent(res.front().second)
                                 .as_nullable();
@@ -1143,7 +1140,7 @@ int main(int argc, char **argv) {
                         res = authFactory->listAreaOfUseFromName(area, true);
                         if (res.size() == 1) {
                             bboxFilter =
-                                AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                dbContext->createAuthorityFactory(
                                                          res.front().first)
                                     ->createExtent(res.front().second)
                                     .as_nullable();
@@ -1157,8 +1154,7 @@ int main(int argc, char **argv) {
                                       << std::endl;
                             for (const auto &candidate : res) {
                                 auto obj =
-                                    AuthorityFactory::create(
-                                        NN_NO_CHECK(dbContext), candidate.first)
+                                    dbContext->createAuthorityFactory(candidate.first)
                                         ->createExtent(candidate.second);
                                 std::cerr << "  " << candidate.first << ":"
                                           << candidate.second << " : "

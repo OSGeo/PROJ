@@ -415,7 +415,7 @@ TEST(wkt_parse, wkt1_EPSG_4326) {
 TEST(wkt_parse, wkt1_EPSG_4267) {
     auto obj =
         WKTParser()
-            .attachDatabaseContext(DatabaseContext::create())
+            .attachDatabaseContext(SQLiteDatabaseContext::create())
             .createFromWKT(
                 "GEOGCS[\"NAD27\","
                 "    DATUM[\"North_American_Datum_1927\","
@@ -480,7 +480,7 @@ TEST(wkt_parse, wkt1_geographic_old_datum_name_from_EPSG_code) {
         "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
         "    AUTHORITY[\"EPSG\",\"4818\"]]";
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -506,7 +506,7 @@ TEST(wkt_parse, wkt1_geographic_old_datum_name_witout_EPSG_code) {
         "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
         "    AUTHORITY[\"EPSG\",\"4818\"]]";
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -531,7 +531,7 @@ TEST(wkt_parse, wkt1_geographic_deprecated) {
                "        AUTHORITY[\"EPSG\",\"9108\"]],\n"
                "    AUTHORITY[\"EPSG\",\"4291\"]]";
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -1022,7 +1022,7 @@ TEST(wkt_parse, wkt1_projected) {
                "    AXIS[\"(N)\",NORTH],\n"
                "    AUTHORITY[\"EPSG\",\"32631\"]]";
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -1088,7 +1088,7 @@ TEST(wkt_parse, wkt1_projected_wrong_axis_geogcs) {
                "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                "    AUTHORITY[\"EPSG\",\"32631\"]]";
     WKTParser parser;
-    parser.setStrict(false).attachDatabaseContext(DatabaseContext::create());
+    parser.setStrict(false).attachDatabaseContext(SQLiteDatabaseContext::create());
     auto obj = parser.createFromWKT(wkt);
     EXPECT_TRUE(!parser.warningList().empty());
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
@@ -4086,7 +4086,7 @@ TEST(wkt_parse, esri_geogcs_datum_spheroid_name_from_db_substitution) {
     // Test substitutions of CRS, datum and ellipsoid names from ESRI names
     // to EPSG names.
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -4108,7 +4108,7 @@ TEST(wkt_parse, esri_datum_name_with_prime_meridian) {
     // but as we have a non-Greenwich prime meridian, we also test if
     // "Nouvelle Triangulation Francaise (Paris)" is not a registered datum name
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -5039,7 +5039,7 @@ TEST(wkt_parse, wkt1_esri_krovak_south_west) {
                "PARAMETER[\"XY_Plane_Rotation\",0.0],UNIT[\"Meter\",1.0]]";
 
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -5109,7 +5109,7 @@ TEST(wkt_parse, wkt1_esri_normalize_unit) {
                "UNIT[\"Foot_Gold_Coast\",0.3047997101815088]]";
 
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -5134,7 +5134,7 @@ TEST(wkt_parse, wkt1_esri_ups_north) {
                "UNIT[\"Meter\",1.0]]";
 
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -5164,7 +5164,7 @@ TEST(wkt_parse, wkt1_esri_ups_south) {
                "UNIT[\"Meter\",1.0]]";
 
     auto obj = WKTParser()
-                   .attachDatabaseContext(DatabaseContext::create())
+                   .attachDatabaseContext(SQLiteDatabaseContext::create())
                    .createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -5194,7 +5194,7 @@ TEST(wkt_parse, wkt1_esri_gauss_kruger) {
                "PARAMETER[\"Latitude_Of_Origin\",0.0],"
                "UNIT[\"Meter\",1.0]]";
 
-    auto dbContext = DatabaseContext::create();
+    auto dbContext = SQLiteDatabaseContext::create();
     auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -5205,7 +5205,7 @@ TEST(wkt_parse, wkt1_esri_gauss_kruger) {
                 .get()),
         wkt);
 
-    auto crs2 = AuthorityFactory::create(dbContext, "ESRI")
+    auto crs2 = dbContext->createAuthorityFactory("ESRI")
                     ->createProjectedCRS("102177");
 
     EXPECT_EQ(
@@ -8609,7 +8609,7 @@ TEST(io, projparse_projected_title) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_init) {
-    auto dbContext = DatabaseContext::create();
+    auto dbContext = SQLiteDatabaseContext::create();
 
     // Not allowed in non-compatibillity mode
     EXPECT_THROW(
@@ -8806,7 +8806,7 @@ TEST(io, projparse_projected_errors) {
 // ---------------------------------------------------------------------------
 
 TEST(io, createFromUserInput) {
-    auto dbContext = DatabaseContext::create();
+    auto dbContext = SQLiteDatabaseContext::create();
     EXPECT_THROW(createFromUserInput("foo", nullptr), ParsingException);
     EXPECT_THROW(createFromUserInput("GEOGCRS", nullptr), ParsingException);
     EXPECT_THROW(createFromUserInput("+proj=unhandled +type=crs", nullptr),
@@ -10582,7 +10582,7 @@ TEST(json_import, geographic_crs_with_datum_ensemble) {
             json);
     }
     {
-        auto obj = createFromUserInput(json, DatabaseContext::create());
+        auto obj = createFromUserInput(json, SQLiteDatabaseContext::create());
         auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(gcrs != nullptr);
         EXPECT_EQ(
@@ -10591,7 +10591,7 @@ TEST(json_import, geographic_crs_with_datum_ensemble) {
     }
     {
         auto obj =
-            createFromUserInput(expected_json, DatabaseContext::create());
+            createFromUserInput(expected_json, SQLiteDatabaseContext::create());
         auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(gcrs != nullptr);
         EXPECT_EQ(

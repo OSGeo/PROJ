@@ -1564,8 +1564,7 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
 
         if (dbContext_ && tableNameForAlias) {
             std::string outTableName;
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
+            auto authFactory = dbContext_->createAuthorityFactory(std::string());
             auto officialName = authFactory->getOfficialNameFromAlias(
                 name, tableNameForAlias, "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
@@ -1808,8 +1807,7 @@ UnitOfMeasure WKTParser::Private::buildUnit(const WKTNodeNNPtr &node,
             std::string outTableName;
             std::string authNameFromAlias;
             std::string codeFromAlias;
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
+            auto authFactory = dbContext_->createAuthorityFactory(std::string());
             auto officialName = authFactory->getOfficialNameFromAlias(
                 unitName, "unit_of_measure", "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
@@ -2015,8 +2013,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
         if (dbContext_ && tableNameForAlias) {
             std::string outTableName;
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
+            auto authFactory = dbContext_->createAuthorityFactory(std::string());
             auto officialName = authFactory->getOfficialNameFromAlias(
                 name, tableNameForAlias, "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
@@ -2046,7 +2043,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     } else if (name.find('_') != std::string::npos) {
         // Likely coming from WKT1
         if (dbContext_) {
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+            auto authFactory = dbContext_->createAuthorityFactory(
                                                         std::string());
             auto res = authFactory->createObjectsFromName(
                 name, {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
@@ -2079,8 +2076,8 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                 if (!isNull(idNode)) {
                     try {
                         auto id = buildId(idNode, true, false);
-                        auto authFactory2 = AuthorityFactory::create(
-                            NN_NO_CHECK(dbContext_), *id->codeSpace());
+                        auto authFactory2 = dbContext_->createAuthorityFactory(
+                            *id->codeSpace());
                         auto dbDatum =
                             authFactory2->createGeodeticDatum(id->code());
                         foundDatumName = true;
@@ -2694,8 +2691,8 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
                 GeographicCRSPtr dbCRS;
                 try {
                     const auto &id = crs->identifiers()[0];
-                    auto authFactory = AuthorityFactory::create(
-                        NN_NO_CHECK(dbContext_), *id->codeSpace());
+                    auto authFactory = dbContext_->createAuthorityFactory(
+                        *id->codeSpace());
                     dbCRS = authFactory->createGeographicCRS(id->code())
                                 .as_nullable();
                 } catch (const util::Exception &) {
@@ -3576,8 +3573,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             std::string outTableName;
             std::string authNameFromAlias;
             std::string codeFromAlias;
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
+            auto authFactory = dbContext_->createAuthorityFactory(std::string());
             auto officialName = authFactory->getOfficialNameFromAlias(
                 projCRSName, "projected_crs", "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
@@ -5288,8 +5284,7 @@ DatumEnsembleNNPtr JSONParser::buildDatumEnsemble(const json &j) {
         if (dbContext_ && memberJ.contains("id")) {
             auto id = getObject(memberJ, "id");
             auto authority = getString(id, "authority");
-            auto authFactory =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext_), authority);
+            auto authFactory = dbContext_->createAuthorityFactory(authority);
             auto code = id["code"];
             std::string codeStr;
             if (code.is_string()) {
@@ -5306,8 +5301,7 @@ DatumEnsembleNNPtr JSONParser::buildDatumEnsemble(const json &j) {
             }
             continue;
         } else if (dbContext_) {
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
+            auto authFactory = dbContext_->createAuthorityFactory(std::string());
             auto list = authFactory->createObjectsFromName(
                 datumName, {AuthorityFactory::ObjectType::DATUM},
                 false /* approximate=false*/);
@@ -5503,8 +5497,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         const auto &authName = tokens[0];
         const auto &code = tokens[1];
         static const std::string epsg_lowercase("epsg");
-        auto factory = AuthorityFactory::create(
-            dbContextNNPtr,
+        auto factory = dbContextNNPtr->createAuthorityFactory(
             authName == epsg_lowercase ? Identifier::EPSG : authName);
         try {
             return factory->createCoordinateReferenceSystem(code);
@@ -5512,8 +5505,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             const auto authorities = dbContextNNPtr->getAuthorities();
             for (const auto &authCandidate : authorities) {
                 if (ci_equal(authCandidate, authName)) {
-                    factory =
-                        AuthorityFactory::create(dbContextNNPtr, authCandidate);
+                    factory = dbContextNNPtr->createAuthorityFactory(authCandidate);
                     try {
                         return factory->createCoordinateReferenceSystem(code);
                     } catch (...) {
@@ -5554,8 +5546,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                 throw ParsingException(
                     concat("invalid crs component: ", crsPart));
             }
-            auto factoryCRS =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokensCRS[1]);
+            auto factoryCRS = dbContext->createAuthorityFactory(tokensCRS[1]);
             auto baseCRS =
                 factoryCRS->createCoordinateReferenceSystem(tokensCRS[3], true);
 
@@ -5565,8 +5556,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                 throw ParsingException(
                     concat("invalid cs component: ", csPart));
             }
-            auto factoryCS =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokensCS[1]);
+            auto factoryCS = dbContext->createAuthorityFactory(tokensCS[1]);
             auto cs = factoryCS->createCoordinateSystem(tokensCS[3]);
 
             const auto &opPart = tokensComma[3];
@@ -5575,8 +5565,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                 throw ParsingException(
                     concat("invalid coordinateOperation component: ", opPart));
             }
-            auto factoryOp =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokensOp[1]);
+            auto factoryOp = dbContext->createAuthorityFactory(tokensOp[1]);
             auto op = factoryOp->createCoordinateOperation(tokensOp[3], true);
 
             if (dynamic_cast<GeographicCRS *>(baseCRS.get()) &&
@@ -5660,7 +5649,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             }
             const auto &type = tokens[0];
             auto factory =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[1]);
+                dbContext->createAuthorityFactory(tokens[1]);
             const auto &code = tokens[3];
             if (type == "crs") {
                 auto crs(factory->createCoordinateReferenceSystem(code, false));
@@ -5695,7 +5684,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             }
             const auto &type = tokens[0];
             auto factory =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[1]);
+                dbContext->createAuthorityFactory(tokens[1]);
             const auto &code = tokens[3];
             if (type == "coordinateOperation") {
                 auto op(factory->createCoordinateOperation(code, false));
@@ -5715,7 +5704,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         }
         const auto &type = tokens[3];
         auto factory =
-            AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[4]);
+            dbContext->createAuthorityFactory(tokens[4]);
         const auto &code = tokens[6];
         if (type == "crs") {
             return factory->createCoordinateReferenceSystem(code);
@@ -5737,7 +5726,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
 
     if (dbContext) {
         auto factory =
-            AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
+            dbContext->createAuthorityFactory(std::string());
         // First pass: exact match on CRS objects
         // Second pass: exact match on other objects
         // Third pass: approximate match on CRS objects

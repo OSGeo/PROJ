@@ -142,7 +142,7 @@ NS_PROJ::io::DatabaseContextNNPtr projCppContext::getDatabaseContext() {
         return NN_NO_CHECK(databaseContext_);
     }
     auto dbContext =
-        NS_PROJ::io::DatabaseContext::create(dbPath_, auxDbPaths_, ctx_);
+        NS_PROJ::io::SQLiteDatabaseContext::create(dbPath_, auxDbPaths_, ctx_);
     databaseContext_ = dbContext;
     return dbContext;
 }
@@ -612,7 +612,7 @@ PJ *proj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     SANITIZE_CTX(ctx);
     try {
         const std::string codeStr(code);
-        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
+        auto factory = getDBcontext(ctx)->createAuthorityFactory(auth_name);
         IdentifiedObjectPtr obj;
         switch (category) {
         case PJ_CATEGORY_ELLIPSOID:
@@ -700,7 +700,7 @@ int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     assert(code);
     SANITIZE_CTX(ctx);
     try {
-        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
+        auto factory = getDBcontext(ctx)->createAuthorityFactory(auth_name);
         auto obj = factory->createUnitOfMeasure(code);
         if (out_name) {
             ctx->cpp_context->lastUOMName_ = obj->name();
@@ -805,8 +805,8 @@ PJ_OBJ_LIST *proj_query_geodetic_crs_from_datum(PJ_CONTEXT *ctx,
     assert(datum_code);
     SANITIZE_CTX(ctx);
     try {
-        auto factory = AuthorityFactory::create(
-            getDBcontext(ctx), crs_auth_name ? crs_auth_name : "");
+        auto factory = getDBcontext(ctx)->createAuthorityFactory(
+            crs_auth_name ? crs_auth_name : "");
         auto res = factory->createGeodeticCRSFromDatum(
             datum_auth_name, datum_code, crs_type ? crs_type : "");
         std::vector<IdentifiedObjectNNPtr> objects;
@@ -958,7 +958,7 @@ PJ_OBJ_LIST *proj_create_from_name(PJ_CONTEXT *ctx, const char *auth_name,
     (void)options;
     SANITIZE_CTX(ctx);
     try {
-        auto factory = AuthorityFactory::create(getDBcontext(ctx),
+        auto factory = getDBcontext(ctx)->createAuthorityFactory(
                                                 auth_name ? auth_name : "");
         std::vector<AuthorityFactory::ObjectType> allowedTypes;
         for (size_t i = 0; i < typesCount; ++i) {
@@ -2130,7 +2130,7 @@ PJ_OBJ_LIST *proj_identify(PJ_CONTEXT *ctx, const PJ *obj,
     } else {
         int *confidenceTemp = nullptr;
         try {
-            auto factory = AuthorityFactory::create(getDBcontext(ctx),
+            auto factory = getDBcontext(ctx)->createAuthorityFactory(
                                                     auth_name ? auth_name : "");
             auto res = crs->identify(factory);
             std::vector<IdentifiedObjectNNPtr> objects;
@@ -2213,7 +2213,7 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
     assert(auth_name);
     SANITIZE_CTX(ctx);
     try {
-        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
+        auto factory = getDBcontext(ctx)->createAuthorityFactory(auth_name);
         bool valid = false;
         auto typeInternal = convertPJObjectTypeToObjectType(type, valid);
         if (!valid) {
@@ -2305,7 +2305,7 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     PROJ_CRS_INFO **ret = nullptr;
     int i = 0;
     try {
-        auto factory = AuthorityFactory::create(getDBcontext(ctx),
+        auto factory = getDBcontext(ctx)->createAuthorityFactory(
                                                 auth_name ? auth_name : "");
         auto list = factory->getCRSInfoList();
         ret = new PROJ_CRS_INFO *[list.size() + 1];
@@ -2622,8 +2622,7 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
     } else if (datumName.find('_') != std::string::npos) {
         // Likely coming from WKT1
         if (dbContext) {
-            auto authFactory =
-                AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
+            auto authFactory = dbContext->createAuthorityFactory(std::string());
             auto res = authFactory->createObjectsFromName(
                 datumName,
                 {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, true,
@@ -6550,8 +6549,7 @@ proj_create_operation_factory_context(PJ_CONTEXT *ctx, const char *authority) {
     try {
         if (dbContext) {
             auto factory = CoordinateOperationFactory::create();
-            auto authFactory = AuthorityFactory::create(
-                NN_NO_CHECK(dbContext),
+            auto authFactory = dbContext->createAuthorityFactory(
                 std::string(authority ? authority : ""));
             auto operationContext =
                 CoordinateOperationContext::create(authFactory, nullptr, 0.0);

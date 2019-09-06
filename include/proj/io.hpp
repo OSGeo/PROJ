@@ -135,6 +135,26 @@ using DatabaseContextPtr = std::shared_ptr<DatabaseContext>;
 /** Non-null shared pointer of DatabaseContext. */
 using DatabaseContextNNPtr = util::nn<DatabaseContextPtr>;
 
+class SQLiteDatabaseContext;
+/** Shared pointer of SQLiteDatabaseContext. */
+using SQLiteDatabaseContextPtr = std::shared_ptr<SQLiteDatabaseContext>;
+/** Non-null shared pointer of SQLiteDatabaseContext. */
+using SQLiteDatabaseContextNNPtr = util::nn<SQLiteDatabaseContextPtr>;
+
+// ---------------------------------------------------------------------------
+
+class AuthorityFactory;
+/** Shared pointer of AuthorityFactory. */
+using AuthorityFactoryPtr = std::shared_ptr<AuthorityFactory>;
+/** Non-null shared pointer of AuthorityFactory. */
+using AuthorityFactoryNNPtr = util::nn<AuthorityFactoryPtr>;
+
+class SQLiteAuthorityFactory;
+/** Shared pointer of AuthorityFactory. */
+using SQLiteAuthorityFactoryPtr = std::shared_ptr<SQLiteAuthorityFactory>;
+/** Non-null shared pointer of AuthorityFactory. */
+using SQLiteAuthorityFactoryNNPtr = util::nn<SQLiteAuthorityFactoryPtr>;
+
 // ---------------------------------------------------------------------------
 
 class WKTNode;
@@ -787,14 +807,77 @@ class PROJ_GCC_DLL PROJStringParser {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Database context.
+/** \brief Database context interface.
  *
  * A database context should be used only by one thread at a time.
  */
-class PROJ_GCC_DLL DatabaseContext {
+class PROJ_GCC_DLL DatabaseContext :
+        public util::nn_enable_shared_from_this<DatabaseContext> {
+
+  public:
+    virtual PROJ_DLL ~DatabaseContext() = default;
+
+    virtual PROJ_DLL const std::string &getPath() const = 0;
+
+    virtual PROJ_DLL const char *getMetadata(const char *key) const = 0;
+
+    virtual PROJ_DLL std::set<std::string> getAuthorities() const = 0;
+
+    virtual PROJ_DLL std::vector<std::string> getDatabaseStructure() const = 0;
+
+    virtual PROJ_DLL AuthorityFactoryNNPtr
+    createAuthorityFactory(const std::string &authorityName) = 0;
+
+  PROJ_PRIVATE :
+    //! @cond Doxygen_Suppress
+
+    virtual PROJ_INTERNAL bool lookForGridAlternative(const std::string &officialName,
+                                              std::string &projFilename,
+                                              std::string &projFormat,
+                                              bool &inverse) const = 0;
+
+    virtual PROJ_DLL bool lookForGridInfo(const std::string &projFilename,
+                                  std::string &fullFilename,
+                                  std::string &packageName, std::string &url,
+                                  bool &directDownload, bool &openLicense,
+                                  bool &gridAvailable) const = 0;
+
+    virtual PROJ_INTERNAL std::string
+    getAliasFromOfficialName(const std::string &officialName,
+                             const std::string &tableName,
+                             const std::string &source) const = 0;
+
+    virtual PROJ_INTERNAL bool isKnownName(const std::string &name,
+                                   const std::string &tableName) const = 0;
+
+    virtual PROJ_INTERNAL std::string getTextDefinition(const std::string &tableName,
+                                                const std::string &authName,
+                                                const std::string &code) const = 0;
+
+    virtual PROJ_INTERNAL std::vector<std::string>
+    getAllowedAuthorities(const std::string &sourceAuthName,
+                          const std::string &targetAuthName) const = 0;
+
+    virtual PROJ_INTERNAL std::list<std::pair<std::string, std::string>>
+    getNonDeprecated(const std::string &tableName, const std::string &authName,
+                     const std::string &code) const = 0;
+
+    //! @endcond
+
+  protected:
+    PROJ_INTERNAL DatabaseContext() = default;
+
+  private:
+    DatabaseContext(const DatabaseContext &) = delete;
+    DatabaseContext &operator=(const DatabaseContext &other) = delete;
+};
+
+/** \brief SQLite implementation of the database context.
+ */
+class PROJ_GCC_DLL SQLiteDatabaseContext : public DatabaseContext {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL ~DatabaseContext();
+    PROJ_DLL ~SQLiteDatabaseContext();
     //! @endcond
 
     PROJ_DLL static DatabaseContextNNPtr
@@ -803,74 +886,71 @@ class PROJ_GCC_DLL DatabaseContext {
                std::vector<std::string>(),
            PJ_CONTEXT *ctx = nullptr);
 
-    PROJ_DLL const std::string &getPath() const;
+    PROJ_DLL const std::string &getPath() const override;
 
-    PROJ_DLL const char *getMetadata(const char *key) const;
+    PROJ_DLL const char *getMetadata(const char *key) const override;
 
-    PROJ_DLL std::set<std::string> getAuthorities() const;
+    PROJ_DLL std::set<std::string> getAuthorities() const override;
 
-    PROJ_DLL std::vector<std::string> getDatabaseStructure() const;
+    PROJ_DLL std::vector<std::string> getDatabaseStructure() const override;
 
-    PROJ_PRIVATE :
-        //! @cond Doxygen_Suppress
-        PROJ_DLL void *
-        getSqliteHandle() const;
+    PROJ_DLL AuthorityFactoryNNPtr
+    createAuthorityFactory(const std::string &authorityName) override;
+
+  PROJ_PRIVATE :
+    //! @cond Doxygen_Suppress
+    PROJ_DLL void *
+    getSqliteHandle() const;
 
     PROJ_DLL static DatabaseContextNNPtr create(void *sqlite_handle);
 
     PROJ_INTERNAL bool lookForGridAlternative(const std::string &officialName,
                                               std::string &projFilename,
                                               std::string &projFormat,
-                                              bool &inverse) const;
+                                              bool &inverse) const override;
 
     PROJ_DLL bool lookForGridInfo(const std::string &projFilename,
                                   std::string &fullFilename,
                                   std::string &packageName, std::string &url,
                                   bool &directDownload, bool &openLicense,
-                                  bool &gridAvailable) const;
+                                  bool &gridAvailable) const override;
 
     PROJ_INTERNAL std::string
     getAliasFromOfficialName(const std::string &officialName,
                              const std::string &tableName,
-                             const std::string &source) const;
+                             const std::string &source) const override;
 
     PROJ_INTERNAL bool isKnownName(const std::string &name,
-                                   const std::string &tableName) const;
+                                   const std::string &tableName) const override;
 
     PROJ_INTERNAL std::string getTextDefinition(const std::string &tableName,
                                                 const std::string &authName,
-                                                const std::string &code) const;
+                                                const std::string &code) const override;
 
     PROJ_INTERNAL std::vector<std::string>
     getAllowedAuthorities(const std::string &sourceAuthName,
-                          const std::string &targetAuthName) const;
+                          const std::string &targetAuthName) const override;
 
     PROJ_INTERNAL std::list<std::pair<std::string, std::string>>
     getNonDeprecated(const std::string &tableName, const std::string &authName,
-                     const std::string &code) const;
+                     const std::string &code) const override;
 
     //! @endcond
 
   protected:
-    PROJ_INTERNAL DatabaseContext();
+    PROJ_INTERNAL SQLiteDatabaseContext();
     INLINED_MAKE_SHARED
-    PROJ_FRIEND(AuthorityFactory);
+    PROJ_FRIEND(SQLiteAuthorityFactory);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    DatabaseContext(const DatabaseContext &) = delete;
-    DatabaseContext &operator=(const DatabaseContext &other) = delete;
+    SQLiteDatabaseContext(const SQLiteDatabaseContext &) = delete;
+    SQLiteDatabaseContext &operator=(const SQLiteDatabaseContext &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
 
-class AuthorityFactory;
-/** Shared pointer of AuthorityFactory. */
-using AuthorityFactoryPtr = std::shared_ptr<AuthorityFactory>;
-/** Non-null shared pointer of AuthorityFactory. */
-using AuthorityFactoryNNPtr = util::nn<AuthorityFactoryPtr>;
-
-/** \brief Builds object from an authority database.
+/** \brief Interface for building objects from an authority database.
  *
  * A AuthorityFactory should be used only by one thread at a time.
  *
@@ -878,70 +958,71 @@ using AuthorityFactoryNNPtr = util::nn<AuthorityFactoryPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/referencing/AuthorityFactory.html)
  * from \ref GeoAPI
  */
-class PROJ_GCC_DLL AuthorityFactory {
+class PROJ_GCC_DLL AuthorityFactory  :
+        public util::nn_enable_shared_from_this<AuthorityFactory> {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL ~AuthorityFactory();
+    virtual PROJ_DLL ~AuthorityFactory() = default;
     //! @endcond
 
-    PROJ_DLL util::BaseObjectNNPtr createObject(const std::string &code) const;
+    virtual PROJ_DLL util::BaseObjectNNPtr createObject(const std::string &code) const = 0;
 
-    PROJ_DLL common::UnitOfMeasureNNPtr
-    createUnitOfMeasure(const std::string &code) const;
+    virtual PROJ_DLL common::UnitOfMeasureNNPtr
+    createUnitOfMeasure(const std::string &code) const = 0;
 
-    PROJ_DLL metadata::ExtentNNPtr createExtent(const std::string &code) const;
+    virtual PROJ_DLL metadata::ExtentNNPtr createExtent(const std::string &code) const = 0;
 
-    PROJ_DLL datum::PrimeMeridianNNPtr
-    createPrimeMeridian(const std::string &code) const;
+    virtual PROJ_DLL datum::PrimeMeridianNNPtr
+    createPrimeMeridian(const std::string &code) const = 0;
 
-    PROJ_DLL std::string identifyBodyFromSemiMajorAxis(double a,
-                                                       double tolerance) const;
+    virtual PROJ_DLL std::string identifyBodyFromSemiMajorAxis(double a,
+                                                       double tolerance) const = 0;
 
-    PROJ_DLL datum::EllipsoidNNPtr
-    createEllipsoid(const std::string &code) const;
+    virtual PROJ_DLL datum::EllipsoidNNPtr
+    createEllipsoid(const std::string &code) const = 0;
 
-    PROJ_DLL datum::DatumNNPtr createDatum(const std::string &code) const;
+    virtual PROJ_DLL datum::DatumNNPtr createDatum(const std::string &code) const = 0;
 
-    PROJ_DLL datum::GeodeticReferenceFrameNNPtr
-    createGeodeticDatum(const std::string &code) const;
+    virtual PROJ_DLL datum::GeodeticReferenceFrameNNPtr
+    createGeodeticDatum(const std::string &code) const = 0;
 
-    PROJ_DLL datum::VerticalReferenceFrameNNPtr
-    createVerticalDatum(const std::string &code) const;
+    virtual PROJ_DLL datum::VerticalReferenceFrameNNPtr
+    createVerticalDatum(const std::string &code) const = 0;
 
-    PROJ_DLL cs::CoordinateSystemNNPtr
-    createCoordinateSystem(const std::string &code) const;
+    virtual PROJ_DLL cs::CoordinateSystemNNPtr
+    createCoordinateSystem(const std::string &code) const = 0;
 
-    PROJ_DLL crs::GeodeticCRSNNPtr
-    createGeodeticCRS(const std::string &code) const;
+    virtual PROJ_DLL crs::GeodeticCRSNNPtr
+    createGeodeticCRS(const std::string &code) const = 0;
 
-    PROJ_DLL crs::GeographicCRSNNPtr
-    createGeographicCRS(const std::string &code) const;
+    virtual PROJ_DLL crs::GeographicCRSNNPtr
+    createGeographicCRS(const std::string &code) const = 0;
 
-    PROJ_DLL crs::VerticalCRSNNPtr
-    createVerticalCRS(const std::string &code) const;
+    virtual PROJ_DLL crs::VerticalCRSNNPtr
+    createVerticalCRS(const std::string &code) const = 0;
 
-    PROJ_DLL operation::ConversionNNPtr
-    createConversion(const std::string &code) const;
+    virtual PROJ_DLL operation::ConversionNNPtr
+    createConversion(const std::string &code) const = 0;
 
-    PROJ_DLL crs::ProjectedCRSNNPtr
-    createProjectedCRS(const std::string &code) const;
+    virtual PROJ_DLL crs::ProjectedCRSNNPtr
+    createProjectedCRS(const std::string &code) const = 0;
 
-    PROJ_DLL crs::CompoundCRSNNPtr
-    createCompoundCRS(const std::string &code) const;
+    virtual PROJ_DLL crs::CompoundCRSNNPtr
+    createCompoundCRS(const std::string &code) const = 0;
 
-    PROJ_DLL crs::CRSNNPtr
-    createCoordinateReferenceSystem(const std::string &code) const;
+    virtual PROJ_DLL crs::CRSNNPtr
+    createCoordinateReferenceSystem(const std::string &code) const = 0;
 
-    PROJ_DLL operation::CoordinateOperationNNPtr
+    virtual PROJ_DLL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code,
-                              bool usePROJAlternativeGridNames) const;
+                              bool usePROJAlternativeGridNames) const = 0;
 
-    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    virtual PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
     createFromCoordinateReferenceSystemCodes(
         const std::string &sourceCRSCode,
-        const std::string &targetCRSCode) const;
+        const std::string &targetCRSCode) const = 0;
 
-    PROJ_DLL const std::string &getAuthority() PROJ_PURE_DECL;
+    virtual PROJ_DLL const std::string &getAuthority() const = 0;
 
     /** Object type. */
     enum class ObjectType {
@@ -988,11 +1069,11 @@ class PROJ_GCC_DLL AuthorityFactory {
         CONCATENATED_OPERATION,
     };
 
-    PROJ_DLL std::set<std::string>
+    virtual PROJ_DLL std::set<std::string>
     getAuthorityCodes(const ObjectType &type,
-                      bool allowDeprecated = true) const;
+                      bool allowDeprecated = true) const = 0;
 
-    PROJ_DLL std::string getDescriptionText(const std::string &code) const;
+    virtual PROJ_DLL std::string getDescriptionText(const std::string &code) const = 0;
 
     /** CRS information */
     struct CRSInfo {
@@ -1028,88 +1109,248 @@ class PROJ_GCC_DLL AuthorityFactory {
         //! @endcond
     };
 
-    PROJ_DLL std::list<CRSInfo> getCRSInfoList() const;
+    virtual PROJ_DLL std::list<CRSInfo> getCRSInfoList() const = 0;
 
     // non-standard
-    PROJ_DLL static AuthorityFactoryNNPtr
-    create(const DatabaseContextNNPtr &context,
-           const std::string &authorityName);
 
-    PROJ_DLL const DatabaseContextNNPtr &databaseContext() const;
+    virtual PROJ_DLL DatabaseContextNNPtr databaseContext() const = 0;
 
-    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    virtual PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
     createFromCoordinateReferenceSystemCodes(
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-        bool discardSuperseded) const;
+        bool discardSuperseded) const = 0;
 
-    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    virtual PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
     createFromCRSCodesWithIntermediates(
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
         bool discardSuperseded,
         const std::vector<std::pair<std::string, std::string>>
-            &intermediateCRSAuthCodes) const;
+            &intermediateCRSAuthCodes) const = 0;
 
-    PROJ_DLL std::string getOfficialNameFromAlias(
+    virtual PROJ_DLL std::string getOfficialNameFromAlias(
         const std::string &aliasedName, const std::string &tableName,
         const std::string &source, bool tryEquivalentNameSpelling,
         std::string &outTableName, std::string &outAuthName,
-        std::string &outCode) const;
+        std::string &outCode) const = 0;
 
-    PROJ_DLL std::list<common::IdentifiedObjectNNPtr>
+    virtual PROJ_DLL std::list<common::IdentifiedObjectNNPtr>
     createObjectsFromName(const std::string &name,
                           const std::vector<ObjectType> &allowedObjectTypes =
                               std::vector<ObjectType>(),
                           bool approximateMatch = true,
-                          size_t limitResultCount = 0) const;
+                          size_t limitResultCount = 0) const = 0;
+
+    virtual PROJ_DLL std::list<std::pair<std::string, std::string>>
+    listAreaOfUseFromName(const std::string &name, bool approximateMatch) const = 0;
+
+  PROJ_PRIVATE :
+    //! @cond Doxygen_Suppress
+
+    virtual PROJ_INTERNAL std::list<datum::EllipsoidNNPtr>
+    createEllipsoidFromExisting(
+        const datum::EllipsoidNNPtr &ellipsoid) const = 0;
+
+    virtual PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
+    createGeodeticCRSFromDatum(const std::string &datum_auth_name,
+                               const std::string &datum_code,
+                               const std::string &geodetic_crs_type) const = 0;
+
+    virtual PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
+    createGeodeticCRSFromEllipsoid(const std::string &ellipsoid_auth_name,
+                                   const std::string &ellipsoid_code,
+                                   const std::string &geodetic_crs_type) const = 0;
+
+    virtual PROJ_INTERNAL std::list<crs::ProjectedCRSNNPtr>
+    createProjectedCRSFromExisting(const crs::ProjectedCRSNNPtr &crs) const = 0;
+
+    virtual PROJ_INTERNAL std::list<crs::CompoundCRSNNPtr>
+    createCompoundCRSFromExisting(const crs::CompoundCRSNNPtr &crs) const = 0;
+
+    virtual PROJ_INTERNAL crs::CRSNNPtr
+    createCoordinateReferenceSystem(const std::string &code,
+                                    bool allowCompound) const = 0;
+
+    virtual PROJ_INTERNAL crs::GeodeticCRSNNPtr
+    createGeodeticCRS(const std::string &code, bool geographicOnly) const = 0;
+
+    virtual PROJ_INTERNAL operation::CoordinateOperationNNPtr
+    createCoordinateOperation(const std::string &code, bool allowConcatenated,
+                              bool usePROJAlternativeGridNames,
+                              const std::string &type) const = 0;
+
+    //! @endcond
+
+  protected:
+    PROJ_INTERNAL AuthorityFactory() = default;
+
+private:
+    AuthorityFactory(const AuthorityFactory &) = delete;
+    AuthorityFactory &operator=(const AuthorityFactory &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Builds object from a SQLite authority database.
+ */
+class PROJ_GCC_DLL SQLiteAuthorityFactory : public AuthorityFactory {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~SQLiteAuthorityFactory();
+    //! @endcond
+
+    PROJ_DLL util::BaseObjectNNPtr createObject(const std::string &code) const override;
+
+    PROJ_DLL common::UnitOfMeasureNNPtr
+    createUnitOfMeasure(const std::string &code) const override;
+
+    PROJ_DLL metadata::ExtentNNPtr createExtent(const std::string &code) const override;
+
+    PROJ_DLL datum::PrimeMeridianNNPtr
+    createPrimeMeridian(const std::string &code) const override;
+
+    PROJ_DLL std::string identifyBodyFromSemiMajorAxis(double a,
+                                                       double tolerance) const override;
+
+    PROJ_DLL datum::EllipsoidNNPtr
+    createEllipsoid(const std::string &code) const override;
+
+    PROJ_DLL datum::DatumNNPtr createDatum(const std::string &code) const override;
+
+    PROJ_DLL datum::GeodeticReferenceFrameNNPtr
+    createGeodeticDatum(const std::string &code) const override;
+
+    PROJ_DLL datum::VerticalReferenceFrameNNPtr
+    createVerticalDatum(const std::string &code) const override;
+
+    PROJ_DLL cs::CoordinateSystemNNPtr
+    createCoordinateSystem(const std::string &code) const override;
+
+    PROJ_DLL crs::GeodeticCRSNNPtr
+    createGeodeticCRS(const std::string &code) const override;
+
+    PROJ_DLL crs::GeographicCRSNNPtr
+    createGeographicCRS(const std::string &code) const override;
+
+    PROJ_DLL crs::VerticalCRSNNPtr
+    createVerticalCRS(const std::string &code) const override;
+
+    PROJ_DLL operation::ConversionNNPtr
+    createConversion(const std::string &code) const override;
+
+    PROJ_DLL crs::ProjectedCRSNNPtr
+    createProjectedCRS(const std::string &code) const override;
+
+    PROJ_DLL crs::CompoundCRSNNPtr
+    createCompoundCRS(const std::string &code) const override;
+
+    PROJ_DLL crs::CRSNNPtr
+    createCoordinateReferenceSystem(const std::string &code) const override;
+
+    PROJ_DLL operation::CoordinateOperationNNPtr
+    createCoordinateOperation(const std::string &code,
+                              bool usePROJAlternativeGridNames) const override;
+
+    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    createFromCoordinateReferenceSystemCodes(
+            const std::string &sourceCRSCode,
+            const std::string &targetCRSCode) const override;
+
+    PROJ_DLL const std::string &getAuthority() const override;
+
+    PROJ_DLL std::set<std::string>
+    getAuthorityCodes(const ObjectType &type,
+                      bool allowDeprecated = true) const override;
+
+    PROJ_DLL std::string getDescriptionText(const std::string &code) const override;
+
+    PROJ_DLL std::list<CRSInfo> getCRSInfoList() const override;
+
+    // non-standard
+
+    PROJ_DLL DatabaseContextNNPtr databaseContext() const override;
+
+    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    createFromCoordinateReferenceSystemCodes(
+            const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
+            const std::string &targetCRSAuthName, const std::string &targetCRSCode,
+            bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+            bool discardSuperseded) const override;
+
+    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    createFromCRSCodesWithIntermediates(
+            const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
+            const std::string &targetCRSAuthName, const std::string &targetCRSCode,
+            bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+            bool discardSuperseded,
+            const std::vector<std::pair<std::string, std::string>>
+            &intermediateCRSAuthCodes) const override;
+
+    PROJ_DLL std::string getOfficialNameFromAlias(
+            const std::string &aliasedName, const std::string &tableName,
+            const std::string &source, bool tryEquivalentNameSpelling,
+            std::string &outTableName, std::string &outAuthName,
+            std::string &outCode) const override;
+
+    PROJ_DLL std::list<common::IdentifiedObjectNNPtr>
+    createObjectsFromName(const std::string &name,
+                          const std::vector<ObjectType> &allowedObjectTypes =
+                          std::vector<ObjectType>(),
+                          bool approximateMatch = true,
+                          size_t limitResultCount = 0) const override;
 
     PROJ_DLL std::list<std::pair<std::string, std::string>>
-    listAreaOfUseFromName(const std::string &name, bool approximateMatch) const;
+    listAreaOfUseFromName(const std::string &name, bool approximateMatch) const override;
 
-    PROJ_PRIVATE :
-        //! @cond Doxygen_Suppress
+  PROJ_PRIVATE :
+    //! @cond Doxygen_Suppress
 
-        PROJ_INTERNAL std::list<datum::EllipsoidNNPtr>
-        createEllipsoidFromExisting(
-            const datum::EllipsoidNNPtr &ellipsoid) const;
+    PROJ_INTERNAL std::list<datum::EllipsoidNNPtr>
+    createEllipsoidFromExisting(
+            const datum::EllipsoidNNPtr &ellipsoid) const override;
 
     PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
     createGeodeticCRSFromDatum(const std::string &datum_auth_name,
                                const std::string &datum_code,
-                               const std::string &geodetic_crs_type) const;
+                               const std::string &geodetic_crs_type) const override;
 
     PROJ_INTERNAL std::list<crs::GeodeticCRSNNPtr>
     createGeodeticCRSFromEllipsoid(const std::string &ellipsoid_auth_name,
                                    const std::string &ellipsoid_code,
-                                   const std::string &geodetic_crs_type) const;
+                                   const std::string &geodetic_crs_type) const override;
 
     PROJ_INTERNAL std::list<crs::ProjectedCRSNNPtr>
-    createProjectedCRSFromExisting(const crs::ProjectedCRSNNPtr &crs) const;
+    createProjectedCRSFromExisting(const crs::ProjectedCRSNNPtr &crs) const override;
 
     PROJ_INTERNAL std::list<crs::CompoundCRSNNPtr>
-    createCompoundCRSFromExisting(const crs::CompoundCRSNNPtr &crs) const;
+    createCompoundCRSFromExisting(const crs::CompoundCRSNNPtr &crs) const override;
 
     PROJ_INTERNAL crs::CRSNNPtr
     createCoordinateReferenceSystem(const std::string &code,
-                                    bool allowCompound) const;
+                                    bool allowCompound) const override;
     //! @endcond
 
   protected:
-    PROJ_INTERNAL AuthorityFactory(const DatabaseContextNNPtr &context,
+    PROJ_DLL static AuthorityFactoryNNPtr
+    create(const SQLiteDatabaseContextNNPtr &context,
+           const std::string &authorityName);
+
+    PROJ_INTERNAL SQLiteAuthorityFactory(const SQLiteDatabaseContextNNPtr &context,
                                    const std::string &authorityName);
 
     PROJ_INTERNAL crs::GeodeticCRSNNPtr
-    createGeodeticCRS(const std::string &code, bool geographicOnly) const;
+    createGeodeticCRS(const std::string &code, bool geographicOnly) const override;
 
     PROJ_INTERNAL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code, bool allowConcatenated,
                               bool usePROJAlternativeGridNames,
-                              const std::string &type) const;
+                              const std::string &type) const override;
 
     INLINED_MAKE_SHARED
+    PROJ_FRIEND(SQLiteDatabaseContext);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

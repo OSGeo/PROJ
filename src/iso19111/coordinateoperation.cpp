@@ -10930,8 +10930,7 @@ static void buildSourceAndTargetCRSIds(
         const crs::CRSNNPtr &crs,
         std::list<std::pair<std::string, std::string>> &idList) {
         try {
-            const auto tmpAuthFactory = io::AuthorityFactory::create(
-                authFactory->databaseContext(),
+            const auto tmpAuthFactory = authFactory->databaseContext()->createAuthorityFactory(
                 (authFactoryName.empty() || authFactoryName == "any")
                     ? std::string()
                     : authFactoryName);
@@ -11023,8 +11022,7 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
                 authorities.emplace_back(authFactoryName);
             }
             for (const auto &authority : authorities) {
-                const auto tmpAuthFactory = io::AuthorityFactory::create(
-                    authFactory->databaseContext(),
+                const auto tmpAuthFactory = authFactory->databaseContext()->createAuthorityFactory(
                     authority == "any" ? std::string() : authority);
                 auto res =
                     tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
@@ -11085,8 +11083,7 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
                 authorities.emplace_back(authFactoryName);
             }
             for (const auto &authority : authorities) {
-                const auto tmpAuthFactory = io::AuthorityFactory::create(
-                    authFactory->databaseContext(),
+                const auto tmpAuthFactory = authFactory->databaseContext()->createAuthorityFactory(
                     authority == "any" ? std::string() : authority);
 
                 auto res = tmpAuthFactory->createFromCRSCodesWithIntermediates(
@@ -12971,8 +12968,8 @@ getResolvedCRS(const crs::CRSNNPtr &crs,
     if (projectedCrs && authFactory) {
         const auto &ids = projectedCrs->identifiers();
         if (!ids.empty() && projectedCrs->baseCRS()->identifiers().empty()) {
-            const auto tmpAuthFactory = io::AuthorityFactory::create(
-                authFactory->databaseContext(), *ids.front()->codeSpace());
+            const auto tmpAuthFactory = authFactory->databaseContext()->createAuthorityFactory(
+                *ids.front()->codeSpace());
             try {
                 auto resolvedCrs(
                     tmpAuthFactory->createProjectedCRS(ids.front()->code()));
@@ -13003,8 +13000,8 @@ getResolvedCRS(const crs::CRSNNPtr &crs,
                 }
             }
             if (hasMissingId) {
-                const auto tmpAuthFactory = io::AuthorityFactory::create(
-                    authFactory->databaseContext(), *ids.front()->codeSpace());
+                const auto tmpAuthFactory = authFactory->databaseContext()->createAuthorityFactory(
+                    *ids.front()->codeSpace());
                 try {
                     auto resolvedCrs(
                         tmpAuthFactory->createCompoundCRS(ids.front()->code()));

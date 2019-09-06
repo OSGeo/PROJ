@@ -438,8 +438,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
     for (const auto &authority : authorities) {
         try {
 
-            auto authFactory = io::AuthorityFactory::create(
-                NN_NO_CHECK(dbContext),
+            auto authFactory = dbContext->createAuthorityFactory(
                 authority == "any" ? std::string() : authority);
             auto ctxt = operation::CoordinateOperationContext::create(
                 authFactory, extent, 0.0);
@@ -748,7 +747,7 @@ CRS::getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const {
     auto tmpRes =
         dbContext->getNonDeprecated(tableName, *(id->codeSpace()), id->code());
     for (const auto &pair : tmpRes) {
-        res.emplace_back(io::AuthorityFactory::create(dbContext, pair.first)
+        res.emplace_back(dbContext->createAuthorityFactory(pair.first)
                              ->createCoordinateReferenceSystem(pair.second));
     }
     return res;
@@ -1608,8 +1607,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             for (const auto &id : identifiers()) {
                 if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
                     try {
-                        auto crs = io::AuthorityFactory::create(
-                                       authorityFactory->databaseContext(),
+                        auto crs = authorityFactory->databaseContext()->createAuthorityFactory(
                                        *id->codeSpace())
                                        ->createGeodeticCRS(id->code());
                         bool match = _isEquivalentTo(crs.get(), crsCriterion);
@@ -2476,8 +2474,7 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             for (const auto &id : identifiers()) {
                 if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
                     try {
-                        auto crs = io::AuthorityFactory::create(
-                                       authorityFactory->databaseContext(),
+                        auto crs = authorityFactory->databaseContext()->createAuthorityFactory(
                                        *id->codeSpace())
                                        ->createVerticalCRS(id->code());
                         bool match = _isEquivalentTo(
@@ -2857,8 +2854,7 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         }
     } else if (!isWKT2 && formatter->useESRIDialect() && !l_alias.empty()) {
         try {
-            auto res =
-                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI")
+            auto res = dbContext->createAuthorityFactory("ESRI")
                     ->createObjectsFromName(
                         l_alias,
                         {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
@@ -3349,8 +3345,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             for (const auto &id : identifiers()) {
                 if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
                     try {
-                        auto crs = io::AuthorityFactory::create(
-                                       authorityFactory->databaseContext(),
+                        auto crs = authorityFactory->databaseContext()->createAuthorityFactory(
                                        *id->codeSpace())
                                        ->createProjectedCRS(id->code());
                         bool match = _isEquivalentTo(
@@ -3730,8 +3725,7 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             for (const auto &id : identifiers()) {
                 if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
                     try {
-                        auto crs = io::AuthorityFactory::create(
-                                       authorityFactory->databaseContext(),
+                        auto crs = authorityFactory->databaseContext()->createAuthorityFactory(
                                        *id->codeSpace())
                                        ->createCompoundCRS(id->code());
                         bool match = _isEquivalentTo(

@@ -1060,8 +1060,7 @@ std::string Ellipsoid::guessBodyName(const io::DatabaseContextPtr &dbContext,
     }
     if (dbContext) {
         try {
-            auto factory = io::AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                        std::string());
+            auto factory = dbContext->createAuthorityFactory(std::string());
             return factory->identifyBodyFromSemiMajorAxis(a, relError);
         } catch (const std::exception &) {
         }

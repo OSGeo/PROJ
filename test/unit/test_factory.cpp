@@ -63,17 +63,17 @@ namespace {
 // ---------------------------------------------------------------------------
 
 TEST(factory, databasecontext_create) {
-    DatabaseContext::create();
+    SQLiteDatabaseContext::create();
 #ifndef _WIN32
     // For some reason, no exception is thrown on AppVeyor Windows
-    EXPECT_THROW(DatabaseContext::create("/i/do_not/exist"), FactoryException);
+    EXPECT_THROW(SQLiteDatabaseContext::create("/i/do_not/exist"), FactoryException);
 #endif
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createObject) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createObject("-1"), NoSuchAuthorityCodeException);
     EXPECT_THROW(factory->createObject("4326"),
                  FactoryException); // area and crs
@@ -82,7 +82,7 @@ TEST(factory, AuthorityFactory_createObject) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createUnitOfMeasure_linear) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createUnitOfMeasure("-1"),
                  NoSuchAuthorityCodeException);
     auto uom = factory->createUnitOfMeasure("9001");
@@ -96,7 +96,7 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_linear) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createUnitOfMeasure_angular) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto uom = factory->createUnitOfMeasure("9102");
     EXPECT_EQ(uom->name(), "degree");
     EXPECT_EQ(uom->type(), UnitOfMeasure::Type::ANGULAR);
@@ -108,7 +108,7 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_angular) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createUnitOfMeasure_angular_9107) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto uom = factory->createUnitOfMeasure("9107");
     EXPECT_EQ(uom->name(), "degree minute second");
     EXPECT_EQ(uom->type(), UnitOfMeasure::Type::ANGULAR);
@@ -120,7 +120,7 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_angular_9107) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createUnitOfMeasure_scale) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto uom = factory->createUnitOfMeasure("1028");
     EXPECT_EQ(uom->name(), "parts per billion");
     EXPECT_EQ(uom->type(), UnitOfMeasure::Type::SCALE);
@@ -132,7 +132,7 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_scale) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createUnitOfMeasure_time) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto uom = factory->createUnitOfMeasure("1029");
     EXPECT_EQ(uom->name(), "year");
     EXPECT_EQ(uom->type(), UnitOfMeasure::Type::TIME);
@@ -144,11 +144,11 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_time) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createPrimeMeridian) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createPrimeMeridian("-1"),
                  NoSuchAuthorityCodeException);
     EXPECT_TRUE(nn_dynamic_pointer_cast<PrimeMeridian>(
-                    AuthorityFactory::create(DatabaseContext::create(), "ESRI")
+                    SQLiteDatabaseContext::create()->createAuthorityFactory("ESRI")
                         ->createObject("108900")) != nullptr);
     auto pm = factory->createPrimeMeridian("8903");
     ASSERT_EQ(pm->identifiers().size(), 1U);
@@ -161,7 +161,7 @@ TEST(factory, AuthorityFactory_createPrimeMeridian) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_identifyBodyFromSemiMajorAxis) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_EQ(factory->identifyBodyFromSemiMajorAxis(6378137, 1e-5), "Earth");
     EXPECT_THROW(factory->identifyBodyFromSemiMajorAxis(1, 1e-5),
                  FactoryException);
@@ -170,7 +170,7 @@ TEST(factory, AuthorityFactory_identifyBodyFromSemiMajorAxis) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createEllipsoid) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createEllipsoid("-1"), NoSuchAuthorityCodeException);
     EXPECT_TRUE(nn_dynamic_pointer_cast<Ellipsoid>(
                     factory->createObject("7030")) != nullptr);
@@ -188,7 +188,7 @@ TEST(factory, AuthorityFactory_createEllipsoid) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createEllipsoid_sphere) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ellipsoid = factory->createEllipsoid("7035");
     EXPECT_TRUE(ellipsoid->isSphere());
     EXPECT_EQ(ellipsoid->semiMajorAxis(), Length(6371000));
@@ -197,7 +197,7 @@ TEST(factory, AuthorityFactory_createEllipsoid_sphere) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createEllipsoid_with_semi_minor_axis) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto ellipsoid = factory->createEllipsoid("7011");
     EXPECT_TRUE(ellipsoid->semiMinorAxis().has_value());
     EXPECT_EQ(ellipsoid->semiMajorAxis(), Length(6378249.2));
@@ -207,7 +207,7 @@ TEST(factory, AuthorityFactory_createEllipsoid_with_semi_minor_axis) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createExtent) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createExtent("-1"), NoSuchAuthorityCodeException);
     auto extent = factory->createExtent("1262");
     EXPECT_EQ(*(extent->description()), "World");
@@ -224,7 +224,7 @@ TEST(factory, AuthorityFactory_createExtent) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createExtent_no_bbox) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto extent = factory->createExtent("1361"); // Sudan - south. Deprecated
     EXPECT_EQ(*(extent->description()), "Sudan - south");
     const auto &geogElts = extent->geographicElements();
@@ -234,7 +234,7 @@ TEST(factory, AuthorityFactory_createExtent_no_bbox) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createGeodeticDatum) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createGeodeticDatum("-1"),
                  NoSuchAuthorityCodeException);
     auto grf = factory->createGeodeticDatum("6326");
@@ -256,7 +256,7 @@ TEST(factory, AuthorityFactory_createGeodeticDatum) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createVerticalDatum) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createVerticalDatum("-1"),
                  NoSuchAuthorityCodeException);
     auto vrf = factory->createVerticalDatum("1027");
@@ -273,7 +273,7 @@ TEST(factory, AuthorityFactory_createVerticalDatum) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createDatum) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createDatum("-1"), NoSuchAuthorityCodeException);
     EXPECT_TRUE(factory->createDatum("6326")->isEquivalentTo(
         factory->createGeodeticDatum("6326").get()));
@@ -284,7 +284,7 @@ TEST(factory, AuthorityFactory_createDatum) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateSystem_ellipsoidal_2_axis) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createCoordinateSystem("-1"),
                  NoSuchAuthorityCodeException);
     auto cs = factory->createCoordinateSystem("6422");
@@ -312,7 +312,7 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_ellipsoidal_2_axis) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateSystem_ellipsoidal_3_axis) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
 
     auto cs = factory->createCoordinateSystem("6423");
     auto ellipsoidal_cs = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
@@ -344,7 +344,7 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_ellipsoidal_3_axis) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateSystem_geocentric) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
 
     auto cs = factory->createCoordinateSystem("6500");
     auto cartesian_cs = nn_dynamic_pointer_cast<CartesianCS>(cs);
@@ -376,7 +376,7 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_geocentric) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateSystem_vertical) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createCoordinateSystem("-1"),
                  NoSuchAuthorityCodeException);
 
@@ -400,7 +400,7 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_vertical) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createGeodeticCRS("-1"),
                  NoSuchAuthorityCodeException);
     auto crs = factory->createGeodeticCRS("4326");
@@ -426,7 +426,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D_area_no_bbox) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto crs = factory->createGeodeticCRS("4296"); // Sudan - deprecated
     auto domain = crs->domains()[0];
     auto extent = domain->domainOfValidity();
@@ -437,7 +437,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D_area_no_bbox) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createGeodeticCRS_geographic3D) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto crs = factory->createGeodeticCRS("4979");
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
     ASSERT_TRUE(gcrs != nullptr);
@@ -454,7 +454,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic3D) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createGeodeticCRS_geocentric) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto crs = factory->createGeodeticCRS("4978");
     ASSERT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) == nullptr);
     ASSERT_EQ(crs->identifiers().size(), 1U);
@@ -470,7 +470,7 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geocentric) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createVerticalCRS) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createVerticalCRS("-1"),
                  NoSuchAuthorityCodeException);
 
@@ -493,7 +493,7 @@ TEST(factory, AuthorityFactory_createVerticalCRS) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createConversion) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createConversion("-1"), NoSuchAuthorityCodeException);
 
     auto conv = factory->createConversion("16031");
@@ -543,7 +543,7 @@ TEST(factory, AuthorityFactory_createConversion) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createProjectedCRS) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createProjectedCRS("-1"),
                  NoSuchAuthorityCodeException);
 
@@ -568,7 +568,7 @@ TEST(factory, AuthorityFactory_createProjectedCRS) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createProjectedCRS_south_pole) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createProjectedCRS("-1"),
                  NoSuchAuthorityCodeException);
 
@@ -589,7 +589,7 @@ TEST(factory, AuthorityFactory_createProjectedCRS_south_pole) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createProjectedCRS_north_pole) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
 
     auto crs = factory->createProjectedCRS("32661");
     auto csList = crs->coordinateSystem()->axisList();
@@ -608,7 +608,7 @@ TEST(factory, AuthorityFactory_createProjectedCRS_north_pole) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCompoundCRS) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createCompoundCRS("-1"),
                  NoSuchAuthorityCodeException);
 
@@ -635,7 +635,7 @@ TEST(factory, AuthorityFactory_createCompoundCRS) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateReferenceSystem) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createCoordinateReferenceSystem("-1"),
                  NoSuchAuthorityCodeException);
     EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(
@@ -654,7 +654,7 @@ TEST(factory, AuthorityFactory_createCoordinateReferenceSystem) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_3) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->createCoordinateOperation("-1", false),
                  NoSuchAuthorityCodeException);
     auto op = factory->createCoordinateOperation("1113", false);
@@ -671,7 +671,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_3) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7_CF) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("7676", false);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -686,7 +686,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7_CF) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7_PV) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("1074", false);
     auto wkt = op->exportToPROJString(PROJStringFormatter::create().get());
     EXPECT_TRUE(wkt.find("+proj=helmert +x=-275.7224 +y=94.7824 +z=340.8944 "
@@ -698,7 +698,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7_PV) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8_CF) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("7702", false);
     auto expected = "    PARAMETER[\"Transformation reference epoch\",2002,\n"
                     "        TIMEUNIT[\"year\",31556925.445],\n"
@@ -712,7 +712,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8_CF) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("6276", false);
     auto expected =
         "COORDINATEOPERATION[\"ITRF2008 to GDA94 (1)\",\n"
@@ -825,7 +825,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_PV) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("8069", false);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=helmert +x=-0.0254 +y=0.0005 +z=0.1548 +rx=-0.0001 +ry=0 "
@@ -838,7 +838,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_PV) {
 
 TEST(factory,
      AuthorityFactory_createCoordinateOperation_helmert_15_PV_rounding_of_drz) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("7932", false);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=helmert +x=0 +y=0 +z=0 +rx=0 +ry=0 +rz=0 +s=0 +dx=0 +dy=0 "
@@ -850,7 +850,7 @@ TEST(factory,
 
 TEST(factory,
      AuthorityFactory_createCoordinateOperation_molodensky_badekas_PV) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("1066", false);
 
     auto so = nn_dynamic_pointer_cast<SingleOperation>(op);
@@ -874,7 +874,7 @@ TEST(factory,
 TEST(
     factory,
     AuthorityFactory_createCoordinateOperation_grid_transformation_one_parameter) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("1295", false);
     auto expected =
         "COORDINATEOPERATION[\"RGNC91-93 to NEA74 Noumea (4)\",\n"
@@ -933,7 +933,7 @@ TEST(
 TEST(
     factory,
     AuthorityFactory_createCoordinateOperation_grid_transformation_two_parameter) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("15864", false);
     auto expected =
         "    PARAMETERFILE[\"Latitude difference file\",\"alaska.las\"],\n"
@@ -947,7 +947,7 @@ TEST(
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("1884", false);
     auto expected =
         "COORDINATEOPERATION[\"S-JTSK (Ferro) to S-JTSK (1)\",\n"
@@ -1005,7 +1005,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_test_uom_9110) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     // This tests conversion from unit of measure EPSG:9110 DDD.MMSSsss
     auto crs = factory->createProjectedCRS("2172");
     EXPECT_PRED_FORMAT2(
@@ -1019,7 +1019,7 @@ TEST(factory, AuthorityFactory_test_uom_9110) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_affine_parametric_transform) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("10087", false);
     // Do not do axis unit change
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
@@ -1032,7 +1032,7 @@ TEST(factory, AuthorityFactory_affine_parametric_transform) {
 
 TEST(factory,
      AuthorityFactory_createCoordinateOperation_concatenated_operation) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("3896", false);
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
@@ -1049,7 +1049,7 @@ TEST(factory,
 TEST(
     factory,
     AuthorityFactory_createCoordinateOperation_concatenated_operation_three_steps) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("8647", false);
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
@@ -1068,7 +1068,7 @@ TEST(
 TEST(
     factory,
     AuthorityFactory_createCoordinateOperation_concatenated_operation_inverse_step1) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("8443", false);
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
@@ -1085,7 +1085,7 @@ TEST(
 TEST(
     factory,
     AuthorityFactory_createCoordinateOperation_concatenated_operation_inverse_step2) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("7811", false);
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
@@ -1102,7 +1102,7 @@ TEST(
 TEST(
     factory,
     AuthorityFactory_createCoordinateOperation_concatenated_operation_step1_is_conversion) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("7973", false);
     auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
     ASSERT_TRUE(concatenated != nullptr);
@@ -1128,7 +1128,7 @@ static bool in(const std::string &str, const std::vector<std::string> &list) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_build_all_concatenated) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto setConcatenated = factory->getAuthorityCodes(
         AuthorityFactory::ObjectType::CONCATENATED_OPERATION);
     auto setConcatenatedNoDeprecated = factory->getAuthorityCodes(
@@ -1150,7 +1150,7 @@ TEST(factory, AuthorityFactory_build_all_concatenated) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_conversion) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto op = factory->createCoordinateOperation("16031", false);
     auto conversion = nn_dynamic_pointer_cast<Conversion>(op);
     ASSERT_TRUE(conversion != nullptr);
@@ -1159,7 +1159,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_conversion) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_getAuthorityCodes) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     {
         auto set = factory->getAuthorityCodes(
             AuthorityFactory::ObjectType::PRIME_MERIDIAN);
@@ -1319,7 +1319,7 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_getDescriptionText) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_THROW(factory->getDescriptionText("-1"),
                  NoSuchAuthorityCodeException);
     EXPECT_EQ(factory->getDescriptionText("10000"),
@@ -1338,7 +1338,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
     }
 
     void createStructure() {
-        auto referenceDb = DatabaseContext::create();
+        auto referenceDb = SQLiteDatabaseContext::create();
         const auto dbStructure = referenceDb->getDatabaseStructure();
         for (const auto &sql : dbStructure) {
             ASSERT_TRUE(execute(sql)) << last_error();
@@ -1560,8 +1560,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
     void checkSourceToOther() {
         {
-            auto factoryOTHER = AuthorityFactory::create(
-                DatabaseContext::create(m_ctxt), "OTHER");
+            auto factoryOTHER = SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory(
+                "OTHER");
             auto res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
                 false, {});
@@ -1597,8 +1597,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
         }
         {
-            auto factory = AuthorityFactory::create(
-                DatabaseContext::create(m_ctxt), std::string());
+            auto factory = SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory(
+                std::string());
             auto res = factory->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
                 false, {});
@@ -1606,11 +1606,11 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
 
-            auto srcCRS = AuthorityFactory::create(
-                              DatabaseContext::create(m_ctxt), "NS_SOURCE")
+            auto srcCRS = SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory(
+                              "NS_SOURCE")
                               ->createCoordinateReferenceSystem("SOURCE");
-            auto targetCRS = AuthorityFactory::create(
-                                 DatabaseContext::create(m_ctxt), "NS_TARGET")
+            auto targetCRS = SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory(
+                                 "NS_TARGET")
                                  ->createCoordinateReferenceSystem("TARGET");
 
             {
@@ -1695,7 +1695,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_test_with_fake_EPSG_database) {
     populateWithFakeEPSG();
 
     auto factory =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "EPSG");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("EPSG");
 
     EXPECT_TRUE(nn_dynamic_pointer_cast<UnitOfMeasure>(
                     factory->createObject("9001")) != nullptr);
@@ -1746,7 +1746,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_test_with_fake_EPSG_database) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     EXPECT_TRUE(
         factory->createFromCoordinateReferenceSystemCodes("-1", "-1").empty());
     {
@@ -1794,7 +1794,7 @@ TEST(
     factory,
     AuthorityFactory_createFromCoordinateReferenceSystemCodes_anonymous_authority) {
     auto factory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+        SQLiteDatabaseContext::create()->createAuthorityFactory(std::string());
 
     {
         auto res = factory->createFromCoordinateReferenceSystemCodes(
@@ -1832,8 +1832,8 @@ TEST_F(FactoryWithTmpDatabase,
                         "'EPSG','16031','EPSG','2060',NULL,0);"))
         << last_error();
 
-    auto factoryGeneral = AuthorityFactory::create(
-        DatabaseContext::create(m_ctxt), std::string());
+    auto factoryGeneral = SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory(
+        std::string());
     {
         auto res = factoryGeneral->createFromCoordinateReferenceSystemCodes(
             "OTHER", "OTHER_4326", "OTHER", "OTHER_32631", false, false, false);
@@ -1841,7 +1841,7 @@ TEST_F(FactoryWithTmpDatabase,
     }
 
     auto factoryEPSG =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "EPSG");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("EPSG");
     {
         auto res = factoryEPSG->createFromCoordinateReferenceSystemCodes(
             "OTHER", "OTHER_4326", "OTHER", "OTHER_32631", false, false, false);
@@ -1849,7 +1849,7 @@ TEST_F(FactoryWithTmpDatabase,
     }
 
     auto factoryOTHER =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("OTHER");
     {
         auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
             "OTHER_4326", "OTHER_32631");
@@ -1927,7 +1927,7 @@ TEST_F(FactoryWithTmpDatabase,
         << last_error();
 
     auto factoryOTHER =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
         "EPSG", "4326", "EPSG", "4326", false, false, false);
     ASSERT_EQ(res.size(), 3U);
@@ -1945,7 +1945,7 @@ TEST_F(
     createStructure();
     populateWithFakeEPSG();
 
-    auto factory = AuthorityFactory::create(DatabaseContext::create(m_ctxt),
+    auto factory = SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory(
                                             std::string());
     auto res = factory->createFromCRSCodesWithIntermediates(
         "EPSG", "4326", "EPSG", "4326", false, false, false, {});
@@ -2030,7 +2030,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
         << last_error();
 
     auto factoryOTHER =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
         "EPSG", "4326", "EPSG", "4326", false, false, false);
     ASSERT_EQ(res.size(), 1U);
@@ -2091,7 +2091,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
         << last_error();
 
     auto factoryOTHER =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
         "EPSG", "4326", "EPSG", "4326", false, false, false);
     ASSERT_EQ(res.size(), 1U);
@@ -2126,7 +2126,7 @@ TEST_F(FactoryWithTmpDatabase,
         << last_error();
 
     auto factoryOTHER =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("OTHER");
     EXPECT_THROW(factoryOTHER->createFromCoordinateReferenceSystemCodes(
                      "EPSG", "4326", "EPSG", "4326", false, false, false),
                  FactoryException);
@@ -2153,7 +2153,7 @@ TEST_F(FactoryWithTmpDatabase,
         << last_error();
 
     auto factoryOTHER =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("OTHER");
     EXPECT_THROW(factoryOTHER->createFromCoordinateReferenceSystemCodes(
                      "EPSG", "4326", "EPSG", "4326", false, false, false),
                  FactoryException);
@@ -2162,7 +2162,7 @@ TEST_F(FactoryWithTmpDatabase,
 // ---------------------------------------------------------------------------
 
 TEST(factory, AuthorityFactory_EPSG_4326_approximate_equivalent_to_builtin) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto factory = SQLiteDatabaseContext::create()->createAuthorityFactory("EPSG");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(
         factory->createCoordinateReferenceSystem("4326"));
     EXPECT_TRUE(crs->isEquivalentTo(GeographicCRS::EPSG_4326.get(),
@@ -2175,7 +2175,7 @@ TEST_F(FactoryWithTmpDatabase, getAuthorities) {
     createStructure();
     populateWithFakeEPSG();
 
-    auto res = DatabaseContext::create(m_ctxt)->getAuthorities();
+    auto res = SQLiteDatabaseContext::create(m_ctxt)->getAuthorities();
     EXPECT_EQ(res.size(), 2U);
     EXPECT_TRUE(res.find("EPSG") != res.end());
     EXPECT_TRUE(res.find("PROJ") != res.end());
@@ -2208,7 +2208,7 @@ TEST_F(FactoryWithTmpDatabase, lookForGridInfo) {
     bool directDownload = false;
     bool openLicense = false;
     bool gridAvailable = false;
-    EXPECT_TRUE(DatabaseContext::create(m_ctxt)->lookForGridInfo(
+    EXPECT_TRUE(SQLiteDatabaseContext::create(m_ctxt)->lookForGridInfo(
         "PROJ_fake_grid", fullFilename, packageName, url, directDownload,
         openLicense, gridAvailable));
     EXPECT_TRUE(fullFilename.empty());
@@ -2263,7 +2263,7 @@ TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
         << last_error();
 
     auto factory =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("TEST_NS");
     {
         auto crs = factory->createGeodeticCRS("TEST");
         EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs) != nullptr);
@@ -2371,7 +2371,7 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         << last_error();
 
     auto factory =
-        AuthorityFactory::create(DatabaseContext::create(m_ctxt), "TEST_NS");
+        SQLiteDatabaseContext::create(m_ctxt)->createAuthorityFactory("TEST_NS");
     {
         auto crs = factory->createProjectedCRS("TEST");
         EXPECT_EQ(*(crs->name()->description()), "my name");
@@ -2445,8 +2445,8 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, attachExtraDatabases_none) {
-    auto ctxt = DatabaseContext::create(std::string(), {});
-    auto factory = AuthorityFactory::create(ctxt, "EPSG");
+    auto ctxt = SQLiteDatabaseContext::create(std::string(), {});
+    auto factory = ctxt->createAuthorityFactory("EPSG");
     auto crs = factory->createGeodeticCRS("4979");
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
 }
@@ -2493,7 +2493,7 @@ TEST(factory, attachExtraDatabases_auxiliary) {
         ASSERT_TRUE(sqlite3_exec(dbAux, "BEGIN", nullptr, nullptr, nullptr) ==
                     SQLITE_OK);
         {
-            auto ctxt = DatabaseContext::create();
+            auto ctxt = SQLiteDatabaseContext::create();
             const auto dbStructure = ctxt->getDatabaseStructure();
             for (const auto &sql : dbStructure) {
                 if (sql.find("CREATE TRIGGER") == std::string::npos) {
@@ -2514,16 +2514,16 @@ TEST(factory, attachExtraDatabases_auxiliary) {
                     SQLITE_OK);
 
         {
-            auto ctxt = DatabaseContext::create(std::string(), {auxDbName});
+            auto ctxt = SQLiteDatabaseContext::create(std::string(), {auxDbName});
             // Look for object located in main DB
             {
-                auto factory = AuthorityFactory::create(ctxt, "EPSG");
+                auto factory = ctxt->createAuthorityFactory("EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
             }
             // Look for object located in auxiliary DB
             {
-                auto factory = AuthorityFactory::create(ctxt, "OTHER");
+                auto factory = ctxt->createAuthorityFactory("OTHER");
                 auto crs = factory->createGeodeticCRS("OTHER_4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
             }
@@ -2531,32 +2531,32 @@ TEST(factory, attachExtraDatabases_auxiliary) {
 
         {
             auto ctxt =
-                DatabaseContext::create(std::string(), {auxDbName, ":memory:"});
+                SQLiteDatabaseContext::create(std::string(), {auxDbName, ":memory:"});
             // Look for object located in main DB
             {
-                auto factory = AuthorityFactory::create(ctxt, "EPSG");
+                auto factory = ctxt->createAuthorityFactory("EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
             }
             // Look for object located in auxiliary DB
             {
-                auto factory = AuthorityFactory::create(ctxt, "OTHER");
+                auto factory = ctxt->createAuthorityFactory("OTHER");
                 auto crs = factory->createGeodeticCRS("OTHER_4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
             }
         }
 
         {
-            auto ctxt = DatabaseContext::create(std::string(), {":memory:"});
+            auto ctxt = SQLiteDatabaseContext::create(std::string(), {":memory:"});
             // Look for object located in main DB
             {
-                auto factory = AuthorityFactory::create(ctxt, "EPSG");
+                auto factory = ctxt->createAuthorityFactory("EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
             }
             // Look for object located in auxiliary DB
             {
-                auto factory = AuthorityFactory::create(ctxt, "OTHER");
+                auto factory = ctxt->createAuthorityFactory("OTHER");
                 EXPECT_THROW(factory->createGeodeticCRS("OTHER_4326"),
                              FactoryException);
             }
@@ -2572,15 +2572,15 @@ TEST(factory, attachExtraDatabases_auxiliary) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, attachExtraDatabases_auxiliary_error) {
-    EXPECT_THROW(DatabaseContext::create(std::string(), {"i_dont_exist_db"}),
+    EXPECT_THROW(SQLiteDatabaseContext::create(std::string(), {"i_dont_exist_db"}),
                  FactoryException);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(factory, getOfficialNameFromAlias) {
-    auto ctxt = DatabaseContext::create(std::string(), {});
-    auto factory = AuthorityFactory::create(ctxt, std::string());
+    auto ctxt = SQLiteDatabaseContext::create(std::string(), {});
+    auto factory = ctxt->createAuthorityFactory(std::string());
     std::string outTableName;
     std::string outAuthName;
     std::string outCode;
@@ -2654,16 +2654,16 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
-    auto dbContext = DatabaseContext::create(m_ctxt);
+    auto dbContext = SQLiteDatabaseContext::create(m_ctxt);
     auto authFactory =
-        AuthorityFactory::create(dbContext, std::string("OTHER"));
+        dbContext->createAuthorityFactory(std::string("OTHER"));
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
     auto list = CoordinateOperationFactory::create()->createOperations(
-        AuthorityFactory::create(dbContext, "EPSG")
+        dbContext->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("4326"),
-        AuthorityFactory::create(dbContext, "EPSG")
+        dbContext->createAuthorityFactory("EPSG")
             ->createCoordinateReferenceSystem("4326"),
         ctxt);
     ASSERT_EQ(list.size(), 2U);
@@ -2674,9 +2674,9 @@ TEST_F(FactoryWithTmpDatabase,
 // ---------------------------------------------------------------------------
 
 TEST(factory, createObjectsFromName) {
-    auto ctxt = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(ctxt, std::string());
-    auto factoryEPSG = AuthorityFactory::create(ctxt, "EPSG");
+    auto ctxt = SQLiteDatabaseContext::create();
+    auto factory = ctxt->createAuthorityFactory(std::string());
+    auto factoryEPSG = ctxt->createAuthorityFactory("EPSG");
 
     EXPECT_EQ(factory->createObjectsFromName("").size(), 0U);
 
@@ -2815,7 +2815,7 @@ TEST(factory, createObjectsFromName) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, getMetadata) {
-    auto ctxt = DatabaseContext::create();
+    auto ctxt = SQLiteDatabaseContext::create();
     EXPECT_EQ(ctxt->getMetadata("i_do_not_exist"), nullptr);
     const char *IGNF_VERSION = ctxt->getMetadata("IGNF.VERSION");
     ASSERT_TRUE(IGNF_VERSION != nullptr);
@@ -2825,9 +2825,9 @@ TEST(factory, getMetadata) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, listAreaOfUseFromName) {
-    auto ctxt = DatabaseContext::create();
-    auto factory = AuthorityFactory::create(ctxt, std::string());
-    auto factoryEPSG = AuthorityFactory::create(ctxt, "EPSG");
+    auto ctxt = SQLiteDatabaseContext::create();
+    auto factory = ctxt->createAuthorityFactory(std::string());
+    auto factoryEPSG = ctxt->createAuthorityFactory("EPSG");
     {
         auto res = factory->listAreaOfUseFromName("Denmark - onshore", false);
         ASSERT_EQ(res.size(), 1U);
@@ -2847,9 +2847,9 @@ TEST(factory, listAreaOfUseFromName) {
 // ---------------------------------------------------------------------------
 
 TEST(factory, getCRSInfoList) {
-    auto ctxt = DatabaseContext::create();
+    auto ctxt = SQLiteDatabaseContext::create();
     {
-        auto factory = AuthorityFactory::create(ctxt, std::string());
+        auto factory = ctxt->createAuthorityFactory(std::string());
         auto list = factory->getCRSInfoList();
         EXPECT_GT(list.size(), 1U);
         bool foundEPSG = false;
@@ -2867,7 +2867,7 @@ TEST(factory, getCRSInfoList) {
         EXPECT_TRUE(found4326);
     }
     {
-        auto factory = AuthorityFactory::create(ctxt, "EPSG");
+        auto factory = ctxt->createAuthorityFactory("EPSG");
         auto list = factory->getCRSInfoList();
         EXPECT_GT(list.size(), 1U);
         bool found4326 = false;
