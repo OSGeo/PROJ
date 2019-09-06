@@ -6039,6 +6039,7 @@ PJ *proj_create_conversion_equal_earth(PJ_CONTEXT *ctx, double center_long,
 
 int proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
                                         const PJ *coordoperation) {
+    SANITIZE_CTX(ctx);
     assert(coordoperation);
     auto op = dynamic_cast<const CoordinateOperation *>(
         coordoperation->iso_obj.get());
@@ -6081,6 +6082,7 @@ int proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
 
 int proj_coordoperation_has_ballpark_transformation(PJ_CONTEXT *ctx,
                                                     const PJ *coordoperation) {
+    SANITIZE_CTX(ctx);
     assert(coordoperation);
     auto op = dynamic_cast<const CoordinateOperation *>(
         coordoperation->iso_obj.get());
