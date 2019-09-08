@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test ISO19111:2018 implementation
+ * Purpose:  Test ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -333,13 +333,13 @@ TEST_F(CApi, proj_as_wkt) {
     ASSERT_NE(obj, nullptr);
 
     {
-        auto wkt = proj_as_wkt(m_ctxt, obj, PJ_WKT2_2018, nullptr);
+        auto wkt = proj_as_wkt(m_ctxt, obj, PJ_WKT2_2019, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEOGCRS[") == 0) << wkt;
     }
 
     {
-        auto wkt = proj_as_wkt(m_ctxt, obj, PJ_WKT2_2018_SIMPLIFIED, nullptr);
+        auto wkt = proj_as_wkt(m_ctxt, obj, PJ_WKT2_2019_SIMPLIFIED, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEOGCRS[") == 0) << wkt;
         EXPECT_TRUE(std::string(wkt).find("ANGULARUNIT[") == std::string::npos)
@@ -435,7 +435,7 @@ TEST_F(CApi, proj_as_wkt) {
     // unsupported option
     {
         const char *const options[] = {"unsupported=yes", nullptr};
-        auto wkt = proj_as_wkt(m_ctxt, obj, PJ_WKT2_2018, options);
+        auto wkt = proj_as_wkt(m_ctxt, obj, PJ_WKT2_2019, options);
         EXPECT_EQ(wkt, nullptr);
     }
 }
@@ -1631,7 +1631,7 @@ TEST_F(CApi, proj_context_guess_wkt_dialect) {
                   "        AXIS[\"geodetic latitude (Lat)\",north],\n"
                   "        AXIS[\"geodetic longitude (Lon)\",east],\n"
                   "        UNIT[\"degree\",0.0174532925199433]]"),
-              PJ_GUESSED_WKT2_2018);
+              PJ_GUESSED_WKT2_2019);
 
     EXPECT_EQ(proj_context_guess_wkt_dialect(
                   nullptr,
@@ -2690,7 +2690,7 @@ TEST_F(CApi, proj_crs_alter_parameters_linear_unit) {
         ObjectKeeper keeper_alteredCRS(alteredCRS);
         ASSERT_NE(alteredCRS, nullptr);
 
-        auto wkt = proj_as_wkt(m_ctxt, alteredCRS, PJ_WKT2_2018, nullptr);
+        auto wkt = proj_as_wkt(m_ctxt, alteredCRS, PJ_WKT2_2019, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("500000") != std::string::npos)
             << wkt;
@@ -2704,7 +2704,7 @@ TEST_F(CApi, proj_crs_alter_parameters_linear_unit) {
         ObjectKeeper keeper_alteredCRS(alteredCRS);
         ASSERT_NE(alteredCRS, nullptr);
 
-        auto wkt = proj_as_wkt(m_ctxt, alteredCRS, PJ_WKT2_2018, nullptr);
+        auto wkt = proj_as_wkt(m_ctxt, alteredCRS, PJ_WKT2_2019, nullptr);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("250000") != std::string::npos)
             << wkt;

@@ -1148,7 +1148,7 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isGeographic =
         dynamic_cast<const GeographicCRS *>(this) != nullptr;
     formatter->startNode(isWKT2
-                             ? ((formatter->use2018Keywords() && isGeographic)
+                             ? ((formatter->use2019Keywords() && isGeographic)
                                     ? io::WKTConstants::GEOGCRS
                                     : io::WKTConstants::GEODCRS)
                              : isGeocentric() ? io::WKTConstants::GEOCCS
@@ -2698,11 +2698,11 @@ void DerivedCRS::baseExportToWKT(io::WKTFormatter *formatter,
     formatter->addQuotedString(nameStr());
 
     const auto &l_baseCRS = d->baseCRS_;
-    formatter->startNode(baseKeyword, formatter->use2018Keywords() &&
+    formatter->startNode(baseKeyword, formatter->use2019Keywords() &&
                                           !l_baseCRS->identifiers().empty());
     formatter->addQuotedString(l_baseCRS->nameStr());
     l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
-    if (formatter->use2018Keywords() &&
+    if (formatter->use2019Keywords() &&
         !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
         l_baseCRS->formatID(formatter);
     }
@@ -2883,9 +2883,9 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     const auto &l_coordinateSystem = d->coordinateSystem();
     const auto &axisList = l_coordinateSystem->axisList();
-    if (axisList.size() == 3 && !(isWKT2 && formatter->use2018Keywords())) {
+    if (axisList.size() == 3 && !(isWKT2 && formatter->use2019Keywords())) {
         io::FormattingException::Throw(
-            "Projected 3D CRS can only be exported since WKT2:2018");
+            "Projected 3D CRS can only be exported since WKT2:2019");
     }
 
     const auto exportAxis = [&l_coordinateSystem, &axisList, &formatter]() {
@@ -2962,11 +2962,11 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     if (isWKT2) {
         formatter->startNode(
-            (formatter->use2018Keywords() &&
+            (formatter->use2019Keywords() &&
              dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                 ? io::WKTConstants::BASEGEOGCRS
                 : io::WKTConstants::BASEGEODCRS,
-            formatter->use2018Keywords() && !l_baseCRS->identifiers().empty());
+            formatter->use2019Keywords() && !l_baseCRS->identifiers().empty());
         formatter->addQuotedString(l_baseCRS->nameStr());
         l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
         // insert ellipsoidal cs unit when the units of the map
@@ -2977,7 +2977,7 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             geodeticCRSAxisList[0]->unit()._exportToWKT(formatter);
         }
         l_baseCRS->primeMeridian()->_exportToWKT(formatter);
-        if (formatter->use2018Keywords() &&
+        if (formatter->use2019Keywords() &&
             !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
             l_baseCRS->formatID(formatter);
         }
@@ -4422,7 +4422,7 @@ void DerivedGeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->addQuotedString(nameStr());
 
     auto l_baseCRS = baseCRS();
-    formatter->startNode((formatter->use2018Keywords() &&
+    formatter->startNode((formatter->use2019Keywords() &&
                           dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                              ? io::WKTConstants::BASEGEOGCRS
                              : io::WKTConstants::BASEGEODCRS,
@@ -4560,14 +4560,14 @@ void DerivedGeographicCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         io::FormattingException::Throw(
             "DerivedGeographicCRS can only be exported to WKT2");
     }
-    formatter->startNode(formatter->use2018Keywords()
+    formatter->startNode(formatter->use2019Keywords()
                              ? io::WKTConstants::GEOGCRS
                              : io::WKTConstants::GEODCRS,
                          !identifiers().empty());
     formatter->addQuotedString(nameStr());
 
     auto l_baseCRS = baseCRS();
-    formatter->startNode((formatter->use2018Keywords() &&
+    formatter->startNode((formatter->use2019Keywords() &&
                           dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                              ? io::WKTConstants::BASEGEOGCRS
                              : io::WKTConstants::BASEGEODCRS,
@@ -4693,9 +4693,9 @@ DerivedProjectedCRSNNPtr DerivedProjectedCRS::create(
 //! @cond Doxygen_Suppress
 void DerivedProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2 || !formatter->use2018Keywords()) {
+    if (!isWKT2 || !formatter->use2019Keywords()) {
         io::FormattingException::Throw(
-            "DerivedProjectedCRS can only be exported to WKT2:2018");
+            "DerivedProjectedCRS can only be exported to WKT2:2019");
     }
     formatter->startNode(io::WKTConstants::DERIVEDPROJCRS,
                          !identifiers().empty());
@@ -5348,12 +5348,12 @@ const char *DerivedCRSTemplate<DerivedCRSTraits>::className() const {
 
 static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *formatter,
                                                const std::string &crsName,
-                                               bool wkt2_2018_only) {
+                                               bool wkt2_2019_only) {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2 || (wkt2_2018_only && !formatter->use2018Keywords())) {
+    if (!isWKT2 || (wkt2_2019_only && !formatter->use2019Keywords())) {
         io::FormattingException::Throw(crsName +
                                        " can only be exported to WKT2" +
-                                       (wkt2_2018_only ? ":2018" : ""));
+                                       (wkt2_2019_only ? ":2019" : ""));
     }
 }
 
@@ -5363,7 +5363,7 @@ template <class DerivedCRSTraits>
 void DerivedCRSTemplate<DerivedCRSTraits>::_exportToWKT(
     io::WKTFormatter *formatter) const {
     DerivedCRSTemplateCheckExportToWKT(formatter, DerivedCRSTraits::CRSName(),
-                                       DerivedCRSTraits::wkt2_2018_only);
+                                       DerivedCRSTraits::wkt2_2019_only);
     baseExportToWKT(formatter, DerivedCRSTraits::WKTKeyword(),
                     DerivedCRSTraits::WKTBaseKeyword());
 }

@@ -7943,7 +7943,7 @@ static void exportSourceCRSAndTargetCRSToWKT(const CoordinateOperation *co,
     assert(l_targetCRS);
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     const bool canExportCRSId =
-        (isWKT2 && formatter->use2018Keywords() &&
+        (isWKT2 && formatter->use2019Keywords() &&
          !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId()));
 
     const bool hasDomains = !co->domains().empty();
@@ -8000,7 +8000,7 @@ void SingleOperation::exportTransformationToWKT(
 
     formatter->addQuotedString(nameStr());
 
-    if (formatter->use2018Keywords()) {
+    if (formatter->use2019Keywords()) {
         const auto &version = operationVersion();
         if (version.has_value()) {
             formatter->startNode(io::WKTConstants::VERSION, false);
@@ -9405,13 +9405,13 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 #ifdef DEBUG_CONCATENATED_OPERATION
                 {
                     auto f(io::WKTFormatter::create(
-                        io::WKTFormatter::Convention::WKT2_2018));
+                        io::WKTFormatter::Convention::WKT2_2019));
                     std::cerr << "Source CRS of step " << i << ":" << std::endl;
                     std::cerr << l_sourceCRS->exportToWKT(f.get()) << std::endl;
                 }
                 {
                     auto f(io::WKTFormatter::create(
-                        io::WKTFormatter::Convention::WKT2_2018));
+                        io::WKTFormatter::Convention::WKT2_2019));
                     std::cerr << "Target CRS of step " << i - 1 << ":"
                               << std::endl;
                     std::cerr << lastTargetCRS->exportToWKT(f.get())
@@ -9434,7 +9434,7 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 #ifdef DEBUG_CONCATENATED_OPERATION
     {
         auto f(
-            io::WKTFormatter::create(io::WKTFormatter::Convention::WKT2_2018));
+            io::WKTFormatter::create(io::WKTFormatter::Convention::WKT2_2019));
         std::cerr << "ConcatenatedOperation::create()" << std::endl;
         std::cerr << op->exportToWKT(f.get()) << std::endl;
     }
@@ -9697,16 +9697,16 @@ CoordinateOperationNNPtr ConcatenatedOperation::inverse() const {
 //! @cond Doxygen_Suppress
 void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2 || !formatter->use2018Keywords()) {
+    if (!isWKT2 || !formatter->use2019Keywords()) {
         throw io::FormattingException(
-            "Transformation can only be exported to WKT2:2018");
+            "Transformation can only be exported to WKT2:2019");
     }
 
     formatter->startNode(io::WKTConstants::CONCATENATEDOPERATION,
                          !identifiers().empty());
     formatter->addQuotedString(nameStr());
 
-    if (isWKT2 && formatter->use2018Keywords()) {
+    if (isWKT2 && formatter->use2019Keywords()) {
         const auto &version = operationVersion();
         if (version.has_value()) {
             formatter->startNode(io::WKTConstants::VERSION, false);

@@ -1352,7 +1352,7 @@ struct PROJ_GCC_DLL DerivedEngineeringCRSTraits {
     inline static const std::string &CRSName();
     inline static const std::string &WKTKeyword();
     inline static const std::string &WKTBaseKeyword();
-    static const bool wkt2_2018_only = true;
+    static const bool wkt2_2019_only = true;
 };
 //! @endcond
 
@@ -1390,7 +1390,7 @@ struct PROJ_GCC_DLL DerivedParametricCRSTraits {
     inline static const std::string &CRSName();
     inline static const std::string &WKTKeyword();
     inline static const std::string &WKTBaseKeyword();
-    static const bool wkt2_2018_only = false;
+    static const bool wkt2_2019_only = false;
 };
 //! @endcond
 
@@ -1427,7 +1427,7 @@ struct PROJ_GCC_DLL DerivedTemporalCRSTraits {
     inline static const std::string &CRSName();
     inline static const std::string &WKTKeyword();
     inline static const std::string &WKTBaseKeyword();
-    static const bool wkt2_2018_only = false;
+    static const bool wkt2_2019_only = false;
 };
 //! @endcond
 

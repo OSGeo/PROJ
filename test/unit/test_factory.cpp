@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test ISO19111:2018 implementation
+ * Purpose:  Test ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -705,7 +705,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8_CF) {
                     "        ID[\"EPSG\",1049]],\n";
 
     auto wkt = op->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     EXPECT_TRUE(wkt.find(expected) != std::string::npos) << wkt;
 }
 
@@ -818,7 +818,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
 
     EXPECT_EQ(
         op->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -924,7 +924,7 @@ TEST(
         "in grid file.\"]]";
     EXPECT_EQ(
         op->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -940,7 +940,7 @@ TEST(
         "    PARAMETERFILE[\"Longitude difference file\",\"alaska.los\"],\n";
 
     auto wkt = op->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     EXPECT_TRUE(wkt.find(expected) != std::string::npos) << wkt;
 }
 
@@ -998,7 +998,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
 
     EXPECT_EQ(
         op->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test ISO19111:2018 implementation
+ * Purpose:  Test ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -157,7 +157,7 @@ TEST(crs, GeographicCRS_datum_ensemble) {
             nullptr, ensemble_vdatum,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
         WKTFormatterNNPtr f(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
         crs->exportToWKT(f.get());
         auto expected =
             "GEOGCRS[\"unnamed\",\n"
@@ -187,7 +187,7 @@ TEST(crs, GeographicCRS_datum_ensemble) {
             ensemble_vdatum,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
         WKTFormatterNNPtr f(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
         crs->exportToWKT(f.get());
         auto expected = "GEOGCRS[\"unnamed\",\n"
                         "    ENSEMBLE[\"unnamed\",\n"
@@ -263,10 +263,10 @@ TEST(crs, EPSG_4326_as_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_4326_as_WKT2_2018) {
+TEST(crs, EPSG_4326_as_WKT2_2019) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
     crs->exportToWKT(f.get());
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
@@ -322,10 +322,10 @@ TEST(crs, EPSG_4326_as_WKT2_SIMPLIFIED_single_line) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_4326_as_WKT2_2018_SIMPLIFIED) {
+TEST(crs, EPSG_4326_as_WKT2_2019_SIMPLIFIED) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019_SIMPLIFIED));
     crs->exportToWKT(f.get());
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
@@ -454,10 +454,10 @@ TEST(crs, EPSG_4979_as_WKT2_SIMPLIFIED) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_4979_as_WKT2_2018_SIMPLIFIED) {
+TEST(crs, EPSG_4979_as_WKT2_2019_SIMPLIFIED) {
     auto crs = GeographicCRS::EPSG_4979;
     WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019_SIMPLIFIED));
     crs->exportToWKT(f.get());
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
@@ -1069,7 +1069,7 @@ TEST(crs, geocentricCRS_as_WKT2) {
     EXPECT_EQ(crs->exportToWKT(WKTFormatter::create().get()), expected);
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
@@ -1614,7 +1614,7 @@ TEST(crs, projectedCRS_as_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, projectedCRS_as_WKT2_2018) {
+TEST(crs, projectedCRS_as_WKT2_2019) {
     auto crs = createProjected();
 
     auto expected =
@@ -1655,7 +1655,7 @@ TEST(crs, projectedCRS_as_WKT2_2018) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 // ---------------------------------------------------------------------------
@@ -1690,7 +1690,7 @@ TEST(crs, projectedCRS_as_WKT2_simplified) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, projectedCRS_as_WKT2_2018_simplified) {
+TEST(crs, projectedCRS_as_WKT2_2019_simplified) {
     auto crs = createProjected();
 
     auto expected =
@@ -1714,7 +1714,7 @@ TEST(crs, projectedCRS_as_WKT2_2018_simplified) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED)
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019_SIMPLIFIED)
                 .get()),
         expected);
 }
@@ -2845,7 +2845,7 @@ TEST(crs, usage) {
     ASSERT_TRUE(crs != nullptr);
 
     auto got_wkt = crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     auto expected = "GEODCRS[\"JGD2000\",\n"
                     "    DATUM[\"Japanese Geodetic Datum 2000\",\n"
                     "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
@@ -3061,7 +3061,7 @@ TEST(crs, verticalCRS_datum_ensemble) {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), nullptr,
         ensemble, VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
     WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
     f->simulCurNodeHasId();
     crs->exportToWKT(f.get());
     auto expected = "VERTCRS[\"unnamed\",\n"
@@ -4017,7 +4017,7 @@ TEST(crs, derivedGeographicCRS_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, derivedGeographicCRS_WKT2_2018) {
+TEST(crs, derivedGeographicCRS_WKT2_2019) {
 
     auto expected = "GEOGCRS[\"WMO Atlantic Pole\",\n"
                     "    BASEGEOGCRS[\"WGS 84\",\n"
@@ -4049,7 +4049,7 @@ TEST(crs, derivedGeographicCRS_WKT2_2018) {
 
     EXPECT_EQ(
         createDerivedGeographicCRS()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4207,7 +4207,7 @@ TEST(crs, derivedGeodeticCRS_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, derivedGeodeticCRS_WKT2_2018) {
+TEST(crs, derivedGeodeticCRS_WKT2_2019) {
 
     auto expected = "GEODCRS[\"Derived geodetic CRS\",\n"
                     "    BASEGEOGCRS[\"WGS 84\",\n"
@@ -4234,7 +4234,7 @@ TEST(crs, derivedGeodeticCRS_WKT2_2018) {
 
     EXPECT_EQ(
         createDerivedGeodeticCRS()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4266,7 +4266,7 @@ static DerivedProjectedCRSNNPtr createDerivedProjectedCRS() {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, derivedProjectedCRS_WKT2_2018) {
+TEST(crs, derivedProjectedCRS_WKT2_2019) {
 
     auto expected =
         "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
@@ -4310,7 +4310,7 @@ TEST(crs, derivedProjectedCRS_WKT2_2018) {
     auto crs = createDerivedProjectedCRS();
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
@@ -4381,7 +4381,7 @@ TEST(crs, dateTimeTemporalCRS_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, dateTimeTemporalCRS_WKT2_2018) {
+TEST(crs, dateTimeTemporalCRS_WKT2_2019) {
 
     auto expected = "TIMECRS[\"Temporal CRS\",\n"
                     "    TDATUM[\"Gregorian calendar\",\n"
@@ -4392,7 +4392,7 @@ TEST(crs, dateTimeTemporalCRS_WKT2_2018) {
 
     EXPECT_EQ(
         createDateTimeTemporalCRS()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4418,7 +4418,7 @@ static TemporalCRSNNPtr createTemporalCountCRSWithConvFactor() {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, temporalCountCRSWithConvFactor_WKT2_2018) {
+TEST(crs, temporalCountCRSWithConvFactor_WKT2_2019) {
 
     auto expected = "TIMECRS[\"GPS milliseconds\",\n"
                     "    TDATUM[\"GPS time origin\",\n"
@@ -4430,7 +4430,7 @@ TEST(crs, temporalCountCRSWithConvFactor_WKT2_2018) {
 
     EXPECT_EQ(
         createTemporalCountCRSWithConvFactor()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4458,7 +4458,7 @@ static TemporalCRSNNPtr createTemporalCountCRSWithoutConvFactor() {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, temporalCountCRSWithoutConvFactor_WKT2_2018) {
+TEST(crs, temporalCountCRSWithoutConvFactor_WKT2_2019) {
 
     auto expected = "TIMECRS[\"Calendar hours from 1979-12-29\",\n"
                     "    TDATUM[\"29 December 1979\",\n"
@@ -4470,7 +4470,7 @@ TEST(crs, temporalCountCRSWithoutConvFactor_WKT2_2018) {
 
     EXPECT_EQ(
         createTemporalCountCRSWithoutConvFactor()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4496,7 +4496,7 @@ static TemporalCRSNNPtr createTemporalMeasureCRSWithoutConvFactor() {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
+TEST(crs, temporalMeasureCRSWithoutConvFactor_WKT2_2019) {
 
     auto expected = "TIMECRS[\"Decimal Years CE\",\n"
                     "    TDATUM[\"Common Era\",\n"
@@ -4508,7 +4508,7 @@ TEST(crs, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
 
     EXPECT_EQ(
         createTemporalMeasureCRSWithoutConvFactor()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4718,7 +4718,7 @@ TEST(crs, DerivedEngineeringCRS_WKT2) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
     EXPECT_THROW(
         createDerivedEngineeringCRS()->exportToWKT(
@@ -4775,7 +4775,7 @@ TEST(crs, DerivedParametricCRS_WKT2) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4830,7 +4830,7 @@ TEST(crs, DeriveTemporalCRS_WKT2) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 

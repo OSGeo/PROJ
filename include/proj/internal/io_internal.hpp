@@ -87,8 +87,8 @@ class WKTConstants {
     static const std::string CONVERSION;
     static const std::string METHOD;
     static const std::string REMARK;
-    static const std::string GEOGCRS;     // WKT2-2018
-    static const std::string BASEGEOGCRS; // WKT2-2018
+    static const std::string GEOGCRS;     // WKT2-2019
+    static const std::string BASEGEOGCRS; // WKT2-2019
     static const std::string SCOPE;
     static const std::string AREA;
     static const std::string BBOX;
@@ -103,27 +103,27 @@ class WKTConstants {
     static const std::string TARGETCRS;
     static const std::string INTERPOLATIONCRS;
     static const std::string OPERATIONACCURACY;
-    static const std::string CONCATENATEDOPERATION; // WKT2-2018
-    static const std::string STEP;                  // WKT2-2018
+    static const std::string CONCATENATEDOPERATION; // WKT2-2019
+    static const std::string STEP;                  // WKT2-2019
     static const std::string BOUNDCRS;
     static const std::string ABRIDGEDTRANSFORMATION;
     static const std::string DERIVINGCONVERSION;
     static const std::string TDATUM;
-    static const std::string CALENDAR; // WKT2-2018
+    static const std::string CALENDAR; // WKT2-2019
     static const std::string TIMEORIGIN;
     static const std::string TIMECRS;
     static const std::string VERTICALEXTENT;
     static const std::string TIMEEXTENT;
-    static const std::string USAGE;            // WKT2-2018
-    static const std::string DYNAMIC;          // WKT2-2018
-    static const std::string FRAMEEPOCH;       // WKT2-2018
-    static const std::string MODEL;            // WKT2-2018
-    static const std::string VELOCITYGRID;     // WKT2-2018
-    static const std::string ENSEMBLE;         // WKT2-2018
-    static const std::string MEMBER;           // WKT2-2018
-    static const std::string ENSEMBLEACCURACY; // WKT2-2018
-    static const std::string DERIVEDPROJCRS;   // WKT2-2018
-    static const std::string BASEPROJCRS;      // WKT2-2018
+    static const std::string USAGE;            // WKT2-2019
+    static const std::string DYNAMIC;          // WKT2-2019
+    static const std::string FRAMEEPOCH;       // WKT2-2019
+    static const std::string MODEL;            // WKT2-2019
+    static const std::string VELOCITYGRID;     // WKT2-2019
+    static const std::string ENSEMBLE;         // WKT2-2019
+    static const std::string MEMBER;           // WKT2-2019
+    static const std::string ENSEMBLEACCURACY; // WKT2-2019
+    static const std::string DERIVEDPROJCRS;   // WKT2-2019
+    static const std::string BASEPROJCRS;      // WKT2-2019
     static const std::string EDATUM;
     static const std::string ENGCRS;
     static const std::string PDATUM;
@@ -140,11 +140,11 @@ class WKTConstants {
     static const std::string GEODETICDATUM;
     static const std::string PROJECTEDCRS;
     static const std::string PRIMEMERIDIAN;
-    static const std::string GEOGRAPHICCRS; // WKT2-2018
-    static const std::string TRF;           // WKT2-2018
+    static const std::string GEOGRAPHICCRS; // WKT2-2019
+    static const std::string TRF;           // WKT2-2019
     static const std::string VERTICALCRS;
     static const std::string VERTICALDATUM;
-    static const std::string VRF; // WKT2-2018
+    static const std::string VRF; // WKT2-2019
     static const std::string TIMEDATUM;
     static const std::string TEMPORALQUANTITY;
     static const std::string ENGINEERINGDATUM;

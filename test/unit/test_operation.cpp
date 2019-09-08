@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test ISO19111:2018 implementation
+ * Purpose:  Test ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -446,28 +446,28 @@ TEST(operation, concatenated_operation) {
     std::string src_wkt;
     {
         auto formatter =
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
         src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter.get());
     }
 
     std::string dst_wkt;
     {
         auto formatter =
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
         dst_wkt = GeographicCRS::EPSG_4979->exportToWKT(formatter.get());
     }
 
     std::string step1_wkt;
     {
         auto formatter =
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
         step1_wkt = transf_1->exportToWKT(formatter.get());
     }
 
     std::string step2_wkt;
     {
         auto formatter =
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
         step2_wkt = transf_2->exportToWKT(formatter.get());
     }
 
@@ -485,7 +485,7 @@ TEST(operation, concatenated_operation) {
 
     EXPECT_EQ(replaceAll(replaceAll(concat->exportToWKT(
                                         WKTFormatter::create(
-                                            WKTFormatter::Convention::WKT2_2018)
+                                            WKTFormatter::Convention::WKT2_2019)
                                             .get()),
                                     " ", ""),
                          "\n", ""),
@@ -6559,7 +6559,7 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
         // Test that we can round-trip this through WKT and still get the same
         // PROJ string.
         auto wkt = list[0]->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
         auto obj = WKTParser().createFromWKT(wkt);
         auto co = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
         ASSERT_TRUE(co != nullptr);
@@ -6775,7 +6775,7 @@ TEST(operation, compoundCRS_from_WKT2_to_geogCRS_3D_context) {
         CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
     ASSERT_GE(list.size(), 1U);
     auto wkt2 = src->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     auto obj = WKTParser().createFromWKT(wkt2);
     auto src_from_wkt2 = nn_dynamic_pointer_cast<CRS>(obj);
     ASSERT_TRUE(src_from_wkt2 != nullptr);
@@ -7019,10 +7019,10 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
         EXPECT_TRUE(op->isEquivalentTo(boundCRS->transformation().get()));
         {
             auto wkt1 = op->exportToWKT(
-                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2019)
                     .get());
             auto wkt2 = boundCRS->transformation()->exportToWKT(
-                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2019)
                     .get());
             EXPECT_EQ(wkt1, wkt2);
         }
@@ -7035,10 +7035,10 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
             op->isEquivalentTo(boundCRS->transformation()->inverse().get()));
         {
             auto wkt1 = op->exportToWKT(
-                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2019)
                     .get());
             auto wkt2 = boundCRS->transformation()->inverse()->exportToWKT(
-                WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2019)
                     .get());
             EXPECT_EQ(wkt1, wkt2);
         }

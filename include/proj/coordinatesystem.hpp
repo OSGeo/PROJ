@@ -631,7 +631,7 @@ class PROJ_GCC_DLL TemporalCS : public CoordinateSystem {
     INLINED_MAKE_SHARED
 
     PROJ_INTERNAL std::string
-    getWKT2Type(bool use2018Keywords) const override = 0;
+    getWKT2Type(bool use2019Keywords) const override = 0;
 
   private:
     TemporalCS(const TemporalCS &other) = delete;
@@ -669,7 +669,7 @@ class PROJ_GCC_DLL DateTimeTemporalCS final : public TemporalCS {
         const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2019Keywords) const override;
 
   private:
     DateTimeTemporalCS(const DateTimeTemporalCS &other) = delete;
@@ -705,7 +705,7 @@ class PROJ_GCC_DLL TemporalCountCS final : public TemporalCS {
         const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2019Keywords) const override;
 
   private:
     TemporalCountCS(const TemporalCountCS &other) = delete;
@@ -741,7 +741,7 @@ class PROJ_GCC_DLL TemporalMeasureCS final : public TemporalCS {
         const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2019Keywords) const override;
 
   private:
     TemporalMeasureCS(const TemporalMeasureCS &other) = delete;

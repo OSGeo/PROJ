@@ -478,8 +478,11 @@ typedef char **PROJ_STRING_LIST;
 /** \brief Guessed WKT "dialect". */
 typedef enum
 {
-    /** \ref WKT2_2018 */
-    PJ_GUESSED_WKT2_2018,
+    /** \ref WKT2_2019 */
+    PJ_GUESSED_WKT2_2019,
+
+    /** Deprecated alias for PJ_GUESSED_WKT2_2019 */
+    PJ_GUESSED_WKT2_2018 = PJ_GUESSED_WKT2_2019,
 
     /** \ref WKT2_2015 */
     PJ_GUESSED_WKT2_2015,
@@ -575,10 +578,14 @@ typedef enum
     PJ_WKT2_2015,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_SIMPLIFIED */
     PJ_WKT2_2015_SIMPLIFIED,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018 */
-    PJ_WKT2_2018,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018_SIMPLIFIED */
-    PJ_WKT2_2018_SIMPLIFIED,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2019 */
+    PJ_WKT2_2019,
+    /** Deprecated alias for PJ_WKT2_2019 */
+    PJ_WKT2_2018 = PJ_WKT2_2019,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2019_SIMPLIFIED */
+    PJ_WKT2_2019_SIMPLIFIED,
+    /** Deprecated alias for PJ_WKT2_2019 */
+    PJ_WKT2_2018_SIMPLIFIED = PJ_WKT2_2019_SIMPLIFIED,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_GDAL */
     PJ_WKT1_GDAL,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_ESRI */

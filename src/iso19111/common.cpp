@@ -989,7 +989,7 @@ void ObjectDomain::_exportToWKT(WKTFormatter *formatter) const {
         formatter->startNode(WKTConstants::SCOPE, false);
         formatter->addQuotedString(*(d->scope_));
         formatter->endNode();
-    } else if (formatter->use2018Keywords()) {
+    } else if (formatter->use2019Keywords()) {
         formatter->startNode(WKTConstants::SCOPE, false);
         formatter->addQuotedString("unknown");
         formatter->endNode();
@@ -1192,7 +1192,7 @@ void ObjectUsage::baseExportToWKT(WKTFormatter *formatter) const {
     if (isWKT2 && formatter->outputUsage()) {
         auto l_domains = domains();
         if (!l_domains.empty()) {
-            if (formatter->use2018Keywords()) {
+            if (formatter->use2019Keywords()) {
                 for (const auto &domain : l_domains) {
                     formatter->startNode(WKTConstants::USAGE, false);
                     domain->_exportToWKT(formatter);

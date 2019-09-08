@@ -182,18 +182,24 @@ class PROJ_GCC_DLL WKTFormatter {
         WKT2_SIMPLIFIED,
         WKT2_2015_SIMPLIFIED = WKT2_SIMPLIFIED,
 
-        /** Full WKT2 string, conforming to ISO 19162:2018 / OGC 18-010, with
-         * (\ref WKT2_2018) all possible nodes and new keyword names.
+        /** Full WKT2 string, conforming to ISO 19162:2019 / OGC 18-010, with
+         * (\ref WKT2_2019) all possible nodes and new keyword names.
          * Non-normative list of differences:
          * <ul>
-         *      <li>WKT2_2018 uses GEOGCRS / BASEGEOGCRS keywords for
+         *      <li>WKT2_2019 uses GEOGCRS / BASEGEOGCRS keywords for
          * GeographicCRS.</li>
          * </ul>
          */
-        WKT2_2018,
+        WKT2_2019,
 
-        /** WKT2_2018 with the simplification rule of WKT2_SIMPLIFIED */
-        WKT2_2018_SIMPLIFIED,
+        /** Deprecated alias for WKT2_2019 */
+        WKT2_2018 = WKT2_2019,
+
+        /** WKT2_2019 with the simplification rule of WKT2_SIMPLIFIED */
+        WKT2_2019_SIMPLIFIED,
+
+        /** Deprecated alias for WKT2_2019_SIMPLIFIED */
+        WKT2_2018_SIMPLIFIED = WKT2_2019_SIMPLIFIED,
 
         /** WKT1 as traditionally output by GDAL, deriving from OGC 01-009.
             A notable departure from WKT1_GDAL with respect to OGC 01-009 is
@@ -322,7 +328,7 @@ class PROJ_GCC_DLL WKTFormatter {
     };
 
     PROJ_INTERNAL Version version() const;
-    PROJ_INTERNAL bool use2018Keywords() const;
+    PROJ_INTERNAL bool use2019Keywords() const;
     PROJ_INTERNAL bool useESRIDialect() const;
 
     PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
@@ -736,8 +742,10 @@ class PROJ_GCC_DLL WKTParser {
 
     /** Guessed WKT "dialect" */
     enum class PROJ_MSVC_DLL WKTGuessedDialect {
-        /** \ref WKT2_2018 */
-        WKT2_2018,
+        /** \ref WKT2_2019 */
+        WKT2_2019,
+        /** Deprecated alias for WKT2_2019 */
+        WKT2_2018 = WKT2_2019,
         /** \ref WKT2_2015 */
         WKT2_2015,
         /** \ref WKT1 */

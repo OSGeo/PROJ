@@ -42,8 +42,8 @@ echo "Testing projinfo -o WKT2_2015 EPSG:4326" >> ${OUT}
 $EXE -o WKT2_2015 EPSG:4326 >>${OUT}
 echo "" >>${OUT}
 
-echo "Testing projinfo -o WKT2_2018 EPSG:4326" >> ${OUT}
-$EXE -o WKT2_2018 EPSG:4326 >>${OUT}
+echo "Testing projinfo -o WKT2_2019 EPSG:4326" >> ${OUT}
+$EXE -o WKT2_2019 EPSG:4326 >>${OUT}
 echo "" >>${OUT}
 
 echo "Testing projinfo -o ALL EPSG:4326" >> ${OUT}
