@@ -95,7 +95,7 @@ static void usage() {
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
-        << "                [--identify]" << std::endl
+        << "                [--identify] [--3d]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
         << "                {object_definition} | (-s {srs_def} -t {srs_def})"
         << std::endl;
@@ -143,7 +143,7 @@ static BaseObjectNNPtr buildObject(
     const std::string &kind, const std::string &context,
     bool buildBoundCRSToWGS84,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
-    bool quiet) {
+    bool promoteTo3D, bool quiet) {
     BaseObjectPtr obj;
 
     std::string l_user_string(user_string);
@@ -222,6 +222,13 @@ static BaseObjectNNPtr buildObject(
             obj = crs->createBoundCRSToWGS84IfPossible(dbContext,
                                                        allowUseIntermediateCRS)
                       .as_nullable();
+        }
+    }
+
+    if (promoteTo3D) {
+        auto crs = std::dynamic_pointer_cast<CRS>(obj);
+        if (crs) {
+            obj = crs->promoteTo3D(std::string(), dbContext).as_nullable();
         }
     }
 
@@ -594,6 +601,37 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op,
 
 // ---------------------------------------------------------------------------
 
+static size_t getAxisCount(const CRSNNPtr &crs) {
+    const auto singleCRS = dynamic_cast<const SingleCRS *>(crs.get());
+    if (singleCRS) {
+        return singleCRS->coordinateSystem()->axisList().size();
+    }
+    const auto compoundCRS = dynamic_cast<const CompoundCRS *>(crs.get());
+    if (compoundCRS) {
+        size_t axisCount = 0;
+        const auto &components = compoundCRS->componentReferenceSystems();
+        for (const auto &subCRS : components) {
+            axisCount += getAxisCount(subCRS);
+        }
+        return axisCount;
+    }
+    const auto boundCRS = dynamic_cast<const BoundCRS *>(crs.get());
+    if (boundCRS) {
+        return getAxisCount(boundCRS->baseCRS());
+    }
+    return 0;
+}
+
+// ---------------------------------------------------------------------------
+
+static bool is2D(const CRSNNPtr &crs) { return getAxisCount(crs) == 2; }
+
+// ---------------------------------------------------------------------------
+
+static bool is3D(const CRSNNPtr &crs) { return getAxisCount(crs) == 3; }
+
+// ---------------------------------------------------------------------------
+
 static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
@@ -604,23 +642,37 @@ static void outputOperations(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
-    bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
-    auto sourceObj = buildObject(
-        dbContext, sourceCRSStr, "crs", "source CRS", false,
-        CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
+    bool showSuperseded, bool promoteTo3D, const OutputOptions &outputOpt,
+    bool summary) {
+    auto sourceObj =
+        buildObject(dbContext, sourceCRSStr, "crs", "source CRS", false,
+                    CoordinateOperationContext::IntermediateCRSUse::NEVER,
+                    promoteTo3D, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
+    auto nnSourceCRS = NN_NO_CHECK(sourceCRS);
 
-    auto targetObj = buildObject(
-        dbContext, targetCRSStr, "crs", "target CRS", false,
-        CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
+    auto targetObj =
+        buildObject(dbContext, targetCRSStr, "crs", "target CRS", false,
+                    CoordinateOperationContext::IntermediateCRSUse::NEVER,
+                    promoteTo3D, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
         std::exit(1);
+    }
+    auto nnTargetCRS = NN_NO_CHECK(targetCRS);
+
+    if (!promoteTo3D && !outputOpt.quiet &&
+        ((is2D(nnSourceCRS) && is3D(nnTargetCRS)) ||
+         (is3D(nnSourceCRS) && is2D(nnTargetCRS)))) {
+        std::cerr << "Warning: mix of 2D and 3D CRS. Vertical transformations, "
+                     "if available, will not be applied. Consider using 3D "
+                     "version of the CRS, or the --3d switch"
+                  << std::endl;
     }
 
     std::vector<CoordinateOperationNNPtr> list;
@@ -641,7 +693,7 @@ static void outputOperations(
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         ctxt->setDiscardSuperseded(!showSuperseded);
         list = CoordinateOperationFactory::create()->createOperations(
-            NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), ctxt);
+            nnSourceCRS, nnTargetCRS, ctxt);
         if (!spatialCriterionExplicitlySpecified &&
             spatialCriterion == CoordinateOperationContext::SpatialCriterion::
                                     STRICT_CONTAINMENT) {
@@ -651,8 +703,7 @@ static void outputOperations(
                         PARTIAL_INTERSECTION);
                 spatialCriterionPartialIntersectionResultCount =
                     CoordinateOperationFactory::create()
-                        ->createOperations(NN_NO_CHECK(sourceCRS),
-                                           NN_NO_CHECK(targetCRS), ctxt)
+                        ->createOperations(nnSourceCRS, nnTargetCRS, ctxt)
                         .size();
             } catch (const std::exception &) {
             }
@@ -735,6 +786,7 @@ int main(int argc, char **argv) {
     std::string authority;
     bool identify = false;
     bool showSuperseded = false;
+    bool promoteTo3D = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -984,6 +1036,8 @@ int main(int argc, char **argv) {
             showSuperseded = true;
         } else if (arg == "--lax") {
             outputOpt.strict = false;
+        } else if (ci_equal(arg, "--3d")) {
+            promoteTo3D = true;
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {
@@ -1054,7 +1108,8 @@ int main(int argc, char **argv) {
         try {
             auto obj(buildObject(dbContext, user_string, objectKind,
                                  "input string", buildBoundCRSToWGS84,
-                                 allowUseIntermediateCRS, outputOpt.quiet));
+                                 allowUseIntermediateCRS, promoteTo3D,
+                                 outputOpt.quiet));
             if (guessDialect) {
                 auto dialect = WKTParser().guessDialect(user_string);
                 std::cout << "Guessed WKT dialect: ";
@@ -1193,7 +1248,7 @@ int main(int argc, char **argv) {
                              spatialCriterionExplicitlySpecified, crsExtentUse,
                              gridAvailabilityUse, allowUseIntermediateCRS,
                              pivots, authority, usePROJGridAlternatives,
-                             showSuperseded, outputOpt, summary);
+                             showSuperseded, promoteTo3D, outputOpt, summary);
         } catch (const std::exception &e) {
             std::cerr << "outputOperations() failed with: " << e.what()
                       << std::endl;

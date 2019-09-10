@@ -5224,3 +5224,60 @@ TEST(crs, getNonDeprecated) {
         ASSERT_EQ(list.size(), 1U);
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, promoteTo3D) {
+    auto dbContext = DatabaseContext::create();
+    {
+        auto crs = GeographicCRS::EPSG_4326;
+        auto crs3D = crs->promoteTo3D(std::string(), nullptr);
+        auto crs3DAsGeog = nn_dynamic_pointer_cast<GeographicCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsGeog != nullptr);
+        EXPECT_EQ(crs3DAsGeog->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_TRUE(crs3D->promoteTo3D(std::string(), nullptr)
+                        ->isEquivalentTo(crs3D.get()));
+    }
+    {
+        auto crs = GeographicCRS::EPSG_4326;
+        auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+        auto crs3DAsGeog = nn_dynamic_pointer_cast<GeographicCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsGeog != nullptr);
+        EXPECT_EQ(crs3DAsGeog->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_TRUE(!crs3DAsGeog->identifiers().empty());
+    }
+    {
+        auto crs = createProjected();
+        auto crs3D = crs->promoteTo3D(std::string(), nullptr);
+        auto crs3DAsProjected = nn_dynamic_pointer_cast<ProjectedCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsProjected != nullptr);
+        EXPECT_EQ(crs3DAsProjected->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_EQ(
+            crs3DAsProjected->baseCRS()->coordinateSystem()->axisList().size(),
+            3U);
+        EXPECT_TRUE(crs3D->promoteTo3D(std::string(), nullptr)
+                        ->isEquivalentTo(crs3D.get()));
+    }
+    {
+        auto crs = createProjected();
+        auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+        auto crs3DAsProjected = nn_dynamic_pointer_cast<ProjectedCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsProjected != nullptr);
+        EXPECT_EQ(crs3DAsProjected->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_EQ(
+            crs3DAsProjected->baseCRS()->coordinateSystem()->axisList().size(),
+            3U);
+        EXPECT_TRUE(!crs3DAsProjected->baseCRS()->identifiers().empty());
+    }
+    {
+        auto crs = BoundCRS::createFromTOWGS84(
+            createProjected(), std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+        auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+        auto crs3DAsBound = nn_dynamic_pointer_cast<BoundCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsBound != nullptr);
+        auto baseCRS =
+            nn_dynamic_pointer_cast<ProjectedCRS>(crs3DAsBound->baseCRS());
+        ASSERT_TRUE(baseCRS != nullptr);
+        EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 3U);
+    }
+}

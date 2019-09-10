@@ -821,3 +821,12 @@ INVERSE(EPSG):10000, Inverse of RGF93 to NGF IGN69 height (1), 0.5 m, France - m
 PROJ string:
 +proj=pipeline +step +inv +proj=vgridshift +grids=ggf97a.txt +multiplier=1
 
+Testing -s EPSG:32631 -t EPSG:4326+3855 --summary
+Warning: mix of 2D and 3D CRS. Vertical transformations, if available, will not be applied. Consider using 3D version of the CRS, or the --3d switch
+
+Testing -s EPSG:32631 -t EPSG:4326+3855 --3d --summary
+Candidate operations found: 3
+unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World
+unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World
+unknown id, Inverse of UTM zone 31N + Inverse of Transformation from EGM2008 height to WGS 84 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
+

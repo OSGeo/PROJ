@@ -3892,4 +3892,78 @@ TEST_F(CApi, proj_create_ellipsoidal_3D_cs) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_promote_to_3D) {
+
+    auto crs2D =
+        proj_create(m_ctxt, GeographicCRS::EPSG_4326
+                                ->exportToWKT(WKTFormatter::create().get())
+                                .c_str());
+    ObjectKeeper keeper_crs2D(crs2D);
+    EXPECT_NE(crs2D, nullptr);
+
+    auto crs3D = proj_crs_promote_to_3D(m_ctxt, nullptr, crs2D);
+    ObjectKeeper keeper_crs3D(crs3D);
+    EXPECT_NE(crs3D, nullptr);
+
+    auto cs = proj_crs_get_coordinate_system(m_ctxt, crs3D);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeperCs(cs);
+    EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+
+    auto code = proj_get_id_code(crs3D, 0);
+    ASSERT_TRUE(code != nullptr);
+    EXPECT_EQ(code, std::string("4979"));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_create_projected_3D_crs_from_2D) {
+
+    auto projCRS = proj_create_from_database(m_ctxt, "EPSG", "32631",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(projCRS, nullptr);
+    ObjectKeeper keeper_projCRS(projCRS);
+
+    {
+        auto geog3DCRS = proj_create_from_database(
+            m_ctxt, "EPSG", "4979", PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(geog3DCRS, nullptr);
+        ObjectKeeper keeper_geog3DCRS(geog3DCRS);
+
+        auto crs3D = proj_crs_create_projected_3D_crs_from_2D(
+            m_ctxt, nullptr, projCRS, geog3DCRS);
+        ObjectKeeper keeper_crs3D(crs3D);
+        EXPECT_NE(crs3D, nullptr);
+
+        EXPECT_EQ(proj_get_type(crs3D), PJ_TYPE_PROJECTED_CRS);
+
+        EXPECT_EQ(std::string(proj_get_name(crs3D)),
+                  std::string(proj_get_name(projCRS)));
+
+        auto cs = proj_crs_get_coordinate_system(m_ctxt, crs3D);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+        EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+    }
+
+    {
+        auto crs3D = proj_crs_create_projected_3D_crs_from_2D(m_ctxt, nullptr,
+                                                              projCRS, nullptr);
+        ObjectKeeper keeper_crs3D(crs3D);
+        EXPECT_NE(crs3D, nullptr);
+
+        EXPECT_EQ(proj_get_type(crs3D), PJ_TYPE_PROJECTED_CRS);
+
+        EXPECT_EQ(std::string(proj_get_name(crs3D)),
+                  std::string(proj_get_name(projCRS)));
+
+        auto cs = proj_crs_get_coordinate_system(m_ctxt, crs3D);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+        EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+    }
+}
+
 } // namespace

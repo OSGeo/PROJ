@@ -24,7 +24,7 @@ Synopsis
     |    [--pivot-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
     |    [--boundcrs-to-wgs84]
     |    [--main-db-path path] [--aux-db-path path]*
-    |    [--identify]
+    |    [--identify] [--3d]
     |    [--c-ify] [--single-line]
     |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
     |
@@ -219,6 +219,14 @@ The following control parameters can appear in any order:
     such as ESRI WKT1. This might also be used with PROJ strings.
     For example, `+proj=utm +zone=31 +datum=WGS84 +type=crs` will be identified
     with a likelihood of 70% to EPSG:32631
+
+.. option:: --3d
+
+    .. versionadded:: 7.0
+
+    "Promote" the CRS(s) to their 3D version. Useful for example when wanting
+    to transform between a 2D projected CRS with elevations as ellipsoidal
+    height to a 3D geographic CRS or a compoundCRS.
 
 .. option:: --c-ify
 
