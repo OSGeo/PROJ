@@ -4982,6 +4982,29 @@ AuthorityFactory::createCompoundCRSFromExisting(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+std::list<datum::GeodeticReferenceFrameNNPtr>
+AuthorityFactory::getPreferredHubGeodeticReferenceFrames(
+    const std::string &geodeticReferenceFrameCode) const {
+    std::list<datum::GeodeticReferenceFrameNNPtr> res;
+
+    const std::string sql("SELECT hub_auth_name, hub_code FROM "
+                          "geodetic_datum_preferred_hub WHERE "
+                          "src_auth_name = ? AND src_code = ?");
+    auto sqlRes = d->run(sql, {d->authority(), geodeticReferenceFrameCode});
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(
+            d->createFactory(auth_name)->createGeodeticDatum(code));
+    }
+
+    return res;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 FactoryException::FactoryException(const char *message) : Exception(message) {}
 
 // ---------------------------------------------------------------------------

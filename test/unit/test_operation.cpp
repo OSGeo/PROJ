@@ -4495,6 +4495,73 @@ TEST(operation, geogCRS_to_geogCRS_context_NAD27_to_WGS84) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_NAD27_to_WGS84_G1762) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+
+    auto authFactoryEPSG =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // NAD27
+        authFactoryEPSG->createCoordinateReferenceSystem("4267"),
+        // WGS84 (G1762)
+        authFactoryEPSG->createCoordinateReferenceSystem("9057"), ctxt);
+    ASSERT_GE(list.size(), 78U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "NAD27 to WGS 84 (33) + WGS 84 to WGS 84 (G1762)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=hgridshift +grids=ntv2_0.gsb "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(list[1]->nameStr(),
+              "NAD27 to WGS 84 (3) + WGS 84 to WGS 84 (G1762)");
+    EXPECT_EQ(list[2]->nameStr(),
+              "NAD27 to WGS 84 (79) + WGS 84 to WGS 84 (G1762)");
+    EXPECT_EQ(list[3]->nameStr(),
+              "NAD27 to WGS 84 (4) + WGS 84 to WGS 84 (G1762)");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_WGS84_G1674_to_WGS84_G1762) {
+    // Check that particular behaviour with WGS 84 (Gxxx) related to
+    // 'geodetic_datum_preferred_hub' table and custom no-op transformations
+    // between WGS 84 and WGS 84 (Gxxx) doesn't affect direct transformations
+    // to those realizations.
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+
+    auto authFactoryEPSG =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // WGS84 (G1674)
+        authFactoryEPSG->createCoordinateReferenceSystem("9056"),
+        // WGS84 (G1762)
+        authFactoryEPSG->createCoordinateReferenceSystem("9057"), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=helmert +x=-0.004 +y=0.003 +z=0.004 +rx=0.00027 "
+              "+ry=-0.00027 +rz=0.00038 +s=-0.0069 "
+              "+convention=coordinate_frame "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_geogCRS_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
