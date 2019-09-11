@@ -24,6 +24,7 @@ We start by writing the program for PROJ 4:
     main(int argc, char **argv) {
         projPJ pj_merc, pj_longlat;
         double x, y;
+        int p;
 
         if (!(pj_longlat = pj_init_plus("+proj=longlat +ellps=clrk66")) )
             return 1;
@@ -33,7 +34,7 @@ We start by writing the program for PROJ 4:
         while (scanf("%lf %lf", &x, &y) == 2) {
             x *= DEG_TO_RAD; /* longitude */
             y *= DEG_TO_RAD; /* latitude */
-            int p = pj_transform(pj_longlat, pj_merc, 1, 1, &x, &y, NULL);
+            p = pj_transform(pj_longlat, pj_merc, 1, 1, &x, &y, NULL);
             printf("%.2f\t%.2f\n", x, y);
         }
 
@@ -51,7 +52,7 @@ The same program implemented using PROJ 6:
 
     main(int argc, char **argv) {
         PJ *P;
-        PJ_COORD c;
+        PJ_COORD c, c_out;
 
         /* NOTE: the use of PROJ strings to describe CRS is strongly discouraged */
         /* in PROJ 6, as PROJ strings are a poor way of describing a CRS, and */
@@ -83,13 +84,22 @@ The same program implemented using PROJ 6:
             P = P_for_GIS;
         }
 
-        while (scanf("%lf %lf", &c.lp.lam, &c.lp.phi) == 2) {
+        /* For reliable geographic <--> geocentric conversions, z shall not */
+        /* be some random value. Also t shall be initialized to HUGE_VAL to */
+        /* allow for proper selection of time-dependent operations if one of */
+        /* the CRS is dynamic. */
+        c.lpzt.z = 0.0;
+        c.lpzt.t = HUGE_VAL;
+
+        while (scanf("%lf %lf", &c.lpzt.lam, &c.lpzt.phi) == 2) {
             /* No need to convert to radian */
-            c = proj_trans(P, PJ_FWD, c);
-            printf("%.2f\t%.2f\n", c.xy.x, c.xy.y);
+            c_out = proj_trans(P, PJ_FWD, c);
+            printf("%.2f\t%.2f\n", c_out.xy.x, c_out.xy.y);
         }
 
         proj_destroy(P);
+
+        return 0;
     }
 
 
