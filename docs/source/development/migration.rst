@@ -22,7 +22,7 @@ We start by writing the program for PROJ 4:
     #include <proj_api.h>
 
     main(int argc, char **argv) {
-        projPJ pj_merc, pj_latlong;
+        projPJ pj_merc, pj_longlat;
         double x, y;
 
         if (!(pj_longlat = pj_init_plus("+proj=longlat +ellps=clrk66")) )
@@ -33,7 +33,7 @@ We start by writing the program for PROJ 4:
         while (scanf("%lf %lf", &x, &y) == 2) {
             x *= DEG_TO_RAD; /* longitude */
             y *= DEG_TO_RAD; /* latitude */
-            p = pj_transform(pj_longlat, pj_merc, 1, 1, &x, &y, NULL );
+            int p = pj_transform(pj_longlat, pj_merc, 1, 1, &x, &y, NULL);
             printf("%.2f\t%.2f\n", x, y);
         }
 
@@ -74,7 +74,7 @@ The same program implemented using PROJ 6:
             /* latitude for geographic CRS, and easting, northing for projected */
             /* CRS. If instead of using PROJ strings as above, "EPSG:XXXX" codes */
             /* had been used, this might had been necessary. */
-            PJ* P_for_GIS = proj_normalize_for_visualization(C, P);
+            PJ* P_for_GIS = proj_normalize_for_visualization(PJ_DEFAULT_CTX, P);
             if( 0 == P_for_GIS )  {
                 proj_destroy(P);
                 return 1;
