@@ -8632,6 +8632,17 @@ TEST(io, projparse_init) {
     }
 
     {
+        // Test that +no_defs +type=crs have no effect
+        auto obj = createFromUserInput("+init=epsg:4326 +no_defs +type=crs",
+                                       dbContext, true);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto wkt = crs->exportToWKT(WKTFormatter::create().get());
+        EXPECT_TRUE(wkt.find("GEODCRS[\"WGS 84\"") == 0) << wkt;
+    }
+
+    {
         // EPSG:3040 is normally northing-easting order, but in compatibillity
         // mode it will be easting-northing
         auto obj =
