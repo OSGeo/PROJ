@@ -3148,7 +3148,7 @@ PJ *proj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ *obj,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return a copy of the CRS with the lineaer units of the parameters
+/** \brief Return a copy of the CRS with the linear units of the parameters
  * of its conversion modified.
  *
  * The CRS must be or contain a ProjectedCRS, VerticalCRS or a GeocentricCRS.
@@ -3192,6 +3192,151 @@ PJ *proj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx, const PJ *obj,
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Create a 3D CRS from an existing 2D CRS.
+ *
+ * The new axis will be ellipsoidal height, oriented upwards, and with metre
+ * units.
+ *
+ * See osgeo::proj::crs::CRS::promoteTo3D().
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_3D_name CRS name. Or NULL (in which case the name of crs_2D
+ * will be used)
+ * @param crs_2D 2D CRS to be "promoted" to 3D. Must not be NULL.
+ *
+ * @return Object that must be unreferenced with
+ * proj_destroy(), or NULL in case of error.
+ * @since 7.0
+ */
+PJ *proj_crs_promote_to_3D(PJ_CONTEXT *ctx, const char *crs_3D_name,
+                           const PJ *crs_2D) {
+    SANITIZE_CTX(ctx);
+    auto cpp_2D_crs = dynamic_cast<const CRS *>(crs_2D->iso_obj.get());
+    if (!cpp_2D_crs) {
+        proj_log_error(ctx, __FUNCTION__, "crs_2D is not a CRS");
+        return nullptr;
+    }
+    try {
+        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+        return pj_obj_create(
+            ctx, cpp_2D_crs->promoteTo3D(crs_3D_name ? std::string(crs_3D_name)
+                                                     : cpp_2D_crs->nameStr(),
+                                         dbContext));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Create a projected 3D CRS from an existing projected 2D CRS.
+ *
+ * The passed projected_2D_crs is used so that its name is replaced by
+ * crs_name and its base geographic CRS is replaced by geog_3D_crs. The vertical
+ * axis of geog_3D_crs (ellipsoidal height) will be added as the 3rd axis of
+ * the resulting projected 3D CRS.
+ * Normally, the passed geog_3D_crs should be the 3D counterpart of the original
+ * 2D base geographic CRS of projected_2D_crs, but such no check is done.
+ *
+ * It is also possible to invoke this function with a NULL geog_3D_crs. In which
+ * case, the existing base geographic 2D CRS of projected_2D_crs will be
+ * automatically promoted to 3D by assuming a 3rd axis being an ellipsoidal
+ * height, oriented upwards, and with metre units. This is equivalent to using
+ * proj_crs_promote_to_3D().
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_name CRS name. Or NULL (in which case the name of projected_2D_crs
+ * will be used)
+ * @param projected_2D_crs Projected 2D CRS to be "promoted" to 3D. Must not be
+ * NULL.
+ * @param geog_3D_crs Base geographic 3D CRS for the new CRS. May be NULL.
+ *
+ * @return Object that must be unreferenced with
+ * proj_destroy(), or NULL in case of error.
+ * @since 7.0
+ */
+PJ *proj_crs_create_projected_3D_crs_from_2D(PJ_CONTEXT *ctx,
+                                             const char *crs_name,
+                                             const PJ *projected_2D_crs,
+                                             const PJ *geog_3D_crs) {
+    SANITIZE_CTX(ctx);
+    auto cpp_projected_2D_crs =
+        dynamic_cast<const ProjectedCRS *>(projected_2D_crs->iso_obj.get());
+    if (!cpp_projected_2D_crs) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "projected_2D_crs is not a Projected CRS");
+        return nullptr;
+    }
+    const auto &oldCS = cpp_projected_2D_crs->coordinateSystem();
+    const auto &oldCSAxisList = oldCS->axisList();
+
+    if (geog_3D_crs && geog_3D_crs->iso_obj) {
+        auto cpp_geog_3D_CRS =
+            std::dynamic_pointer_cast<GeographicCRS>(geog_3D_crs->iso_obj);
+        if (!cpp_geog_3D_CRS) {
+            proj_log_error(ctx, __FUNCTION__,
+                           "geog_3D_crs is not a Geographic CRS");
+            return nullptr;
+        }
+
+        const auto &geogCS = cpp_geog_3D_CRS->coordinateSystem();
+        const auto &geogCSAxisList = geogCS->axisList();
+        if (geogCSAxisList.size() != 3) {
+            proj_log_error(ctx, __FUNCTION__,
+                           "geog_3D_crs is not a Geographic 3D CRS");
+            return nullptr;
+        }
+        try {
+            auto newCS =
+                cs::CartesianCS::create(PropertyMap(), oldCSAxisList[0],
+                                        oldCSAxisList[1], geogCSAxisList[2]);
+            return pj_obj_create(
+                ctx,
+                ProjectedCRS::create(
+                    createPropertyMapName(
+                        crs_name ? crs_name
+                                 : cpp_projected_2D_crs->nameStr().c_str()),
+                    NN_NO_CHECK(cpp_geog_3D_CRS),
+                    cpp_projected_2D_crs->derivingConversionRef(), newCS));
+        } catch (const std::exception &e) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+            if (ctx->cpp_context) {
+                ctx->cpp_context->autoCloseDbIfNeeded();
+            }
+            return nullptr;
+        }
+    } else {
+        try {
+            auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+            return pj_obj_create(ctx,
+                                 cpp_projected_2D_crs->promoteTo3D(
+                                     crs_name ? std::string(crs_name)
+                                              : cpp_projected_2D_crs->nameStr(),
+                                     dbContext));
+        } catch (const std::exception &e) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+            if (ctx->cpp_context) {
+                ctx->cpp_context->autoCloseDbIfNeeded();
+            }
+            return nullptr;
+        }
     }
 }
 
