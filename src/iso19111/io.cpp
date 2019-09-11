@@ -8821,8 +8821,23 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         }
                     }
                     expanded += ' ';
-                    expanded += projStringExportable->exportToPROJString(
-                        PROJStringFormatter::create().get());
+
+                    auto boundToWGS84 = crs->createBoundCRSToWGS84IfPossible(
+                        d->dbContext_,
+                        CoordinateOperationContext::IntermediateCRSUse::NEVER);
+                    auto projStringExportableBoundToWGS84 =
+                        dynamic_cast<IPROJStringExportable *>(
+                            boundToWGS84.get());
+                    if (projStringExportableBoundToWGS84) {
+                        expanded +=
+                            projStringExportableBoundToWGS84
+                                ->exportToPROJString(
+                                    PROJStringFormatter::create().get());
+                    } else {
+                        expanded += projStringExportable->exportToPROJString(
+                            PROJStringFormatter::create().get());
+                    }
+
                     return createFromPROJString(expanded);
                 }
             }

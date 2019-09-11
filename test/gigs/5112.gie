@@ -10,7 +10,7 @@ use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
 operation  proj=pipeline
-           step init=epsg:4284 inv
+           step init=epsg:4284 towgs84=25,-141,-78.5,0,0.35,0.736,0 inv
            step init=epsg:3388
 
 tolerance 50 mm
@@ -33,7 +33,7 @@ expect    1325634.35 -3709687.25
 --------------------------------------------------------------------------------
 operation  proj=pipeline
            step init=epsg:3388 inv
-           step init=epsg:4284
+           step init=epsg:4284 towgs84=25,-141,-78.5,0,0.35,0.736,0
 
 tolerance 50 mm
 --------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ expect    67.0 -41.0
 
 --------------------------------------------------------------------------------
 operation proj=pipeline towgs84=0,0,0
-          step init=epsg:4284 inv
+          step init=epsg:4284 towgs84=25,-141,-78.5,0,0.35,0.736,0 inv
           step init=epsg:3388
 
 tolerance 6 mm

@@ -38,6 +38,7 @@
 
 #include "geodesic.h"
 #include "proj.h"
+#include "proj_experimental.h"
 #include "proj_internal.h"
 #include "proj_math.h"
 
@@ -289,8 +290,12 @@ Expand key from buffer or (if not in buffer) from init file
                 return nullptr;
             }
 
-            proj_string = proj_as_proj_string(ctx, src, PJ_PROJ_4, nullptr);
+            auto boundCRS = proj_crs_create_bound_crs_to_WGS84(ctx, src, nullptr);
+
+            proj_string = proj_as_proj_string(ctx, boundCRS ? boundCRS : src, PJ_PROJ_4, nullptr);
+
             if( !proj_string ) {
+                proj_destroy(boundCRS);
                 proj_destroy(src);
                 return nullptr;
             }
@@ -299,6 +304,7 @@ Expand key from buffer or (if not in buffer) from init file
                 strcpy(definition, proj_string);
             }
 
+            proj_destroy(boundCRS);
             proj_destroy(src);
         }
     }
