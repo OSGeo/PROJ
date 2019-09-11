@@ -7800,6 +7800,10 @@ TEST(io, projparse_somerc) {
     EXPECT_TRUE(wkt.find("\"Northing at projection centre\",5") !=
                 std::string::npos)
         << wkt;
+
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(wkt1.find("EXTENSION") == std::string::npos) << wkt1;
 }
 
 // ---------------------------------------------------------------------------
