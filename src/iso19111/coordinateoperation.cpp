@@ -56,7 +56,9 @@
 #include <string>
 #include <vector>
 
-#ifdef DEBUG
+// #define DEBUG
+// #define DEBUG_SORT
+#if defined(DEBUG) || defined(DEBUG_SORT)
 #include <iostream>
 #endif
 
@@ -10309,16 +10311,12 @@ struct SortFunction {
             return false;
         }
 
-        if (iterA->second.hasGrids_ && iterB->second.hasGrids_) {
-            // Operations where grids are all available go before other
-            if (iterA->second.gridsAvailable_ &&
-                !iterB->second.gridsAvailable_) {
-                return true;
-            }
-            if (iterB->second.gridsAvailable_ &&
-                !iterA->second.gridsAvailable_) {
-                return false;
-            }
+        // Operations where grids are all available go before other
+        if (iterA->second.gridsAvailable_ && !iterB->second.gridsAvailable_) {
+            return true;
+        }
+        if (iterB->second.gridsAvailable_ && !iterA->second.gridsAvailable_) {
+            return false;
         }
 
         // Operations where grids are all known in our DB go before other
@@ -10680,7 +10678,35 @@ struct FilterResults {
         }
 
         // Sort !
-        std::sort(res.begin(), res.end(), SortFunction(map));
+        SortFunction sortFunc(map);
+        std::sort(res.begin(), res.end(), sortFunc);
+
+// Debug code to check consistency of the sort function
+#ifdef DEBUG_SORT
+        constexpr bool debugSort = true;
+#elif !defined(NDEBUG)
+        const bool debugSort = getenv("PROJ_DEBUG_SORT_FUNCT") != nullptr;
+#endif
+#if defined(DEBUG_SORT) || !defined(NDEBUG)
+        if (debugSort) {
+            const bool assertIfIssue =
+                !(getenv("PROJ_DEBUG_SORT_FUNCT_ASSERT") != nullptr);
+            for (size_t i = 0; i < res.size(); ++i) {
+                for (size_t j = i + 1; j < res.size(); ++j) {
+                    if (sortFunc(res[j], res[i])) {
+#ifdef DEBUG_SORT
+                        std::cerr << "Sorting issue with entry " << i << "("
+                                  << res[i]->nameStr() << ") and " << j << "("
+                                  << res[j]->nameStr() << ")" << std::endl;
+#endif
+                        if (assertIfIssue) {
+                            assert(false);
+                        }
+                    }
+                }
+            }
+        }
+#endif
     }
 
     // ----------------------------------------------------------------------
