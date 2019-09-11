@@ -7187,6 +7187,30 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(
+    operation,
+    createOperation_fallback_to_proj4_strings_regular_to_projliteral_with_towgs84) {
+    auto objSrc =
+        createFromUserInput("EPSG:4326", DatabaseContext::create(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=31 +ellps=GRS80 +towgs84=1,2,3 +over +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=utm +zone=31 +ellps=GRS80 +towgs84=1,2,3 +over");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, createOperation_on_crs_with_bound_crs_and_wktext) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 "
