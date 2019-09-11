@@ -8313,10 +8313,13 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     } else if (step.name == "somerc") {
         mapping =
             getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B);
-        step.paramValues.emplace_back(Step::KeyValue("alpha", "90"));
-        step.paramValues.emplace_back(Step::KeyValue("gamma", "90"));
-        step.paramValues.emplace_back(
-            Step::KeyValue("lonc", getParamValue(step, "lon_0")));
+        if (!hasParamValue(step, "alpha") && !hasParamValue(step, "gamma") &&
+            !hasParamValue(step, "lonc")) {
+            step.paramValues.emplace_back(Step::KeyValue("alpha", "90"));
+            step.paramValues.emplace_back(Step::KeyValue("gamma", "90"));
+            step.paramValues.emplace_back(
+                Step::KeyValue("lonc", getParamValue(step, "lon_0")));
+        }
     } else if (step.name == "krovak" &&
                ((getParamValue(step, "axis") == "swu" && iAxisSwap < 0) ||
                 (iAxisSwap > 0 &&
