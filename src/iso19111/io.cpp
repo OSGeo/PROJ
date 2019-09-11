@@ -8759,10 +8759,17 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             if (!file_found) {
                 auto obj = createFromUserInput(stepName, d->dbContext_, true);
                 auto crs = dynamic_cast<CRS *>(obj.get());
-                if (crs &&
-                    (d->steps_[0].paramValues.empty() ||
-                     (d->steps_[0].paramValues.size() == 1 &&
-                      d->getParamValue(d->steps_[0], "type") == "crs"))) {
+
+                bool hasSignificantParamValues = false;
+                for (const auto &kv : d->steps_[0].paramValues) {
+                    if (!((kv.key == "type" && kv.value == "crs") ||
+                          kv.key == "no_defs")) {
+                        hasSignificantParamValues = true;
+                        break;
+                    }
+                }
+
+                if (crs && !hasSignificantParamValues) {
                     PropertyMap properties;
                     properties.set(IdentifiedObject::NAME_KEY,
                                    d->title_.empty() ? crs->nameStr()
