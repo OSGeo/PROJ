@@ -3312,9 +3312,9 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     bool discardSuperseded) const {
 
     auto cacheKey(d->authority());
-    cacheKey += sourceCRSAuthName;
+    cacheKey += sourceCRSAuthName.empty() ? "{empty}" : sourceCRSAuthName;
     cacheKey += sourceCRSCode;
-    cacheKey += targetCRSAuthName;
+    cacheKey += targetCRSAuthName.empty() ? "{empty}" : targetCRSAuthName;
     cacheKey += targetCRSCode;
     cacheKey += (usePROJAlternativeGridNames ? '1' : '0');
     cacheKey += (discardIfMissingGrid ? '1' : '0');
@@ -3326,27 +3326,30 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         return list;
     }
 
-    // Look-up first for conversion which is the most precise.
-    std::string sql("SELECT conversion_auth_name, "
-                    "geodetic_crs_auth_name, geodetic_crs_code FROM "
-                    "projected_crs WHERE auth_name = ? AND code = ?");
-    auto params = ListOfParams{targetCRSAuthName, targetCRSCode};
-    auto res = d->run(sql, params);
-    if (!res.empty()) {
-        const auto &row = res.front();
-        bool ok = row[1] == sourceCRSAuthName && row[2] == sourceCRSCode;
-        if (ok && d->hasAuthorityRestriction()) {
-            ok = row[0] == d->authority();
-        }
-        if (ok) {
-            auto targetCRS = d->createFactory(targetCRSAuthName)
-                                 ->createProjectedCRS(targetCRSCode);
-            auto conv = targetCRS->derivingConversion();
-            list.emplace_back(conv);
-            d->context()->d->cache(cacheKey, list);
-            return list;
+    if (!targetCRSAuthName.empty()) {
+        // Look-up first for conversion which is the most precise.
+        std::string sql("SELECT conversion_auth_name, "
+                        "geodetic_crs_auth_name, geodetic_crs_code FROM "
+                        "projected_crs WHERE auth_name = ? AND code = ?");
+        auto params = ListOfParams{targetCRSAuthName, targetCRSCode};
+        auto res = d->run(sql, params);
+        if (!res.empty()) {
+            const auto &row = res.front();
+            bool ok = row[1] == sourceCRSAuthName && row[2] == sourceCRSCode;
+            if (ok && d->hasAuthorityRestriction()) {
+                ok = row[0] == d->authority();
+            }
+            if (ok) {
+                auto targetCRS = d->createFactory(targetCRSAuthName)
+                                     ->createProjectedCRS(targetCRSCode);
+                auto conv = targetCRS->derivingConversion();
+                list.emplace_back(conv);
+                d->context()->d->cache(cacheKey, list);
+                return list;
+            }
         }
     }
+    std::string sql;
     if (discardSuperseded) {
         sql = "SELECT cov.auth_name, cov.code, cov.table_name, "
               "ss.replacement_auth_name, ss.replacement_code FROM "
@@ -3358,20 +3361,26 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
               "ss.superseded_auth_name = cov.auth_name AND "
               "ss.superseded_code = cov.code AND "
               "ss.superseded_table_name = ss.replacement_table_name "
-              "WHERE source_crs_auth_name = ? AND source_crs_code = ? AND "
-              "target_crs_auth_name = ? AND target_crs_code = ? AND "
-              "cov.deprecated = 0";
+              "WHERE ";
     } else {
         sql = "SELECT cov.auth_name, cov.code, cov.table_name FROM "
               "coordinate_operation_view cov JOIN area "
               "ON cov.area_of_use_auth_name = area.auth_name AND "
               "cov.area_of_use_code = area.code "
-              "WHERE source_crs_auth_name = ? AND source_crs_code = ? AND "
-              "target_crs_auth_name = ? AND target_crs_code = ? AND "
-              "cov.deprecated = 0";
+              "WHERE ";
     }
-    params = {sourceCRSAuthName, sourceCRSCode, targetCRSAuthName,
-              targetCRSCode};
+    ListOfParams params;
+    if (!sourceCRSAuthName.empty()) {
+        sql += "source_crs_auth_name = ? AND source_crs_code = ? AND ";
+        params.emplace_back(sourceCRSAuthName);
+        params.emplace_back(sourceCRSCode);
+    }
+    if (!targetCRSAuthName.empty()) {
+        sql += "target_crs_auth_name = ? AND target_crs_code = ? AND ";
+        params.emplace_back(targetCRSAuthName);
+        params.emplace_back(targetCRSCode);
+    }
+    sql += "cov.deprecated = 0";
     if (d->hasAuthorityRestriction()) {
         sql += " AND cov.auth_name = ?";
         params.emplace_back(d->authority());
@@ -3379,7 +3388,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     sql += " ORDER BY pseudo_area_from_swne(south_lat, west_lon, north_lat, "
            "east_lon) DESC, "
            "(CASE WHEN accuracy is NULL THEN 1 ELSE 0 END), accuracy";
-    res = d->run(sql, params);
+    auto res = d->run(sql, params);
     std::set<std::pair<std::string, std::string>> setTransf;
     if (discardSuperseded) {
         for (const auto &row : res) {

@@ -10172,6 +10172,7 @@ struct CoordinateOperationFactory::Private {
         const CoordinateOperationContextNNPtr &context;
         bool inCreateOperationsWithDatumPivotAntiRecursion = false;
         bool inCreateOperationsThroughPreferredHub = false;
+        bool inCreateOperationsGeogToVertWithIntermediate = false;
 
         Context(const crs::CRSNNPtr &sourceCRSIn,
                 const crs::CRSNNPtr &targetCRSIn,
@@ -10201,6 +10202,11 @@ struct CoordinateOperationFactory::Private {
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
         const crs::GeodeticCRS *geodSrc, const crs::GeodeticCRS *geodDst,
         Context &context);
+
+    static std::vector<CoordinateOperationNNPtr>
+    createOperationsGeogToVertWithIntermediate(const crs::CRSNNPtr &sourceCRS,
+                                               const crs::CRSNNPtr &targetCRS,
+                                               Context &context);
 
     static bool
     hasPerfectAccuracyResult(const std::vector<CoordinateOperationNNPtr> &res,
@@ -10950,18 +10956,21 @@ applyInverse(const std::vector<CoordinateOperationNNPtr> &list) {
 
 //! @cond Doxygen_Suppress
 
-static void buildSourceAndTargetCRSIds(
-    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    const CoordinateOperationContextNNPtr &context,
-    std::list<std::pair<std::string, std::string>> &sourceIds,
-    std::list<std::pair<std::string, std::string>> &targetIds) {
+static void buildCRSIds(const crs::CRSNNPtr &crs,
+                        const CoordinateOperationContextNNPtr &context,
+                        std::list<std::pair<std::string, std::string>> &ids) {
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
     const auto &authFactoryName = authFactory->getAuthority();
 
-    const auto findObjectInDB = [&authFactory, &authFactoryName](
-        const crs::CRSNNPtr &crs,
-        std::list<std::pair<std::string, std::string>> &idList) {
+    for (const auto &id : crs->identifiers()) {
+        const auto &authName = *(id->codeSpace());
+        const auto &code = id->code();
+        if (!authName.empty()) {
+            ids.emplace_back(authName, code);
+        }
+    }
+    if (ids.empty()) {
         try {
             const auto tmpAuthFactory = io::AuthorityFactory::create(
                 authFactory->databaseContext(),
@@ -10987,35 +10996,37 @@ static void buildSourceAndTargetCRSIds(
                         matches.front().get(),
                         util::IComparable::Criterion::EQUIVALENT) &&
                     !matches.front()->identifiers().empty()) {
-                    const auto &ids = matches.front()->identifiers();
-                    idList.emplace_back(*(ids[0]->codeSpace()), ids[0]->code());
+                    const auto &tmpIds = matches.front()->identifiers();
+                    ids.emplace_back(*(tmpIds[0]->codeSpace()),
+                                     tmpIds[0]->code());
                 }
             }
         } catch (const std::exception &) {
         }
-    };
+    }
+}
 
-    for (const auto &id : sourceCRS->identifiers()) {
-        const auto &authName = *(id->codeSpace());
-        const auto &code = id->code();
-        if (!authName.empty()) {
-            sourceIds.emplace_back(authName, code);
-        }
-    }
-    if (sourceIds.empty()) {
-        findObjectInDB(sourceCRS, sourceIds);
-    }
+// ---------------------------------------------------------------------------
 
-    for (const auto &id : targetCRS->identifiers()) {
-        const auto &authName = *(id->codeSpace());
-        const auto &code = id->code();
-        if (!authName.empty()) {
-            targetIds.emplace_back(authName, code);
+static std::vector<std::string>
+getCandidateAuthorities(const io::AuthorityFactoryPtr &authFactory,
+                        const std::string &srcAuthName,
+                        const std::string &targetAuthName) {
+    const auto &authFactoryName = authFactory->getAuthority();
+    std::vector<std::string> authorities;
+    if (authFactoryName == "any") {
+        authorities.emplace_back();
+    }
+    if (authFactoryName.empty()) {
+        authorities = authFactory->databaseContext()->getAllowedAuthorities(
+            srcAuthName, targetAuthName);
+        if (authorities.empty()) {
+            authorities.emplace_back();
         }
+    } else {
+        authorities.emplace_back(authFactoryName);
     }
-    if (targetIds.empty()) {
-        findObjectInDB(targetCRS, targetIds);
-    }
+    return authorities;
 }
 
 // ---------------------------------------------------------------------------
@@ -11027,12 +11038,11 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
                         const CoordinateOperationContextNNPtr &context) {
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
-    const auto &authFactoryName = authFactory->getAuthority();
 
     std::list<std::pair<std::string, std::string>> sourceIds;
     std::list<std::pair<std::string, std::string>> targetIds;
-    buildSourceAndTargetCRSIds(sourceCRS, targetCRS, context, sourceIds,
-                               targetIds);
+    buildCRSIds(sourceCRS, context, sourceIds);
+    buildCRSIds(targetCRS, context, targetIds);
 
     for (const auto &idSrc : sourceIds) {
         const auto &srcAuthName = idSrc.first;
@@ -11041,20 +11051,8 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
             const auto &targetAuthName = idTarget.first;
             const auto &targetCode = idTarget.second;
 
-            std::vector<std::string> authorities;
-            if (authFactoryName == "any") {
-                authorities.emplace_back();
-            }
-            if (authFactoryName.empty()) {
-                authorities =
-                    authFactory->databaseContext()->getAllowedAuthorities(
-                        srcAuthName, targetAuthName);
-                if (authorities.empty()) {
-                    authorities.emplace_back();
-                }
-            } else {
-                authorities.emplace_back(authFactoryName);
-            }
+            const auto authorities(getCandidateAuthorities(
+                authFactory, srcAuthName, targetAuthName));
             for (const auto &authority : authorities) {
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
                     authFactory->databaseContext(),
@@ -11075,6 +11073,81 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
     }
     return std::vector<CoordinateOperationNNPtr>();
 }
+
+// ---------------------------------------------------------------------------
+
+// Look in the authority registry for operations from sourceCRS
+static std::vector<CoordinateOperationNNPtr>
+findOpsInRegistryDirectFrom(const crs::CRSNNPtr &sourceCRS,
+                            const CoordinateOperationContextNNPtr &context) {
+    const auto &authFactory = context->getAuthorityFactory();
+    assert(authFactory);
+
+    std::list<std::pair<std::string, std::string>> ids;
+    buildCRSIds(sourceCRS, context, ids);
+
+    for (const auto &id : ids) {
+        const auto &srcAuthName = id.first;
+        const auto &srcCode = id.second;
+
+        const auto authorities(
+            getCandidateAuthorities(authFactory, srcAuthName, srcAuthName));
+        for (const auto &authority : authorities) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(),
+                authority == "any" ? std::string() : authority);
+            auto res = tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
+                srcAuthName, srcCode, std::string(), std::string(),
+                context->getUsePROJAlternativeGridNames(),
+                context->getGridAvailabilityUse() ==
+                    CoordinateOperationContext::GridAvailabilityUse::
+                        DISCARD_OPERATION_IF_MISSING_GRID,
+                context->getDiscardSuperseded());
+            if (!res.empty()) {
+                return res;
+            }
+        }
+    }
+    return std::vector<CoordinateOperationNNPtr>();
+}
+
+// ---------------------------------------------------------------------------
+
+// Look in the authority registry for operations to targetCRS
+static std::vector<CoordinateOperationNNPtr>
+findOpsInRegistryDirectTo(const crs::CRSNNPtr &targetCRS,
+                          const CoordinateOperationContextNNPtr &context) {
+    const auto &authFactory = context->getAuthorityFactory();
+    assert(authFactory);
+
+    std::list<std::pair<std::string, std::string>> ids;
+    buildCRSIds(targetCRS, context, ids);
+
+    for (const auto &id : ids) {
+        const auto &targetAuthName = id.first;
+        const auto &targetCode = id.second;
+
+        const auto authorities(getCandidateAuthorities(
+            authFactory, targetAuthName, targetAuthName));
+        for (const auto &authority : authorities) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(),
+                authority == "any" ? std::string() : authority);
+            auto res = tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
+                std::string(), std::string(), targetAuthName, targetCode,
+                context->getUsePROJAlternativeGridNames(),
+                context->getGridAvailabilityUse() ==
+                    CoordinateOperationContext::GridAvailabilityUse::
+                        DISCARD_OPERATION_IF_MISSING_GRID,
+                context->getDiscardSuperseded());
+            if (!res.empty()) {
+                return res;
+            }
+        }
+    }
+    return std::vector<CoordinateOperationNNPtr>();
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -11089,12 +11162,11 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
 
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
-    const auto &authFactoryName = authFactory->getAuthority();
 
     std::list<std::pair<std::string, std::string>> sourceIds;
     std::list<std::pair<std::string, std::string>> targetIds;
-    buildSourceAndTargetCRSIds(sourceCRS, targetCRS, context, sourceIds,
-                               targetIds);
+    buildCRSIds(sourceCRS, context, sourceIds);
+    buildCRSIds(targetCRS, context, targetIds);
 
     for (const auto &idSrc : sourceIds) {
         const auto &srcAuthName = idSrc.first;
@@ -11103,20 +11175,8 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
             const auto &targetAuthName = idTarget.first;
             const auto &targetCode = idTarget.second;
 
-            std::vector<std::string> authorities;
-            if (authFactoryName == "any") {
-                authorities.emplace_back();
-            }
-            if (authFactoryName.empty()) {
-                authorities =
-                    authFactory->databaseContext()->getAllowedAuthorities(
-                        srcAuthName, targetAuthName);
-                if (authorities.empty()) {
-                    authorities.emplace_back();
-                }
-            } else {
-                authorities.emplace_back(authFactoryName);
-            }
+            const auto authorities(getCandidateAuthorities(
+                authFactory, srcAuthName, targetAuthName));
             for (const auto &authority : authorities) {
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
                     authFactory->databaseContext(),
@@ -12139,6 +12199,51 @@ void CoordinateOperationFactory::Private::createOperationsThroughPreferredHub(
 
 // ---------------------------------------------------------------------------
 
+std::vector<CoordinateOperationNNPtr>
+CoordinateOperationFactory::Private::createOperationsGeogToVertWithIntermediate(
+    const crs::CRSNNPtr & /*sourceCRS*/, // geographic CRS
+    const crs::CRSNNPtr &targetCRS,      // vertical CRS
+    Private::Context &context) {
+
+    std::vector<CoordinateOperationNNPtr> res;
+
+    struct AntiRecursionGuard {
+        Context &context;
+
+        explicit AntiRecursionGuard(Context &contextIn) : context(contextIn) {
+            assert(!context.inCreateOperationsGeogToVertWithIntermediate);
+            context.inCreateOperationsGeogToVertWithIntermediate = true;
+        }
+
+        ~AntiRecursionGuard() {
+            context.inCreateOperationsGeogToVertWithIntermediate = false;
+        }
+    };
+    AntiRecursionGuard guard(context);
+
+    for (int i = 0; i < 2; i++) {
+
+        // Generally EPSG has operations from GeogCrs to VertCRS
+        auto ops =
+            i == 0 ? findOpsInRegistryDirectTo(targetCRS, context.context)
+                   : findOpsInRegistryDirectFrom(targetCRS, context.context);
+
+        for (const auto &op : ops) {
+            const auto tmpCRS = i == 0 ? op->sourceCRS() : op->targetCRS();
+            if (tmpCRS &&
+                dynamic_cast<const crs::GeographicCRS *>(tmpCRS.get())) {
+                res.emplace_back(i == 0 ? op : op->inverse());
+            }
+        }
+        if (!res.empty())
+            break;
+    }
+
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 static CoordinateOperationNNPtr
 createBallparkGeocentricTranslation(const crs::CRSNNPtr &sourceCRS,
                                     const crs::CRSNNPtr &targetCRS) {
@@ -12348,6 +12453,21 @@ CoordinateOperationFactory::Private::createOperations(
                         break;
                     }
                 }
+            }
+
+            // There's no direct transformation from NAVD88 height to WGS84,
+            // so try to research all transformations from NAVD88 to another
+            // intermediate GeographicCRS.
+            if (res.empty() &&
+                !context.inCreateOperationsGeogToVertWithIntermediate &&
+                geogSrc && vertDst) {
+                res = createOperationsGeogToVertWithIntermediate(
+                    sourceCRS, targetCRS, context);
+            } else if (res.empty() &&
+                       !context.inCreateOperationsGeogToVertWithIntermediate &&
+                       geogDst && vertSrc) {
+                res = applyInverse(createOperationsGeogToVertWithIntermediate(
+                    targetCRS, sourceCRS, context));
             }
 
             if (res.empty() && !sameGeodeticDatum &&
@@ -12908,6 +13028,61 @@ CoordinateOperationFactory::Private::createOperations(
                 componentsSrc[1]->extractVerticalCRS()) {
                 verticalTransforms =
                     createOperations(componentsSrc[1], targetCRS, context);
+                bool foundRegisteredTransformWithAllGridsAvailable = false;
+                for (const auto &op : verticalTransforms) {
+                    if (!op->identifiers().empty() && authFactory) {
+                        bool missingGrid = false;
+                        const auto gridsNeeded =
+                            op->gridsNeeded(authFactory->databaseContext());
+                        for (const auto &gridDesc : gridsNeeded) {
+                            if (!gridDesc.available) {
+                                missingGrid = true;
+                                break;
+                            }
+                        }
+                        if (!missingGrid) {
+                            foundRegisteredTransformWithAllGridsAvailable =
+                                true;
+                            break;
+                        }
+                    }
+                }
+                if (!foundRegisteredTransformWithAllGridsAvailable &&
+                    srcGeogCRS &&
+                    !srcGeogCRS->_isEquivalentTo(
+                        geogDst, util::IComparable::Criterion::EQUIVALENT) &&
+                    !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst))) {
+                    auto verticalTransformsTmp = createOperations(
+                        componentsSrc[1], NN_NO_CHECK(srcGeogCRS), context);
+                    bool foundRegisteredTransform = false;
+                    foundRegisteredTransformWithAllGridsAvailable = false;
+                    for (const auto &op : verticalTransformsTmp) {
+                        if (!op->identifiers().empty() && authFactory) {
+                            bool missingGrid = false;
+                            const auto gridsNeeded =
+                                op->gridsNeeded(authFactory->databaseContext());
+                            for (const auto &gridDesc : gridsNeeded) {
+                                if (!gridDesc.available) {
+                                    missingGrid = true;
+                                    break;
+                                }
+                            }
+                            foundRegisteredTransform = true;
+                            if (!missingGrid) {
+                                foundRegisteredTransformWithAllGridsAvailable =
+                                    true;
+                                break;
+                            }
+                        }
+                    }
+                    if (foundRegisteredTransformWithAllGridsAvailable) {
+                        verticalTransforms = verticalTransformsTmp;
+                    } else if (foundRegisteredTransform) {
+                        verticalTransforms.insert(verticalTransforms.end(),
+                                                  verticalTransformsTmp.begin(),
+                                                  verticalTransformsTmp.end());
+                    }
+                }
             }
             if (!horizTransforms.empty() && !verticalTransforms.empty()) {
                 for (const auto &horizTransform : horizTransforms) {
