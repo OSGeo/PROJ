@@ -10172,6 +10172,7 @@ struct CoordinateOperationFactory::Private {
         const CoordinateOperationContextNNPtr &context;
         bool inCreateOperationsWithDatumPivotAntiRecursion = false;
         bool inCreateOperationsGeogToVertWithIntermediate = false;
+        bool skipHorizontalTransformation = false;
 
         Context(const crs::CRSNNPtr &sourceCRSIn,
                 const crs::CRSNNPtr &targetCRSIn,
@@ -12599,27 +12600,32 @@ CoordinateOperationFactory::Private::createOperations(
             hubSrcGeog->coordinateSystem()->axisList().size() == 3 &&
             geogDst->coordinateSystem()->axisList().size() == 3) {
             auto opsFirst = createOperations(sourceCRS, hubSrc, context);
-            auto opsSecond = createOperations(hubSrc, targetCRS, context);
-            if (!opsFirst.empty() && !opsSecond.empty()) {
-                for (const auto &opFirst : opsFirst) {
-                    for (const auto &opLast : opsSecond) {
-                        // Exclude artificial transformations from the hub
-                        // to the target CRS
-                        if (!opLast->hasBallparkTransformation()) {
-                            try {
-                                res.emplace_back(
-                                    ConcatenatedOperation::
-                                        createComputeMetadata(
-                                            {opFirst, opLast},
-                                            !allowEmptyIntersection));
-                            } catch (
-                                const InvalidOperationEmptyIntersection &) {
+            if (context.skipHorizontalTransformation) {
+                if (!opsFirst.empty())
+                    return opsFirst;
+            } else {
+                auto opsSecond = createOperations(hubSrc, targetCRS, context);
+                if (!opsFirst.empty() && !opsSecond.empty()) {
+                    for (const auto &opFirst : opsFirst) {
+                        for (const auto &opLast : opsSecond) {
+                            // Exclude artificial transformations from the hub
+                            // to the target CRS
+                            if (!opLast->hasBallparkTransformation()) {
+                                try {
+                                    res.emplace_back(
+                                        ConcatenatedOperation::
+                                            createComputeMetadata(
+                                                {opFirst, opLast},
+                                                !allowEmptyIntersection));
+                                } catch (
+                                    const InvalidOperationEmptyIntersection &) {
+                                }
                             }
                         }
                     }
-                }
-                if (!res.empty()) {
-                    return res;
+                    if (!res.empty()) {
+                        return res;
+                    }
                 }
             }
         }
@@ -12841,6 +12847,22 @@ CoordinateOperationFactory::Private::createOperations(
             std::vector<CoordinateOperationNNPtr> verticalTransforms;
             if (componentsSrc.size() >= 2 &&
                 componentsSrc[1]->extractVerticalCRS()) {
+
+                struct SetSkipHorizontalTransform {
+                    Context &context;
+
+                    explicit SetSkipHorizontalTransform(Context &contextIn)
+                        : context(contextIn) {
+                        assert(!context.skipHorizontalTransformation);
+                        context.skipHorizontalTransformation = true;
+                    }
+
+                    ~SetSkipHorizontalTransform() {
+                        context.skipHorizontalTransformation = false;
+                    }
+                };
+                SetSkipHorizontalTransform setSkipHorizontalTransform(context);
+
                 verticalTransforms =
                     createOperations(componentsSrc[1], targetCRS, context);
                 bool foundRegisteredTransformWithAllGridsAvailable = false;
