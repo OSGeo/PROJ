@@ -6792,23 +6792,28 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem(
                 "5500"), // NAD83(NSRS2007) + NAVD88 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
         ASSERT_GE(list.size(), 1U);
-        EXPECT_TRUE(list[0]->hasBallparkTransformation());
         EXPECT_EQ(list[0]->nameStr(),
-                  "NAD83(NSRS2007) to WGS 84 (1) + Transformation from NAVD88 "
-                  "height to WGS 84 (ballpark vertical transformation, without "
-                  "ellipsoid height to vertical height correction)");
+                  "NAD83(NSRS2007) to WGS 84 (1) + "
+                  "Inverse of NAD83(2011) to NAVD88 height (1)");
         EXPECT_EQ(list[0]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
                           authFactory->databaseContext())
                           .get()),
-                  "+proj=noop");
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=vgridshift +grids=g2012bu0.gtx +multiplier=1 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
     }
 }
 
