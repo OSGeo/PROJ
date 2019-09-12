@@ -771,4 +771,30 @@ TEST(gie, proj_create_crs_to_crs_outside_area_of_use) {
     proj_destroy(P);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(gie, proj_trans_generic) {
+    // GDA2020 to WGS84 (G1762)
+    auto P = proj_create(
+        PJ_DEFAULT_CTX,
+        "+proj=pipeline +step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=cart +ellps=GRS80 "
+        "+step +proj=helmert +x=0 +y=0 +z=0 +rx=0 +ry=0 +rz=0 +s=0 +dx=0 "
+        "+dy=0 +dz=0 +drx=-0.00150379 +dry=-0.00118346 +drz=-0.00120716 "
+        "+ds=0 +t_epoch=2020 +convention=coordinate_frame "
+        "+step +inv +proj=cart +ellps=WGS84 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=axisswap +order=2,1");
+    double lat = -60;
+    double lon = 120;
+    proj_trans_generic(P, PJ_FWD, &lat, sizeof(double), 1, &lon, sizeof(double),
+                       1, nullptr, 0, 0, nullptr, 0, 0);
+    // Should be a no-op when the time is unknown (or equal to 2020)
+    EXPECT_NEAR(lat, -60, 1e-9);
+    EXPECT_NEAR(lon, 120, 1e-9);
+
+    proj_destroy(P);
+}
+
 } // namespace
