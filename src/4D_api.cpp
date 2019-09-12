@@ -362,6 +362,7 @@ size_t proj_trans_generic (
     PJ_COORD coord = {{0,0,0,0}};
     size_t i, nmin;
     double null_broadcast = 0;
+    double invalid_time = HUGE_VAL;
 
     if (nullptr==P)
         return 0;
@@ -379,7 +380,7 @@ size_t proj_trans_generic (
     if (0==nx) x = &null_broadcast;
     if (0==ny) y = &null_broadcast;
     if (0==nz) z = &null_broadcast;
-    if (0==nt) t = &null_broadcast;
+    if (0==nt) t = &invalid_time;
 
     /* nothing to do? */
     if (0==nx+ny+nz+nt)
