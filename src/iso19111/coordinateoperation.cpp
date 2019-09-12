@@ -12048,14 +12048,23 @@ CoordinateOperationFactory::Private::createOperations(
     std::vector<CoordinateOperationNNPtr> res;
     const bool allowEmptyIntersection = true;
 
-    const auto &sourceProj4Ext = sourceCRS->getExtensionProj4();
-    const auto &targetProj4Ext = targetCRS->getExtensionProj4();
+    auto boundSrc = dynamic_cast<const crs::BoundCRS *>(sourceCRS.get());
+    auto boundDst = dynamic_cast<const crs::BoundCRS *>(targetCRS.get());
+
+    const auto &sourceProj4Ext = boundSrc
+                                     ? boundSrc->baseCRS()->getExtensionProj4()
+                                     : sourceCRS->getExtensionProj4();
+    const auto &targetProj4Ext = boundDst
+                                     ? boundDst->baseCRS()->getExtensionProj4()
+                                     : targetCRS->getExtensionProj4();
     if (!sourceProj4Ext.empty() || !targetProj4Ext.empty()) {
 
         auto sourceProjExportable =
-            dynamic_cast<io::IPROJStringExportable *>(sourceCRS.get());
+            dynamic_cast<const io::IPROJStringExportable *>(
+                boundSrc ? boundSrc : sourceCRS.get());
         auto targetProjExportable =
-            dynamic_cast<io::IPROJStringExportable *>(targetCRS.get());
+            dynamic_cast<const io::IPROJStringExportable *>(
+                boundDst ? boundDst : targetCRS.get());
         if (!sourceProjExportable) {
             throw InvalidOperation("Source CRS is not PROJ exportable");
         }
@@ -12284,7 +12293,6 @@ CoordinateOperationFactory::Private::createOperations(
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
-    auto boundSrc = dynamic_cast<const crs::BoundCRS *>(sourceCRS.get());
     auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
     if (boundSrc && geogDst) {
         const auto &hubSrc = boundSrc->hubCRS();
@@ -12474,7 +12482,6 @@ CoordinateOperationFactory::Private::createOperations(
     }
 
     // reverse of previous case
-    auto boundDst = dynamic_cast<const crs::BoundCRS *>(targetCRS.get());
     auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
     if (geogSrc && boundDst) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
