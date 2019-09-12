@@ -12106,11 +12106,16 @@ CoordinateOperationFactory::Private::createOperations(
 
     auto geodSrc = dynamic_cast<const crs::GeodeticCRS *>(sourceCRS.get());
     auto geodDst = dynamic_cast<const crs::GeodeticCRS *>(targetCRS.get());
+    auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
+    auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
+    auto vertSrc = dynamic_cast<const crs::VerticalCRS *>(sourceCRS.get());
+    auto vertDst = dynamic_cast<const crs::VerticalCRS *>(targetCRS.get());
 
     // First look-up if the registry provide us with operations.
     auto derivedSrc = dynamic_cast<const crs::DerivedCRS *>(sourceCRS.get());
     auto derivedDst = dynamic_cast<const crs::DerivedCRS *>(targetCRS.get());
-    if (context.context->getAuthorityFactory() &&
+    const auto &authFactory = context.context->getAuthorityFactory();
+    if (authFactory &&
         (derivedSrc == nullptr ||
          !derivedSrc->baseCRS()->_isEquivalentTo(
              targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) &&
@@ -12142,6 +12147,58 @@ CoordinateOperationFactory::Private::createOperations(
                     srcDatum->_isEquivalentTo(
                         dstDatum.get(),
                         util::IComparable::Criterion::EQUIVALENT);
+            }
+
+            // NAD83 only exists in 2D version in EPSG, so if it has been
+            // promotted to 3D, when researching a vertical to geog
+            // transformation,
+            // try to down cast to 2D.
+            if (res.empty() && geogSrc && vertDst &&
+                geogSrc->coordinateSystem()->axisList().size() == 3 &&
+                geogSrc->datum()) {
+                const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
+                    authFactory, geogSrc->datum().get()));
+                for (const auto &candidate : candidatesSrcGeod) {
+                    auto geogCandidate =
+                        util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                            candidate);
+                    if (geogCandidate &&
+                        geogCandidate->coordinateSystem()->axisList().size() ==
+                            2) {
+                        res =
+                            findOpsInRegistryDirect(NN_NO_CHECK(geogCandidate),
+                                                    targetCRS, context.context);
+                        if (res.empty()) {
+                            res = applyInverse(findOpsInRegistryDirect(
+                                targetCRS, NN_NO_CHECK(geogCandidate),
+                                context.context));
+                        }
+                        break;
+                    }
+                }
+            } else if (res.empty() && geogDst && vertSrc &&
+                       geogDst->coordinateSystem()->axisList().size() == 3 &&
+                       geogDst->datum()) {
+                const auto candidatesDstGeod(findCandidateGeodCRSForDatum(
+                    authFactory, geogDst->datum().get()));
+                for (const auto &candidate : candidatesDstGeod) {
+                    auto geogCandidate =
+                        util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                            candidate);
+                    if (geogCandidate &&
+                        geogCandidate->coordinateSystem()->axisList().size() ==
+                            2) {
+                        res = findOpsInRegistryDirect(
+                            sourceCRS, NN_NO_CHECK(geogCandidate),
+                            context.context);
+                        if (res.empty()) {
+                            res = applyInverse(findOpsInRegistryDirect(
+                                NN_NO_CHECK(geogCandidate), sourceCRS,
+                                context.context));
+                        }
+                        break;
+                    }
+                }
             }
 
             if (res.empty() && !sameGeodeticDatum &&
@@ -12202,10 +12259,6 @@ CoordinateOperationFactory::Private::createOperations(
                 "celestial body");
         }
 
-        auto geogSrc =
-            dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
-        auto geogDst =
-            dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
         if (geogSrc && geogDst) {
             return createOperationsGeogToGeog(res, sourceCRS, targetCRS,
                                               geogSrc, geogDst);
@@ -12293,7 +12346,6 @@ CoordinateOperationFactory::Private::createOperations(
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
-    auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
     if (boundSrc && geogDst) {
         const auto &hubSrc = boundSrc->hubCRS();
         auto hubSrcGeog =
@@ -12482,14 +12534,12 @@ CoordinateOperationFactory::Private::createOperations(
     }
 
     // reverse of previous case
-    auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
     if (geogSrc && boundDst) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
     // vertCRS (as boundCRS with transformation to target vertCRS) to
     // vertCRS
-    auto vertDst = dynamic_cast<const crs::VerticalCRS *>(targetCRS.get());
     if (boundSrc && vertDst) {
         auto baseSrcVert =
             dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get());
@@ -12506,7 +12556,6 @@ CoordinateOperationFactory::Private::createOperations(
     }
 
     // reverse of previous case
-    auto vertSrc = dynamic_cast<const crs::VerticalCRS *>(sourceCRS.get());
     if (boundDst && vertSrc) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
@@ -12550,7 +12599,6 @@ CoordinateOperationFactory::Private::createOperations(
     if (vertSrc && geogDst) {
 
         if (vertSrc->identifiers().empty()) {
-            const auto &authFactory = context.context->getAuthorityFactory();
             const auto &vertSrcName = vertSrc->nameStr();
             if (authFactory != nullptr && vertSrcName != "unnamed" &&
                 vertSrcName != "unknown") {

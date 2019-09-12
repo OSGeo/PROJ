@@ -6763,6 +6763,32 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    // NAD83 + NAVD88 height
+    auto srcObj = createFromUserInput("EPSG:4269+5703",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst = authFactory->createCoordinateReferenceSystem("4269"); // NAD83
+    dst = dst->promoteTo3D(std::string(), authFactory->databaseContext());
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            nnSrc, dst, ctxt);
+        ASSERT_GE(list.size(), 8U);
+    }
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            dst, nnSrc, ctxt);
+        ASSERT_GE(list.size(), 8U);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_from_WKT2_to_geogCRS_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
