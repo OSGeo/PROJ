@@ -39,7 +39,7 @@ testvarious-check:
 	PROJ_LIB=$(PROJ_LIB) $(TESTVARIOUS) $(CS2CSEXE)
 
 testdatumfile-check:
-	@if [ -f $(PROJ_LIB)/conus -a -f $(PROJ_LIB)/ntv1_can.dat -a -f $(PROJ_LIB)/MD -a -f $(PROJ_LIB)/ntf_r93.gsb ]; then \
+	@if [ -f $(PROJ_LIB)/conus -a -f $(PROJ_LIB)/ntv1_can.dat -a -f $(PROJ_LIB)/MD -a -f $(PROJ_LIB)/ntf_r93.gsb -a -f $(PROJ_LIB)/egm96_15.gtx ]; then \
 	  PROJ_LIB=$(PROJ_LIB) $(TESTDATUMFILE) $(CS2CSEXE) ; \
 	fi
 
