@@ -8540,23 +8540,32 @@ TEST(io, projparse_projected_wktext) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_ob_tran_longlat) {
-    std::string input(
-        "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
-        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran "
-        "+o_proj=longlat +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 +ellps=WGS84 "
-        "+step +proj=axisswap +order=2,1");
-    auto obj = PROJStringParser().createFromPROJString(input);
-    auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
-    ASSERT_TRUE(crs != nullptr);
-    auto op = CoordinateOperationFactory::create()->createOperation(
-        GeographicCRS::EPSG_4326, NN_NO_CHECK(crs));
-    ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran "
-              "+o_proj=longlat +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 "
-              "+ellps=WGS84 +step +proj=unitconvert +xy_in=rad +xy_out=deg "
-              "+step +proj=axisswap +order=2,1");
+    for (const char *o_proj : {"longlat", "lonlat", "latlong", "latlon"}) {
+        std::string input(
+            "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
+            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran "
+            "+o_proj=");
+        input += o_proj;
+        input += " +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 +ellps=WGS84 "
+                 "+step +proj=axisswap +order=2,1";
+        auto obj = PROJStringParser().createFromPROJString(input);
+        auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            GeographicCRS::EPSG_4326, NN_NO_CHECK(crs));
+        ASSERT_TRUE(op != nullptr);
+        std::string expected(
+            "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+            "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran "
+            "+o_proj=");
+        expected += o_proj;
+        expected +=
+            " +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 "
+            "+ellps=WGS84 +step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1";
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  expected);
+    }
 }
 
 // ---------------------------------------------------------------------------

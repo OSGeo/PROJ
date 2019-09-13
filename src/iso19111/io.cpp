@@ -8577,7 +8577,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                    parameters, values)
                    .as_nullable();
 
-        if (methodName == "PROJ ob_tran o_proj=longlat") {
+        if (methodName == "PROJ ob_tran o_proj=longlat" ||
+            methodName == "PROJ ob_tran o_proj=lonlat" ||
+            methodName == "PROJ ob_tran o_proj=latlon" ||
+            methodName == "PROJ ob_tran o_proj=latlong") {
             return DerivedGeographicCRS::create(
                 PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
                 geogCRS, NN_NO_CHECK(conv),
