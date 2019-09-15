@@ -107,6 +107,10 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
     PROJ_DLL std::list<CRSNNPtr>
     getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const;
 
+    PROJ_DLL CRSNNPtr
+    promoteTo3D(const std::string &newName,
+                const io::DatabaseContextPtr &dbContext) const;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL const GeodeticCRS *

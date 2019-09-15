@@ -756,6 +756,96 @@ CRS::getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a variant of this CRS "promoted" to a 3D one, if not already
+ * the case.
+ *
+ * The new axis will be ellipsoidal height, oriented upwards, and with metre
+ * units.
+ *
+ * @param newName Name of the new CRS. If empty, nameStr() will be used.
+ * @param dbContext Database context to look for potentially already registered
+ *                  3D CRS. May be nullptr.
+ * @return a new CRS promoted to 3D, or the current one if already 3D or not
+ * applicable.
+ * @since 7.0
+ */
+CRSNNPtr CRS::promoteTo3D(const std::string &newName,
+                          const io::DatabaseContextPtr &dbContext) const {
+
+    const auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        const auto &axisList = geogCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 2) {
+            const auto &l_identifiers = identifiers();
+            // First check if there is a Geographic 3D CRS in the database
+            // of the same name.
+            // This is the common practice in the EPSG dataset.
+            if (dbContext && l_identifiers.size() == 1) {
+                auto authFactory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), *(l_identifiers[0]->codeSpace()));
+                auto res = authFactory->createObjectsFromName(
+                    nameStr(),
+                    {io::AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS},
+                    false);
+                if (!res.empty()) {
+                    const auto &firstRes = res.front();
+                    if (geogCRS->is2DPartOf3D(NN_NO_CHECK(
+                            dynamic_cast<GeographicCRS *>(firstRes.get())))) {
+                        return NN_NO_CHECK(
+                            util::nn_dynamic_pointer_cast<CRS>(firstRes));
+                    }
+                }
+            }
+
+            auto upAxis = cs::CoordinateSystemAxis::create(
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                        cs::AxisName::Ellipsoidal_height),
+                cs::AxisAbbreviation::h, cs::AxisDirection::UP,
+                common::UnitOfMeasure::METRE);
+            auto cs = cs::EllipsoidalCS::create(
+                util::PropertyMap(), axisList[0], axisList[1], upAxis);
+            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        !newName.empty() ? newName : nameStr()),
+                geogCRS->datum(), geogCRS->datumEnsemble(), cs));
+        }
+    }
+
+    const auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        const auto &axisList = projCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 2) {
+            auto base3DCRS =
+                projCRS->baseCRS()->promoteTo3D(std::string(), dbContext);
+            auto upAxis = cs::CoordinateSystemAxis::create(
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                        cs::AxisName::Ellipsoidal_height),
+                cs::AxisAbbreviation::h, cs::AxisDirection::UP,
+                common::UnitOfMeasure::METRE);
+            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                              axisList[1], upAxis);
+            return util::nn_static_pointer_cast<CRS>(ProjectedCRS::create(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        !newName.empty() ? newName : nameStr()),
+                NN_NO_CHECK(
+                    util::nn_dynamic_pointer_cast<GeodeticCRS>(base3DCRS)),
+                projCRS->derivingConversionRef(), cs));
+        }
+    }
+
+    const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    if (boundCRS) {
+        return BoundCRS::create(
+            boundCRS->baseCRS()->promoteTo3D(newName, dbContext),
+            boundCRS->hubCRS(), boundCRS->transformation());
+    }
+
+    return NN_NO_CHECK(
+        std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 std::list<std::pair<CRSNNPtr, int>>
@@ -1898,14 +1988,18 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
     const auto &secondAxis = axis[1];
     const auto &otherFirstAxis = otherAxis[0];
     const auto &otherSecondAxis = otherAxis[1];
-    if (!(firstAxis->_isEquivalentTo(otherFirstAxis.get()) &&
-          secondAxis->_isEquivalentTo(otherSecondAxis.get()))) {
+    if (!(firstAxis->_isEquivalentTo(
+              otherFirstAxis.get(), util::IComparable::Criterion::EQUIVALENT) &&
+          secondAxis->_isEquivalentTo(
+              otherSecondAxis.get(),
+              util::IComparable::Criterion::EQUIVALENT))) {
         return false;
     }
     const auto &thisDatum = GeodeticCRS::getPrivate()->datum_;
     const auto &otherDatum = other->GeodeticCRS::getPrivate()->datum_;
     if (thisDatum && otherDatum) {
-        return thisDatum->_isEquivalentTo(otherDatum.get());
+        return thisDatum->_isEquivalentTo(
+            otherDatum.get(), util::IComparable::Criterion::EQUIVALENT);
     }
     return false;
 }
