@@ -117,7 +117,8 @@ Function mapping from old to new API
 +---------------------------------------+-------------------------------------------------+
 | pj_inv3                               | :c:func:`proj_trans`                            |
 +---------------------------------------+-------------------------------------------------+
-| pj_transform                          | :c:func:`proj_create_crs_to_crs` +              |
+| pj_transform                          | :c:func:`proj_create_crs_to_crs`                |
+|                                       | or :c:func:`proj_create_crs_to_crs_from_pj` +   |
 |                                       | (:c:func:`proj_normalize_for_visualization` +)  |
 |                                       | :c:func:`proj_trans`,                           |
 |                                       | :c:func:`proj_trans_array` or                   |
@@ -154,6 +155,31 @@ Function mapping from old to new API
 +---------------------------------------+-------------------------------------------------+
 | pj_get_release                        | :c:func:`proj_info`                             |
 +---------------------------------------+-------------------------------------------------+
+
+
+Backward incompatibilities
+###############################################################################
+
+Access to the proj_api.h is still possible but requires to define the
+``ACCEPT_USE_OF_DEPRECATED_PROJ_API_H`` macro.
+
+The emulation of the now deprecated ``+init=epsg:XXXX`` syntax in PROJ 6 is not
+fully compatible with previous versions.
+
+In particular, when used with the ``pj_transform()`` function, no datum shift term
+(``towgs84``, ``nadgrids``, ``geoidgrids``) will be added during the expansion of the
+``+init=epsg:XXXX`` string to ``+proj=YYYY ....``. If you still uses ``pj_transform()``
+and want datum shift to be applied, then you need to provide a fully expanded
+string with appropriate ``towgs84``, ``nadgrids`` or ``geoidgrids`` terms to ``pj_init()``.
+
+To use the ``+init=epsg:XXXX`` syntax with :c:func:`proj_create` and then
+:c:func:`proj_create_crs_to_crs`, ``proj_context_use_proj4_init_rules(ctx, TRUE)``
+or the ``PROJ_USE_PROJ4_INIT_RULES=YES`` environment variable must have been
+previously set. In that context, datum shift will be researched. However they
+might be different than with PROJ 4 or PROJ 5, since a "late-binding" approach
+will be used (that is trying to find as much as possible the most direct
+transformation between the source and target datum), whereas PROJ 4 or PROJ 5
+used an "early-binding" approach consisting in always going to EPSG:4326 / WGS 84.
 
 ================================================================================
 Version 4 to 5 API Migration
