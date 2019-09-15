@@ -8313,10 +8313,13 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     } else if (step.name == "somerc") {
         mapping =
             getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B);
-        step.paramValues.emplace_back(Step::KeyValue("alpha", "90"));
-        step.paramValues.emplace_back(Step::KeyValue("gamma", "90"));
-        step.paramValues.emplace_back(
-            Step::KeyValue("lonc", getParamValue(step, "lon_0")));
+        if (!hasParamValue(step, "alpha") && !hasParamValue(step, "gamma") &&
+            !hasParamValue(step, "lonc")) {
+            step.paramValues.emplace_back(Step::KeyValue("alpha", "90"));
+            step.paramValues.emplace_back(Step::KeyValue("gamma", "90"));
+            step.paramValues.emplace_back(
+                Step::KeyValue("lonc", getParamValue(step, "lon_0")));
+        }
     } else if (step.name == "krovak" &&
                ((getParamValue(step, "axis") == "swu" && iAxisSwap < 0) ||
                 (iAxisSwap > 0 &&
@@ -8756,10 +8759,17 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             if (!file_found) {
                 auto obj = createFromUserInput(stepName, d->dbContext_, true);
                 auto crs = dynamic_cast<CRS *>(obj.get());
-                if (crs &&
-                    (d->steps_[0].paramValues.empty() ||
-                     (d->steps_[0].paramValues.size() == 1 &&
-                      d->getParamValue(d->steps_[0], "type") == "crs"))) {
+
+                bool hasSignificantParamValues = false;
+                for (const auto &kv : d->steps_[0].paramValues) {
+                    if (!((kv.key == "type" && kv.value == "crs") ||
+                          kv.key == "no_defs")) {
+                        hasSignificantParamValues = true;
+                        break;
+                    }
+                }
+
+                if (crs && !hasSignificantParamValues) {
                     PropertyMap properties;
                     properties.set(IdentifiedObject::NAME_KEY,
                                    d->title_.empty() ? crs->nameStr()
