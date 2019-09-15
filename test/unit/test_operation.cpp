@@ -4367,6 +4367,9 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
         ctxt->setUsePROJAlternativeGridNames(false);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
@@ -4394,6 +4397,9 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
@@ -4409,6 +4415,9 @@ TEST(operation, geogCRS_to_geogCRS_context_inverse_needed) {
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
             authFactory->createCoordinateReferenceSystem("4275"), // NTF
@@ -4455,6 +4464,33 @@ TEST(operation, geogCRS_to_geogCRS_context_ntv1_ntv2_ctable2) {
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
               "+grids=conus +step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_NAD27_to_WGS84) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4267"), // NAD27
+        authFactory->createCoordinateReferenceSystem("4326"), // WGS84
+        ctxt);
+    ASSERT_EQ(list.size(), 78U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "NAD27 to WGS 84 (33)"); // 1.0 m, Canada - NAD27
+    EXPECT_EQ(list[1]->nameStr(),
+              "NAD27 to WGS 84 (3)"); // 20.0 m, Canada - NAD27
+    EXPECT_EQ(list[2]->nameStr(),
+              "NAD27 to WGS 84 (79)"); // 5.0 m, USA - CONUS including EEZ
+    EXPECT_EQ(list[3]->nameStr(),
+              "NAD27 to WGS 84 (4)"); // 10.0 m, USA - CONUS - onshore
 }
 
 // ---------------------------------------------------------------------------
@@ -4588,6 +4624,9 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
     ctxt->setAllowUseIntermediateCRS(
         CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
     auto list = CoordinateOperationFactory::create()->createOperations(
@@ -4615,6 +4654,9 @@ TEST(operation, geogCRS_to_geogCRS_context_same_grid_name) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
     auto list = CoordinateOperationFactory::create()->createOperations(
         authFactory->createCoordinateReferenceSystem("4314"), // DHDN
         authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
@@ -5253,6 +5295,9 @@ TEST(operation,
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
     ctxt->setAllowUseIntermediateCRS(
         CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
     auto list = CoordinateOperationFactory::create()->createOperations(
@@ -5969,14 +6014,49 @@ TEST(operation, ETRS89_3D_to_proj_string_with_geoidgrids_nadgrids) {
         src, NN_NO_CHECK(dst), ctxt);
     ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+proj=pipeline "
               "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +inv +proj=vgridshift +grids=naptrans2008.gtx "
               "+multiplier=1 "
               "+step +inv +proj=hgridshift +grids=rdtrans2008.gsb "
               "+step +proj=sterea +lat_0=52.1561605555556 "
               "+lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 "
               "+y_0=463000 +ellps=bessel");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, WGS84_to_compoundCRS_with_bound_vertCRS) {
+    auto authFactoryEPSG =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // WGS 84 3D
+    auto src = authFactoryEPSG->createCoordinateReferenceSystem("4979");
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=longlat +datum=NAD83 +geoidgrids=@foo.gtx +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        src, NN_NO_CHECK(dst), ctxt);
+    ASSERT_GE(list.size(), 53U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of unknown to WGS84 ellipsoidal height + "
+              "Inverse of NAD83 to WGS 84 (1) + "
+              "Inverse of axis order change (2D)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------
@@ -6535,6 +6615,9 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
     auto list = CoordinateOperationFactory::create()->createOperations(
@@ -6713,6 +6796,9 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem(
                 "7406"), // NAD27 + NGVD29 height (ftUS)
@@ -6741,23 +6827,28 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem(
                 "5500"), // NAD83(NSRS2007) + NAVD88 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
         ASSERT_GE(list.size(), 1U);
-        EXPECT_TRUE(list[0]->hasBallparkTransformation());
         EXPECT_EQ(list[0]->nameStr(),
-                  "NAD83(NSRS2007) to WGS 84 (1) + Transformation from NAVD88 "
-                  "height to WGS 84 (ballpark vertical transformation, without "
-                  "ellipsoid height to vertical height correction)");
+                  "NAD83(NSRS2007) to WGS 84 (1) + "
+                  "Inverse of NAD83(2011) to NAVD88 height (1)");
         EXPECT_EQ(list[0]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
                           authFactory->databaseContext())
                           .get()),
-                  "+proj=noop");
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=vgridshift +grids=g2012bu0.gtx +multiplier=1 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
     }
 }
 
@@ -6898,6 +6989,9 @@ TEST(operation, IGNF_LAMB1_TO_EPSG_4326) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), std::string());
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
     ctxt->setAllowUseIntermediateCRS(
         CoordinateOperationContext::IntermediateCRSUse::ALWAYS);
     auto list = CoordinateOperationFactory::create()->createOperations(
