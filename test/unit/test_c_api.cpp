@@ -3966,4 +3966,35 @@ TEST_F(CApi, proj_crs_create_projected_3D_crs_from_2D) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_create_bound_vertical_crs_to_WGS84) {
+
+    auto vert_crs = proj_create_vertical_crs(m_ctxt, "myVertCRS", "myVertDatum",
+                                             nullptr, 0.0);
+    ObjectKeeper keeper_vert_crs(vert_crs);
+    ASSERT_NE(vert_crs, nullptr);
+
+    auto bound_crs = proj_crs_create_bound_vertical_crs_to_WGS84(
+        m_ctxt, vert_crs, "foo.gtx");
+    ObjectKeeper keeper_bound_crs(bound_crs);
+    ASSERT_NE(bound_crs, nullptr);
+
+    auto projCRS = proj_create_from_database(m_ctxt, "EPSG", "32631",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(projCRS, nullptr);
+    ObjectKeeper keeper_projCRS(projCRS);
+
+    auto compound_crs =
+        proj_create_compound_crs(m_ctxt, "myCompoundCRS", projCRS, bound_crs);
+    ObjectKeeper keeper_compound_crss(compound_crs);
+    ASSERT_NE(compound_crs, nullptr);
+
+    auto proj_4 = proj_as_proj_string(m_ctxt, compound_crs, PJ_PROJ_4, nullptr);
+    ASSERT_NE(proj_4, nullptr);
+    EXPECT_EQ(std::string(proj_4),
+              "+proj=utm +zone=31 +datum=WGS84 +units=m +geoidgrids=foo.gtx "
+              "+vunits=m +no_defs +type=crs");
+}
+
 } // namespace

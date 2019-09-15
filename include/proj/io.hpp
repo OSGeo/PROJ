@@ -1103,6 +1103,11 @@ class PROJ_GCC_DLL AuthorityFactory {
     PROJ_INTERNAL crs::CRSNNPtr
     createCoordinateReferenceSystem(const std::string &code,
                                     bool allowCompound) const;
+
+    PROJ_INTERNAL std::list<datum::GeodeticReferenceFrameNNPtr>
+    getPreferredHubGeodeticReferenceFrames(
+        const std::string &geodeticReferenceFrameCode) const;
+
     //! @endcond
 
   protected:

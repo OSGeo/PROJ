@@ -1810,6 +1810,52 @@ PJ *proj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx, const PJ *crs,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns a BoundCRS, with a transformation to EPSG:4979 using a grid.
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param vert_crs Object of type VerticalCRS (must not be NULL)
+ * @param grid_name Grid name (typically a .gtx file)
+ * @return Object that must be unreferenced with proj_destroy(), or NULL
+ * in case of error.
+ * @since 7.0
+ */
+PJ *proj_crs_create_bound_vertical_crs_to_WGS84(PJ_CONTEXT *ctx,
+                                                const PJ *vert_crs,
+                                                const char *grid_name) {
+    SANITIZE_CTX(ctx);
+    assert(vert_crs);
+    assert(grid_name);
+    auto l_crs = std::dynamic_pointer_cast<VerticalCRS>(vert_crs->iso_obj);
+    if (!l_crs) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a VerticalCRS");
+        return nullptr;
+    }
+    try {
+        auto nnCRS = NN_NO_CHECK(l_crs);
+        auto transformation =
+            Transformation::createGravityRelatedHeightToGeographic3D(
+                PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                  "unknown to WGS84 ellipsoidal height"),
+                nnCRS, GeographicCRS::EPSG_4979, nullptr,
+                std::string(grid_name), std::vector<PositionalAccuracyNNPtr>());
+        return pj_obj_create(
+            ctx,
+            BoundCRS::create(nnCRS, GeographicCRS::EPSG_4979, transformation));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Get the ellipsoid from a CRS or a GeodeticReferenceFrame.
  *
  * The returned object must be unreferenced with proj_destroy() after
