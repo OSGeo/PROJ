@@ -7800,6 +7800,10 @@ TEST(io, projparse_somerc) {
     EXPECT_TRUE(wkt.find("\"Northing at projection centre\",5") !=
                 std::string::npos)
         << wkt;
+
+    auto wkt1 = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(wkt1.find("EXTENSION") == std::string::npos) << wkt1;
 }
 
 // ---------------------------------------------------------------------------
@@ -8634,6 +8638,17 @@ TEST(io, projparse_init) {
         EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
             EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE)
                 .get()));
+    }
+
+    {
+        // Test that +no_defs +type=crs have no effect
+        auto obj = createFromUserInput("+init=epsg:4326 +no_defs +type=crs",
+                                       dbContext, true);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto wkt = crs->exportToWKT(WKTFormatter::create().get());
+        EXPECT_TRUE(wkt.find("GEODCRS[\"WGS 84\"") == 0) << wkt;
     }
 
     {

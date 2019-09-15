@@ -1000,9 +1000,11 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     if (d->pjCtxt() == nullptr) {
         d->setPjCtxt(pj_get_default_ctx());
     }
+    int errno_before = proj_context_errno(d->pjCtxt());
     gridAvailable =
         pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
                      fullFilename.size() - 1) != 0;
+    proj_context_errno_set(d->pjCtxt(), errno_before);
     fullFilename.resize(strlen(fullFilename.c_str()));
 
     auto res =
