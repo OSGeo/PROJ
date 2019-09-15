@@ -110,7 +110,7 @@ echo "##############################################################" >> ${OUT}
 echo "WGS84 -> WGS84+EGM96" >> ${OUT}
 #
 $EXE +init=epsg:4326 +to +init=epsg:4326 +geoidgrids=egm96_15.gtx -E >>${OUT} <<EOF
-49N 2E 0
+2dE 49dN 0
 EOF
 
 # Cleanup
