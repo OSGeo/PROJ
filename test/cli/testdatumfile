@@ -105,6 +105,14 @@ $EXE NAD27 NAD83 -E >>${OUT} <<EOF
 39d00'00.000"N 111d00'00.000"W 0.0
 EOF
 
+#
+echo "##############################################################" >> ${OUT}
+echo "WGS84 -> WGS84+EGM96" >> ${OUT}
+#
+$EXE +init=epsg:4326 +to +init=epsg:4326 +geoidgrids=egm96_15.gtx -E >>${OUT} <<EOF
+2dE 49dN 0
+EOF
+
 # Cleanup
 rm -rf "dir with \" space"
 

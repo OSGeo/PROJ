@@ -114,6 +114,7 @@ osgeo::proj::crs::CRS::extractGeographicCRS() const
 osgeo::proj::crs::CRS::extractVerticalCRS() const
 osgeo::proj::crs::CRS::getNonDeprecated(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> > const&) const
 osgeo::proj::crs::CRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
+osgeo::proj::crs::CRS::promoteTo3D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::CRS::shallowClone() const
 osgeo::proj::crs::CRS::stripVerticalComponent() const
 osgeo::proj::crs::DerivedCRS::baseCRS() const
@@ -897,6 +898,7 @@ proj_crs_alter_geodetic_crs
 proj_crs_alter_parameters_linear_unit
 proj_crs_create_bound_crs
 proj_crs_create_bound_crs_to_WGS84
+proj_crs_create_projected_3D_crs_from_2D
 proj_crs_get_coordinate_system
 proj_crs_get_coordoperation
 proj_crs_get_datum
@@ -904,6 +906,7 @@ proj_crs_get_geodetic_crs
 proj_crs_get_horizontal_datum
 proj_crs_get_sub_crs
 proj_crs_info_list_destroy
+proj_crs_promote_to_3D
 proj_cs_get_axis_count
 proj_cs_get_axis_info
 proj_cs_get_type
