@@ -105,7 +105,8 @@ distributed, but can be obtained by users through free and legal methods.
 Austria
 ................................................................................
 
-`Austrian Grid <http://www.bev.gv.at/portal/page?_pageid=713,2204753&_dad=portal&_schema=PORTAL>`__ for MGI
+Overview of `Austrian grids <http://www.bev.gv.at/portal/page?_pageid=713,1569828&_dad=portal&_schema=PORTAL>`__ and other resources
+related to the local geodetic reference.
 
 Brazil
 ................................................................................
