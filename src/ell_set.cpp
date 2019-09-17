@@ -389,6 +389,9 @@ static int ellps_spherification (PJ *P) {
             return proj_errno_set (P, PJD_ERR_REF_RAD_LARGER_THAN_90);
         t = sin (t);
         t = 1 - P->es * t * t;
+        if (t == 0.) {
+            return proj_errno_set(P, PJD_ERR_INVALID_ECCENTRICITY);
+        }
         if (i==5)   /* arithmetic */
             P->a *= (1. - P->es + t) / (2 * t * sqrt(t));
         else        /* geometric */
