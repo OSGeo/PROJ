@@ -126,11 +126,11 @@ static PJ_LP geos_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
     /* Setting three components of vector from satellite to position.*/
     Vx = -1.0;
     if(Q->flip_axis) {
-        Vz = tan (xy.y / (Q->radius_g - 1.0));
-        Vy = tan (xy.x / (Q->radius_g - 1.0)) * sqrt (1.0 + Vz * Vz);
+        Vz = tan (xy.y / Q->radius_g_1);
+        Vy = tan (xy.x / Q->radius_g_1) * sqrt (1.0 + Vz * Vz);
     } else {
-        Vy = tan (xy.x / (Q->radius_g - 1.0));
-        Vz = tan (xy.y / (Q->radius_g - 1.0)) * sqrt (1.0 + Vy * Vy);
+        Vy = tan (xy.x / Q->radius_g_1);
+        Vz = tan (xy.y / Q->radius_g_1) * sqrt (1.0 + Vy * Vy);
     }
 
     /* Calculation of terms in cubic equation and determinant.*/
