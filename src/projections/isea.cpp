@@ -902,7 +902,7 @@ static int isea_hex(struct isea_dgg *g, int tri,
     {
         throw "Invalid shift";
     }
-    hex->x = ((int)v.x << 4) + quad;
+    hex->x = ((int)v.x * 16) + quad;
     hex->y = v.y;
 
     return 1;
