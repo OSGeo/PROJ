@@ -35,7 +35,7 @@
 #endif
 
 #include "geodesic.h"
-#if PROJ_COMPILAION
+#if PROJ_COMPILATION
 #include "proj_math.h"
 #else
 #include <math.h>
