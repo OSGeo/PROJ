@@ -65,7 +65,7 @@ double pj_hypot(double x, double y) {
     x /= y;                     /* y is nonzero */
     return y * sqrt(1 + x * x);
   } else {
-    y /= (x ? x : 1);
+    y /= (x != 0 ? x : 1);
     return x * sqrt(1 + y * y);
   }
 }
