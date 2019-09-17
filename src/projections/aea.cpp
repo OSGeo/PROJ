@@ -127,6 +127,10 @@ static PJ_LP aea_e_inverse (PJ_XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse 
         if (Q->ellips) {
             lp.phi = (Q->c - lp.phi * lp.phi) / Q->n;
             if (fabs(Q->ec - fabs(lp.phi)) > TOL7) {
+                if (fabs(lp.phi) > 2 ) {
+                    proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                    return lp;
+                }
                 if ((lp.phi = phi1_(lp.phi, P->e, P->one_es)) == HUGE_VAL) {
                     proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
                     return lp;
