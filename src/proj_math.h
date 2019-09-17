@@ -64,16 +64,25 @@ extern "C" {
 double  pj_hypot(double x, double y);
 double  pj_log1p(double x);
 double  pj_asinh(double x);
+double  pj_atanh(double x);
+double  pj_copysign(double x, double y);
+double  pj_cbrt(double x);
+double  pj_remainder(double x, double y);
+double  pj_remquo(double x, double y, int* n);
 double  pj_round(double x);
 long    pj_lround(double x);
 int     PROJ_DLL pj_isnan(double x);
 
-#define hypot   pj_hypot
-#define log1p   pj_log1p
-#define asinh   pj_asinh
-#define round   pj_round
-#define lround  pj_lround
-
+#define hypot     pj_hypot
+#define log1p     pj_log1p
+#define asinh     pj_asinh
+#define atanh     pj_atanh
+#define copysign  pj_copysign
+#define cbrt      pj_cbrt
+#define remainder pj_remainder
+#define remquo    pj_remquo
+#define round     pj_round
+#define lround    pj_lround
 
 #ifdef isnan
 #undef isnan
