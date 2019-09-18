@@ -28,7 +28,7 @@
  * to the data directory for PROJ).  If this is set, we use the PROJ supplied
  * implementations of the C99 math functions instead of the ones defined here.
  */
-#if defined(PROJ_LIB)
+#if 0 && defined(PROJ_LIB)
 #define PROJ_COMPILATION 1
 #else
 #define PROJ_COMPILATION 0
