@@ -23,23 +23,8 @@
  * https://geographiclib.sourceforge.io/
  */
 
-/* The PROJ_COMPILATION flag indicates that this is part of the compilation of
- * the PROJ library (keyed off the presence of the PROJ_LIB macro which points
- * to the data directory for PROJ).  If this is set, we use the PROJ supplied
- * implementations of the C99 math functions instead of the ones defined here.
- */
-#if 0 && defined(PROJ_LIB)
-#define PROJ_COMPILATION 1
-#else
-#define PROJ_COMPILATION 0
-#endif
-
 #include "geodesic.h"
-#if PROJ_COMPILATION
-#include "proj_math.h"
-#else
 #include <math.h>
-#endif
 
 #if !defined(HAVE_C99_MATH)
 #define HAVE_C99_MATH 0
@@ -133,7 +118,7 @@ enum captype {
 };
 
 static real sq(real x) { return x * x; }
-#if HAVE_C99_MATH || PROJ_COMPILATION
+#if HAVE_C99_MATH
 #define atanhx atanh
 #define copysignx copysign
 #define hypotx hypot
