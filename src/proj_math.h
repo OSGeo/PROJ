@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ
- * Purpose:  Make C99 math functions available on C89 systems
+ * Purpose:  Math support for PROJ -- now provided by system libraries
  * Author:   Kristian Evers
  *
  ******************************************************************************
@@ -30,49 +30,5 @@
 
 #include <math.h>
 #include <limits.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
-
-#ifndef PROJ_DLL
-#ifdef PROJ_MSVC_DLL_EXPORT
-#define PROJ_DLL __declspec(dllexport)
-#elif defined(PROJ_MSVC_DLL_IMPORT)
-#define PROJ_DLL __declspec(dllimport)
-#elif defined(__GNUC__)
-#define PROJ_DLL __attribute__ ((visibility("default")))
-#else
-#define PROJ_DLL
-#endif
-#endif
-
-#ifdef PROJ_RENAME_SYMBOLS
-#include "proj_symbol_rename.h"
-#endif
-
-#ifndef NAN
-#ifdef _WIN32
-#define NAN sqrt(-1.0)
-#else
-#define NAN 0.0/0.0
-#endif
-#endif
-
-int     PROJ_DLL pj_isnan(double x);
-
-#ifdef isnan
-#undef isnan
-#endif
-
-#define isnan   pj_isnan
-
-#endif /* !(defined(HAVE_C99_MATH) && HAVE_C99_MATH) */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* PROJ_MATH_H */

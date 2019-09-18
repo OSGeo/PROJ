@@ -249,7 +249,6 @@ set(SRC_LIBPROJ_CORE
   list.cpp
   log.cpp
   malloc.cpp
-  math.cpp
   mlfn.cpp
   msfn.cpp
   mutex.cpp

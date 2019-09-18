@@ -141,7 +141,7 @@ int main() {
   int q;
   return (int)(hypot(3.0, 4.0) + atanh(0.8) + copysign(1.0, -0.0) +
                cbrt(8.0) + remainder(100.0, 90.0) +
-               remquo(100.0, 90.0, &q)) + isnan(0.0);
+               remquo(100.0, 90.0, &q));
 }
 " C99_MATH)
 if(C99_MATH)
