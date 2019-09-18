@@ -3,7 +3,7 @@
 #include <errno.h>
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 PROJ_HEAD(mil_os, "Miller Oblated Stereographic") "\n\tAzi(mod)";
 PROJ_HEAD(lee_os, "Lee Oblated Stereographic") "\n\tAzi(mod)";

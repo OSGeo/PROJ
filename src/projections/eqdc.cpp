@@ -5,7 +5,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 namespace { // anonymous namespace
 struct pj_opaque {

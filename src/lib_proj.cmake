@@ -262,7 +262,6 @@ set(SRC_LIBPROJ_CORE
   pj_list.h
   pr_list.cpp
   proj_internal.h
-  proj_math.h
   proj_mdist.cpp
   qsfn.cpp
   release.cpp

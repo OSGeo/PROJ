@@ -46,7 +46,7 @@ libproj_la_LDFLAGS = -no-undefined -version-info 17:0:2
 libproj_la_LIBADD = @SQLITE3_LIBS@
 
 libproj_la_SOURCES = \
-	pj_list.h proj_internal.h proj_math.h \
+	pj_list.h proj_internal.h \
 	\
 	iso19111/static.cpp \
 	iso19111/util.cpp \

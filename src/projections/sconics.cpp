@@ -2,7 +2,7 @@
 #include <errno.h>
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 
 namespace { // anonymous namespace

@@ -4,7 +4,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 PROJ_HEAD(bipc, "Bipolar conic of western hemisphere") "\n\tConic Sph";
 

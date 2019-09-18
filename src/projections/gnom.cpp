@@ -5,7 +5,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 PROJ_HEAD(gnom, "Gnomonic") "\n\tAzi, Sph";
 
