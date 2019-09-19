@@ -28,6 +28,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 message(STATUS "Requiring C++${CMAKE_CXX_STANDARD} - done")
 
+# Set C99 version
+# Make CMAKE_C_STANDARD available as cache option overridable by user
+set(CMAKE_C_STANDARD 99
+  CACHE STRING "C standard version to use (default is 99)")
+message(STATUS "Requiring C${CMAKE_C_STANDARD}")
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+message(STATUS "Requiring C${CMAKE_C_STANDARD} - done")
+
 # Set global -fvisibility=hidden
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -52,7 +61,6 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(PROJ_C_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
     -Wmissing-prototypes
     -Wfloat-conversion
-    -Wc99-extensions
     -Wc11-extensions
   )
   set(PROJ_CXX_WARN_FLAGS ${PROJ_common_WARN_FLAGS}
@@ -133,21 +141,6 @@ if(MSVC)
 else()
   set(CMAKE_REQUIRED_LIBRARIES m)
   set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} -Werror -Wall")
-endif()
-# Check whether the C99 math function: hypot, atanh, etc. are available.
-check_c_source_compiles("
-#include <math.h>
-int main() {
-  int q;
-  return (int)(hypot(3.0, 4.0) + atanh(0.8) + copysign(1.0, -0.0) +
-               cbrt(8.0) + remainder(100.0, 90.0) +
-               remquo(100.0, 90.0, &q));
-}
-" C99_MATH)
-if(C99_MATH)
-  add_definitions(-DHAVE_C99_MATH=1)
-else()
-  add_definitions(-DHAVE_C99_MATH=0)
 endif()
 
 if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
