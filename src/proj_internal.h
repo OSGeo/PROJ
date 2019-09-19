@@ -76,10 +76,6 @@
 
 #define STATIC_ASSERT(COND) ((void)sizeof(char[(COND) ? 1 : -1]))
 
-#if !defined(HAVE_C99_MATH)
-#define HAVE_C99_MATH 0
-#endif
-
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
 #endif

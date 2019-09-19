@@ -12,6 +12,7 @@ AM_CONFIG_HEADER(src/proj_config.h)
 
 dnl Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 AC_PROG_INSTALL
@@ -81,20 +82,6 @@ AX_CHECK_COMPILE_FLAG([-Wfloat-conversion], [C_WFLAGS="$C_WFLAGS -Wfloat-convers
 
 dnl clang >= 3.2
 AX_CHECK_COMPILE_FLAG([-Wdocumentation -Wno-documentation-deprecated-sync], [C_WFLAGS="$C_WFLAGS -Wdocumentation -Wno-documentation-deprecated-sync" CXX_WFLAGS="$CXX_WFLAGS -Wdocumentation -Wno-documentation-deprecated-sync"],,[$ERROR_ON_UNKNOWN_OPTIONS])
-
-dnl gnu89 is a reasonable target to get MSVC compatibility.
-dnl but only apply it with gcc, since clang will throw a lot of warnings
-SAVED_CFLAGS=$CFLAGS
-CFLAGS="$CFLAGS $ERROR_ON_UNKNOWN_OPTIONS -std=gnu89"
-AC_MSG_CHECKING([if -std=gnu89 can be enabled])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-  [[#if defined(__clang__) || !defined(__GNUC__)
-    #error "not gcc"
-    #endif]])],
-  [C_WFLAGS="$C_WFLAGS -std=gnu89"]
-  [AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-CFLAGS=$SAVED_CFLAGS
 
 dnl C++ specific stuff
 
@@ -197,19 +184,6 @@ dnl like (a + b) + c and from simplifying 0.0 + x to x (which is wrong if
 dnl x = -0.0).
 AX_CHECK_COMPILE_FLAG([-fp-model precise],
         [CFLAGS="$CFLAGS -fp-model precise"],,[-Werror])
-dnl Check for C99 math functions
-save_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -Wall -Werror"
-AC_MSG_CHECKING([for C99 math functions])
-AC_LINK_IFELSE([AC_LANG_PROGRAM(
-        [#include <math.h>],
-        [int q;
-         return (int)(hypot(3.0, 4.0) + atanh(0.8) + copysign(1.0, -0.0) +
-                      cbrt(8.0) + remainder(100.0, 90.0) +
-                      remquo(100.0, 90.0, &q));])],
-        [AC_MSG_RESULT([yes]);C99_MATH="-DHAVE_C99_MATH=1"],
-        [AC_MSG_RESULT([no]);C99_MATH="-DHAVE_C99_MATH=0"])
-CFLAGS="$save_CFLAGS $C99_MATH"
 
 AC_SEARCH_LIBS([sqrt], [m])
 
