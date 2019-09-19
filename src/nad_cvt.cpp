@@ -5,7 +5,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 #define MAX_ITERATIONS 10
 #define TOL 1e-12

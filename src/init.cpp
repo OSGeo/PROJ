@@ -39,7 +39,7 @@
 #include "geodesic.h"
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 
 /**************************************************************************************/

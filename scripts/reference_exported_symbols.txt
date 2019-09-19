@@ -745,7 +745,6 @@ pj_inv
 pj_inv3d
 pj_is_geocent
 pj_is_latlong
-pj_isnan
 pj_latlong_from_proj
 pj_log
 pj_malloc

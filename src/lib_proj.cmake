@@ -249,7 +249,6 @@ set(SRC_LIBPROJ_CORE
   list.cpp
   log.cpp
   malloc.cpp
-  math.cpp
   mlfn.cpp
   msfn.cpp
   mutex.cpp
@@ -263,7 +262,6 @@ set(SRC_LIBPROJ_CORE
   pj_list.h
   pr_list.cpp
   proj_internal.h
-  proj_math.h
   proj_mdist.cpp
   qsfn.cpp
   release.cpp

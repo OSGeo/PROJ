@@ -139,11 +139,9 @@ check_c_source_compiles("
 #include <math.h>
 int main() {
   int q;
-  return (int)(
-    hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
-    remquo(100.0, 90.0, &q) +
-    remainder(100.0, 90.0) + copysign(1.0, -0.0) +
-    log1p(0.1) + asinh(0.1)) + isnan(0.0);
+  return (int)(hypot(3.0, 4.0) + atanh(0.8) + copysign(1.0, -0.0) +
+               cbrt(8.0) + remainder(100.0, 90.0) +
+               remquo(100.0, 90.0, &q));
 }
 " C99_MATH)
 if(C99_MATH)

@@ -2,7 +2,7 @@
 #include <errno.h>
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 PROJ_HEAD(lcc, "Lambert Conformal Conic")
     "\n\tConic, Sph&Ell\n\tlat_1= and lat_2= or lat_0, k_0=";

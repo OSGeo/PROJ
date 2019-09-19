@@ -45,7 +45,7 @@
 #include "proj.h"
 #include "proj_experimental.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 #include "geodesic.h"
 
 #include "proj/common.hpp"

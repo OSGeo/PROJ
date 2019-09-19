@@ -46,7 +46,7 @@ libproj_la_LDFLAGS = -no-undefined -version-info 17:0:2
 libproj_la_LIBADD = @SQLITE3_LIBS@
 
 libproj_la_SOURCES = \
-	pj_list.h proj_internal.h proj_math.h \
+	pj_list.h proj_internal.h \
 	\
 	iso19111/static.cpp \
 	iso19111/util.cpp \
@@ -200,7 +200,7 @@ libproj_la_SOURCES = \
 	apply_gridshift.cpp datums.cpp datum_set.cpp transform.cpp \
 	geocent.cpp geocent.h utils.cpp gridinfo.cpp gridlist.cpp \
 	jniproj.cpp mutex.cpp initcache.cpp apply_vgridshift.cpp geodesic.c \
-	strtod.cpp math.cpp \
+	strtod.cpp \
 	\
 	4D_api.cpp pipeline.cpp \
 	internal.cpp \

@@ -24,11 +24,7 @@
  */
 
 #include "geodesic.h"
-#ifdef PJ_LIB__
-#include "proj_math.h"
-#else
 #include <math.h>
-#endif
 
 #if !defined(HAVE_C99_MATH)
 #define HAVE_C99_MATH 0

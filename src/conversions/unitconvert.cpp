@@ -71,7 +71,7 @@ Last update: 2017-05-16
 #include <time.h>
 
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 PROJ_HEAD(unitconvert, "Unit conversion");
 

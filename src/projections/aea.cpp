@@ -31,7 +31,7 @@
 #include "proj.h"
 #include <errno.h>
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 
 # define EPS10  1.e-10

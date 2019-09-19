@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "proj_math.h"
+#include <math.h>
 #include "proj_internal.h"
 
 static int is_nodata(float value, double vmultiplier)
