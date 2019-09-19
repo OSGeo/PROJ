@@ -399,7 +399,17 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
  */
     CT = Z/RR;
     ST = P/RR;
-    RX = 1.0/sqrt(1.0-gi->Geocent_e2*(2.0-gi->Geocent_e2)*ST*ST);
+    {
+        const double denominator = 1.0-gi->Geocent_e2*(2.0-gi->Geocent_e2)*ST*ST;
+        if( denominator == 0 )
+        {
+            *Latitude = HUGE_VAL;
+            *Longitude = HUGE_VAL;
+            *Height = HUGE_VAL;
+            return;
+        }
+        RX = 1.0/sqrt(denominator);
+    }
     CPHI0 = ST*(1.0-gi->Geocent_e2)*RX;
     SPHI0 = CT*RX;
     iter = 0;
@@ -420,7 +430,17 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
             return;
         }
         RK = gi->Geocent_e2*RN/(RN+*Height);
-        RX = 1.0/sqrt(1.0-RK*(2.0-RK)*ST*ST);
+        {
+            const double denominator = 1.0-RK*(2.0-RK)*ST*ST;
+            if( denominator == 0 )
+            {
+                *Latitude = HUGE_VAL;
+                *Longitude = HUGE_VAL;
+                *Height = HUGE_VAL;
+                return;
+            }
+            RX = 1.0/sqrt(denominator);
+        }
         CPHI = ST*(1.0-RK)*RX;
         SPHI = CT*RX;
         SDPHI = SPHI*CPHI0-CPHI*SPHI0;

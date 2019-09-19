@@ -612,6 +612,8 @@ PJ *TRANSFORMATION(helmert, 0) {
     /* Scale */
     if (pj_param (P->ctx, P->params, "ts").i) {
         Q->scale_0 = pj_param (P->ctx, P->params, "ds").f;
+        if( Q->scale_0 <= -1.0e6 )
+            return pj_default_destructor (P, PJD_ERR_INVALID_SCALE);
         if (pj_param (P->ctx, P->params, "ttheta").i && Q->scale_0 == 0.0)
             return pj_default_destructor (P, PJD_ERR_INVALID_SCALE);
     }
