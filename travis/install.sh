@@ -84,9 +84,7 @@ cd build_cmake
 cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
 VERBOSE=1 make -j${NPROC}
 make install
-# The cmake build is not able to generate the null file, so copy it at hand
-cp /tmp/proj_autoconf_install_from_dist_all/share/proj/null /tmp/proj_cmake_install/share/proj
-PROJ_LIB=/tmp/proj_cmake_install/share/proj ctest
+ctest
 find /tmp/proj_cmake_install
 cd ..
 

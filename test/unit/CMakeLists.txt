@@ -70,6 +70,9 @@ target_link_libraries(proj_pj_transform_test
   GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME proj_pj_transform_test COMMAND proj_pj_transform_test)
+set_property(TEST proj_pj_transform_test
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
+
 
 add_executable(proj_errno_string_test
   main.cpp
@@ -78,6 +81,8 @@ target_link_libraries(proj_errno_string_test
   GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME proj_errno_string_test COMMAND proj_errno_string_test)
+set_property(TEST proj_errno_string_test
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
 
 add_executable(proj_angular_io_test
   main.cpp
@@ -86,6 +91,8 @@ target_link_libraries(proj_angular_io_test
   GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME proj_angular_io_test COMMAND proj_angular_io_test)
+set_property(TEST proj_angular_io_test
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
 
 add_executable(proj_context_test
   main.cpp
@@ -94,6 +101,8 @@ target_link_libraries(proj_context_test
   GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME proj_context_test COMMAND proj_context_test)
+set_property(TEST proj_context_test
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
 
 if(MSVC AND BUILD_LIBPROJ_SHARED)
   # ph_phi2_test not compatible of a .dll build
@@ -105,6 +114,8 @@ else()
     GTest::gtest
     ${PROJ_LIBRARIES})
   add_test(NAME pj_phi2_test COMMAND pj_phi2_test)
+  set_property(TEST pj_phi2_test
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
 endif()
 
 add_executable(proj_test_cpp_api
@@ -123,6 +134,9 @@ target_link_libraries(proj_test_cpp_api
   ${PROJ_LIBRARIES}
   ${SQLITE3_LIBRARY})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
+set_property(TEST proj_test_cpp_api
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
+
 
 add_executable(gie_self_tests
   main.cpp
@@ -131,3 +145,5 @@ target_link_libraries(gie_self_tests
   GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME gie_self_tests COMMAND gie_self_tests)
+set_property(TEST gie_self_tests
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
