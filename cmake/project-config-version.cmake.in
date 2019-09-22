@@ -5,20 +5,21 @@ set (PACKAGE_VERSION_MAJOR "@PROJ_VERSION_MAJOR@")
 set (PACKAGE_VERSION_MINOR "@PROJ_VERSION_MINOR@")
 set (PACKAGE_VERSION_PATCH "@PROJ_VERSION_PATCH@")
 
-if (CMAKE_CROSSCOMPILING)
-  set (CMAKE_CROSSCOMPILING_STR "ON")
-else ()
-  set (CMAKE_CROSSCOMPILING_STR "OFF")
-endif ()
-
+# These variable definitions parallel those in @PROJECT_NAME@'s
+# cmake/CMakeLists.txt.
 if (MSVC)
   # For checking the compatibility of MSVC_TOOLSET_VERSION; see
   # https://docs.microsoft.com/en-us/cpp/porting/overview-of-potential-upgrade-issues-visual-cpp
   # Assume major version number is obtained by dropping the last decimal
-  # digit.  LIBR, resp. PROJ, refer to @PROJECT_NAME@, resp. the package
-  # trying to find and link against @PROJECT_NAME@.
-  math (EXPR _MSVC_PROJ_MAJOR "${MSVC_TOOLSET_VERSION}/10")
-  math (EXPR _MSVC_LIBR_MAJOR  "@MSVC_TOOLSET_VERSION@/10")
+  # digit.
+  math (EXPR MSVC_TOOLSET_MAJOR "${MSVC_TOOLSET_VERSION}/10")
+endif ()
+if (CMAKE_CROSSCOMPILING)
+  # Ensure that all "true" (resp. "false") settings are represented by
+  # the same string.
+  set (CMAKE_CROSSCOMPILING_STR "ON")
+else ()
+  set (CMAKE_CROSSCOMPILING_STR "OFF")
 endif ()
 
 if (NOT PACKAGE_FIND_NAME STREQUAL "@PROJECT_NAME@")
@@ -36,9 +37,9 @@ elseif (NOT (APPLE OR (NOT DEFINED CMAKE_SIZEOF_VOID_P) OR
   set (PACKAGE_VERSION_UNSUITABLE TRUE)
 elseif (MSVC AND NOT (
     # toolset version must be at least as great as @PROJECT_NAME@'s
-    ${MSVC_TOOLSET_VERSION} GREATER_EQUAL @MSVC_TOOLSET_VERSION@
-      # and major versions must match
-      AND _MSVC_PROJ_MAJOR EQUAL _MSVC_LIBR_MAJOR ))
+    MSVC_TOOLSET_VERSION GREATER_EQUAL @MSVC_TOOLSET_VERSION@
+    # and major versions must match
+    AND MSVC_TOOLSET_MAJOR EQUAL @MSVC_TOOLSET_MAJOR@ ))
   # Reject if there's a mismatch in MSVC compiler versions
   set (REASON "MSVC_TOOLSET_VERSION = @MSVC_TOOLSET_VERSION@")
   set (PACKAGE_VERSION_UNSUITABLE TRUE)
@@ -66,5 +67,3 @@ endif ()
 if (PACKAGE_VERSION_UNSUITABLE)
   set (PACKAGE_VERSION "${PACKAGE_VERSION} (${REASON})")
 endif ()
-
-unset(CMAKE_CROSSCOMPILING_STR)
